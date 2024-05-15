@@ -114,9 +114,9 @@ All the photo galleries can do a lot of what I need, but no single one can do it
 5. In case, you don't have `make` installed in your system or don't want to use it for the Photoview management activities, you could use the same commands from the `Makefile` and run them in your shell directly, or create your own scripts. Make sure to apply or replace the variables from your `.env` first in this case. `Makefile` is provided just for your convenience and simplicity, but is optional.
 6. Start the server by running the following command (or corresponding sequence of commands from the `Makefile`):
 
-```bash
-make all
-```
+   ```bash
+   make all
+   ```
 
 If the endpoint or the port hasn't been changed in the `docker-compose.yml` file, Photoview can now be accessed at http://localhost:8000
 
