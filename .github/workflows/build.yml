@@ -56,8 +56,8 @@ jobs:
       - name: Set Build Args
         id: vars
         run: |
-          echo "::set-output name=BUILD_DATE::$(date +%Y-%m-%d)"
-          echo "::set-output name=VERSION::kkoval-2-$(date +%Y-%m-%d)"
+          run: echo "BUILD_DATE=$(date +%Y-%m-%d)" >> $GITHUB_OUTPUT
+          run: echo "VERSION=kkoval-2-$(date +%Y-%m-%d)" >> $GITHUB_OUTPUT
 
       - name: Build and push
         id: docker_buildx
