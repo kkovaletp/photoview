@@ -43,17 +43,17 @@ ENV CGO_ENABLED 1
 # Download dependencies
 RUN chmod +x /tmp/install_build_dependencies.sh \
   && chmod +x /go/bin/go \
-  && /tmp/install_build_dependencies.sh \
-  && go env \
-  && go mod download \
+  && /tmp/install_build_dependencies.sh
+RUN go env
+RUN go mod download \
   # Patch go-face
-  && sed -i 's/-march=native//g' ${GOPATH}/pkg/mod/github.com/!kagami/go-face*/face.go \
+  && sed -i 's/-march=native//g' ${GOPATH}/pkg/mod/github.com/!kagami/go-face*/face.go
   # Build dependencies that use CGO
-  && go install \
+RUN go install \
     github.com/mattn/go-sqlite3 \
-    github.com/Kagami/go-face \
+    github.com/Kagami/go-face
   # Build api source
-  && go build -v -o photoview .
+RUN go build -v -o photoview .
 
 ### Copy api and ui to production environment ###
 FROM debian:bookworm-slim
