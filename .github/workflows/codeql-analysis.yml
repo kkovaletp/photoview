@@ -83,15 +83,11 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo
             });
-            console.log('Comments:', comments.data);
             
             const botComment = comments.data.find(comment => comment.user.login === 'github-actions[bot]' && comment.body.includes('Hadolint'));
-            console.log('Bot comment:', botComment);
 
             if (hadolintOutcome === 'success') {
-              console.log('92');
               if (botComment) {
-                console.log('94');
                 await github.rest.issues.deleteComment({
                   comment_id: botComment.id,
                   owner: context.repo.owner,
