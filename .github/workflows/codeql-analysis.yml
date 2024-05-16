@@ -101,6 +101,7 @@ jobs:
   
               if (hadolintResults) {
                 output += '\n```\n' + hadolintResults + '\n```\n';
+                output += '\nFind more info about detected issues and recommendations for fixes in the [Rules table](https://github.com/hadolint/hadolint?tab=readme-ov-file#rules).';
               }
   
               if (botComment) {
