@@ -85,7 +85,7 @@ jobs:
             });
             console.log('Comments:', comments.data);
             
-            const botComment = comments.data.find(comment => comment.user.login === 'github-actions' && comment.body.includes('Hadolint'));
+            const botComment = comments.data.find(comment => comment.user.login === 'github-actions[bot]' && comment.body.includes('Hadolint'));
             console.log('Bot comment:', botComment);
 
             if (hadolintOutcome === 'success') {
