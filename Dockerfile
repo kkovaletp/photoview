@@ -60,7 +60,7 @@ FROM debian:bookworm-slim
 ARG TARGETPLATFORM
 
 # See for details: https://github.com/hadolint/hadolint/wiki/DL4006
-SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+#SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 # Create a user to run Photoview server
 RUN useradd -r -U -m photoview \
   # Required dependencies
