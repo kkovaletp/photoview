@@ -84,25 +84,29 @@ jobs:
         with:
           path: "."
           add-cpes-if-none: true
-          output-format: table
+          output-format: json
           severity-cutoff: high
           only-fixed: true
 
-      - name: Save scan results
+      - name: Read JSON
         if: always() && github.event_name == 'pull_request'
+        id: json
         run: |
-          docker ps -a
-          docker ps -aqf "ancestor=anchore/scan-action@v3"
-          docker logs $(docker ps -aqf "ancestor=anchore/scan-action@v3") > scan-results.txt
-          echo "Scan results:"
-          cat scan-results.txt
+          echo "data=$(cat ${{ steps.scan-fixed.outputs.json }})" >> $GITHUB_OUTPUT
+
+      - name: JSON to Table
+        uses: buildingcash/json-to-markdown-table-action@v1
+        if: always() && github.event_name == 'pull_request'
+        id: table
+        with:
+          json: ${{ steps.json.outputs.data }}
 
       - name: Update Pull Request
         uses: actions/github-script@v7
         if: always() && github.event_name == 'pull_request'
         with:
           script: |
-            const scanResults = fs.readFileSync('scan-results.txt', 'utf8');
+            const scanResults = ${{ steps.table.outputs.table }};
             let anchoreOutcome = "${{ steps.scan-fixed.outcome }}";
             let output = '';
 
