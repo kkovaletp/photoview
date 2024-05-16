@@ -85,9 +85,9 @@ jobs:
     name: Dockle Container Analysis
     runs-on: ubuntu-latest
     needs: build
-    if: github.repository == 'kkovaletp/photoview'
+    if: github.repository == 'kkovaletp/photoview' && github.event_name != 'pull_request'
     steps:
-       # Makes sure your .dockleignore file is available to the next step && github.event_name != 'pull_request'
+       # Makes sure your .dockleignore file is available to the next step
       - name: Checkout repository
         uses: actions/checkout@v4
 
