@@ -105,9 +105,10 @@ jobs:
         if: always() && github.event_name == 'pull_request'
         with:
           script: |
-            const scanResults = ${{ steps.table.outputs.table }};
-            let anchoreOutcome = "${{ steps.scan-fixed.outcome }}";
+            let scanResults = ${{ steps.table.outputs.table }};
             let output = '';
+            
+            console.log(scanResults);
 
             const comments = await github.rest.issues.listComments({
               issue_number: context.issue.number,
@@ -117,38 +118,27 @@ jobs:
             
             const botComment = comments.data.find(comment => comment.user.login === 'github-actions[bot]' && comment.body.includes('Anchore'));
 
-            if (anchoreOutcome === 'success') {
-              if (botComment) {
-                await github.rest.issues.deleteComment({
-                  comment_id: botComment.id,
-                  owner: context.repo.owner,
-                  repo: context.repo.repo
-                });
-              }
-            }else if (anchoreOutcome === 'failure') {
+            output += '#### Anchore Grype scan results:\n';
+            output += 'Anchore Grype detected vulnerabilities in project's dependencies, for which fixed versions available.\n';
 
-              output += '#### Anchore: ' + anchoreOutcome + '\n';
-              output += 'Anchore Grype detected High or Critical severity vulnerabilities in project's dependencies, for which fixed versions available.\n';
-  
-              if (scanResults) {
-                output += '\n```\n' + scanResults + '\n```\n';
-              }
-  
-              if (botComment) {
-                await github.rest.issues.updateComment({
-                  comment_id: botComment.id,
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  body: output
-                });
-              } else {
-                await github.rest.issues.createComment({
-                  issue_number: context.issue.number,
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  body: output
-                });
-              }
+            if (scanResults) {
+              output += '\n' + scanResults + '\n';
+            }
+
+            if (botComment) {
+              await github.rest.issues.updateComment({
+                comment_id: botComment.id,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: output
+              });
+            } else {
+              await github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: output
+              });
             }
 
   hadolint:
