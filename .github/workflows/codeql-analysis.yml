@@ -109,7 +109,6 @@ jobs:
               }
   
               if (botComment) {
-                console.log('112');
                 await github.rest.issues.updateComment({
                   comment_id: botComment.id,
                   owner: context.repo.owner,
@@ -117,7 +116,6 @@ jobs:
                   body: output
                 });
               } else {
-                console.log('120');
                 await github.rest.issues.createComment({
                   issue_number: context.issue.number,
                   owner: context.repo.owner,
