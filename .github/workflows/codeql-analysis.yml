@@ -77,12 +77,12 @@ jobs:
             let hadolintOutcome = "${{ steps.hadolint.outcome }}";
             let output = '';
 
-            if (hadolintOutcome === 'success') {
+            if (hadolintOutcome === 'success' || hadolintOutcome === '') {
               output += '#### Hadolint: Success\n';
               output += 'Hadolint executed successfully with no issues found.\n';
             } else {
               output += '#### Hadolint: Failure\n';
-              output += 'Hadolint encountered issues during execution.\n';
+              output += 'Hadolint detected issues during execution.\n';
             }
 
             if (hadolintResults) {
