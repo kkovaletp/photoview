@@ -73,13 +73,22 @@ jobs:
         if: github.event_name == 'pull_request'
         with:
           script: |
-            const output = `
-            #### Hadolint: \`${{ steps.hadolint.outcome }}\`
-            \`\`\`
-            ${process.env.HADOLINT_RESULTS}
-            \`\`\`
-            `;
-      
+            let hadolintResults = process.env.HADOLINT_RESULTS;
+            let hadolintOutcome = "${{ steps.hadolint.outcome }}";
+            let output = '';
+
+            if (hadolintOutcome === 'success') {
+              output += '#### Hadolint: Success\n';
+              output += 'Hadolint executed successfully with no issues found.\n';
+            } else {
+              output += '#### Hadolint: Failure\n';
+              output += 'Hadolint encountered issues during execution.\n';
+            }
+
+            if (hadolintResults) {
+              output += '```\n' + hadolintResults + '\n```\n';
+            }
+
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
