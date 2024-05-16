@@ -91,6 +91,8 @@ jobs:
       - name: Save scan results
         if: always() && github.event_name == 'pull_request'
         run: |
+          docker ps -a
+          docker ps -aqf "ancestor=anchore/scan-action@v3"
           docker logs $(docker ps -aqf "ancestor=anchore/scan-action@v3") > scan-results.txt
           echo "Scan results:"
           cat scan-results.txt
