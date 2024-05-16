@@ -90,16 +90,15 @@ jobs:
 
       - name: Read JSON
         if: always() && github.event_name == 'pull_request'
-        id: json
         run: |
-          echo "data='$(cat ${{ steps.scan-fixed.outputs.json }})'" >> $GITHUB_OUTPUT
+          echo "JSON_DATA=$(jq -c . < ${{ steps.scan-fixed.outputs.json }})" >> $GITHUB_ENV
 
       - name: JSON to Table
         uses: buildingcash/json-to-markdown-table-action@v1
         if: always() && github.event_name == 'pull_request'
         id: table
         with:
-          json: ${{ steps.json.outputs.data }}
+          json: ${{ env.JSON_DATA }}
 
       - name: Update Pull Request
         uses: actions/github-script@v7
