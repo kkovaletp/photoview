@@ -70,23 +70,18 @@ jobs:
 
       - name: Update Pull Request
         uses: actions/github-script@v7
-        if: github.event_name == 'pull_request'
+        if: github.event_name == 'pull_request' && steps.hadolint.outcome != '' && steps.hadolint.outcome != 'success'
         with:
           script: |
             let hadolintResults = process.env.HADOLINT_RESULTS;
             let hadolintOutcome = "${{ steps.hadolint.outcome }}";
             let output = '';
 
-            if (hadolintOutcome === 'success' || hadolintOutcome === '') {
-              output += '#### Hadolint: Success\n';
-              output += 'Hadolint executed successfully with no issues found.\n';
-            } else {
-              output += '#### Hadolint: Failure\n';
-              output += 'Hadolint detected issues during execution.\n';
-            }
+            output += '#### Hadolint: ' + hadolintOutcome + '\n';
+            output += 'Hadolint detected issues during execution.\n';
 
             if (hadolintResults) {
-              output += '```\n' + hadolintResults + '\n```\n';
+              output += '\n```\n' + hadolintResults + '\n```\n';
             }
 
             github.rest.issues.createComment({
