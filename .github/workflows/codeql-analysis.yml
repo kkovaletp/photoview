@@ -92,7 +92,7 @@ jobs:
         if: always() && github.event_name == 'pull_request'
         id: json
         run: |
-          echo "data=$(cat ${{ steps.scan-fixed.outputs.json }})" >> $GITHUB_OUTPUT
+          echo "data='$(cat ${{ steps.scan-fixed.outputs.json }})'" >> $GITHUB_OUTPUT
 
       - name: JSON to Table
         uses: buildingcash/json-to-markdown-table-action@v1
