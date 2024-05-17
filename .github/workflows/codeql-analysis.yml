@@ -119,27 +119,36 @@ jobs:
             const botComment = comments.data.find(comment => comment.user.login === 'github-actions[bot]' && comment.body.includes('Anchore'));
 
             output += '#### Anchore Grype scan results:\n';
-            output += 'Anchore Grype detected vulnerabilities in project's dependencies, for which fixed versions available.\n';
+            output += "Anchore Grype detected vulnerabilities in project's dependencies, for which fixed versions available.\n";
 
             if (scanResults) {
               output += '\n' + scanResults + '\n';
+
+              if (botComment) {
+                await github.rest.issues.updateComment({
+                  comment_id: botComment.id,
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  body: output
+                });
+              } else {
+                await github.rest.issues.createComment({
+                  issue_number: context.issue.number,
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  body: output
+                });
+              }
+            } else {
+              if (botComment) {
+                await github.rest.issues.deleteComment({
+                  comment_id: botComment.id,
+                  owner: context.repo.owner,
+                  repo: context.repo.repo
+                });
+              }
             }
 
-            if (botComment) {
-              await github.rest.issues.updateComment({
-                comment_id: botComment.id,
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                body: output
-              });
-            } else {
-              await github.rest.issues.createComment({
-                issue_number: context.issue.number,
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                body: output
-              });
-            }
 
   hadolint:
     name: Hadolint Dockerfile
