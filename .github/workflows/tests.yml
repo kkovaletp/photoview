@@ -164,8 +164,12 @@ jobs:
           flags: ui
           token: ${{ secrets.CODECOV_TKN }}
 
+      - name: Run ESLint
+        run: eslint ./src --config .eslintrc.js -f json > eslint-report.json
+
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master
+        if: always()
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_UI }}

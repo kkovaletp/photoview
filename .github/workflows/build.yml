@@ -22,6 +22,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Hadolint report
+        uses: hadolint/hadolint-action@v3.1.0
+        with:
+          dockerfile: Dockerfile
+          output-file: hadolint.json
+          format: json
+          failure-threshold: ignore
+
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master
         env:
