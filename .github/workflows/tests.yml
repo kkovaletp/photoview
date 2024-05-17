@@ -164,7 +164,7 @@ jobs:
           flags: ui
           token: ${{ secrets.CODECOV_TKN }}
 
-      - run: cat junit-report.xml
+      - run: cat coverage/lcov.info
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master
         env:
