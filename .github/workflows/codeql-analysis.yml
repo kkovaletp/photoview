@@ -94,6 +94,7 @@ jobs:
           echo '{"|": ' > vulns.json
           jq -c '.matches' < ${{ steps.scan-fixed.outputs.json }} >> vulns.json
           echo '}' >> vulns.json
+          cat vulns.json | jq
 
       - name: JSON to Table
         uses: Teebra/JSON-to-HTML-table@v2.0.0
