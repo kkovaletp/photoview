@@ -103,13 +103,21 @@ jobs:
           cp ../.github/sqlite.testing.env testing.env
 
       - name: Test
-        run: go test ./... -v -database -filesystem -p 1 -coverprofile=coverage.txt -covermode=atomic
+        run: go test ./... -v -database -filesystem -p 1 -coverprofile=coverage.txt -covermode=atomic -json > test-report.json
 
       - name: Upload coverage
         uses: codecov/codecov-action@v4
         with:
           flags: api
           token: ${{ secrets.CODECOV_TKN }}
+
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          projectBaseDir: api/
 
   test-ui:
     name: Test UI
@@ -155,3 +163,11 @@ jobs:
         with:
           flags: ui
           token: ${{ secrets.CODECOV_TKN }}
+
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@master
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          projectBaseDir: ui/

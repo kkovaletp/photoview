@@ -6,6 +6,14 @@
 [![Docker builds](https://github.com/kkovaletp/photoview/actions/workflows/build.yml/badge.svg?branch=master)](https://github.com/kkovaletp/photoview/actions/workflows/build.yml)
 [![codecov](https://codecov.io/gh/kkovaletp/photoview/branch/master/graph/badge.svg?token=ENP02P5NYS)](https://codecov.io/gh/kkovaletp/photoview)
 
+[![SonarCloud](https://sonarcloud.io/images/project_badges/sonarcloud-white.svg)](https://sonarcloud.io/summary/new_code?id=kkovaletp_photoview)
+[![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=kkovaletp_photoview&metric=ncloc)](https://sonarcloud.io/summary/new_code?id=kkovaletp_photoview)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=kkovaletp_photoview&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=kkovaletp_photoview)
+[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=kkovaletp_photoview&metric=bugs)](https://sonarcloud.io/summary/new_code?id=kkovaletp_photoview)
+[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=kkovaletp_photoview&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=kkovaletp_photoview)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=kkovaletp_photoview&metric=coverage)](https://sonarcloud.io/summary/new_code?id=kkovaletp_photoview)
+[![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=kkovaletp_photoview&metric=sqale_index)](https://sonarcloud.io/summary/new_code?id=kkovaletp_photoview)
+
 ![screenshot](./screenshots/timeline.png)
 
 **This is a forked repository from the [photoview/photoview](https://github.com/photoview/photoview).** 

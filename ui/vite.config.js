@@ -18,8 +18,15 @@ export default defineConfig({
     globals: true,
     environment: 'jsdom',
     setupFiles: './testing/setupTests.ts',
+    reporters: [
+      'verbose',
+      ['junit', { suiteName: 'UI tests' }]
+    ],
+    outputFile: {
+    junit: './junit-report.xml',
+  },
     coverage: {
-      reporter: ['text', 'json', 'html'],
+      reporter: ['text', 'lcov', 'json', 'html'],
     },
   },
 })

@@ -21,5 +21,6 @@ storage
 ui/node_modules/
 ui/build/
 ui/.cache/
+ui/.nvmrc
 
 api/photo_cache
