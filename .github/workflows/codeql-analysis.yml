@@ -100,12 +100,17 @@ jobs:
         with:
           json: ${{ env.JSON_DATA }}
 
+      - name: Encode table to Base64
+        if: always() && github.event_name == 'pull_request'
+        run: |
+          echo "TABLE_B64=$(echo '${{ steps.table.outputs.table }}' | base64)" >> $GITHUB_ENV
+
       - name: Update Pull Request
         uses: actions/github-script@v7
         if: always() && github.event_name == 'pull_request'
         with:
           script: |
-            let scanResults = "${{ steps.table.outputs.table }}";
+            let scanResults = atob("${{ env.TABLE_B64 }}");
             let output = '';
             
             console.log(scanResults);
