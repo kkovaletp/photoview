@@ -105,7 +105,7 @@ jobs:
         if: always() && github.event_name == 'pull_request'
         with:
           script: |
-            let scanResults = ${{ steps.table.outputs.table }};
+            let scanResults = "${{ steps.table.outputs.table }}";
             let output = '';
             
             console.log(scanResults);
