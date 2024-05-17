@@ -88,22 +88,16 @@ jobs:
           severity-cutoff: high
           only-fixed: true
 
-      - name: Read JSON
+      - name: Prepare JSON
         if: always() && github.event_name == 'pull_request'
         run: |
-          echo "JSON_DATA=$(jq -c '.matches' < ${{ steps.scan-fixed.outputs.json }})" >> $GITHUB_ENV
+          jq -c '.matches' < ${{ steps.scan-fixed.outputs.json }} > vulns.json
 
       - name: JSON to Table
-        uses: buildingcash/json-to-markdown-table-action@v1
+        uses: Teebra/JSON-to-HTML-table@v2.0.0
         if: always() && github.event_name == 'pull_request'
-        id: table
         with:
-          json: ${{ env.JSON_DATA }}
-
-      - name: Encode table to Base64
-        if: always() && github.event_name == 'pull_request'
-        run: |
-          echo "${{ steps.table.outputs.table }}" | base64 -w 0 > table.b64
+          json-file: vulns.json
 
       - name: Update Pull Request
         uses: actions/github-script@v7
@@ -111,10 +105,8 @@ jobs:
         with:
           script: |
             const fs = require('fs');
-            let scanResults = atob(fs.readFileSync('table.b64', 'utf8'));
+            let scanResults = fs.readFileSync('output.html', 'utf8');
             let output = '';
-            
-            console.log(scanResults);
 
             const comments = await github.rest.issues.listComments({
               issue_number: context.issue.number,
