@@ -164,6 +164,7 @@ jobs:
           flags: ui
           token: ${{ secrets.CODECOV_TKN }}
 
+      - run: cat ui/junit-report.xml
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master
         env:
