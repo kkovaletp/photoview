@@ -91,9 +91,18 @@ jobs:
       - name: Prepare JSON
         if: always() && github.event_name == 'pull_request'
         run: |
-          echo '{"|": ' > vulns.json
-          jq -c '.matches' < ${{ steps.scan-fixed.outputs.json }} >> vulns.json
-          echo '}' >> vulns.json
+          jq '{
+            "|": .matches | map({
+              "language": .artifact.language,
+              "id": .vulnerability.id,
+              "severity": .vulnerability.severity,
+              "name": .artifact.name,
+              "version": .artifact.version,
+              "fix-versions": .vulnerability.fix.versions[0],
+              "path": .artifact.locations[0].path,
+              "description": .vulnerability.description
+            })
+          }' ${{ steps.scan-fixed.outputs.json }} > vulns.json
           cat vulns.json | jq
 
       - name: JSON to Table
@@ -121,6 +130,7 @@ jobs:
 
             output += '#### Anchore Grype scan results:\n';
             output += 'Anchore Grype detected vulnerabilities in project dependencies, for which fixed versions are available.\n';
+            output += 'Please find more details in the "Checks" tab of this PR > "Code scanning results" > "Grype".\n';
 
             if (scanResults) {
               output += '\n' + scanResults + '\n';
