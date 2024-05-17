@@ -119,7 +119,7 @@ jobs:
             const botComment = comments.data.find(comment => comment.user.login === 'github-actions[bot]' && comment.body.includes('Anchore'));
 
             output += '#### Anchore Grype scan results:\n';
-            output += "Anchore Grype detected vulnerabilities in project's dependencies, for which fixed versions available.\n";
+            output += 'Anchore Grype detected vulnerabilities in project dependencies, for which fixed versions are available.\n';
 
             if (scanResults) {
               output += '\n' + scanResults + '\n';
@@ -148,7 +148,6 @@ jobs:
                 });
               }
             }
-
 
   hadolint:
     name: Hadolint Dockerfile
