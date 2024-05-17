@@ -7,12 +7,25 @@
 [![codecov](https://codecov.io/gh/kkovaletp/photoview/branch/master/graph/badge.svg?token=ENP02P5NYS)](https://codecov.io/gh/kkovaletp/photoview)
 
 [![SonarCloud](https://sonarcloud.io/images/project_badges/sonarcloud-white.svg)](https://sonarcloud.io/summary/new_code?id=kkovaletp_photoview)
-[![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=kkovaletp_photoview&metric=ncloc)](https://sonarcloud.io/summary/new_code?id=kkovaletp_photoview)
-[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=kkovaletp_photoview&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=kkovaletp_photoview)
-[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=kkovaletp_photoview&metric=bugs)](https://sonarcloud.io/summary/new_code?id=kkovaletp_photoview)
-[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=kkovaletp_photoview&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=kkovaletp_photoview)
-[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=kkovaletp_photoview&metric=coverage)](https://sonarcloud.io/summary/new_code?id=kkovaletp_photoview)
-[![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=kkovaletp_photoview&metric=sqale_index)](https://sonarcloud.io/summary/new_code?id=kkovaletp_photoview)
+
+#### Backend
+
+[![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=kostiantyn-github_photoview-api&metric=ncloc)](https://sonarcloud.io/summary/new_code?id=kostiantyn-github_photoview-api)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=kostiantyn-github_photoview-api&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=kostiantyn-github_photoview-api)
+[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=kostiantyn-github_photoview-api&metric=bugs)](https://sonarcloud.io/summary/new_code?id=kostiantyn-github_photoview-api)
+[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=kostiantyn-github_photoview-api&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=kostiantyn-github_photoview-api)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=kostiantyn-github_photoview-api&metric=coverage)](https://sonarcloud.io/summary/new_code?id=kostiantyn-github_photoview-api)
+[![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=kostiantyn-github_photoview-api&metric=sqale_index)](https://sonarcloud.io/summary/new_code?id=kostiantyn-github_photoview-api)
+
+#### Frontend
+
+[![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=kostiantyn-github_photoview-ui&metric=ncloc)](https://sonarcloud.io/summary/new_code?id=kostiantyn-github_photoview-ui)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=kostiantyn-github_photoview-ui&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=kostiantyn-github_photoview-ui)
+[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=kostiantyn-github_photoview-ui&metric=bugs)](https://sonarcloud.io/summary/new_code?id=kostiantyn-github_photoview-ui)
+[![Code Smells](https://sonarcloud.io/api/project_badges/measure?project=kostiantyn-github_photoview-ui&metric=code_smells)](https://sonarcloud.io/summary/new_code?id=kostiantyn-github_photoview-ui)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=kostiantyn-github_photoview-ui&metric=coverage)](https://sonarcloud.io/summary/new_code?id=kostiantyn-github_photoview-ui)
+[![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=kostiantyn-github_photoview-ui&metric=sqale_index)](https://sonarcloud.io/summary/new_code?id=kostiantyn-github_photoview-ui)
+
 
 ![screenshot](./screenshots/timeline.png)
 
