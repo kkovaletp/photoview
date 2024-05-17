@@ -103,14 +103,15 @@ jobs:
       - name: Encode table to Base64
         if: always() && github.event_name == 'pull_request'
         run: |
-          echo "TABLE_B64=$(echo '${{ steps.table.outputs.table }}' | base64)" >> $GITHUB_ENV
+          echo "${{ steps.table.outputs.table }}" | base64 -w 0 > table.b64
 
       - name: Update Pull Request
         uses: actions/github-script@v7
         if: always() && github.event_name == 'pull_request'
         with:
           script: |
-            let scanResults = atob("${{ env.TABLE_B64 }}");
+            const fs = require('fs');
+            let scanResults = atob(fs.readFileSync('table.b64', 'utf8'));
             let output = '';
             
             console.log(scanResults);
