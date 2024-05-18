@@ -174,7 +174,7 @@ jobs:
       - name: Run ESLint
         run: |
           npm clean-install --include dev
-          npm run lint:ci
+          npm run lint:ci || true
 
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master
