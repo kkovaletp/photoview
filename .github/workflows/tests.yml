@@ -86,17 +86,8 @@ jobs:
               dep ensure
           fi
 
-      #- name: Build
-      #  run: go build -v .
-      - name: Build with Coverity Scan
-        uses: vapier/coverity-scan-action@v1
-        if: always() && github.repository == 'kkovaletp/photoview' #&& github.event_name != 'pull_request'
-        with:
-          email: ${{ secrets.COVERITY_SCAN_EMAIL }}
-          token: ${{ secrets.COVERITY_SCAN_TOKEN }}
-          build_language: "other"
-          working-directory: 'api'
-          command: 'go build -v .'
+      - name: Build
+        run: go build -v .
 
       - name: Configure MySQL
         if: ${{ matrix.database == 'mysql' }}
@@ -131,6 +122,56 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_API }}
         with:
           projectBaseDir: api/
+
+  coverity-api:
+    name: Coverity Scan API
+    runs-on: ubuntu-latest
+    if: github.repository == 'kkovaletp/photoview' #&& github.event_name != 'pull_request'
+    steps:
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: ^1.16
+        id: go
+
+      - name: Check out code into the Go module directory
+        uses: actions/checkout@v4
+
+      - name: Fetch branches
+        run: git fetch --all
+
+      - name: Cache Go dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/go/pkg/mod
+          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
+          restore-keys: |
+            ${{ runner.os }}-go-
+
+      - name: Get C dependencies
+        run: |
+          sudo add-apt-repository ppa:strukturag/libheif
+          sudo add-apt-repository ppa:strukturag/libde265
+          sudo apt-get update
+          sudo apt-get install -y libdlib-dev libblas-dev libatlas-base-dev liblapack-dev libjpeg-turbo8-dev libheif-dev
+
+      - name: Get GO dependencies
+        run: |
+          go get -v -t -d ./...
+          if [ -f Gopkg.toml ]; then
+              curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
+              dep ensure
+          fi
+
+      - name: Build with Coverity Scan
+        uses: vapier/coverity-scan-action@v1
+        with:
+          email: ${{ secrets.COVERITY_SCAN_EMAIL }}
+          token: ${{ secrets.COVERITY_SCAN_TOKEN }}
+          build_language: "other"
+          working-directory: 'api'
+          command: '--fs-capture-search ./ go build -v .'
 
   test-ui:
     name: Test UI
@@ -202,3 +243,4 @@ jobs:
           token: ${{ secrets.COVERITY_SCAN_TOKEN }}
           build_language: "javascript"
           working-directory: 'ui'
+          command: '--no-command --fs-capture-search ./src/'
