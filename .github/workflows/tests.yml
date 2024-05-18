@@ -127,6 +127,9 @@ jobs:
     name: Coverity Scan API
     runs-on: ubuntu-latest
     if: github.repository == 'kkovaletp/photoview' #&& github.event_name != 'pull_request'
+    defaults:
+      run:
+        working-directory: api
     steps:
 
       - name: Set up Go
