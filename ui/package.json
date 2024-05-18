@@ -12,6 +12,7 @@
     "start": "vite",
     "build": "vite build",
     "lint": "eslint ./src --max-warnings 0 --config .eslintrc.js",
+    "lint:ci": "eslint ./src --config .eslintrc.js -f json > eslint-report.json",
     "test": "vitest",
     "test:ci": "CI=true vitest --reporter=junit --reporter=verbose --run --coverage",
     "genSchemaTypes": "apollo client:codegen --target=typescript --globalTypesFile=src/__generated__/globalTypes.ts --passthroughCustomScalars && prettier --write */**/__generated__/*.ts",

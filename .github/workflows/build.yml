@@ -22,6 +22,9 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Fetch branches
+        run: git fetch --all
+
       - name: Hadolint report
         uses: hadolint/hadolint-action@v3.1.0
         with:
@@ -32,6 +35,7 @@ jobs:
 
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master
+        if: github.repository == 'kkovaletp/photoview'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_DOCKER }}
