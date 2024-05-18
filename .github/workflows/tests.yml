@@ -86,8 +86,17 @@ jobs:
               dep ensure
           fi
 
-      - name: Build
-        run: go build -v .
+      #- name: Build
+      #  run: go build -v .
+      - name: Build with Coverity Scan
+        uses: vapier/coverity-scan-action@v1
+        if: always() && github.repository == 'kkovaletp/photoview' #&& github.event_name != 'pull_request'
+        with:
+          email: ${{ secrets.COVERITY_SCAN_EMAIL }}
+          token: ${{ secrets.COVERITY_SCAN_TOKEN }}
+          build_language: "other"
+          working-directory: 'api'
+          command: 'go build -v .'
 
       - name: Configure MySQL
         if: ${{ matrix.database == 'mysql' }}
@@ -184,3 +193,12 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_UI }}
         with:
           projectBaseDir: ui/
+
+      - name: Run Coverity Scan - JS
+        uses: vapier/coverity-scan-action@v1
+        if: always() && github.repository == 'kkovaletp/photoview' #&& github.event_name != 'pull_request'
+        with:
+          email: ${{ secrets.COVERITY_SCAN_EMAIL }}
+          token: ${{ secrets.COVERITY_SCAN_TOKEN }}
+          build_language: "javascript"
+          working-directory: 'ui'
