@@ -292,4 +292,4 @@ jobs:
           token: ${{ secrets.COVERITY_SCAN_TOKEN }}
           build_language: "other"
           #working-directory: 'api'
-          command: '--fs-capture-search ./ cd ./api && go build -v .'
+          command: '--fs-capture-search ./ go build -v ./api'
