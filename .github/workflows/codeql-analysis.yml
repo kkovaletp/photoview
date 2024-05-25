@@ -281,7 +281,6 @@ jobs:
       - name: Get GO dependencies
         working-directory: api
         run: |
-          go version
           go get -v -t -d ./...
           if [ -f Gopkg.toml ]; then
               curl https://raw.githubusercontent.com/golang/dep/master/install.sh | sh
@@ -325,6 +324,7 @@ jobs:
         shell: bash
         run: |
           echo "${{ github.workspace }}/cov-analysis/bin" >> $GITHUB_PATH
+          export PATH="${{ github.workspace }}/cov-analysis/bin:${PATH}"
           cov-configure --comptype go --compiler $(which go)
 
       - name: Build API with cov-build
