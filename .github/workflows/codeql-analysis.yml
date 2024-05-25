@@ -361,6 +361,7 @@ jobs:
       - name: Scan whole project with fs-capture
         shell: bash
         run: |
+          ls -lah
           cov-build --dir ${{ github.workspace }}/cov-int \
             --return-emit-failures --no-command \
             --fs-capture-search ./
