@@ -246,7 +246,7 @@ jobs:
   coverity:
     name: Coverity Scan
     runs-on: ubuntu-latest
-    if: github.repository == 'kkovaletp/photoview' #&& github.event_name != 'pull_request'
+    if: github.repository == 'kkovaletp/photoview' && github.event_name != 'pull_request'
     env:
       COV_PROJECT: kkovaletp%2Fphotoview
     steps:
@@ -379,7 +379,7 @@ jobs:
             --verbose 2 \
             --tu-pattern "file('/.vscode/')" \
             --tu-pattern "file('_test.go')" \
-            --tu-pattern "file('/ui/node_modules/')" \
+            --tu-pattern "file('/node_modules/')" \
             --tu-pattern "file('/testing/')" \
             --tu-pattern "file('.test.tsx')" \
             --tu-pattern "file('/cov-analysis/')" \
@@ -390,7 +390,7 @@ jobs:
             --verbose 2 \
             --tu-pattern "file('/.vscode/')" \
             --tu-pattern "file('_test.go')" \
-            --tu-pattern "file('/ui/node_modules/')" \
+            --tu-pattern "file('/node_modules/')" \
             --tu-pattern "file('/testing/')" \
             --tu-pattern "file('.test.tsx')" \
             --tu-pattern "file('/cov-analysis/')" \
