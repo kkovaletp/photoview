@@ -322,13 +322,13 @@ jobs:
           mkdir ./cov-analysis
           tar -xzf ./cov-analysis.tar.gz --strip 1 -C ./cov-analysis
           rm ./cov-analysis.tar.gz
+          export PATH="${{ github.workspace }}/cov-analysis/bin:${PATH}"
+          cov-configure --comptype go --compiler $(which go)
 
-      - name: Configure Coverity Analysis Tool
+      - name: Add Coverity Analysis Tool to PATH
         shell: bash
         run: |
           echo "${{ github.workspace }}/cov-analysis/bin" >> $GITHUB_PATH
-          export PATH="${{ github.workspace }}/cov-analysis/bin:${PATH}"
-          cov-configure --comptype go --compiler $(which go)
 
       - name: Build API with cov-build
         shell: bash
@@ -361,7 +361,6 @@ jobs:
       - name: Scan whole project with fs-capture
         shell: bash
         run: |
-          ls -lah
           cov-build --dir ${{ github.workspace }}/cov-int \
             --return-emit-failures --no-command \
             --fs-capture-search ./
@@ -371,23 +370,25 @@ jobs:
         run: |
           cov-manage-emit --dir ${{ github.workspace }}/cov-int \
             --verbose 2 \
-            --tu-pattern "file('.vscode/')" \
+            --tu-pattern "file('/.vscode/')" \
             --tu-pattern "file('_test.go')" \
-            --tu-pattern "file('node_modules/')" \
-            --tu-pattern "file('testing/')" \
+            --tu-pattern "file('/node_modules/')" \
+            --tu-pattern "file('/testing/')" \
             --tu-pattern "file('.test.tsx')" \
-            --tu-pattern "file('cov-analysis/')" \
-            --tu-pattern "file('cov-int/')" \
+            --tu-pattern "file('/cov-analysis/')" \
+            --tu-pattern "file('/cov-int/')" \
+            --tu-pattern "file('/home/runner/go/pkg/')" \
             list
           cov-manage-emit --dir ${{ github.workspace }}/cov-int \
             --verbose 2 \
-            --tu-pattern "file('.vscode/')" \
+            --tu-pattern "file('/.vscode/')" \
             --tu-pattern "file('_test.go')" \
-            --tu-pattern "file('node_modules/')" \
-            --tu-pattern "file('testing/')" \
+            --tu-pattern "file('/node_modules/')" \
+            --tu-pattern "file('/testing/')" \
             --tu-pattern "file('.test.tsx')" \
-            --tu-pattern "file('cov-analysis/')" \
-            --tu-pattern "file('cov-int/')" \
+            --tu-pattern "file('/cov-analysis/')" \
+            --tu-pattern "file('/cov-int/')" \
+            --tu-pattern "file('/home/runner/go/pkg/')" \
             delete
           cov-import-scm --scm git \
             --dir ${{ github.workspace }}/cov-int \
