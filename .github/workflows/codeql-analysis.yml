@@ -311,6 +311,7 @@ jobs:
           path: ${{ github.workspace }}/cov-analysis
           key: cov-analysis-linux64-${{ steps.coverity-cache-lookup.outputs.hash }}
 
+      # Download and unpack the binaries, configure to use our GO compiler
       - name: Install Coverity Analysis Tool
         if: steps.cov-analysis-cache.outputs.cache-hit != 'true'
         shell: bash
@@ -325,11 +326,13 @@ jobs:
           export PATH="${{ github.workspace }}/cov-analysis/bin:${PATH}"
           cov-configure --comptype go --compiler $(which go)
 
+      # Register Coverity executables in system PATH
       - name: Add Coverity Analysis Tool to PATH
         shell: bash
         run: |
           echo "${{ github.workspace }}/cov-analysis/bin" >> $GITHUB_PATH
 
+      # Build and capture API code
       - name: Build API with cov-build
         shell: bash
         working-directory: api
@@ -350,6 +353,7 @@ jobs:
         working-directory: ui
         run: npm ci --omit=dev --ignore-scripts
 
+      # Build and capture UI code
       - name: Build UI with cov-build
         shell: bash
         working-directory: ui
@@ -358,6 +362,7 @@ jobs:
             --return-emit-failures \
             --fs-capture-search ./ npm run build -- --base=/
 
+      # Run FS capture for the rest of the files in the project
       - name: Scan whole project with fs-capture
         shell: bash
         run: |
@@ -365,6 +370,8 @@ jobs:
             --return-emit-failures --no-command \
             --fs-capture-search ./
 
+      # Remove unnecessary captures from the Coverity results before sending them for analysis
+      # Extract 'git blame' info for captured files
       - name: Prepare collected results
         shell: bash
         run: |
@@ -372,7 +379,7 @@ jobs:
             --verbose 2 \
             --tu-pattern "file('/.vscode/')" \
             --tu-pattern "file('_test.go')" \
-            --tu-pattern "file('/node_modules/')" \
+            --tu-pattern "file('/ui/node_modules/')" \
             --tu-pattern "file('/testing/')" \
             --tu-pattern "file('.test.tsx')" \
             --tu-pattern "file('/cov-analysis/')" \
@@ -383,7 +390,7 @@ jobs:
             --verbose 2 \
             --tu-pattern "file('/.vscode/')" \
             --tu-pattern "file('_test.go')" \
-            --tu-pattern "file('/node_modules/')" \
+            --tu-pattern "file('/ui/node_modules/')" \
             --tu-pattern "file('/testing/')" \
             --tu-pattern "file('.test.tsx')" \
             --tu-pattern "file('/cov-analysis/')" \
@@ -393,14 +400,12 @@ jobs:
           cov-import-scm --scm git \
             --dir ${{ github.workspace }}/cov-int \
             --ms-delay 10 --verbose 0
-        
-      - name: Archive results
-        shell: bash
-        run: tar -czvf ./cov-int.tgz ./cov-int
 
+      # Archive and send all the results to the Coverity server
       - name: Submit results to Coverity Scan
         shell: bash
         run: |
+          tar -czvf ./cov-int.tgz ./cov-int
           curl \
             --form token="${{ secrets.COVERITY_SCAN_TOKEN }}" \
             --form email="${{ secrets.COVERITY_SCAN_EMAIL }}" \
