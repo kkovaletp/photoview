@@ -18,14 +18,15 @@ jobs:
 
     services:
       mariadb:
-        image: mariadb:10.11
+        image: mariadb:lts
         env:
           MYSQL_DATABASE: photoview_test
           MYSQL_USER: photoview
           MYSQL_PASSWORD: photosecret
           MYSQL_RANDOM_ROOT_PASSWORD: yes
+        # https://github.com/MariaDB/mariadb-docker/issues/497
         options: >-
-          --health-cmd="mysqladmin ping"
+          --health-cmd="mariadb-admin ping"
           --health-interval=20s
           --health-timeout=5s
           --health-retries=10
