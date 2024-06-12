@@ -8,14 +8,12 @@ import logging
 
 app = Flask(__name__)
 auth = HTTPBasicAuth()
+gunicorn_logger = logging.getLogger('gunicorn.error')
 try:
   app_port = int(os.environ['PHOTOVIEW_FFMPEG_PORT'])
 except ValueError as e:
-    print("Got string value for port and cannot convert it to integer.")
-    raise SystemExit(e)
-
-# Get the Gunicorn logger
-gunicorn_logger = logging.getLogger('gunicorn.error')
+  gunicorn_logger.error("Got string value for port and cannot convert it to integer.\n%s", exc_info=True)
+  raise SystemExit(e)
 
 users = {
   os.environ['PHOTOVIEW_FFMPEG_USER']: os.environ['PHOTOVIEW_FFMPEG_PASSWORD']
@@ -25,7 +23,7 @@ users = {
 @auth.verify_password
 def verify_password(username, password):
   if username in users and users.get(username) == password:
-    gunicorn_logger.info("Authorized as " + username)
+    gunicorn_logger.info("Authorized with correct credentials")
     return username
   else:
     gunicorn_logger.error("Unauthorized request with invalid credentials declined")
@@ -33,7 +31,6 @@ def verify_password(username, password):
 
 @app.route('/health', methods=['GET'])
 def health():
-  gunicorn_logger.debug("Got health request")
   result = subprocess.run(['ffmpeg', '-version'],
                           capture_output=True, text=True)
 
