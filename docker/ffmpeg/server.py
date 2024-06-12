@@ -64,7 +64,7 @@ def execute():
                           capture_output=True, text=True)
 
   gunicorn_logger.debug("Finished media processing by the FFmpeg tool")
-  
+
   # Log the result to stdout and stderr
   if not result.stdout.endswith('\n'):
     result.stdout += '\n'
