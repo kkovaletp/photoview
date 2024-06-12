@@ -9,8 +9,9 @@ on:
       - v*
 
 env:
+  DOCKER_IMAGE_PHOTOVIEW: kkoval/photoview
+  DOCKER_IMAGE_FFMPEG: kkoval/ffmpeg
   DOCKER_USERNAME: kkoval
-  DOCKER_IMAGE: kkoval/photoview
   DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
 
 jobs:
@@ -60,7 +61,9 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           # list of Docker images to use as base name for tags
-          images: ${{ env.DOCKER_IMAGE }}
+          images: |
+            ${{ env.DOCKER_IMAGE_PHOTOVIEW }}
+            ${{ env.DOCKER_IMAGE_FFMPEG }}
           # Docker tags based on the following events/attributes
           tags: |
             type=schedule
@@ -77,8 +80,8 @@ jobs:
           echo "BUILD_DATE=$(date +%Y-%m-%d)" >> $GITHUB_OUTPUT
           echo "VERSION=kkoval-2-$(date +%Y-%m-%d)" >> $GITHUB_OUTPUT
 
-      - name: Build and push
-        id: docker_buildx
+      - name: Build and push Photoview
+        id: docker_buildx_photoview
         uses: docker/build-push-action@v5
         with:
           context: .
@@ -98,6 +101,21 @@ jobs:
             REACT_APP_BUILD_VERSION=${{ steps.vars.outputs.VERSION }}
             COMMIT_SHA=${{ github.sha }}
             REACT_APP_BUILD_COMMIT_SHA=${{ github.sha }}
+
+      - name: Build and push FFmpeg
+        id: docker_buildx-ffmpeg
+        uses: docker/build-push-action@v5
+        with:
+          context: "{{defaultContext}}:docker/ffmpeg"
+          sbom: true
+          provenance: mode=max
+          platforms: linux/amd64,linux/arm64
+          push: ${{ github.event_name != 'pull_request' && github.repository == 'kkovaletp/photoview' }}
+          tags: ${{ steps.docker_meta.outputs.tags }}
+          labels: ${{ steps.docker_meta.outputs.labels }}
+          annotations: ${{ steps.meta.outputs.annotations }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
   dockle:
     name: Dockle Container Analysis
