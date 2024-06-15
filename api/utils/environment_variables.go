@@ -40,6 +40,17 @@ const (
 	EnvDisableRawProcessing   EnvironmentVariable = "PHOTOVIEW_DISABLE_RAW_PROCESSING"
 )
 
+// External FFmpeg worker
+const (
+  EnvExtFFmpegBaseURL       EnvironmentVariable = "PHOTOVIEW_FFMPEG_BASE_URL"
+  EnvExtFFmpegPort          EnvironmentVariable = "PHOTOVIEW_FFMPEG_PORT"
+  EnvExtFFmpegUser          EnvironmentVariable = "PHOTOVIEW_FFMPEG_USER"
+  EnvExtFFmpegPass          EnvironmentVariable = "PHOTOVIEW_FFMPEG_PASSWORD"
+  EnvExtFFmpegTimeout       EnvironmentVariable = "PHOTOVIEW_FFMPEG_TIMEOUT"
+  EnvExtFFmpegVideoCmd      EnvironmentVariable = "PHOTOVIEW_FFMPEG_VIDEO_CMD"
+  EnvExtFFmpegThumbnailCmd  EnvironmentVariable = "PHOTOVIEW_FFMPEG_THUMBNAIL_CMD"
+)
+
 // GetName returns the name of the environment variable itself
 func (v EnvironmentVariable) GetName() string {
 	return string(v)
