@@ -1,23 +1,33 @@
-from flask import Flask, request, abort
+from flask import Flask, request
 from flask_httpauth import HTTPBasicAuth
 import subprocess
 import os
 import re
-import sys
 import logging
+import time
+from datetime import timedelta
 
 app = Flask(__name__)
 auth = HTTPBasicAuth()
 gunicorn_logger = logging.getLogger('gunicorn.error')
+
 try:
   app_port = int(os.environ['PHOTOVIEW_FFMPEG_PORT'])
 except ValueError as e:
-  gunicorn_logger.error("Got string value for port and cannot convert it to integer.\n%s", exc_info=True)
+  gunicorn_logger.error(
+      "Got string value for port and cannot convert it to integer.\n%s",
+      "", exc_info=True)
   raise SystemExit(e)
 
-users = {
-  os.environ['PHOTOVIEW_FFMPEG_USER']: os.environ['PHOTOVIEW_FFMPEG_PASSWORD']
-}
+if os.environ['PHOTOVIEW_FFMPEG_USER'] != "" and os.environ['PHOTOVIEW_FFMPEG_PASSWORD'] != "":
+  users = {
+    os.environ['PHOTOVIEW_FFMPEG_USER']: os.environ['PHOTOVIEW_FFMPEG_PASSWORD']
+  }
+else:
+  gunicorn_logger.error(
+      "Got empty value for at least 1 of: PHOTOVIEW_FFMPEG_USER, PHOTOVIEW_FFMPEG_PASSWORD.\n%s",
+      "", exc_info=True)
+  raise SystemExit()
 
 
 @auth.verify_password
@@ -31,7 +41,7 @@ def verify_password(username, password):
 
 @app.route('/health', methods=['GET'])
 def health():
-  result = subprocess.run(['ffmpeg', '-version'],
+  result = subprocess.run(['/ffmpegwrapper.sh', '-version'],
                           capture_output=True, text=True)
 
   if result.returncode == 0:
@@ -47,26 +57,36 @@ def health():
 @app.route('/execute', methods=['POST'])
 @auth.login_required
 def execute():
+  start_time = time.time()
   command = request.json['command']
-  gunicorn_logger.debug("Got POST request with the command " + command)
+  gunicorn_logger.debug("Got POST request with the command: " + command)
 
   # Input validation
   if re.search(r'[;&|`$<>]', command):
     gunicorn_logger.error(
         "Abort execution before starting: Invalid characters in command")
-    abort(400, description="Invalid characters in command")
+    return {'stderr': 'Invalid characters in command. Forbidden [;&|`$<>]'}, 400
 
   # Execute the command using ffmpeg
   result = subprocess.run(['/ffmpegwrapper.sh'] + command.split(),
                           capture_output=True, text=True)
 
-  gunicorn_logger.debug("Finished media processing by the FFmpeg tool")
+  spent_time_str = str(timedelta(seconds=(time.time() - start_time))).split('.')
+  spent_time = spent_time_str[0] + '.' + spent_time_str[1][:3]
+  gunicorn_logger.info(f"Finished media processing by the FFmpeg tool. Time spent: {spent_time}")
 
   # Log the result to stdout and stderr
-  if not result.stdout.endswith('\n'):
-    result.stdout += '\n'
-  gunicorn_logger.info(result.stdout)
-  gunicorn_logger.error(result.stderr)
+  if result.stdout != "":
+    gunicorn_logger.info(result.stdout)
+  else:
+    gunicorn_logger.debug("STDOUT of the command execution is empty")
+  if result.stderr != "":
+    if result.returncode == 0:
+      gunicorn_logger.info(result.stderr)
+    else:
+      gunicorn_logger.error(result.stderr)
+  else:
+    gunicorn_logger.debug("STDERR of the command execution is empty")
 
   # Check the return code of the command
   if result.returncode != 0:
