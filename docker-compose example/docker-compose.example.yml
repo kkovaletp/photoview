@@ -12,7 +12,10 @@ services:
     ## This ensures that DB is initialized and ready for connections.
     ## Comment out the entire `depends_on` section if PHOTOVIEW_DATABASE_DRIVER is set to `sqlite` in the .env
     ## Or comment out the `postgres:` and uncomment the `mariadb:` if PHOTOVIEW_DATABASE_DRIVER is set to `mysql`
+    ## Uncomment the `ffmpeg:` with its `condition` if you use the external FFmpeg processing service in this compose
     depends_on:
+      # ffmpeg:
+      #   condition: service_healthy
       # mariadb:
       postgres:
         condition: service_healthy
@@ -42,20 +45,65 @@ services:
       ## A token can be generated for free here https://account.mapbox.com/access-tokens/
       ## It's a good idea to limit the scope of the token to your own domain, to prevent others from using it.
       MAPBOX_TOKEN: ${MAPBOX_TOKEN}
-    ## Share hardware devices with scan job runners (optional):
-    # devices:
-      ## Uncomment next devices mappings if they are available in your host system
-      ## Intel QSV
-      # - "/dev/dri:/dev/dri"
-      ## Nvidia CUDA
-      # - "/dev/nvidia0:/dev/nvidia0"
-      # - "/dev/nvidiactl:/dev/nvidiactl"
-      # - "/dev/nvidia-modeset:/dev/nvidia-modeset"
-      # - "/dev/nvidia-nvswitchctl:/dev/nvidia-nvswitchctl"
-      # - "/dev/nvidia-uvm:/dev/nvidia-uvm"
-      # - "/dev/nvidia-uvm-tools:/dev/nvidia-uvm-tools"
-      ## Video4Linux Video Encode Device (h264_v4l2m2m)
-      # - "/dev/video11:/dev/video11"
+      ## Uncomment the next FFmpeg-related variables if you use the external FFmpeg processing service in this compose
+      # PHOTOVIEW_FFMPEG_BASE_URL: ${PHOTOVIEW_FFMPEG_BASE_URL}
+      # PHOTOVIEW_FFMPEG_USER: ${PHOTOVIEW_FFMPEG_USER}
+      # PHOTOVIEW_FFMPEG_PASSWORD: ${PHOTOVIEW_FFMPEG_PASSWORD}
+      # PHOTOVIEW_FFMPEG_PORT: ${PHOTOVIEW_FFMPEG_PORT}
+      # PHOTOVIEW_FFMPEG_TIMEOUT: ${PHOTOVIEW_FFMPEG_TIMEOUT}
+      ## Here there are the same 2 variables with the command templates for different setups.
+      ## You need to choose and uncomment only 1 pair of them according to your setup. Keep others commented out.
+      ## Next 2 CMD variables for the case of no hardware acceleration
+      # PHOTOVIEW_FFMPEG_VIDEO_CMD: >
+      #   -i	<inputPath>
+      #   -vcodec h264 -acodec aac
+      #   -vf scale='min(1080,iw)':'min(1080,ih)':force_original_aspect_ratio=decrease:force_divisible_by=2
+      #   -movflags +faststart+use_metadata_tags	<outputPath>
+      # PHOTOVIEW_FFMPEG_THUMBNAIL_CMD: >
+      #   -ss <thumbnailOffsetSeconds>
+      #   -i <inputPath>	-vframes 1 -an
+      #   -vf scale='min(1024,iw)':'min(1024,ih)':force_original_aspect_ratio=decrease:force_divisible_by=2
+      #   <outputPath>
+      ## Next 2 CMD variables for the case of AMD VAAPI hardware acceleration (NOT TESTED)
+      # PHOTOVIEW_FFMPEG_VIDEO_CMD: >
+      #   -vaapi_device /dev/dri/renderD128
+      #   -i	<inputPath>
+      #   -vcodec h264_vaapi -acodec aac
+      #   -vf format=nv12|vaapi,hwupload,scale_vaapi='min(1080,iw)':'min(1080,ih)':force_original_aspect_ratio=decrease:force_divisible_by=2
+      #   -movflags +faststart+use_metadata_tags	<outputPath>
+      # PHOTOVIEW_FFMPEG_THUMBNAIL_CMD: >
+      #   -vaapi_device /dev/dri/renderD128
+      #   -ss <thumbnailOffsetSeconds>
+      #   -i <inputPath>	-vframes 1 -an
+      #   -vf format=nv12|vaapi,hwupload,scale_vaapi='min(1024,iw)':'min(1024,ih)':force_original_aspect_ratio=decrease:force_divisible_by=2
+      #   <outputPath>
+      ## Next 2 CMD variables for the case of Intel QSV hardware acceleration
+      ## (NOT TESTED: maybe the `-vf` option needs to be replaced with the `-global_quality 25`)
+      # PHOTOVIEW_FFMPEG_VIDEO_CMD: >
+      #   -hwaccel qsv
+      #   -i	<inputPath>
+      #   -vcodec h264_qsv -acodec aac
+      #   -vf scale='min(1080,iw)':'min(1080,ih)':force_original_aspect_ratio=decrease:force_divisible_by=2
+      #   -movflags +faststart+use_metadata_tags	<outputPath>
+      # PHOTOVIEW_FFMPEG_THUMBNAIL_CMD: >
+      #   -hwaccel qsv
+      #   -ss <thumbnailOffsetSeconds>
+      #   -i <inputPath>	-vframes 1 -an
+      #   -vf scale='min(1024,iw)':'min(1024,ih)':force_original_aspect_ratio=decrease:force_divisible_by=2
+      #   <outputPath>
+      ## Next 2 CMD variables for the case of Nvidia hardware acceleration (NOT TESTED)
+      # PHOTOVIEW_FFMPEG_VIDEO_CMD: >
+      #   -hwaccel nvdec
+      #   -i	<inputPath>
+      #   -vcodec h264_nvenc -acodec aac
+      #   -vf scale='min(1080,iw)':'min(1080,ih)':force_original_aspect_ratio=decrease:force_divisible_by=2
+      #   -movflags +faststart+use_metadata_tags	<outputPath>
+      # PHOTOVIEW_FFMPEG_THUMBNAIL_CMD: >
+      #   -hwaccel nvdec
+      #   -ss <thumbnailOffsetSeconds>
+      #   -i <inputPath>	-vframes 1 -an
+      #   -vf scale='min(1024,iw)':'min(1024,ih)':force_original_aspect_ratio=decrease:force_divisible_by=2
+      #   <outputPath>
     volumes:
       ## Example:
       ## - "/host/folder:/container/folder"
@@ -164,3 +212,65 @@ services:
 #      timeout: 5s
 #      retries: 5
 #      start_period: 3m
+
+  ## This is the external FFmpeg worker container with GPU hardware support. Use it to boost the
+  ## Photoview scan job performance.
+  ## Read carefully the FFmpeg container description and uncomment the necessary lines in the
+  ## corresponding sections of the `ffmpeg` and `photoview` services: https://hub.docker.com/r/linuxserver/ffmpeg
+  ## 1. You need to uncomment this service if you decided to run it on the same host.
+  ##    You can run this service on another host (as a Docker container or hosted directly), accessible
+  ##    by Photoview and with the same paths and access to the Source Media volumes (read-only)
+  ##    and the Photoview cache volume (with write permissions).
+  ## 2. Based on your setup, you need to configure the environment variables for the `photoview` and
+  ##    `ffmpeg` services (here and in the `.env` file), as well as the devices mapping.
+  ## 3. Based on your setup, you need to perform 1 of the next actions:
+  ## - Basic Transcode (no hardware acceleration): no need to uncomment anything additional.
+  ## - Hardware accelerated (VAAPI): don't forget to uncomment the "/dev/dri:/dev/dri"
+  ##   under the "devices" section
+  ## - Hardware accelerated (QSV): don't forget to uncomment the "/dev/dri:/dev/dri"
+  ##   under the "devices" section
+  ## - Nvidia Hardware accelerated: make sure to install Nvidia driver and Container Toolkit on the host
+  ##   and restart the Docker daemon
+#  ffmpeg:
+#    image: kkoval/ffmpeg:master
+#    hostname: photoview-ffmpeg
+#    container_name: photoview-ffmpeg
+#    restart: unless-stopped
+#    stop_grace_period: 1s
+#    ## Security options for some restricted systems
+#    security_opt:
+#      - seccomp:unconfined
+#      - apparmor:unconfined
+#    environment:
+#      PHOTOVIEW_FFMPEG_USER: ${PHOTOVIEW_FFMPEG_USER}
+#      PHOTOVIEW_FFMPEG_PASSWORD: ${PHOTOVIEW_FFMPEG_PASSWORD}
+#      PHOTOVIEW_FFMPEG_PORT: ${PHOTOVIEW_FFMPEG_PORT}
+#      PHOTOVIEW_FFMPEG_TIMEOUT: ${PHOTOVIEW_FFMPEG_TIMEOUT}
+#      PHOTOVIEW_FFMPEG_WORKERS: ${PHOTOVIEW_FFMPEG_WORKERS}
+#      PHOTOVIEW_FFMPEG_LOGLEVEL: ${PHOTOVIEW_FFMPEG_LOGLEVEL}
+#    ## Share hardware devices with FFmpeg:
+#    # devices:
+#      ## Uncomment next devices mappings if they are available in your host system
+#      ## Intel QSV and/or AMD VAAPI GPU
+#      # - "/dev/dri:/dev/dri"
+#      ## Nvidia CUDA
+#      # - "/dev/nvidia0:/dev/nvidia0"
+#      # - "/dev/nvidiactl:/dev/nvidiactl"
+#      # - "/dev/nvidia-modeset:/dev/nvidia-modeset"
+#      # - "/dev/nvidia-nvswitchctl:/dev/nvidia-nvswitchctl"
+#      # - "/dev/nvidia-uvm:/dev/nvidia-uvm"
+#      # - "/dev/nvidia-uvm-tools:/dev/nvidia-uvm-tools"
+#      ## Video4Linux Video Encode Device (h264_v4l2m2m)
+#      # - "/dev/video11:/dev/video11"
+#    ## Make sure that the volumes here are defined exactly the same as in the `photoview` service
+#    ## with the only 1 exception: you don't need to map here the SQLite volume if you use this DBMS,
+#    ## and its volume is uncommented in the `photoview` service.
+#    ## All other volume mappings have to be identical.
+#    volumes:
+#      ## Example:
+#      ## - "/host/folder:/container/folder"
+#      - "/etc/localtime:/etc/localtime:ro" ## use local time from host
+#      - "/etc/timezone:/etc/timezone:ro"   ## use timezone from host
+#      - "${HOST_PHOTOVIEW_LOCATION}/storage:/home/photoview/media-cache"
+#      - "${HOST_PHOTOVIEW_MEDIA_ROOT}:/photos/main:ro"
+#      - "${HOST_PHOTOVIEW_MEDIA_VIBER}:/photos/Viber:ro"
