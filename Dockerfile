@@ -65,7 +65,7 @@ SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 RUN useradd -r -U -m photoview \
   # Required dependencies
   && apt-get update \
-  && apt-get install -y curl gnupg gpg libdlib19.1 ffmpeg exiftool libheif1 sqlite3 \
+  && apt-get install -y curl gnupg2 gpg ca-certificates libdlib19.1 ffmpeg exiftool libheif1 sqlite3 \
   # Install Darktable if building for a supported architecture
   && if [ "${TARGETPLATFORM}" = "linux/amd64" ] || [ "${TARGETPLATFORM}" = "linux/arm64" ]; then \
     echo 'deb https://download.opensuse.org/repositories/graphics:/darktable/Debian_12/ /' \
@@ -76,7 +76,7 @@ RUN useradd -r -U -m photoview \
     apt-get install -y darktable; \
   fi \
   # Remove build dependencies and cleanup
-  && apt-get purge -y gnupg gpg \
+  && apt-get purge -y gnupg2 gpg \
   && apt-get autoremove -y \
   && apt-get clean \
   && rm -rf /var/lib/apt/lists/*
