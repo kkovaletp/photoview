@@ -186,22 +186,6 @@ jobs:
           config: ${{ github.workspace }}/.hadolint.yaml
           format: tty
 
-      - name: Generate report
-        uses: hadolint/hadolint-action@v3.1.0
-        if: always()
-        with:
-          dockerfile: ${{ matrix.context }}/Dockerfile
-          config: ${{ github.workspace }}/.hadolint.yaml
-          output-file: ${{ github.workspace }}/${{ matrix.name }}-hadolint.sarif
-          format: sarif
-          failure-threshold: ignore
-
-      - name: Upload report
-        uses: github/codeql-action/upload-sarif@v3
-        if: always()
-        with:
-          sarif_file: ${{ github.workspace }}/${{ matrix.name }}-hadolint.sarif
-
       - name: Update Pull Request
         uses: actions/github-script@v7
         if: always() && github.event_name == 'pull_request'
@@ -233,8 +217,7 @@ jobs:
             }else if (hadolintOutcome === 'failure') {
 
               output += '#### Hadolint (${{ matrix.name }}): ' + hadolintOutcome + '\n';
-              output += 'Hadolint detected issues in the Dockerfile for the ${{ matrix.name }} image during execution.\n';
-              output += '${{ matrix.context }}/Dockerfile\n';
+              output += 'Hadolint detected issues in the `${{ matrix.context }}/Dockerfile` for the ${{ matrix.name }} image during execution.\n';
   
               if (hadolintResults) {
                 output += '\n```\n' + hadolintResults + '\n```\n';
@@ -257,6 +240,22 @@ jobs:
                 });
               }
             }
+
+      - name: Generate report
+        uses: hadolint/hadolint-action@v3.1.0
+        if: always()
+        with:
+          dockerfile: ${{ matrix.context }}/Dockerfile
+          config: ${{ github.workspace }}/.hadolint.yaml
+          output-file: ${{ github.workspace }}/${{ matrix.name }}-hadolint.sarif
+          format: sarif
+          failure-threshold: ignore
+
+      - name: Upload report
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: ${{ github.workspace }}/${{ matrix.name }}-hadolint.sarif
 
   coverity:
     name: Coverity Scan
