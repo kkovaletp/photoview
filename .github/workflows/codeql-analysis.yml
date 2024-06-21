@@ -193,7 +193,6 @@ jobs:
         with:
           script: |
             let hadolintResults = process.env.HADOLINT_RESULTS;
-            let hadolintOutcome = "${{ steps.hadolint.outcome }}";
             let output = '';
 
             const comments = await github.rest.issues.listComments({
@@ -204,26 +203,15 @@ jobs:
             
             const botComment = comments.data.find(
               comment => comment.user.login === 'github-actions[bot]' 
-              && comment.body.includes('Hadolint (${{ matrix.name }}):')
+              && comment.body.includes('Hadolint (${{ matrix.name }}) issues:')
             );
 
-            if (hadolintOutcome === 'success') {
-              if (botComment) {
-                await github.rest.issues.deleteComment({
-                  comment_id: botComment.id,
-                  owner: context.repo.owner,
-                  repo: context.repo.repo
-                });
-              }
-            }else if (hadolintOutcome === 'failure') {
-
-              output += '#### Hadolint (${{ matrix.name }}): ' + hadolintOutcome + '\n';
-              output += 'Hadolint detected issues for the `${{ matrix.name }}` image during execution.\n';
+            if (hadolintResults) {
   
-              if (hadolintResults) {
-                output += '\n```\n' + hadolintResults + '\n```\n';
-                output += '\nFind more info about detected issues and recommendations for fixes in the [Rules table](https://github.com/hadolint/hadolint?tab=readme-ov-file#rules).';
-              }
+              output += '#### Hadolint (${{ matrix.name }}) issues:\n';
+              output += 'Hadolint detected issues for the `${{ matrix.name }}` image during execution.\n';
+              output += '\n```\n' + hadolintResults + '\n```\n';
+              output += '\nFind more info about detected issues and recommendations for fixes in the [Rules table](https://github.com/hadolint/hadolint?tab=readme-ov-file#rules).';
   
               if (botComment) {
                 await github.rest.issues.updateComment({
@@ -238,6 +226,16 @@ jobs:
                   owner: context.repo.owner,
                   repo: context.repo.repo,
                   body: output
+                });
+              }
+            
+            } else {
+
+              if (botComment) {
+                await github.rest.issues.deleteComment({
+                  comment_id: botComment.id,
+                  owner: context.repo.owner,
+                  repo: context.repo.repo
                 });
               }
             }
