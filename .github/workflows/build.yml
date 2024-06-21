@@ -68,8 +68,8 @@ jobs:
             org.opencontainers.image.title=${{ matrix.name }}
             org.opencontainers.image.description=${{ matrix.description }}
           annotations: |
-            manifest:org.opencontainers.image.title=${{ matrix.name }}
-            manifest:org.opencontainers.image.description=${{ matrix.description }}
+            org.opencontainers.image.title=${{ matrix.name }}
+            org.opencontainers.image.description=${{ matrix.description }}
           # Docker tags based on the following events/attributes
           tags: |
             type=schedule
