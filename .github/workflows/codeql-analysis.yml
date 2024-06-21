@@ -217,7 +217,7 @@ jobs:
             }else if (hadolintOutcome === 'failure') {
 
               output += '#### Hadolint (${{ matrix.name }}): ' + hadolintOutcome + '\n';
-              output += 'Hadolint detected issues in the `${{ matrix.context }}/Dockerfile` for the ${{ matrix.name }} image during execution.\n';
+              output += 'Hadolint detected issues for the `${{ matrix.name }}` image during execution.\n';
   
               if (hadolintResults) {
                 output += '\n```\n' + hadolintResults + '\n```\n';
