@@ -21,9 +21,11 @@ jobs:
       matrix:
         include:
           - name: photoview
+            description: Photo gallery for self-hosted personal servers
             platforms: linux/amd64,linux/arm64,linux/arm/v7,linux/arm/v6
             context: .
           - name: ffmpeg
+            description: External FFmpeg HW-accelerated media processor
             platforms: linux/amd64,linux/arm64
             context: ./docker/ffmpeg
 
@@ -62,6 +64,12 @@ jobs:
         with:
           # list of Docker images to use as base name for tags
           images: ${{ env.DOCKER_USERNAME }}/${{ matrix.name }}
+          labels: |
+            org.opencontainers.image.title=${{ matrix.name }}
+            org.opencontainers.image.description=${{ matrix.description }}
+          annotations: |
+            manifest:org.opencontainers.image.title=${{ matrix.name }}
+            manifest:org.opencontainers.image.description=${{ matrix.description }}
           # Docker tags based on the following events/attributes
           tags: |
             type=schedule
