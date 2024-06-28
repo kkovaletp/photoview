@@ -54,9 +54,10 @@ jobs:
     steps:
       - name: Set up Go
         uses: actions/setup-go@v5
-        with:
-          go-version: ^1.22
         id: go
+        with:
+          go-version-file: api/go.mod
+          cache: false
 
       - name: Check out code into the Go module directory
         uses: actions/checkout@v4
