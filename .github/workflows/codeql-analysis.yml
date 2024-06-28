@@ -255,7 +255,7 @@ jobs:
         uses: actions/setup-go@v5
         id: go
         with:
-          go-version-file: api/go.mod
+          go-version-file: ${{ github.workspace }}/api/go.mod
           cache: false
 
       - name: Check out code
