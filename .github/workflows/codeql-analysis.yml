@@ -250,6 +250,12 @@ jobs:
     env:
       COV_PROJECT: kkovaletp%2Fphotoview
     steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Fetch branches
+        shell: bash
+        run: git fetch --all
 
       - name: Set up Go
         uses: actions/setup-go@v5
@@ -257,13 +263,6 @@ jobs:
         with:
           go-version-file: ${{ github.workspace }}/api/go.mod
           cache: false
-
-      - name: Check out code
-        uses: actions/checkout@v4
-
-      - name: Fetch branches
-        shell: bash
-        run: git fetch --all
 
       - name: Cache Go dependencies
         uses: actions/cache@v4
