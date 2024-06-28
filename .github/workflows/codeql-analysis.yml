@@ -333,6 +333,7 @@ jobs:
           echo "${{ github.workspace }}/cov-analysis/bin" >> $GITHUB_PATH
 
       # Build and capture API code
+      # At this moment Coverity doesn't support GO 1.22, so ignoring build failures
       - name: Build API with cov-build
         shell: bash
         working-directory: api
@@ -341,7 +342,7 @@ jobs:
             --return-emit-failures \
             --fs-capture-search ./ go build -v . || (\
               cat ${{ github.workspace }}/cov-int/build-log.txt && \
-              exit 1 \
+              exit 0 \
             )
 
       - name: Setup Node.js 18
