@@ -1,6 +1,6 @@
-module github.com/photoview/photoview/api
+module github.com/kkovaletp/photoview/api
 
-go 1.18
+go 1.22
 
 require (
 	github.com/99designs/gqlgen v0.17.49

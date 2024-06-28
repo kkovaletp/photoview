@@ -46,6 +46,7 @@ ENV PATH="${GOPATH}/bin:${PATH}"
 ENV CGO_ENABLED=1
 
 # Download dependencies
+# shellcheck source=scripts/set_go_env.sh
 RUN chmod +x /tmp/scripts/*.sh \
   && /tmp/scripts/install_build_dependencies.sh \
   && source /tmp/scripts/set_go_env.sh \
