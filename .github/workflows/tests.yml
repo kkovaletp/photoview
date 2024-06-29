@@ -198,15 +198,27 @@ jobs:
         id: extract
         run: |
           image_tag="${{ needs.build-ffmpeg.outputs.image_tag }}"
-          echo "package_name=${image_tag##*/}" >> $GITHUB_OUTPUT
+          echo "package_tag=${image_tag##*:}" >> $GITHUB_OUTPUT
 
-      - name: Delete Docker Image
+      - name: Get image version ID
+        id: ver_id
         run: >
-          curl -L -X DELETE 
+          version_id=$(curl -L
           -H "Accept: application/vnd.github+json"
           -H "Authorization: Bearer ${{ secrets.COMMENT_TOKEN }}"
           -H "X-GitHub-Api-Version: 2022-11-28"
-          https://api.github.com/users/${{ github.repository_owner }}/packages/container/${{ steps.extract.outputs.package_name }}
+          https://api.github.com/user/packages/container/ffmpeg/versions
+          | jq -r '.[] | select(.metadata.container.tags[]? == "${{ steps.extract.outputs.package_tag }}") | .id');
+          echo "version_id=${version_id}" >> $GITHUB_OUTPUT
+
+      - name: Delete Docker image version
+        uses: actions/delete-package-versions@v5
+        with:
+          owner: '${{ github.repository_owner }}'
+          token: '${{ secrets.COMMENT_TOKEN }}'
+          package-type: 'container'
+          package-name: 'ffmpeg'
+          package-version-ids: '${{ steps.ver_id.outputs.version_id }}'
 
   test-ui:
     name: Test UI
