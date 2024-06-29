@@ -198,8 +198,8 @@ jobs:
         id: extract
         run: |
           image_tag="${{ needs.build-ffmpeg.outputs.image_tag }}"
-          echo "package_name=$${image_tag##*/}" >> $GITHUB_OUTPUT
-          
+          echo "package_name=${image_tag##*/}" >> $GITHUB_OUTPUT
+
       - name: Delete Docker Image
         run: >
           curl -L -X DELETE 
