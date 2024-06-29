@@ -1,6 +1,9 @@
 ### Build UI ###
 FROM --platform=${BUILDPLATFORM:-linux/amd64} node:18 AS ui
 
+# See for details: https://github.com/hadolint/hadolint/wiki/DL4006
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+
 ARG REACT_APP_API_ENDPOINT
 ENV REACT_APP_API_ENDPOINT=${REACT_APP_API_ENDPOINT}
 
@@ -28,11 +31,13 @@ RUN npm ci --omit=dev --ignore-scripts \
   && npm run build -- --base=$UI_PUBLIC_URL
 
 ### Build API ###
-FROM --platform=${BUILDPLATFORM:-linux/amd64} debian:bookworm AS api
+FROM --platform=${BUILDPLATFORM:-linux/amd64} golang:1.22-bookworm AS api
 ARG TARGETPLATFORM
 
-COPY docker/install_build_dependencies.sh /tmp/
-COPY docker/go_wrapper.sh /go/bin/go
+# See for details: https://github.com/hadolint/hadolint/wiki/DL4006
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+
+COPY scripts /tmp/scripts
 COPY api /app
 WORKDIR /app
 
@@ -41,9 +46,9 @@ ENV PATH="${GOPATH}/bin:${PATH}"
 ENV CGO_ENABLED=1
 
 # Download dependencies
-RUN chmod +x /tmp/install_build_dependencies.sh \
-  && chmod +x /go/bin/go \
-  && /tmp/install_build_dependencies.sh \
+RUN chmod +x /tmp/scripts/*.sh \
+  && /tmp/scripts/install_build_dependencies.sh \
+  && source /tmp/scripts/set_go_env.sh \
   && go env \
   && go mod download \
   # Patch go-face
@@ -61,8 +66,10 @@ ARG TARGETPLATFORM
 
 # See for details: https://github.com/hadolint/hadolint/wiki/DL4006
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+
 # Create a user to run Photoview server
-RUN useradd -r -U -m photoview \
+RUN groupadd -g 999 photoview \
+  && useradd -r -u 999 -g photoview -m photoview \
   # Required dependencies
   && apt-get update \
   && apt-get install -y curl gnupg2 gpg ca-certificates libdlib19.1 ffmpeg exiftool libheif1 sqlite3 \

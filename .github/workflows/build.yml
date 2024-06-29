@@ -27,7 +27,7 @@ jobs:
           - name: ffmpeg
             description: External FFmpeg HW-accelerated media processor
             platforms: linux/amd64,linux/arm64
-            context: ./docker/ffmpeg
+            context: ./ffmpeg-image
 
     steps:
       - name: Checkout

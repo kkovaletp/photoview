@@ -5,6 +5,7 @@ ENV PIPENV_IGNORE_VIRTUALENVS=1
 
 # See for details: https://github.com/hadolint/hadolint/wiki/DL4006
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+
 # Install dependencies
 RUN apt-get update && apt-get install -y python3 python3-pip pipenv curl \
   && apt-get autoremove -y \

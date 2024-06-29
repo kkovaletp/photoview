@@ -1,4 +1,5 @@
 ignored:
-  - DL3007
-  - DL3008
-  - DL3015
+  - DL3007 # Using latest is prone to errors if the image will ever update. Pin the version explicitly to a release tag.
+  - DL3008 # Pin versions in apt get install. Instead of `apt-get install <package>` use `apt-get install <package>=<version>`
+  - DL3015 # Avoid additional packages by specifying `--no-install-recommends`.
+  - SC1091 # Not following: File not included in mock.
