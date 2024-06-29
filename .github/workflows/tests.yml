@@ -194,8 +194,7 @@ jobs:
       - name: Delete Docker Image
         run: >
           curl -X DELETE -u ${{ github.repository_owner }}:${{ secrets.COMMENT_TOKEN }} 
-          https://ghcr.io/v2/${{ github.repository_owner }}/${{ github.repository }}-ffmpeg/
-          manifests/${{ needs.build-ffmpeg.outputs.image_tag }}
+          https://ghcr.io/v2/${{ github.repository_owner }}/${{ github.repository }}-ffmpeg/manifests/${{ needs.build-ffmpeg.outputs.image_tag }}
 
   test-ui:
     name: Test UI
