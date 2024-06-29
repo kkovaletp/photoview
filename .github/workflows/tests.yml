@@ -100,7 +100,7 @@ jobs:
           PHOTOVIEW_FFMPEG_USER: ffmpeg
           PHOTOVIEW_FFMPEG_PASSWORD: ffmpeg-pass
         options: >-
-          --health-cmd curl --fail http://localhost:5000/health || exit 1
+          --health-cmd="curl --fail http://localhost:5000/health || exit 1"
           --health-interval 20s
           --health-timeout 5s
           --health-retries 10
@@ -188,17 +188,14 @@ jobs:
 
   cleanup:
     runs-on: ubuntu-latest
-    needs: test-api
-    if: always()
+    needs: [build-ffmpeg, test-api]
+    if: always() && needs.build-ffmpeg.result == 'success'
     steps:
-      - name: Docker Login
-        uses: actions/delete-package-versions@v5
-        with:
-          package-name: '${{ github.repository }}-ffmpeg'
-          package-type: 'container'
-          owner: '${{ github.repository_owner }}'
-          token: ${{ secrets.COMMENT_TOKEN }}
-          min-versions-to-keep: 0
+      - name: Delete Docker Image
+        run: >
+          curl -X DELETE -u ${{ github.repository_owner }}:${{ secrets.COMMENT_TOKEN }} 
+          https://ghcr.io/v2/${{ github.repository_owner }}/${{ github.repository }}-ffmpeg/
+          manifests/${{ needs.build-ffmpeg.outputs.image_tag }}
 
   test-ui:
     name: Test UI
