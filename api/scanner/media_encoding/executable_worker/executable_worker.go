@@ -1,12 +1,19 @@
 package executable_worker
 
 import (
+	"bytes"
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"log"
+	"net/http"
+	"net/url"
 	"os"
 	"os/exec"
+	"regexp"
+	"strconv"
 	"strings"
+	"time"
 
 	"github.com/kkovaletp/photoview/api/utils"
 	"github.com/pkg/errors"
@@ -23,6 +30,9 @@ var FfmpegCli *FfmpegWorker = nil
 
 type ExecutableWorker interface {
 	Path() string
+	IsInstalled() bool
+	EncodeMp4(inputPath string, outputPath string) error
+	EncodeVideoThumbnail(inputPath string, outputPath string, probeData *ffprobe.ProbeData) error
 }
 
 type DarktableWorker struct {
@@ -30,7 +40,15 @@ type DarktableWorker struct {
 }
 
 type FfmpegWorker struct {
-	path string
+	path             string
+	external         bool
+	baseURL          string
+	port             string
+	user             string
+	pass             string
+	timeout          int
+	videoCmdTemplate string
+	thumbCmdTemplate string
 }
 
 func newDarktableWorker() *DarktableWorker {
@@ -65,6 +83,75 @@ func newFfmpegWorker() *FfmpegWorker {
 		return nil
 	}
 
+	worker, err := configureExternalFfmpegWorker()
+	if err == nil {
+		return worker
+	}
+
+	log.Printf("Falling back to local ffmpeg worker due to: %s\n", err)
+	return configureLocalFfmpegWorker()
+}
+
+func configureExternalFfmpegWorker() (*FfmpegWorker, error) {
+	baseURL := os.Getenv(string(utils.EnvExtFFmpegBaseURL))
+	portStr := os.Getenv(string(utils.EnvExtFFmpegPort))
+	user := os.Getenv(string(utils.EnvExtFFmpegUser))
+	pass := os.Getenv(string(utils.EnvExtFFmpegPass))
+	timeoutStr := os.Getenv(string(utils.EnvExtFFmpegTimeout))
+	videoCmdTemplate := strings.ReplaceAll(os.Getenv(string(utils.EnvExtFFmpegVideoCmd)), "\n", " ")
+	thumbCmdTemplate := strings.ReplaceAll(os.Getenv(string(utils.EnvExtFFmpegThumbnailCmd)), "\n", " ")
+
+	// Validate inputs
+	if err := validateBaseURL(baseURL); err != nil {
+		return nil, err
+	}
+
+	port, err := strconv.Atoi(portStr)
+	if err != nil || port <= 0 {
+		return nil, fmt.Errorf("invalid port value: %s", portStr)
+	}
+
+	timeout, err := strconv.Atoi(timeoutStr)
+	if err != nil || timeout <= 0 {
+		return nil, fmt.Errorf("invalid timeout value: %s", timeoutStr)
+	}
+
+	if err := validateCommandTemplate(videoCmdTemplate); err != nil {
+		return nil, err
+	}
+
+	if err := validateCommandTemplate(thumbCmdTemplate); err != nil {
+		return nil, err
+	}
+
+	// Check external FFmpeg worker availability and parse version
+	healthURL := fmt.Sprintf("%s:%d/health", baseURL, port)
+	resp, err := http.Get(healthURL)
+	if err != nil || resp.StatusCode != http.StatusOK {
+		return nil, fmt.Errorf("External ffmpeg worker is not available: %s", err)
+	}
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return nil, fmt.Errorf("Failed to read health response body: %s", err)
+	}
+	defer resp.Body.Close()
+
+	log.Printf("Configured external ffmpeg worker at %s:%d (%s)\n",
+		baseURL, port, strings.Split(string(body), "\n")[0])
+	return &FfmpegWorker{
+		external:         true,
+		baseURL:          baseURL,
+		port:             portStr,
+		user:             user,
+		pass:             pass,
+		timeout:          timeout,
+		videoCmdTemplate: videoCmdTemplate,
+		thumbCmdTemplate: thumbCmdTemplate,
+	}, nil
+}
+
+func configureLocalFfmpegWorker() *FfmpegWorker {
 	path, err := exec.LookPath("ffmpeg")
 	if err != nil {
 		log.Println("Executable worker not found: ffmpeg")
@@ -78,10 +165,26 @@ func newFfmpegWorker() *FfmpegWorker {
 		log.Printf("Found executable worker: ffmpeg (%s)\n", strings.Split(string(version), "\n")[0])
 
 		return &FfmpegWorker{
-			path: path,
+			path:     path,
+			external: false,
 		}
 	}
 
+	return nil
+}
+
+func validateBaseURL(baseURL string) error {
+	re := regexp.MustCompile(`^https?://[a-zA-Z0-9.-]+$`)
+	if !re.MatchString(baseURL) {
+		return fmt.Errorf("Invalid BaseURL format: %s. Something like 'http(s)://host-name.or.fqdn' expected", baseURL)
+	}
+	return nil
+}
+
+func validateCommandTemplate(template string) error {
+	if strings.ContainsAny(template, "[;&|`$]") {
+		return fmt.Errorf("Invalid characters in command template: %s. Next characters forbidden: '[;&|`$]'", template)
+	}
 	return nil
 }
 
@@ -91,6 +194,10 @@ func (worker *DarktableWorker) IsInstalled() bool {
 
 func (worker *FfmpegWorker) IsInstalled() bool {
 	return worker != nil
+}
+
+func (worker *FfmpegWorker) Path() string {
+	return worker.path
 }
 
 func (worker *DarktableWorker) EncodeJpeg(inputPath string, outputPath string, jpegQuality int) error {
@@ -120,6 +227,75 @@ func (worker *DarktableWorker) EncodeJpeg(inputPath string, outputPath string, j
 }
 
 func (worker *FfmpegWorker) EncodeMp4(inputPath string, outputPath string) error {
+	if worker.external {
+		command := strings.ReplaceAll(worker.videoCmdTemplate, "<inputPath>", inputPath)
+		command = strings.ReplaceAll(command, "<outputPath>", outputPath)
+		return worker.encodeWithExternalWorker(inputPath, outputPath, command)
+	}
+	return worker.encodeWithLocalFFmpeg(inputPath, outputPath)
+}
+
+func (worker *FfmpegWorker) EncodeVideoThumbnail(inputPath string, outputPath string, probeData *ffprobe.ProbeData) error {
+	if worker.external {
+		thumbnailOffsetSeconds := fmt.Sprintf("%d", int(probeData.Format.DurationSeconds*0.25))
+		command := strings.ReplaceAll(worker.thumbCmdTemplate, "<thumbnailOffsetSeconds>", thumbnailOffsetSeconds)
+		command = strings.ReplaceAll(command, "<inputPath>", inputPath)
+		command = strings.ReplaceAll(command, "<outputPath>", outputPath)
+		return worker.encodeWithExternalWorker(inputPath, outputPath, command)
+	}
+	return worker.encodeThumbnailWithLocalFFmpeg(inputPath, outputPath, probeData)
+}
+
+func (worker *FfmpegWorker) encodeWithExternalWorker(inputPath string, outputPath string, command string) error {
+	requestBody, err := json.Marshal(map[string]string{
+		"command": command,
+	})
+	if err != nil {
+		log.Printf("Failed to serialize command to JSON: %s\n", err)
+		return errors.Wrap(err, "Failed to serialize command to JSON")
+	}
+
+	url := fmt.Sprintf("%s:%s/execute", worker.baseURL, worker.port)
+	req, err := http.NewRequest("POST", url, bytes.NewBuffer(requestBody))
+	if err != nil {
+		log.Printf("Failed to create new request: %s\n", err)
+		return errors.Wrap(err, "Failed to create new request")
+	}
+	req.SetBasicAuth(worker.user, worker.pass)
+	req.Header.Set("Content-Type", "application/json")
+
+	client := &http.Client{Timeout: time.Duration(worker.timeout) * time.Second}
+	resp, err := client.Do(req)
+	if err != nil {
+		log.Printf("Failed to execute request to external ffmpeg worker: %s\n", err)
+		return errors.Wrap(err, "Failed to execute request to external ffmpeg worker")
+	}
+	defer resp.Body.Close()
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Printf("Failed to read response body: %s\n", err)
+		return errors.Wrap(err, "Failed to read response body")
+	}
+
+	if resp.StatusCode != http.StatusOK {
+		log.Printf("External ffmpeg worker failed: %s\n", body)
+		return errors.Errorf("External ffmpeg worker failed: %s", body)
+	}
+
+	var result map[string]string
+	if err := json.Unmarshal(body, &result); err != nil {
+		log.Printf("Failed to deserialize response body: %s\n", err)
+		return errors.Wrap(err, "Failed to deserialize response body")
+	}
+
+	log.Printf("External ffmpeg worker stdout: %s", result["stdout"])
+	log.Printf("External ffmpeg worker stderr: %s", result["stderr"])
+
+	return nil
+}
+
+func (worker *FfmpegWorker) encodeWithLocalFFmpeg(inputPath string, outputPath string) error {
 	args := []string{
 		"-i",
 		inputPath,
@@ -133,14 +309,13 @@ func (worker *FfmpegWorker) EncodeMp4(inputPath string, outputPath string) error
 	cmd := exec.Command(worker.path, args...)
 
 	if err := cmd.Run(); err != nil {
-		return errors.Wrapf(err, "encoding video using: %s", worker.path)
+		return errors.Wrapf(err, "Encoding video using: %s", worker.path)
 	}
 
 	return nil
 }
 
-func (worker *FfmpegWorker) EncodeVideoThumbnail(inputPath string, outputPath string, probeData *ffprobe.ProbeData) error {
-
+func (worker *FfmpegWorker) encodeThumbnailWithLocalFFmpeg(inputPath string, outputPath string, probeData *ffprobe.ProbeData) error {
 	thumbnailOffsetSeconds := fmt.Sprintf("%d", int(probeData.Format.DurationSeconds*0.25))
 
 	args := []string{
