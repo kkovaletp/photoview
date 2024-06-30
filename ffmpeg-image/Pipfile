@@ -1,0 +1,14 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[packages]
+Flask-HTTPAuth = "~=4.8"
+gevent = "~=24.2"
+gunicorn = "~=22.0"
+
+[dev-packages]
+
+[requires]
+python_version = "3.12"
