@@ -194,7 +194,7 @@ jobs:
     needs: [build-ffmpeg, test-api]
     if: always() && needs.build-ffmpeg.result == 'success'
     steps:
-      - name: List image versions
+      - name: Get image version ID
         run: >
           image_tag="${{ needs.build-ffmpeg.outputs.image_tag }}";
           echo "image tag = '${image_tag}'";
@@ -204,15 +204,11 @@ jobs:
           -H "Accept: application/vnd.github+json"
           -H "Authorization: Bearer ${{ secrets.COMMENT_TOKEN }}"
           -H "X-GitHub-Api-Version: 2022-11-28"
-          https://api.github.com/user/packages/container/photoview%2Fffmpeg/versions > ./resp.json;
+          https://api.github.com/user/packages/container/photoview%2Fffmpeg/versions -o ./resp.json;
           cat ./resp.json;
-          
-
-      - name: Get image version ID
-        run: |
-          ls -lah
-          version_id=$(jq -r '.[] | select(.metadata.container.tags[]? == "${package_tag}") | .id' ./resp.json)
-          echo "version_id = '${version_id}'"
+          version_id=$(jq -r --arg tag "${package_tag}" 
+          '.[] | select(.metadata.container.tags[]? == "$tag) | .id' ./resp.json);
+          echo "version_id = '${version_id}'";
           echo "version_id=${version_id}" >> $GITHUB_OUTPUT
 
       - name: Delete Docker image version
