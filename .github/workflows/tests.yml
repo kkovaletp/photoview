@@ -195,6 +195,7 @@ jobs:
     if: always() && needs.build-ffmpeg.result == 'success'
     steps:
       - name: Get image version ID
+        id: ver_id
         run: >
           image_tag="${{ needs.build-ffmpeg.outputs.image_tag }}";
           echo "image tag = '${image_tag}'";
