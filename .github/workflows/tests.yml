@@ -207,7 +207,7 @@ jobs:
           https://api.github.com/user/packages/container/photoview%2Fffmpeg/versions -o ./resp.json;
           cat ./resp.json;
           version_id=$(jq -r --arg tag "${package_tag}" 
-          '.[] | select(.metadata.container.tags[]? == "$tag) | .id' ./resp.json);
+          '.[] | select(.metadata.container.tags[]? == $tag) | .id' ./resp.json);
           echo "version_id = '${version_id}'";
           echo "version_id=${version_id}" >> $GITHUB_OUTPUT
 
