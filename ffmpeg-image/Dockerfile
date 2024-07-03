@@ -20,4 +20,6 @@ EXPOSE ${PHOTOVIEW_FFMPEG_PORT}
 HEALTHCHECK --interval=60s --timeout=10s \
   CMD curl --fail http://localhost:${PHOTOVIEW_FFMPEG_PORT}/health || exit 1
 
+LABEL org.opencontainers.image.source=https://github.com/kkovaletp/photoview
+
 ENTRYPOINT ["/entrypoint.sh"]
