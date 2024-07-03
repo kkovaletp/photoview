@@ -218,7 +218,7 @@ jobs:
           owner: '${{ github.repository_owner }}'
           token: '${{ secrets.COMMENT_TOKEN }}'
           package-type: 'container'
-          package-name: 'ffmpeg'
+          package-name: 'photoview/ffmpeg'
           package-version-ids: '${{ steps.ver_id.outputs.version_id }}'
 
   test-ui:
