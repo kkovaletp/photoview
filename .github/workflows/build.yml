@@ -98,7 +98,7 @@ jobs:
           push: ${{ github.event_name != 'pull_request' && github.repository == 'kkovaletp/photoview' }}
           tags: ${{ steps.docker_meta.outputs.tags }}
           labels: ${{ steps.docker_meta.outputs.labels }}
-          annotations: ${{ steps.meta.outputs.annotations }}
+          annotations: ${{ steps.docker_meta.outputs.annotations }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
           build-args: |
@@ -122,7 +122,7 @@ jobs:
           - name: ffmpeg
 
     steps:
-       # Makes sure your .dockleignore file is available to the next step
+      # Makes sure your .dockleignore file is available to the next step
       - name: Checkout repository
         uses: actions/checkout@v4
 

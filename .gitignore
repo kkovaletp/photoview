@@ -1,11 +1,10 @@
 # See https://help.github.com/ignore-files/ for more about ignoring files.
 
 cache/
-/media_cache/
-/api/media_cache/
+**/media_cache/
 /photos_path
 photoview.db
-photoview.db-journal
+photoview.db-*
 
 .env
 testing.env
@@ -13,11 +12,11 @@ testing.env
 # docker
 docker-compose.yml
 /Makefile
-storage
-database
+storage/
+database/
 
 # dependencies
-node_modules/
+**/node_modules/
 
 # testing
 /ui/coverage
@@ -43,7 +42,6 @@ yarn-error.log*
 /ui/.nvmrc
 
 # IDEs
-.vscode
+.vscode/
 __debug_bin
-.idea
-.nvmrc
+.idea/
