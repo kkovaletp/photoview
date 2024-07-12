@@ -180,6 +180,8 @@ The photos will have to be scanned before they show up, you can start a scan man
 
 ## Advanced setup
 
+It is possible to run an external FFmpeg video processing worker in addition to the standard Photoview setup. This worker will allow you to process videos faster by utilizing available GPU hardware acceleration and/or optionally run this type of resourceful job on another host, more powerful than the host, running Photoview service. To get more details and instructions for the setup, please read its [readme](./ffmpeg-image/README.md) and check other files in the [ffmpeg-image](./ffmpeg-image) folder. Please note that setting it up requires appropriate system administration skills from you, which is out of this project's scope. 
+
 I suggest securing the Photoview instance before exposing it outside your local network: even while it provides read-only access to your media gallery and has basic user authentication functionality, it is not enough to protect your private media from malicious actors on the Internet.
 
 Possible ways of securing a self-hosted service might be (but not limited to):

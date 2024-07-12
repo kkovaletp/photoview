@@ -272,5 +272,14 @@ services:
 #      - "/etc/localtime:/etc/localtime:ro" ## use local time from host
 #      - "/etc/timezone:/etc/timezone:ro"   ## use timezone from host
 #      - "${HOST_PHOTOVIEW_LOCATION}/storage:/home/photoview/media-cache"
-#      - "${HOST_PHOTOVIEW_MEDIA_ROOT}:/photos/main:ro"
-#      - "${HOST_PHOTOVIEW_MEDIA_VIBER}:/photos/Viber:ro"
+#      ## Change This in the .env file: to the directory where your photos are located on your server.
+#      ## You can mount multiple paths if your photos are spread across multiple directories.
+#      ## The same path as the container path set here, you'll need to provide on the Photoview's init page (the one between the ':' chars).
+#      ## If you mount several folders, provide the path to the parent one on the init page.
+#      ## If you mount several folders, make sure that there are no direct mappings to the media root folder.
+#      ## This means that you need to also modify the container path of the HOST_PHOTOVIEW_MEDIA_ROOT
+#      ## to something like '/photos/main'. Note that this new name ('main' in this example) will become an album in Photoview.
+#      - "${HOST_PHOTOVIEW_MEDIA_ROOT}:/photos:ro"
+#      ## *Additional* media folders can be mounted like this (set the variable in .env file)
+#      ## Note that a mount cannot be located in a subfolder of another mount.
+#      # - "${HOST_PHOTOVIEW_MEDIA_FAMILY}:/photos/Family:ro"
