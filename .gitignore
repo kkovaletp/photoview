@@ -12,8 +12,9 @@ testing.env
 # docker
 docker-compose.yml
 /Makefile
-storage/
-database/
+/storage/
+/database/
+/tmp/
 
 # dependencies
 **/node_modules/
@@ -45,3 +46,4 @@ yarn-error.log*
 .vscode/
 __debug_bin
 .idea/
+.nvmrc
