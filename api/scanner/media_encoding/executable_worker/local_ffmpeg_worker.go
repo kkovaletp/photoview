@@ -10,17 +10,15 @@ import (
 	"gopkg.in/vansante/go-ffprobe.v2"
 )
 
-func configureLocalFfmpegWorker() *FfmpegWorker {
+func configureLocalFfmpegWorker() (*FfmpegWorker, error) {
 	path, err := exec.LookPath("ffmpeg")
 	if err != nil {
-		log.Println("Executable worker not found: ffmpeg")
-		return nil
+		return nil, fmt.Errorf("executable worker not found: ffmpeg \n%s", err)
 	}
 
 	version, err := exec.Command(path, "-version").Output()
 	if err != nil {
-		log.Printf("Error getting version of ffmpeg: %s\n", err)
-		return nil
+		return nil, fmt.Errorf("error getting version of ffmpeg: \n%s", err)
 	}
 
 	log.Printf("Found executable worker: ffmpeg (%s)\n", strings.Split(string(version), "\n")[0])
@@ -28,7 +26,7 @@ func configureLocalFfmpegWorker() *FfmpegWorker {
 	return &FfmpegWorker{
 		path:     path,
 		external: false,
-	}
+	}, nil
 }
 
 func (worker *FfmpegWorker) encodeWithLocalFFmpeg(inputPath string, outputPath string) error {

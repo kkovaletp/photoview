@@ -27,7 +27,7 @@ func configureExternalFfmpegWorker() (*FfmpegWorker, error) {
 	thumbCmdTemplate := strings.ReplaceAll(os.Getenv(string(utils.EnvExtFFmpegThumbnailCmd)), "\n", " ")
 
 	// Validate inputs
-	if err := validateBaseURL(baseURL); err != nil {
+	if err := ValidateBaseURL(baseURL); err != nil {
 		return nil, err
 	}
 
@@ -41,11 +41,11 @@ func configureExternalFfmpegWorker() (*FfmpegWorker, error) {
 		return nil, fmt.Errorf("invalid timeout value: %s", timeoutStr)
 	}
 
-	if err := validateCommandTemplate(videoCmdTemplate); err != nil {
+	if err := ValidateCommandTemplate(videoCmdTemplate); err != nil {
 		return nil, err
 	}
 
-	if err := validateCommandTemplate(thumbCmdTemplate); err != nil {
+	if err := ValidateCommandTemplate(thumbCmdTemplate); err != nil {
 		return nil, err
 	}
 
@@ -76,7 +76,7 @@ func configureExternalFfmpegWorker() (*FfmpegWorker, error) {
 	}, nil
 }
 
-func validateBaseURL(baseURL string) error {
+func ValidateBaseURL(baseURL string) error {
 	re := regexp.MustCompile(`^https?://[a-zA-Z0-9.-]+$`)
 	if !re.MatchString(baseURL) {
 		return fmt.Errorf("invalid BaseURL format: %s. Something like 'http(s)://host-name.or.fqdn' expected", baseURL)
@@ -84,7 +84,7 @@ func validateBaseURL(baseURL string) error {
 	return nil
 }
 
-func validateCommandTemplate(template string) error {
+func ValidateCommandTemplate(template string) error {
 	if strings.ContainsAny(template, "[;&|`$]") {
 		return fmt.Errorf("invalid characters in command template: %s. Next characters forbidden: '[;&|`$]'", template)
 	}

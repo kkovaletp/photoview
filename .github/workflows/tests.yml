@@ -141,7 +141,11 @@ jobs:
           sudo add-apt-repository ppa:strukturag/libheif
           sudo add-apt-repository ppa:strukturag/libde265
           sudo apt-get update
-          sudo apt-get install -y libdlib-dev libblas-dev libatlas-base-dev liblapack-dev libjpeg-turbo8-dev libheif-dev ffmpeg exiftool
+          sudo apt-get install -y libdlib-dev libblas-dev libatlas-base-dev liblapack-dev libjpeg-turbo8-dev libheif-dev ffmpeg exiftool gnupg2 gpg curl
+          echo 'deb https://download.opensuse.org/repositories/graphics:/darktable/Debian_12/ /' | tee /etc/apt/sources.list.d/graphics:darktable.list
+          curl -fsSL https://download.opensuse.org/repositories/graphics:/darktable/Debian_12/Release.key | gpg --dearmor | tee /etc/apt/trusted.gpg.d/graphics_darktable.gpg > /dev/null
+          sudo apt-get update
+          sudo apt-get install -y darktable
 
       - name: Get GO dependencies
         run: |
@@ -206,7 +210,7 @@ jobs:
           -H "Authorization: Bearer ${{ secrets.COMMENT_TOKEN }}"
           -H "X-GitHub-Api-Version: 2022-11-28"
           https://api.github.com/user/packages/container/ffmpeg/versions -o ./resp.json;
-          version_id=$(jq -r --arg tag "${package_tag}" 
+          version_id=$(jq -r --arg tag "${package_tag}"
           '.[] | select(.metadata.container.tags[]? == $tag) | .id' ./resp.json);
           echo "version_id = '${version_id}'";
           echo "version_id=${version_id}" >> $GITHUB_OUTPUT

@@ -1,6 +1,7 @@
 package executable_worker
 
 import (
+	"fmt"
 	"log"
 
 	"github.com/kkovaletp/photoview/api/utils"
@@ -8,8 +9,12 @@ import (
 )
 
 func InitializeExecutableWorkers() {
+	var err error
 	DarktableCli = newDarktableWorker()
-	FfmpegCli = newFfmpegWorker()
+	FfmpegCli, err = NewFfmpegWorker()
+	if err != nil {
+		log.Printf("An error occured when trying to initialize FFmpeg worker:\n%s", err)
+	}
 }
 
 var DarktableCli *DarktableWorker = nil
@@ -30,15 +35,14 @@ func newDarktableWorker() *DarktableWorker {
 	return configureDarktableWorker()
 }
 
-func newFfmpegWorker() *FfmpegWorker {
+func NewFfmpegWorker() (*FfmpegWorker, error) {
 	if utils.EnvDisableVideoEncoding.GetBool() {
-		log.Printf("Executable worker disabled (%s=1): ffmpeg\n", utils.EnvDisableVideoEncoding.GetName())
-		return nil
+		return nil, fmt.Errorf("executable worker disabled (%s=1): ffmpeg", utils.EnvDisableVideoEncoding.GetName())
 	}
 
 	worker, err := configureExternalFfmpegWorker()
 	if err == nil {
-		return worker
+		return worker, nil
 	}
 
 	log.Printf("Falling back to local ffmpeg worker due to: %s\n", err)
