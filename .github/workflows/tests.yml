@@ -176,7 +176,8 @@ jobs:
 
       - name: Test
         run: |
-          /bin/bash -o pipefail -c "go test ./... -v -database -filesystem -p 1 -coverprofile=coverage.txt -covermode=atomic -json | tee test-report.json | jq -r '.Time .Test .Output .Package'"
+          go test ./... -v -database -filesystem -p 1
+          go test ./... -v -database -filesystem -p 1 -coverprofile=coverage.txt -covermode=atomic -json > test-report.json
 
       - name: Upload coverage
         uses: codecov/codecov-action@v4
