@@ -53,7 +53,7 @@ func TestValidateBaseURL(t *testing.T) {
 		"http://localhost",
 		"https://example.com",
 		"http://example.com",
-		"https://example.com/path",
+		"https://sub-domain.example.com",
 	}
 	for _, url := range validURLs {
 		assert.NoError(t, executable_worker.ValidateBaseURL(url))
@@ -64,6 +64,8 @@ func TestValidateBaseURL(t *testing.T) {
 		"example.com",
 		"http://",
 		"//example.com",
+		"https://example.com/path",
+		"http://example.com:5000",
 	}
 	for _, url := range invalidURLs {
 		assert.Error(t, executable_worker.ValidateBaseURL(url))

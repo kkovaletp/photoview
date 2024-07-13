@@ -14,19 +14,71 @@ func TestMain(m *testing.M) {
 	os.Exit(test_utils.IntegrationTestRun(m))
 }
 
-func TestInitializeExecutableWorkers(t *testing.T) {
+func setup(t *testing.T) {
 	test_utils.FilesystemTest(t)
-	executable_worker.InitializeExecutableWorkers()
+}
 
-	if utils.EnvDisableRawProcessing.GetBool() {
-		assert.Nil(t, executable_worker.DarktableCli)
-	} else {
-		assert.NotNil(t, executable_worker.DarktableCli)
+func teardown() {
+	os.Unsetenv(string(utils.EnvDisableRawProcessing))
+	os.Unsetenv(string(utils.EnvDisableVideoEncoding))
+}
+
+func boolToString(b bool) string {
+	if b {
+		return "true"
+	}
+	return "false"
+}
+
+func TestInitializeExecutableWorkers(t *testing.T) {
+	setup(t)
+	defer teardown()
+
+	testCases := []struct {
+		name                 string
+		disableRawProcessing bool
+		disableVideoEncoding bool
+	}{
+		{
+			name:                 "Both Enabled",
+			disableRawProcessing: false,
+			disableVideoEncoding: false,
+		},
+		{
+			name:                 "Raw Processing Disabled",
+			disableRawProcessing: true,
+			disableVideoEncoding: false,
+		},
+		{
+			name:                 "Video Encoding Disabled",
+			disableRawProcessing: false,
+			disableVideoEncoding: true,
+		},
+		{
+			name:                 "Both Disabled",
+			disableRawProcessing: true,
+			disableVideoEncoding: true,
+		},
 	}
 
-	if utils.EnvDisableVideoEncoding.GetBool() {
-		assert.Nil(t, executable_worker.FfmpegCli)
-	} else {
-		assert.NotNil(t, executable_worker.FfmpegCli)
+	for _, tc := range testCases {
+		t.Run(tc.name, func(t *testing.T) {
+			os.Setenv(string(utils.EnvDisableRawProcessing), boolToString(tc.disableRawProcessing))
+			os.Setenv(string(utils.EnvDisableVideoEncoding), boolToString(tc.disableVideoEncoding))
+
+			executable_worker.InitializeExecutableWorkers()
+
+			if tc.disableRawProcessing {
+				assert.Nil(t, executable_worker.DarktableCli, "Expected DarktableCli to be nil")
+			} else {
+				assert.NotNil(t, executable_worker.DarktableCli, "Expected DarktableCli to be initialized")
+			}
+
+			if tc.disableVideoEncoding {
+				assert.Nil(t, executable_worker.FfmpegCli, "Expected FfmpegCli to be nil")
+			} else {
+				assert.NotNil(t, executable_worker.FfmpegCli, "Expected FfmpegCli to be initialized")
+			}
+		})
 	}
 }
