@@ -175,7 +175,7 @@ jobs:
           cp ../.github/sqlite.testing.env testing.env
 
       - name: Test
-        run: go test ./... -v -database -filesystem -p 1 -coverprofile=coverage.txt -covermode=atomic -json > test-report.json
+        run: go test ./... -v -database -filesystem -p 1 -coverprofile=coverage.txt -covermode=atomic -json | tee test-report.json
 
       - name: Upload coverage
         uses: codecov/codecov-action@v4
