@@ -138,13 +138,12 @@ jobs:
 
       - name: Get C dependencies and 3rd-party tools
         run: |
-          cat /etc/*release*
           sudo add-apt-repository ppa:strukturag/libheif
           sudo add-apt-repository ppa:strukturag/libde265
           sudo apt-get update
           sudo apt-get install -y libdlib-dev libblas-dev libatlas-base-dev liblapack-dev libjpeg-turbo8-dev libheif-dev ffmpeg exiftool gnupg2 gpg curl
-          echo 'deb http://download.opensuse.org/repositories/graphics:/darktable/xUbuntu_24.04/ /' | sudo tee /etc/apt/sources.list.d/graphics:darktable.list
-          curl -fsSL https://download.opensuse.org/repositories/graphics:darktable/xUbuntu_24.04/Release.key | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/graphics_darktable.gpg > /dev/null
+          echo 'deb http://download.opensuse.org/repositories/graphics:/darktable/xUbuntu_22.04/ /' | sudo tee /etc/apt/sources.list.d/graphics:darktable.list
+          curl -fsSL https://download.opensuse.org/repositories/graphics:darktable/xUbuntu_22.04/Release.key | gpg --dearmor | sudo tee /etc/apt/trusted.gpg.d/graphics_darktable.gpg > /dev/null
           sudo apt-get update
           sudo apt-get install -y darktable
 
