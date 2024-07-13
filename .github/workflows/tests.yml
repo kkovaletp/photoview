@@ -138,6 +138,7 @@ jobs:
 
       - name: Get C dependencies and 3rd-party tools
         run: |
+          cat /etc/*release*
           sudo add-apt-repository ppa:strukturag/libheif
           sudo add-apt-repository ppa:strukturag/libde265
           sudo apt-get update
