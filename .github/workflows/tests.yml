@@ -109,6 +109,8 @@ jobs:
           --health-retries 10
         ports:
           - 5000:5000
+        volumes:
+          - "${{ github.workspace }}:${{ github.workspace }}"
 
     defaults:
       run:

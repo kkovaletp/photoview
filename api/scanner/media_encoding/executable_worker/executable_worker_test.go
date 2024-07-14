@@ -8,6 +8,7 @@ import (
 	"github.com/kkovaletp/photoview/api/test_utils"
 	"github.com/kkovaletp/photoview/api/utils"
 	"github.com/stretchr/testify/assert"
+	"gopkg.in/vansante/go-ffprobe.v2"
 )
 
 func TestMain(m *testing.M) {
@@ -18,9 +19,20 @@ func setup(t *testing.T) {
 	test_utils.FilesystemTest(t)
 }
 
-func teardown() {
+func teardown(tempDir string) {
 	os.Unsetenv(string(utils.EnvDisableRawProcessing))
 	os.Unsetenv(string(utils.EnvDisableVideoEncoding))
+	os.Unsetenv(string(utils.EnvExtFFmpegBaseURL))
+	os.Unsetenv(string(utils.EnvExtFFmpegPort))
+	os.Unsetenv(string(utils.EnvExtFFmpegUser))
+	os.Unsetenv(string(utils.EnvExtFFmpegPass))
+	os.Unsetenv(string(utils.EnvExtFFmpegTimeout))
+	os.Unsetenv(string(utils.EnvExtFFmpegVideoCmd))
+	os.Unsetenv(string(utils.EnvExtFFmpegThumbnailCmd))
+
+	if tempDir != "" {
+		os.RemoveAll(tempDir)
+	}
 }
 
 func boolToString(b bool) string {
@@ -30,9 +42,34 @@ func boolToString(b bool) string {
 	return "false"
 }
 
+func getWorkingDir(t *testing.T) string {
+	wd, err := os.Getwd()
+	if err != nil {
+		t.Fatalf("failed to get working directory: %v", err)
+	}
+	return wd
+}
+
+func createTempDir(t *testing.T) string {
+	wd := getWorkingDir(t)
+	tempDir, err := os.MkdirTemp(wd, "test_temp_")
+	if err != nil {
+		t.Fatalf("failed to create temporary directory: %v", err)
+	}
+	return tempDir
+}
+
+func stubProbeData() *ffprobe.ProbeData {
+	return &ffprobe.ProbeData{
+		Format: &ffprobe.Format{
+			DurationSeconds: 8.0,
+		},
+	}
+}
+
 func TestInitializeExecutableWorkers(t *testing.T) {
 	setup(t)
-	defer teardown()
+	defer teardown("")
 
 	testCases := []struct {
 		name                 string
