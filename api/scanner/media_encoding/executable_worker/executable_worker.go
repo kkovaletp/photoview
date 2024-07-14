@@ -1,7 +1,6 @@
 package executable_worker
 
 import (
-	"fmt"
 	"log"
 
 	"github.com/kkovaletp/photoview/api/utils"
@@ -37,7 +36,8 @@ func newDarktableWorker() *DarktableWorker {
 
 func NewFfmpegWorker() (*FfmpegWorker, error) {
 	if utils.EnvDisableVideoEncoding.GetBool() {
-		return nil, fmt.Errorf("executable worker disabled (%s=1): ffmpeg", utils.EnvDisableVideoEncoding.GetName())
+		log.Printf("Executable worker disabled (%s=1): ffmpeg", utils.EnvDisableVideoEncoding.GetName())
+		return nil, nil
 	}
 
 	worker, err := configureExternalFfmpegWorker()

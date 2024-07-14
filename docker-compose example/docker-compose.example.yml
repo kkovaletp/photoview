@@ -55,53 +55,53 @@ services:
       ## You need to choose and uncomment only 1 pair of them according to your setup. Keep others commented out.
       ## Next 2 CMD variables for the case of no hardware acceleration
       # PHOTOVIEW_FFMPEG_VIDEO_CMD: >
-      #   -i	<inputPath>
+      #   -i <inputPath>
       #   -vcodec h264 -acodec aac
       #   -vf scale='min(1080,iw)':'min(1080,ih)':force_original_aspect_ratio=decrease:force_divisible_by=2
-      #   -movflags +faststart+use_metadata_tags	<outputPath>
+      #   -movflags +faststart+use_metadata_tags <outputPath>
       # PHOTOVIEW_FFMPEG_THUMBNAIL_CMD: >
       #   -ss <thumbnailOffsetSeconds>
-      #   -i <inputPath>	-vframes 1 -an
+      #   -i <inputPath> -vframes 1 -an
       #   -vf scale='min(1024,iw)':'min(1024,ih)':force_original_aspect_ratio=decrease:force_divisible_by=2
       #   <outputPath>
       ## Next 2 CMD variables for the case of AMD VAAPI hardware acceleration (NOT TESTED)
       # PHOTOVIEW_FFMPEG_VIDEO_CMD: >
       #   -vaapi_device /dev/dri/renderD128
-      #   -i	<inputPath>
+      #   -i <inputPath>
       #   -vcodec h264_vaapi -acodec aac
-      #   -vf format=nv12|vaapi,hwupload,scale_vaapi='min(1080,iw)':'min(1080,ih)':force_original_aspect_ratio=decrease:force_divisible_by=2
-      #   -movflags +faststart+use_metadata_tags	<outputPath>
+      #   -vf "format=nv12|vaapi,hwupload,scale_vaapi='min(1080,iw)':'min(1080,ih)':force_original_aspect_ratio=decrease:force_divisible_by=2"
+      #   -movflags +faststart+use_metadata_tags <outputPath>
       # PHOTOVIEW_FFMPEG_THUMBNAIL_CMD: >
       #   -vaapi_device /dev/dri/renderD128
       #   -ss <thumbnailOffsetSeconds>
-      #   -i <inputPath>	-vframes 1 -an
-      #   -vf format=nv12|vaapi,hwupload,scale_vaapi='min(1024,iw)':'min(1024,ih)':force_original_aspect_ratio=decrease:force_divisible_by=2
+      #   -i <inputPath> -vframes 1 -an
+      #   -vf "format=nv12|vaapi,hwupload,scale_vaapi='min(1024,iw)':'min(1024,ih)':force_original_aspect_ratio=decrease:force_divisible_by=2"
       #   <outputPath>
       ## Next 2 CMD variables for the case of Intel QSV hardware acceleration
       ## (NOT TESTED: maybe the `-vf` option needs to be replaced with the `-global_quality 25`)
       # PHOTOVIEW_FFMPEG_VIDEO_CMD: >
       #   -hwaccel qsv
-      #   -i	<inputPath>
+      #   -i <inputPath>
       #   -vcodec h264_qsv -acodec aac
       #   -vf scale='min(1080,iw)':'min(1080,ih)':force_original_aspect_ratio=decrease:force_divisible_by=2
-      #   -movflags +faststart+use_metadata_tags	<outputPath>
+      #   -movflags +faststart+use_metadata_tags <outputPath>
       # PHOTOVIEW_FFMPEG_THUMBNAIL_CMD: >
       #   -hwaccel qsv
       #   -ss <thumbnailOffsetSeconds>
-      #   -i <inputPath>	-vframes 1 -an
+      #   -i <inputPath> -vframes 1 -an
       #   -vf scale='min(1024,iw)':'min(1024,ih)':force_original_aspect_ratio=decrease:force_divisible_by=2
       #   <outputPath>
       ## Next 2 CMD variables for the case of Nvidia hardware acceleration (NOT TESTED)
       # PHOTOVIEW_FFMPEG_VIDEO_CMD: >
       #   -hwaccel nvdec
-      #   -i	<inputPath>
+      #   -i <inputPath>
       #   -vcodec h264_nvenc -acodec aac
       #   -vf scale='min(1080,iw)':'min(1080,ih)':force_original_aspect_ratio=decrease:force_divisible_by=2
-      #   -movflags +faststart+use_metadata_tags	<outputPath>
+      #   -movflags +faststart+use_metadata_tags <outputPath>
       # PHOTOVIEW_FFMPEG_THUMBNAIL_CMD: >
       #   -hwaccel nvdec
       #   -ss <thumbnailOffsetSeconds>
-      #   -i <inputPath>	-vframes 1 -an
+      #   -i <inputPath> -vframes 1 -an
       #   -vf scale='min(1024,iw)':'min(1024,ih)':force_original_aspect_ratio=decrease:force_divisible_by=2
       #   <outputPath>
     volumes:

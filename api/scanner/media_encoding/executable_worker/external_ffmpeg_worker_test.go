@@ -74,12 +74,12 @@ func TestValidateCommandTemplate(t *testing.T) {
 	validTemplates := []string{
 		"-i <inputPath> -vcodec h264 -acodec aac -vf scale='min(1080,iw)':'min(1080,ih)':force_original_aspect_ratio=decrease:force_divisible_by=2 -movflags +faststart+use_metadata_tags <outputPath>",
 		"-ss <thumbnailOffsetSeconds> -i <inputPath> -vframes 1 -an -vf scale='min(1024,iw)':'min(1024,ih)':force_original_aspect_ratio=decrease:force_divisible_by=2 <outputPath>",
-		"-vaapi_device /dev/dri/renderD128 -i <inputPath> -vcodec h264_vaapi -acodec aac -vf format=nv12|vaapi,hwupload,scale_vaapi='min(1080,iw)':'min(1080,ih)':force_original_aspect_ratio=decrease:force_divisible_by=2 -movflags +faststart+use_metadata_tags <outputPath>",
-		"-vaapi_device /dev/dri/renderD128 -ss <thumbnailOffsetSeconds> -i <inputPath>	-vframes 1 -an -vf format=nv12|vaapi,hwupload,scale_vaapi='min(1024,iw)':'min(1024,ih)':force_original_aspect_ratio=decrease:force_divisible_by=2 <outputPath>",
+		"-vaapi_device /dev/dri/renderD128 -i <inputPath> -vcodec h264_vaapi -acodec aac -vf \"format=nv12|vaapi,hwupload,scale_vaapi='min(1080,iw)':'min(1080,ih)':force_original_aspect_ratio=decrease:force_divisible_by=2\" -movflags +faststart+use_metadata_tags <outputPath>",
+		"-vaapi_device /dev/dri/renderD128 -ss <thumbnailOffsetSeconds> -i <inputPath> -vframes 1 -an -vf \"format=nv12|vaapi,hwupload,scale_vaapi='min(1024,iw)':'min(1024,ih)':force_original_aspect_ratio=decrease:force_divisible_by=2\" <outputPath>",
 		"-hwaccel qsv -i <inputPath> -vcodec h264_qsv -acodec aac -vf scale='min(1080,iw)':'min(1080,ih)':force_original_aspect_ratio=decrease:force_divisible_by=2 -movflags +faststart+use_metadata_tags <outputPath>",
 		"-hwaccel qsv -ss <thumbnailOffsetSeconds> -i <inputPath> -vframes 1 -an -vf scale='min(1024,iw)':'min(1024,ih)':force_original_aspect_ratio=decrease:force_divisible_by=2 <outputPath>",
-		"-hwaccel nvdec -i	<inputPath> -vcodec h264_nvenc -acodec aac -vf scale='min(1080,iw)':'min(1080,ih)':force_original_aspect_ratio=decrease:force_divisible_by=2 -movflags +faststart+use_metadata_tags	<outputPath>",
-		"-hwaccel nvdec -ss <thumbnailOffsetSeconds> -i <inputPath>	-vframes 1 -an -vf scale='min(1024,iw)':'min(1024,ih)':force_original_aspect_ratio=decrease:force_divisible_by=2 <outputPath>",
+		"-hwaccel nvdec -i <inputPath> -vcodec h264_nvenc -acodec aac -vf scale='min(1080,iw)':'min(1080,ih)':force_original_aspect_ratio=decrease:force_divisible_by=2 -movflags +faststart+use_metadata_tags <outputPath>",
+		"-hwaccel nvdec -ss <thumbnailOffsetSeconds> -i <inputPath> -vframes 1 -an -vf scale='min(1024,iw)':'min(1024,ih)':force_original_aspect_ratio=decrease:force_divisible_by=2 <outputPath>",
 	}
 	for _, template := range validTemplates {
 		assert.NoError(t, executable_worker.ValidateCommandTemplate(template),
@@ -88,7 +88,6 @@ func TestValidateCommandTemplate(t *testing.T) {
 
 	invalidTemplates := []string{
 		"-i <inputPath> -vcodec h264; rm -rf /",
-		"-i <inputPath> -vcodec h264 | ls",
 		"-i <inputPath> -vcodec h264 [ls]",
 		"-i <inputPath> -vcodec h264 && ls",
 		"-i <inputPath> -vcodec h264 `ls`",

@@ -85,8 +85,8 @@ func ValidateBaseURL(baseURL string) error {
 }
 
 func ValidateCommandTemplate(template string) error {
-	if strings.ContainsAny(template, "[;&|`$]") {
-		return fmt.Errorf("invalid characters in command template: %s. Next characters forbidden: '[;&|`$]'", template)
+	if strings.ContainsAny(template, "[;&`$]") {
+		return fmt.Errorf("invalid characters in command template: %s. Next characters forbidden: '[;&`$]'", template)
 	}
 	return nil
 }
@@ -134,8 +134,9 @@ func (worker *FfmpegWorker) encodeWithExternalWorker(command string) error {
 		return errors.Wrap(err, "Failed to deserialize response body")
 	}
 
-	log.Printf("External ffmpeg worker stdout: %s", result["stdout"])
-	log.Printf("External ffmpeg worker stderr: %s", result["stderr"])
+	//Is there a DEBUG logging mode in the project? Uncomment only for DEBUG logging
+	//log.Printf("External ffmpeg worker STDOUT: %s", result["stdout"])
+	//log.Printf("External ffmpeg worker STDERR: %s", result["stderr"])
 
 	return nil
 }
