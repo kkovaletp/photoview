@@ -1,31 +1,36 @@
 package executable_worker_test
 
 import (
+	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/kkovaletp/photoview/api/scanner/media_encoding/executable_worker"
+	"github.com/kkovaletp/photoview/api/utils"
 	"github.com/stretchr/testify/assert"
-	"gopkg.in/vansante/go-ffprobe.v2"
 )
 
 func TestLocalFfmpegWorker(t *testing.T) {
-	testFile := "./test_data/Free_Test_Data_1.21MB_MKV.mkv"
+	tempDir := createTempDir(t)
+	setup(t)
+	defer teardown(tempDir)
 
+	os.Setenv(string(utils.EnvDisableRawProcessing), "true")
+	os.Setenv(string(utils.EnvDisableVideoEncoding), "false")
+	executable_worker.InitializeExecutableWorkers()
 	worker := executable_worker.FfmpegCli
-	assert.True(t, worker.IsInstalled())
-	assert.Contains(t, worker.Path(), "ffmpeg")
+	assert.True(t, worker.IsInstalled(), "FFmpeg worker should be configured")
+	assert.Contains(t, worker.Path(), "ffmpeg", "Path to the FFmpeg's executable should contain 'ffmpeg'")
 
-	assert.FileExists(t, testFile)
-	err := worker.EncodeMp4(testFile, "./test_data/local_output.mp4")
-	assert.NoError(t, err)
-	assert.FileExists(t, "./test_data/local_output.mp4")
+	testFile := filepath.Join(getWorkingDir(t), "test_data/Free_Test_Data_1.21MB_MKV.mkv")
+	assert.FileExists(t, testFile, "Test data source video should be available")
+	outputPath := filepath.Join(tempDir, "local_output.mp4")
+	err := worker.EncodeMp4(testFile, outputPath)
+	assert.NoError(t, err, "No error expected from video encoding")
+	assert.FileExists(t, outputPath, "Encoded video output file should exist")
 
-	probeData := &ffprobe.ProbeData{
-		Format: &ffprobe.Format{
-			DurationSeconds: 8.0,
-		},
-	}
-	err = worker.EncodeVideoThumbnail(testFile, "./test_data/local_thumbnail.jpg", probeData)
-	assert.NoError(t, err)
-	assert.FileExists(t, "./test_data/local_thumbnail.jpg")
+	outputThumbPath := filepath.Join(tempDir, "local_thumbnail.jpg")
+	err = worker.EncodeVideoThumbnail(testFile, outputThumbPath, stubProbeData())
+	assert.NoError(t, err, "No error expected from thumbnail extraction")
+	assert.FileExists(t, outputThumbPath, "Video thumbnail output file should exist")
 }
