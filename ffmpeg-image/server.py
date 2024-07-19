@@ -59,7 +59,7 @@ def health():
 @auth.login_required
 def execute():
   start_time = time.time()
-  command = request.json['command'].replace('\r\n', ' ').replace('\n', ' ')
+  command = request.json['command'].replace('\r\n', '').replace('\n', '')
   gunicorn_logger.debug("Got POST request with the command: " + command)
 
   # Input validation
@@ -69,7 +69,7 @@ def execute():
     return {'stderr': 'Invalid characters in command. Forbidden [;&|`$<>]'}, 400
 
   # Execute the command using ffmpeg
-  result = subprocess.run(['/ffmpegwrapper.sh '] + command.split(),
+  result = subprocess.run(['/ffmpegwrapper.sh'] + command.split(),
                           capture_output=True, text=True)
 
   spent_time_str = str(timedelta(seconds=(time.time() - start_time))).split('.')
