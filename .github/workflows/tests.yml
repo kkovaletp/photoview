@@ -228,6 +228,16 @@ jobs:
           package-name: 'ffmpeg'
           package-version-ids: '${{ steps.ver_id.outputs.version_id }}'
 
+      - name: Delete untagged Docker image versions
+        uses: actions/delete-package-versions@v5
+        with:
+          owner: '${{ github.repository_owner }}'
+          token: '${{ secrets.COMMENT_TOKEN }}'
+          package-type: 'container'
+          package-name: 'ffmpeg'
+          delete-only-untagged-versions: true
+          min-versions-to-keep: 0
+
   test-ui:
     name: Test UI
     runs-on: ubuntu-latest
@@ -256,16 +266,6 @@ jobs:
 
       - name: Install dependencies
         run: npm clean-install
-
-      - name: NPM audit
-        uses: oke-py/npm-audit-action@v2
-        with:
-          audit_level: none
-          create_issues: false
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          dedupe_issues: true
-          production_flag: true
-          working_directory: ui
 
       - name: Test
         run: npm run test:ci
