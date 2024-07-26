@@ -3,3 +3,9 @@ DKL-DI-0006
 
 # Don't care about signatures
 CIS-DI-0005
+
+# Allow root user
+CIS-DI-0001
+
+# Allow ADD usage in Dockerfile
+CIS-DI-0009

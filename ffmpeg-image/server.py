@@ -37,6 +37,7 @@ def verify_password(username, password):
     return username
   else:
     gunicorn_logger.error("Unauthorized request with invalid credentials declined")
+    return None
 
 
 @app.route('/health', methods=['GET'])
@@ -58,7 +59,7 @@ def health():
 @auth.login_required
 def execute():
   start_time = time.time()
-  command = request.json['command']
+  command = request.json['command'].replace('\r\n', '').replace('\n', '')
   gunicorn_logger.debug("Got POST request with the command: " + command)
 
   # Input validation
