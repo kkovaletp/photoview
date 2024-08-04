@@ -20,7 +20,7 @@ const MapContainer = styled.div`
   height: 100%;
 `
 
-const ForwardedMapContainer = forwardRef<HTMLDivElement, any>((props, ref) => (
+const ForwardedMapContainer = forwardRef<HTMLDivElement, React.HTMLProps<HTMLDivElement>>((props, ref) => (
   <MapContainer {...props} ref={ref} />
 ))
 
