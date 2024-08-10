@@ -41,7 +41,7 @@
     "connect-history-api-fallback": "^2.0.0",
     "copy-to-clipboard": "^3.3.3",
     "i18next": "^21.10.0",
-    "mapbox-gl": "^3.5.2",
+    "mapbox-gl": "~3.4.0",
     "postcss": "^8.4.41",
     "prettier": "^2.8.8",
     "react": "^18.2.0",
