@@ -1,39 +1,79 @@
 <img src="./screenshots/photoview-logo.svg" height="92px" alt="photoview logo" />
 
-[![License](https://img.shields.io/github/license/viktorstrate/photoview)](./LICENSE.txt)
-[![GitHub contributors](https://img.shields.io/github/contributors/viktorstrate/photoview)](https://github.com/viktorstrate/photoview/graphs/contributors)
-[![Docker Pulls](https://img.shields.io/docker/pulls/viktorstrate/photoview)](https://hub.docker.com/r/viktorstrate/photoview)
-[![Docker builds](https://github.com/photoview/photoview/actions/workflows/build.yml/badge.svg?branch=master)](https://github.com/photoview/photoview/actions/workflows/build.yml)
-[![codecov](https://codecov.io/gh/photoview/photoview/branch/master/graph/badge.svg?token=AATZKC93F7)](https://codecov.io/gh/photoview/photoview)
+[![License](https://img.shields.io/github/license/kkovaletp/photoview)](./LICENSE.txt)
+[![GitHub contributors](https://img.shields.io/github/contributors/kkovaletp/photoview)](https://github.com/kkovaletp/photoview/graphs/contributors)
+[![Docker Pulls](https://img.shields.io/docker/pulls/kkoval/photoview)](https://hub.docker.com/r/kkoval/photoview)
+[![Docker builds](https://github.com/kkovaletp/photoview/actions/workflows/build.yml/badge.svg?branch=master)](https://github.com/kkovaletp/photoview/actions/workflows/build.yml)
+[![codecov](https://codecov.io/gh/kkovaletp/photoview/branch/master/graph/badge.svg?token=ENP02P5NYS)](https://codecov.io/gh/kkovaletp/photoview)
+<a href="https://scan.coverity.com/projects/kkovaletp-photoview">
+  <img alt="Coverity Scan Build Status"
+       src="https://scan.coverity.com/projects/30259/badge.svg"/>
+</a>
+
+[![SonarCloud](https://sonarcloud.io/images/project_badges/sonarcloud-white.svg)](https://sonarcloud.io/summary/new_code?id=kkovaletp_photoview)
+
+**Backend**
+
+[![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=kostiantyn-github_photoview-api&metric=ncloc)](https://sonarcloud.io/summary/new_code?id=kostiantyn-github_photoview-api)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=kostiantyn-github_photoview-api&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=kostiantyn-github_photoview-api)
+[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=kostiantyn-github_photoview-api&metric=bugs)](https://sonarcloud.io/summary/new_code?id=kostiantyn-github_photoview-api)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=kostiantyn-github_photoview-api&metric=coverage)](https://sonarcloud.io/summary/new_code?id=kostiantyn-github_photoview-api)
+[![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=kostiantyn-github_photoview-api&metric=sqale_index)](https://sonarcloud.io/summary/new_code?id=kostiantyn-github_photoview-api)
+
+**Frontend**
+
+[![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=kostiantyn-github_photoview-ui&metric=ncloc)](https://sonarcloud.io/summary/new_code?id=kostiantyn-github_photoview-ui)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=kostiantyn-github_photoview-ui&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=kostiantyn-github_photoview-ui)
+[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=kostiantyn-github_photoview-ui&metric=bugs)](https://sonarcloud.io/summary/new_code?id=kostiantyn-github_photoview-ui)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=kostiantyn-github_photoview-ui&metric=coverage)](https://sonarcloud.io/summary/new_code?id=kostiantyn-github_photoview-ui)
+[![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=kostiantyn-github_photoview-ui&metric=sqale_index)](https://sonarcloud.io/summary/new_code?id=kostiantyn-github_photoview-ui)
+
+**Docker**
+
+[![Lines of Code](https://sonarcloud.io/api/project_badges/measure?project=kostiantyn-github_photoview-docker&metric=ncloc)](https://sonarcloud.io/summary/new_code?id=kostiantyn-github_photoview-docker)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=kostiantyn-github_photoview-docker&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=kostiantyn-github_photoview-docker)
+[![Bugs](https://sonarcloud.io/api/project_badges/measure?project=kostiantyn-github_photoview-docker&metric=bugs)](https://sonarcloud.io/summary/new_code?id=kostiantyn-github_photoview-docker)
+[![Technical Debt](https://sonarcloud.io/api/project_badges/measure?project=kostiantyn-github_photoview-docker&metric=sqale_index)](https://sonarcloud.io/summary/new_code?id=kostiantyn-github_photoview-docker)
+
 
 ![screenshot](./screenshots/timeline.png)
 
-Photoview is a simple and user-friendly photo gallery that's made for photographers and aims to provide an easy and fast way to navigate directories, with thousands of high-resolution photos.
+**This is a forked repository from the [photoview/photoview](https://github.com/photoview/photoview).** 
+My vision of the product development strategy is different from the Photoview owner and the maintainer of the upstream repo, so I decided to fork and go my way.
+
+**Photoview** is a simple and user-friendly photo gallery that's made for photographers and aims to provide an easy and fast way to navigate directories, with thousands of high-resolution photos.
 
 You configure Photoview to look for photos and videos within a directory on your file system. The scanner automatically picks up your media and starts to generate thumbnail images to make browsing super fast.
 
-When your media has been scanned, they show up on the website, organised in the same way as on the filesystem.
+When your media has been scanned, they show up on the website, organized in the same way as on the filesystem.
 
 > If you have questions regarding setup or development,
-feel free to join the Discord server https://discord.gg/jQ392948u9
+feel free to start or join a discussion in this repo
 
-## Demo site
+## Terms of use
 
-Visit https://photos.qpqp.dk/
+By using this project or its source code, for any purpose and in any shape or form, you grant your **implicit agreement** to all of the following statements:
 
-Username: **demo**
-Password: **demo**
+- You unequivocally condemn Russia and its military aggression against Ukraine;
+- You recognize that Russia is an occupant that unlawfully invaded a sovereign state;
+- You agree that [Russia is a terrorist state](https://www.europarl.europa.eu/doceo/document/RC-9-2022-0482_EN.html);
+- You fully support Ukraine's territorial integrity, including its claims over [temporarily occupied territories](https://en.wikipedia.org/wiki/Russian-occupied_territories_of_Ukraine);
+- You reject false narratives perpetuated by Russian state propaganda.
+
+To learn more about the war and how you can help, [click here](https://war.ukraine.ua/).
+
+Glory to Ukraine! 🇺🇦
 
 ## Contents
 
-- [Demo site](#demo-site)
+- [Terms of use](#Terms-of-use)
 - [Main features](#main-features)
 - [Supported Platforms](#supported-platforms)
 - [Why yet another self-hosted photo gallery](#why-yet-another-self-hosted-photo-gallery)
 - [Getting started — Setup with Docker](#getting-started--setup-with-docker)
 - [Advanced setup](#advanced-setup)
+- [Contributing](#contributing)
 - [Set up development environment](#set-up-development-environment)
-- [Sponsors](#sponsors)
 
 ## Main features
 
@@ -48,7 +88,9 @@ Password: **demo**
 
 ## Supported platforms
 
-- [Docker](https://hub.docker.com/r/viktorstrate/photoview/)
+- [Docker](https://hub.docker.com/r/kkoval/photoview/) - recommended and preferred
+- Debian, Ubuntu and similar Linux distros
+- Fedora Linux
 - [Arch Linux Aur](https://aur.archlinux.org/packages/photoview)
 - [Unraid](https://forums.unraid.net/topic/103028-support-photoview-corneliousjd-repo/)
 - EmbassyOS: [announcement](https://start9labs.medium.com/new-service-photoview-72ee681b2ff0), [repo](https://github.com/Start9Labs/embassyos-photoview-wrapper)
@@ -105,6 +147,11 @@ All the photo galleries can do a lot of what I need, but no single one can do it
 
    If command(s) return `Permission denied` error, run them under the user, owning corresponding files and folders. Alternatively, run them adding `sudo ` before the command: this will switch the execution context to `root` user and ask for the root password. You have to have permission to run `sudo` in the system.
 
+   If you don't want to give required permissions to `others` group for your files, alternatively, you can:
+
+   - create a group on your host with GID=999 and make all the files and folders inside volumes of the `photoview` service being owned by this group; then set the appropriate permissions to the `group` section.
+   - create on your host a group with GID=999 and a user in this group with UID=999; then change the ownership of all the files and folders inside volumes of the `photoview` service to this user; then set the appropriate permissions to the `user` section.
+
    If you configured other mounts with media files from other locations on the host (like HOST_PHOTOVIEW_MEDIA_FAMILY or anything else), you need to run the same commands, as in the `Makefile` `readable` target, for each media root folder on your host manually: copy each command to your shell and replace the variable with the absolute path to an additional media root folder without the trailing `/`. Run both commands for each additional root folder.
 5. In case, you don't have `make` installed in your system or don't want to use it for the Photoview management activities, you could use the same commands from the `Makefile` and run them in your shell directly, or create your own scripts. Make sure to apply or replace the variables from your `.env` first in this case. `Makefile` is provided just for your convenience and simplicity, but is optional.
 6. Start the server by running the following command (or corresponding sequence of commands from the `Makefile`):
@@ -133,7 +180,7 @@ The photos will have to be scanned before they show up, you can start a scan man
 
 ## Advanced setup
 
-We suggest securing the Photoview instance before exposing it outside your local network: even while it provides read-only access to your media gallery and has basic user authentication functionality, it is not enough to protect your private media from malicious actors on the Internet.
+I suggest securing the Photoview instance before exposing it outside your local network: even while it provides read-only access to your media gallery and has basic user authentication functionality, it is not enough to protect your private media from malicious actors on the Internet.
 
 Possible ways of securing a self-hosted service might be (but not limited to):
 
@@ -150,6 +197,18 @@ Possible ways of securing a self-hosted service might be (but not limited to):
 8. Set up an **Intrusion Detection/Prevention System** to monitor network traffic for suspicious activity and issue alerts when such activity is discovered.
 
 Setting up and configuring of all these protections depends on and requires a lot of info about your local network and self-hosted services. Based on this info, the configuration flow and resulting services architecture might differ a lot between cases. That is why in the scope of this project, we can only provide you with this high-level list of possible ways of webservice protection. You'll need to investigate them, find the best combination and configuration for your case, and take responsibility to configure everything in the correct and consistent way. We cannot provide you support for such highly secured setups, as a lot of things might work differently because of security limitations.
+
+## Contributing
+
+🎉 First off, thanks for your interest in contribution! 🎉
+
+This project is a result of hard work, and it's great to see you interested in contributing. 
+Contributions are not just about code — you can help in many ways!
+
+Before you start, please take a moment to read our [Contributing guide](./CONTRIBUTING.md). 
+It includes information on our code of conduct, the process for submitting pull requests, and more.
+
+Remember, every contribution counts. Let's make this project better together! 💪
 
 ## Set up development environment
 
@@ -200,45 +259,3 @@ npm start
 
 The site can now be accessed at [localhost:1234](http://localhost:1234).
 And the graphql playground at [localhost:4001](http://localhost:4001)
-
-## Sponsors
-
-<table>
-<tr>
-  <td>
-    <a href="https://github.com/ericerkz">
-      <img src="https://avatars.githubusercontent.com/u/79728329?v=4" height="auto" width="100" style="border-radius:50%"><br/>
-      <b>@ericerkz</b>
-    </a>
-  </td>
-  <td>
-    <a href="https://github.com/robin-moser">
-      <img src="https://avatars.githubusercontent.com/u/26254821?v=4" height="auto" width="100" style="border-radius:50%"><br/>
-      <b>@robin-moser</b>
-    </a>
-  </td>
-  <td>
-    <a href="https://github.com/Revorge">
-      <img src="https://avatars.githubusercontent.com/u/32901816?v=4" height="auto" width="100" style="border-radius:50%"><br/>
-      <b>@Revorge</b>
-    </a>
-  </td>
-  <td>
-    <a href="https://github.com/deexno">
-      <img src="https://avatars.githubusercontent.com/u/50229919?v=4" height="auto" width="100" style="border-radius:50%"><br/>
-      <b>@deexno</b>
-    </a>
-  </td>
-  <td>
-    <a href="https://github.com/FKrauss">
-      <img src="https://avatars.githubusercontent.com/u/4820683?v=4" height="auto" width="100" style="border-radius:50%"><br/>
-      <b>@FKrauss</b>
-    </a>
-  </td>
-  <td>
-    <a href="https://github.com/jupblb">
-      <img src="https://avatars.githubusercontent.com/u/3370617?v=4" height="auto" width="100" style="border-radius:50%"><br/>
-      <b>@jupblb</b>
-    </a>
-  </td>
-</table>

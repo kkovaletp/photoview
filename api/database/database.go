@@ -7,9 +7,10 @@ import (
 	"net/url"
 	"time"
 
-	"github.com/photoview/photoview/api/database/drivers"
-	"github.com/photoview/photoview/api/graphql/models"
-	"github.com/photoview/photoview/api/utils"
+	"github.com/kkovaletp/photoview/api/database/drivers"
+	"github.com/kkovaletp/photoview/api/database/migrations"
+	"github.com/kkovaletp/photoview/api/graphql/models"
+	"github.com/kkovaletp/photoview/api/utils"
 	"github.com/pkg/errors"
 
 	"github.com/go-sql-driver/mysql"
@@ -63,7 +64,7 @@ func GetSqliteAddress(path string) (*url.URL, error) {
 	queryValues.Add("cache", "shared")
 	queryValues.Add("mode", "rwc")
 	// queryValues.Add("_busy_timeout", "60000") // 1 minute
-	queryValues.Add("_journal_mode", "WAL") // Write-Ahead Logging (WAL) mode
+	queryValues.Add("_journal_mode", "WAL")    // Write-Ahead Logging (WAL) mode
 	queryValues.Add("_locking_mode", "NORMAL") // allows concurrent reads and writes
 	address.RawQuery = queryValues.Encode()
 
@@ -192,6 +193,11 @@ func MigrateDatabase(db *gorm.DB) error {
 	// from string values to decimal and int respectively
 	if err := migrate_exif_fields(db); err != nil {
 		log.Printf("Failed to run exif fields migration: %v\n", err)
+	}
+
+	// Remove invalid GPS data from DB
+	if err := migrations.MigrateForExifGPSCorrection(db); err != nil {
+		log.Printf("Failed to run exif GPS correction migration: %v\n", err)
 	}
 
 	return nil

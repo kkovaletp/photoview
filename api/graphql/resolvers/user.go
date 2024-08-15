@@ -6,13 +6,13 @@ import (
 	"path"
 	"strconv"
 
-	api "github.com/photoview/photoview/api/graphql"
-	"github.com/photoview/photoview/api/graphql/auth"
-	"github.com/photoview/photoview/api/graphql/models"
-	"github.com/photoview/photoview/api/graphql/models/actions"
-	"github.com/photoview/photoview/api/scanner"
-	"github.com/photoview/photoview/api/scanner/face_detection"
-	"github.com/photoview/photoview/api/utils"
+	api "github.com/kkovaletp/photoview/api/graphql"
+	"github.com/kkovaletp/photoview/api/graphql/auth"
+	"github.com/kkovaletp/photoview/api/graphql/models"
+	"github.com/kkovaletp/photoview/api/graphql/models/actions"
+	"github.com/kkovaletp/photoview/api/scanner"
+	"github.com/kkovaletp/photoview/api/scanner/face_detection"
+	"github.com/kkovaletp/photoview/api/utils"
 	"github.com/pkg/errors"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
@@ -56,7 +56,7 @@ func (r *userResolver) RootAlbums(ctx context.Context, user *models.User) (album
 			db.Table("user_albums").
 				Select("albums.id").
 				Joins("JOIN albums ON albums.id = user_albums.album_id AND user_albums.user_id = ?", user.ID),
-		).Or("albums.parent_album_id IS NULL").
+		).Or("albums.parent_album_id IS NULL").Order("path ASC").
 		Association("Albums").Find(&albums)
 
 	return

@@ -8,11 +8,11 @@ import (
 	"os"
 	"path"
 
-	"github.com/photoview/photoview/api/graphql/models"
-	"github.com/photoview/photoview/api/scanner/scanner_cache"
-	"github.com/photoview/photoview/api/scanner/scanner_tasks/cleanup_tasks"
-	"github.com/photoview/photoview/api/scanner/scanner_utils"
-	"github.com/photoview/photoview/api/utils"
+	"github.com/kkovaletp/photoview/api/graphql/models"
+	"github.com/kkovaletp/photoview/api/scanner/scanner_cache"
+	"github.com/kkovaletp/photoview/api/scanner/scanner_tasks/cleanup_tasks"
+	"github.com/kkovaletp/photoview/api/scanner/scanner_utils"
+	"github.com/kkovaletp/photoview/api/utils"
 	"github.com/pkg/errors"
 	ignore "github.com/sabhiram/go-gitignore"
 	"gorm.io/gorm"
@@ -55,7 +55,11 @@ func FindAlbumsForUser(db *gorm.DB, user *models.User, album_cache *scanner_cach
 	}
 
 	var userRootAlbums []*models.Album
-	if err := db.Where("id IN (?)", userAlbumIDs).Where("parent_album_id IS NULL OR parent_album_id NOT IN (?)", userAlbumIDs).Find(&userRootAlbums).Error; err != nil {
+	if err := db.
+		Where("id IN (?)", userAlbumIDs).
+		Where("parent_album_id IS NULL OR parent_album_id NOT IN (?)", userAlbumIDs).
+		Order("path ASC").
+		Find(&userRootAlbums).Error; err != nil {
 		return nil, []error{err}
 	}
 

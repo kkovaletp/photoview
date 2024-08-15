@@ -9,7 +9,7 @@ on:
 jobs:
   test-api:
     name: Test API
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
 
     strategy:
       fail-fast: false
@@ -18,31 +18,32 @@ jobs:
 
     services:
       mariadb:
-        image: mariadb:10.5
+        image: mariadb:lts
         env:
           MYSQL_DATABASE: photoview_test
           MYSQL_USER: photoview
           MYSQL_PASSWORD: photosecret
           MYSQL_RANDOM_ROOT_PASSWORD: yes
+        # https://github.com/MariaDB/mariadb-docker/issues/497
         options: >-
-          --health-cmd="mysqladmin ping"
-          --health-interval=10s
+          --health-cmd="mariadb-admin ping"
+          --health-interval=20s
           --health-timeout=5s
-          --health-retries=5
+          --health-retries=10
         ports:
           - 3306:3306
 
       postgres:
-        image: postgres:13.2
+        image: postgres:16-alpine
         env:
           POSTGRES_USER: photoview
           POSTGRES_PASSWORD: photosecret
           POSTGRES_DB: photoview_test
         options: >-
           --health-cmd pg_isready
-          --health-interval 10s
+          --health-interval 20s
           --health-timeout 5s
-          --health-retries 5
+          --health-retries 10
         ports:
           - 5432:5432
 
@@ -51,29 +52,36 @@ jobs:
         working-directory: api
 
     steps:
-      - name: Set up Go
-        uses: actions/setup-go@v2
-        with:
-          go-version: ^1.16
-        id: go
-
       - name: Check out code into the Go module directory
-        uses: actions/checkout@v2
+        uses: actions/checkout@v4
+
+      - name: Fetch branches
+        run: git fetch --all
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        id: go
+        with:
+          go-version-file: ${{ github.workspace }}/api/go.mod
+          cache: false
 
       - name: Cache Go dependencies
-        uses: actions/cache@v2
+        uses: actions/cache@v4
         with:
           path: ~/go/pkg/mod
           key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
           restore-keys: |
             ${{ runner.os }}-go-
 
-      - name: Get C dependencies
+      - name: Get C dependencies and 3rd-party tools
         run: |
           sudo add-apt-repository ppa:strukturag/libheif
           sudo add-apt-repository ppa:strukturag/libde265
           sudo apt-get update
-          sudo apt-get install -y libdlib-dev libblas-dev libatlas-base-dev liblapack-dev libjpeg-turbo8-dev libheif-dev
+          sudo apt-get install -y libdlib-dev libblas-dev libatlas-base-dev liblapack-dev libjpeg-turbo8-dev libheif-dev ffmpeg exiftool gnupg2 gpg curl
+          echo 'deb [trusted=yes] http://download.opensuse.org/repositories/graphics:/darktable/xUbuntu_22.04/ /' | sudo tee /etc/apt/sources.list.d/graphics:darktable.list
+          sudo apt-get update
+          sudo apt-get install -y darktable
 
       - name: Get GO dependencies
         run: |
@@ -103,12 +111,25 @@ jobs:
           cp ../.github/sqlite.testing.env testing.env
 
       - name: Test
-        run: go test ./... -v -database -filesystem -p 1 -coverprofile=coverage.txt -covermode=atomic
+        run: |
+          go test ./... -v -database -filesystem -p 1
+          go test ./... -v -database -filesystem -p 1 -coverprofile=coverage.txt -covermode=atomic -json > test-report.json
 
       - name: Upload coverage
-        uses: codecov/codecov-action@v1
+        uses: codecov/codecov-action@v4
+        if: always()
         with:
           flags: api
+          token: ${{ secrets.CODECOV_TKN }}
+
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@master
+        if: always() && github.repository == 'kkovaletp/photoview'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_API }}
+        with:
+          projectBaseDir: api/
 
   test-ui:
     name: Test UI
@@ -120,23 +141,21 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [18.x]
+        node-version: [18]
 
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      - name: Cache NPM dependencies
-        uses: actions/cache@v2
-        with:
-          path: ~/.npm
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-
+      - name: Fetch branches
+        run: git fetch --all
 
       - name: Use Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+          cache-dependency-path: ui/package-lock.json
 
       - name: Install dependencies
         run: npm clean-install
@@ -145,6 +164,21 @@ jobs:
         run: npm run test:ci
 
       - name: Upload coverage
-        uses: codecov/codecov-action@v1
+        uses: codecov/codecov-action@v4
         with:
           flags: ui
+          token: ${{ secrets.CODECOV_TKN }}
+
+      - name: Run ESLint
+        run: |
+          npm clean-install --include dev
+          npm run lint:ci || true
+
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@master
+        if: always() && github.repository == 'kkovaletp/photoview'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_UI }}
+        with:
+          projectBaseDir: ui/

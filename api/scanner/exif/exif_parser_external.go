@@ -6,8 +6,8 @@ import (
 	"time"
 
 	"github.com/barasher/go-exiftool"
-	"github.com/photoview/photoview/api/dataloader"
-	"github.com/photoview/photoview/api/graphql/models"
+	"github.com/kkovaletp/photoview/api/dataloader"
+	"github.com/kkovaletp/photoview/api/graphql/models"
 )
 
 type externalExifParser struct {
@@ -61,6 +61,31 @@ func sanitizeEXIF(exif *models.MediaEXIF) {
 		exif.GPSLatitude = nil
 		exif.GPSLongitude = nil
 	}
+}
+
+func extractValidGpsData(fileInfo *exiftool.FileMetadata, media_path string) (*float64, *float64) {
+	var GPSLat, GPSLong *float64
+
+	// GPS coordinates - longitude
+	longitudeRaw, err := fileInfo.GetFloat("GPSLongitude")
+	if err == nil {
+		GPSLong = &longitudeRaw
+	}
+
+	// GPS coordinates - latitude
+	latitudeRaw, err := fileInfo.GetFloat("GPSLatitude")
+	if err == nil {
+		GPSLat = &latitudeRaw
+	}
+
+	// GPS data validation
+	if (GPSLat != nil && math.Abs(*GPSLat) > 90) || (GPSLong != nil && math.Abs(*GPSLong) > 90) {
+		log.Printf(
+			"Incorrect GPS data in the %s Exif data: %f, %f, while expected values between '-90' and '90'. Ignoring GPS data.",
+			media_path, *GPSLat, *GPSLong)
+		return nil, nil
+	}
+	return GPSLat, GPSLong
 }
 
 func (p *externalExifParser) ParseExif(media_path string) (returnExif *models.MediaEXIF, returnErr error) {
@@ -182,18 +207,10 @@ func (p *externalExifParser) ParseExif(media_path string) (returnExif *models.Me
 		newExif.ExposureProgram = &expProgram
 	}
 
-	// GPS coordinates - longitude
-	longitudeRaw, err := fileInfo.GetFloat("GPSLongitude")
-	if err == nil {
+	// Get GPS data
+	newExif.GPSLatitude, newExif.GPSLongitude = extractValidGpsData(&fileInfo, media_path)
+	if (newExif.GPSLatitude != nil) && (newExif.GPSLongitude != nil) {
 		found_exif = true
-		newExif.GPSLongitude = &longitudeRaw
-	}
-
-	// GPS coordinates - latitude
-	latitudeRaw, err := fileInfo.GetFloat("GPSLatitude")
-	if err == nil {
-		found_exif = true
-		newExif.GPSLatitude = &latitudeRaw
 	}
 
 	if !found_exif {

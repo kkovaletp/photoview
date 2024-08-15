@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react'
+import React, { useState, useRef, useEffect, forwardRef } from 'react'
 import { gql, useQuery } from '@apollo/client'
 import type mapboxgl from 'mapbox-gl'
 import styled from 'styled-components'
@@ -6,6 +6,7 @@ import styled from 'styled-components'
 import 'mapbox-gl/dist/mapbox-gl.css'
 import { mapboxToken } from './__generated__/mapboxToken'
 import { isDarkMode } from '../../theme'
+import { SetMapLanguages } from '../../localization'
 
 const MAPBOX_TOKEN_QUERY = gql`
   query mapboxToken {
@@ -18,6 +19,10 @@ const MapContainer = styled.div`
   width: 100%;
   height: 100%;
 `
+
+const ForwardedMapContainer = forwardRef<HTMLDivElement, React.HTMLProps<HTMLDivElement>>((props, ref) => (
+  <MapContainer {...props} ref={ref} />
+))
 
 type MapboxMapProps = {
   configureMapbox(map: mapboxgl.Map, mapboxLibrary: typeof mapboxgl): void
@@ -66,6 +71,8 @@ const useMapboxMap = ({
       ...mapboxOptions,
     })
 
+    SetMapLanguages(map.current)
+
     configureMapbox(map.current, mapboxLibrary)
     map.current?.resize()
   }, [mapContainer, mapboxLibrary, mapboxData])
@@ -73,10 +80,10 @@ const useMapboxMap = ({
   map.current?.resize()
 
   return {
-    mapContainer: <MapContainer ref={mapContainer}></MapContainer>,
+    mapContainer: <ForwardedMapContainer ref={mapContainer} />,
     mapboxMap: map.current,
     mapboxLibrary,
-    mapboxToken: mapboxData?.mapboxToken || null,
+    mapboxToken: mapboxData?.mapboxToken ?? null,
   }
 }
 
