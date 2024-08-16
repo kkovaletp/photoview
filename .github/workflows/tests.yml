@@ -190,7 +190,7 @@ jobs:
         with:
           github-token: ${{ secrets.COMMENT_TOKEN }}
           script: |
-            let ESLintResults = ${{ steps.eslint-artifact.outputs.artifact-url }};
+            let ESLintResults = "${{ steps.eslint-artifact.outputs.artifact-url }}";
             let output = '';
 
             const comments = await github.rest.issues.listComments({
