@@ -173,7 +173,7 @@ jobs:
       - name: ESLint artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ESlint results
+          name: ESLint-report
           path: ./ui/eslint-report.txt
           if-no-files-found: warn
           retention-days: 1
