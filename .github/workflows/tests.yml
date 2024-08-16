@@ -209,7 +209,7 @@ jobs:
               output += '#### ESLint issues:\n';
               output += 'ESLint detected issues during execution.\n';
               output += '\n[ESLint execution report](' + ESLintResults + ')\n';
-              output += '\nMake sure that you're logged in to be able to access the report.';
+              output += '\nMake sure that you are logged in to be able to access the report.';
               output += '\nThe report is accessible within 90 days after the last UI testing workflow execution time.';
               output += '\nAfter that time you need to go to the ESLint execution step in the Actions tab to see the same results.';
 
