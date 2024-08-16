@@ -139,10 +139,6 @@ jobs:
       run:
         working-directory: ui
 
-    strategy:
-      matrix:
-        node-version: [18]
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -150,10 +146,10 @@ jobs:
       - name: Fetch branches
         run: git fetch --all
 
-      - name: Use Node.js ${{ matrix.node-version }}
+      - name: Use Node.js 18
         uses: actions/setup-node@v4
         with:
-          node-version: ${{ matrix.node-version }}
+          node-version: 18
           cache: 'npm'
           cache-dependency-path: ui/package-lock.json
 
@@ -173,6 +169,16 @@ jobs:
         run: |
           npm clean-install --include dev
           npm run lint:ci || true
+
+      - name: ESLint artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ESlint results
+          path: eslint-report.json
+          if-no-files-found: warn
+          retention-days: 1
+          compression-level: 9
+          overwrite: true
 
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@master
