@@ -269,7 +269,7 @@ jobs:
         uses: actions/setup-go@v5
         id: go
         with:
-          go-version-file: '~1.21.13' # Temporary hardcode Go version, as Coverity doesn't support latest Go
+          go-version: '~1.21.13' # Temporary hardcode Go version, as Coverity doesn't support latest Go
           cache: false
 
       - name: Cache Go dependencies
