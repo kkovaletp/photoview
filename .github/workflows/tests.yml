@@ -168,13 +168,15 @@ jobs:
       - name: Run ESLint
         run: |
           npm clean-install --include dev
-          npm run lint:ci || true
+          npm run lint:ci
+          pwd
+          ls -lah
 
       - name: ESLint artifact
         uses: actions/upload-artifact@v4
         with:
           name: ESlint results
-          path: eslint-report.json
+          path: ./ui/eslint-report.json
           if-no-files-found: warn
           retention-days: 1
           compression-level: 9
