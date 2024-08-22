@@ -180,7 +180,7 @@ jobs:
           echo "matrix.tags != '' && conclusion == 'success' || 'failure' : ${{ matrix.tags != '' && ( steps.dockle.conclusion == 'success' || steps.dockle.conclusion == 'failure' ) }}"
 
       - name: Upload SARIF file
-        if: |
+        if: >
           ${{
           matrix.tags != '' &&
           (
