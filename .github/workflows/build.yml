@@ -94,13 +94,13 @@ jobs:
             type=semver,pattern={{major}}
             type=sha
 
-      - name: Set Build Args
+      - name: Set build args
         id: vars
         run: |
           echo "BUILD_DATE=$(date +%Y-%m-%d)" >> $GITHUB_OUTPUT
           echo "VERSION=kkoval-2-$(date +%Y-%m-%d)" >> $GITHUB_OUTPUT
 
-      - name: Build and push
+      - name: Build and Push
         id: docker_buildx
         uses: docker/build-push-action@v6
         with:
@@ -147,15 +147,18 @@ jobs:
     steps:
       # Makes sure your .dockleignore file is available to the next step
       - name: Checkout repository
+        if: ${{ matrix.tags }} != ''
         uses: actions/checkout@v4
 
       - name: Docker Login
+        if: ${{ matrix.tags }} != ''
         uses: docker/login-action@v3
         with:
           username: ${{ env.DOCKER_USERNAME }}
           password: ${{ env.DOCKER_PASSWORD }}
 
       - name: Run Dockle
+        if: ${{ matrix.tags }} != ''
         uses: erzz/dockle-action@v1
         with:
           image: kkoval/photoview:${{ matrix.tags }}
@@ -166,7 +169,7 @@ jobs:
           timeout: 5m
 
       - name: Upload SARIF file
-        if: always()
+        if: always() && ${{ matrix.tags }} != ''
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: dockle-results-${{ matrix.tags }}.sarif
