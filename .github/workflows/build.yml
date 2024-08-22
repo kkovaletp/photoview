@@ -169,6 +169,16 @@ jobs:
           exit-code: 1
           timeout: 5m
 
+      - name: Debug
+        run: |
+          echo "matrix.tags = <${{ matrix.tags != '' }}>"
+          echo "steps.dockle.conclusion = <${{ steps.dockle.conclusion }}>"
+          echo "matrix.tags != '' : ${{ matrix.tags != '' }}"
+          echo "steps.dockle.conclusion == 'success' : ${{ steps.dockle.conclusion == 'success' }}"
+          echo "steps.dockle.conclusion == 'failure' : ${{ steps.dockle.conclusion == 'failure' }}"
+          echo "conclusion == 'success' || 'failure' : ( ${{ steps.dockle.conclusion == 'success' }} || ${{ steps.dockle.conclusion == 'failure' }} )"
+          echo "matrix.tags != '' && conclusion == 'success' || 'failure' : ${{ matrix.tags != '' }} && ( ${{ steps.dockle.conclusion == 'success' }} || ${{ steps.dockle.conclusion == 'failure' }} )"
+
       - name: Upload SARIF file
         if: |
           ${{ matrix.tags != '' }} &&
