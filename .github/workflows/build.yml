@@ -27,7 +27,7 @@ jobs:
       - name: Get latest tag
         id: get_latest_tag
         run: |
-          TAG=$(git describe --tags --abbrev=0)
+          TAG=$(git describe --tags --abbrev=0 || exit 0)
           if [ -z "$TAG" ]; then
             echo 'tags=["master"]' >> $GITHUB_OUTPUT
           else
