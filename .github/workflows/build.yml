@@ -33,17 +33,17 @@ jobs:
           else
             echo 'tags=["master", "$TAG"]' >> $GITHUB_OUTPUT
           fi
-          echo "is_allowed_to_run=${{ github.event_name == 'schedule' && ( github.ref == 'refs/heads/master' || github.ref == 'refs/tags/$TAG' ) }}" >> $GITHUB_OUTPUT
+          echo "is_schedule_to_run=${{ github.event_name == 'schedule' && ( github.ref == 'refs/heads/master' || github.ref == 'refs/tags/$TAG' ) }}" >> $GITHUB_OUTPUT
 
     outputs:
       tags: ${{ steps.get_latest_tag.outputs.tags }}
-      is_allowed_to_run: ${{ steps.get_latest_tag.outputs.is_allowed_to_run }}
+      is_schedule_to_run: ${{ steps.get_latest_tag.outputs.is_schedule_to_run }}
 
   build:
     name: Build Docker Image
     runs-on: ubuntu-latest
     needs: get-tag
-    if: github.event_name == 'pull_request'|| github.event_name == 'push' || ${{ needs.get-tag.outputs.is_allowed_to_run }}
+    if: github.event_name == 'pull_request'|| github.event_name == 'push' || ${{ needs.get-tag.outputs.is_schedule_to_run }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -126,11 +126,7 @@ jobs:
     needs:
       - get-tag
       - build
-    if: |
-      github.repository == 'kkovaletp/photoview' &&
-      (
-        github.event_name == 'push' || ${{ needs.get-tag.outputs.is_allowed_to_run }}'
-      )
+    if: github.repository == 'kkovaletp/photoview' && ( github.event_name == 'push' || ${{ needs.get-tag.outputs.is_schedule_to_run }} )
     strategy:
       fail-fast: false
       matrix:
