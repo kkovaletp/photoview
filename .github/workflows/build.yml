@@ -180,13 +180,7 @@ jobs:
           echo "matrix.tags != '' && conclusion == 'success' || 'failure' : ${{ matrix.tags != '' && ( steps.dockle.conclusion == 'success' || steps.dockle.conclusion == 'failure' ) }}"
 
       - name: Upload SARIF file
-        if: >
-          ${{
-          matrix.tags != '' &&
-          (
-            steps.dockle.conclusion == 'success' ||
-            steps.dockle.conclusion == 'failure'
-          ) }}
+        if: ${{ matrix.tags != '' && ( steps.dockle.conclusion == 'success' || steps.dockle.conclusion == 'failure' ) }}
         uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: dockle-results-${{ matrix.tags }}.sarif
