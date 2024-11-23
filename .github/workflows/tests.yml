@@ -184,11 +184,10 @@ jobs:
 
       - name: Run ESLint
         run: |
-          npm run lint:ci || true
           echo "--------------------------"
           echo "ESLint execution results :"
           echo "--------------------------"
-          cat ./eslint-report.txt || echo "ESLint report file not found."
+          npm run lint:ci || true
 
       - name: ESLint artifact
         id: eslint-artifact
