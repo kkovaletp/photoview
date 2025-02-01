@@ -48,7 +48,11 @@ const makeUpdateMarkers =
         const coords = point.coordinates as [number, number]
         const props = feature.properties as MediaMarker
         if (props == null) {
-          console.warn('WARN: geojson feature had no properties', feature)
+          console.warn('WARN: geojson feature had no properties', {
+            feature,
+            geometry: feature.geometry,
+            coordinates: (feature.geometry as geojson.Point)?.coordinates,
+          })
           continue
         }
 
@@ -61,9 +65,14 @@ const makeUpdateMarkers =
           const el = createClusterPopupElement(props, {
             dispatchMarkerMedia,
           })
-          marker = markers[id] = new mapboxLibrary.Marker({
-            element: el,
-          }).setLngLat(coords)
+          if (el) {
+            marker = markers[id] = new mapboxLibrary.Marker({
+              element: el,
+            }).setLngLat(coords)
+          } else {
+            console.error('Failed to create marker element for:', id)
+            continue
+          }
         }
         newMarkers[id] = marker
 
@@ -88,14 +97,19 @@ function createClusterPopupElement(
     dispatchMarkerMedia: React.Dispatch<PlacesAction>
   }
 ) {
-  const el = document.createElement('div') as MarkerElement
-  const root = createRoot(el)
-  root.render(
-    <MapClusterMarker
-      marker={geojsonProps}
-      dispatchMarkerMedia={dispatchMarkerMedia}
-    />
-  )
-  el._root = root
-  return el
+  try {
+    const el = document.createElement('div') as MarkerElement
+    const root = createRoot(el)
+    root.render(
+      <MapClusterMarker
+        marker={geojsonProps}
+        dispatchMarkerMedia={dispatchMarkerMedia}
+      />
+    )
+    el._root = root
+    return el
+  } catch (error) {
+    console.error('Failed to create cluster popup element:', error)
+    // throw error or return a fallback element to make error handling more consistent
+  }
 }
