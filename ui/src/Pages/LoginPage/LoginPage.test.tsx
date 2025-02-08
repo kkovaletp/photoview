@@ -50,16 +50,18 @@ describe('Login page redirects', () => {
 })
 
 describe('Login page', () => {
-  test('Render login form', () => {
+  test('Render login form', async () => {
     authToken.mockImplementation(() => null)
 
     const history = createMemoryHistory({
       initialEntries: ['/login'],
     })
 
-    renderWithProviders(<LoginPage />, {
-      mocks: [mockInitialSetupGraphql(false)],
-      history: history
+    await act(async () => {
+      await renderWithProviders(<LoginPage />, {
+        mocks: [mockInitialSetupGraphql(false)],
+        history,
+      })
     })
 
     expect(screen.getByLabelText('Username')).toBeInTheDocument()

@@ -59,6 +59,31 @@ describe('MessageState', () => {
         expect(result.current.messages).toHaveLength(0)
     })
 
+    it('should handle concurrent message additions', async () => {
+        const now = 1643673600000
+        Date.now = vi.fn(() => now)
+
+        const { result } = renderHook(() => useMessageState(), { wrapper })
+
+        await act(async () => {
+            // Add multiple messages concurrently
+            result.current.add({
+                key: 'msg1',
+                type: NotificationType.Message,
+                props: { header: 'Message 1', content: 'Content 1' }
+            })
+            result.current.add({
+                key: 'msg2',
+                type: NotificationType.Message,
+                props: { header: 'Message 2', content: 'Content 2' }
+            })
+        })
+
+        expect(result.current.messages).toHaveLength(2)
+        expect(result.current.messages[0].key).toBe('msg1')
+        expect(result.current.messages[1].key).toBe('msg2')
+    })
+
     it('should add timestamp to new messages', async () => {
         const now = 1643673600000
         Date.now = vi.fn(() => now)

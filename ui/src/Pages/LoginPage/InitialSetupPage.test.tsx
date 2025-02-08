@@ -12,15 +12,17 @@ vi.mock('../../helpers/authentication.ts')
 const authToken = vi.mocked(authentication.authToken)
 
 describe('Initial setup page', () => {
-  test('Render initial setup form', () => {
+  test('Render initial setup form', async () => {
     authToken.mockImplementation(() => null)
 
     const history = createMemoryHistory()
     history.push('/initialSetup')
 
-    renderWithProviders(<InitialSetupPage />, {
-      mocks: [mockInitialSetupGraphql(true)],
-      history,
+    await act(async () => {
+      await renderWithProviders(<InitialSetupPage />, {
+        mocks: [mockInitialSetupGraphql(true)],
+        history,
+      })
     })
 
     expect(screen.getByLabelText('Username')).toBeInTheDocument()

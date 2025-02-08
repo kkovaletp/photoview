@@ -60,7 +60,8 @@ test('photo gallery with media', () => {
       dispatchMedia={dispatchMedia}
       mediaState={mediaState}
       loading={false}
-    />
+    />,
+    { mocks: [] }
   )
 
   expect(
