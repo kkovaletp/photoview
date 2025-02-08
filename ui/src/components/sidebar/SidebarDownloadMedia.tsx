@@ -4,6 +4,7 @@ import { NotificationType } from '../../__generated__/globalTypes'
 import { authToken } from '../../helpers/authentication'
 import { TranslationFn } from '../../localization'
 import { useMessageState } from '../messages/MessageState'
+import { Message } from '../messages/SubscriptionsHook'
 import { MediaSidebarMedia } from './MediaSidebar/MediaSidebar'
 import React from 'react'
 import { SidebarSection, SidebarSectionTitle } from './SidebarComponents'
@@ -14,12 +15,7 @@ import {
   sidebarDownloadQuery_media_downloads,
 } from './__generated__/sidebarDownloadQuery'
 
-interface MessageOptions {
-  key: string
-  type: NotificationType
-  props: any
-  onDismiss?: () => void
-}
+const DOWNLOAD_COMPLETE_NOTIFICATION_DURATION = 2000
 
 export const SIDEBAR_DOWNLOAD_QUERY = gql`
   query sidebarDownloadQuery($mediaId: ID!) {
@@ -64,7 +60,7 @@ const formatBytes = (t: TranslationFn) => (bytes: number) => {
 
 const downloadMedia = (
   t: TranslationFn,
-  add: (message: MessageOptions) => void,
+  add: (message: Message) => void,
   removeKey: (key: string) => void
 ) => async (url: string) => {
   const imgUrl = new URL(
@@ -110,14 +106,13 @@ const downloadMedia = (
 const downloadMediaShowProgress =
   (
     t: TranslationFn,
-    add: (message: MessageOptions) => void,
+    add: (message: Message) => void,
     removeKey: (key: string) => void
   ) => async (response: Response) => {
     const notifyKey = `download-${Date.now()}-${Math.random().toString(36).slice(2, 11)}`
     const totalBytes = Number(response.headers.get('content-length'))
     const reader = response.body?.getReader()
     const data = new Uint8Array(totalBytes)
-    const DOWNLOAD_COMPLETE_NOTIFICATION_DURATION = 2000
 
     if (reader == null) {
       throw new Error('Download reader is null')
@@ -258,7 +253,7 @@ type SidebarDownloadTableRow = {
 
 type SidebarDownloadTableProps = {
   rows: SidebarDownloadTableRow[]
-  add: (message: MessageOptions) => void
+  add: (message: Message) => void
   removeKey: (key: string) => void
 }
 

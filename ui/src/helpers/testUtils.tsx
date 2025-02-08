@@ -1,18 +1,25 @@
-import { MockedProvider, MockedResponse } from '@apollo/client/testing'
-import { FetchPolicy, WatchQueryFetchPolicy } from '@apollo/client/core'
+import { MockedProvider } from '@apollo/client/testing'
 import { render } from '@testing-library/react'
 import { MessageProvider } from '../components/messages/MessageState'
 import { MemoryRouter, Route, Routes, Location, Router } from 'react-router-dom'
 import React from 'react'
-import { unstable_HistoryRouter as HistoryRouter } from 'react-router-dom'
 import { History } from 'history'
 
+/**
+ * Options for configuring the test environment in renderWithProviders.
+ */
 interface RenderWithProvidersOptions {
+    /** Apollo GraphQL mocks */
     mocks?: any[]
+    /** Initial router entries for MemoryRouter */
     initialEntries?: (string | Partial<Location>)[]
+    /** Route element to render */
     route?: React.ReactElement
+    /** Path for the route */
     path?: string
+    /** History object for HistoryRouter */
     history?: History
+    /** Apollo client configuration options */
     apolloOptions?: {
         addTypename?: boolean
         defaultOptions?: any

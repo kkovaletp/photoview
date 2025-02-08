@@ -1,7 +1,6 @@
 import { renderHook, act } from '@testing-library/react'
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest'
 import { useMessageState, MessageProvider } from './MessageState'
-import { Message } from './SubscriptionsHook'
 import { NotificationType } from '../../__generated__/globalTypes'
 
 describe('MessageState', () => {
@@ -10,14 +9,22 @@ describe('MessageState', () => {
 
     beforeEach(() => {
         originalDateNow = Date.now
-        vi.useFakeTimers()
-        clearIntervalSpy = vi.spyOn(window, 'clearInterval')
+        try {
+            vi.useFakeTimers()
+            clearIntervalSpy = vi.spyOn(window, 'clearInterval')
+        } catch (error) {
+            Date.now = originalDateNow
+            throw error
+        }
     })
 
     afterEach(() => {
-        Date.now = originalDateNow
-        vi.useRealTimers()
-        clearIntervalSpy.mockRestore()
+        try {
+            vi.useRealTimers()
+            clearIntervalSpy.mockRestore()
+        } finally {
+            Date.now = originalDateNow
+        }
     })
 
     const wrapper = ({ children }: { children: React.ReactNode }) => (

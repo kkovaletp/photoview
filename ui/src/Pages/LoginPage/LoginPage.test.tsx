@@ -1,3 +1,4 @@
+import React from 'react' //React must be in scope when using JSX.
 import { screen, waitFor } from '@testing-library/react'
 import LoginPage from './LoginPage'
 import * as authentication from '../../helpers/authentication'
@@ -18,7 +19,7 @@ describe('Login page redirects', () => {
     history.push('/login')
 
     await act(async () => {
-      renderWithProviders(<LoginPage />, {
+      await renderWithProviders(<LoginPage />, {
         mocks: [],
         history,
       })
@@ -36,7 +37,7 @@ describe('Login page redirects', () => {
     history.push('/login')
 
     await act(async () => {
-      renderWithProviders(<LoginPage />, {
+      await renderWithProviders(<LoginPage />, {
         mocks: [mockInitialSetupGraphql(true)],
         history,
       })

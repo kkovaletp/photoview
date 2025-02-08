@@ -1,3 +1,4 @@
+import React from 'react' //React must be in scope when using JSX.
 import { screen, waitFor } from '@testing-library/react'
 import { createMemoryHistory } from 'history'
 import * as authentication from '../../helpers/authentication'
@@ -35,7 +36,7 @@ describe('Initial setup page', () => {
     history.push('/initialSetup')
 
     await act(async () => {
-      renderWithProviders(<InitialSetupPage />, {
+      await renderWithProviders(<InitialSetupPage />, {
         mocks: [mockInitialSetupGraphql(true)],
         history,
       })
@@ -53,7 +54,7 @@ describe('Initial setup page', () => {
     history.push('/initialSetup')
 
     await act(async () => {
-      renderWithProviders(<InitialSetupPage />, {
+      await renderWithProviders(<InitialSetupPage />, {
         mocks: [mockInitialSetupGraphql(false)],
         history,
       })

@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react'
+import { screen } from '@testing-library/react'
 
 import React from 'react'
 import { MediaType } from '../../__generated__/globalTypes'
@@ -113,12 +113,13 @@ describe('photo gallery presenting', () => {
       presenting: true,
     }
 
-    render(
+    renderWithProviders(
       <MediaGallery
         dispatchMedia={dispatchMedia}
         loading={false}
         mediaState={mediaStatePresent}
-      />
+      />,
+      { mocks: [] }
     )
 
     expect(screen.getByTestId('present-overlay')).toBeInTheDocument()
