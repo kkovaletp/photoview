@@ -34,14 +34,17 @@ export const MessageProvider = ({ children }: MessageProviderProps) => {
     setMessages((prevMessages) => prevMessages.filter((msg) => msg.key !== key))
   }
 
+  const CLEANUP_INTERVAL = 60 * 60 * 1000; // 1 hour in ms
+  const MESSAGE_LIFETIME = 24 * 60 * 60 * 1000; // 24 hours in ms
+
   useEffect(() => {
     const cleanupInterval = setInterval(() => {
       setMessages((prevMessages) => {
-        const cutoff = Date.now() - 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+        const cutoff = Date.now() - MESSAGE_LIFETIME
 
         return prevMessages.filter((msg) => (msg.timestamp ?? 0) > cutoff);
       });
-    }, 60 * 60 * 1000); // Runs every hour
+    }, CLEANUP_INTERVAL);
 
     return () => clearInterval(cleanupInterval);
   }, []);

@@ -1,5 +1,4 @@
-import React from 'react'
-import { fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { fireEvent, screen, waitFor } from '@testing-library/react'
 import {
   PeoplePage,
   FaceDetails,
@@ -7,8 +6,6 @@ import {
   MY_FACES_QUERY,
   SET_GROUP_LABEL_MUTATION,
 } from './PeoplePage'
-import { MockedProvider } from '@apollo/client/testing'
-import { MemoryRouter } from 'react-router'
 import { myFaces_myFaceGroups } from './__generated__/myFaces'
 import { renderWithProviders } from '../../helpers/testUtils'
 
@@ -154,14 +151,13 @@ describe('FaceDetails component', () => {
       label: 'Some label',
     }
 
-    render(
-      <MockedProvider mocks={[]} addTypename={false}>
-        <FaceDetails
-          editLabel={false}
-          setEditLabel={vi.fn()}
-          group={labeledFaceGroup}
-        />
-      </MockedProvider>
+    renderWithProviders(
+      <FaceDetails
+        editLabel={false}
+        setEditLabel={vi.fn()}
+        group={labeledFaceGroup}
+      />,
+      { mocks: [] }
     )
 
     expect(screen.getByText(labeledFaceGroup.label!)).toBeInTheDocument()
@@ -189,13 +185,12 @@ describe('FaceDetails component', () => {
         })),
       },
     ]
-    render(
-      <MockedProvider mocks={graphqlMocks} addTypename={false}>
-        <MemoryRouter>
-          <FaceGroup group={faceGroup} />
-        </MemoryRouter>
-      </MockedProvider>
-    )
+    renderWithProviders(<FaceGroup group={faceGroup} />, {
+      mocks: graphqlMocks,
+      apolloOptions: {
+        addTypename: false
+      }
+    })
 
     const btn = screen.getByRole('button')
     expect(btn).toBeInTheDocument()
@@ -216,13 +211,12 @@ describe('FaceDetails component', () => {
   })
 
   test('cancel add label to face group', () => {
-    render(
-      <MockedProvider mocks={[]} addTypename={false}>
-        <MemoryRouter>
-          <FaceGroup group={faceGroup} />
-        </MemoryRouter>
-      </MockedProvider>
-    )
+    renderWithProviders(<FaceGroup group={faceGroup} />, {
+      mocks: [],
+      apolloOptions: {
+        addTypename: false
+      }
+    })
 
     const btn = screen.getByRole('button')
     expect(btn).toBeInTheDocument()

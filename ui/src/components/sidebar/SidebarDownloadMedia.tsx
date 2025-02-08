@@ -224,8 +224,12 @@ const downloadMediaShowProgress =
       removeKey(notifyKey)
     }, DOWNLOAD_COMPLETE_NOTIFICATION_DURATION)
 
+    const contentType = response.headers.get('content-type');
+    if (!contentType) {
+      console.warn('No content-type header received, falling back to application/octet-stream');
+    }
     return new Blob([data.buffer], {
-      type: response.headers.get('content-type') || 'application/octet-stream',
+      type: contentType || 'application/octet-stream',
     })
   }
 

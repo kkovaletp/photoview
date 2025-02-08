@@ -78,12 +78,13 @@ describe('photo gallery presenting', () => {
       presenting: false,
     }
 
-    render(
+    renderWithProviders(
       <MediaGallery
         dispatchMedia={dispatchMedia}
         loading={false}
         mediaState={mediaStateNoPresent}
-      />
+      />,
+      { mocks: [] }
     )
 
     expect(screen.queryByTestId('present-overlay')).not.toBeInTheDocument()

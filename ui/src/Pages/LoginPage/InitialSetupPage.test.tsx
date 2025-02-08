@@ -1,11 +1,9 @@
-import React from 'react'
-import { MockedProvider } from '@apollo/client/testing'
-import { render, screen, waitFor } from '@testing-library/react'
-import { unstable_HistoryRouter as HistoryRouter } from 'react-router-dom'
+import { screen, waitFor } from '@testing-library/react'
 import { createMemoryHistory } from 'history'
 import * as authentication from '../../helpers/authentication'
 import InitialSetupPage from './InitialSetupPage'
 import { mockInitialSetupGraphql } from './loginTestHelpers'
+import { renderWithProviders } from '../../helpers/testUtils'
 
 vi.mock('../../helpers/authentication.ts')
 
@@ -19,13 +17,10 @@ describe('Initial setup page', () => {
       initialEntries: ['/initialSetup'],
     })
 
-    render(
-      <MockedProvider mocks={[mockInitialSetupGraphql(true)]}>
-        <HistoryRouter history={history}>
-          <InitialSetupPage />
-        </HistoryRouter>
-      </MockedProvider>
-    )
+    renderWithProviders(<InitialSetupPage />, {
+      mocks: [mockInitialSetupGraphql(true)],
+      history: history
+    })
 
     expect(screen.getByLabelText('Username')).toBeInTheDocument()
     expect(screen.getByLabelText('Password')).toBeInTheDocument()
@@ -40,13 +35,10 @@ describe('Initial setup page', () => {
       initialEntries: ['/initialSetup'],
     })
 
-    render(
-      <MockedProvider mocks={[mockInitialSetupGraphql(true)]}>
-        <HistoryRouter history={history}>
-          <InitialSetupPage />
-        </HistoryRouter>
-      </MockedProvider>
-    )
+    renderWithProviders(<InitialSetupPage />, {
+      mocks: [mockInitialSetupGraphql(true)],
+      history: history
+    })
 
     await waitFor(() => {
       expect(history.location.pathname).toBe('/')
@@ -60,13 +52,10 @@ describe('Initial setup page', () => {
       initialEntries: ['/initialSetup'],
     })
 
-    render(
-      <MockedProvider mocks={[mockInitialSetupGraphql(false)]}>
-        <HistoryRouter history={history}>
-          <InitialSetupPage />
-        </HistoryRouter>
-      </MockedProvider>
-    )
+    renderWithProviders(<InitialSetupPage />, {
+      mocks: [mockInitialSetupGraphql(true)],
+      history: history
+    })
 
     await waitFor(() => {
       expect(history.location.pathname).toBe('/')

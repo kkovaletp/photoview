@@ -4,13 +4,17 @@ import { render } from '@testing-library/react'
 import { MessageProvider } from '../components/messages/MessageState'
 import { MemoryRouter, Route, Routes, Location } from 'react-router-dom'
 import React from 'react'
+import { unstable_HistoryRouter as HistoryRouter } from 'react-router-dom'
+import { History } from 'history'
 
 interface RenderWithProvidersOptions {
     mocks?: MockedResponse[]
     initialEntries?: (string | Partial<Location>)[]
     route?: React.ReactElement
     path?: string
+    history?: History
     apolloOptions?: {
+        addTypename?: boolean
         defaultOptions?: {
             watchQuery?: { fetchPolicy?: WatchQueryFetchPolicy }
             query?: { fetchPolicy?: FetchPolicy }
@@ -45,7 +49,7 @@ export function renderWithProviders(
     return render(
         <MockedProvider
             mocks={mocks}
-            addTypename={false}
+            addTypename={apolloOptions.addTypename ?? false}
             defaultOptions={apolloOptions.defaultOptions}
         >
             <MemoryRouter initialEntries={initialEntries}>

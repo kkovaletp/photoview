@@ -1,11 +1,9 @@
-import { render, screen, waitFor } from '@testing-library/react'
-import React from 'react'
+import { screen, waitFor } from '@testing-library/react'
 import LoginPage from './LoginPage'
 import * as authentication from '../../helpers/authentication'
-import { unstable_HistoryRouter as HistoryRouter } from 'react-router-dom'
 import { createMemoryHistory } from 'history'
-import { MockedProvider } from '@apollo/client/testing'
 import { mockInitialSetupGraphql } from './loginTestHelpers'
+import { renderWithProviders } from '../../helpers/testUtils'
 
 vi.mock('../../helpers/authentication.ts')
 
@@ -19,13 +17,10 @@ describe('Login page redirects', () => {
       initialEntries: ['/login'],
     })
 
-    render(
-      <MockedProvider mocks={[]}>
-        <HistoryRouter history={history}>
-          <LoginPage />
-        </HistoryRouter>
-      </MockedProvider>
-    )
+    renderWithProviders(<LoginPage />, {
+      mocks: [],
+      history: history
+    })
 
     await waitFor(() => {
       expect(history.location.pathname).toBe('/')
@@ -39,13 +34,10 @@ describe('Login page redirects', () => {
       initialEntries: ['/login'],
     })
 
-    render(
-      <MockedProvider mocks={[mockInitialSetupGraphql(true)]}>
-        <HistoryRouter history={history}>
-          <LoginPage />
-        </HistoryRouter>
-      </MockedProvider>
-    )
+    renderWithProviders(<LoginPage />, {
+      mocks: [mockInitialSetupGraphql(true)],
+      history: history
+    })
 
     await waitFor(() => {
       expect(history.location.pathname).toBe('/initialSetup')
@@ -61,13 +53,10 @@ describe('Login page', () => {
       initialEntries: ['/login'],
     })
 
-    render(
-      <MockedProvider mocks={[mockInitialSetupGraphql(false)]}>
-        <HistoryRouter history={history}>
-          <LoginPage />
-        </HistoryRouter>
-      </MockedProvider>
-    )
+    renderWithProviders(<LoginPage />, {
+      mocks: [mockInitialSetupGraphql(false)],
+      history: history
+    })
 
     expect(screen.getByLabelText('Username')).toBeInTheDocument()
     expect(screen.getByLabelText('Password')).toBeInTheDocument()
