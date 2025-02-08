@@ -40,12 +40,20 @@ export function renderWithProviders(
         initialEntries = ['/'],
         route,
         path,
+        history,
         apolloOptions = {},
     }: RenderWithProvidersOptions = {}
 ) {
     if ((route && !path) || (!route && path)) {
         throw new Error('Both route and path must be provided together');
     }
+    const Router = history ?
+        ({ children }: { children: React.ReactNode }) => (
+            <HistoryRouter history={history}>{children}</HistoryRouter>
+        ) :
+        ({ children }: { children: React.ReactNode }) => (
+            <MemoryRouter initialEntries={initialEntries}>{children}</MemoryRouter>
+        );
     return render(
         <MockedProvider
             mocks={mocks}

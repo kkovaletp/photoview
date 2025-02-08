@@ -1,4 +1,4 @@
-import { renderHook } from '@testing-library/react'
+import { renderHook, act } from '@testing-library/react'
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest'
 import { useMessageState, MessageProvider } from './MessageState'
 import { Message } from './SubscriptionsHook'
@@ -21,7 +21,7 @@ describe('MessageState', () => {
         <MessageProvider>{children}</MessageProvider>
     )
 
-    it('should cleanup messages older than 24 hours', () => {
+    it('should cleanup messages older than 24 hours', async () => {
         // Mock current time
         const now = 1643673600000 // 2022-02-01T00:00:00.000Z
         Date.now = vi.fn(() => now)
@@ -29,53 +29,56 @@ describe('MessageState', () => {
         const { result } = renderHook(() => useMessageState(), { wrapper })
 
         // Add messages with different timestamps
-        const oldMessage: Message = {
-            key: 'old',
-            type: NotificationType.Message,
-            timestamp: now - 25 * 60 * 60 * 1000, // 25 hours ago
-            props: {
-                header: 'Old Message',
-                content: 'This message is old'
-            }
-        }
-        const recentMessage: Message = {
-            key: 'recent',
-            type: NotificationType.Message,
-            timestamp: now - 23 * 60 * 60 * 1000, // 23 hours ago
-            props: {
-                header: 'Recent Message',
-                content: 'This message is recent'
-            }
-        }
-
-        result.current.add(oldMessage)
-        result.current.add(recentMessage)
+        await act(async () => {
+            result.current.add({
+                key: 'old',
+                type: NotificationType.Message,
+                timestamp: now - 25 * 60 * 60 * 1000, // 25 hours ago
+                props: {
+                    header: 'Old Message',
+                    content: 'This message is old'
+                }
+            })
+            result.current.add({
+                key: 'recent',
+                type: NotificationType.Message,
+                timestamp: now - 23 * 60 * 60 * 1000, // 23 hours ago
+                props: {
+                    header: 'Recent Message',
+                    content: 'This message is recent'
+                }
+            })
+        })
 
         // Advance time by 1 hour to trigger cleanup
-        Date.now = vi.fn(() => now + 60 * 60 * 1000)
-        vi.advanceTimersByTime(60 * 60 * 1000)
+        await act(async () => {
+            Date.now = vi.fn(() => now + 60 * 60 * 1000)
+            vi.advanceTimersByTime(60 * 60 * 1000)
+            // Small delay to ensure state updates are processed
+            await new Promise(resolve => setTimeout(resolve, 0))
+        })
 
         // Only recent message should remain
         expect(result.current.messages).toHaveLength(1)
         expect(result.current.messages[0].key).toBe('recent')
     })
 
-    it('should add timestamp to new messages', () => {
+    it('should add timestamp to new messages', async () => {
         const now = 1643673600000
         Date.now = vi.fn(() => now)
 
         const { result } = renderHook(() => useMessageState(), { wrapper })
 
-        const message: Message = {
-            key: 'test',
-            type: NotificationType.Message,
-            props: {
-                header: 'Test Message',
-                content: 'Test content'
-            }
-        }
-
-        result.current.add(message)
+        await act(async () => {
+            result.current.add({
+                key: 'test',
+                type: NotificationType.Message,
+                props: {
+                    header: 'Test Message',
+                    content: 'Test content'
+                }
+            })
+        })
 
         expect(result.current.messages[0].timestamp).toBe(now)
     })
@@ -94,66 +97,75 @@ describe('MessageState', () => {
         clearIntervalSpy.mockRestore()
     })
 
-    it('should run cleanup every hour', () => {
+    it('should run cleanup every hour', async () => {
         const now = 1643673600000
         Date.now = vi.fn(() => now)
 
         const { result } = renderHook(() => useMessageState(), { wrapper })
 
-        const message: Message = {
-            key: 'test',
-            type: NotificationType.Message,
-            timestamp: now - 23.5 * 60 * 60 * 1000, // 23.5 hours ago
-            props: {
-                header: 'Test Message',
-                content: 'Test content'
-            }
-        }
-
-        result.current.add(message)
+        await act(async () => {
+            result.current.add({
+                key: 'test',
+                type: NotificationType.Message,
+                timestamp: now - 23.5 * 60 * 60 * 1000, // 23.5 hours ago
+                props: {
+                    header: 'Test Message',
+                    content: 'Test content'
+                }
+            })
+        })
 
         // Message should still be present
         expect(result.current.messages).toHaveLength(1)
 
         // Advance time by 1 hour
-        Date.now = vi.fn(() => now + 60 * 60 * 1000)
-        vi.advanceTimersByTime(60 * 60 * 1000)
+        await act(async () => {
+            Date.now = vi.fn(() => now + 60 * 60 * 1000)
+            vi.advanceTimersByTime(60 * 60 * 1000)
+            await new Promise(resolve => setTimeout(resolve, 0))
+        })
 
         // Message should still be present (24.5 hours old)
         expect(result.current.messages).toHaveLength(1)
 
         // Advance time by another hour
-        Date.now = vi.fn(() => now + 2 * 60 * 60 * 1000)
-        vi.advanceTimersByTime(60 * 60 * 1000)
+        await act(async () => {
+            Date.now = vi.fn(() => now + 2 * 60 * 60 * 1000)
+            vi.advanceTimersByTime(60 * 60 * 1000)
+            await new Promise(resolve => setTimeout(resolve, 0))
+        })
 
         // Message should be removed (25.5 hours old)
         expect(result.current.messages).toHaveLength(0)
     })
 
-    it('should handle messages without timestamp', () => {
+    it('should handle messages without timestamp', async () => {
         const now = 1643673600000
         Date.now = vi.fn(() => now)
 
         const { result } = renderHook(() => useMessageState(), { wrapper })
 
-        const message: Message = {
-            key: 'test',
-            type: NotificationType.Message,
-            props: {
-                header: 'Test Message',
-                content: 'Message without timestamp'
-            }
-        }
-
-        result.current.add(message)
+        await act(async () => {
+            result.current.add({
+                key: 'test',
+                type: NotificationType.Message,
+                props: {
+                    header: 'Test Message',
+                    content: 'Message without timestamp'
+                }
+            })
+        })
 
         // Message should be present with auto-added timestamp
         expect(result.current.messages).toHaveLength(1)
         expect(result.current.messages[0].timestamp).toBe(now)
 
         // Advance time by 25 hours
-        Date.now = vi.fn(() => now + 25 * 60 * 60 * 1000)
-        vi.advanceTimersByTime(60 * 60 * 1000)
+        await act(async () => {
+            Date.now = vi.fn(() => now + 25 * 60 * 60 * 1000)
+            vi.advanceTimersByTime(60 * 60 * 1000)
+            await new Promise(resolve => setTimeout(resolve, 0))
+        })
 
         // Message should be removed
         expect(result.current.messages).toHaveLength(0)
