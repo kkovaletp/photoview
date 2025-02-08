@@ -2,23 +2,20 @@ import { MockedProvider, MockedResponse } from '@apollo/client/testing'
 import { FetchPolicy, WatchQueryFetchPolicy } from '@apollo/client/core'
 import { render } from '@testing-library/react'
 import { MessageProvider } from '../components/messages/MessageState'
-import { MemoryRouter, Route, Routes, Location } from 'react-router-dom'
+import { MemoryRouter, Route, Routes, Location, Router } from 'react-router-dom'
 import React from 'react'
 import { unstable_HistoryRouter as HistoryRouter } from 'react-router-dom'
 import { History } from 'history'
 
 interface RenderWithProvidersOptions {
-    mocks?: MockedResponse[]
+    mocks?: any[]
     initialEntries?: (string | Partial<Location>)[]
     route?: React.ReactElement
     path?: string
     history?: History
     apolloOptions?: {
         addTypename?: boolean
-        defaultOptions?: {
-            watchQuery?: { fetchPolicy?: WatchQueryFetchPolicy }
-            query?: { fetchPolicy?: FetchPolicy }
-        }
+        defaultOptions?: any
     }
 }
 
@@ -47,30 +44,35 @@ export function renderWithProviders(
     if ((route && !path) || (!route && path)) {
         throw new Error('Both route and path must be provided together');
     }
-    const Router = history ?
-        ({ children }: { children: React.ReactNode }) => (
-            <HistoryRouter history={history}>{children}</HistoryRouter>
-        ) :
-        ({ children }: { children: React.ReactNode }) => (
-            <MemoryRouter initialEntries={initialEntries}>{children}</MemoryRouter>
-        );
-    return render(
+    const Wrapper = ({ children }: { children: React.ReactNode }) => (
         <MockedProvider
             mocks={mocks}
             addTypename={apolloOptions.addTypename ?? false}
             defaultOptions={apolloOptions.defaultOptions}
         >
-            <MemoryRouter initialEntries={initialEntries}>
-                <MessageProvider>
-                    {route && path ? (
-                        <Routes>
-                            <Route path={path} element={route} />
-                        </Routes>
-                    ) : (
-                        ui
-                    )}
-                </MessageProvider>
-            </MemoryRouter>
+            {history ? (
+                <Router location={history.location} navigator={history}>
+                    <MessageProvider>{children}</MessageProvider>
+                </Router>
+            ) : (
+                <MemoryRouter initialEntries={initialEntries}>
+                    <MessageProvider>{children}</MessageProvider>
+                </MemoryRouter>
+            )}
         </MockedProvider>
     )
+    return {
+        ...render(
+            <Wrapper>
+                {route && path ? (
+                    <Routes>
+                        <Route path={path} element={route} />
+                    </Routes>
+                ) : (
+                    ui
+                )}
+            </Wrapper>
+        ),
+        history,
+    }
 }

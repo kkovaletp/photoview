@@ -4,6 +4,7 @@ import * as authentication from '../../helpers/authentication'
 import { createMemoryHistory } from 'history'
 import { mockInitialSetupGraphql } from './loginTestHelpers'
 import { renderWithProviders } from '../../helpers/testUtils'
+import { act } from '@testing-library/react'
 
 vi.mock('../../helpers/authentication.ts')
 
@@ -13,13 +14,14 @@ describe('Login page redirects', () => {
   test('Auth token redirect', async () => {
     authToken.mockImplementation(() => 'some-token')
 
-    const history = createMemoryHistory({
-      initialEntries: ['/login'],
-    })
+    const history = createMemoryHistory()
+    history.push('/login')
 
-    renderWithProviders(<LoginPage />, {
-      mocks: [],
-      history: history
+    await act(async () => {
+      renderWithProviders(<LoginPage />, {
+        mocks: [],
+        history,
+      })
     })
 
     await waitFor(() => {
@@ -30,13 +32,14 @@ describe('Login page redirects', () => {
   test('Initial setup redirect', async () => {
     authToken.mockImplementation(() => null)
 
-    const history = createMemoryHistory({
-      initialEntries: ['/login'],
-    })
+    const history = createMemoryHistory()
+    history.push('/login')
 
-    renderWithProviders(<LoginPage />, {
-      mocks: [mockInitialSetupGraphql(true)],
-      history: history
+    await act(async () => {
+      renderWithProviders(<LoginPage />, {
+        mocks: [mockInitialSetupGraphql(true)],
+        history,
+      })
     })
 
     await waitFor(() => {
