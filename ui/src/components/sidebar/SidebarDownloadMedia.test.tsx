@@ -10,6 +10,14 @@ vi.mock('../../helpers/authentication', () => ({
     authToken: vi.fn().mockReturnValue(null)
 }))
 
+// Mock URL methods on window.URL
+const mockCreateObjectURL = vi.fn(() => 'blob:test')
+const mockRevokeObjectURL = vi.fn()
+
+// Add missing URL methods to window.URL
+window.URL.createObjectURL = mockCreateObjectURL
+window.URL.revokeObjectURL = mockRevokeObjectURL
+
 const mockMedia: MediaSidebarMedia = {
     __typename: 'Media' as const,
     id: '1',
@@ -45,8 +53,6 @@ const mockMedia: MediaSidebarMedia = {
 describe('SidebarMediaDownload', () => {
     beforeEach(() => {
         vi.clearAllMocks()
-        vi.spyOn(URL, 'createObjectURL').mockReturnValue('blob:test')
-        vi.spyOn(URL, 'revokeObjectURL').mockImplementation(() => { })
 
         const mockAnchor = {
             href: '',
