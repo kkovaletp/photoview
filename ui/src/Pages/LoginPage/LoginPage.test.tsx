@@ -53,9 +53,8 @@ describe('Login page', () => {
   test('Render login form', async () => {
     authToken.mockImplementation(() => null)
 
-    const history = createMemoryHistory({
-      initialEntries: ['/login'],
-    })
+    const history = createMemoryHistory()
+    history.push('/login')
 
     await act(async () => {
       await renderWithProviders(<LoginPage />, {
