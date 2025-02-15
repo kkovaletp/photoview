@@ -52,7 +52,7 @@ const SearchBar = () => {
   const inputEl = useRef<HTMLInputElement>(null)
 
   type QueryFn = (query: string) => void
-
+  //.
   const debouncedFetch = useRef<null | DebouncedFn<QueryFn>>(null)
   useEffect(() => {
     debouncedFetch.current = debounce<QueryFn>(query => {
@@ -339,6 +339,7 @@ type PhotoRowArgs = {
 }
 
 const PhotoRow = ({ query, media, selected, setSelected }: PhotoRowArgs) => (
+  //.
   <SearchRow
     key={media.id}
     id={media.id}
@@ -361,7 +362,7 @@ type AlbumRowArgs = {
   selected: boolean
   setSelected(): void
 }
-
+//.
 const AlbumRow = ({ query, album, selected, setSelected }: AlbumRowArgs) => (
   <SearchRow
     key={album.id}

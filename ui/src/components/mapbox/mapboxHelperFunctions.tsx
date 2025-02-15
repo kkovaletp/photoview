@@ -33,7 +33,7 @@ export const registerMediaMarkers = (args: registerMediaMarkersArgs) => {
 }
 
 /**
- * Make a function that can be passed to Mapbox to tell it how to render and update the image markers
+ * Make a function that can be passed to Mapbox to tell it how to render and update the image markers.
  */
 const makeUpdateMarkers =
   ({ map, mapboxLibrary, dispatchMarkerMedia }: registerMediaMarkersArgs) =>

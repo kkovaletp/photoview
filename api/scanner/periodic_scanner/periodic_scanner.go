@@ -76,7 +76,7 @@ func ChangePeriodicScanInterval(duration time.Duration) {
 func scanIntervalRunner() {
 	for {
 		log.Print("Scan interval runner: Waiting for signal")
-		if mainPeriodicScanner.ticker != nil {
+		if mainPeriodicScanner.ticker != nil { //.
 			select {
 			case <-mainPeriodicScanner.ticker_changed:
 				log.Print("Scan interval runner: New ticker detected")

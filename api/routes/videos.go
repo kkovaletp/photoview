@@ -28,7 +28,7 @@ func RegisterVideoRoutes(db *gorm.DB, router *mux.Router) {
 		}
 
 		var media = mediaURL.Media
-
+		//.
 		if success, response, status, err := authenticateMedia(media, db, r); !success {
 			if err != nil {
 				log.Printf("WARN: error authenticating video: %s\n", err)

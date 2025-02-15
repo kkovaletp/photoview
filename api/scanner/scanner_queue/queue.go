@@ -109,7 +109,7 @@ func (queue *ScannerQueue) startBackgroundWorker() {
 		queue.mutex.Unlock()
 
 		if should_stop {
-			*queue.close_chan <- true
+			*queue.close_chan <- true //.
 			break
 		}
 
