@@ -104,14 +104,15 @@ func (queue *ScannerQueue) startBackgroundWorker() {
 		<-queue.idle_chan
 
 		queue.mutex.Lock()
-		should_stop := queue.close_chan != nil && len(queue.in_progress) == 0 && len(queue.up_next) == 0
-		queue.running = false
-		queue.mutex.Unlock()
-
-		if should_stop {
-			*queue.close_chan <- true //.
+		if queue.close_chan != nil && len(queue.in_progress) == 0 && len(queue.up_next) == 0 {
+			*queue.close_chan <- true
+			queue.running = false
+			queue.mutex.Unlock()
 			break
 		}
+
+		queue.running = false
+		queue.mutex.Unlock()
 
 		queue.processQueue(&notifyThrottle)
 	}

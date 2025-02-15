@@ -51,11 +51,14 @@ const SearchBar = () => {
   const [expanded, setExpanded] = useState(false)
   const inputEl = useRef<HTMLInputElement>(null)
 
-  type QueryFn = (query: string) => void
-  //.
+  type QueryFn = (...args: unknown[]) => void
+
   const debouncedFetch = useRef<null | DebouncedFn<QueryFn>>(null)
   useEffect(() => {
-    debouncedFetch.current = debounce<QueryFn>(query => {
+    debouncedFetch.current = debounce((...args: unknown[]) => {
+      const query = args[0]
+      if (typeof query !== 'string') return
+
       fetchSearches({ variables: { query } })
       setFetched(true)
       setExpanded(true)
@@ -362,23 +365,27 @@ type AlbumRowArgs = {
   selected: boolean
   setSelected(): void
 }
-//.
-const AlbumRow = ({ query, album, selected, setSelected }: AlbumRowArgs) => (
-  <SearchRow
-    key={album.id}
-    id={album.id}
-    link={`/album/${album.id}`}
-    preview={
-      <ProtectedImage
-        src={album?.thumbnail?.thumbnail?.url}
-        className="w-14 h-14 rounded object-cover"
-      />
-    }
-    label={searchHighlighted(query, album.title)}
-    selected={selected}
-    setSelected={setSelected}
-  />
-)
+
+const AlbumRow = ({ query, album, selected, setSelected }: AlbumRowArgs) => {
+  if (!album) return null;
+
+  return (
+    <SearchRow
+      key={album.id}
+      id={album.id}
+      link={`/album/${album.id}`}
+      preview={
+        <ProtectedImage
+          src={album?.thumbnail?.thumbnail?.url}
+          className="w-14 h-14 rounded object-cover"
+        />
+      }
+      label={searchHighlighted(query, album.title)}
+      selected={selected}
+      setSelected={setSelected}
+    />
+  );
+}
 
 const searchHighlighted = (query: string, text: string) => {
   const i = text.toLowerCase().indexOf(query.toLowerCase())

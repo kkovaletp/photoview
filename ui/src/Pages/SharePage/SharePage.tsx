@@ -121,7 +121,7 @@ const AuthorizedTokenRoute = () => {
         <AlbumSharePage albumID={subAlbum} token={token} password={password} />
       )
     }
-    //.
+
     return (
       <Routes>
         <Route path=":subAlbum" element={<SharedSubAlbumPage />} />

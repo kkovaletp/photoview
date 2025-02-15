@@ -26,7 +26,12 @@ func RegisterPhotoRoutes(db *gorm.DB, router *mux.Router) {
 		}
 
 		media := mediaURL.Media
-		//.
+		if media == nil {
+			w.WriteHeader(http.StatusNotFound)
+			w.Write([]byte("404 - Media not found"))
+			return
+		}
+
 		if success, response, status, err := authenticateMedia(media, db, r); !success {
 			if err != nil {
 				log.Printf("WARN: error authenticating photo: %s\n", err)
