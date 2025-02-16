@@ -342,7 +342,6 @@ type PhotoRowArgs = {
 }
 
 const PhotoRow = ({ query, media, selected, setSelected }: PhotoRowArgs) => (
-  //.
   <SearchRow
     key={media.id}
     id={media.id}

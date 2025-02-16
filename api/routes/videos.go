@@ -6,6 +6,7 @@ import (
 	"os"
 	"path"
 	"strconv"
+	"strings"
 
 	"github.com/gorilla/mux"
 	"github.com/kkovaletp/photoview/api/graphql/models"
@@ -27,7 +28,9 @@ func RegisterVideoRoutes(db *gorm.DB, router *mux.Router) {
 		}
 
 		if len(mediaURLs) > 1 {
-			log.Printf("WARN: Multiple video web URLs found for name %s\n", mediaName)
+			sanitizedMediaName := strings.ReplaceAll(mediaName, "\n", "")
+			sanitizedMediaName = strings.ReplaceAll(sanitizedMediaName, "\r", "")
+			log.Printf("WARN: Multiple video web URLs found for name %s: %d\n", sanitizedMediaName, len(mediaURLs))
 		}
 
 		mediaURL := mediaURLs[0]
