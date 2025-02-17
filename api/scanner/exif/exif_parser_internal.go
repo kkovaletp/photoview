@@ -110,15 +110,12 @@ func (p internalExifParser) ParseExif(media_path string) (returnExif *models.Med
 		} else {
 			// For some photos, the focal length cannot be read as a rational value,
 			// but is instead the second value read as an integer
-
-			if err == nil {
-				focalLength, err := focalLengthTag.Int(1)
-				if err != nil {
-					log.Printf("WARN: Could not parse EXIF FocalLength as rational or integer: %v\n%s\n", media_path, err)
-				} else {
-					focalLenFloat := float64(focalLength)
-					newExif.FocalLength = &focalLenFloat
-				}
+			focalLength, err := focalLengthTag.Int(1)
+			if err != nil {
+				log.Printf("WARN: Could not parse EXIF FocalLength as rational or integer: %v\n%s\n", media_path, err)
+			} else {
+				focalLenFloat := float64(focalLength)
+				newExif.FocalLength = &focalLenFloat
 			}
 		}
 	}
