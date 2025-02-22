@@ -18,24 +18,35 @@ import (
 
 func TestRegisterPhotoRoutes(t *testing.T) {
 	db := test_utils.DatabaseTest(t)
-	router := mux.NewRouter()
 
-	// Create temporary cache directory
-	tmpDir := t.TempDir()
-	cachedPath := filepath.Join(tmpDir, "test_photo.jpg")
-	if !assert.NoError(t, os.MkdirAll(filepath.Dir(cachedPath), 0755)) {
-		return
+	// Create media cache directory structure
+	cacheDir := filepath.Join(t.TempDir(), "media_cache/1/1")
+	if err := os.MkdirAll(cacheDir, 0755); err != nil {
+		t.Fatalf("Failed to create cache directory: %v", err)
 	}
-	if !assert.NoError(t, os.WriteFile(cachedPath, []byte("test image data"), 0644)) {
-		return
+
+	// Set environment variable for media cache
+	t.Setenv("PHOTOVIEW_MEDIA_CACHE", cacheDir)
+
+	// Copy test photo to cache
+	testPhotoPath := "api/scanner/exif/test_data/bird.jpg"
+	cachedPath := filepath.Join(cacheDir, "test_photo.jpg")
+	testPhotoData, err := os.ReadFile(testPhotoPath)
+	if err != nil {
+		t.Fatalf("Failed to read test photo: %v", err)
 	}
+	if err := os.WriteFile(cachedPath, testPhotoData, 0644); err != nil {
+		t.Fatalf("Failed to create test image: %v", err)
+	}
+
+	router := mux.NewRouter()
 
 	tests := []struct {
 		name           string
 		setupDB        func(*testing.T, *gorm.DB) (*models.User, *models.Media)
 		authenticate   bool
 		expectedStatus int
-		expectedBody   string
+		expectedBody   []byte
 	}{
 		{
 			name: "successful photo retrieval",
@@ -47,11 +58,12 @@ func TestRegisterPhotoRoutes(t *testing.T) {
 					MediaName: "test_photo.jpg",
 					Purpose:   models.PhotoThumbnail,
 				}
-				assert.NoError(t, tx.Save(&mediaURL).Error)
+				assert.NoError(t, tx.Create(&mediaURL).Error)
 				return user, media
 			},
 			authenticate:   true,
 			expectedStatus: http.StatusOK,
+			expectedBody:   testPhotoData,
 		},
 		{
 			name: "media URL not found",
@@ -61,23 +73,23 @@ func TestRegisterPhotoRoutes(t *testing.T) {
 			},
 			authenticate:   true,
 			expectedStatus: http.StatusNotFound,
-			expectedBody:   "404",
+			expectedBody:   []byte("404"),
 		},
 		{
 			name: "media is nil",
 			setupDB: func(t *testing.T, tx *gorm.DB) (*models.User, *models.Media) {
 				user, _ := setupTestData(t, tx)
 				mediaURL := models.MediaURL{
-					Media:     nil,
+					MediaID:   999, // Non-existent media ID
 					MediaName: "test_photo.jpg",
 					Purpose:   models.PhotoThumbnail,
 				}
-				assert.NoError(t, tx.Save(&mediaURL).Error)
+				assert.NoError(t, tx.Create(&mediaURL).Error)
 				return user, nil
 			},
 			authenticate:   true,
 			expectedStatus: http.StatusNotFound,
-			expectedBody:   "404 - Media not found",
+			expectedBody:   []byte("404 - Media not found"),
 		},
 		{
 			name: "unauthenticated request",
@@ -89,11 +101,12 @@ func TestRegisterPhotoRoutes(t *testing.T) {
 					MediaName: "test_photo.jpg",
 					Purpose:   models.PhotoThumbnail,
 				}
-				assert.NoError(t, tx.Save(&mediaURL).Error)
+				assert.NoError(t, tx.Create(&mediaURL).Error)
 				return user, media
 			},
 			authenticate:   false,
 			expectedStatus: http.StatusUnauthorized,
+			expectedBody:   []byte("unauthorized"),
 		},
 	}
 
@@ -101,6 +114,11 @@ func TestRegisterPhotoRoutes(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			// Use transaction to isolate database changes
 			tx := db.Begin()
+			if tx.Error != nil {
+				t.Fatalf("Failed to begin transaction: %v", tx.Error)
+			}
+
+			// Ensure transaction is rolled back after test
 			defer tx.Rollback()
 
 			// Setup test case
@@ -122,12 +140,11 @@ func TestRegisterPhotoRoutes(t *testing.T) {
 
 			// Assert response
 			assert.Equal(t, tt.expectedStatus, w.Code)
-			if tt.expectedBody != "" {
-				assert.Equal(t, tt.expectedBody, w.Body.String())
+			if tt.expectedBody != nil {
+				assert.Equal(t, string(tt.expectedBody), w.Body.String())
 			}
 			if tt.expectedStatus == http.StatusOK {
 				assert.Equal(t, "private, max-age=86400, immutable", w.Header().Get("Cache-Control"))
-				assert.Equal(t, "test image data", w.Body.String())
 			}
 		})
 	}
@@ -143,7 +160,7 @@ func setupTestData(t *testing.T, tx *gorm.DB) (*models.User, *models.Media) {
 		Title: "test_album",
 		Path:  "/test/photos",
 	}
-	if !assert.NoError(t, tx.Save(&album).Error) {
+	if !assert.NoError(t, tx.Create(&album).Error) {
 		t.FailNow()
 	}
 	if !assert.NoError(t, tx.Model(&user).Association("Albums").Append(&album)) {
@@ -155,7 +172,7 @@ func setupTestData(t *testing.T, tx *gorm.DB) (*models.User, *models.Media) {
 		Path:    "/test/photos/test_photo.jpg",
 		AlbumID: album.ID,
 	}
-	if !assert.NoError(t, tx.Save(&media).Error) {
+	if !assert.NoError(t, tx.Create(&media).Error) {
 		t.FailNow()
 	}
 
