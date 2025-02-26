@@ -29,7 +29,7 @@ func TestRegisterPhotoRoutes(t *testing.T) {
 	t.Setenv("PHOTOVIEW_MEDIA_CACHE", cacheDir)
 
 	// Copy test photo to cache
-	testPhotoPath := "api/scanner/exif/test_data/bird.jpg"
+	testPhotoPath := "../scanner/exif/test_data/bird.jpg"
 	cachedPath := filepath.Join(cacheDir, "test_photo.jpg")
 	testPhotoData, err := os.ReadFile(testPhotoPath)
 	if err != nil {
