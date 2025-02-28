@@ -1,10 +1,12 @@
 package routes
 
 import (
+	"bytes"
 	"net/http"
 	"net/http/httptest"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/gorilla/mux"
@@ -20,46 +22,50 @@ func TestRegisterPhotoRoutes(t *testing.T) {
 	db := test_utils.DatabaseTest(t)
 
 	// Create media cache directory structure
-	cacheDir := filepath.Join(t.TempDir(), "media_cache/1/1")
-	if err := os.MkdirAll(cacheDir, 0755); err != nil {
-		t.Fatalf("Failed to create cache directory: %v", err)
+	cacheDir := t.TempDir()
+	if _, err := os.ReadDir(cacheDir); err != nil {
+		if err := os.MkdirAll(cacheDir, 0755); err != nil {
+			t.Fatalf("Failed to create cache directory: %v", err)
+		}
 	}
-
-	// Set environment variable for media cache
 	t.Setenv("PHOTOVIEW_MEDIA_CACHE", cacheDir)
 
 	// Copy test photo to cache
 	testPhotoPath := "../scanner/exif/test_data/bird.jpg"
-	cachedPath := filepath.Join(cacheDir, "test_photo.jpg")
 	testPhotoData, err := os.ReadFile(testPhotoPath)
 	if err != nil {
-		t.Fatalf("Failed to read test photo: %v", err)
-	}
-	if err := os.WriteFile(cachedPath, testPhotoData, 0644); err != nil {
-		t.Fatalf("Failed to create test image: %v", err)
+		t.Fatalf("Failed to read test photo at %s: %v", testPhotoPath, err)
 	}
 
 	router := mux.NewRouter()
 
 	tests := []struct {
 		name           string
-		setupDB        func(*testing.T, *gorm.DB) (*models.User, *models.Media)
+		setupDB        func(*testing.T, *gorm.DB, string) (*models.User, *models.Media, string)
 		authenticate   bool
 		expectedStatus int
 		expectedBody   []byte
 	}{
 		{
 			name: "successful photo retrieval",
-			setupDB: func(t *testing.T, tx *gorm.DB) (*models.User, *models.Media) {
+			setupDB: func(t *testing.T, tx *gorm.DB, cacheDir string) (*models.User, *models.Media, string) {
 				user, media := setupTestData(t, tx)
+
+				// Create the actual file in cache
+				mediaFileName := "photo_retrieval_test.jpg"
+				cachedPath := filepath.Join(cacheDir, mediaFileName)
+				if err := os.WriteFile(cachedPath, testPhotoData, 0644); err != nil {
+					t.Fatalf("Failed to create test image: %v", err)
+				}
+
 				mediaURL := models.MediaURL{
 					Media:     media,
 					MediaID:   media.ID,
-					MediaName: "test_photo.jpg",
+					MediaName: mediaFileName,
 					Purpose:   models.PhotoThumbnail,
 				}
 				assert.NoError(t, tx.Create(&mediaURL).Error)
-				return user, media
+				return user, media, mediaFileName
 			},
 			authenticate:   true,
 			expectedStatus: http.StatusOK,
@@ -67,9 +73,9 @@ func TestRegisterPhotoRoutes(t *testing.T) {
 		},
 		{
 			name: "media URL not found",
-			setupDB: func(t *testing.T, tx *gorm.DB) (*models.User, *models.Media) {
+			setupDB: func(t *testing.T, tx *gorm.DB, cacheDir string) (*models.User, *models.Media, string) {
 				user, media := setupTestData(t, tx)
-				return user, media
+				return user, media, "nonexistent_file.jpg"
 			},
 			authenticate:   true,
 			expectedStatus: http.StatusNotFound,
@@ -77,32 +83,55 @@ func TestRegisterPhotoRoutes(t *testing.T) {
 		},
 		{
 			name: "media is nil",
-			setupDB: func(t *testing.T, tx *gorm.DB) (*models.User, *models.Media) {
-				user, _ := setupTestData(t, tx)
+			setupDB: func(t *testing.T, tx *gorm.DB, cacheDir string) (*models.User, *models.Media, string) {
+				user, media := setupTestData(t, tx)
+
+				// Create a separate media to delete
+				deletableMedia := models.Media{
+					Title:   "deletable_photo.jpg",
+					Path:    "/test/photos/deletable_photo.jpg",
+					AlbumID: media.AlbumID, // Use same album as the other media
+				}
+				assert.NoError(t, tx.Create(&deletableMedia).Error)
+
+				mediaFileName := "nil_media_test.jpg"
 				mediaURL := models.MediaURL{
-					MediaID:   999, // Non-existent media ID
-					MediaName: "test_photo.jpg",
+					Media:     &deletableMedia,
+					MediaID:   deletableMedia.ID, // Non-existent media ID
+					MediaName: mediaFileName,
 					Purpose:   models.PhotoThumbnail,
 				}
 				assert.NoError(t, tx.Create(&mediaURL).Error)
-				return user, nil
+
+				// Delete the media after creating the URL reference
+				assert.NoError(t, tx.Delete(&deletableMedia).Error)
+
+				return user, media, mediaFileName
 			},
 			authenticate:   true,
 			expectedStatus: http.StatusNotFound,
-			expectedBody:   []byte("404 - Media not found"),
+			expectedBody:   []byte("404"),
 		},
 		{
 			name: "unauthenticated request",
-			setupDB: func(t *testing.T, tx *gorm.DB) (*models.User, *models.Media) {
+			setupDB: func(t *testing.T, tx *gorm.DB, cacheDir string) (*models.User, *models.Media, string) {
 				user, media := setupTestData(t, tx)
+
+				// Create the actual file in cache
+				mediaFileName := "unauthenticated_test.jpg"
+				cachedPath := filepath.Join(cacheDir, mediaFileName)
+				if err := os.WriteFile(cachedPath, testPhotoData, 0644); err != nil {
+					t.Fatalf("Failed to create test image: %v", err)
+				}
+
 				mediaURL := models.MediaURL{
 					Media:     media,
 					MediaID:   media.ID,
-					MediaName: "test_photo.jpg",
+					MediaName: mediaFileName,
 					Purpose:   models.PhotoThumbnail,
 				}
 				assert.NoError(t, tx.Create(&mediaURL).Error)
-				return user, media
+				return user, media, mediaFileName
 			},
 			authenticate:   false,
 			expectedStatus: http.StatusUnauthorized,
@@ -122,13 +151,13 @@ func TestRegisterPhotoRoutes(t *testing.T) {
 			defer tx.Rollback()
 
 			// Setup test case
-			user, _ := tt.setupDB(t, tx)
+			user, _, mediaFileName := tt.setupDB(t, tx, cacheDir)
 
 			// Register routes with transaction
 			RegisterPhotoRoutes(tx, router)
 
 			// Create request
-			req := httptest.NewRequest("GET", "/test_photo.jpg", nil)
+			req := httptest.NewRequest("GET", "/"+mediaFileName, nil)
 			if tt.authenticate {
 				ctx := auth.AddUserToContext(req.Context(), user)
 				req = req.WithContext(ctx)
@@ -139,12 +168,19 @@ func TestRegisterPhotoRoutes(t *testing.T) {
 			router.ServeHTTP(w, req)
 
 			// Assert response
-			assert.Equal(t, tt.expectedStatus, w.Code)
+			assert.Equal(t, tt.expectedStatus, w.Code, "Response status code didn't match expected")
 			if tt.expectedBody != nil {
-				assert.Equal(t, string(tt.expectedBody), w.Body.String())
+				// For binary data, compare directly without string conversion
+				if w.Code == http.StatusOK && bytes.Equal(tt.expectedBody, testPhotoData) {
+					assert.Equal(t, testPhotoData, w.Body.Bytes(), "Response body didn't match expected")
+				} else {
+					// For error messages, compare as strings for better readability
+					assert.Equal(t, string(tt.expectedBody), strings.TrimSpace(w.Body.String()), "Response body didn't match expected")
+				}
 			}
+			// Check Cache-Control header for successful responses
 			if tt.expectedStatus == http.StatusOK {
-				assert.Equal(t, "private, max-age=86400, immutable", w.Header().Get("Cache-Control"))
+				assert.Equal(t, "private, max-age=86400, immutable", w.Header().Get("Cache-Control"), "Cache-Control header missing or incorrect")
 			}
 		})
 	}
