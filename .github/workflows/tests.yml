@@ -115,7 +115,7 @@ jobs:
         run: |
           set -eo pipefail
           go install github.com/jstemmer/go-junit-report@latest
-          go test ./... -v -database -filesystem -p 1 -coverprofile=coverage.txt -covermode=atomic 2>&1 | tee >(go-junit-report > test-report.xml)
+          go test ./... -v -database -filesystem -p 1 -coverpkg=./... -coverprofile=coverage.txt -covermode=atomic 2>&1 | tee >(go-junit-report > test-report.xml)
 
       - name: Upload coverage
         uses: codecov/codecov-action@v5
