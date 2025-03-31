@@ -46,7 +46,7 @@
     "prettier": "^2.8.8",
     "react": "^19.0.0",
     "react-blurhash": "^0.3.0",
-    "react-dom": "^19.0.0",
+    "react-dom": "^19.1.0",
     "react-helmet": "^6.1.0",
     "react-hook-form": "^7.54.2",
     "react-i18next": "^15.4.1",
