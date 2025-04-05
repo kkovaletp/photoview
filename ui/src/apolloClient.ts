@@ -104,8 +104,8 @@ const linkError = onError(({ graphQLErrors, networkError }) => {
     } else if (errors.length > 1) {
       errorMessages.push({
         header: 'Multiple server errors',
-        content: `Received ${graphQLErrors?.length || 0}
-          errors from the server. You are being logged out in an attempt to recover.`,
+        content: `Received ${graphQLErrors?.length
+          || 0} errors from the server. You are being logged out in an attempt to recover.`,
       })
     }
   }
