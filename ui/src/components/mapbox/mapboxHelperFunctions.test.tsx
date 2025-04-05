@@ -1,45 +1,48 @@
 import React from 'react'
 import { vi, describe, test, expect, beforeEach, afterEach } from 'vitest'
-import { registerMediaMarkers } from './mapboxHelperFunctions'
 import type mapboxgl from 'mapbox-gl'
-import MapClusterMarker from '../../Pages/PlacesPage/MapClusterMarker'
-import type { MediaMarker } from '../../Pages/PlacesPage/MapPresentMarker'
 import type { PlacesAction } from '../../Pages/PlacesPage/placesReducer'
-import { Root, createRoot } from 'react-dom/client'
+import type { MediaMarker } from '../../Pages/PlacesPage/MapPresentMarker'
+import { Root } from 'react-dom/client'
 
 // Define types needed for testing
 type MarkerElement = HTMLDivElement & {
     _root?: Root;
 }
 
-// Mock react-dom/client
+// IMPORTANT: Define module variable objects BEFORE any vi.mock calls
+// because vi.mock is hoisted to the top of the file
+const moduleState = {
+    markers: {} as Record<string, mapboxgl.Marker>,
+    markersOnScreen: {} as Record<string, mapboxgl.Marker>
+};
+
+// Mock dependencies - these MUST come after any variables they reference
 vi.mock('react-dom/client', () => ({
     createRoot: vi.fn(() => ({
         render: vi.fn(),
         unmount: vi.fn(),
     })),
-}))
+}));
 
-// Mock MapClusterMarker component
 vi.mock('../../Pages/PlacesPage/MapClusterMarker', () => ({
     default: vi.fn(() => <div data-testid="mock-cluster-marker" />),
-}))
+}));
 
-// Create module variables for testing
-// These need to be reset between tests
-let markers: Record<string, mapboxgl.Marker> = {};
-let markersOnScreen: Record<string, mapboxgl.Marker> = {};
-
-// Override the module's variables to use our testing versions
-// Fixed error 1: Removed the third argument { virtual: true }
+// Mock the mapboxHelperFunctions module to access its internal state
 vi.mock('./mapboxHelperFunctions', async (importOriginal) => {
-    const original = await importOriginal<typeof import('./mapboxHelperFunctions')>();
+    const actual = await importOriginal<typeof import('./mapboxHelperFunctions')>();
+    // Override the module with our test state
     return {
-        ...original,
-        markers,
-        markersOnScreen,
+        ...actual,
+        // Export these for test inspection - use the moduleState object defined above
+        __TEST_MARKERS__: moduleState
     };
 });
+
+// Now import after all mocks are defined
+import { registerMediaMarkers } from './mapboxHelperFunctions'
+import MapClusterMarker from '../../Pages/PlacesPage/MapClusterMarker'
 
 // Test setup functions
 const createMockRoot = (): Root => ({
@@ -108,8 +111,8 @@ describe('mapboxHelperFunctions', () => {
 
     beforeEach(() => {
         // Reset module state for each test
-        markers = {};
-        markersOnScreen = {};
+        moduleState.markers = {};
+        moduleState.markersOnScreen = {};
 
         // Create fresh mocks
         mockDispatch = vi.fn() as unknown as React.Dispatch<PlacesAction>;
@@ -280,17 +283,16 @@ describe('mapboxHelperFunctions', () => {
             mockFeatures.length = 0;
 
             // Store a reference to created marker before clearing mocks
-            const mockMarker = Object.values(markers)[0];
+            const mockMarker = Object.values(moduleState.markers)[0];
 
             // Setup markersOnScreen to match what would be there after first call
-            markersOnScreen = { ...markers };
+            moduleState.markersOnScreen = { ...moduleState.markers };
 
             // Call the event handler directly
             eventHandlers.move();
 
             // Should remove the marker
             expect(mockMarker.remove).toHaveBeenCalled();
-            // Fixed error 2: Properly cast to MarkerElement before accessing _root
             const markerElement = mockMarker.getElement() as MarkerElement;
             expect(markerElement._root?.unmount).toHaveBeenCalled();
         });
@@ -327,9 +329,9 @@ describe('mapboxHelperFunctions', () => {
             expect(mockMapboxgl.Marker).toHaveBeenCalledTimes(2);
 
             // Verify markers were created with correct IDs
-            expect(Object.keys(markers)).toHaveLength(2);
-            expect(Object.keys(markers)).toContain('media_test-media-id');
-            expect(Object.keys(markers)).toContain('cluster_test-cluster-id');
+            expect(Object.keys(moduleState.markers)).toHaveLength(2);
+            expect(Object.keys(moduleState.markers)).toContain('media_test-media-id');
+            expect(Object.keys(moduleState.markers)).toContain('cluster_test-cluster-id');
         });
 
         test('handles error in createClusterPopupElement', () => {
