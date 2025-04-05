@@ -16,7 +16,6 @@ import { clearTokenCookie } from './helpers/authentication'
 import { globalMessageHandler } from './components/messages/globalMessageHandler'
 import { Message } from './components/messages/SubscriptionsHook'
 import { NotificationType } from './__generated__/globalTypes'
-import React from "react";
 
 export const API_ENDPOINT = import.meta.env.REACT_APP_API_ENDPOINT
   ? (import.meta.env.REACT_APP_API_ENDPOINT as string)
@@ -132,7 +131,7 @@ type PaginateCacheType = {
 }
 
 // Modified version of Apollo's offsetLimitPagination()
-const paginateCache = (keyArgs: string[]) =>
+export const paginateCache = (keyArgs: string[]) =>
 ({
   keyArgs,
   merge(existing, incoming, { args, fieldName }) {
