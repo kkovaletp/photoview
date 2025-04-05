@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from 'vitest'
+import { describe, it, expect } from 'vitest'
 
 // Since paginateCache isn't currently exported, we'll need to recreate it for testing
 // Consider exporting it from apolloClient.ts to make it directly testable
