@@ -307,7 +307,7 @@ type SidebarMediaDownladProps = {
 
 const SidebarMediaDownload = ({ media }: SidebarMediaDownladProps) => {
   const { t } = useTranslation()
-  const { add, removeKey } = useMessageState()
+  const { add, removeKey } = useMessageState() // Uncaught Error: useMessageState was called outside of MessageProvider. Ensure it is used within MessageProvider.
   if (!media || !media.id) return null
 
   const [loadPhotoDownloads, { called, loading, data }] = useLazyQuery<
