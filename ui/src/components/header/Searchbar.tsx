@@ -353,7 +353,7 @@ const PhotoRow = ({ query, media, selected, setSelected }: PhotoRowArgs) => (
     }
     label={searchHighlighted(query, media.title)}
     selected={selected}
-    setSelected={setSelected}
+    setSelected={() => setSelected()}
   />
 )
 
@@ -380,7 +380,7 @@ const AlbumRow = ({ query, album, selected, setSelected }: AlbumRowArgs) => {
       }
       label={searchHighlighted(query, album.title)}
       selected={selected}
-      setSelected={setSelected}
+      setSelected={() => setSelected()}
     />
   );
 }
