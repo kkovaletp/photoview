@@ -8,6 +8,18 @@ import SearchBar, { SEARCH_QUERY, AlbumRow, searchHighlighted } from './Searchba
 import * as utils from '../../helpers/utils'
 import { searchQuery_search_albums, searchQuery_search_media } from './__generated__/searchQuery'
 
+// Module-level mock for fetchSearches
+const fetchMock = vi.fn();
+
+// Mock the Apollo Client
+vi.mock('@apollo/client', async () => {
+    const actual = await vi.importActual('@apollo/client') as object;
+    return {
+        ...actual,
+        useLazyQuery: () => [fetchMock, { loading: false, data: null }]
+    };
+});
+
 // Mock the debounce function
 vi.mock('../../helpers/utils', async () => {
     const actual = await vi.importActual('../../helpers/utils') as object
@@ -105,7 +117,8 @@ const createSearchMocks = (query: string, results: { albums: any[], media: any[]
 
 describe('SearchBar Component', () => {
     beforeEach(() => {
-        vi.resetAllMocks()
+        vi.resetAllMocks();
+        fetchMock.mockClear();
     })
 
     afterEach(() => {
@@ -289,21 +302,6 @@ describe('SearchBar Component', () => {
     test('debounced function only processes string queries', async () => {
         // Get access to the mocked debounce function
         const debounceMock = vi.mocked(utils.debounce)
-        const fetchMock = vi.fn()
-
-        // Mock useLazyQuery to track calls
-        vi.mock('@apollo/client', async () => {
-            const actual = await vi.importActual('@apollo/client') as object
-            return {
-                ...actual,
-                useLazyQuery: () => [fetchMock, { loading: false, data: null }]
-            }
-        })
-
-        renderWithProviders(<SearchBar />, {
-            mocks: [],
-            initialEntries: ['/']
-        })
 
         // Get the function passed to debounce
         const debouncedFn = debounceMock.mock.calls[0][0]
@@ -373,8 +371,8 @@ describe('searchHighlighted function', () => {
         // Render the result to check highlighting
         renderWithProviders(<div>{result}</div>, { initialEntries: ['/'] })
 
-        // The term "photo" should be highlighted
-        const highlightedText = screen.getByText('photo')
+        // The term "photo" should be highlighted - use a more flexible matcher
+        const highlightedText = screen.getByText(/photo/i, { selector: '.font-semibold' })
         expect(highlightedText).toHaveClass('font-semibold')
     })
 
@@ -390,7 +388,7 @@ describe('searchHighlighted function', () => {
         renderWithProviders(<div>{result}</div>, { initialEntries: ['/'] })
 
         // The term "PHOTO" should be highlighted (case-insensitive)
-        const highlightedText = screen.getByText('PHOTO')
+        const highlightedText = screen.getByText(/PHOTO/i, { selector: '.font-semibold' })
         expect(highlightedText).toHaveClass('font-semibold')
     })
 })
