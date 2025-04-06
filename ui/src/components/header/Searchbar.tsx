@@ -58,7 +58,6 @@ const SearchBar = () => {
     debouncedFetch.current = debounce((...args: unknown[]) => {
       const query = args[0]
       if (typeof query !== 'string') return
-
       fetchSearches({ variables: { query } })
       setFetched(true)
       setExpanded(true)
@@ -341,22 +340,29 @@ type PhotoRowArgs = {
   setSelected(): void
 }
 
-const PhotoRow = ({ query, media, selected, setSelected }: PhotoRowArgs) => (
-  <SearchRow
-    key={media.id}
-    id={media.id}
-    link={`/album/${media.album.id}`}
-    preview={
-      <ProtectedImage
-        src={media?.thumbnail?.url}
-        className="w-14 h-14 object-cover"
-      />
-    }
-    label={searchHighlighted(query, media.title)}
-    selected={selected}
-    setSelected={setSelected}
-  />
-)
+const PhotoRow = (props: PhotoRowArgs) => {
+  if (!props.media) return null;
+
+  // Only destructure the non-function properties
+  const { query, media, selected } = props;
+
+  return (
+    <SearchRow
+      key={media.id}
+      id={media.id}
+      link={`/album/${media.album.id}`}
+      preview={
+        <ProtectedImage
+          src={media?.thumbnail?.url}
+          className="w-14 h-14 object-cover"
+        />
+      }
+      label={searchHighlighted(query, media.title)}
+      selected={selected}
+      setSelected={() => props.setSelected()} // Use props.setSelected directly
+    />
+  );
+};
 
 type AlbumRowArgs = {
   query: string
@@ -365,8 +371,11 @@ type AlbumRowArgs = {
   setSelected(): void
 }
 
-const AlbumRow = ({ query, album, selected, setSelected }: AlbumRowArgs) => {
-  if (!album) return null;
+const AlbumRow = (props: AlbumRowArgs) => {
+  if (!props.album) return null;
+
+  // Only destructure the non-function properties
+  const { query, album, selected } = props;
 
   return (
     <SearchRow
@@ -381,7 +390,7 @@ const AlbumRow = ({ query, album, selected, setSelected }: AlbumRowArgs) => {
       }
       label={searchHighlighted(query, album.title)}
       selected={selected}
-      setSelected={setSelected}
+      setSelected={() => props.setSelected()} // Use props.setSelected directly
     />
   );
 }
@@ -406,4 +415,5 @@ const searchHighlighted = (query: string, text: string) => {
   )
 }
 
+export { AlbumRow, PhotoRow, searchHighlighted };
 export default SearchBar
