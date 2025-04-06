@@ -413,5 +413,5 @@ const searchHighlighted = (query: string, text: string) => {
   )
 }
 
-export { AlbumRow, searchHighlighted, SEARCH_QUERY };
+export { AlbumRow, PhotoRow, searchHighlighted };
 export default SearchBar

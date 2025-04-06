@@ -3,9 +3,9 @@ import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import * as Apollo from '@apollo/client'
-import SearchBar, { AlbumRow, searchHighlighted } from './Searchbar'
+import SearchBar, { AlbumRow, PhotoRow, searchHighlighted } from './Searchbar'
 import * as utils from '../../helpers/utils'
-import { searchQuery_search_albums } from './__generated__/searchQuery'
+import { searchQuery_search_albums, searchQuery_search_media } from './__generated__/searchQuery'
 
 // Mock the debounce function with a direct implementation
 vi.mock('../../helpers/utils', () => ({
@@ -52,6 +52,30 @@ const sampleAlbums = [
             }
         }
     } as unknown as searchQuery_search_albums
+];
+const sampleMedia = [
+    {
+        __typename: 'Media' as const,
+        id: 'media1',
+        title: 'Beach Sunset',
+        thumbnail: {
+            url: '/api/thumbnail/media1'
+        },
+        album: {
+            id: 'album1'
+        }
+    } as unknown as searchQuery_search_media,
+    {
+        __typename: 'Media' as const,
+        id: 'media2',
+        title: 'Mountain View',
+        thumbnail: {
+            url: '/api/thumbnail/media2'
+        },
+        album: {
+            id: 'album2'
+        }
+    } as unknown as searchQuery_search_media
 ];
 
 describe('SearchBar Component', () => {
@@ -242,6 +266,76 @@ describe('AlbumRow Component', () => {
         const image = screen.getByTestId('protected-image');
         expect(image).toBeInTheDocument();
         expect(image).toHaveAttribute('src', '/api/thumbnail/album1');
+    });
+
+    test('calls setSelected callback on mouse over', async () => {
+        // Create a mock function for setSelected
+        const mockSetSelected = vi.fn();
+
+        render(
+            <MemoryRouter>
+                <AlbumRow
+                    query="test"
+                    album={sampleAlbums[0]}
+                    selected={false}
+                    setSelected={mockSetSelected}
+                />
+            </MemoryRouter>
+        );
+
+        // Find the list item element and trigger mouse over
+        const listItem = screen.getByRole('option');
+        await userEvent.hover(listItem);
+
+        // Verify the mock function was called
+        expect(mockSetSelected).toHaveBeenCalledTimes(1);
+    });
+});
+
+// Test PhotoRow component separately
+describe('PhotoRow Component', () => {
+    test('renders correctly with valid media', () => {
+        render(
+            <MemoryRouter>
+                <PhotoRow
+                    query="test"
+                    media={sampleMedia[0]}
+                    selected={false}
+                    setSelected={() => { }}
+                />
+            </MemoryRouter>
+        );
+
+        // Should render the media title
+        expect(screen.getByText('Beach Sunset')).toBeInTheDocument();
+
+        // Should render image
+        const image = screen.getByTestId('protected-image');
+        expect(image).toBeInTheDocument();
+        expect(image).toHaveAttribute('src', '/api/thumbnail/media1');
+    });
+
+    test('calls setSelected callback on mouse over', async () => {
+        // Create a mock function for setSelected
+        const mockSetSelected = vi.fn();
+
+        render(
+            <MemoryRouter>
+                <PhotoRow
+                    query="test"
+                    media={sampleMedia[0]}
+                    selected={false}
+                    setSelected={mockSetSelected}
+                />
+            </MemoryRouter>
+        );
+
+        // Find the list item element and trigger mouse over
+        const listItem = screen.getByRole('option');
+        await userEvent.hover(listItem);
+
+        // Verify the mock function was called
+        expect(mockSetSelected).toHaveBeenCalledTimes(1);
     });
 });
 
