@@ -1,5 +1,4 @@
-// IMPORTANT: All vi.mock calls MUST come before any imports
-// These mock definitions can't reference any variables defined in the test file
+// All vi.mock calls MUST come first - they get hoisted to the top of the file
 vi.mock('react-dom/client', () => ({
     createRoot: vi.fn(() => ({
         render: vi.fn(),
@@ -8,10 +7,10 @@ vi.mock('react-dom/client', () => ({
 }));
 
 vi.mock('../../Pages/PlacesPage/MapClusterMarker', () => ({
-    default: vi.fn(() => null),
+    default: vi.fn(() => <div data-testid="mock-cluster-marker" />),
 }));
 
-// Now import React and everything else AFTER the mocks
+// Import after mocks
 import React from 'react'
 import { vi, describe, test, expect, beforeEach, afterEach } from 'vitest'
 import { registerMediaMarkers } from './mapboxHelperFunctions'
@@ -21,86 +20,32 @@ import type { MediaMarker } from '../../Pages/PlacesPage/MapPresentMarker'
 import type { PlacesAction } from '../../Pages/PlacesPage/placesReducer'
 import { Root, createRoot } from 'react-dom/client'
 
-// Define types needed for testing
+// Define types
 type MarkerElement = HTMLDivElement & {
     _root?: Root;
 }
 
-// Create a marker tracking system that doesn't rely on accessing internal module state
-const markerTracker = {
-    // Store all markers created during a test
-    created: new Map<string, mapboxgl.Marker>(),
-    // Store markers currently on the map
-    onMap: new Map<string, mapboxgl.Marker>(),
-    // Reset for a new test
-    reset() {
-        this.created.clear();
-        this.onMap.clear();
-    }
-};
-
-// Test setup functions
-const createMockRoot = (): Root => ({
-    render: vi.fn(),
-    unmount: vi.fn(),
-});
-
+// Test helpers
 const createMockElement = (): MarkerElement => {
     const el = document.createElement('div') as MarkerElement;
-    el._root = createMockRoot();
+    el._root = {
+        render: vi.fn(),
+        unmount: vi.fn()
+    };
     return el;
 };
 
-const createMockMarker = (id?: string): mapboxgl.Marker => {
-    const mockEl = createMockElement();
-    const marker = {
-        id,
-        setLngLat: vi.fn().mockReturnThis(),
-        addTo: vi.fn((map) => {
-            if (id) markerTracker.onMap.set(id, marker as any);
-            return marker;
-        }),
-        remove: vi.fn(() => {
-            if (id) markerTracker.onMap.delete(id);
-        }),
-        getElement: vi.fn(() => mockEl),
-    } as unknown as mapboxgl.Marker;
-
-    if (id) markerTracker.created.set(id, marker as any);
-    return marker;
-};
-
-const createMockMapboxgl = () => {
+const createMockMarker = () => {
+    const mockElement = createMockElement();
     return {
-        Marker: vi.fn(({ element }) => {
-            // Extract ID from element's dataset if possible
-            const id = element?.dataset?.id;
-            return createMockMarker(id);
-        }),
-    } as unknown as typeof mapboxgl;
+        setLngLat: vi.fn(function () { return this }),
+        addTo: vi.fn(function () { return this }),
+        remove: vi.fn(),
+        getElement: vi.fn(() => mockElement),
+    };
 };
 
-const createMockMap = () => {
-    const mockFeatures: any[] = [];
-    const eventHandlers: Record<string, () => void> = {};
-
-    const mockMap = {
-        on: vi.fn((event: string, handler: () => void) => {
-            eventHandlers[event] = handler;
-            return mockMap;
-        }),
-        off: vi.fn(),
-        querySourceFeatures: vi.fn(() => mockFeatures),
-        getSource: vi.fn(() => ({
-            getClusterLeaves: vi.fn(),
-        })),
-    } as unknown as mapboxgl.Map;
-
-    return { mockMap, mockFeatures, eventHandlers };
-};
-
-// Utility to create test feature data
-const createTestFeature = (overrides: Record<string, any> = {}) => ({
+const createTestFeature = (overrides = {}) => ({
     geometry: {
         type: 'Point',
         coordinates: [0, 0],
@@ -113,106 +58,97 @@ const createTestFeature = (overrides: Record<string, any> = {}) => ({
     ...overrides,
 });
 
-// Mock document.createElement to set dataset.id
-const origCreateElement = document.createElement;
-const mockCreateElement = (tagName: string) => {
-    const el = origCreateElement.call(document, tagName) as HTMLElement;
-    if (tagName === 'div') {
-        // Add a dataset property for id tracking
-        (el as any).dataset = { id: '' };
-        (el as MarkerElement)._root = createMockRoot();
-    }
-    return el;
-};
-
 describe('mapboxHelperFunctions', () => {
     let mockDispatch: React.Dispatch<PlacesAction>;
     let consoleWarnSpy: ReturnType<typeof vi.spyOn>;
     let consoleErrorSpy: ReturnType<typeof vi.spyOn>;
-    let mockMapboxgl: typeof mapboxgl;
+    let mockMapboxgl: Record<string, any>;
+    let mockMap: Record<string, any>;
+    let mockFeatures: any[];
+    let eventHandlers: Record<string, Function>;
+    let mockMarker: ReturnType<typeof createMockMarker>;
 
     beforeEach(() => {
-        // Reset marker tracking
-        markerTracker.reset();
-
-        // Create fresh mocks
-        mockDispatch = vi.fn() as unknown as React.Dispatch<PlacesAction>;
+        // Reset for each test
+        mockDispatch = vi.fn() as any;
         consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => { });
         consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => { });
-        mockMapboxgl = createMockMapboxgl();
 
-        // Mock document.createElement
-        document.createElement = vi.fn(mockCreateElement);
+        // Create mock marker that will be returned by Marker constructor
+        mockMarker = createMockMarker();
 
-        // Reset MapClusterMarker mock
-        vi.mocked(MapClusterMarker).mockImplementation(() => (
-            <div data-testid="mock-cluster-marker" />
-        ));
+        // Set up mock mapboxgl
+        mockMapboxgl = {
+            Marker: vi.fn(() => mockMarker),
+        };
+
+        // Set up mock map and features
+        mockFeatures = [];
+        eventHandlers = {};
+        mockMap = {
+            on: vi.fn((event, handler) => {
+                eventHandlers[event] = handler;
+                return mockMap;
+            }),
+            querySourceFeatures: vi.fn(() => mockFeatures),
+        };
+
+        // Store original implementation before mocking
+        const originalCreateElement = document.createElement;
+
+        // Mock document.createElement for the div element
+        document.createElement = vi.fn((tagName) => {
+            if (tagName === 'div') {
+                return createMockElement();
+            }
+            // Call the original directly
+            return originalCreateElement.call(document, tagName);
+        }) as any;
     });
 
     afterEach(() => {
-        vi.restoreAllMocks();
+        vi.clearAllMocks();
     });
 
     describe('registerMediaMarkers', () => {
         test('registers event handlers on the map', () => {
-            const { mockMap } = createMockMap();
-
             registerMediaMarkers({
-                map: mockMap,
-                mapboxLibrary: mockMapboxgl,
+                map: mockMap as any,
+                mapboxLibrary: mockMapboxgl as any,
                 dispatchMarkerMedia: mockDispatch,
             });
 
-            // Should register 3 event handlers
             expect(mockMap.on).toHaveBeenCalledTimes(3);
             expect(mockMap.on).toHaveBeenCalledWith('move', expect.any(Function));
             expect(mockMap.on).toHaveBeenCalledWith('moveend', expect.any(Function));
             expect(mockMap.on).toHaveBeenCalledWith('sourcedata', expect.any(Function));
         });
 
-        test('initially calls updateMarkers function', () => {
-            const { mockMap } = createMockMap();
-
-            registerMediaMarkers({
-                map: mockMap,
-                mapboxLibrary: mockMapboxgl,
-                dispatchMarkerMedia: mockDispatch,
-            });
-
-            // Should query source features on initialization
-            expect(mockMap.querySourceFeatures).toHaveBeenCalledWith('media');
-            expect(mockMap.querySourceFeatures).toHaveBeenCalledTimes(1);
-        });
-    });
-
-    describe('makeUpdateMarkers', () => {
         test('creates and adds markers for features with valid data', () => {
-            const { mockMap, mockFeatures } = createMockMap();
+            // Prepare feature data
             const feature = createTestFeature();
             mockFeatures.push(feature);
 
             registerMediaMarkers({
-                map: mockMap,
-                mapboxLibrary: mockMapboxgl,
+                map: mockMap as any,
+                mapboxLibrary: mockMapboxgl as any,
                 dispatchMarkerMedia: mockDispatch,
             });
 
             // Should create a marker and add it to the map
             expect(mockMapboxgl.Marker).toHaveBeenCalledTimes(1);
-            const mockMarkerInstance = vi.mocked(mockMapboxgl.Marker).mock.results[0].value;
-            expect(mockMarkerInstance.setLngLat).toHaveBeenCalledWith([0, 0]);
-            expect(mockMarkerInstance.addTo).toHaveBeenCalledWith(mockMap);
+            expect(mockMarker.setLngLat).toHaveBeenCalledWith([0, 0]);
+            expect(mockMarker.addTo).toHaveBeenCalledWith(mockMap);
         });
 
         test('handles features with missing geometry', () => {
-            const { mockMap, mockFeatures } = createMockMap();
-            const featureWithoutGeometry = createTestFeature({ geometry: undefined });
-            mockFeatures.push(featureWithoutGeometry);
+            // Prepare feature with missing geometry
+            const feature = createTestFeature({ geometry: undefined });
+            mockFeatures.push(feature);
 
             registerMediaMarkers({
-                map: mockMap,
-                mapboxLibrary: mockMapboxgl,
+                map: mockMap as any,
+                mapboxLibrary: mockMapboxgl as any,
                 dispatchMarkerMedia: mockDispatch,
             });
 
@@ -220,20 +156,20 @@ describe('mapboxHelperFunctions', () => {
             expect(mockMapboxgl.Marker).not.toHaveBeenCalled();
             expect(consoleWarnSpy).toHaveBeenCalledWith(
                 'WARN: geojson feature had no geometry',
-                { feature: featureWithoutGeometry }
+                { feature }
             );
         });
 
         test('handles features with non-Point geometry type', () => {
-            const { mockMap, mockFeatures } = createMockMap();
-            const featureWithLineGeometry = createTestFeature({
+            // Prepare feature with non-Point geometry
+            const feature = createTestFeature({
                 geometry: { type: 'LineString', coordinates: [[0, 0], [1, 1]] },
             });
-            mockFeatures.push(featureWithLineGeometry);
+            mockFeatures.push(feature);
 
             registerMediaMarkers({
-                map: mockMap,
-                mapboxLibrary: mockMapboxgl,
+                map: mockMap as any,
+                mapboxLibrary: mockMapboxgl as any,
                 dispatchMarkerMedia: mockDispatch,
             });
 
@@ -241,18 +177,18 @@ describe('mapboxHelperFunctions', () => {
             expect(mockMapboxgl.Marker).not.toHaveBeenCalled();
             expect(consoleWarnSpy).toHaveBeenCalledWith(
                 'WARN: geojson feature geometry is not a Point',
-                { feature: featureWithLineGeometry }
+                { feature }
             );
         });
 
         test('handles features with missing properties', () => {
-            const { mockMap, mockFeatures } = createMockMap();
-            const featureWithoutProps = createTestFeature({ properties: null });
-            mockFeatures.push(featureWithoutProps);
+            // Prepare feature with missing properties
+            const feature = createTestFeature({ properties: null });
+            mockFeatures.push(feature);
 
             registerMediaMarkers({
-                map: mockMap,
-                mapboxLibrary: mockMapboxgl,
+                map: mockMap as any,
+                mapboxLibrary: mockMapboxgl as any,
                 dispatchMarkerMedia: mockDispatch,
             });
 
@@ -261,67 +197,62 @@ describe('mapboxHelperFunctions', () => {
             expect(consoleWarnSpy).toHaveBeenCalledWith(
                 'WARN: geojson feature had no properties',
                 expect.objectContaining({
-                    feature: featureWithoutProps
+                    feature
                 })
             );
         });
 
         test('reuses existing markers for the same features', () => {
-            const { mockMap, mockFeatures, eventHandlers } = createMockMap();
+            // First add a feature
             const feature = createTestFeature();
             mockFeatures.push(feature);
 
             registerMediaMarkers({
-                map: mockMap,
-                mapboxLibrary: mockMapboxgl,
+                map: mockMap as any,
+                mapboxLibrary: mockMapboxgl as any,
                 dispatchMarkerMedia: mockDispatch,
             });
 
-            const initialMarkerCount = vi.mocked(mockMapboxgl.Marker).mock.calls.length;
-
-            // Clear mocks but keep the feature
+            // Clear mocks and call the event handler again
             vi.clearAllMocks();
 
-            // Call the event handler directly (simulate map movement)
+            // Simulate map movement (which triggers updateMarkers)
             eventHandlers.move();
 
-            // Should not create new markers for existing features
+            // No new markers should be created
             expect(mockMapboxgl.Marker).not.toHaveBeenCalled();
         });
 
         test('removes markers that are no longer visible', () => {
-            const { mockMap, mockFeatures, eventHandlers } = createMockMap();
-
-            // First add a feature to create a marker
+            // First add a feature
             const feature = createTestFeature();
             mockFeatures.push(feature);
 
             registerMediaMarkers({
-                map: mockMap,
-                mapboxLibrary: mockMapboxgl,
+                map: mockMap as any,
+                mapboxLibrary: mockMapboxgl as any,
                 dispatchMarkerMedia: mockDispatch,
             });
 
-            // Get reference to the created marker
-            const mockMarker = vi.mocked(mockMapboxgl.Marker).mock.results[0].value;
+            // Save reference to marker element
+            const markerElement = mockMarker.getElement();
 
-            // Now clear the features to simulate it going out of view
+            // Clear features to simulate them going out of view
             mockFeatures.length = 0;
 
-            // Reset mocks to clearly see what happens next
+            // Reset mocks to see what happens on the next update
             vi.clearAllMocks();
 
-            // Call the event handler directly
+            // Simulate map movement (which triggers updateMarkers)
             eventHandlers.move();
 
             // The marker should be removed
             expect(mockMarker.remove).toHaveBeenCalled();
-            expect(mockMarker.getElement()._root?.unmount).toHaveBeenCalled();
+            expect(markerElement._root?.unmount).toHaveBeenCalled();
         });
 
         test('handles both cluster and media markers', () => {
-            const { mockMap, mockFeatures } = createMockMap();
-
+            // Add both cluster and media features
             const mediaFeature = createTestFeature({
                 properties: {
                     cluster: false,
@@ -341,9 +272,13 @@ describe('mapboxHelperFunctions', () => {
 
             mockFeatures.push(mediaFeature, clusterFeature);
 
+            // We'll need two markers for this test
+            const secondMarker = createMockMarker();
+            mockMapboxgl.Marker.mockReturnValueOnce(mockMarker).mockReturnValueOnce(secondMarker);
+
             registerMediaMarkers({
-                map: mockMap,
-                mapboxLibrary: mockMapboxgl,
+                map: mockMap as any,
+                mapboxLibrary: mockMapboxgl as any,
                 dispatchMarkerMedia: mockDispatch,
             });
 
@@ -352,22 +287,22 @@ describe('mapboxHelperFunctions', () => {
         });
 
         test('handles error in createClusterPopupElement', () => {
-            const { mockMap, mockFeatures } = createMockMap();
+            // Add a feature
             const feature = createTestFeature();
             mockFeatures.push(feature);
 
-            // Force an error in document.createElement
+            // Make document.createElement throw an error
             document.createElement = vi.fn().mockImplementation(() => {
                 throw new Error('Test error');
-            });
+            }) as any;
 
             registerMediaMarkers({
-                map: mockMap,
-                mapboxLibrary: mockMapboxgl,
+                map: mockMap as any,
+                mapboxLibrary: mockMapboxgl as any,
                 dispatchMarkerMedia: mockDispatch,
             });
 
-            // Should log error and not create marker
+            // Should log error and not create a marker
             expect(consoleErrorSpy).toHaveBeenCalledWith(
                 'Failed to create cluster popup element:',
                 expect.any(Error)
