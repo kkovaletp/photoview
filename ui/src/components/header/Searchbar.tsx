@@ -341,6 +341,8 @@ type PhotoRowArgs = {
 }
 
 const PhotoRow = (props: PhotoRowArgs) => {
+  if (!props.media) return null;
+
   // Only destructure the non-function properties
   const { query, media, selected } = props;
 
