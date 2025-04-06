@@ -367,6 +367,11 @@ type AlbumRowArgs = {
 const AlbumRow = ({ query, album, selected, setSelected }: AlbumRowArgs) => {
   if (!album) return null;
 
+  // Define a named function separate from the JSX
+  const handleSelect = () => {
+    setSelected();
+  };
+
   return (
     <SearchRow
       key={album.id}
@@ -380,7 +385,7 @@ const AlbumRow = ({ query, album, selected, setSelected }: AlbumRowArgs) => {
       }
       label={searchHighlighted(query, album.title)}
       selected={selected}
-      setSelected={() => setSelected()}
+      setSelected={handleSelect}
     />
   );
 }
