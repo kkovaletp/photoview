@@ -294,6 +294,22 @@ describe('AlbumRow Component', () => {
 
 // Test PhotoRow component separately
 describe('PhotoRow Component', () => {
+    test('returns null when media is null', () => {
+        const { container } = render(
+            <MemoryRouter>
+                <PhotoRow
+                    query="test"
+                    media={null as unknown as searchQuery_search_media}
+                    selected={false}
+                    setSelected={() => { }}
+                />
+            </MemoryRouter>
+        );
+
+        // Container should be empty since PhotoRow returns null
+        expect(container.firstChild).toBeNull();
+    });
+
     test('renders correctly with valid media', () => {
         render(
             <MemoryRouter>
