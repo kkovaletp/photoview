@@ -367,7 +367,8 @@ type AlbumRowArgs = {
 const AlbumRow = (props: AlbumRowArgs) => {
   if (!props.album) return null;
 
-  const { query, album, selected, setSelected } = props;
+  // Only destructure the non-function properties
+  const { query, album, selected } = props;
 
   return (
     <SearchRow
@@ -382,7 +383,7 @@ const AlbumRow = (props: AlbumRowArgs) => {
       }
       label={searchHighlighted(query, album.title)}
       selected={selected}
-      setSelected={() => setSelected()}
+      setSelected={() => props.setSelected()} // Use props.setSelected directly
     />
   );
 }
