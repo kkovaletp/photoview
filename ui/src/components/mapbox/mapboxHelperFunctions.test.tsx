@@ -14,11 +14,7 @@ vi.mock('../../Pages/PlacesPage/MapClusterMarker', () => ({
 import React from 'react'
 import { vi, describe, test, expect, beforeEach, afterEach } from 'vitest'
 import { registerMediaMarkers } from './mapboxHelperFunctions'
-import type mapboxgl from 'mapbox-gl'
-import MapClusterMarker from '../../Pages/PlacesPage/MapClusterMarker'
-import type { MediaMarker } from '../../Pages/PlacesPage/MapPresentMarker'
 import type { PlacesAction } from '../../Pages/PlacesPage/placesReducer'
-import { Root } from 'react-dom/client'
 
 // Define needed types
 type MarkerElement = HTMLDivElement & {
