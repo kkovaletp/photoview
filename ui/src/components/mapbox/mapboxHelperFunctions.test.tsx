@@ -30,7 +30,7 @@ describe('mapboxHelperFunctions', () => {
     let consoleErrorSpy: ReturnType<typeof vi.spyOn>;
     let mockMap: Record<string, any>;
     let mockFeatures: any[];
-    let eventHandlers: Record<string, Function>;
+    let eventHandlers: Record<string, (...args: any[]) => void>;
 
     beforeEach(() => {
         mockDispatch = vi.fn() as any;
@@ -51,6 +51,8 @@ describe('mapboxHelperFunctions', () => {
 
     afterEach(() => {
         vi.restoreAllMocks();
+        consoleWarnSpy.mockRestore();
+        consoleErrorSpy.mockRestore();
     });
 
     describe('registerMediaMarkers', () => {
