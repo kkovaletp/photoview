@@ -340,22 +340,27 @@ type PhotoRowArgs = {
   setSelected(): void
 }
 
-const PhotoRow = ({ query, media, selected, setSelected }: PhotoRowArgs) => (
-  <SearchRow
-    key={media.id}
-    id={media.id}
-    link={`/album/${media.album.id}`}
-    preview={
-      <ProtectedImage
-        src={media?.thumbnail?.url}
-        className="w-14 h-14 object-cover"
-      />
-    }
-    label={searchHighlighted(query, media.title)}
-    selected={selected}
-    setSelected={() => setSelected()}
-  />
-)
+const PhotoRow = (props: PhotoRowArgs) => {
+  // Only destructure the non-function properties
+  const { query, media, selected } = props;
+
+  return (
+    <SearchRow
+      key={media.id}
+      id={media.id}
+      link={`/album/${media.album.id}`}
+      preview={
+        <ProtectedImage
+          src={media?.thumbnail?.url}
+          className="w-14 h-14 object-cover"
+        />
+      }
+      label={searchHighlighted(query, media.title)}
+      selected={selected}
+      setSelected={() => props.setSelected()} // Use props.setSelected directly
+    />
+  );
+};
 
 type AlbumRowArgs = {
   query: string
