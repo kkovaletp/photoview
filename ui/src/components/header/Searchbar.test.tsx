@@ -1,9 +1,9 @@
 import { vi, describe, test, expect, beforeEach, afterEach } from 'vitest'
-import { fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import * as Apollo from '@apollo/client'
-import SearchBar, { AlbumRow, searchHighlighted, SEARCH_QUERY } from './Searchbar'
+import SearchBar, { AlbumRow, searchHighlighted } from './Searchbar'
 import * as utils from '../../helpers/utils'
 import { searchQuery_search_albums, searchQuery_search_media } from './__generated__/searchQuery'
 
@@ -52,31 +52,6 @@ const sampleAlbums = [
             }
         }
     } as unknown as searchQuery_search_albums
-];
-
-const sampleMedia = [
-    {
-        __typename: "Media" as const,
-        id: 'media1',
-        title: 'Beach Sunset',
-        thumbnail: {
-            url: '/api/thumbnail/media1'
-        },
-        album: {
-            id: 'album1'
-        }
-    } as unknown as searchQuery_search_media,
-    {
-        __typename: "Media" as const,
-        id: 'media2',
-        title: 'Mountain View',
-        thumbnail: {
-            url: '/api/thumbnail/media2'
-        },
-        album: {
-            id: 'album2'
-        }
-    } as unknown as searchQuery_search_media
 ];
 
 describe('SearchBar Component', () => {
@@ -132,7 +107,7 @@ describe('SearchBar Component', () => {
         expect(fetchSearchMock).toHaveBeenCalledWith({ variables: { query: 'test' } });
     });
 
-    test('shows loading state while fetching results', async () => {
+    test('calls fetch function with correct parameters when typing', async () => {
         // Set up our mocks to control the loading state
         fetchSearchMock = vi.fn().mockImplementation(() => {
             mockLoading = true;
@@ -189,6 +164,11 @@ describe('SearchBar Component', () => {
 
         // For this test, check if fetchSearches was called with correct params
         expect(fetchSearchMock).toHaveBeenCalledWith({ variables: { query: 'empty' } });
+
+        // Wait for the component to update with our mock data
+        await waitFor(() => {
+            expect(screen.getByText('header.search.no_results')).toBeInTheDocument();
+        });
     });
 
     test('verifies debounced function only processes string queries', () => {
