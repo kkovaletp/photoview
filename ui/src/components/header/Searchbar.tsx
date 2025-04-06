@@ -364,13 +364,10 @@ type AlbumRowArgs = {
   setSelected(): void
 }
 
-const AlbumRow = ({ query, album, selected, setSelected }: AlbumRowArgs) => {
-  if (!album) return null;
+const AlbumRow = (props: AlbumRowArgs) => {
+  if (!props.album) return null;
 
-  // Define a named function separate from the JSX
-  const handleSelect = () => {
-    setSelected();
-  };
+  const { query, album, selected, setSelected } = props;
 
   return (
     <SearchRow
@@ -385,7 +382,7 @@ const AlbumRow = ({ query, album, selected, setSelected }: AlbumRowArgs) => {
       }
       label={searchHighlighted(query, album.title)}
       selected={selected}
-      setSelected={handleSelect}
+      setSelected={() => setSelected()}
     />
   );
 }
