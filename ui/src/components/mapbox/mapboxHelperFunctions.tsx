@@ -1,5 +1,4 @@
 import type mapboxgl from 'mapbox-gl'
-import type geojson from 'geojson'
 import React from 'react'
 import { createRoot } from 'react-dom/client'
 import MapClusterMarker from '../../Pages/PlacesPage/MapClusterMarker'
