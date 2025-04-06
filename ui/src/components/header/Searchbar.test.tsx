@@ -5,7 +5,7 @@ import { MemoryRouter } from 'react-router-dom'
 import * as Apollo from '@apollo/client'
 import SearchBar, { AlbumRow, searchHighlighted } from './Searchbar'
 import * as utils from '../../helpers/utils'
-import { searchQuery_search_albums, searchQuery_search_media } from './__generated__/searchQuery'
+import { searchQuery_search_albums } from './__generated__/searchQuery'
 
 // Mock the debounce function with a direct implementation
 vi.mock('../../helpers/utils', () => ({
