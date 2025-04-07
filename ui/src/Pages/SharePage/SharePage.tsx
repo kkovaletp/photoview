@@ -88,7 +88,7 @@ export const VALIDATE_TOKEN_PASSWORD_QUERY = gql`
 
 const tokenFromParams = () => {
   const { token } = useParams()
-  if (isNil(token)) throw new Error('Expected `token` param to be defined')
+  if (isNil(token) || token.trim() === '') throw new Error('Expected `token` param to be defined')
   return token
 }
 
@@ -108,7 +108,7 @@ const AuthorizedTokenRoute = () => {
     },
   })
 
-  if (!isNil(error)) return <div>{error.message}</div>
+  if (!isNil(error)) return <div>{error.message || 'An unknown error occurred'}</div>
   if (loading) return <div>{t('general.loading.default', 'Loading...')}</div>
 
   if (data?.shareToken?.album) {
@@ -167,7 +167,7 @@ export const TokenRoute = () => {
   })
 
   if (error) {
-    if (error.message == 'GraphQL error: share not found') {
+    if (error.message === 'GraphQL error: share not found') {
       return (
         <MessageContainer>
           <h1>{t('share_page.share_not_found', 'Share not found')}</h1>
