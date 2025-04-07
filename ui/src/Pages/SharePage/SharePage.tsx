@@ -111,7 +111,7 @@ const AuthorizedTokenRoute = () => {
   if (!isNil(error)) return <div>{error.message}</div>
   if (loading) return <div>{t('general.loading.default', 'Loading...')}</div>
 
-  if (data?.shareToken.album) {
+  if (data?.shareToken?.album) {
     const SharedSubAlbumPage = () => {
       const { subAlbum } = useParams()
       if (isNil(subAlbum))
@@ -129,7 +129,7 @@ const AuthorizedTokenRoute = () => {
           index
           element={
             <AlbumSharePage
-              albumID={data.shareToken.album.id} //TODO: check for null
+              albumID={data.shareToken.album.id}
               token={token}
               password={password}
             />
@@ -139,8 +139,8 @@ const AuthorizedTokenRoute = () => {
     )
   }
 
-  if (data?.shareToken.media) {
-    return <MediaSharePage media={data.shareToken.media} /> //TODO: check for null
+  if (data?.shareToken?.media) {
+    return <MediaSharePage media={data.shareToken.media} />
   }
 
   return <h1>{t('share_page.share_not_found', 'Share not found')}</h1>
