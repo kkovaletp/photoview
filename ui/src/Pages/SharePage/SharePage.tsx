@@ -129,7 +129,7 @@ const AuthorizedTokenRoute = () => {
           index
           element={
             <AlbumSharePage
-              albumID={data.shareToken.album.id}
+              albumID={data.shareToken.album.id} //TODO: check for null
               token={token}
               password={password}
             />
@@ -140,7 +140,7 @@ const AuthorizedTokenRoute = () => {
   }
 
   if (data?.shareToken.media) {
-    return <MediaSharePage media={data.shareToken.media} />
+    return <MediaSharePage media={data.shareToken.media} /> //TODO: check for null
   }
 
   return <h1>{t('share_page.share_not_found', 'Share not found')}</h1>
