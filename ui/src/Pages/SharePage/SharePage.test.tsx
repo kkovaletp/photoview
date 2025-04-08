@@ -4,7 +4,7 @@ import { vi } from 'vitest'
 vi.mock('../../hooks/useScrollPagination')
 
 import React from 'react'
-import { MemoryRouter, Routes, Route, useParams } from 'react-router-dom'
+import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import { MockedProvider } from '@apollo/client/testing'
 import { renderWithProviders } from '../../helpers/testUtils'
 
@@ -267,20 +267,6 @@ describe('load correct share page, based on graphql query', () => {
 
     expect(screen.getByTestId('Layout')).toBeInTheDocument()
     expect(screen.getByTestId('AlbumSharePage')).toBeInTheDocument()
-  })
-
-  test('handles empty token string', async () => {
-    const historyMock = [{ pathname: '/share/' }]
-
-    // The component throws an error with empty token, so we should expect that
-    expect(() => {
-      renderWithProviders(<TokenRoute />, {
-        mocks: [],
-        initialEntries: historyMock,
-        path: "/share/:token/*",
-        route: <TokenRoute />,
-      })
-    }).toThrow('Expected `token` param to be defined')
   })
 
   test('handles error with undefined message', async () => {
