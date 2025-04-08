@@ -3,11 +3,14 @@ import { vi } from 'vitest'
 // Existing mock
 vi.mock('../../hooks/useScrollPagination')
 
-// New mock for react-router-dom with async pattern
-vi.mock('react-router-dom', () => ({
-  ...vi.importActual('react-router-dom'),
-  useParams: vi.fn()
-}));
+// Add type assertion to fix the spread error
+vi.mock('react-router-dom', async () => {
+  const actual = await vi.importActual('react-router-dom') as object
+  return {
+    ...actual,
+    useParams: vi.fn()
+  }
+})
 
 import React from 'react'
 import { MemoryRouter, Routes, Route, useParams } from 'react-router-dom'
@@ -274,9 +277,7 @@ describe('load correct share page, based on graphql query', () => {
   })
 
   test('handles empty token string', async () => {
-    // Import the useParams function from react-router-dom explicitly
-    const mockedUseParams = vi.fn().mockReturnValue({ token: '' })
-    vi.mocked(useParams).mockImplementation(() => mockedUseParams())
+    vi.mocked(useParams).mockReturnValue({ token: '' })
 
     // We expect the component to throw an error
     expect(() => {
