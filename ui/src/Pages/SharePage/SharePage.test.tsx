@@ -1,5 +1,16 @@
+import { vi } from 'vitest'
+
+// Existing mock
+vi.mock('../../hooks/useScrollPagination')
+
+// New mock for react-router-dom with async pattern
+vi.mock('react-router-dom', () => ({
+  ...vi.importActual('react-router-dom'),
+  useParams: vi.fn()
+}));
+
 import React from 'react'
-import { MemoryRouter, Routes, Route } from 'react-router-dom'
+import { MemoryRouter, Routes, Route, useParams } from 'react-router-dom'
 import { MockedProvider } from '@apollo/client/testing'
 import { renderWithProviders } from '../../helpers/testUtils'
 
@@ -263,14 +274,9 @@ describe('load correct share page, based on graphql query', () => {
   })
 
   test('handles empty token string', async () => {
-    // Mock useParams outside the test at module level
-    const mockedUseParams = vi.fn().mockReturnValue({ token: '' });
-
-    // Mock the react-router-dom module
-    vi.mock('react-router-dom', () => ({
-      ...vi.importActual('react-router-dom'),
-      useParams: () => mockedUseParams()
-    }));
+    // Import the useParams function from react-router-dom explicitly
+    const mockedUseParams = vi.fn().mockReturnValue({ token: '' })
+    vi.mocked(useParams).mockImplementation(() => mockedUseParams())
 
     // We expect the component to throw an error
     expect(() => {
@@ -280,10 +286,10 @@ describe('load correct share page, based on graphql query', () => {
         path: "/share/:token/*",
         route: <TokenRoute />,
       })
-    }).toThrow('Expected `token` param to be defined');
+    }).toThrow('Expected `token` param to be defined')
 
-    // Cleanup mock
-    vi.restoreAllMocks();
+    // Reset mock for other tests
+    vi.mocked(useParams).mockReset()
   })
 
   test('handles error with undefined message', async () => {
