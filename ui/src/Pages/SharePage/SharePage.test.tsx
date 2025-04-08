@@ -6,6 +6,7 @@ import { renderWithProviders } from '../../helpers/testUtils'
 import {
   render,
   screen,
+  waitFor,
   waitForElementToBeRemoved,
 } from '@testing-library/react'
 
@@ -259,5 +260,140 @@ describe('load correct share page, based on graphql query', () => {
 
     expect(screen.getByTestId('Layout')).toBeInTheDocument()
     expect(screen.getByTestId('AlbumSharePage')).toBeInTheDocument()
+  })
+
+  test('handles empty token string', async () => {
+    // Mock useParams outside the test at module level
+    const mockedUseParams = vi.fn().mockReturnValue({ token: '' });
+
+    // Mock the react-router-dom module
+    vi.mock('react-router-dom', () => ({
+      ...vi.importActual('react-router-dom'),
+      useParams: () => mockedUseParams()
+    }));
+
+    // We expect the component to throw an error
+    expect(() => {
+      renderWithProviders(<TokenRoute />, {
+        mocks: [],
+        initialEntries: ['/share/'],
+        path: "/share/:token/*",
+        route: <TokenRoute />,
+      })
+    }).toThrow('Expected `token` param to be defined');
+
+    // Cleanup mock
+    vi.restoreAllMocks();
+  })
+
+  test('handles error with undefined message', async () => {
+    const token = 'TOKEN123'
+    const historyMock = [{ pathname: `/share/${token}` }]
+
+    const errorMock = {
+      request: {
+        query: VALIDATE_TOKEN_PASSWORD_QUERY,
+        variables: {
+          token,
+          password: null,
+        },
+      },
+      error: new Error(),
+    }
+
+    // Remove the message property from the error
+    Object.defineProperty(errorMock.error, 'message', {
+      get: () => undefined
+    })
+
+    renderWithProviders(<TokenRoute />, {
+      mocks: [errorMock],
+      initialEntries: historyMock,
+      path: "/share/:token/*",
+      route: <TokenRoute />,
+    })
+
+    // Wait for error to be displayed
+    await waitFor(() => {
+      expect(screen.getByText('An unknown error occurred')).toBeInTheDocument()
+    })
+  })
+
+  test('handles null shareToken response', async () => {
+    const token = 'TOKEN123'
+    const historyMock = [{ pathname: `/share/${token}` }]
+
+    const nullTokenMock = [
+      {
+        request: {
+          query: VALIDATE_TOKEN_PASSWORD_QUERY,
+          variables: {
+            token,
+            password: null,
+          },
+        },
+        result: {
+          data: {
+            shareTokenValidatePassword: true,
+          },
+        },
+      },
+      {
+        request: {
+          query: SHARE_TOKEN_QUERY,
+          variables: {
+            token,
+            password: null,
+          },
+        },
+        result: {
+          data: {
+            shareToken: null
+          },
+        },
+      },
+    ]
+
+    renderWithProviders(<TokenRoute />, {
+      mocks: nullTokenMock,
+      initialEntries: historyMock,
+      path: "/share/:token/*",
+      route: <TokenRoute />,
+    })
+
+    expect(screen.getByText('Loading...')).toBeInTheDocument()
+    await waitForElementToBeRemoved(() => screen.queryByText('Loading...'))
+
+    // Should show "Share not found" when shareToken is null
+    expect(screen.getByText('Share not found')).toBeInTheDocument()
+  })
+
+  test('handles share not found error', async () => {
+    const token = 'TOKEN123'
+    const historyMock = [{ pathname: `/share/${token}` }]
+
+    const shareNotFoundMock = {
+      request: {
+        query: VALIDATE_TOKEN_PASSWORD_QUERY,
+        variables: {
+          token,
+          password: null,
+        },
+      },
+      error: new Error('GraphQL error: share not found'),
+    }
+
+    renderWithProviders(<TokenRoute />, {
+      mocks: [shareNotFoundMock],
+      initialEntries: historyMock,
+      path: "/share/:token/*",
+      route: <TokenRoute />,
+    })
+
+    // Wait for error message to be displayed
+    await waitFor(() => {
+      expect(screen.getByText('Share not found')).toBeInTheDocument()
+      expect(screen.getByText('Maybe the share has expired or has been deleted.')).toBeInTheDocument()
+    })
   })
 })
