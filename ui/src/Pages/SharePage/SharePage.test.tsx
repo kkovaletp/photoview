@@ -66,7 +66,7 @@ describe('load correct share page, based on graphql query', () => {
     },
   ]
 
-  test('load media share page', async () => {
+  test('load media share page', async () => { //TODO: fix "SidebarContext: updateSidebar was called before initialized"
     const mediaPageMock = {
       request: {
         query: SHARE_TOKEN_QUERY,

@@ -7,7 +7,7 @@ import { renderWithProviders } from '../../../helpers/testUtils'
 
 vi.mock('../../../hooks/useScrollPagination')
 
-test('single face group', async () => {
+test('single face group', async () => { //TODO: fix several errors
   const graphqlMocks = [
     {
       request: {

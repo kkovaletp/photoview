@@ -38,7 +38,7 @@ describe('MediaSidebar', () => {
     },
   }
 
-  test('render sample image, unauthorized', () => {
+  test('render sample image, unauthorized', () => { //TODO: fix the "No more mocked responses for the query" error
     authToken.mockImplementation(() => null)
     renderWithProviders(<MediaSidebar media={media} />)
 
@@ -54,7 +54,7 @@ describe('MediaSidebar', () => {
     expect(screen.queryByText('Sharing options')).not.toBeInTheDocument()
   })
 
-  test('render sample image, authorized', () => {
+  test('render sample image, authorized', () => { //TODO: fix long output, 3 "No more mocked responses for the query" errs
     authToken.mockImplementation(() => 'token-here')
 
     renderWithProviders(<MediaSidebar media={media} />)

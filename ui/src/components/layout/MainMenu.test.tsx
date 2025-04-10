@@ -15,7 +15,7 @@ afterEach(() => {
   authTokenMock.mockClear()
 })
 
-test('Layout sidebar component', async () => {
+test('Layout sidebar component', async () => { //TODO: fix the "No more mocked responses for the query" error
   authTokenMock.mockImplementation(() => 'test-token')
 
   const mockedGraphql = [

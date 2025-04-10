@@ -7,7 +7,7 @@ import { renderWithProviders } from '../../helpers/testUtils'
 
 vi.mock('../../hooks/useScrollPagination')
 
-test('AlbumPage renders', () => {
+test('AlbumPage renders', () => { //TODO: fix long output and "No more mocked responses for the query" error
   renderWithProviders(<AlbumPage />, {
     mocks: [],
     initialEntries: ['/album/1'],
