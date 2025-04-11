@@ -121,7 +121,7 @@ test('AlbumPage shows loading state', () => {
 
     })
 
-  expect(screen.getByText('Loading...')).toBeInTheDocument()
+  expect(screen.getByText(/Loading/)).toBeInTheDocument()
 })
 
 test('AlbumPage shows error state', async () => {
@@ -155,7 +155,7 @@ test('AlbumPage shows error state', async () => {
     })
 
   await waitFor(() => {
-    expect(screen.getByText(/Error:/)).toBeInTheDocument()
+    expect(screen.getByText('Error')).toBeInTheDocument()
   })
 })
 
