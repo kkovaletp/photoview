@@ -95,7 +95,9 @@ function AlbumPage() {
   return (
     <Layout
       title={
-        data ? data.album.title : t('title.loading_album', 'Loading album')
+        !data ? t('title.loading_album', 'Loading album') :
+          !data.album ? t('title.not_found', 'Not found') :
+            data.album.title
       }
     >
       <AlbumGallery

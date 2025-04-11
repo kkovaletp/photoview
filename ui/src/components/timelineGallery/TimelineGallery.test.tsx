@@ -8,7 +8,7 @@ import { renderWithProviders } from '../../helpers/testUtils'
 
 vi.mock('../../hooks/useScrollPagination')
 
-test('timeline with media', async () => {
+test('timeline with media', async () => { //TODO: fix the "No more mocked responses for the query" error
   const graphqlMocks = [
     {
       request: {
