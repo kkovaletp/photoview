@@ -216,7 +216,7 @@ jobs:
             });
 
             const botComment = comments.data.find(
-              comment.body.includes('UI: ESLint issues:')
+              comment => comment.body.includes('UI: ESLint issues:')
             );
 
             if (ESLintResults) {
