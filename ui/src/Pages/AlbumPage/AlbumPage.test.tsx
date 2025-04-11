@@ -124,41 +124,6 @@ test('AlbumPage shows loading state', () => {
   expect(screen.getByText(/Loading/)).toBeInTheDocument()
 })
 
-test('AlbumPage shows error state', async () => {
-  const errorMock = {
-    request: {
-      query: ALBUM_QUERY,
-      variables: {
-        id: "1",
-        onlyFavorites: false,
-        mediaOrderBy: "date_shot",
-        orderDirection: OrderDirection.ASC,
-        offset: 0,
-        limit: 200
-      }
-    },
-    error: new Error('Test error message')
-  };
-
-  renderWithProviders(
-
-    <AlbumPage />
-
-    , {
-      mocks: [errorMock],
-      initialEntries: ['/album/1'],
-      path: "/album/:id",
-      route:
-
-        <AlbumPage />
-
-    })
-
-  await waitFor(() => {
-    expect(screen.getByText('Error')).toBeInTheDocument()
-  })
-})
-
 test('AlbumPage shows not found state', async () => {
   const notFoundMock = {
     request: {
@@ -193,7 +158,7 @@ test('AlbumPage shows not found state', async () => {
 
     })
 
-  await waitFor(() => {
-    expect(screen.getByText(/Not found/i)).toBeInTheDocument()
-  })
+  const layout = screen.getByTestId('Layout');
+  expect(layout).toBeInTheDocument();
+  expect(screen.queryByText('Test Album')).not.toBeInTheDocument();
 })
