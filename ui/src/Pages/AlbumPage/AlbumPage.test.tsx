@@ -1,14 +1,19 @@
-import { MockedProvider } from '@apollo/client/testing'
-import { render, screen } from '@testing-library/react'
-import React from 'react'
-import { MemoryRouter, Route, Routes } from 'react-router-dom'
+import { screen, waitFor } from '@testing-library/react'
 import AlbumPage from './AlbumPage'
 import { renderWithProviders } from '../../helpers/testUtils'
 import { gql } from '@apollo/client'
+import { OrderDirection } from '../../__generated__/globalTypes'
 
-vi.mock('../../hooks/useScrollPagination')
+vi.mock('../../hooks/useScrollPagination', () => {
+  return {
+    default: () => ({
+      containerElem: { current: null },
+      finished: false
+    })
+  }
+})
 
-// Define the album query based on the error message
+// Define the album query based on the actual implementation
 const ALBUM_QUERY = gql`
   fragment MediaGalleryFields on Media {
     id
@@ -65,7 +70,7 @@ const mockAlbumQuery = {
       id: "1",
       onlyFavorites: false,
       mediaOrderBy: "date_shot",
-      orderDirection: "ASC",
+      orderDirection: OrderDirection.ASC,
       offset: 0,
       limit: 200
     }
@@ -83,13 +88,112 @@ const mockAlbumQuery = {
 };
 
 test('AlbumPage renders', () => {
-  renderWithProviders(<AlbumPage />, {
-    mocks: [mockAlbumQuery],
-    initialEntries: ['/album/1'],
-    path: "/album/:id",
-    route: <AlbumPage />
-  })
+  renderWithProviders(
+
+    <AlbumPage />
+
+    , {
+      mocks: [mockAlbumQuery],
+      initialEntries: ['/album/1'],
+      path: "/album/:id",
+      route:
+
+        <AlbumPage />
+
+    })
 
   expect(screen.getByText('Sort')).toBeInTheDocument()
   expect(screen.getByLabelText('Sort direction')).toBeInTheDocument()
+})
+
+test('AlbumPage shows loading state', () => {
+  renderWithProviders(
+
+    <AlbumPage />
+
+    , {
+      mocks: [],
+      initialEntries: ['/album/1'],
+      path: "/album/:id",
+      route:
+
+        <AlbumPage />
+
+    })
+
+  expect(screen.getByText('Loading...')).toBeInTheDocument()
+})
+
+test('AlbumPage shows error state', async () => {
+  const errorMock = {
+    request: {
+      query: ALBUM_QUERY,
+      variables: {
+        id: "1",
+        onlyFavorites: false,
+        mediaOrderBy: "date_shot",
+        orderDirection: OrderDirection.ASC,
+        offset: 0,
+        limit: 200
+      }
+    },
+    error: new Error('Test error message')
+  };
+
+  renderWithProviders(
+
+    <AlbumPage />
+
+    , {
+      mocks: [errorMock],
+      initialEntries: ['/album/1'],
+      path: "/album/:id",
+      route:
+
+        <AlbumPage />
+
+    })
+
+  await waitFor(() => {
+    expect(screen.getByText(/Error:/)).toBeInTheDocument()
+  })
+})
+
+test('AlbumPage shows not found state', async () => {
+  const notFoundMock = {
+    request: {
+      query: ALBUM_QUERY,
+      variables: {
+        id: "1",
+        onlyFavorites: false,
+        mediaOrderBy: "date_shot",
+        orderDirection: OrderDirection.ASC,
+        offset: 0,
+        limit: 200
+      }
+    },
+    result: {
+      data: {
+        album: null
+      }
+    }
+  };
+
+  renderWithProviders(
+
+    <AlbumPage />
+
+    , {
+      mocks: [notFoundMock],
+      initialEntries: ['/album/1'],
+      path: "/album/:id",
+      route:
+
+        <AlbumPage />
+
+    })
+
+  await waitFor(() => {
+    expect(screen.getByText('Not found')).toBeInTheDocument()
+  })
 })
