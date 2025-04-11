@@ -107,12 +107,38 @@ test('AlbumPage renders', () => {
 })
 
 test('AlbumPage shows loading state', () => {
+  // Create a loading mock with delay
+  const loadingMock = {
+    request: {
+      query: ALBUM_QUERY,
+      variables: {
+        id: "1",
+        onlyFavorites: false,
+        mediaOrderBy: "date_shot",
+        orderDirection: OrderDirection.ASC,
+        offset: 0,
+        limit: 200
+      }
+    },
+    result: {
+      data: {
+        album: {
+          id: "1",
+          title: "Test Album",
+          subAlbums: [],
+          media: []
+        }
+      }
+    },
+    delay: 500 // Add a delay to ensure component shows loading state
+  };
+
   renderWithProviders(
 
     <AlbumPage />
 
     , {
-      mocks: [],
+      mocks: [loadingMock],
       initialEntries: ['/album/1'],
       path: "/album/:id",
       route:
@@ -121,6 +147,7 @@ test('AlbumPage shows loading state', () => {
 
     })
 
+  // Using regex to match any text containing "Loading"
   expect(screen.getByText(/Loading/)).toBeInTheDocument()
 })
 
