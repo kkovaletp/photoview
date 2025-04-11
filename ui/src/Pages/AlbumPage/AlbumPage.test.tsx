@@ -193,5 +193,7 @@ test('AlbumPage shows not found state', async () => {
 
     })
 
-  expect(document.title).toContain('Not found')
+  await waitFor(() => {
+    expect(screen.getByText(/Not found/i)).toBeInTheDocument()
+  })
 })
