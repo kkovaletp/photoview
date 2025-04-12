@@ -62,7 +62,7 @@ const ALBUM_QUERY = gql`
   }
 `;
 
-test('AlbumPage renders', () => {
+test('AlbumPage renders', async () => {
   // Create a mock with the expected structure
   const mockAlbumQuery = {
     request: {
@@ -95,9 +95,11 @@ test('AlbumPage renders', () => {
     route: <AlbumPage />
   })
 
-  expect(screen.getByText('Sort')).toBeInTheDocument()
-  expect(screen.getByLabelText('Sort direction')).toBeInTheDocument()
-  expect(document.title).toContain('Test Album')
+  await waitFor(() => {
+    expect(screen.getByText('Sort')).toBeInTheDocument()
+    expect(screen.getByLabelText('Sort direction')).toBeInTheDocument()
+    expect(document.title).toContain('Test Album')
+  })
 })
 
 test('AlbumPage shows loading state', async () => {
