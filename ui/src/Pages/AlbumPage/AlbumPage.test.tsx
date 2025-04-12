@@ -62,6 +62,20 @@ const ALBUM_QUERY = gql`
   }
 `;
 
+const waitForDocumentTitle = async (expectedTitle: string, timeoutMs = 5000) => {
+  const startTime = Date.now();
+  while (Date.now() - startTime < timeoutMs) {
+    if (document.title.includes(expectedTitle)) {
+      return true;
+    }
+    // Small delay between checks
+    await new Promise(resolve => setTimeout(resolve, 100));
+  }
+  throw new Error(
+    `Document title didn't update to "${expectedTitle}" within ${timeoutMs}ms. The current title is "${document.title}".`
+  );
+};
+
 test('AlbumPage renders', async () => {
   // Create a mock with the expected structure
   const mockAlbumQuery = {
@@ -97,12 +111,10 @@ test('AlbumPage renders', async () => {
 
   expect(screen.getByText('Sort')).toBeInTheDocument()
   expect(screen.getByLabelText('Sort direction')).toBeInTheDocument()
+  await waitForDocumentTitle('Test Album');
   await waitFor(() => {
     expect(screen.getByText('Test Album')).toBeInTheDocument()
   }, { timeout: 3000 }) // Increased timeout gives more time for data loading
-
-  // Then check document title which should be updated after data is loaded
-  expect(document.title).toContain('Test Album')
 })
 
 test('AlbumPage shows loading state', async () => {
