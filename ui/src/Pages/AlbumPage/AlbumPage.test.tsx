@@ -62,7 +62,7 @@ const ALBUM_QUERY = gql`
   }
 `;
 
-const waitForDocumentTitle = async (expectedTitle: string, timeoutMs = 5000) => {
+const waitForDocumentTitle = async (expectedTitle: string, timeoutMs = 3000) => {
   const startTime = Date.now();
   while (Date.now() - startTime < timeoutMs) {
     if (document.title.includes(expectedTitle)) {
@@ -114,7 +114,7 @@ test('AlbumPage renders', async () => {
   await waitForDocumentTitle('Test Album');
   await waitFor(() => {
     expect(screen.getByText('Test Album')).toBeInTheDocument()
-  }, { timeout: 3000 }) // Increased timeout gives more time for data loading
+  }, { timeout: 1000 }) // Increased timeout gives more time for data loading
 })
 
 test('AlbumPage shows loading state', async () => {
