@@ -62,53 +62,9 @@ const ALBUM_QUERY = gql`
   }
 `;
 
-// Create a mock with the expected structure
-const mockAlbumQuery = {
-  request: {
-    query: ALBUM_QUERY,
-    variables: {
-      id: "1",
-      onlyFavorites: false,
-      mediaOrderBy: "date_shot",
-      orderDirection: OrderDirection.ASC,
-      offset: 0,
-      limit: 200
-    }
-  },
-  result: {
-    data: {
-      album: {
-        id: "1",
-        title: "Test Album",
-        subAlbums: [],
-        media: []
-      }
-    }
-  }
-};
-
 test('AlbumPage renders', () => {
-  renderWithProviders(
-
-    <AlbumPage />
-
-    , {
-      mocks: [mockAlbumQuery],
-      initialEntries: ['/album/1'],
-      path: "/album/:id",
-      route:
-
-        <AlbumPage />
-
-    })
-
-  expect(screen.getByText('Sort')).toBeInTheDocument()
-  expect(screen.getByLabelText('Sort direction')).toBeInTheDocument()
-})
-
-test('AlbumPage shows loading state', async () => {
-  // Create a loading mock with delay
-  const loadingMock = {
+  // Create a mock with the expected structure
+  const mockAlbumQuery = {
     request: {
       query: ALBUM_QUERY,
       variables: {
@@ -129,23 +85,44 @@ test('AlbumPage shows loading state', async () => {
           media: []
         }
       }
-    },
-    delay: 500 // Add a delay to ensure component shows loading state
+    }
   };
 
-  renderWithProviders(
+  renderWithProviders(<AlbumPage />, {
+    mocks: [mockAlbumQuery],
+    initialEntries: ['/album/1'],
+    path: "/album/:id",
+    route: <AlbumPage />
+  })
 
-    <AlbumPage />
+  expect(screen.getByText('Sort')).toBeInTheDocument()
+  expect(screen.getByLabelText('Sort direction')).toBeInTheDocument()
+  expect(screen.queryByText('Test Album')).toBeInTheDocument()
+})
 
-    , {
-      mocks: [loadingMock],
-      initialEntries: ['/album/1'],
-      path: "/album/:id",
-      route:
+test('AlbumPage shows loading state', async () => {
+  // Create a loading mock with delay
+  const loadingMock = {
+    request: {
+      query: ALBUM_QUERY,
+      variables: {
+        id: "1",
+        onlyFavorites: false,
+        mediaOrderBy: "date_shot",
+        orderDirection: OrderDirection.ASC,
+        offset: 0,
+        limit: 200
+      }
+    },
+    delay: Infinity // Add a delay to ensure component shows loading state
+  };
 
-        <AlbumPage />
-
-    })
+  renderWithProviders(<AlbumPage />, {
+    mocks: [loadingMock],
+    initialEntries: ['/album/1'],
+    path: "/album/:id",
+    route: <AlbumPage />
+  })
 
   await waitFor(() => {
     // Using regex to match any text containing "Loading"
@@ -174,19 +151,12 @@ test('AlbumPage shows not found state', async () => {
     }
   };
 
-  renderWithProviders(
-
-    <AlbumPage />
-
-    , {
-      mocks: [notFoundMock],
-      initialEntries: ['/album/1'],
-      path: "/album/:id",
-      route:
-
-        <AlbumPage />
-
-    })
+  renderWithProviders(<AlbumPage />, {
+    mocks: [notFoundMock],
+    initialEntries: ['/album/1'],
+    path: "/album/:id",
+    route: <AlbumPage />
+  })
 
   await waitFor(() => {
     expect(document.title).toContain('Not found')
