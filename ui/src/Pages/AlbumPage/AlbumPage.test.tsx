@@ -106,7 +106,7 @@ test('AlbumPage renders', () => {
   expect(screen.getByLabelText('Sort direction')).toBeInTheDocument()
 })
 
-test('AlbumPage shows loading state', () => {
+test('AlbumPage shows loading state', async () => {
   // Create a loading mock with delay
   const loadingMock = {
     request: {
@@ -147,8 +147,11 @@ test('AlbumPage shows loading state', () => {
 
     })
 
-  // Using regex to match any text containing "Loading"
-  expect(screen.getByText(/Loading/)).toBeInTheDocument()
+  await waitFor(() => {
+    // Using regex to match any text containing "Loading"
+    expect(screen.getByText(/Loading/)).toBeInTheDocument()
+    expect(document.title).toContain('Loading album')
+  })
 })
 
 test('AlbumPage shows not found state', async () => {
@@ -185,7 +188,10 @@ test('AlbumPage shows not found state', async () => {
 
     })
 
-  const layout = screen.getByTestId('Layout');
-  expect(layout).toBeInTheDocument();
-  expect(screen.queryByText('Test Album')).not.toBeInTheDocument();
+  await waitFor(() => {
+    expect(document.title).toContain('Not found')
+    const layout = screen.getByTestId('Layout');
+    expect(layout).toBeInTheDocument();
+    expect(screen.queryByText('Test Album')).not.toBeInTheDocument();
+  })
 })
