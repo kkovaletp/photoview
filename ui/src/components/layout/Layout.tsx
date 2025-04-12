@@ -1,6 +1,6 @@
 import { gql } from '@apollo/client'
 import React, { useContext } from 'react'
-import { Helmet } from 'react-helmet'
+import { Helmet } from '@dr.pogodin/react-helmet'
 import Header from '../header/Header'
 import { Authorized } from '../routes/AuthorizedRoute'
 import { Sidebar, SidebarContext } from '../sidebar/Sidebar'

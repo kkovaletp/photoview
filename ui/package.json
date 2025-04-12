@@ -23,6 +23,7 @@
   "dependencies": {
     "@apollo/client": "~3.13.6",
     "@babel/preset-typescript": "^7.27.0",
+    "@dr.pogodin/react-helmet": "^3.0.1",
     "@headlessui/react": "^2.2.1",
     "@mapbox/mapbox-gl-language": "^1.0.0",
     "@types/geojson": "^7946.0.16",
@@ -47,7 +48,6 @@
     "react": "^19.1.0",
     "react-blurhash": "^0.3.0",
     "react-dom": "^19.1.0",
-    "react-helmet": "^6.1.0",
     "react-hook-form": "^7.55.0",
     "react-i18next": "^15.4.1",
     "react-router-dom": "^6.3.0",

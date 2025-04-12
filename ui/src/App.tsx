@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react'
-import { Helmet } from 'react-helmet'
+import { Helmet } from '@dr.pogodin/react-helmet'
 import Routes from './components/routes/Routes'
 import Messages from './components/messages/Messages'
 import { useTranslation } from 'react-i18next'
