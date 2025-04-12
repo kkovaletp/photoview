@@ -62,7 +62,7 @@ const ALBUM_QUERY = gql`
   }
 `;
 
-test('AlbumPage renders', () => {
+test('AlbumPage renders', async () => {
   // Create a mock with the expected structure
   const mockAlbumQuery = {
     request: {
@@ -95,10 +95,13 @@ test('AlbumPage renders', () => {
     route: <AlbumPage />
   })
 
-  screen.debug()
-  console.log('Document title:', document.title)
   expect(screen.getByText('Sort')).toBeInTheDocument()
   expect(screen.getByLabelText('Sort direction')).toBeInTheDocument()
+  await waitFor(() => {
+    expect(screen.getByText('Test Album')).toBeInTheDocument()
+  }, { timeout: 3000 }) // Increased timeout gives more time for data loading
+
+  // Then check document title which should be updated after data is loaded
   expect(document.title).toContain('Test Album')
 })
 
