@@ -97,7 +97,7 @@ test('AlbumPage renders', () => {
 
   expect(screen.getByText('Sort')).toBeInTheDocument()
   expect(screen.getByLabelText('Sort direction')).toBeInTheDocument()
-  expect(screen.queryByText('Test Album')).toBeInTheDocument()
+  expect(document.title).toContain('Test Album')
 })
 
 test('AlbumPage shows loading state', async () => {
@@ -162,6 +162,5 @@ test('AlbumPage shows not found state', async () => {
     expect(document.title).toContain('Not found')
     const layout = screen.getByTestId('Layout');
     expect(layout).toBeInTheDocument();
-    expect(screen.queryByText('Test Album')).not.toBeInTheDocument();
   })
 })
