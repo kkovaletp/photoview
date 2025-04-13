@@ -6,6 +6,10 @@ import { MemoryRouter } from 'react-router-dom'
 import { renderWithProviders } from '../../../helpers/testUtils'
 import { MY_FACES_QUERY } from '../PeoplePage'
 
+vi.mock('react-blurhash', () => ({
+  Blurhash: () =>
+    <div data-testid="mock-blurhash">Blurhash</div>
+}))
 vi.mock('../../../hooks/useScrollPagination')
 
 test('single face group', async () => {
@@ -104,6 +108,6 @@ test('single face group', async () => {
   })
 
   await waitFor(() => {
-    expect(screen.getAllByRole('img')).toHaveLength(2)
+    expect(screen.getAllByTestId('mock-blurhash')).toHaveLength(2)
   })
 })
