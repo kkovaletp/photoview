@@ -230,7 +230,7 @@ jobs:
               output += 'Actions tab to see the same results.';
             } else {
               output += '#### UI: ESLint issues:\n';
-              output += 'ESLint didn't return any results.\n';
+              output += 'ESLint did not return any results.\n';
               output += 'This means that probably the ESLint job failed. Please check it.\n';
             }
 
