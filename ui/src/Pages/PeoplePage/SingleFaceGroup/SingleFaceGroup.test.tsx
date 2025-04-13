@@ -115,3 +115,72 @@ test('single face group', async () => {
     expect(blurhashElements.length + canvasElements.length).toBeGreaterThan(0);
   }, { timeout: 2000 });
 })
+
+test('handles GraphQL error', async () => {
+  const graphqlMocks = [
+    {
+      request: {
+        query: SINGLE_FACE_GROUP,
+        variables: { limit: 200, offset: 0, id: '123' },
+      },
+      error: new Error('An error occurred'),
+    },
+    {
+      request: {
+        query: MY_FACES_QUERY,
+        variables: {},
+      },
+      result: {
+        data: {
+          myFaceGroups: []
+        }
+      }
+    }
+  ]
+
+  renderWithProviders(<SingleFaceGroup faceGroupID="123" />, {
+    mocks: graphqlMocks,
+    initialEntries: ['/person/123']
+  })
+
+  // Check that the error message is displayed
+  await waitFor(() => {
+    expect(screen.getByText('An error occurred')).toBeInTheDocument();
+  }, { timeout: 2000 });
+})
+
+test('handles face group not found', async () => {
+  const graphqlMocks = [
+    {
+      request: {
+        query: SINGLE_FACE_GROUP,
+        variables: { limit: 200, offset: 0, id: '123' },
+      },
+      result: {
+        data: {
+          faceGroup: null,
+        },
+      },
+    },
+    {
+      request: {
+        query: MY_FACES_QUERY,
+        variables: {},
+      },
+      result: {
+        data: {
+          myFaceGroups: []
+        }
+      }
+    }
+  ]
+
+  renderWithProviders(<SingleFaceGroup faceGroupID="123" />, {
+    mocks: graphqlMocks,
+    initialEntries: ['/person/123']
+  })
+
+  await waitFor(() => {
+    expect(screen.getByText('Face group not found')).toBeInTheDocument();
+  }, { timeout: 2000 });
+})

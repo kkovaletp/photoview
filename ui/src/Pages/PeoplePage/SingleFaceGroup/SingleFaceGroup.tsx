@@ -87,6 +87,10 @@ const SingleFaceGroup = ({ faceGroupID }: SingleFaceGroupProps) => {
     return <div>{error.message}</div>
   }
 
+  if (data && !data.faceGroup) {
+    return <div>{t('general.notFound', 'Face group not found')}</div>
+  }
+
   return (
     <div ref={containerElem}>
       <FaceGroupTitle faceGroup={faceGroup} />
