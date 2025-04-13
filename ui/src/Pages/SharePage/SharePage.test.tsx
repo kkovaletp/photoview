@@ -1,9 +1,35 @@
 import { vi } from 'vitest'
 
-// Existing mock
+type SidebarContextType = {
+  updateSidebar: (content: React.ReactNode) => void;
+  setPinned: (pinned: boolean) => void;
+  content: React.ReactNode | null;
+  pinned: boolean;
+};
+
+vi.mock('../../components/sidebar/Sidebar', () => {
+  const mockUpdateSidebar = vi.fn();
+  return {
+    SidebarContext: {
+      Consumer: ({ children }: { children: (value: SidebarContextType) => React.ReactNode }) =>
+        children({
+          updateSidebar: mockUpdateSidebar,
+          setPinned: vi.fn(),
+          content: null,
+          pinned: false
+        }),
+      Provider: ({ children }: { children: React.ReactNode }) => children,
+    },
+    useContext: () => ({
+      updateSidebar: mockUpdateSidebar,
+      setPinned: vi.fn(),
+      content: null,
+      pinned: false
+    }),
+  };
+});
 vi.mock('../../hooks/useScrollPagination')
 
-import React from 'react'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import { MockedProvider } from '@apollo/client/testing'
 import { renderWithProviders } from '../../helpers/testUtils'
@@ -66,7 +92,7 @@ describe('load correct share page, based on graphql query', () => {
     },
   ]
 
-  test('load media share page', async () => { //TODO: fix "SidebarContext: updateSidebar was called before initialized"
+  test('load media share page', async () => {
     const mediaPageMock = {
       request: {
         query: SHARE_TOKEN_QUERY,
