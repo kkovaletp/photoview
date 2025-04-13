@@ -195,39 +195,31 @@ jobs:
             );
 
             if (hadolintResults) {
-
               output += '#### Hadolint issues:\n';
               output += 'Hadolint detected issues during execution.\n';
               output += '\n```\n' + hadolintResults + '\n```\n';
               output += '\nFind more info about detected issues and recommendations for fixes in the ';
               output += '[Rules table](https://github.com/hadolint/hadolint?tab=readme-ov-file#rules).';
-
-              if (botComment) {
-                await github.rest.issues.updateComment({
-                  comment_id: botComment.id,
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  body: output
-                });
-              } else {
-                await github.rest.issues.createComment({
-                  issue_number: context.issue.number,
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  body: output
-                });
-              }
-
             } else {
-
-              if (botComment) {
-                await github.rest.issues.deleteComment({
-                  comment_id: botComment.id,
-                  owner: context.repo.owner,
-                  repo: context.repo.repo
-                });
-              }
+              output += '#### Hadolint issues:\n';
+              output += 'Hadolint did not return any results.\n';
+              output += 'This means that probably the Hadolint job failed. Please check it.\n';
             }
+
+            if (botComment) {
+              await github.rest.issues.deleteComment({
+                comment_id: botComment.id,
+                owner: context.repo.owner,
+                repo: context.repo.repo
+              });
+            }
+
+            await github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: output
+            });
 
       - name: Generate report
         uses: hadolint/hadolint-action@v3.1.0

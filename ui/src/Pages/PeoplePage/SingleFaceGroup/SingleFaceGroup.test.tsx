@@ -7,7 +7,10 @@ import { renderWithProviders } from '../../../helpers/testUtils'
 
 vi.mock('../../../hooks/useScrollPagination')
 
-test('single face group', async () => { //TODO: fix several errors
+test('single face group', async () => {
+  // Import MY_FACES_QUERY to properly mock it
+  const { MY_FACES_QUERY } = require('../PeoplePage');
+
   const graphqlMocks = [
     {
       request: {
@@ -36,6 +39,7 @@ test('single face group', async () => { //TODO: fix several errors
                   id: '10',
                   type: 'Photo',
                   title: '122A2785-2.jpg',
+                  blurhash: 'LKO2?U%2Tw=w]~RBVZRi};RPxuwH',
                   thumbnail: {
                     __typename: 'MediaURL',
                     url: '/photo/thumbnail_122A2785-2_jpg_lFmZcaN5.jpg',
@@ -64,6 +68,7 @@ test('single face group', async () => { //TODO: fix several errors
                   id: '52',
                   type: 'Photo',
                   title: 'image.png',
+                  blurhash: 'LKO2?U%2Tw=w]~RBVZRi};RPxuwH',
                   thumbnail: {
                     __typename: 'MediaURL',
                     url: '/photo/thumbnail_image_png_OwTDG5fM.jpg',
@@ -82,6 +87,17 @@ test('single face group', async () => { //TODO: fix several errors
         },
       },
     },
+    {
+      request: {
+        query: MY_FACES_QUERY,
+        variables: {}, // Empty variables as shown in the error
+      },
+      result: {
+        data: {
+          myFaceGroups: [] // Empty array as we don't need real data
+        }
+      }
+    }
   ]
 
   renderWithProviders(<SingleFaceGroup faceGroupID="123" />, {
