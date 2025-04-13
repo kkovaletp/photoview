@@ -202,8 +202,7 @@ jobs:
               output += '[Rules table](https://github.com/hadolint/hadolint?tab=readme-ov-file#rules).';
             } else {
               output += '#### Hadolint issues:\n';
-              output += 'Hadolint did not return any results.\n';
-              output += 'This means that probably the Hadolint job failed. Please check it.\n';
+              output += 'Hadolint did not find any issues.\n';
             }
 
             if (botComment) {

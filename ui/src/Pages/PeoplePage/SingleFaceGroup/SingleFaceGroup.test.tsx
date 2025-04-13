@@ -4,13 +4,11 @@ import { MockedProvider } from '@apollo/client/testing'
 import SingleFaceGroup, { SINGLE_FACE_GROUP } from './SingleFaceGroup'
 import { MemoryRouter } from 'react-router-dom'
 import { renderWithProviders } from '../../../helpers/testUtils'
+import { MY_FACES_QUERY } from '../PeoplePage'
 
 vi.mock('../../../hooks/useScrollPagination')
 
 test('single face group', async () => {
-  // Import MY_FACES_QUERY to properly mock it
-  const { MY_FACES_QUERY } = require('../PeoplePage');
-
   const graphqlMocks = [
     {
       request: {
