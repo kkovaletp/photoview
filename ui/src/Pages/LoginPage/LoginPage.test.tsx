@@ -12,7 +12,7 @@ vi.mock('../../helpers/authentication.ts')
 const authToken = vi.mocked(authentication.authToken)
 
 describe('Login page redirects', () => {
-  test('Auth token redirect', async () => { //TODO: fix the "No more mocked responses for the query" error
+  test('Auth token redirect', async () => {
     authToken.mockImplementation(() => 'some-token')
 
     const history = createMemoryHistory()
@@ -20,7 +20,7 @@ describe('Login page redirects', () => {
 
     await act(async () => {
       await renderWithProviders(<LoginPage />, {
-        mocks: [],
+        mocks: [mockInitialSetupGraphql(false)],
         history,
       })
     })
