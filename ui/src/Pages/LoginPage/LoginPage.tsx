@@ -85,8 +85,8 @@ const LoginForm = () => {
         label={t('login_page.field.username', 'Username')}
         {...register('username', { required: true })}
         error={
-          formErrors.username?.type == 'required'
-            ? 'Please enter a username'
+          formErrors.username?.type === 'required'
+            ? t('login_page.field.username_error', 'Please enter a username')
             : undefined
         }
       />
@@ -96,7 +96,17 @@ const LoginForm = () => {
         className="w-full"
         type="password"
         label={t('login_page.field.password', 'Password')}
-        {...register('password')}
+        {...register('password', { required: true })}
+        error={
+          formErrors.password?.type === 'required'
+            ? t('login_page.field.password_error', 'Please enter a password')
+            : undefined
+        }
+      />
+          formErrors.password?.type === 'required'
+            ? t('login_page.field.password_error', 'Please enter a password')
+            : undefined
+        }
       />
       <input
         type="submit"
@@ -117,27 +127,36 @@ type LoginInputs = {
   username: string
   password: string
 }
+<TextField
+  sizeVariant="big"
+  wrapperClassName="my-6"
+  className="w-full"
+  label={t('login_page.field.username', 'Username')}
+  {...register('username', { required: true })}
+  error={
+    formErrors.username?.type === 'required'
+      ? t('login_page.field.username_error', 'Please enter a username')
+      : undefined
+  }
+/>
+<CheckInitialSetup>(INITIAL_SETUP_QUERY, { variables: {} })
 
-const LoginPage = () => {
-  const { t } = useTranslation()
-  const navigate = useNavigate()
-
-  const { data: initialSetupData } = useQuery<CheckInitialSetup>(
-    INITIAL_SETUP_QUERY,
-    { variables: {} }
-  )
-
+  // If a token exists, redirect immediately using the cached value.
   useEffect(() => {
-    if (authToken()) navigate('/')
-  }, [])
+    if (token) navigate('/')
+  }, [token, navigate])
 
+  // If initial setup is detected, redirect accordingly.
   useEffect(() => {
     if (initialSetupData?.siteInfo?.initialSetup) navigate('/initialSetup')
-  }, [initialSetupData?.siteInfo?.initialSetup])
+  }, [initialSetupData?.siteInfo?.initialSetup, navigate])
 
-  if (authToken() || initialSetupData?.siteInfo?.initialSetup) {
+  // Prevent rendering while redirection conditions are met.
+  if (token || initialSetupData?.siteInfo?.initialSetup) {
     return null
   }
+  // ... rest of the component's render function.
+}
 
   return (
     <>
