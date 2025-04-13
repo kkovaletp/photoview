@@ -77,7 +77,7 @@ const SingleFaceGroup = ({ faceGroupID }: SingleFaceGroupProps) => {
     })
 
   useEffect(() => {
-    const media = data?.faceGroup.imageFaces.map(x => x.media) || []
+    const media = data?.faceGroup?.imageFaces?.map(x => x.media) || []
     dispatchMedia({ type: 'replaceMedia', media })
   }, [data])
 
