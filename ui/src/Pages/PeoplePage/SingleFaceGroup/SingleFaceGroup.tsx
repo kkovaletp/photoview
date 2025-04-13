@@ -1,5 +1,5 @@
 import { gql, useQuery } from '@apollo/client'
-import React, { useEffect, useReducer } from 'react'
+import { useEffect, useReducer } from 'react'
 import { useTranslation } from 'react-i18next'
 import PaginateLoader from '../../../components/PaginateLoader'
 import MediaGallery from '../../../components/photoGallery/MediaGallery'
