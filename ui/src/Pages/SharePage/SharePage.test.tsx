@@ -6,44 +6,56 @@ import { SIDEBAR_DOWNLOAD_QUERY } from '../../components/sidebar/SidebarDownload
 import { SHARE_ALBUM_QUERY } from './AlbumSharePage'
 import { MediaType } from '../../__generated__/globalTypes'
 
-// Mock the useParams hook
+// Mock react-router-dom
 vi.mock('react-router-dom', async () => {
   const actual = await vi.importActual('react-router-dom') as object;
   return {
     ...actual,
     useParams: vi.fn().mockReturnValue({ token: 'TOKEN123' }),
-  }
-})
+  };
+});
 
-// Simple mock for Layout component
+// Mock Layout component
 vi.mock('../../components/layout/Layout', () => ({
   __esModule: true,
   default: ({ children, title }: { children: React.ReactNode, title?: string }) => (
+
     <div data-testid="Layout">
       {title && <title>{title}</title>}
       {children}
     </div>
-  ),
-}))
 
-// Mock SidebarContext with a simple implementation
+  ),
+}));
+
+// Mock MediaSidebar component
+vi.mock('../../components/sidebar/MediaSidebar/MediaSidebar', () => ({
+  __esModule: true,
+  default: ({ media }: { media: any }) =>
+    <div data-testid="MediaSidebar">{media.title}</div>,
+}));
+
+// Mock SidebarContext with necessary implementation
 vi.mock('../../components/sidebar/Sidebar', () => {
+  const mockUpdateSidebar = vi.fn();
+  const mockSetPinned = vi.fn();
   const mockContext = {
-    updateSidebar: vi.fn(),
-    setPinned: vi.fn(),
+    updateSidebar: mockUpdateSidebar,
+    setPinned: mockSetPinned,
     content: null,
     pinned: false
-  }
+  };
+
   return {
+    __esModule: true,
     SidebarContext: {
       Provider: ({ children }: { children: React.ReactNode }) => children,
       Consumer: ({ children }: { children: (value: any) => React.ReactNode }) =>
         children(mockContext),
     },
-    // Provide the context value directly when useContext is called
     useContext: () => mockContext
-  }
-})
+  };
+});
 
 // Mock the scrollPagination hook
 vi.mock('../../hooks/useScrollPagination', () => ({
@@ -51,16 +63,43 @@ vi.mock('../../hooks/useScrollPagination', () => ({
     containerElem: { current: null },
     finished: false
   })
-}))
+}));
+
+// Mock MediaSharePage and AlbumSharePage components
+vi.mock('./MediaSharePage', () => ({
+  __esModule: true,
+  default: ({ media, token }: { media: any, token: string }) => (
+
+    <div data-testid="MediaSharePage">
+      {media.title}
+    </div>
+
+  ),
+}));
+
+vi.mock('./AlbumSharePage', () => {
+  const original = vi.importActual('./AlbumSharePage') as object;
+  return {
+    ...original,
+    default: ({ albumId, token }: { albumId: string, token: string }) => (
+      <div data-testid="AlbumSharePage">
+        Album ID: {albumId}, Token: {token}
+      </div>
+    ),
+  };
+});
 
 describe('TokenRoute tests', () => {
-  const token = 'TOKEN123'
-  const historyMock = [{ pathname: `/share/${token}` }]
+  const token = 'TOKEN123';
+  const historyMock = [{ pathname: `/share/${token}` }];
 
-  // Reset mocks between tests
-  afterEach(() => {
-    vi.resetAllMocks()
-  })
+  // Set up mocks before each test
+  beforeEach(() => {
+    // Reset mocks
+    vi.resetAllMocks();
+    // Set default useParams mock implementation
+    vi.mocked(require('react-router-dom').useParams).mockReturnValue({ token });
+  });
 
   const validTokenMock = {
     request: {
@@ -75,7 +114,7 @@ describe('TokenRoute tests', () => {
         shareTokenValidatePassword: true,
       },
     },
-  }
+  };
 
   const mediaDownloadMock = {
     request: {
@@ -92,7 +131,7 @@ describe('TokenRoute tests', () => {
         },
       },
     },
-  }
+  };
 
   test('displays media share page when token contains media', async () => {
     const mediaTokenMock = {
@@ -119,21 +158,21 @@ describe('TokenRoute tests', () => {
           },
         },
       },
-    }
+    };
 
     renderWithProviders(<TokenRoute />, {
       mocks: [validTokenMock, mediaTokenMock, mediaDownloadMock],
       initialEntries: historyMock,
-    })
+    });
 
     // Wait for the loading state to disappear
-    await waitForElementToBeRemoved(() => screen.queryByText('Loading...'))
+    await waitForElementToBeRemoved(() => screen.queryByText('Loading...'));
 
     // Verify components are rendered
-    expect(screen.getByTestId('Layout')).toBeInTheDocument()
-    expect(screen.getByTestId('MediaSharePage')).toBeInTheDocument()
-    expect(screen.getByText('shared_image.jpg')).toBeInTheDocument()
-  })
+    expect(screen.getByTestId('Layout')).toBeInTheDocument();
+    expect(screen.getByTestId('MediaSharePage')).toBeInTheDocument();
+    expect(screen.getByText('shared_image.jpg')).toBeInTheDocument();
+  });
 
   test('displays album share page when token contains album', async () => {
     const albumTokenMock = {
@@ -155,7 +194,7 @@ describe('TokenRoute tests', () => {
           },
         },
       },
-    }
+    };
 
     const albumDetailsMock = {
       request: {
@@ -183,25 +222,25 @@ describe('TokenRoute tests', () => {
           },
         },
       },
-    }
+    };
 
     renderWithProviders(<TokenRoute />, {
       mocks: [validTokenMock, albumTokenMock, albumDetailsMock],
       initialEntries: historyMock,
-    })
+    });
 
     // Wait for the loading state to disappear
-    await waitForElementToBeRemoved(() => screen.queryByText('Loading...'))
+    await waitForElementToBeRemoved(() => screen.queryByText('Loading...'));
 
     // Verify components are rendered
-    expect(screen.getByTestId('Layout')).toBeInTheDocument()
-    expect(screen.getByTestId('AlbumSharePage')).toBeInTheDocument()
-  })
+    expect(screen.getByTestId('Layout')).toBeInTheDocument();
+    expect(screen.getByTestId('AlbumSharePage')).toBeInTheDocument();
+  });
 
   test('handles error with undefined message', async () => {
     // Create an error with undefined message
-    const error = new Error()
-    Object.defineProperty(error, 'message', { get: () => undefined })
+    const error = new Error();
+    Object.defineProperty(error, 'message', { get: () => undefined });
 
     const errorMock = {
       request: {
@@ -212,18 +251,18 @@ describe('TokenRoute tests', () => {
         },
       },
       error,
-    }
+    };
 
     renderWithProviders(<TokenRoute />, {
       mocks: [errorMock],
       initialEntries: historyMock,
-    })
+    });
 
     // Verify error message is displayed
     await waitFor(() => {
-      expect(screen.getByText('Error message not found.')).toBeInTheDocument()
-    })
-  })
+      expect(screen.getByText('Error message not found.')).toBeInTheDocument();
+    });
+  });
 
   test('handles null shareToken response', async () => {
     const nullTokenMock = {
@@ -239,19 +278,19 @@ describe('TokenRoute tests', () => {
           shareToken: null
         },
       },
-    }
+    };
 
     renderWithProviders(<TokenRoute />, {
       mocks: [validTokenMock, nullTokenMock],
       initialEntries: historyMock,
-    })
+    });
 
     // Wait for loading to finish
-    await waitForElementToBeRemoved(() => screen.queryByText('Loading...'))
+    await waitForElementToBeRemoved(() => screen.queryByText('Loading...'));
 
     // Verify "Share not found" message is displayed
-    expect(screen.getByText('Share not found')).toBeInTheDocument()
-  })
+    expect(screen.getByText('Share not found')).toBeInTheDocument();
+  });
 
   test('handles share not found error', async () => {
     const shareNotFoundMock = {
@@ -263,25 +302,30 @@ describe('TokenRoute tests', () => {
         },
       },
       error: new Error('GraphQL error: share not found'),
-    }
+    };
 
     renderWithProviders(<TokenRoute />, {
       mocks: [shareNotFoundMock],
       initialEntries: historyMock,
-    })
+    });
 
     // Verify error messages are displayed
     await waitFor(() => {
-      expect(screen.getByText('Share not found')).toBeInTheDocument()
-      expect(screen.getByText('Maybe the share has expired or has been deleted.')).toBeInTheDocument()
-    })
-  })
+      expect(screen.getByText('Share not found')).toBeInTheDocument();
+      expect(screen.getByText('Maybe the share has expired or has been deleted.')).toBeInTheDocument();
+    });
+  });
 
   test('handles sub-album share page', async () => {
-    // Mock useParams to return both token and subAlbum
-    vi.mocked(require('react-router-dom').useParams)
-      .mockReturnValueOnce({ token }) // First call in tokenFromParams
-      .mockReturnValueOnce({ token, subAlbum: '456' }) // Second call in SharedSubAlbumPage
+    // First set the mock to return just the token for the initial call
+    const useParamsMock = vi.mocked(require('react-router-dom').useParams);
+    useParamsMock.mockReset();
+    // First call returns just the token (for tokenFromParams)
+    useParamsMock.mockReturnValueOnce({ token });
+    // Second call returns token and subAlbum (for the nested component)
+    useParamsMock.mockReturnValueOnce({ token, subAlbum: '456' });
+    // Any subsequent calls also return both (just in case)
+    useParamsMock.mockReturnValue({ token, subAlbum: '456' });
 
     const albumTokenMock = {
       request: {
@@ -302,7 +346,7 @@ describe('TokenRoute tests', () => {
           },
         },
       },
-    }
+    };
 
     const subAlbumDetailsMock = {
       request: {
@@ -330,18 +374,18 @@ describe('TokenRoute tests', () => {
           },
         },
       },
-    }
+    };
 
     renderWithProviders(<TokenRoute />, {
       mocks: [validTokenMock, albumTokenMock, subAlbumDetailsMock],
       initialEntries: [{ pathname: `/share/${token}/456` }],
-    })
+    });
 
     // Wait for loading to finish
-    await waitForElementToBeRemoved(() => screen.queryByText('Loading...'))
+    await waitForElementToBeRemoved(() => screen.queryByText('Loading...'));
 
     // Verify components are rendered
-    expect(screen.getByTestId('Layout')).toBeInTheDocument()
-    expect(screen.getByTestId('AlbumSharePage')).toBeInTheDocument()
-  })
-})
+    expect(screen.getByTestId('Layout')).toBeInTheDocument();
+    expect(screen.getByTestId('AlbumSharePage')).toBeInTheDocument();
+  });
+});
