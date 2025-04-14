@@ -28,6 +28,17 @@ vi.mock('../../components/sidebar/Sidebar', () => {
     }),
   };
 });
+vi.mock('../../components/layout/Layout', () => {
+  return {
+    __esModule: true,
+    default: ({ children, title, ...otherProps }: { children: React.ReactNode, title?: string, [key: string]: any }) => (
+      <div data-testid="Layout" {...otherProps}>
+        {title && <title>{title}</title>}
+        {children}
+      </div>
+    ),
+  };
+});
 vi.mock('../../hooks/useScrollPagination')
 
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
