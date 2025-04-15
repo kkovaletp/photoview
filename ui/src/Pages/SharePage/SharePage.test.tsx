@@ -8,14 +8,6 @@ vi.mock('react-router-dom', async () => {
   };
 });
 
-import { vi } from 'vitest'
-import { screen, waitFor, waitForElementToBeRemoved } from '@testing-library/react'
-import { renderWithProviders } from '../../helpers/testUtils'
-import { SHARE_TOKEN_QUERY, TokenRoute, VALIDATE_TOKEN_PASSWORD_QUERY } from './SharePage'
-import { SIDEBAR_DOWNLOAD_QUERY } from '../../components/sidebar/SidebarDownloadMedia'
-import { SHARE_ALBUM_QUERY } from './AlbumSharePage'
-import { MediaType } from '../../__generated__/globalTypes'
-
 // Mock Layout component
 vi.mock('../../components/layout/Layout', () => ({
   __esModule: true,
@@ -85,6 +77,14 @@ vi.mock('./AlbumSharePage', async () => {
     ),
   };
 });
+
+import { vi } from 'vitest'
+import { screen, waitFor, waitForElementToBeRemoved } from '@testing-library/react'
+import { renderWithProviders } from '../../helpers/testUtils'
+import { SHARE_TOKEN_QUERY, TokenRoute, VALIDATE_TOKEN_PASSWORD_QUERY } from './SharePage'
+import { SIDEBAR_DOWNLOAD_QUERY } from '../../components/sidebar/SidebarDownloadMedia'
+import { SHARE_ALBUM_QUERY } from './AlbumSharePage'
+import { MediaType } from '../../__generated__/globalTypes'
 
 describe('TokenRoute tests', () => {
   const token = 'TOKEN123';
