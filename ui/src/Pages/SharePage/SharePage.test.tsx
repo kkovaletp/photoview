@@ -1,10 +1,9 @@
-// Mock react-router-dom
-const useParamsMock = vi.fn().mockReturnValue({ token: 'TOKEN123' });
+// First, all the mock declarations without external dependencies
 vi.mock('react-router-dom', async () => {
   const actual = await vi.importActual('react-router-dom') as object;
   return {
     ...actual,
-    useParams: useParamsMock,
+    useParams: vi.fn().mockReturnValue({ token: 'TOKEN123' }),
   };
 });
 
@@ -26,25 +25,26 @@ vi.mock('../../components/sidebar/MediaSidebar/MediaSidebar', () => ({
     <div data-testid="MediaSidebar">{media.title}</div>,
 }));
 
-// Mock SidebarContext with necessary implementation
+// Mock SidebarContext
 vi.mock('../../components/sidebar/Sidebar', () => {
-  const mockUpdateSidebar = vi.fn();
-  const mockSetPinned = vi.fn();
-  const mockContext = {
-    updateSidebar: mockUpdateSidebar,
-    setPinned: mockSetPinned,
-    content: null,
-    pinned: false
-  };
-
   return {
     __esModule: true,
     SidebarContext: {
       Provider: ({ children }: { children: React.ReactNode }) => children,
       Consumer: ({ children }: { children: (value: any) => React.ReactNode }) =>
-        children(mockContext),
+        children({
+          updateSidebar: vi.fn(),
+          setPinned: vi.fn(),
+          content: null,
+          pinned: false
+        }),
     },
-    useContext: () => mockContext
+    useContext: () => ({
+      updateSidebar: vi.fn(),
+      setPinned: vi.fn(),
+      content: null,
+      pinned: false
+    })
   };
 });
 
@@ -67,7 +67,7 @@ vi.mock('./MediaSharePage', () => ({
 }));
 
 vi.mock('./AlbumSharePage', async () => {
-  const actual = await vi.importActual('./AlbumSharePage') as any;
+  const actual = await vi.importActual('./AlbumSharePage') as object;
   return {
     ...actual,
     default: ({ albumId, token }: { albumId: string, token: string }) => (
@@ -78,6 +78,7 @@ vi.mock('./AlbumSharePage', async () => {
   };
 });
 
+// AFTER all vi.mock calls, import the modules
 import { vi } from 'vitest'
 import { screen, waitFor, waitForElementToBeRemoved } from '@testing-library/react'
 import { renderWithProviders } from '../../helpers/testUtils'
@@ -85,7 +86,9 @@ import { SHARE_TOKEN_QUERY, TokenRoute, VALIDATE_TOKEN_PASSWORD_QUERY } from './
 import { SIDEBAR_DOWNLOAD_QUERY } from '../../components/sidebar/SidebarDownloadMedia'
 import { SHARE_ALBUM_QUERY } from './AlbumSharePage'
 import { MediaType } from '../../__generated__/globalTypes'
+import { useParams } from 'react-router-dom'
 
+// Now we can use the mocked functions
 describe('TokenRoute tests', () => {
   const token = 'TOKEN123';
   const historyMock = [{ pathname: `/share/${token}` }];
@@ -93,7 +96,8 @@ describe('TokenRoute tests', () => {
   // Set up mocks before each test
   beforeEach(() => {
     vi.resetAllMocks();
-    useParamsMock.mockReturnValue({ token: 'TOKEN123' });
+    // Access the useParams mock through the imported module
+    vi.mocked(useParams).mockReturnValue({ token });
   });
 
   const validTokenMock = {
@@ -312,13 +316,15 @@ describe('TokenRoute tests', () => {
   });
 
   test('handles sub-album share page', async () => {
-    useParamsMock.mockReset();
+    // First set the mock to return just the token for the initial call
+    const useParamsMocked = vi.mocked(useParams);
+    useParamsMocked.mockReset();
     // First call returns just the token (for tokenFromParams)
-    useParamsMock.mockReturnValueOnce({ token });
+    useParamsMocked.mockReturnValueOnce({ token });
     // Second call returns token and subAlbum (for the nested component)
-    useParamsMock.mockReturnValueOnce({ token, subAlbum: '456' });
+    useParamsMocked.mockReturnValueOnce({ token, subAlbum: '456' });
     // Any subsequent calls also return both (just in case)
-    useParamsMock.mockReturnValue({ token, subAlbum: '456' });
+    useParamsMocked.mockReturnValue({ token, subAlbum: '456' });
 
     const albumTokenMock = {
       request: {
