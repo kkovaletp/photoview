@@ -19,12 +19,10 @@ vi.mock('react-router-dom', async () => {
 vi.mock('../../components/layout/Layout', () => ({
   __esModule: true,
   default: ({ children, title }: { children: React.ReactNode, title?: string }) => (
-
     <div data-testid="Layout">
       {title && <title>{title}</title>}
       {children}
     </div>
-
   ),
 }));
 
@@ -69,18 +67,16 @@ vi.mock('../../hooks/useScrollPagination', () => ({
 vi.mock('./MediaSharePage', () => ({
   __esModule: true,
   default: ({ media, token }: { media: any, token: string }) => (
-
     <div data-testid="MediaSharePage">
       {media.title}
     </div>
-
   ),
 }));
 
-vi.mock('./AlbumSharePage', () => {
-  const original = vi.importActual('./AlbumSharePage') as object;
+vi.mock('./AlbumSharePage', async () => {
+  const actual = await vi.importActual('./AlbumSharePage') as any;
   return {
-    ...original,
+    ...actual,
     default: ({ albumId, token }: { albumId: string, token: string }) => (
       <div data-testid="AlbumSharePage">
         Album ID: {albumId}, Token: {token}
