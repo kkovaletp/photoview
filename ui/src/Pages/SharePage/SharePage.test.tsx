@@ -8,15 +8,19 @@ vi.mock('react-router-dom', async () => {
 });
 
 // Mock Layout component
-vi.mock('../../components/layout/Layout', () => ({
-  __esModule: true,
-  default: ({ children, title }: { children: React.ReactNode, title?: string }) => (
+vi.mock('../../components/layout/Layout', () => {
+  // Define Layout component first, then export it to ensure proper definition
+  const Layout = ({ children, title }: { children: React.ReactNode, title?: string }) => (
     <div data-testid="Layout">
       {title && <title>{title}</title>}
       {children}
     </div>
-  ),
-}));
+  );
+  return {
+    __esModule: true,
+    default: Layout,
+  };
+});
 
 // Mock MediaSidebar component
 vi.mock('../../components/sidebar/MediaSidebar/MediaSidebar', () => ({
@@ -27,24 +31,21 @@ vi.mock('../../components/sidebar/MediaSidebar/MediaSidebar', () => ({
 
 // Mock SidebarContext
 vi.mock('../../components/sidebar/Sidebar', () => {
+  const mockContext = {
+    updateSidebar: vi.fn(),
+    setPinned: vi.fn(),
+    content: null,
+    pinned: false
+  };
+
   return {
     __esModule: true,
     SidebarContext: {
       Provider: ({ children }: { children: React.ReactNode }) => children,
       Consumer: ({ children }: { children: (value: any) => React.ReactNode }) =>
-        children({
-          updateSidebar: vi.fn(),
-          setPinned: vi.fn(),
-          content: null,
-          pinned: false
-        }),
+        children(mockContext),
     },
-    useContext: () => ({
-      updateSidebar: vi.fn(),
-      setPinned: vi.fn(),
-      content: null,
-      pinned: false
-    })
+    useContext: () => mockContext
   };
 });
 
@@ -75,6 +76,22 @@ vi.mock('./AlbumSharePage', async () => {
         Album ID: {albumId}, Token: {token}
       </div>
     ),
+  };
+});
+
+// Most importantly, we need to mock the AuthorizedTokenRoute component
+vi.mock('./AuthorizedTokenRoute', () => {
+  return {
+    __esModule: true,
+    default: () => {
+      // Import Layout to use our properly mocked version
+      const Layout = require('../../components/layout/Layout').default;
+      return (
+        <Layout title="Mock Share">
+          <div data-testid="AuthorizedTokenRouteContent">Mocked content</div>
+        </Layout>
+      );
+    }
   };
 });
 
