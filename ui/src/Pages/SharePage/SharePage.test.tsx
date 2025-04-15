@@ -7,11 +7,12 @@ import { SHARE_ALBUM_QUERY } from './AlbumSharePage'
 import { MediaType } from '../../__generated__/globalTypes'
 
 // Mock react-router-dom
+const useParamsMock = vi.fn().mockReturnValue({ token: 'TOKEN123' });
 vi.mock('react-router-dom', async () => {
   const actual = await vi.importActual('react-router-dom') as object;
   return {
     ...actual,
-    useParams: vi.fn().mockReturnValue({ token: 'TOKEN123' }),
+    useParams: useParamsMock,
   };
 });
 
@@ -91,10 +92,8 @@ describe('TokenRoute tests', () => {
 
   // Set up mocks before each test
   beforeEach(() => {
-    // Reset mocks
     vi.resetAllMocks();
-    // Set default useParams mock implementation
-    vi.mocked(require('react-router-dom').useParams).mockReturnValue({ token });
+    useParamsMock.mockReturnValue({ token: 'TOKEN123' });
   });
 
   const validTokenMock = {
@@ -313,8 +312,6 @@ describe('TokenRoute tests', () => {
   });
 
   test('handles sub-album share page', async () => {
-    // First set the mock to return just the token for the initial call
-    const useParamsMock = vi.mocked(require('react-router-dom').useParams);
     useParamsMock.mockReset();
     // First call returns just the token (for tokenFromParams)
     useParamsMock.mockReturnValueOnce({ token });
