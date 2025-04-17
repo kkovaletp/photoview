@@ -1,8 +1,28 @@
 import { vi } from 'vitest'
 
 vi.mock('../../hooks/useScrollPagination')
+vi.mock('../../Pages/SharePage/MediaSharePage', () => {
+  const originalModule = vi.importActual('../../Pages/SharePage/MediaSharePage')
+  // Define interface for the props
+  interface MediaViewProps {
+    media?: {
+      id?: string;
+      title?: string;
+      type?: string;
+      highRes?: {
+        url?: string;
+      };
+    };
+  }
+  // Simple implementation that doesn't use SidebarContext
+  const MockMediaView = (props: MediaViewProps) =>
+    <div data-testid="MediaSharePage">{props.media?.title}</div>
+  return {
+    ...originalModule,
+    MediaView: MockMediaView,
+  }
+})
 
-import React from 'react'
 import { MemoryRouter, Routes, Route } from 'react-router-dom'
 import { MockedProvider } from '@apollo/client/testing'
 import { renderWithProviders } from '../../helpers/testUtils'
