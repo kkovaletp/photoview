@@ -14,12 +14,20 @@ vi.mock('../../Pages/SharePage/MediaSharePage', () => {
       };
     };
   }
-  // Simple implementation that doesn't use SidebarContext
   const MockMediaView = (props: MediaViewProps) =>
     <div data-testid="MediaSharePage">{props.media?.title}</div>
+  const MockMediaSharePage = (props: MediaViewProps) => {
+    return (
+      <div data-testid="Layout">
+        <MockMediaView {...props} />
+      </div>
+    )
+  }
   return {
+    __esModule: true,
     ...originalModule,
     MediaView: MockMediaView,
+    default: MockMediaSharePage,
   }
 })
 
