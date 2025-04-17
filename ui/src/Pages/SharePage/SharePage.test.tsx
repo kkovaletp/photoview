@@ -1,195 +1,382 @@
-// Import vi first to ensure it's available
 import { vi } from 'vitest'
 
-// Mock react-router-dom
-vi.mock('react-router-dom', async () => {
-  const actual = await vi.importActual('react-router-dom') as object;
-  return {
-    ...actual,
-    useParams: vi.fn().mockReturnValue({ token: 'TOKEN123' }),
-  };
-});
+// Existing mock
+vi.mock('../../hooks/useScrollPagination')
 
-// Mock SidebarContext to silence the warning
-vi.mock('../../components/sidebar/Sidebar', () => {
-  return {
-    SidebarContext: {
-      Provider: ({ children }: { children: React.ReactNode }) => children,
-      Consumer: ({ children }: { children: (value: any) => React.ReactNode }) =>
-        children({
-          updateSidebar: vi.fn(),
-          setPinned: vi.fn(),
-          content: null,
-          pinned: false
-        }),
-    },
-    useContext: () => ({
-      updateSidebar: vi.fn(),
-      setPinned: vi.fn(),
-      content: null,
-      pinned: false
-    })
-  };
-});
-
-// Import after mocks
-import { screen, waitForElementToBeRemoved } from '@testing-library/react'
+import React from 'react'
+import { MemoryRouter, Routes, Route } from 'react-router-dom'
+import { MockedProvider } from '@apollo/client/testing'
 import { renderWithProviders } from '../../helpers/testUtils'
-import { SHARE_TOKEN_QUERY, TokenRoute, VALIDATE_TOKEN_PASSWORD_QUERY } from './SharePage'
-import { MediaType } from '../../__generated__/globalTypes'
-import { useParams } from 'react-router-dom'
 
-describe('TokenRoute', () => {
-  const token = 'TOKEN123';
+import {
+  render,
+  screen,
+  waitFor,
+  waitForElementToBeRemoved,
+} from '@testing-library/react'
 
-  beforeEach(() => {
-    vi.resetAllMocks();
-    vi.mocked(useParams).mockReturnValue({ token });
-  });
+import {
+  SHARE_TOKEN_QUERY,
+  TokenRoute,
+  VALIDATE_TOKEN_PASSWORD_QUERY,
+} from './SharePage'
 
-  test('displays loading state initially', () => {
-    const validTokenMock = {
+import { SIDEBAR_DOWNLOAD_QUERY } from '../../components/sidebar/SidebarDownloadMedia'
+import { SHARE_ALBUM_QUERY } from './AlbumSharePage'
+
+afterEach(() => {
+  vi.restoreAllMocks();
+});
+
+describe('load correct share page, based on graphql query', () => {
+  const token = 'TOKEN123'
+
+  const historyMock = [{ pathname: `/share/${token}` }]
+
+  const graphqlMocks = [
+    {
       request: {
         query: VALIDATE_TOKEN_PASSWORD_QUERY,
-        variables: { token, password: null },
+        variables: {
+          token,
+          password: null,
+        },
       },
       result: {
-        data: { shareTokenValidatePassword: true },
+        data: {
+          shareTokenValidatePassword: true,
+        },
       },
-    };
-
-    renderWithProviders(<TokenRoute />, {
-      mocks: [validTokenMock],
-      initialEntries: [{ pathname: `/share/${token}` }],
-    });
-
-    expect(screen.getByText('Loading...')).toBeInTheDocument();
-  });
-
-  test('displays media content when token contains media', async () => {
-    const validTokenMock = {
+    },
+    {
       request: {
-        query: VALIDATE_TOKEN_PASSWORD_QUERY,
-        variables: { token, password: null },
+        query: SIDEBAR_DOWNLOAD_QUERY,
+        variables: {
+          mediaId: '1',
+        },
       },
       result: {
-        data: { shareTokenValidatePassword: true },
+        data: {
+          media: {
+            id: '1',
+            downloads: [],
+          },
+        },
       },
-    };
+    },
+  ]
 
-    const mediaTokenMock = {
+  test('load media share page', async () => {
+    const mediaPageMock = {
       request: {
         query: SHARE_TOKEN_QUERY,
-        variables: { token, password: null },
+        variables: {
+          token,
+          password: null,
+        },
       },
       result: {
         data: {
           shareToken: {
-            token,
+            token: token,
             album: null,
             media: {
               id: '1',
               title: 'shared_image.jpg',
-              type: MediaType.Photo,
-              // Add all required fields to avoid Apollo errors
-              thumbnail: {
-                url: 'https://example.com/thumbnail.jpg',
-                width: 100,
-                height: 100
-              },
-              downloads: [],
+              type: 'Photo',
               highRes: {
                 url: 'https://example.com/shared_image.jpg',
-                width: 1000,
-                height: 800
               },
-              videoWeb: null,
-              exif: null
             },
           },
         },
       },
-    };
+    }
 
     renderWithProviders(<TokenRoute />, {
-      mocks: [validTokenMock, mediaTokenMock],
-      initialEntries: [{ pathname: `/share/${token}` }],
-    });
+      mocks: [...graphqlMocks, mediaPageMock],
+      initialEntries: historyMock,
+      path: "/share/:token/*",
+      route: <TokenRoute />,
+      apolloOptions: {
+        defaultOptions: {
+          watchQuery: { fetchPolicy: 'no-cache' },
+          query: { fetchPolicy: 'no-cache' }
+        }
+      }
+    })
 
-    // Wait for loading to finish
-    await waitForElementToBeRemoved(() => screen.queryByText('Loading...'));
+    expect(screen.getByText('Loading...')).toBeInTheDocument()
 
-    // Just check that loading is gone and the title appears somewhere
-    expect(screen.queryByText('Loading...')).not.toBeInTheDocument();
-    expect(document.title).toContain('Shared media');
-  });
+    await waitForElementToBeRemoved(() => screen.queryByText('Loading...'))
+
+    expect(screen.getByTestId('Layout')).toBeInTheDocument()
+    expect(screen.getByTestId('MediaSharePage')).toBeInTheDocument()
+  })
+
+  test('load album share page', async () => {
+    const albumPageMock = [
+      {
+        request: {
+          query: SHARE_TOKEN_QUERY,
+          variables: {
+            token,
+            password: null,
+          },
+        },
+        result: {
+          data: {
+            shareToken: {
+              token: token,
+              album: {
+                id: '1',
+              },
+              media: null,
+            },
+          },
+        },
+      },
+      {
+        request: {
+          query: SHARE_ALBUM_QUERY,
+          variables: {
+            id: '1',
+            token: token,
+            password: null,
+            limit: 200,
+            offset: 0,
+            mediaOrderBy: 'date_shot',
+            mediaOrderDirection: 'ASC',
+          },
+        },
+        result: {
+          data: {
+            album: {
+              id: '1',
+              title: 'album_title',
+              subAlbums: [],
+              thumbnail: {
+                url: 'https://photoview.example.com/album_thumbnail.jpg',
+              },
+              media: [],
+            },
+          },
+        },
+      },
+    ]
+
+    render(
+      <MockedProvider
+        mocks={[...graphqlMocks, ...albumPageMock]}
+        addTypename={false}
+        defaultOptions={{
+          // disable cache, required to make fragments work
+          watchQuery: { fetchPolicy: 'no-cache' },
+          query: { fetchPolicy: 'no-cache' },
+        }}
+      >
+        <MemoryRouter initialEntries={historyMock}>
+          <Routes>
+            <Route path="/share/:token/*" element={<TokenRoute />} />
+          </Routes>
+        </MemoryRouter>
+      </MockedProvider>
+    )
+
+    expect(screen.getByText('Loading...')).toBeInTheDocument()
+    await waitForElementToBeRemoved(() => screen.getByText('Loading...'))
+
+    expect(screen.getByTestId('Layout')).toBeInTheDocument()
+    expect(screen.getByTestId('AlbumSharePage')).toBeInTheDocument()
+  })
+
+  test('load subalbum of a shared album', async () => {
+    const subalbumID = '456'
+    const subalbumHistoryMock = [{ pathname: `/share/${token}/${subalbumID}` }]
+
+    const subalbumPageMocks = [
+      {
+        request: {
+          query: SHARE_TOKEN_QUERY,
+          variables: {
+            token,
+            password: null,
+          },
+        },
+        result: {
+          data: {
+            shareToken: {
+              token: token,
+              album: {
+                id: subalbumID,
+              },
+              media: null,
+            },
+          },
+        },
+      },
+      {
+        request: {
+          query: SHARE_ALBUM_QUERY,
+          variables: {
+            id: subalbumID,
+            token: token,
+            password: null,
+            limit: 200,
+            offset: 0,
+            mediaOrderBy: 'date_shot',
+            mediaOrderDirection: 'ASC',
+          },
+        },
+        result: {
+          data: {
+            album: {
+              id: '1',
+              title: 'album_title',
+              subAlbums: [],
+              thumbnail: {
+                url: 'https://photoview.example.com/album_thumbnail.jpg',
+              },
+              media: [],
+            },
+          },
+        },
+      },
+    ]
+
+    render(
+      <MockedProvider
+        mocks={[...graphqlMocks, ...subalbumPageMocks]}
+        addTypename={false}
+        defaultOptions={{
+          // disable cache, required to make fragments work
+          watchQuery: { fetchPolicy: 'no-cache' },
+          query: { fetchPolicy: 'no-cache' },
+        }}
+      >
+        <MemoryRouter initialEntries={subalbumHistoryMock}>
+          <Routes>
+            <Route path="/share/:token/*" element={<TokenRoute />} />
+          </Routes>
+        </MemoryRouter>
+      </MockedProvider>
+    )
+
+    expect(screen.getByText('Loading...')).toBeInTheDocument()
+    await waitForElementToBeRemoved(() => screen.getByText('Loading...'))
+
+    expect(screen.getByTestId('Layout')).toBeInTheDocument()
+    expect(screen.getByTestId('AlbumSharePage')).toBeInTheDocument()
+  })
 
   test('handles error with undefined message', async () => {
-    const error = new Error();
-    Object.defineProperty(error, 'message', { get: () => undefined });
+    const token = 'TOKEN123'
+    const historyMock = [{ pathname: `/share/${token}` }]
 
     const errorMock = {
       request: {
         query: VALIDATE_TOKEN_PASSWORD_QUERY,
-        variables: { token, password: null },
+        variables: {
+          token,
+          password: null,
+        },
       },
-      error,
-    };
+      error: new Error(),
+    }
+
+    // Remove the message property from the error
+    Object.defineProperty(errorMock.error, 'message', {
+      get: () => undefined
+    })
 
     renderWithProviders(<TokenRoute />, {
       mocks: [errorMock],
-      initialEntries: [{ pathname: `/share/${token}` }],
-    });
+      initialEntries: historyMock,
+      path: "/share/:token/*",
+      route: <TokenRoute />,
+    })
 
-    expect(await screen.findByText('Error message not found.')).toBeInTheDocument();
-  });
+    // The actual error message being rendered is "Error message not found"
+    await waitFor(() => {
+      expect(screen.getByText('Error message not found.')).toBeInTheDocument()
+    })
+  })
 
   test('handles null shareToken response', async () => {
-    const validTokenMock = {
-      request: {
-        query: VALIDATE_TOKEN_PASSWORD_QUERY,
-        variables: { token, password: null },
-      },
-      result: {
-        data: { shareTokenValidatePassword: true },
-      },
-    };
+    const token = 'TOKEN123'
+    const historyMock = [{ pathname: `/share/${token}` }]
 
-    const nullTokenMock = {
-      request: {
-        query: SHARE_TOKEN_QUERY,
-        variables: { token, password: null },
+    const nullTokenMock = [
+      {
+        request: {
+          query: VALIDATE_TOKEN_PASSWORD_QUERY,
+          variables: {
+            token,
+            password: null,
+          },
+        },
+        result: {
+          data: {
+            shareTokenValidatePassword: true,
+          },
+        },
       },
-      result: {
-        data: { shareToken: null }
+      {
+        request: {
+          query: SHARE_TOKEN_QUERY,
+          variables: {
+            token,
+            password: null,
+          },
+        },
+        result: {
+          data: {
+            shareToken: null
+          },
+        },
       },
-    };
+    ]
 
     renderWithProviders(<TokenRoute />, {
-      mocks: [validTokenMock, nullTokenMock],
-      initialEntries: [{ pathname: `/share/${token}` }],
-    });
+      mocks: nullTokenMock,
+      initialEntries: historyMock,
+      path: "/share/:token/*",
+      route: <TokenRoute />,
+    })
 
-    // Wait for loading to finish and verify "Share not found" message
-    await waitForElementToBeRemoved(() => screen.queryByText('Loading...'));
-    expect(screen.getByText('Share not found')).toBeInTheDocument();
-  });
+    expect(screen.getByText('Loading...')).toBeInTheDocument()
+    await waitForElementToBeRemoved(() => screen.queryByText('Loading...'))
+
+    // Should show "Share not found" when shareToken is null
+    expect(screen.getByText('Share not found')).toBeInTheDocument()
+  })
 
   test('handles share not found error', async () => {
+    const token = 'TOKEN123'
+    const historyMock = [{ pathname: `/share/${token}` }]
+
     const shareNotFoundMock = {
       request: {
         query: VALIDATE_TOKEN_PASSWORD_QUERY,
-        variables: { token, password: null },
+        variables: {
+          token,
+          password: null,
+        },
       },
       error: new Error('GraphQL error: share not found'),
-    };
+    }
 
     renderWithProviders(<TokenRoute />, {
       mocks: [shareNotFoundMock],
-      initialEntries: [{ pathname: `/share/${token}` }],
-    });
+      initialEntries: historyMock,
+      path: "/share/:token/*",
+      route: <TokenRoute />,
+    })
 
-    expect(await screen.findByText('Share not found')).toBeInTheDocument();
-    expect(await screen.findByText('Maybe the share has expired or has been deleted.')).toBeInTheDocument();
-  });
-});
+    // Wait for error message to be displayed
+    await waitFor(() => {
+      expect(screen.getByText('Share not found')).toBeInTheDocument()
+      expect(screen.getByText('Maybe the share has expired or has been deleted.')).toBeInTheDocument()
+    })
+  })
+})
