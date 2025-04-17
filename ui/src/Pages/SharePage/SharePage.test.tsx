@@ -1,6 +1,5 @@
 import { vi } from 'vitest'
 
-// Existing mock
 vi.mock('../../hooks/useScrollPagination')
 
 import React from 'react'
