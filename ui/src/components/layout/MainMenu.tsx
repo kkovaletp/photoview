@@ -81,14 +81,18 @@ export const MainMenu = () => {
     ? useQuery<faceDetectionEnabled>(FACE_DETECTION_ENABLED_QUERY)
     : null
 
-  const mapboxEnabled = !!mapboxQuery?.data?.mapboxToken
+  const mapboxEnabled =
+    !!mapboxQuery?.data?.mapboxToken &&
+    !mapboxQuery?.error
   const faceDetectionEnabled =
-    !!faceDetectionEnabledQuery?.data?.siteInfo?.faceDetectionEnabled
+    !!faceDetectionEnabledQuery?.data?.siteInfo?.faceDetectionEnabled &&
+    !faceDetectionEnabledQuery?.error
 
   return (
-    <div className="fixed w-full bottom-0 lg:bottom-auto lg:top-[84px] z-30 bg-white dark:bg-dark-bg shadow-separator lg:shadow-none lg:w-[240px] lg:ml-8 lg:mr-5 flex-shrink-0">
-      <ul className="flex justify-around py-2 px-2 max-w-lg mx-auto lg:flex-col lg:p-0">
+    <div className="fixed w-full bottom-0 lg:bottom-auto lg:top-[84px] z-30 bg-white dark:bg-dark-bg shadow-separator lg:shadow-none lg:w-[240px] lg:ml-8 lg:mr-5 flex-shrink-0" data-testid="main-menu">
+      <ul className="flex justify-around py-2 px-2 max-w-lg mx-auto lg:flex-col lg:p-0" data-testid="menu-items">
         <MenuButton
+          data-testid="menu-timeline"
           to="/timeline"
           exact
           label={t('sidemenu.photos', 'Timeline')}
@@ -102,6 +106,7 @@ export const MainMenu = () => {
           }
         />
         <MenuButton
+          data-testid="menu-albums"
           to="/albums"
           exact
           label={t('sidemenu.albums', 'Albums')}
@@ -116,6 +121,7 @@ export const MainMenu = () => {
         />
         {mapboxEnabled ? (
           <MenuButton
+            data-testid="menu-places"
             to="/places"
             exact
             label={t('sidemenu.places', 'Places')}
@@ -131,6 +137,7 @@ export const MainMenu = () => {
         ) : null}
         {faceDetectionEnabled ? (
           <MenuButton
+            data-testid="menu-people"
             to="/people"
             exact
             label={t('sidemenu.people', 'People')}
@@ -146,6 +153,7 @@ export const MainMenu = () => {
         ) : null}
         <MenuSeparator />
         <MenuButton
+          data-testid="menu-settings"
           to="/settings"
           exact
           label={t('sidemenu.settings', 'Settings')}
