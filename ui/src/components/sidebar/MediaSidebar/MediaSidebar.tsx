@@ -183,7 +183,6 @@ const SidebarContent = ({ media, hidePreview }: SidebarContentProps) => {
   let albumPath = null
   const mediaAlbum = media.album
   if (!isNil(mediaAlbum)) {
-    console.log('PATH reversed', mediaAlbum.path ?? [])
     const pathElms = [
       ...[...(mediaAlbum.path ?? [])].reverse(),
       mediaAlbum,
