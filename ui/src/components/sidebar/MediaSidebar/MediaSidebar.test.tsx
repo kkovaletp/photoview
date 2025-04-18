@@ -64,8 +64,22 @@ describe('MediaSidebar', () => {
       result: {
         data: {
           media: {
+            __typename: 'Media',
             id: '6867',
-            downloads: []
+            downloads: [
+              // Include at least one properly structured download item
+              {
+                __typename: 'Download',
+                title: 'Original',
+                mediaUrl: {
+                  __typename: 'MediaURL',
+                  url: '/download/original.jpg',
+                  width: 5322,
+                  height: 4362,
+                  fileSize: 1234567
+                }
+              }
+            ]
           }
         }
       }
@@ -78,6 +92,7 @@ describe('MediaSidebar', () => {
       result: {
         data: {
           media: {
+            __typename: 'Media',
             id: '6867',
             shares: []
           }
@@ -92,15 +107,18 @@ describe('MediaSidebar', () => {
       result: {
         data: {
           media: {
+            __typename: 'Media',
             id: '6867',
             title: '122A6069.jpg',
             type: MediaType.Photo,
             highRes: {
+              __typename: 'MediaURL',
               url: '/photo/highres.jpg',
               width: 5322,
               height: 4362,
             },
             thumbnail: {
+              __typename: 'MediaURL',
               url: '/photo/thumbnail.jpg',
               width: 1024,
               height: 839,
@@ -109,6 +127,7 @@ describe('MediaSidebar', () => {
             videoMetadata: null,
             exif: null,
             album: {
+              __typename: 'Album',
               id: '2294',
               title: 'album_name',
               path: []
@@ -125,7 +144,14 @@ describe('MediaSidebar', () => {
 
     // Only need the download query for unauthorized view
     renderWithProviders(<MediaSidebar media={media} />, {
-      mocks: [mocks[0]]
+      mocks: [mocks[0]],
+      apolloOptions: {
+        addTypename: true,
+        defaultOptions: {
+          watchQuery: { fetchPolicy: 'no-cache' },
+          query: { fetchPolicy: 'no-cache' }
+        }
+      }
     })
 
     expect(screen.getByText('122A6069.jpg')).toBeInTheDocument()
@@ -145,7 +171,14 @@ describe('MediaSidebar', () => {
 
     // Need all mocks for authorized view
     renderWithProviders(<MediaSidebar media={media} />, {
-      mocks: mocks
+      mocks: mocks,
+      apolloOptions: {
+        addTypename: true,
+        defaultOptions: {
+          watchQuery: { fetchPolicy: 'no-cache' },
+          query: { fetchPolicy: 'no-cache' }
+        }
+      }
     })
 
     expect(screen.getByText('122A6069.jpg')).toBeInTheDocument()
