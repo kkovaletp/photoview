@@ -33,7 +33,7 @@ module.exports = {
     sourceType: 'module',
   },
   plugins: ['react', 'react-hooks', '@typescript-eslint'],
-  rules: {
+  rules: { //TODO: disable react import rule
     'no-unused-vars': 'off',
     'react/display-name': 'off',
     '@typescript-eslint/no-unused-vars': 'warn',

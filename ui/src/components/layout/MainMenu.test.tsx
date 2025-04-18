@@ -1,11 +1,10 @@
-import React from 'react'
 import { MockedProvider } from '@apollo/client/testing'
 import { render, screen } from '@testing-library/react'
 
 import * as authentication from '../../helpers/authentication'
 import { ADMIN_QUERY } from './Layout'
 import { MemoryRouter } from 'react-router-dom'
-import MainMenu, { MAPBOX_QUERY } from './MainMenu'
+import MainMenu, { FACE_DETECTION_ENABLED_QUERY, MAPBOX_QUERY } from './MainMenu'
 
 vi.mock('../../helpers/authentication.ts')
 
@@ -15,7 +14,7 @@ afterEach(() => {
   authTokenMock.mockClear()
 })
 
-test('Layout sidebar component', async () => { //TODO: fix the "No more mocked responses for the query" error
+test('Layout sidebar component', async () => {
   authTokenMock.mockImplementation(() => 'test-token')
 
   const mockedGraphql = [
@@ -38,6 +37,18 @@ test('Layout sidebar component', async () => { //TODO: fix the "No more mocked r
       result: {
         data: {
           mapboxToken: true,
+        },
+      },
+    },
+    {
+      request: {
+        query: FACE_DETECTION_ENABLED_QUERY,
+      },
+      result: {
+        data: {
+          siteInfo: {
+            faceDetectionEnabled: true,
+          },
         },
       },
     },
