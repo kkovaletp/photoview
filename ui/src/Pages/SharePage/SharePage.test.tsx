@@ -192,23 +192,19 @@ describe('load correct share page, based on graphql query', () => {
       },
     ]
 
-    render(
-      <MockedProvider
-        mocks={[...graphqlMocks, ...albumPageMock]}
-        addTypename={false}
-        defaultOptions={{
-          // disable cache, required to make fragments work
+    renderWithProviders(<TokenRoute />, {
+      mocks: [...graphqlMocks, ...albumPageMock],
+      initialEntries: historyMock,
+      path: "/share/:token/*",
+      route: <TokenRoute />,
+      apolloOptions: {
+        addTypename: false,
+        defaultOptions: {
           watchQuery: { fetchPolicy: 'no-cache' },
-          query: { fetchPolicy: 'no-cache' },
-        }}
-      >
-        <MemoryRouter initialEntries={historyMock}>
-          <Routes>
-            <Route path="/share/:token/*" element={<TokenRoute />} />
-          </Routes>
-        </MemoryRouter>
-      </MockedProvider>
-    )
+          query: { fetchPolicy: 'no-cache' }
+        }
+      }
+    })
 
     expect(screen.getByText('Loading...')).toBeInTheDocument()
     await waitForElementToBeRemoved(() => screen.getByText('Loading...'))
