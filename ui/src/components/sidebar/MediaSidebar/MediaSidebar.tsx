@@ -1,5 +1,5 @@
 import { gql, useLazyQuery } from '@apollo/client'
-import React, { useEffect, useContext } from 'react'
+import { useEffect, useContext } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 import styled from 'styled-components'
@@ -163,7 +163,7 @@ type SidebarContentProps = {
 }
 
 const SidebarContent = ({ media, hidePreview }: SidebarContentProps) => {
-	const { updateSidebar } = useContext(SidebarContext)
+  const { updateSidebar } = useContext(SidebarContext)
   const { t } = useTranslation()
   let previewImage = null
   if (media.highRes) previewImage = media.highRes
@@ -192,7 +192,7 @@ const SidebarContent = ({ media, hidePreview }: SidebarContentProps) => {
         <Link
           className="text-blue-900 dark:text-blue-200 hover:underline"
           to={`/album/${album.id}`}
-					onClick={() => updateSidebar(null)}
+          onClick={() => updateSidebar(null)}
         >
           {album.title}
         </Link>
