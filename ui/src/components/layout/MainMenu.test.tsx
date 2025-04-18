@@ -125,3 +125,31 @@ test('Layout sidebar when unauthenticated', async () => {
   expect(screen.queryByText('Places')).not.toBeInTheDocument()
   expect(screen.queryByText('People')).not.toBeInTheDocument()
 })
+
+test('Layout sidebar handles GraphQL errors gracefully', async () => {
+  authTokenMock.mockImplementation(() => 'test-token')
+
+  const errorMocks = [
+    {
+      request: { query: MAPBOX_QUERY },
+      error: new Error('Failed to fetch mapbox data')
+    },
+    {
+      request: { query: FACE_DETECTION_ENABLED_QUERY },
+      error: new Error('Failed to fetch face detection status')
+    }
+  ]
+
+  render(
+    <MockedProvider mocks={errorMocks} addTypename={false}>
+      <MemoryRouter>
+        <MainMenu />
+      </MemoryRouter>
+    </MockedProvider>
+  )
+
+  // Only basic items should be present, conditional items should be hidden
+  expect(await screen.getByText('Timeline')).toBeInTheDocument()
+  expect(screen.queryByText('Places')).not.toBeInTheDocument()
+  expect(screen.queryByText('People')).not.toBeInTheDocument()
+})
