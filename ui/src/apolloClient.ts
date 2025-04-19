@@ -51,6 +51,19 @@ const link = split(
   httpLink
 )
 
+function getServerErrorMessages(networkError: Error | undefined): Error[] {
+  if (!networkError) return [];
+
+  const serverError = networkError as ServerError;
+  if (!serverError.result) return [];
+
+  if (typeof serverError.result === 'object' && 'errors' in serverError.result) {
+    return serverError.result.errors as Error[];
+  }
+
+  return [];
+}
+
 const linkError = onError(({ graphQLErrors, networkError }) => {
   const errorMessages = []
 
@@ -91,9 +104,7 @@ const linkError = onError(({ graphQLErrors, networkError }) => {
     console.error(`[Network error]: ${JSON.stringify(networkError)}`)
     clearTokenCookie()
 
-    const errors =
-      ((networkError as ServerError)?.result.errors as Error[]) || []
-
+    const errors = getServerErrorMessages(networkError);
     if (errors.length == 1) {
       errorMessages.push({
         header: 'Server error',
