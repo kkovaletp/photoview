@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react'
+import { useCallback } from 'react'
 import { useQuery, gql } from '@apollo/client'
 import AlbumGallery, {
   ALBUM_GALLERY_FRAGMENT,
@@ -86,8 +86,7 @@ function AlbumPage() {
       } else {
         setOnlyFavorites(onlyFavorites)
       }
-    },
-    [setOnlyFavorites, refetch]
+    }, [setOnlyFavorites, refetch, albumId]
   )
 
   if (error) return <div>Error</div>
@@ -95,7 +94,9 @@ function AlbumPage() {
   return (
     <Layout
       title={
-        data ? data.album.title : t('title.loading_album', 'Loading album')
+        !data ? t('title.loading_album', 'Loading album') :
+          !data.album ? t('title.not_found', 'Not found') :
+            data.album.title
       }
     >
       <AlbumGallery
