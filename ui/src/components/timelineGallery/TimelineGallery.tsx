@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useReducer } from 'react'
+import { useRef, useEffect, useReducer } from 'react'
 import { useQuery, gql } from '@apollo/client'
 import TimelineGroupDate from './TimelineGroupDate'
 import PresentView from '../photoGallery/presentView/PresentView'
@@ -14,6 +14,7 @@ import {
 import {
   getActiveTimelineImage as getActiveTimelineMedia,
   timelineGalleryReducer,
+  TimelineMediaIndex,
 } from './timelineGalleryReducer'
 import { urlPresentModeSetupHook } from '../photoGallery/mediaGalleryReducer'
 import TimelineFilters from './TimelineFilters'
@@ -86,8 +87,6 @@ const TimelineGallery = () => {
   const filterDate = getParam('date')
   const setFilterDate = (x: string) => setParam('date', x)
 
-  const favoritesNeedsRefresh = useRef(false)
-
   const [mediaState, dispatchMedia] = useReducer(timelineGalleryReducer, {
     presenting: false,
     timelineGroups: [],
@@ -128,8 +127,12 @@ const TimelineGallery = () => {
   }, [data])
 
   useEffect(() => {
-    ;(async () => {
-      await client.resetStore()
+    ; (async () => {
+      await client.cache.evict({
+        fieldName: 'myTimeline',
+        broadcast: false
+      });
+      client.cache.gc();
       await refetch({
         onlyFavorites,
         fromDate: filterDate
@@ -146,13 +149,12 @@ const TimelineGallery = () => {
     openPresentMode: event => {
       dispatchMedia({
         type: 'openPresentMode',
-        activeIndex: event.state.activeIndex,
+        activeIndex: event.state.activeIndex as unknown as TimelineMediaIndex,
       })
     },
   })
 
   useEffect(() => {
-    favoritesNeedsRefresh.current = false
     refetch({
       onlyFavorites: onlyFavorites,
     })
