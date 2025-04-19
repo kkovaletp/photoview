@@ -126,7 +126,7 @@ test('Layout sidebar when unauthenticated', () => {
   expect(screen.queryByText('People')).not.toBeInTheDocument()
 })
 
-test('Layout sidebar handles GraphQL errors gracefully', async () => {
+test('Layout sidebar handles GraphQL errors gracefully', () => {
   authTokenMock.mockImplementation(() => 'test-token')
 
   const errorMocks = [
