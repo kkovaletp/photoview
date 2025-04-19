@@ -127,8 +127,8 @@ const TimelineGallery = () => {
   }, [data])
 
   useEffect(() => {
-    ; (async () => {
-      await client.cache.evict({
+    (async () => {
+      client.cache.evict({
         fieldName: 'myTimeline',
         broadcast: false
       });
@@ -142,7 +142,7 @@ const TimelineGallery = () => {
         limit: 200,
       })
     })()
-  }, [filterDate])
+  }, [filterDate, onlyFavorites, refetch])
 
   urlPresentModeSetupHook({
     dispatchMedia,
@@ -158,7 +158,7 @@ const TimelineGallery = () => {
     refetch({
       onlyFavorites: onlyFavorites,
     })
-  }, [onlyFavorites])
+  }, [onlyFavorites, refetch])
 
   if (error) {
     return <div>{error.message}</div>
