@@ -1,4 +1,4 @@
-import { useRef, useEffect, useReducer } from 'react'
+import { useEffect, useReducer } from 'react'
 import { useQuery, gql } from '@apollo/client'
 import TimelineGroupDate from './TimelineGroupDate'
 import PresentView from '../photoGallery/presentView/PresentView'
