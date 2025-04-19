@@ -3,6 +3,8 @@ import AlbumPage from './AlbumPage'
 import { renderWithProviders } from '../../helpers/testUtils'
 import { gql } from '@apollo/client'
 import { OrderDirection } from '../../__generated__/globalTypes'
+import { ALBUM_GALLERY_FRAGMENT } from '../../components/albumGallery/AlbumGallery'
+import { MEDIA_GALLERY_FRAGMENT } from '../../components/photoGallery/MediaGallery'
 
 vi.mock('../../hooks/useScrollPagination', () => {
   return {
@@ -15,45 +17,8 @@ vi.mock('../../hooks/useScrollPagination', () => {
 
 // Define the album query based on the actual implementation
 const ALBUM_QUERY = gql`
-  fragment MediaGalleryFields on Media {
-    id
-    type
-    blurhash
-    thumbnail {
-      url
-      width
-      height
-    }
-    highRes {
-      url
-    }
-    videoWeb {
-      url
-    }
-    favorite
-  }
-
-  fragment AlbumGalleryFields on Album {
-    id
-    title
-    subAlbums(order: {order_by: "title", order_direction: $orderDirection}) {
-      id
-      title
-      thumbnail {
-        id
-        thumbnail {
-          url
-        }
-      }
-    }
-    media(
-      paginate: {limit: $limit, offset: $offset}
-      order: {order_by: $mediaOrderBy, order_direction: $orderDirection}
-      onlyFavorites: $onlyFavorites
-    ) {
-      ...MediaGalleryFields
-    }
-  }
+  ${MEDIA_GALLERY_FRAGMENT}
+  ${ALBUM_GALLERY_FRAGMENT}
 
   query albumQuery($id: ID!, $onlyFavorites: Boolean, $mediaOrderBy: String, $orderDirection: OrderDirection, $limit: Int, $offset: Int) {
     album(id: $id) {

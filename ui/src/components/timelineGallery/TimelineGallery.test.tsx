@@ -102,7 +102,6 @@ test('filter by favorites', async () => {
 
   // Make sure we have at least one favorite item in test data
   if (favoriteTimelineData.length === 0) {
-    console.warn('Test data has no favorite items, creating a modified version for testing');
     // Create a copy with at least one favorite item if needed
     favoriteTimelineData.push({ ...timelineData[0], favorite: true });
   }
