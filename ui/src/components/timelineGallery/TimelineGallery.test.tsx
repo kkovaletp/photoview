@@ -171,22 +171,22 @@ test('filter by favorites', async () => {
 
 // Test error handling with the actual error message Apollo displays
 test('handles error state', async () => {
-  // Mock for initial view that throws an error
+  // Mock for the favorites-only query with an error
   const errorMock = {
-    request: {
-      query: MY_TIMELINE_QUERY,
-      variables: { onlyFavorites: false, fromDate: undefined, offset: 0, limit: 200 },
-    },
-    error: new Error('Failed to load timeline'),
-  };
-
-  // Add this mock for the favorites-only query that the component tries to make
-  const favoritesMock = {
     request: {
       query: MY_TIMELINE_QUERY,
       variables: { onlyFavorites: true, fromDate: undefined, offset: 0, limit: 200 },
     },
-    result: { data: { myTimeline: [] } },  // Empty results for favorites query
+    error: new Error('Failed to load timeline'),
+  };
+
+  // Need to mock the non-favorites query too
+  const nonFavoritesQueryMock = {
+    request: {
+      query: MY_TIMELINE_QUERY,
+      variables: { onlyFavorites: false, fromDate: undefined, offset: 0, limit: 200 },
+    },
+    result: { data: { myTimeline: [] } },
   };
 
   const earliestMediaMock = {
@@ -202,11 +202,14 @@ test('handles error state', async () => {
   };
 
   renderWithProviders(<TimelineGallery />, {
-    mocks: [errorMock, favoritesMock, earliestMediaMock],
-    initialEntries: ['/timeline']
+    mocks: [errorMock, nonFavoritesQueryMock, earliestMediaMock],
+    // Initialize with the favorites parameter to match what the component expects
+    initialEntries: ['/timeline?favorites=1']
   });
 
-  // Look for any error message containing the word "Failed" instead of exact text
-  const errorElement = await screen.findByText(/Failed/i);
-  expect(errorElement).toBeInTheDocument();
+  // Use waitFor for more resilient testing
+  await waitFor(() => {
+    const errorElement = screen.getByText('Failed to load timeline');
+    expect(errorElement).toBeInTheDocument();
+  }, { timeout: 2000 });
 })
