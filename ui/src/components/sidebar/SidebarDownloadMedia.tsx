@@ -307,12 +307,15 @@ type SidebarMediaDownladProps = {
 const SidebarMediaDownload = ({ media }: SidebarMediaDownladProps) => {
   const { t } = useTranslation()
   const { add, removeKey } = useMessageState()
-  if (!media || !media.id) return null
 
   const [loadPhotoDownloads, { called, loading, data }] = useLazyQuery<
     sidebarDownloadQuery,
     sidebarDownloadQueryVariables
-  >(SIDEBAR_DOWNLOAD_QUERY, { variables: { mediaId: media.id } })
+  >(SIDEBAR_DOWNLOAD_QUERY, {
+    variables: { mediaId: media?.id || '' }
+  })
+
+  if (!media || !media.id) return null
 
   let downloads: sidebarDownloadQuery_media_downloads[] = []
 
