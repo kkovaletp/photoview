@@ -73,13 +73,16 @@ const MenuSeparator = () => (
 
 export const MainMenu = () => {
   const { t } = useTranslation()
+  const token = authToken();
 
-  const mapboxQuery = authToken()
-    ? useQuery<mapboxEnabledQuery>(MAPBOX_QUERY)
-    : null
-  const faceDetectionEnabledQuery = authToken()
-    ? useQuery<faceDetectionEnabled>(FACE_DETECTION_ENABLED_QUERY)
-    : null
+  const mapboxQuery = useQuery<mapboxEnabledQuery>(
+    MAPBOX_QUERY,
+    { skip: !token }
+  );
+  const faceDetectionEnabledQuery = useQuery<faceDetectionEnabled>(
+    FACE_DETECTION_ENABLED_QUERY,
+    { skip: !token }
+  );
 
   const mapboxEnabled =
     !!mapboxQuery?.data?.mapboxToken &&

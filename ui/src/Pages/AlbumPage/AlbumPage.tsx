@@ -44,8 +44,10 @@ function AlbumPage() {
   const orderParams = useOrderingParams(urlParams)
 
   const onlyFavorites = urlParams.getParam('favorites') == '1' ? true : false
-  const setOnlyFavorites = (favorites: boolean) =>
-    urlParams.setParam('favorites', favorites ? '1' : '0')
+  const setOnlyFavorites = useCallback((favorites: boolean) =>
+    urlParams.setParam('favorites', favorites ? '1' : '0'),
+    [urlParams]
+  )
 
   const { loading, error, data, refetch, fetchMore } = useQuery<
     albumQuery,

@@ -7,7 +7,6 @@ import { SIDEBAR_DOWNLOAD_QUERY } from '../SidebarDownloadMedia'
 import { MediaType } from '../../../__generated__/globalTypes'
 import { renderWithProviders } from '../../../helpers/testUtils'
 import { gql } from '@apollo/client'
-
 import * as authentication from '../../../helpers/authentication'
 
 vi.mock('../../../helpers/authentication.ts')

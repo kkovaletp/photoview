@@ -78,7 +78,7 @@ function registerValidSW(swUrl: string, config?: Config) {
               }
               // At this point, everything has been precached.
               // Execute callback
-            } else if (config && config.onSuccess) {
+            } else if (config?.onSuccess) {
               config.onSuccess(registration)
             }
           }

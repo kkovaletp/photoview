@@ -105,7 +105,7 @@ test('Layout sidebar with disabled features', async () => {
   expect(screen.queryByText('People')).not.toBeInTheDocument()
 })
 
-test('Layout sidebar when unauthenticated', async () => {
+test('Layout sidebar when unauthenticated', () => {
   authTokenMock.mockImplementation(() => '')
 
   render(
@@ -149,7 +149,7 @@ test('Layout sidebar handles GraphQL errors gracefully', async () => {
   )
 
   // Only basic items should be present, conditional items should be hidden
-  expect(await screen.getByText('Timeline')).toBeInTheDocument()
+  expect(screen.getByText('Timeline')).toBeInTheDocument()
   expect(screen.queryByText('Places')).not.toBeInTheDocument()
   expect(screen.queryByText('People')).not.toBeInTheDocument()
 })
