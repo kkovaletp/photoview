@@ -171,60 +171,79 @@ test('filter by favorites', async () => {
 
 // Test error handling with the actual error message Apollo displays
 test('handles error state', async () => {
-  // Mock console.error to prevent the unhandled rejection warning
+  // Set up a handler for the unhandled rejection
+  const unhandledRejectionHandler = (event: PromiseRejectionEvent) => {
+    // Only intercept our expected error
+    if (event.reason?.message === 'Failed to load timeline') {
+      // Prevent it from being reported as unhandled
+      event.preventDefault();
+    }
+  };
+
+  // Add the handler before the test runs
+  window.addEventListener('unhandledrejection', unhandledRejectionHandler);
+
+  // Also mock console.error to prevent console noise
   const originalConsoleError = console.error;
   console.error = vi.fn((...args) => {
-    // Only suppress our expected Apollo error
     const message = args[0]?.toString() || '';
     if (message.includes('Failed to load timeline')) {
-      return;
+      return; // Suppress our expected error
     }
-    // Let other errors pass through normally
-    originalConsoleError(...args);
+    originalConsoleError(...args); // Let other errors through
   });
 
-  // Mock for the favorites-only query with an error
-  const errorMock = {
-    request: {
-      query: MY_TIMELINE_QUERY,
-      variables: { onlyFavorites: true, fromDate: undefined, offset: 0, limit: 200 },
-    },
-    error: new Error('Failed to load timeline'),
-  };
+  try {
+    // Mock for the favorites-only query with an error
+    const errorMock = {
+      request: {
+        query: MY_TIMELINE_QUERY,
+        variables: { onlyFavorites: true, fromDate: undefined, offset: 0, limit: 200 },
+      },
+      error: new Error('Failed to load timeline'),
+    };
 
-  // Need to mock the non-favorites query too
-  const nonFavoritesQueryMock = {
-    request: {
-      query: MY_TIMELINE_QUERY,
-      variables: { onlyFavorites: false, fromDate: undefined, offset: 0, limit: 200 },
-    },
-    result: { data: { myTimeline: [] } },
-  };
+    // Need to mock the non-favorites query too
+    const nonFavoritesQueryMock = {
+      request: {
+        query: MY_TIMELINE_QUERY,
+        variables: { onlyFavorites: false, fromDate: undefined, offset: 0, limit: 200 },
+      },
+      result: { data: { myTimeline: [] } },
+    };
 
-  const earliestMediaMock = {
-    request: {
-      query: EARLIEST_MEDIA_QUERY,
-      variables: {},
-    },
-    result: {
-      data: {
-        myMedia: [{ id: '1001', date: '2020-01-01T00:00:00Z' }]
+    const earliestMediaMock = {
+      request: {
+        query: EARLIEST_MEDIA_QUERY,
+        variables: {},
+      },
+      result: {
+        data: {
+          myMedia: [{ id: '1001', date: '2020-01-01T00:00:00Z' }]
+        }
+      },
+    };
+
+    renderWithProviders(<TimelineGallery />, {
+      mocks: [errorMock, nonFavoritesQueryMock, earliestMediaMock],
+      initialEntries: ['/timeline?favorites=1'],
+      apolloOptions: {
+        // Tell Apollo to not throw errors but return them to the component
+        defaultOptions: {
+          watchQuery: { errorPolicy: 'all' },
+          query: { errorPolicy: 'all' }
+        }
       }
-    },
-  };
+    });
 
-  renderWithProviders(<TimelineGallery />, {
-    mocks: [errorMock, nonFavoritesQueryMock, earliestMediaMock],
-    // Initialize with the favorites parameter to match what the component expects
-    initialEntries: ['/timeline?favorites=1']
-  });
-
-  // Use waitFor for more resilient testing
-  await waitFor(() => {
-    const errorElement = screen.getByText('Failed to load timeline');
-    expect(errorElement).toBeInTheDocument();
-  }, { timeout: 2000 });
-
-  // Restore console.error when done
-  console.error = originalConsoleError;
-})
+    // Use waitFor for more resilient testing
+    await waitFor(() => {
+      const errorElement = screen.getByText('Failed to load timeline');
+      expect(errorElement).toBeInTheDocument();
+    }, { timeout: 2000 });
+  } finally {
+    // Always clean up, even if the test fails
+    window.removeEventListener('unhandledrejection', unhandledRejectionHandler);
+    console.error = originalConsoleError;
+  }
+});
