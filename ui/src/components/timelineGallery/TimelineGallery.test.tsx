@@ -171,6 +171,18 @@ test('filter by favorites', async () => {
 
 // Test error handling with the actual error message Apollo displays
 test('handles error state', async () => {
+  // Mock console.error to prevent the unhandled rejection warning
+  const originalConsoleError = console.error;
+  console.error = vi.fn((...args) => {
+    // Only suppress our expected Apollo error
+    const message = args[0]?.toString() || '';
+    if (message.includes('Failed to load timeline')) {
+      return;
+    }
+    // Let other errors pass through normally
+    originalConsoleError(...args);
+  });
+
   // Mock for the favorites-only query with an error
   const errorMock = {
     request: {
@@ -212,4 +224,7 @@ test('handles error state', async () => {
     const errorElement = screen.getByText('Failed to load timeline');
     expect(errorElement).toBeInTheDocument();
   }, { timeout: 2000 });
+
+  // Restore console.error when done
+  console.error = originalConsoleError;
 })
