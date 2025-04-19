@@ -53,6 +53,7 @@ const link = split(
 
 function getServerErrorMessages(networkError: Error | undefined): Error[] {
   if (!networkError) return [];
+  if (!('result' in networkError)) return [];
 
   const serverError = networkError as ServerError;
   if (!serverError.result) return [];
