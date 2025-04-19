@@ -117,8 +117,6 @@ export const SIDEBAR_MEDIA_QUERY = gql`
   }
 `
 
-const { t } = useTranslation()
-
 const PreviewImage = styled(ProtectedImage)`
   position: absolute;
   width: 100%;
@@ -166,6 +164,7 @@ type SidebarContentProps = {
 
 const SidebarContent = ({ media, hidePreview }: SidebarContentProps) => {
   const { updateSidebar } = useContext(SidebarContext)
+  const { t } = useTranslation()
   let previewImage = null
   if (media.highRes) previewImage = media.highRes
   else if (media.thumbnail) previewImage = media.thumbnail
@@ -275,6 +274,7 @@ type MediaSidebarType = {
 }
 
 const MediaSidebar = ({ media, hidePreview }: MediaSidebarType) => {
+  const { t } = useTranslation()
   const [loadMedia, { loading, error, data }] = useLazyQuery<
     sidebarMediaQuery,
     sidebarMediaQueryVariables
