@@ -171,13 +171,22 @@ test('filter by favorites', async () => {
 
 // Test error handling with the actual error message Apollo displays
 test('handles error state', async () => {
+  // Mock for initial view that throws an error
   const errorMock = {
     request: {
       query: MY_TIMELINE_QUERY,
-      // Important: Use exact variable ordering from error message
       variables: { onlyFavorites: false, fromDate: undefined, offset: 0, limit: 200 },
     },
     error: new Error('Failed to load timeline'),
+  };
+
+  // Add this mock for the favorites-only query that the component tries to make
+  const favoritesMock = {
+    request: {
+      query: MY_TIMELINE_QUERY,
+      variables: { onlyFavorites: true, fromDate: undefined, offset: 0, limit: 200 },
+    },
+    result: { data: { myTimeline: [] } },  // Empty results for favorites query
   };
 
   const earliestMediaMock = {
@@ -193,7 +202,7 @@ test('handles error state', async () => {
   };
 
   renderWithProviders(<TimelineGallery />, {
-    mocks: [errorMock, earliestMediaMock],
+    mocks: [errorMock, favoritesMock, earliestMediaMock],
     initialEntries: ['/timeline']
   });
 
