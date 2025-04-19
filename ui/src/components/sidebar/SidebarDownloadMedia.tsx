@@ -311,9 +311,7 @@ const SidebarMediaDownload = ({ media }: SidebarMediaDownladProps) => {
   const [loadPhotoDownloads, { called, loading, data }] = useLazyQuery<
     sidebarDownloadQuery,
     sidebarDownloadQueryVariables
-  >(SIDEBAR_DOWNLOAD_QUERY, {
-    variables: { mediaId: media?.id || '' }
-  })
+  >(SIDEBAR_DOWNLOAD_QUERY, {})
 
   if (!media || !media.id) return null
 
@@ -325,7 +323,9 @@ const SidebarMediaDownload = ({ media }: SidebarMediaDownladProps) => {
     }
   } else {
     if (!media.downloads) {
-      loadPhotoDownloads()
+      loadPhotoDownloads({
+        variables: { mediaId: media.id }
+      })
     } else {
       downloads = media.downloads
     }
