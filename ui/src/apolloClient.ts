@@ -28,8 +28,6 @@ const httpLink = new HttpLink({
   credentials: 'include',
 })
 
-console.log('GRAPHQL ENDPOINT', GRAPHQL_ENDPOINT)
-
 const apiProtocol = new URL(GRAPHQL_ENDPOINT).protocol
 
 const websocketUri = new URL(GRAPHQL_ENDPOINT)
@@ -61,7 +59,7 @@ const linkError = onError(({ graphQLErrors, networkError }) => {
 
   if (graphQLErrors) {
     graphQLErrors.map(({ message, locations, path }) =>
-      console.log(
+      console.error(
         `[GraphQL error]: Message: ${message}, Location: ${JSON.stringify(
           locations
         )} Path: ${formatPath(path)}`
@@ -83,14 +81,14 @@ const linkError = onError(({ graphQLErrors, networkError }) => {
     }
 
     if (graphQLErrors.find(x => x.message == 'unauthorized')) {
-      console.log('Unauthorized, clearing token cookie')
+      console.error('Unauthorized, clearing token cookie')
       clearTokenCookie()
       // location.reload()
     }
   }
 
   if (networkError) {
-    console.log(`[Network error]: ${JSON.stringify(networkError)}`)
+    console.error(`[Network error]: ${JSON.stringify(networkError)}`)
     clearTokenCookie()
 
     const errors =

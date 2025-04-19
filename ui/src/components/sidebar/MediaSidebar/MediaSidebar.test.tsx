@@ -190,4 +190,57 @@ describe('MediaSidebar', () => {
     expect(screen.getByText('Set as album cover photo')).toBeInTheDocument()
     expect(screen.getByText('Album path')).toBeInTheDocument()
   })
+
+  test('displays loading state correctly', () => {
+    // Use the media object already defined in the describe block
+    authToken.mockImplementation(() => 'token-here')
+
+    // Mock loadMedia to show loading state
+    const loadMediaMock = vi.fn()
+    vi.spyOn(require('@apollo/client'), 'useLazyQuery').mockReturnValue([
+      loadMediaMock,
+      { loading: true, error: undefined, data: null }
+    ])
+
+    renderWithProviders(<MediaSidebar media={media} />)
+
+    // Should show the media from props while loading
+    expect(screen.getByText('122A6069.jpg')).toBeInTheDocument()
+  })
+
+  test('displays error state correctly', () => {
+    // Use the media object already defined in the describe block
+    authToken.mockImplementation(() => 'token-here')
+
+    // Mock a GraphQL error
+    vi.spyOn(require('@apollo/client'), 'useLazyQuery').mockReturnValue([
+      vi.fn(),
+      { loading: false, error: new Error('Failed to load media'), data: null }
+    ])
+
+    renderWithProviders(<MediaSidebar media={media} />)
+
+    // Should show the error message
+    expect(screen.getByText(/Failed to load media/)).toBeInTheDocument()
+  })
+
+  test('renders video content correctly', () => {
+    // Create a video variant of the media object
+    const videoMedia: MediaSidebarMedia = {
+      ...media,
+      type: MediaType.Video,
+      videoWeb: {
+        __typename: 'MediaURL',
+        url: '/video/web.mp4',
+        width: 1280,
+        height: 720
+      }
+    }
+
+    renderWithProviders(<MediaSidebar media={videoMedia} />)
+
+    // Should render video element instead of image
+    expect(screen.queryByRole('img')).not.toBeInTheDocument()
+    // Video testing would depend on how your ProtectedVideo component renders
+  })
 })

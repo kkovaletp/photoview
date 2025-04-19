@@ -117,6 +117,8 @@ export const SIDEBAR_MEDIA_QUERY = gql`
   }
 `
 
+const { t } = useTranslation()
+
 const PreviewImage = styled(ProtectedImage)`
   position: absolute;
   width: 100%;
@@ -164,7 +166,6 @@ type SidebarContentProps = {
 
 const SidebarContent = ({ media, hidePreview }: SidebarContentProps) => {
   const { updateSidebar } = useContext(SidebarContext)
-  const { t } = useTranslation()
   let previewImage = null
   if (media.highRes) previewImage = media.highRes
   else if (media.thumbnail) previewImage = media.thumbnail
@@ -287,7 +288,7 @@ const MediaSidebar = ({ media, hidePreview }: MediaSidebarType) => {
         },
       })
     }
-  }, [media])
+  }, [media, loadMedia])
 
   if (!media) return null
 
@@ -295,7 +296,11 @@ const MediaSidebar = ({ media, hidePreview }: MediaSidebarType) => {
     return <SidebarContent media={media} hidePreview={hidePreview} />
   }
 
-  if (error) return <div>{error.message}</div>
+  if (error) return (
+    <div className="p-4 text-red-600 dark:text-red-400">
+      {t('sidebar.error', 'Error loading media details: {{message}}', { message: error.message })}
+    </div>
+  )
 
   if (loading || data == null) {
     return <SidebarContent media={media} hidePreview={hidePreview} />

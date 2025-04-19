@@ -88,7 +88,6 @@ const downloadMedia = (
   }
 
   if (blob == null) {
-    console.log('Blob is null canceling')
     return
   }
 
