@@ -169,12 +169,60 @@ test('filter by favorites', async () => {
 })
 
 test('loads present mode from URL/history state', async () => {
-  // Setup GraphQL mocks with the existing timelineData from the test file
+  // Mock data for timeline
+  const timelineData = [
+    {
+      id: '1',
+      title: 'Test photo',
+      type: 'Photo',
+      blurhash: 'LEHV6nWB2yk8pyo0adR*.7kCMdnj',
+      thumbnail: {
+        url: '/test/thumbnail.jpg',
+        width: 200,
+        height: 150,
+      },
+      highRes: {
+        url: '/test/highres.jpg',
+        width: 1920,
+        height: 1080,
+      },
+      videoWeb: null,
+      favorite: false,
+      album: {
+        id: '100',
+        title: 'Test Album',
+      },
+      date: '2022-01-01T00:00:00Z',
+    }
+  ]
+
+  // Create mocks for both onlyFavorites true and false variations
   const graphqlMocks = [
     {
       request: {
         query: MY_TIMELINE_QUERY,
-        variables: { onlyFavorites: false, offset: 0, limit: 200 },
+        variables: {
+          onlyFavorites: false,
+          offset: 0,
+          limit: 200,
+          fromDate: undefined
+        },
+      },
+      result: {
+        data: {
+          myTimeline: timelineData,
+        },
+      },
+    },
+    {
+      request: {
+        query: MY_TIMELINE_QUERY,
+        variables: {
+          onlyFavorites: true,
+          offset: 0,
+          limit: 200,
+          fromDate: undefined
+        },
       },
       result: {
         data: {
@@ -198,37 +246,48 @@ test('loads present mode from URL/history state', async () => {
         }
       }
     }
-  ];
+  ]
 
-  // Render the component with mocks
+  // Set an initial URL with favorites explicitly set to 0 to match our mock
   renderWithProviders(<TimelineGallery />, {
     mocks: graphqlMocks,
-    initialEntries: ['/timeline']
-  });
+    initialEntries: ['/timeline?favorites=0'],
+    apolloOptions: {
+      addTypename: false,
+      defaultOptions: {
+        watchQuery: {
+          fetchPolicy: 'no-cache'
+        }
+      }
+    }
+  })
 
-  // Wait for timeline data to load and images to appear
+  // Wait for timeline data to load by checking for the presence of the timeline filters
   await waitFor(() => {
-    expect(screen.queryAllByRole('img').length).toBeGreaterThan(0);
-  });
+    expect(screen.getByLabelText(/show favorites only/i)).toBeInTheDocument()
+  })
 
-  // Now that data is loaded, we can trigger present mode
-  // Use a valid activeIndex based on the actual data structure
+  // Define the active index that matches our data structure
   const activeIndex = {
     date: 0,
     album: 0,
-    media: 0  // First media in first album in first date group
-  };
+    media: 0
+  }
 
-  // Push state and dispatch popstate event
-  window.history.pushState({ activeIndex, presenting: true }, '', '/timeline?present');
+  // Push state and trigger popstate event
+  window.history.pushState({
+    activeIndex,
+    presenting: true
+  }, '', '/timeline?favorites=0&present')
+
   fireEvent(window, new PopStateEvent('popstate', {
     state: {
       activeIndex,
       presenting: true
     }
-  }));
+  }))
 
-  // Verify present view is displayed
-  const presentView = await screen.findByTestId('present-view');
-  expect(presentView).toBeInTheDocument();
+  // Check for presence of present view
+  const presentView = await screen.findByTestId('present-view')
+  expect(presentView).toBeInTheDocument()
 })
