@@ -1,4 +1,4 @@
-import { screen, waitFor } from '@testing-library/react'
+import { fireEvent, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event';
 import TimelineGallery, { MY_TIMELINE_QUERY } from './TimelineGallery'
 import { timelineData } from './timelineTestData'
@@ -167,3 +167,68 @@ test('filter by favorites', async () => {
     expect(images.length).toBe(favoriteTimelineData.length);
   }, { timeout: 3000 });
 })
+
+test('loads present mode from URL/history state', async () => {
+  // Set up a proper TimelineMediaIndex structure
+  const activeIndex = {
+    date: 0,
+    album: 0,
+    media: 2
+  };
+
+  // Setup GraphQL mocks
+  const graphqlMocks = [
+    {
+      request: {
+        query: MY_TIMELINE_QUERY,
+        variables: { onlyFavorites: false, offset: 0, limit: 200 },
+      },
+      result: {
+        data: {
+          myTimeline: timelineData,
+        },
+      },
+    },
+    {
+      request: {
+        query: EARLIEST_MEDIA_QUERY,
+        variables: {},
+      },
+      result: {
+        data: {
+          myMedia: [
+            {
+              id: '1001',
+              date: '2020-01-01T00:00:00Z',
+            }
+          ]
+        }
+      }
+    }
+  ];
+
+  // Push state with the activeIndex
+  window.history.pushState({ activeIndex }, '', '/timeline?present');
+
+  // Render using the existing pattern in the test file
+  const { findByTestId } = renderWithProviders(<TimelineGallery />, {
+    mocks: graphqlMocks,
+    initialEntries: ['/timeline?present']
+  });
+
+  // Need to wait for initial render
+  await waitFor(() => {
+    expect(screen.queryAllByRole('img').length).toBeGreaterThan(0);
+  });
+
+  // Trigger popstate event to activate the handler
+  fireEvent(window, new PopStateEvent('popstate', {
+    state: {
+      activeIndex,
+      presenting: true
+    }
+  }));
+
+  const presentView = await findByTestId('present-view');
+  expect(presentView).toBeInTheDocument();
+});

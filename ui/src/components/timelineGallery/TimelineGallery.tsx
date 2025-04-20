@@ -154,12 +154,6 @@ const TimelineGallery = () => {
     },
   })
 
-  useEffect(() => {
-    refetch({
-      onlyFavorites: onlyFavorites,
-    })
-  }, [onlyFavorites, refetch])
-
   if (error) {
     return <div>{error.message}</div>
   }
@@ -190,6 +184,7 @@ const TimelineGallery = () => {
       />
       {mediaState.presenting && (
         <PresentView
+          data-testid="present-view"
           activeMedia={getActiveTimelineMedia({ mediaState })!}
           dispatchMedia={dispatchMedia}
         />
