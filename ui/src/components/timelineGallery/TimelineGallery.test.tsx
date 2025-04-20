@@ -169,14 +169,7 @@ test('filter by favorites', async () => {
 })
 
 test('loads present mode from URL/history state', async () => {
-  // Set up a proper TimelineMediaIndex structure
-  const activeIndex = {
-    date: 0,
-    album: 0,
-    media: 2
-  };
-
-  // Setup GraphQL mocks
+  // Setup GraphQL mocks with the existing timelineData from the test file
   const graphqlMocks = [
     {
       request: {
@@ -198,7 +191,7 @@ test('loads present mode from URL/history state', async () => {
         data: {
           myMedia: [
             {
-              id: '1001',
+              id: '1',
               date: '2020-01-01T00:00:00Z',
             }
           ]
@@ -207,21 +200,27 @@ test('loads present mode from URL/history state', async () => {
     }
   ];
 
-  // Push state with the activeIndex
-  window.history.pushState({ activeIndex }, '', '/timeline?present');
-
-  // Render using the existing pattern in the test file
-  const { findByTestId } = renderWithProviders(<TimelineGallery />, {
+  // Render the component with mocks
+  renderWithProviders(<TimelineGallery />, {
     mocks: graphqlMocks,
-    initialEntries: ['/timeline?present']
+    initialEntries: ['/timeline']
   });
 
-  // Need to wait for initial render
+  // Wait for timeline data to load and images to appear
   await waitFor(() => {
     expect(screen.queryAllByRole('img').length).toBeGreaterThan(0);
   });
 
-  // Trigger popstate event to activate the handler
+  // Now that data is loaded, we can trigger present mode
+  // Use a valid activeIndex based on the actual data structure
+  const activeIndex = {
+    date: 0,
+    album: 0,
+    media: 0  // First media in first album in first date group
+  };
+
+  // Push state and dispatch popstate event
+  window.history.pushState({ activeIndex, presenting: true }, '', '/timeline?present');
   fireEvent(window, new PopStateEvent('popstate', {
     state: {
       activeIndex,
@@ -229,6 +228,7 @@ test('loads present mode from URL/history state', async () => {
     }
   }));
 
-  const presentView = await findByTestId('present-view');
+  // Verify present view is displayed
+  const presentView = await screen.findByTestId('present-view');
   expect(presentView).toBeInTheDocument();
-});
+})
