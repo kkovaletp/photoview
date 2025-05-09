@@ -1,3 +1,4 @@
+
 package routes
 
 import (
@@ -13,12 +14,15 @@ import (
 )
 
 func RegisterPhotoRoutes(db *gorm.DB, router *mux.Router) {
-
 	router.HandleFunc("/{name}", func(w http.ResponseWriter, r *http.Request) {
 		mediaName := mux.Vars(r)["name"]
 
 		var mediaURL models.MediaURL
-		result := db.Model(&models.MediaURL{}).Joins("Media").Select("media_urls.*").Where("media_urls.media_name = ?", mediaName).Scan(&mediaURL)
+		result := db.Model(&models.MediaURL{}).
+			Joins("Media").
+			Select("media_urls.*").
+			Where("media_urls.media_name = ?", mediaName).
+			Scan(&mediaURL)
 		if err := result.Error; err != nil {
 			w.WriteHeader(http.StatusNotFound)
 			w.Write([]byte("404"))
@@ -51,7 +55,7 @@ func RegisterPhotoRoutes(db *gorm.DB, router *mux.Router) {
 
 		if _, err := os.Stat(cachedPath); os.IsNotExist((err)) {
 			// err := db.Transaction(func(tx *gorm.DB) error {
-			if err = scanner.ProcessSingleMedia(db, media); err != nil {
+			if err = scanner.ProcessSingleMediaFunc(db, media); err != nil {
 				log.Printf("ERROR: processing image not found in cache (%s): %s\n", cachedPath, err)
 				w.WriteHeader(http.StatusInternalServerError)
 				w.Write([]byte(internalServerError))

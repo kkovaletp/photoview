@@ -1,3 +1,4 @@
+
 package scanner
 
 import (
@@ -13,6 +14,9 @@ import (
 	"github.com/pkg/errors"
 	"gorm.io/gorm"
 )
+
+// ProcessSingleMediaFunc is a hook for processing a single media file. Defaults to ProcessSingleMedia but can be overridden in tests.
+var ProcessSingleMediaFunc = ProcessSingleMedia
 
 func ScanMedia(tx *gorm.DB, mediaPath string, albumId int, cache *scanner_cache.AlbumScannerCache) (*models.Media, bool, error) {
 	mediaName := path.Base(mediaPath)
