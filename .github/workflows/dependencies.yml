@@ -17,6 +17,7 @@ env:
   PLATFORMS: linux/amd64,linux/arm64
 
 jobs:
+  #TODO: speedup the build by using cache
   build:
     name: Build Dependencies Image
     runs-on: ubuntu-latest

@@ -62,6 +62,7 @@ jobs:
     outputs:
       tags: ${{ steps.prepare_matrix.outputs.tags }}
 
+  #TODO: speedup the build by using cache
   build:
     name: Build Docker Image
     runs-on: ubuntu-latest
