@@ -57,8 +57,12 @@ jobs:
         working-directory: dependencies
         run: |
           docker build --target version-detector -t version-detector .
+          echo "running image"
           docker run --name version-detector version-detector
+          echo "copying versions.env"
           docker cp version-detector:/versions.env ./
+          ls -lah
+          cat ./versions.env
           cat ./versions.env >> $GITHUB_OUTPUT
 
       - name: Build and push
