@@ -21,7 +21,7 @@ ARG LIBRAW_VERSION
 WORKDIR /tmp/build-libraw
 COPY --chmod=0755 build_libraw.sh .
 RUN --mount=type=secret,id=github_token \
-    && export GITHUB_TOKEN=$(cat /run/secrets/github_token) \
+    export GITHUB_TOKEN=$(cat /run/secrets/github_token) \
     && export $(cat /env) && export $(cat /versions.env) && ./build_libraw.sh
 
 FROM base-prep AS build-libheif
@@ -29,7 +29,7 @@ ARG LIBHEIF_VERSION
 WORKDIR /tmp/build-libheif
 COPY --chmod=0755 build_libheif.sh .
 RUN --mount=type=secret,id=github_token \
-    && export GITHUB_TOKEN=$(cat /run/secrets/github_token) \
+    export GITHUB_TOKEN=$(cat /run/secrets/github_token) \
     && export $(cat /env) && export $(cat /versions.env) && ./build_libheif.sh
 
 FROM base-prep AS build-imagemagick
@@ -37,7 +37,7 @@ ARG IMAGEMAGICK_VERSION
 WORKDIR /tmp/build-imagemagick
 COPY --chmod=0755 build_imagemagick.sh .
 RUN --mount=type=secret,id=github_token \
-    && export GITHUB_TOKEN=$(cat /run/secrets/github_token) \
+    export GITHUB_TOKEN=$(cat /run/secrets/github_token) \
     && export $(cat /env) && export $(cat /versions.env) && ./build_imagemagick.sh
 
 FROM base-prep AS download-jellyfin-ffmpeg
@@ -45,7 +45,7 @@ ARG JELLYFIN_FFMPEG_VERSION
 WORKDIR /tmp/build-jellyfin
 COPY --chmod=0755 download_jellyfin-ffmpeg.sh .
 RUN --mount=type=secret,id=github_token \
-    && export GITHUB_TOKEN=$(cat /run/secrets/github_token) \
+    export GITHUB_TOKEN=$(cat /run/secrets/github_token) \
     && export $(cat /env) && export $(cat /versions.env) && ./download_jellyfin-ffmpeg.sh
 
 FROM base-prep AS final-assembly
