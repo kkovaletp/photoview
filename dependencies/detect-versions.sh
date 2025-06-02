@@ -1,9 +1,6 @@
 #!/bin/bash
 set -euo pipefail
 
-apt-get update
-apt-get install -y curl jq
-
 # Fetch latest version tags from GitHub releases
 LIBRAW_VERSION=$(curl -s https://api.github.com/repos/LibRaw/LibRaw/releases/latest | jq -r '.tag_name')
 LIBHEIF_VERSION=$(curl -s https://api.github.com/repos/strukturag/libheif/releases/latest | jq -r '.tag_name')

@@ -3,7 +3,8 @@ ARG TARGETPLATFORM
 # See for details: https://github.com/hadolint/hadolint/wiki/DL4006
 SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
 COPY detect-versions.sh /tmp/
-RUN chmod +x /tmp/detect-versions.sh \
+RUN apt-get update && apt-get install -y curl jq \
+    && chmod +x /tmp/detect-versions.sh \
     && /tmp/detect-versions.sh > /versions.env
 
 FROM --platform=${BUILDPLATFORM:-linux/amd64} debian:bookworm-slim AS base-prep
