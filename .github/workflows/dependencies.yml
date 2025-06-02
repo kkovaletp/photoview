@@ -54,10 +54,12 @@ jobs:
 
       - name: Detect dependency versions
         id: versions
+        working-directory: dependencies
         run: |
-          cd dependencies
           docker build --target version-detector -t version-detector .
-          docker run --rm version-detector cat /versions.env >> $GITHUB_OUTPUT
+          docker run --name version-detector version-detector
+          docker cp version-detector:/versions.env ./
+          cat ./versions.env >> $GITHUB_OUTPUT
 
       - name: Build and push
         uses: docker/build-push-action@v6
