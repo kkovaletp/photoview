@@ -6,7 +6,7 @@ set -euo pipefail
 
 echo Compiler: "${DEB_HOST_MULTIARCH}" Arch: "${DEB_HOST_ARCH}"
 
-apt-get install -y \
+apt-get install -y --no-install-recommends \
   libjxl-dev:"${DEB_HOST_ARCH}" \
   liblcms2-dev:"${DEB_HOST_ARCH}" \
   liblqr-1-0-dev:"${DEB_HOST_ARCH}" \
@@ -25,7 +25,7 @@ apt-get install -y \
 
 URL="https://api.github.com/repos/ImageMagick/ImageMagick/tarball/${IMAGEMAGICK_VERSION}"
 echo download ImageMagick from "$URL"
-curl -L -o ./magick.tar.gz "$URL"
+curl -L -o ./magick.tar.gz ${GITHUB_TOKEN:+-H "Authorization: Bearer ${GITHUB_TOKEN}"} "$URL"
 
 tar xfv ./magick.tar.gz
 cd ImageMagick-*

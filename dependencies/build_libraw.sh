@@ -6,14 +6,14 @@ set -euo pipefail
 
 echo Compiler: "${DEB_HOST_MULTIARCH}" Arch: "${DEB_HOST_ARCH}"
 
-apt-get install -y \
+apt-get install -y --no-install-recommends \
   libjpeg62-turbo-dev:"${DEB_HOST_ARCH}" \
   liblcms2-dev:"${DEB_HOST_ARCH}" \
   zlib1g-dev:"${DEB_HOST_ARCH}"
 
 URL="https://api.github.com/repos/LibRaw/LibRaw/tarball/${LIBRAW_VERSION}"
 echo download libraw from "$URL"
-curl -L -o ./libraw.tar.gz "$URL"
+curl -L -o ./libraw.tar.gz ${GITHUB_TOKEN:+-H "Authorization: Bearer ${GITHUB_TOKEN}"} "$URL"
 
 tar xfv ./libraw.tar.gz
 cd LibRaw-*

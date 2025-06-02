@@ -6,7 +6,7 @@ set -euo pipefail
 
 echo Compiler: "${DEB_HOST_MULTIARCH}" Arch: "${DEB_HOST_ARCH}"
 
-apt-get install -y \
+apt-get install -y --no-install-recommends \
   libdav1d-dev:"${DEB_HOST_ARCH}" \
   libde265-dev:"${DEB_HOST_ARCH}" \
   libjpeg62-turbo-dev:"${DEB_HOST_ARCH}" \
@@ -16,8 +16,8 @@ apt-get install -y \
   zlib1g-dev:"${DEB_HOST_ARCH}"
 
 URL="https://api.github.com/repos/strukturag/libheif/tarball/${LIBHEIF_VERSION}"
-echo download libraw from "$URL"
-curl -L -o ./libheif.tar.gz "$URL"
+echo download libheif from "$URL"
+curl -L -o ./libheif.tar.gz ${GITHUB_TOKEN:+-H "Authorization: Bearer ${GITHUB_TOKEN}"} "$URL"
 
 tar xfv ./libheif.tar.gz
 cd ./*-libheif-*

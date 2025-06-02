@@ -2,45 +2,50 @@ FROM --platform=${BUILDPLATFORM:-linux/amd64} debian:bookworm-slim AS version-de
 ARG TARGETPLATFORM
 # See for details: https://github.com/hadolint/hadolint/wiki/DL4006
 SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
-COPY detect-versions.sh /tmp/
-RUN apt-get update && apt-get install -y curl jq \
-    && chmod +x /tmp/detect-versions.sh \
+COPY --chmod=0755 detect-versions.sh /tmp/
+RUN --mount=type=secret,id=github_token \
+    apt-get update && apt-get install -y curl jq \
+    && export GITHUB_TOKEN=$(cat /run/secrets/github_token) \
     && /tmp/detect-versions.sh > /versions.env
 
 FROM --platform=${BUILDPLATFORM:-linux/amd64} debian:bookworm-slim AS base-prep
 ARG TARGETPLATFORM
 SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
 COPY --from=version-detector /versions.env /versions.env
-COPY prepare.sh /tmp/
-RUN chmod +x /tmp/prepare.sh && /tmp/prepare.sh \
+COPY --chmod=0755 prepare.sh /tmp/
+RUN /tmp/prepare.sh \
     && mkdir -p /output/bin /output/lib /output/include /output/pkgconfig /output/etc /output/deb
 
 FROM base-prep AS build-libraw
 ARG LIBRAW_VERSION
 WORKDIR /tmp/build-libraw
-COPY build_libraw.sh .
-RUN chmod +x ./build_libraw.sh \
+COPY --chmod=0755 build_libraw.sh .
+RUN --mount=type=secret,id=github_token \
+    && export GITHUB_TOKEN=$(cat /run/secrets/github_token) \
     && export $(cat /env) && export $(cat /versions.env) && ./build_libraw.sh
 
 FROM base-prep AS build-libheif
 ARG LIBHEIF_VERSION
 WORKDIR /tmp/build-libheif
-COPY build_libheif.sh .
-RUN chmod +x ./build_libheif.sh \
+COPY --chmod=0755 build_libheif.sh .
+RUN --mount=type=secret,id=github_token \
+    && export GITHUB_TOKEN=$(cat /run/secrets/github_token) \
     && export $(cat /env) && export $(cat /versions.env) && ./build_libheif.sh
 
 FROM base-prep AS build-imagemagick
 ARG IMAGEMAGICK_VERSION
 WORKDIR /tmp/build-imagemagick
-COPY build_imagemagick.sh .
-RUN chmod +x ./build_imagemagick.sh \
+COPY --chmod=0755 build_imagemagick.sh .
+RUN --mount=type=secret,id=github_token \
+    && export GITHUB_TOKEN=$(cat /run/secrets/github_token) \
     && export $(cat /env) && export $(cat /versions.env) && ./build_imagemagick.sh
 
 FROM base-prep AS download-jellyfin-ffmpeg
 ARG JELLYFIN_FFMPEG_VERSION
 WORKDIR /tmp/build-jellyfin
-COPY download_jellyfin-ffmpeg.sh .
-RUN chmod +x ./download_jellyfin-ffmpeg.sh \
+COPY --chmod=0755 download_jellyfin-ffmpeg.sh .
+RUN --mount=type=secret,id=github_token \
+    && export GITHUB_TOKEN=$(cat /run/secrets/github_token) \
     && export $(cat /env) && export $(cat /versions.env) && ./download_jellyfin-ffmpeg.sh
 
 FROM base-prep AS final-assembly
@@ -49,8 +54,8 @@ COPY --from=build-libheif /output/ /output/
 COPY --from=build-imagemagick /output/ /output/
 COPY --from=download-jellyfin-ffmpeg /output/ /output/
 
-COPY output.sh /
-RUN chmod +x /output.sh && /output.sh
+COPY --chmod=0755 output.sh /
+RUN /output.sh
 
 FROM debian:bookworm-slim AS release
 COPY --from=final-assembly /artifacts.tar.gz /
