@@ -11,7 +11,7 @@ on:
 
 env:
   IS_PUSHING_IMAGES: ${{ github.event_name != 'pull_request' && github.repository == 'kkovaletp/photoview' }}
-  IS_CACHING: ${{ github.event_name == 'pull_request' }}
+  IS_CACHING: true
   DOCKER_USERNAME: kkoval
   DOCKER_IMAGE: kkoval/dependencies
   PLATFORMS: linux/amd64,linux/arm64
@@ -52,6 +52,13 @@ jobs:
             type=raw,value=latest
             type=sha
 
+      - name: Detect dependency versions
+        id: versions
+        run: |
+          cd dependencies
+          docker build --target version-detector -t version-detector .
+          docker run --rm version-detector cat /versions.env >> $GITHUB_OUTPUT
+
       - name: Build and push
         uses: docker/build-push-action@v6
         with:
@@ -62,8 +69,13 @@ jobs:
           tags:        ${{ steps.docker_meta.outputs.tags }}
           labels:      ${{ steps.docker_meta.outputs.labels }}
           annotations: ${{ steps.docker_meta.outputs.annotations }}
-          cache-from:  ${{ ( env.IS_CACHING == 'true' && 'type=gha' ) || '' }}
-          cache-to:    ${{ ( env.IS_CACHING == 'true' && 'type=gha,mode=max' ) || '' }}
           no-cache:    ${{ env.IS_CACHING != 'true' }}
+          cache-from:  type=gha,scope=deps-${{ steps.versions.outputs.COMBINED_VERSION }}
+          cache-to:    type=gha,mode=max,scope=deps-${{ steps.versions.outputs.COMBINED_VERSION }}
           sbom:        true
           provenance:  mode=max
+          build-args: |
+            LIBRAW_VERSION=${{ steps.versions.outputs.LIBRAW_VERSION }}
+            LIBHEIF_VERSION=${{ steps.versions.outputs.LIBHEIF_VERSION }}
+            IMAGEMAGICK_VERSION=${{ steps.versions.outputs.IMAGEMAGICK_VERSION }}
+            JELLYFIN_FFMPEG_VERSION=${{ steps.versions.outputs.JELLYFIN_FFMPEG_VERSION }}
