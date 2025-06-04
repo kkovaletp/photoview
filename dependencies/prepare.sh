@@ -31,6 +31,7 @@ apt-get install -y --no-install-recommends \
   cmake
 
 dpkg-architecture -a "$DEBIAN_ARCH" >/env
-export "$(cat /env)"
+# shellcheck disable=SC2046
+export $(cat /env)
 echo PKG_CONFIG_PATH=/usr/lib/"${DEB_HOST_MULTIARCH}"/pkgconfig >>/env
 cat /env
