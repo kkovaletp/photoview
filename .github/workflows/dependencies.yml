@@ -70,10 +70,10 @@ jobs:
             https://api.github.com/repos/jellyfin/jellyfin-ffmpeg/releases/latest | jq -r '.tag_name')
 
           # Output as environment variables
-          echo "LIBRAW_VERSION=${LIBRAW_VERSION}" > | tee -a $GITHUB_OUTPUT
-          echo "LIBHEIF_VERSION=${LIBHEIF_VERSION}" > | tee -a $GITHUB_OUTPUT
-          echo "IMAGEMAGICK_VERSION=${IMAGEMAGICK_VERSION}" > | tee -a $GITHUB_OUTPUT
-          echo "JELLYFIN_FFMPEG_VERSION=${JELLYFIN_FFMPEG_VERSION}" > | tee -a $GITHUB_OUTPUT
+          echo "LIBRAW_VERSION=${LIBRAW_VERSION}" | tee -a $GITHUB_OUTPUT
+          echo "LIBHEIF_VERSION=${LIBHEIF_VERSION}" | tee -a $GITHUB_OUTPUT
+          echo "IMAGEMAGICK_VERSION=${IMAGEMAGICK_VERSION}" | tee -a $GITHUB_OUTPUT
+          echo "JELLYFIN_FFMPEG_VERSION=${JELLYFIN_FFMPEG_VERSION}" | tee -a $GITHUB_OUTPUT
 
       - name: Build and push
         uses: docker/build-push-action@v6
