@@ -54,16 +54,26 @@ jobs:
       - name: Detect dependency versions
         id: versions
         working-directory: dependencies
+        shell: bash
         run: |
-          docker build \
-            --target version-detector \
-            --secret id=github_token,src=<(echo "${{ secrets.GITHUB_TOKEN }}") \
-            -t version-detector .
-          docker run --name version-detector version-detector
-          docker cp version-detector:/versions.env ./
-          docker rm version-detector
-          cat ./versions.env
-          cat ./versions.env >> "$GITHUB_OUTPUT"
+          set -euo pipefail
+          export GITHUB_TOKEN="${{ secrets.GITHUB_TOKEN }}"
+
+          # Fetch latest version tags from GitHub releases
+          LIBRAW_VERSION=$(curl -s ${GITHUB_TOKEN:+-H "Authorization: Bearer ${GITHUB_TOKEN}"} \
+            https://api.github.com/repos/LibRaw/LibRaw/releases/latest | jq -r '.tag_name')
+          LIBHEIF_VERSION=$(curl -s ${GITHUB_TOKEN:+-H "Authorization: Bearer ${GITHUB_TOKEN}"} \
+            https://api.github.com/repos/strukturag/libheif/releases/latest | jq -r '.tag_name')
+          IMAGEMAGICK_VERSION=$(curl -s ${GITHUB_TOKEN:+-H "Authorization: Bearer ${GITHUB_TOKEN}"} \
+            https://api.github.com/repos/ImageMagick/ImageMagick/releases/latest | jq -r '.tag_name')
+          JELLYFIN_FFMPEG_VERSION=$(curl -s ${GITHUB_TOKEN:+-H "Authorization: Bearer ${GITHUB_TOKEN}"} \
+            https://api.github.com/repos/jellyfin/jellyfin-ffmpeg/releases/latest | jq -r '.tag_name')
+
+          # Output as environment variables
+          echo "LIBRAW_VERSION=${LIBRAW_VERSION}" > | tee -a $GITHUB_OUTPUT
+          echo "LIBHEIF_VERSION=${LIBHEIF_VERSION}" > | tee -a $GITHUB_OUTPUT
+          echo "IMAGEMAGICK_VERSION=${IMAGEMAGICK_VERSION}" > | tee -a $GITHUB_OUTPUT
+          echo "JELLYFIN_FFMPEG_VERSION=${JELLYFIN_FFMPEG_VERSION}" > | tee -a $GITHUB_OUTPUT
 
       - name: Build and push
         uses: docker/build-push-action@v6
@@ -75,11 +85,21 @@ jobs:
           tags:        ${{ steps.docker_meta.outputs.tags }}
           labels:      ${{ steps.docker_meta.outputs.labels }}
           annotations: ${{ steps.docker_meta.outputs.annotations }}
-          no-cache:    ${{ env.IS_CACHING != 'true' }}
-          cache-from:  type=gha,scope=deps-${{ steps.versions.outputs.COMBINED_VERSION }}
-          cache-to:    type=gha,mode=max,scope=deps-${{ steps.versions.outputs.COMBINED_VERSION }}
           sbom:        true
           provenance:  mode=max
+          no-cache:    ${{ env.IS_CACHING != 'true' }}
+          cache-from: |
+            type=gha,scope=deps-base
+            type=gha,scope=deps-libraw-${{ steps.versions.outputs.LIBRAW_VERSION }}
+            type=gha,scope=deps-libheif-${{ steps.versions.outputs.LIBHEIF_VERSION }}
+            type=gha,scope=deps-imagemagick-${{ steps.versions.outputs.IMAGEMAGICK_VERSION }}
+            type=gha,scope=deps-jellyfin-${{ steps.versions.outputs.JELLYFIN_FFMPEG_VERSION }}
+          cache-to: |
+            type=gha,mode=max,scope=deps-base
+            type=gha,mode=max,scope=deps-libraw-${{ steps.versions.outputs.LIBRAW_VERSION }}
+            type=gha,mode=max,scope=deps-libheif-${{ steps.versions.outputs.LIBHEIF_VERSION }}
+            type=gha,mode=max,scope=deps-imagemagick-${{ steps.versions.outputs.IMAGEMAGICK_VERSION }}
+            type=gha,mode=max,scope=deps-jellyfin-${{ steps.versions.outputs.JELLYFIN_FFMPEG_VERSION }}
           secrets: |
             github_token=${{ secrets.GITHUB_TOKEN }}
           build-args: |

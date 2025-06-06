@@ -1,17 +1,6 @@
-FROM --platform=${BUILDPLATFORM:-linux/amd64} debian:bookworm-slim AS version-detector
-ARG TARGETPLATFORM
-# See for details: https://github.com/hadolint/hadolint/wiki/DL4006
-SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
-COPY --chmod=0755 detect-versions.sh /tmp/
-RUN --mount=type=secret,id=github_token \
-    apt-get update && apt-get install -y curl jq \
-    && export GITHUB_TOKEN=$(cat /run/secrets/github_token) \
-    && /tmp/detect-versions.sh > /versions.env
-
 FROM --platform=${BUILDPLATFORM:-linux/amd64} debian:bookworm-slim AS base-prep
 ARG TARGETPLATFORM
 SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
-COPY --from=version-detector /versions.env /versions.env
 COPY --chmod=0755 prepare.sh /tmp/
 RUN /tmp/prepare.sh \
     && mkdir -p /output/bin /output/lib /output/include /output/pkgconfig /output/etc /output/deb
@@ -22,7 +11,7 @@ WORKDIR /tmp/build-libraw
 COPY --chmod=0755 build_libraw.sh .
 RUN --mount=type=secret,id=github_token \
     export GITHUB_TOKEN=$(cat /run/secrets/github_token) \
-    && export $(cat /env) && export $(cat /versions.env) && ./build_libraw.sh
+    && export $(cat /env) && ./build_libraw.sh
 
 FROM base-prep AS build-libheif
 ARG LIBHEIF_VERSION
@@ -30,7 +19,7 @@ WORKDIR /tmp/build-libheif
 COPY --chmod=0755 build_libheif.sh .
 RUN --mount=type=secret,id=github_token \
     export GITHUB_TOKEN=$(cat /run/secrets/github_token) \
-    && export $(cat /env) && export $(cat /versions.env) && ./build_libheif.sh
+    && export $(cat /env) && ./build_libheif.sh
 
 FROM base-prep AS build-imagemagick
 ARG IMAGEMAGICK_VERSION
@@ -38,7 +27,7 @@ WORKDIR /tmp/build-imagemagick
 COPY --chmod=0755 build_imagemagick.sh .
 RUN --mount=type=secret,id=github_token \
     export GITHUB_TOKEN=$(cat /run/secrets/github_token) \
-    && export $(cat /env) && export $(cat /versions.env) && ./build_imagemagick.sh
+    && export $(cat /env) && ./build_imagemagick.sh
 
 FROM base-prep AS download-jellyfin-ffmpeg
 ARG JELLYFIN_FFMPEG_VERSION
@@ -46,7 +35,7 @@ WORKDIR /tmp/build-jellyfin
 COPY --chmod=0755 download_jellyfin-ffmpeg.sh .
 RUN --mount=type=secret,id=github_token \
     export GITHUB_TOKEN=$(cat /run/secrets/github_token) \
-    && export $(cat /env) && export $(cat /versions.env) && ./download_jellyfin-ffmpeg.sh
+    && export $(cat /env) && ./download_jellyfin-ffmpeg.sh
 
 FROM base-prep AS final-assembly
 COPY --from=build-libraw /output/ /output/
