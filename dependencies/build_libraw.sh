@@ -3,6 +3,18 @@ set -euo pipefail
 
 : "${DEB_HOST_MULTIARCH:=$(uname -m)-linux-gnu}"
 : "${DEB_HOST_ARCH:=$(dpkg --print-architecture)}"
+CACHE_DIR="${BUILD_CACHE_DIR:-/build-cache}/LibRaw-${LIBRAW_VERSION}"
+CACHE_MARKER="${CACHE_DIR}/LibRaw-${LIBRAW_VERSION}-complete"
+
+# Check if this specific version is already built and cached
+if [[ -f "$CACHE_MARKER" ]] && [[ -d "${CACHE_DIR}/output" ]]; then
+  echo "LibRaw ${LIBRAW_VERSION} found in cache, reusing..."
+  mkdir -p /output
+  cp -r "${CACHE_DIR}/output/"* /output/
+  exit 0
+fi
+
+echo "Building LibRaw ${LIBRAW_VERSION} (cache miss)..."
 
 echo Compiler: "${DEB_HOST_MULTIARCH}" Arch: "${DEB_HOST_ARCH}"
 
@@ -34,3 +46,11 @@ cp -a /usr/local/lib/libraw_r* /output/lib/
 cp -a /usr/local/lib/pkgconfig/libraw* /output/pkgconfig/
 cp -a /usr/local/include/libraw /output/include/
 file /usr/local/lib/libraw_r.so*
+
+# After successful build, cache the results
+echo "Caching LibRaw ${LIBRAW_VERSION} build results..."
+mkdir -p "${CACHE_DIR}/output"
+cp -r /output/* "${CACHE_DIR}/output/"
+touch "$CACHE_MARKER"
+
+echo "LibRaw ${LIBRAW_VERSION} build complete and cached"
