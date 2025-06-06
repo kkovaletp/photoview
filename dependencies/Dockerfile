@@ -10,9 +10,7 @@ ARG LIBRAW_VERSION
 ENV BUILD_CACHE_DIR=/build-cache
 WORKDIR /tmp/build-libraw
 COPY --chmod=0755 build_libraw.sh .
-RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
-    --mount=type=cache,target=/var/lib/apt,sharing=locked \
-    --mount=type=cache,target=${BUILD_CACHE_DIR},id=libraw-${LIBRAW_VERSION} \
+RUN --mount=type=cache,target=${BUILD_CACHE_DIR},id=libraw-${LIBRAW_VERSION} \
     --mount=type=secret,id=github_token \
     export GITHUB_TOKEN=$(cat /run/secrets/github_token) \
     && export $(cat /env) && ./build_libraw.sh
@@ -22,9 +20,7 @@ ARG LIBHEIF_VERSION
 ENV BUILD_CACHE_DIR=/build-cache
 WORKDIR /tmp/build-libheif
 COPY --chmod=0755 build_libheif.sh .
-RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
-    --mount=type=cache,target=/var/lib/apt,sharing=locked \
-    --mount=type=cache,target=${BUILD_CACHE_DIR},id=libheif-${LIBHEIF_VERSION} \
+RUN --mount=type=cache,target=${BUILD_CACHE_DIR},id=libheif-${LIBHEIF_VERSION} \
     --mount=type=secret,id=github_token \
     export GITHUB_TOKEN=$(cat /run/secrets/github_token) \
     && export $(cat /env) && ./build_libheif.sh
@@ -34,9 +30,7 @@ ARG IMAGEMAGICK_VERSION
 ENV BUILD_CACHE_DIR=/build-cache
 WORKDIR /tmp/build-imagemagick
 COPY --chmod=0755 build_imagemagick.sh .
-RUN --mount=type=cache,target=/var/cache/apt,sharing=locked \
-    --mount=type=cache,target=/var/lib/apt,sharing=locked \
-    --mount=type=cache,target=${BUILD_CACHE_DIR},id=imagemagick-${IMAGEMAGICK_VERSION} \
+RUN --mount=type=cache,target=${BUILD_CACHE_DIR},id=imagemagick-${IMAGEMAGICK_VERSION} \
     --mount=type=secret,id=github_token \
     export GITHUB_TOKEN=$(cat /run/secrets/github_token) \
     && export $(cat /env) && ./build_imagemagick.sh
