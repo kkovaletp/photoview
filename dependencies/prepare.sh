@@ -1,19 +1,16 @@
 #!/bin/bash
 set -euo pipefail
 
-: "${TARGETPLATFORM=linux/$(dpkg --print-architecture)}"
-: "${DEB_HOST_MULTIARCH=$(uname -m)-linux-gnu}"
+: "${TARGETPLATFORM:=linux/$(dpkg --print-architecture)}"
+: "${DEB_HOST_MULTIARCH:=$(uname -m)-linux-gnu}"
 
-TARGETOS="$(echo "$TARGETPLATFORM" | cut -d"/" -f1)"
+#TARGETOS="$(echo "$TARGETPLATFORM" | cut -d"/" -f1)"
 TARGETARCH="$(echo "$TARGETPLATFORM" | cut -d"/" -f2)"
-TARGETVARIANT="$(echo "$TARGETPLATFORM" | cut -d"/" -f3)"
+#TARGETVARIANT="$(echo "$TARGETPLATFORM" | cut -d"/" -f3)"
 
 DEBIAN_ARCH=$TARGETARCH
 if [ "$TARGETARCH" = "arm" ]; then
   DEBIAN_ARCH=armel
-  if [ "$TARGETVARIANT" = "v7" ]; then
-    DEBIAN_ARCH=armhf
-  fi
 fi
 
 dpkg --add-architecture "$DEBIAN_ARCH"
@@ -33,5 +30,5 @@ apt-get install -y --no-install-recommends \
 dpkg-architecture -a "$DEBIAN_ARCH" >/env
 # shellcheck disable=SC2046
 export $(cat /env)
-echo PKG_CONFIG_PATH=/usr/lib/"${DEB_HOST_MULTIARCH}"/pkgconfig >>/env
+echo "PKG_CONFIG_PATH=/usr/lib/${DEB_HOST_MULTIARCH}/pkgconfig" >>/env
 cat /env

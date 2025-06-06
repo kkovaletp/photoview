@@ -1,8 +1,8 @@
 #!/bin/bash
 set -euo pipefail
 
-: "${DEB_HOST_MULTIARCH=x86_64-linux-gnu}"
-: "${DEB_HOST_ARCH=amd64}"
+: "${DEB_HOST_MULTIARCH:=x86_64-linux-gnu}"
+: "${DEB_HOST_ARCH:=amd64}"
 
 echo Compiler: "${DEB_HOST_MULTIARCH}" Arch: "${DEB_HOST_ARCH}"
 

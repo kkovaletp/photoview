@@ -1,8 +1,8 @@
 #!/bin/bash
 set -euo pipefail
 
-: "${DEB_HOST_MULTIARCH=$(uname -m)-linux-gnu}"
-: "${DEB_HOST_ARCH=$(dpkg --print-architecture)}"
+: "${DEB_HOST_MULTIARCH:=$(uname -m)-linux-gnu}"
+: "${DEB_HOST_ARCH:=$(dpkg --print-architecture)}"
 
 echo Compiler: "${DEB_HOST_MULTIARCH}" Arch: "${DEB_HOST_ARCH}"
 
