@@ -57,7 +57,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          export GITHUB_TOKEN="${{ secrets.GITHUB_TOKEN }}"
+          GITHUB_TOKEN="${{ secrets.GITHUB_TOKEN }}"
 
           # Fetch latest version tags from GitHub releases
           LIBRAW_VERSION=$(curl -fsSL ${GITHUB_TOKEN:+-H "Authorization: Bearer ${GITHUB_TOKEN}"} \
@@ -70,7 +70,6 @@ jobs:
             "https://api.github.com/repos/jellyfin/jellyfin-ffmpeg/releases/latest" | jq -r '.tag_name')
 
           # Output as environment variables
-          echo "ARCH=$(uname -m)" | tee -a $GITHUB_OUTPUT
           echo "LIBRAW_VERSION=${LIBRAW_VERSION}" | tee -a $GITHUB_OUTPUT
           echo "LIBHEIF_VERSION=${LIBHEIF_VERSION}" | tee -a $GITHUB_OUTPUT
           echo "IMAGEMAGICK_VERSION=${IMAGEMAGICK_VERSION}" | tee -a $GITHUB_OUTPUT
@@ -89,8 +88,8 @@ jobs:
           sbom:        true
           provenance:  mode=max
           no-cache:    ${{ env.IS_CACHING != 'true' }}
-          cache-from:  type=gha,scope=deps-${{ steps.versions.outputs.ARCH }}
-          cache-to:    type=gha,mode=max,scope=deps-${{ steps.versions.outputs.ARCH }}
+          cache-from:  type=gha,scope=dependencies
+          cache-to:    type=gha,mode=max,scope=dependencies
           secrets: |
             github_token=${{ secrets.GITHUB_TOKEN }}
           build-args: |
