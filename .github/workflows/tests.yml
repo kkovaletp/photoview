@@ -56,7 +56,6 @@ jobs:
     - name: Git fetch blame information
       run: git fetch --unshallow
 
-    #TODO: speedup the build by using cache
     - name: Build test image
       uses: docker/build-push-action@v6
       with:
@@ -65,8 +64,8 @@ jobs:
         load:       true
         target:     api
         tags:       photoview/api
-        cache-from: type=gha
-        cache-to:   type=gha,mode=max
+        cache-from: type=gha,scope=test-api-${{ hashFiles('api/go.sum', 'scripts/install_*.sh') }}
+        cache-to:   type=gha,mode=max,scope=test-api-${{ hashFiles('api/go.sum', 'scripts/install_*.sh') }}
 
     - name: Test
       id: test
@@ -120,7 +119,6 @@ jobs:
     - name: Git fetch blame information
       run: git fetch --unshallow
 
-    #TODO: speedup the build by using cache
     - name: Build test image
       uses: docker/build-push-action@v6
       with:
@@ -129,8 +127,8 @@ jobs:
         load:       true
         target:     ui
         tags:       photoview/ui
-        cache-from: type=gha
-        cache-to:   type=gha,mode=max
+        cache-from: type=gha,scope=test-ui-${{ hashFiles('ui/package-lock.json') }}
+        cache-to:   type=gha,mode=max,scope=test-ui-${{ hashFiles('ui/package-lock.json') }}
         build-args: |
           NODE_ENV=testing
 

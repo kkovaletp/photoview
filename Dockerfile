@@ -1,6 +1,6 @@
 ### Build UI ###
 FROM --platform=${BUILDPLATFORM:-linux/amd64} node:18 AS ui
-ARG TARGETPLATFORM
+ARG TARGETARCH
 
 # See for details: https://github.com/hadolint/hadolint/wiki/DL4006
 SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
@@ -25,17 +25,22 @@ ENV REACT_APP_BUILD_COMMIT_SHA=${COMMIT_SHA:-}
 WORKDIR /app/ui
 
 COPY ui/package.json ui/package-lock.json /app/ui/
-RUN npm ci --ignore-scripts
+RUN --mount=type=cache,target=/root/.npm/_cacache,sharing=locked,id=npm-${TARGETARCH} \
+    --mount=type=cache,target=/app/ui/node_modules,sharing=locked,id=node_modules-${TARGETARCH} \
+    npm ci --ignore-scripts
 
 COPY ui/ /app/ui
 # hadolint ignore=SC2155
-RUN export BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ'); \
-  export REACT_APP_BUILD_DATE=${BUILD_DATE}; \
-  npm run build -- --base="${UI_PUBLIC_URL}"
+RUN --mount=type=cache,target=/root/.npm/_cacache,sharing=locked,id=npm-${TARGETARCH} \
+    --mount=type=cache,target=/app/ui/node_modules,sharing=locked,id=node_modules-${TARGETARCH} \
+    export BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ'); \
+    export REACT_APP_BUILD_DATE=${BUILD_DATE}; \
+    npm run build -- --base="${UI_PUBLIC_URL}"
 
 ### Build API ###
 FROM --platform=${BUILDPLATFORM:-linux/amd64} golang:1.24-bookworm AS api
 ARG TARGETPLATFORM
+ARG TARGETARCH
 
 # See for details: https://github.com/hadolint/hadolint/wiki/DL4006
 SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
@@ -46,16 +51,20 @@ ENV CGO_ENABLED=1
 
 # Download dependencies
 COPY scripts/set_compiler_env.sh /app/scripts/
-RUN chmod +x /app/scripts/*.sh \
-  && source /app/scripts/set_compiler_env.sh
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked,id=apt-cache-${TARGETARCH} \
+    --mount=type=cache,target=/var/lib/apt/lists,sharing=locked,id=apt-lists-${TARGETARCH} \
+    chmod +x /app/scripts/*.sh \
+    && source /app/scripts/set_compiler_env.sh
 
 COPY scripts/install_*.sh /app/scripts/
 # Split values in `/env`
 # hadolint ignore=SC2046
-RUN chmod +x /app/scripts/*.sh \
-  && export $(cat /env) \
-  && /app/scripts/install_build_dependencies.sh \
-  && /app/scripts/install_runtime_dependencies.sh
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked,id=apt-cache-${TARGETARCH} \
+    --mount=type=cache,target=/var/lib/apt/lists,sharing=locked,id=apt-lists-${TARGETARCH} \
+    chmod +x /app/scripts/*.sh \
+    && export $(cat /env) \
+    && /app/scripts/install_build_dependencies.sh \
+    && /app/scripts/install_runtime_dependencies.sh
 
 # hadolint ignore=DL3022
 COPY --from=kkoval/dependencies /artifacts.tar.gz /dependencies/
@@ -63,35 +72,38 @@ WORKDIR /dependencies
 # Split values in `/env`
 # hadolint ignore=SC2046,SC2086
 RUN export $(cat /env) \
-  && git config --global --add safe.directory /app \
-  && tar xfv artifacts.tar.gz \
-  && cp -a include/* /usr/local/include/ \
-  && cp -a pkgconfig/* ${PKG_CONFIG_PATH} \
-  && cp -a lib/* /usr/local/lib/ \
-  && cp -a bin/* /usr/local/bin/ \
-  && ldconfig \
-  && apt-get install -y ./deb/jellyfin-ffmpeg.deb
+    && git config --global --add safe.directory /app \
+    && tar xfv artifacts.tar.gz \
+    && cp -a include/* /usr/local/include/ \
+    && cp -a pkgconfig/* ${PKG_CONFIG_PATH} \
+    && cp -a lib/* /usr/local/lib/ \
+    && cp -a bin/* /usr/local/bin/ \
+    && ldconfig \
+    && apt-get install -y ./deb/jellyfin-ffmpeg.deb
 
 COPY api/go.mod api/go.sum /app/api/
 WORKDIR /app/api
 # Split values in `/env`
 # hadolint ignore=SC2046
-RUN export $(cat /env) \
-  && go env \
-  && go mod download \
-  # Patch go-face
-  && sed -i 's/-march=native//g' ${GOPATH}/pkg/mod/github.com/!kagami/go-face*/face.go \
-  # Build dependencies that use CGO
-  && go install \
-  github.com/mattn/go-sqlite3 \
-  github.com/Kagami/go-face
+RUN --mount=type=cache,target=/go/pkg/mod,sharing=locked,id=go-mod-${TARGETARCH} \
+    export $(cat /env) \
+    && go env \
+    && go mod download \
+    # Patch go-face
+    && sed -i 's/-march=native//g' ${GOPATH}/pkg/mod/github.com/!kagami/go-face*/face.go \
+    # Build dependencies that use CGO
+    && go install \
+    github.com/mattn/go-sqlite3 \
+    github.com/Kagami/go-face
 
 COPY api /app/api
 # Split values in `/env`
 # hadolint ignore=SC2046
-RUN export $(cat /env) \
-  && go env \
-  && go build -v -o photoview .
+RUN --mount=type=cache,target=/go/pkg/mod,sharing=locked,id=go-mod-${TARGETARCH} \
+    --mount=type=cache,target=/root/.cache/go-build,sharing=locked,id=go-build-${TARGETARCH} \
+    export $(cat /env) \
+    && go env \
+    && go build -v -o photoview .
 
 ### Build release image ###
 FROM debian:bookworm-slim AS release
@@ -102,25 +114,27 @@ SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
 
 COPY scripts/install_runtime_dependencies.sh /app/scripts/
 WORKDIR /dependencies
-RUN --mount=type=bind,from=api,source=/dependencies/,target=/dependencies/ \
-  chmod +x /app/scripts/install_runtime_dependencies.sh \
-  # Create a user to run Photoview server
-  && groupadd -g 999 photoview \
-  && useradd -r -u 999 -g photoview -m photoview \
-  # Install required dependencies
-  && /app/scripts/install_runtime_dependencies.sh \
-  # Install self-building libs
-  && cp -a lib/*.so* /usr/local/lib/ \
-  && cp -a bin/* /usr/local/bin/ \
-  && cp -a etc/* /usr/local/etc/ \
-  && ldconfig \
-  && apt-get install -y ./deb/jellyfin-ffmpeg.deb \
-  && ln -s /usr/lib/jellyfin-ffmpeg/ffmpeg /usr/local/bin/ \
-  && ln -s /usr/lib/jellyfin-ffmpeg/ffprobe /usr/local/bin/ \
-  # Cleanup
-  && apt-get autoremove -y \
-  && apt-get clean \
-  && rm -rf /var/lib/apt/lists/*
+RUN --mount=type=cache,target=/var/cache/apt,sharing=locked,id=apt-cache-${TARGETARCH} \
+    --mount=type=cache,target=/var/lib/apt/lists,sharing=locked,id=apt-lists-${TARGETARCH} \
+    --mount=type=bind,from=api,source=/dependencies/,target=/dependencies/ \
+    chmod +x /app/scripts/install_runtime_dependencies.sh \
+    # Create a user to run Photoview server
+    && groupadd -g 999 photoview \
+    && useradd -r -u 999 -g photoview -m photoview \
+    # Install required dependencies
+    && /app/scripts/install_runtime_dependencies.sh \
+    # Install self-building libs
+    && cp -a lib/*.so* /usr/local/lib/ \
+    && cp -a bin/* /usr/local/bin/ \
+    && cp -a etc/* /usr/local/etc/ \
+    && ldconfig \
+    && apt-get install -y ./deb/jellyfin-ffmpeg.deb \
+    && ln -s /usr/lib/jellyfin-ffmpeg/ffmpeg /usr/local/bin/ \
+    && ln -s /usr/lib/jellyfin-ffmpeg/ffprobe /usr/local/bin/ \
+    # Cleanup
+    && apt-get autoremove -y \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
 COPY api/data /app/data
 COPY --from=ui /app/ui/dist /app/ui
@@ -139,10 +153,10 @@ ENV PHOTOVIEW_MEDIA_CACHE=/home/photoview/media-cache
 EXPOSE ${PHOTOVIEW_LISTEN_PORT}
 
 HEALTHCHECK --interval=60s --timeout=10s \
-  CMD curl --fail http://localhost:${PHOTOVIEW_LISTEN_PORT}/api/graphql \
-  -X POST -H 'Content-Type: application/json' \
-  --data-raw '{"operationName":"CheckInitialSetup","variables":{},"query":"query CheckInitialSetup { siteInfo { initialSetup }}"}' \
-  || exit 1
+    CMD curl --fail http://localhost:${PHOTOVIEW_LISTEN_PORT}/api/graphql \
+    -X POST -H 'Content-Type: application/json' \
+    --data-raw '{"operationName":"CheckInitialSetup","variables":{},"query":"query CheckInitialSetup { siteInfo { initialSetup }}"}' \
+    || exit 1
 
 LABEL org.opencontainers.image.source=https://github.com/kkovaletp/photoview/
 USER photoview
