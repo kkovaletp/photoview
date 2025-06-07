@@ -11,7 +11,7 @@ ARG TARGETARCH
 ENV BUILD_CACHE_DIR=/build-cache
 WORKDIR /tmp/build-libraw
 COPY --chmod=0755 build_libraw.sh .
-RUN --mount=type=cache,target=${BUILD_CACHE_DIR},id=libraw-${LIBRAW_VERSION}-${TARGETARCH} \
+RUN --mount=type=cache,target=${BUILD_CACHE_DIR},id=libraw-${TARGETARCH}-${LIBRAW_VERSION} \
     --mount=type=secret,id=github_token \
     export GITHUB_TOKEN=$(cat /run/secrets/github_token) \
     && export $(cat /env) && ./build_libraw.sh
@@ -22,7 +22,7 @@ ARG TARGETARCH
 ENV BUILD_CACHE_DIR=/build-cache
 WORKDIR /tmp/build-libheif
 COPY --chmod=0755 build_libheif.sh .
-RUN --mount=type=cache,target=${BUILD_CACHE_DIR},id=libheif-${LIBHEIF_VERSION}-${TARGETARCH} \
+RUN --mount=type=cache,target=${BUILD_CACHE_DIR},id=libheif-${TARGETARCH}-${LIBHEIF_VERSION} \
     --mount=type=secret,id=github_token \
     export GITHUB_TOKEN=$(cat /run/secrets/github_token) \
     && export $(cat /env) && ./build_libheif.sh
@@ -33,7 +33,7 @@ ARG TARGETARCH
 ENV BUILD_CACHE_DIR=/build-cache
 WORKDIR /tmp/build-imagemagick
 COPY --chmod=0755 build_imagemagick.sh .
-RUN --mount=type=cache,target=${BUILD_CACHE_DIR},id=imagemagick-${IMAGEMAGICK_VERSION}-${TARGETARCH} \
+RUN --mount=type=cache,target=${BUILD_CACHE_DIR},id=imagemagick-${TARGETARCH}-${IMAGEMAGICK_VERSION} \
     --mount=type=secret,id=github_token \
     export GITHUB_TOKEN=$(cat /run/secrets/github_token) \
     && export $(cat /env) && ./build_imagemagick.sh
@@ -44,7 +44,7 @@ ARG TARGETARCH
 ENV BUILD_CACHE_DIR=/build-cache
 WORKDIR /tmp/download-ffmpeg
 COPY --chmod=0755 download_jellyfin-ffmpeg.sh .
-RUN --mount=type=cache,target=${BUILD_CACHE_DIR},id=ffmpeg-${JELLYFIN_FFMPEG_VERSION}-${TARGETARCH} \
+RUN --mount=type=cache,target=${BUILD_CACHE_DIR},id=ffmpeg-${TARGETARCH}-${JELLYFIN_FFMPEG_VERSION} \
     --mount=type=secret,id=github_token \
     export GITHUB_TOKEN=$(cat /run/secrets/github_token) \
     && export $(cat /env) && ./download_jellyfin-ffmpeg.sh

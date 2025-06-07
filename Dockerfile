@@ -1,5 +1,6 @@
 ### Build UI ###
 FROM --platform=${BUILDPLATFORM:-linux/amd64} node:18 AS ui
+ARG TARGETPLATFORM
 
 # See for details: https://github.com/hadolint/hadolint/wiki/DL4006
 SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
@@ -14,13 +15,8 @@ ENV REACT_APP_API_ENDPOINT=${REACT_APP_API_ENDPOINT}
 ARG UI_PUBLIC_URL
 ENV UI_PUBLIC_URL=${UI_PUBLIC_URL:-/}
 
-ARG VERSION
-ENV VERSION=${VERSION:-undefined}
-ENV REACT_APP_BUILD_VERSION=${VERSION:-undefined}
-
-ARG BUILD_DATE
-ENV BUILD_DATE=${BUILD_DATE:-undefined}
-ENV REACT_APP_BUILD_DATE=${BUILD_DATE:-undefined}
+ENV VERSION="kkoval-2"
+ENV REACT_APP_BUILD_VERSION=${VERSION}
 
 ARG COMMIT_SHA
 ENV COMMIT_SHA=${COMMIT_SHA:-}
@@ -33,10 +29,8 @@ RUN npm ci --ignore-scripts
 
 COPY ui/ /app/ui
 # hadolint ignore=SC2155
-RUN if [ "${BUILD_DATE}" = "undefined" ]; then \
-  export BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ'); \
+RUN export BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ'); \
   export REACT_APP_BUILD_DATE=${BUILD_DATE}; \
-  fi; \
   npm run build -- --base="${UI_PUBLIC_URL}"
 
 ### Build API ###
