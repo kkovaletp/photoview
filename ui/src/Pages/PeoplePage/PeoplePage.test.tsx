@@ -11,6 +11,17 @@ import { renderWithProviders } from '../../helpers/testUtils'
 
 vi.mock('../../hooks/useScrollPagination')
 
+// Mock MergeFaceGroupsModal to prevent GraphQL query conflicts
+vi.mock('./SingleFaceGroup/MergeFaceGroupsModal', () => ({
+  __esModule: true,
+  default: () => <div data-testid="merge-face-groups-modal">Merge Modal</div>,
+  MergeFaceGroupsModalState: {
+    Closed: 'closed',
+    SelectDestination: 'select_destination',
+    SelectSources: 'select_sources',
+  },
+}))
+
 describe('PeoplePage component', () => {
   const graphqlMocks = [
     {
@@ -65,9 +76,34 @@ describe('PeoplePage component', () => {
         },
       },
     },
+    {
+      request: {
+        query: MY_FACES_QUERY,
+        variables: {},
+      },
+      result: {
+        data: {
+          myFaceGroups: [
+            {
+              __typename: 'FaceGroup',
+              id: '3',
+              label: 'Person A',
+              imageFaceCount: 2,
+              imageFaces: [],
+            },
+            {
+              __typename: 'FaceGroup',
+              id: '1',
+              label: 'Person B',
+              imageFaceCount: 1,
+              imageFaces: [],
+            },
+          ],
+        },
+      },
+    },
   ]
 
-  //TODO: fix "No more mocked responses for the query" error
   test('people page', async () => {
     renderWithProviders(<PeoplePage />, {
       mocks: graphqlMocks,
