@@ -67,6 +67,7 @@ describe('PeoplePage component', () => {
     },
   ]
 
+  //TODO: fix "No more mocked responses for the query" error
   test('people page', async () => {
     renderWithProviders(<PeoplePage />, {
       mocks: graphqlMocks,
