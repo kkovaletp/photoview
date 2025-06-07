@@ -72,14 +72,13 @@ WORKDIR /dependencies
 # Split values in `/env`
 # hadolint ignore=SC2046,SC2086
 RUN export $(cat /env) \
-    && git config --global --add safe.directory /app \
-    && tar xfv artifacts.tar.gz \
-    && cp -a include/* /usr/local/include/ \
-    && cp -a pkgconfig/* ${PKG_CONFIG_PATH} \
-    && cp -a lib/* /usr/local/lib/ \
-    && cp -a bin/* /usr/local/bin/ \
-    && ldconfig \
-    && apt-get install -y ./deb/jellyfin-ffmpeg.deb
+  && git config --global --add safe.directory /app \
+  && tar xfv artifacts.tar.gz \
+  && cp -a include/* /usr/local/include/ \
+  && cp -a pkgconfig/* ${PKG_CONFIG_PATH} \
+  && cp -a lib/* /usr/local/lib/ \
+  && ldconfig \
+  && apt-get install -y ./deb/jellyfin-ffmpeg.deb
 
 COPY api/go.mod api/go.sum /app/api/
 WORKDIR /app/api
@@ -117,24 +116,22 @@ WORKDIR /dependencies
 RUN --mount=type=cache,target=/var/cache/apt,sharing=locked,id=apt-cache-${TARGETARCH} \
     --mount=type=cache,target=/var/lib/apt/lists,sharing=locked,id=apt-lists-${TARGETARCH} \
     --mount=type=bind,from=api,source=/dependencies/,target=/dependencies/ \
-    chmod +x /app/scripts/install_runtime_dependencies.sh \
-    # Create a user to run Photoview server
-    && groupadd -g 999 photoview \
-    && useradd -r -u 999 -g photoview -m photoview \
-    # Install required dependencies
-    && /app/scripts/install_runtime_dependencies.sh \
-    # Install self-building libs
-    && cp -a lib/*.so* /usr/local/lib/ \
-    && cp -a bin/* /usr/local/bin/ \
-    && cp -a etc/* /usr/local/etc/ \
-    && ldconfig \
-    && apt-get install -y ./deb/jellyfin-ffmpeg.deb \
-    && ln -s /usr/lib/jellyfin-ffmpeg/ffmpeg /usr/local/bin/ \
-    && ln -s /usr/lib/jellyfin-ffmpeg/ffprobe /usr/local/bin/ \
-    # Cleanup
-    && apt-get autoremove -y \
-    && apt-get clean \
-    && rm -rf /var/lib/apt/lists/*
+  chmod +x /app/scripts/install_runtime_dependencies.sh \
+  # Create a user to run Photoview server
+  && groupadd -g 999 photoview \
+  && useradd -r -u 999 -g photoview -m photoview \
+  # Install required dependencies
+  && /app/scripts/install_runtime_dependencies.sh \
+  # Install self-building libs
+  && cp -a lib/*.so* /usr/local/lib/ \
+  && ldconfig \
+  && apt-get install -y ./deb/jellyfin-ffmpeg.deb \
+  && ln -s /usr/lib/jellyfin-ffmpeg/ffmpeg /usr/local/bin/ \
+  && ln -s /usr/lib/jellyfin-ffmpeg/ffprobe /usr/local/bin/ \
+  # Cleanup
+  && apt-get autoremove -y \
+  && apt-get clean \
+  && rm -rf /var/lib/apt/lists/*
 
 COPY api/data /app/data
 COPY --from=ui /app/ui/dist /app/ui
