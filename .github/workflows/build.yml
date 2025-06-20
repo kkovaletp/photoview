@@ -150,9 +150,9 @@ jobs:
           cache-from: |
             type=gha,scope=test-ui-${{ hashFiles('ui/package-lock.json') }}
             type=gha,scope=test-api-${{ hashFiles('api/go.sum', 'scripts/install_*.sh') }}
-            type=gha,scope=release-${{ hashFiles('api/go.sum', 'scripts/install_*.sh', 'ui/package-lock.json') }}
           cache-to: |
-            type=gha,mode=max,scope=release-${{ hashFiles('api/go.sum', 'scripts/install_*.sh', 'ui/package-lock.json') }}
+            type=gha,mode=max,scope=test-ui-${{ hashFiles('ui/package-lock.json') }}
+            type=gha,mode=max,scope=test-api-${{ hashFiles('api/go.sum', 'scripts/install_*.sh') }}
           build-args: |
             NODE_ENV=production
             COMMIT_SHA=${{ github.sha }}

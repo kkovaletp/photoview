@@ -25,15 +25,11 @@ ENV REACT_APP_BUILD_COMMIT_SHA=${COMMIT_SHA:-}
 WORKDIR /app/ui
 
 COPY ui/package.json ui/package-lock.json /app/ui/
-RUN --mount=type=cache,target=/root/.npm,sharing=locked,id=npm-${TARGETARCH} \
-    --mount=type=cache,target=/app/ui/node_modules,sharing=locked,id=node_modules-${TARGETARCH} \
-    npm ci --ignore-scripts
+RUN npm ci --ignore-scripts
 
 COPY ui/ /app/ui
 # hadolint ignore=SC2155
-RUN --mount=type=cache,target=/root/.npm,sharing=locked,id=npm-${TARGETARCH} \
-    --mount=type=cache,target=/app/ui/node_modules,sharing=locked,id=node_modules-${TARGETARCH} \
-    export BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ'); \
+RUN export BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ'); \
     export REACT_APP_BUILD_DATE=${BUILD_DATE}; \
     npm run build -- --base="${UI_PUBLIC_URL}"
 
@@ -80,8 +76,7 @@ COPY api/go.mod api/go.sum /app/api/
 WORKDIR /app/api
 # Split values in `/env`
 # hadolint ignore=SC2046
-RUN --mount=type=cache,target=/go/pkg/mod,sharing=locked,id=go-mod-${TARGETARCH} \
-    export $(cat /env) \
+RUN export $(cat /env) \
     && go env \
     && go mod download \
     # Patch go-face
@@ -94,9 +89,7 @@ RUN --mount=type=cache,target=/go/pkg/mod,sharing=locked,id=go-mod-${TARGETARCH}
 COPY api /app/api
 # Split values in `/env`
 # hadolint ignore=SC2046
-RUN --mount=type=cache,target=/go/pkg/mod,sharing=locked,id=go-mod-${TARGETARCH} \
-    --mount=type=cache,target=/root/.cache/go-build,sharing=locked,id=go-build-${TARGETARCH} \
-    export $(cat /env) \
+RUN export $(cat /env) \
     && go env \
     && go build -v -o photoview .
 
