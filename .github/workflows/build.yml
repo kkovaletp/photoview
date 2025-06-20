@@ -133,12 +133,6 @@ jobs:
             ${{ github.event_name != 'schedule' && 'type=semver,pattern={{major}}' || '' }}
             ${{ github.event_name != 'schedule' && 'type=sha' || '' }}
 
-      - name: Set build args
-        id: vars
-        run: |
-          echo "BUILD_DATE=$(date +%Y-%m-%d)" >> $GITHUB_OUTPUT
-          echo "VERSION=kkoval-2-$(date +%Y-%m-%d)" >> $GITHUB_OUTPUT
-
       - name: Build and Push
         id: docker_buildx
         uses: docker/build-push-action@v6
@@ -152,14 +146,14 @@ jobs:
           tags:        ${{ steps.docker_meta.outputs.tags }}
           labels:      ${{ steps.docker_meta.outputs.labels }}
           annotations: ${{ steps.docker_meta.outputs.annotations }}
-          cache-from:  type=gha
-          cache-to:    type=gha,mode=max
+          cache-from: |
+            type=gha,scope=test-ui-${{ hashFiles('ui/package-lock.json') }}
+            type=gha,scope=test-api-${{ hashFiles('api/go.sum', 'scripts/install_*.sh') }}
+          cache-to: |
+            type=gha,mode=max,scope=test-ui-${{ hashFiles('ui/package-lock.json') }}
+            type=gha,mode=max,scope=test-api-${{ hashFiles('api/go.sum', 'scripts/install_*.sh') }}
           build-args: |
             NODE_ENV=production
-            BUILD_DATE=${{ steps.vars.outputs.BUILD_DATE }}
-            REACT_APP_BUILD_DATE=${{ steps.vars.outputs.BUILD_DATE }}
-            VERSION=${{ steps.vars.outputs.VERSION }}
-            REACT_APP_BUILD_VERSION=${{ steps.vars.outputs.VERSION }}
             COMMIT_SHA=${{ github.sha }}
             REACT_APP_BUILD_COMMIT_SHA=${{ github.sha }}
 
