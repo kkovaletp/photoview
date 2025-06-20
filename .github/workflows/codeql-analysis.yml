@@ -97,23 +97,34 @@ jobs:
         if: ${{ ( steps.scan-fixed.conclusion == 'success' || steps.scan-fixed.conclusion == 'failure' ) && github.event_name == 'pull_request' }}
         run: |
           jq '{
-            "|": .matches | map({
-              "language": .artifact.language,
-              "id": .vulnerability.id,
-              "severity": .vulnerability.severity,
-              "severity-rank": (
-                .vulnerability.severity
-                | (., {Critical: 1, High: 2, Medium: 3, Low: 4, Negligible: 5, Unknown: 6}) as $s
-                | $s[.] // 99
-              ),
-              "name": .artifact.name,
-              "version": .artifact.version,
-              "fix-versions": .vulnerability.fix.versions[0],
-              "path": .artifact.locations[0].path,
-              "description": .vulnerability.description
-            })
-            | sort_by(.["severity-rank"], .name)
-            | map(del(.["severity-rank"]))
+            "|": (
+              .matches
+              | map(
+                  . + {
+                    severity_rank: (
+                      {
+                        Critical: 1,
+                        High: 2,
+                        Medium: 3,
+                        Low: 4,
+                        Negligible: 5,
+                        Unknown: 6
+                      }[.vulnerability.severity] // 99
+                    )
+                  }
+                )
+              | sort_by(.severity_rank, .artifact.name)
+              | map({
+                  "language": .artifact.language,
+                  "id": .vulnerability.id,
+                  "severity": .vulnerability.severity,
+                  "name": .artifact.name,
+                  "version": .artifact.version,
+                  "fix-versions": .vulnerability.fix.versions[0],
+                  "path": .artifact.locations[0].path,
+                  "description": .vulnerability.description
+                })
+            )
           }' ${{ steps.scan-fixed.outputs.json }} > vulns.json
           cat vulns.json | jq
 
