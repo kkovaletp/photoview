@@ -25,13 +25,13 @@ ENV REACT_APP_BUILD_COMMIT_SHA=${COMMIT_SHA:-}
 WORKDIR /app/ui
 
 COPY ui/package.json ui/package-lock.json /app/ui/
-RUN --mount=type=cache,target=/root/.npm/_cacache,sharing=locked,id=npm-${TARGETARCH} \
+RUN --mount=type=cache,target=/root/.npm,sharing=locked,id=npm-${TARGETARCH} \
     --mount=type=cache,target=/app/ui/node_modules,sharing=locked,id=node_modules-${TARGETARCH} \
     npm ci --ignore-scripts
 
 COPY ui/ /app/ui
 # hadolint ignore=SC2155
-RUN --mount=type=cache,target=/root/.npm/_cacache,sharing=locked,id=npm-${TARGETARCH} \
+RUN --mount=type=cache,target=/root/.npm,sharing=locked,id=npm-${TARGETARCH} \
     --mount=type=cache,target=/app/ui/node_modules,sharing=locked,id=node_modules-${TARGETARCH} \
     export BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ'); \
     export REACT_APP_BUILD_DATE=${BUILD_DATE}; \
@@ -51,17 +51,13 @@ ENV CGO_ENABLED=1
 
 # Download dependencies
 COPY scripts/set_compiler_env.sh /app/scripts/
-RUN --mount=type=cache,target=/var/cache/apt,sharing=locked,id=apt-cache-${TARGETARCH} \
-    --mount=type=cache,target=/var/lib/apt/lists,sharing=locked,id=apt-lists-${TARGETARCH} \
-    chmod +x /app/scripts/*.sh \
+RUN chmod +x /app/scripts/*.sh \
     && source /app/scripts/set_compiler_env.sh
 
 COPY scripts/install_*.sh /app/scripts/
 # Split values in `/env`
 # hadolint ignore=SC2046
-RUN --mount=type=cache,target=/var/cache/apt,sharing=locked,id=apt-cache-${TARGETARCH} \
-    --mount=type=cache,target=/var/lib/apt/lists,sharing=locked,id=apt-lists-${TARGETARCH} \
-    chmod +x /app/scripts/*.sh \
+RUN chmod +x /app/scripts/*.sh \
     && export $(cat /env) \
     && /app/scripts/install_build_dependencies.sh \
     && /app/scripts/install_runtime_dependencies.sh
@@ -72,13 +68,13 @@ WORKDIR /dependencies
 # Split values in `/env`
 # hadolint ignore=SC2046,SC2086
 RUN export $(cat /env) \
-  && git config --global --add safe.directory /app \
-  && tar xfv artifacts.tar.gz \
-  && cp -a include/* /usr/local/include/ \
-  && cp -a pkgconfig/* ${PKG_CONFIG_PATH} \
-  && cp -a lib/* /usr/local/lib/ \
-  && ldconfig \
-  && apt-get install -y ./deb/jellyfin-ffmpeg.deb
+    && git config --global --add safe.directory /app \
+    && tar xfv artifacts.tar.gz \
+    && cp -a include/* /usr/local/include/ \
+    && cp -a pkgconfig/* ${PKG_CONFIG_PATH} \
+    && cp -a lib/* /usr/local/lib/ \
+    && ldconfig \
+    && apt-get install -y ./deb/jellyfin-ffmpeg.deb
 
 COPY api/go.mod api/go.sum /app/api/
 WORKDIR /app/api
@@ -113,25 +109,23 @@ SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
 
 COPY scripts/install_runtime_dependencies.sh /app/scripts/
 WORKDIR /dependencies
-RUN --mount=type=cache,target=/var/cache/apt,sharing=locked,id=apt-cache-${TARGETARCH} \
-    --mount=type=cache,target=/var/lib/apt/lists,sharing=locked,id=apt-lists-${TARGETARCH} \
-    --mount=type=bind,from=api,source=/dependencies/,target=/dependencies/ \
-  chmod +x /app/scripts/install_runtime_dependencies.sh \
-  # Create a user to run Photoview server
-  && groupadd -g 999 photoview \
-  && useradd -r -u 999 -g photoview -m photoview \
-  # Install required dependencies
-  && /app/scripts/install_runtime_dependencies.sh \
-  # Install self-building libs
-  && cp -a lib/*.so* /usr/local/lib/ \
-  && ldconfig \
-  && apt-get install -y ./deb/jellyfin-ffmpeg.deb \
-  && ln -s /usr/lib/jellyfin-ffmpeg/ffmpeg /usr/local/bin/ \
-  && ln -s /usr/lib/jellyfin-ffmpeg/ffprobe /usr/local/bin/ \
-  # Cleanup
-  && apt-get autoremove -y \
-  && apt-get clean \
-  && rm -rf /var/lib/apt/lists/*
+RUN --mount=type=bind,from=api,source=/dependencies/,target=/dependencies/ \
+    chmod +x /app/scripts/install_runtime_dependencies.sh \
+    # Create a user to run Photoview server
+    && groupadd -g 999 photoview \
+    && useradd -r -u 999 -g photoview -m photoview \
+    # Install required dependencies
+    && /app/scripts/install_runtime_dependencies.sh \
+    # Install self-building libs
+    && cp -a lib/*.so* /usr/local/lib/ \
+    && ldconfig \
+    && apt-get install -y ./deb/jellyfin-ffmpeg.deb \
+    && ln -s /usr/lib/jellyfin-ffmpeg/ffmpeg /usr/local/bin/ \
+    && ln -s /usr/lib/jellyfin-ffmpeg/ffprobe /usr/local/bin/ \
+    # Cleanup
+    && apt-get autoremove -y \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
 COPY api/data /app/data
 COPY --from=ui /app/ui/dist /app/ui
