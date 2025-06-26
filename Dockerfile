@@ -1,6 +1,7 @@
 ### Build UI ###
 FROM --platform=${BUILDPLATFORM:-linux/amd64} node:18 AS ui
 ARG TARGETARCH
+ARG GITHUB_SHA
 
 # See for details: https://github.com/hadolint/hadolint/wiki/DL4006
 SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
@@ -8,19 +9,16 @@ SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
 ARG NODE_ENV
 ENV NODE_ENV=${NODE_ENV:-production}
 
+# Set environment variable REACT_APP_API_ENDPOINT from build args, uses "<web server>/api" as default
 ARG REACT_APP_API_ENDPOINT
 ENV REACT_APP_API_ENDPOINT=${REACT_APP_API_ENDPOINT}
 
-# Set environment variable UI_PUBLIC_URL from build args, uses "/" as default
+# Set environment variable UI_PUBLIC_URL from build args, uses "<web server>/" as default
 ARG UI_PUBLIC_URL
 ENV UI_PUBLIC_URL=${UI_PUBLIC_URL:-/}
 
 ENV VERSION="kkovaletp-2-${TARGETARCH}"
 ENV REACT_APP_BUILD_VERSION=${VERSION}
-
-ARG COMMIT_SHA
-ENV COMMIT_SHA=${COMMIT_SHA:-}
-ENV REACT_APP_BUILD_COMMIT_SHA=${COMMIT_SHA:-}
 
 WORKDIR /app/ui
 
@@ -31,12 +29,13 @@ COPY ui/ /app/ui
 # hadolint ignore=SC2155
 RUN export BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ'); \
     export REACT_APP_BUILD_DATE=${BUILD_DATE}; \
+    export COMMIT_SHA=${GITHUB_SHA:-$(git rev-parse --short HEAD || echo 000000)}; \
+    export REACT_APP_BUILD_COMMIT_SHA=${COMMIT_SHA}; \
     npm run build -- --base="${UI_PUBLIC_URL}"
 
 ### Build API ###
 FROM --platform=${BUILDPLATFORM:-linux/amd64} golang:1.24-bookworm AS api
 ARG TARGETPLATFORM
-ARG TARGETARCH
 
 # See for details: https://github.com/hadolint/hadolint/wiki/DL4006
 SHELL ["/bin/bash", "-euo", "pipefail", "-c"]

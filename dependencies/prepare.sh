@@ -4,9 +4,7 @@ set -euo pipefail
 : "${TARGETPLATFORM:=linux/$(dpkg --print-architecture)}"
 : "${DEB_HOST_MULTIARCH:=$(uname -m)-linux-gnu}"
 
-#TARGETOS="$(echo "$TARGETPLATFORM" | cut -d"/" -f1)"
 TARGETARCH="$(echo "$TARGETPLATFORM" | cut -d"/" -f2)"
-#TARGETVARIANT="$(echo "$TARGETPLATFORM" | cut -d"/" -f3)"
 
 DEBIAN_ARCH=$TARGETARCH
 if [ "$TARGETARCH" = "arm" ]; then
@@ -28,7 +26,7 @@ apt-get install -y --no-install-recommends \
   cmake
 
 dpkg-architecture -a "$DEBIAN_ARCH" >/env
+echo "PKG_CONFIG_PATH=/usr/lib/${DEB_HOST_MULTIARCH}/pkgconfig" >>/env
 # shellcheck disable=SC2046
 export $(cat /env)
-echo "PKG_CONFIG_PATH=/usr/lib/${DEB_HOST_MULTIARCH}/pkgconfig" >>/env
 cat /env
