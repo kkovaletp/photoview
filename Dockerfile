@@ -58,7 +58,7 @@ COPY scripts/install_*.sh /app/scripts/
 # Split values in `/env`
 # hadolint ignore=SC2046
 RUN chmod +x /app/scripts/*.sh \
-    && export $(cat /env) \
+    && set -a && source /env && set +a \
     && /app/scripts/install_build_dependencies.sh \
     && /app/scripts/install_runtime_dependencies.sh
 
@@ -67,7 +67,7 @@ COPY --from=kkoval/dependencies:latest /artifacts.tar.gz /dependencies/
 WORKDIR /dependencies
 # Split values in `/env`
 # hadolint ignore=SC2046,SC2086
-RUN export $(cat /env) \
+RUN set -a && source /env && set +a \
     && git config --global --add safe.directory /app \
     && tar xfv artifacts.tar.gz \
     && cp -a include/* /usr/local/include/ \
@@ -82,7 +82,7 @@ COPY api/go.mod api/go.sum /app/api/
 WORKDIR /app/api
 # Split values in `/env`
 # hadolint ignore=SC2046
-RUN export $(cat /env) \
+RUN set -a && source /env && set +a \
     && go env \
     && go mod download \
     # Patch go-face
@@ -95,7 +95,7 @@ RUN export $(cat /env) \
 COPY api /app/api
 # Split values in `/env`
 # hadolint ignore=SC2046
-RUN export $(cat /env) \
+RUN set -a && source /env && set +a \
     && go env \
     && go build -v -o photoview .
 
