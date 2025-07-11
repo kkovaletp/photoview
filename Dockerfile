@@ -1,36 +1,41 @@
 ### Build UI ###
 FROM --platform=${BUILDPLATFORM:-linux/amd64} node:18 AS ui
-ARG TARGETARCH
-ARG GITHUB_SHA
-
 # See for details: https://github.com/hadolint/hadolint/wiki/DL4006
 SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
 
-ARG NODE_ENV
-ENV NODE_ENV=${NODE_ENV:-production}
+ARG NODE_ENV=production
+ENV NODE_ENV=${NODE_ENV}
+
+WORKDIR /app/ui
+
+COPY ui/package.json ui/package-lock.json /app/ui/
+RUN if [ "$NODE_ENV" = "production" ]; then \
+        echo "Installing production dependencies only..."; \
+        npm ci --omit=dev; \
+    else \
+        echo "Installing all dependencies..."; \
+        npm ci; \
+    fi
+
+COPY ui/ /app/ui
 
 # Set environment variable REACT_APP_API_ENDPOINT from build args, uses "<web server>/api" as default
 ARG REACT_APP_API_ENDPOINT
 ENV REACT_APP_API_ENDPOINT=${REACT_APP_API_ENDPOINT}
 
 # Set environment variable UI_PUBLIC_URL from build args, uses "<web server>/" as default
-ARG UI_PUBLIC_URL
-ENV UI_PUBLIC_URL=${UI_PUBLIC_URL:-/}
+ARG UI_PUBLIC_URL=/
+ENV UI_PUBLIC_URL=${UI_PUBLIC_URL}
 
-ENV VERSION="kkovaletp-2-${TARGETARCH}"
-ENV REACT_APP_BUILD_VERSION=${VERSION}
-
-WORKDIR /app/ui
-
-COPY ui/package.json ui/package-lock.json /app/ui/
-RUN npm ci --ignore-scripts
-
-COPY ui/ /app/ui
+ARG VERSION=unknown-branch
+ARG TARGETARCH
 # hadolint ignore=SC2155
-RUN export BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%SZ'); \
+RUN export BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%S+00:00(UTC)'); \
     export REACT_APP_BUILD_DATE=${BUILD_DATE}; \
-    export COMMIT_SHA=${GITHUB_SHA:-$(git rev-parse --short HEAD || echo 000000)}; \
+    export COMMIT_SHA="-=<GitHub-CI-commit-sha-placeholder>=-"; \
     export REACT_APP_BUILD_COMMIT_SHA=${COMMIT_SHA}; \
+    export VERSION="kkovaletp-2-${VERSION}-${TARGETARCH}"; \
+    export REACT_APP_BUILD_VERSION=${VERSION}; \
     npm run build -- --base="${UI_PUBLIC_URL}"
 
 ### Build API ###
@@ -58,7 +63,7 @@ RUN chmod +x /app/scripts/*.sh \
     && /app/scripts/install_runtime_dependencies.sh
 
 # hadolint ignore=DL3022
-COPY --from=kkoval/dependencies /artifacts.tar.gz /dependencies/
+COPY --from=kkoval/dependencies:latest /artifacts.tar.gz /dependencies/
 WORKDIR /dependencies
 # Split values in `/env`
 # hadolint ignore=SC2046,SC2086
@@ -69,7 +74,9 @@ RUN export $(cat /env) \
     && cp -a pkgconfig/* ${PKG_CONFIG_PATH} \
     && cp -a lib/* /usr/local/lib/ \
     && ldconfig \
-    && apt-get install -y ./deb/jellyfin-ffmpeg.deb
+    && apt-get install -y ./deb/jellyfin-ffmpeg.deb \
+    && ln -s /usr/lib/jellyfin-ffmpeg/ffmpeg /usr/local/bin/ \
+    && ln -s /usr/lib/jellyfin-ffmpeg/ffprobe /usr/local/bin/
 
 COPY api/go.mod api/go.sum /app/api/
 WORKDIR /app/api
@@ -82,8 +89,8 @@ RUN export $(cat /env) \
     && sed -i 's/-march=native//g' ${GOPATH}/pkg/mod/github.com/!kagami/go-face*/face.go \
     # Build dependencies that use CGO
     && go install \
-    github.com/mattn/go-sqlite3 \
-    github.com/Kagami/go-face
+        github.com/mattn/go-sqlite3 \
+        github.com/Kagami/go-face
 
 COPY api /app/api
 # Split values in `/env`
@@ -122,6 +129,11 @@ RUN --mount=type=bind,from=api,source=/dependencies/,target=/dependencies/ \
 COPY api/data /app/data
 COPY --from=ui /app/ui/dist /app/ui
 COPY --from=api /app/api/photoview /app/photoview
+# This is a w/a for letting the UI build stage to be cached
+# and not rebuilt every new commit because of the build_arg value change.
+ARG COMMIT_SHA=NoCommit
+RUN find /app/ui/assets -type f -name "SettingsPage.*.js" \
+        -exec sed -i "s/=\"-=<GitHub-CI-commit-sha-placeholder>=-\";/=\"${COMMIT_SHA}\";/g" {} \;
 
 WORKDIR /home/photoview
 
@@ -137,8 +149,8 @@ EXPOSE ${PHOTOVIEW_LISTEN_PORT}
 
 HEALTHCHECK --interval=60s --timeout=10s \
     CMD curl --fail http://localhost:${PHOTOVIEW_LISTEN_PORT}/api/graphql \
-    -X POST -H 'Content-Type: application/json' \
-    --data-raw '{"operationName":"CheckInitialSetup","variables":{},"query":"query CheckInitialSetup { siteInfo { initialSetup }}"}' \
+        -X POST -H 'Content-Type: application/json' \
+        --data-raw '{"operationName":"CheckInitialSetup","variables":{},"query":"query CheckInitialSetup { siteInfo { initialSetup }}"}' \
     || exit 1
 
 LABEL org.opencontainers.image.source=https://github.com/kkovaletp/photoview/
