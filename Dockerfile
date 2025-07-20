@@ -55,8 +55,6 @@ RUN chmod +x /app/scripts/*.sh \
     && source /app/scripts/set_compiler_env.sh
 
 COPY scripts/install_*.sh /app/scripts/
-# Split values in `/env`
-# hadolint ignore=SC2046
 RUN chmod +x /app/scripts/*.sh \
     && set -a && source /env && set +a \
     && /app/scripts/install_build_dependencies.sh \
@@ -65,13 +63,11 @@ RUN chmod +x /app/scripts/*.sh \
 # hadolint ignore=DL3022
 COPY --from=kkoval/dependencies:latest /artifacts.tar.gz /dependencies/
 WORKDIR /dependencies
-# Split values in `/env`
-# hadolint ignore=SC2046,SC2086
 RUN set -a && source /env && set +a \
     && git config --global --add safe.directory /app \
     && tar xfv artifacts.tar.gz \
     && cp -a include/* /usr/local/include/ \
-    && cp -a pkgconfig/* ${PKG_CONFIG_PATH} \
+    && cp -a pkgconfig/* "${PKG_CONFIG_PATH}" \
     && cp -a lib/* /usr/local/lib/ \
     && ldconfig \
     && apt-get install -y ./deb/jellyfin-ffmpeg.deb \
@@ -80,8 +76,6 @@ RUN set -a && source /env && set +a \
 
 COPY api/go.mod api/go.sum /app/api/
 WORKDIR /app/api
-# Split values in `/env`
-# hadolint ignore=SC2046
 RUN set -a && source /env && set +a \
     && go env \
     && go mod download \
@@ -93,8 +87,6 @@ RUN set -a && source /env && set +a \
         github.com/Kagami/go-face
 
 COPY api /app/api
-# Split values in `/env`
-# hadolint ignore=SC2046
 RUN set -a && source /env && set +a \
     && go env \
     && go build -v -o photoview .
