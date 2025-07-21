@@ -1,6 +1,7 @@
 package media_type
 
 import (
+	"os"
 	"testing"
 
 	"github.com/kkovaletp/photoview/api/test_utils"
@@ -8,6 +9,7 @@ import (
 
 func TestMain(m *testing.M) {
 	test_utils.UnitTestRun(m)
+	os.Exit(test_utils.UnitTestRun(m))
 }
 
 type boolImage bool
