@@ -8,7 +8,6 @@ import (
 )
 
 func TestMain(m *testing.M) {
-	test_utils.UnitTestRun(m)
 	os.Exit(test_utils.UnitTestRun(m))
 }
 
