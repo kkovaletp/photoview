@@ -1,9 +1,11 @@
 package scanner_tasks
 
 import (
+	"fmt"
 	"io/fs"
 
 	"github.com/kkovaletp/photoview/api/graphql/models"
+	"github.com/kkovaletp/photoview/api/log"
 	"github.com/kkovaletp/photoview/api/scanner/media_encoding"
 	"github.com/kkovaletp/photoview/api/scanner/scanner_task"
 	"github.com/kkovaletp/photoview/api/scanner/scanner_tasks/cleanup_tasks"
@@ -18,6 +20,7 @@ var allTasks []scanner_task.ScannerTask = []scanner_task.ScannerTask{
 	processing_tasks.ProcessPhotoTask{},
 	processing_tasks.ProcessVideoTask{},
 	FaceDetectionTask{},
+	BlurhashTask{},
 	ExifTask{},
 	VideoMetadataTask{},
 	cleanup_tasks.MediaCleanupTask{},
@@ -80,6 +83,7 @@ func (t scannerTasks) MediaFound(ctx scanner_task.TaskContext, fileInfo fs.FileI
 		}
 
 		if skip {
+			log.Info(ctx, "skip the media", "media_path", mediaPath, "by_task", fmt.Sprintf("%T", task))
 			return true, nil
 		}
 	}
