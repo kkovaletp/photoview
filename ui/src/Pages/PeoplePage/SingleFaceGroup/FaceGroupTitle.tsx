@@ -70,9 +70,8 @@ const FaceGroupTitle = ({ faceGroup }: FaceGroupTitleProps) => {
     title = (
       <>
         <h1
-          className={`text-2xl font-semibold ${
-            faceGroup?.label ? '' : 'text-gray-600 dark:text-gray-400'
-          }`}
+          className={`text-2xl font-semibold ${faceGroup?.label ? '' : 'text-gray-600 dark:text-gray-400'
+            }`}
         >
           {faceGroup?.label ??
             t('people_page.face_group.unlabeled_person', 'Unlabeled person')}
@@ -148,21 +147,21 @@ const FaceGroupTitle = ({ faceGroup }: FaceGroupTitleProps) => {
           </li>
           <li>
             <Button
-                onClick={() =>
-                  setMergeModalState(MergeFaceGroupsModalState.SelectDestination)
-                }
-              >
+              onClick={() =>
+                setMergeModalState(MergeFaceGroupsModalState.SelectDestination) // error
+              }
+            >
               {t('people_page.action_label.merge_face', 'Merge face')}
             </Button>
           </li>
           <li>
             <Button onClick={() => setDetachModalOpen(true)}>
-              {t('people_page.action_label.detach_images', 'Detach images')}
+              {t('people_page.action_label.detach_images', 'Detach images')} // error
             </Button>
           </li>
           <li>
             <Button onClick={() => setMoveModalOpen(true)}>
-              {t('people_page.action_label.move_faces', 'Move faces')}
+              {t('people_page.action_label.move_faces', 'Move faces')} // error
             </Button>
           </li>
         </ul>
