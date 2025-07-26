@@ -1,5 +1,5 @@
 import React from 'react'
-import { Dialog } from '@headlessui/react'
+import { Dialog, DialogPanel, DialogTitle, Description } from '@headlessui/react'
 import { Button } from './form/Input'
 
 export type ModalAction = {
@@ -43,15 +43,16 @@ const Modal = ({
       onClose={onClose}
       className="fixed z-40 inset-0 overflow-y-auto"
     >
-      <div className="flex items-center justify-center min-h-screen">
-        <Dialog.Overlay className="fixed inset-0 bg-black opacity-30" />
+      {/* Backdrop */}
+      <div className="fixed inset-0 bg-black opacity-30" />
 
-        <div className="fixed bg-white dark:bg-dark-bg max-w-[calc(100%-16px)] mx-auto rounded shadow-md border">
+      <div className="flex items-center justify-center min-h-screen">
+        <DialogPanel className="fixed bg-white dark:bg-dark-bg max-w-[calc(100%-16px)] mx-auto rounded shadow-md border">
           <div className="p-4">
-            <Dialog.Title className="text-xl mb-1">{title}</Dialog.Title>
-            <Dialog.Description className="text-sm mb-4">
+            <DialogTitle className="text-xl mb-1">{title}</DialogTitle>
+            <Description className="text-sm mb-4">
               {description}
-            </Dialog.Description>
+            </Description>
 
             {children}
           </div>
@@ -59,7 +60,7 @@ const Modal = ({
           <div className="bg-gray-50 p-2 dark:bg-[#31363d] flex gap-2 justify-end mt-4">
             {actionElms}
           </div>
-        </div>
+        </DialogPanel>
       </div>
     </Dialog>
   )

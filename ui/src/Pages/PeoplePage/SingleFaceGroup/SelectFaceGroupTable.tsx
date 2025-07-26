@@ -47,7 +47,7 @@ const FaceGroupRow = ({
 }: FaceGroupRowProps) => {
   const { t } = useTranslation()
   return (
-    <TableRow key={faceGroup.id} onClick={toggleFaceSelected} className={selectable ? 'cursor-pointer' : 'cursor-not-allowed'}>
+    <TableRow onClick={toggleFaceSelected} className={selectable ? 'cursor-pointer' : 'cursor-not-allowed'}>
       <FlexCell className={faceSelected ? 'brightness-110' : ''}>
         <FaceCircleWrapper $selected={faceSelected}>
           <FaceCircleImage
@@ -57,9 +57,8 @@ const FaceGroupRow = ({
           />
         </FaceCircleWrapper>
         <span
-          className={`ml-3 ${
-            faceSelected ? 'font-semibold text-slate-100' : 'text-gray-400'
-          } ${!faceSelected && !faceGroup.label ? 'text-gray-600 italic' : ''}`}
+          className={`ml-3 ${faceSelected ? 'font-semibold text-slate-100' : 'text-gray-400'
+            } ${!faceSelected && !faceGroup.label ? 'text-gray-600 italic' : ''}`}
         >
           {faceGroup.label ??
             t('people_page.face_group.unlabeled', 'Unlabeled')}
@@ -75,7 +74,7 @@ type SelectFaceGroupTableProps = {
     singleFaceGroup_faceGroup | myFaces_myFaceGroups | null
   >
   toggleSelectedFaceGroup: React.Dispatch<
-      singleFaceGroup_faceGroup | myFaces_myFaceGroups | null
+    singleFaceGroup_faceGroup | myFaces_myFaceGroups | null
   >
   title: string,
   frozen: boolean

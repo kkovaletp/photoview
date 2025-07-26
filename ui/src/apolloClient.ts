@@ -6,6 +6,7 @@ import {
   HttpLink,
   ServerError,
   FieldMergeFunction,
+  Reference,
 } from '@apollo/client'
 import { getMainDefinition } from '@apollo/client/utilities'
 import { onError } from '@apollo/client/link/error'
@@ -22,6 +23,12 @@ export const API_ENDPOINT = import.meta.env.REACT_APP_API_ENDPOINT
   : urlJoin(location.origin, '/api')
 
 export const GRAPHQL_ENDPOINT = urlJoin(API_ENDPOINT, '/graphql')
+
+type CachedItem = Reference | {
+  id: string
+  __typename: string
+  [key: string]: unknown
+}
 
 const httpLink = new HttpLink({
   uri: GRAPHQL_ENDPOINT,
@@ -151,16 +158,34 @@ export const paginateCache = (keyArgs: string[]) =>
 ({
   keyArgs,
   merge(existing, incoming, { args, fieldName }) {
-    const merged = existing ? existing.slice(0) : []
     if (args?.paginate) {
       const { offset = 0 } = args.paginate as { offset: number }
-      for (let i = 0; i < incoming.length; ++i) {
-        merged[offset + i] = incoming[i]
+
+      // If offset is 0, start fresh (initial query or refresh)
+      if (offset === 0) {
+        return [...incoming]
       }
+
+      // For subsequent pages, merge while avoiding duplicates
+      const existingItems = existing ? existing.slice(0) : []
+      const existingIds = new Set(
+        existingItems.map((item) => {
+          const cachedItem = item as CachedItem
+          return '__ref' in cachedItem ? cachedItem.__ref : cachedItem.id
+        }).filter(Boolean)
+      )
+
+      // Only add items that don't already exist
+      const newItems = incoming.filter((item) => {
+        const cachedItem = item as CachedItem
+        const itemId = '__ref' in cachedItem ? cachedItem.__ref : cachedItem.id
+        return itemId ? !existingIds.has(itemId) : true
+      })
+
+      return [...existingItems, ...newItems]
     } else {
       throw new Error(`Paginate argument is missing for query: ${fieldName}`)
     }
-    return merged
   },
 } as PaginateCacheType)
 

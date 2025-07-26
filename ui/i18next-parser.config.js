@@ -1,6 +1,6 @@
 module.exports = {
   defaultValue: function (locale, namespace, key, value) {
-    if (locale != 'en'){
+    if (locale != 'en') {
       return '';
     }
     return value || key;
@@ -17,6 +17,7 @@ module.exports = {
     'pt',
     'ru',
     'sv',
+    'ua',
     'zh-CN',
     'zh-HK',
     'zh-TW',

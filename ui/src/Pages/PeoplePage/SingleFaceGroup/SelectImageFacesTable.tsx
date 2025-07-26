@@ -22,8 +22,8 @@ const SelectImagePreview = styled(ProtectedImage)`
 
 type ImageFaceRowProps = {
   imageFace:
-    | myFaces_myFaceGroups_imageFaces
-    | singleFaceGroup_faceGroup_imageFaces
+  | myFaces_myFaceGroups_imageFaces
+  | singleFaceGroup_faceGroup_imageFaces
   faceSelected: boolean
   setFaceSelected(): void
 }
@@ -34,7 +34,7 @@ const ImageFaceRow = ({
   setFaceSelected,
 }: ImageFaceRowProps) => {
   return (
-    <TableRow key={imageFace.id}>
+    <TableRow>
       <TableCell>
         <SelectImagePreview
           src={imageFace.media.thumbnail?.url}
