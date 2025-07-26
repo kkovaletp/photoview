@@ -168,7 +168,7 @@ export const paginateCache = (keyArgs: string[]) =>
       // Only add items that don't already exist
       const newItems = incoming.filter((item: any) => {
         const itemId = item.id || item.__ref
-        return itemId && !existingIds.has(itemId)
+        return itemId ? !existingIds.has(itemId) : true
       })
 
       return [...existingItems, ...newItems]
