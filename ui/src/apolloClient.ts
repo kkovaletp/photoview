@@ -151,16 +151,30 @@ export const paginateCache = (keyArgs: string[]) =>
 ({
   keyArgs,
   merge(existing, incoming, { args, fieldName }) {
-    const merged = existing ? existing.slice(0) : []
     if (args?.paginate) {
       const { offset = 0 } = args.paginate as { offset: number }
-      for (let i = 0; i < incoming.length; ++i) {
-        merged[offset + i] = incoming[i]
+
+      // If offset is 0, start fresh (initial query or refresh)
+      if (offset === 0) {
+        return [...incoming]
       }
+
+      // For subsequent pages, merge while avoiding duplicates
+      const existingItems = existing ? existing.slice(0) : []
+      const existingIds = new Set(
+        existingItems.map((item: any) => item.id || item.__ref).filter(Boolean)
+      )
+
+      // Only add items that don't already exist
+      const newItems = incoming.filter((item: any) => {
+        const itemId = item.id || item.__ref
+        return itemId && !existingIds.has(itemId)
+      })
+
+      return [...existingItems, ...newItems]
     } else {
       throw new Error(`Paginate argument is missing for query: ${fieldName}`)
     }
-    return merged
   },
 } as PaginateCacheType)
 

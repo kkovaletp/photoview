@@ -148,7 +148,7 @@ const FaceGroupTitle = ({ faceGroup }: FaceGroupTitleProps) => {
           <li>
             <Button
               onClick={() =>
-                setMergeModalState(MergeFaceGroupsModalState.SelectDestination) // error
+                setMergeModalState(MergeFaceGroupsModalState.SelectDestination)
               }
             >
               {t('people_page.action_label.merge_face', 'Merge face')}
@@ -156,12 +156,12 @@ const FaceGroupTitle = ({ faceGroup }: FaceGroupTitleProps) => {
           </li>
           <li>
             <Button onClick={() => setDetachModalOpen(true)}>
-              {t('people_page.action_label.detach_images', 'Detach images')} // error
+              {t('people_page.action_label.detach_images', 'Detach images')}
             </Button>
           </li>
           <li>
             <Button onClick={() => setMoveModalOpen(true)}>
-              {t('people_page.action_label.move_faces', 'Move faces')} // error
+              {t('people_page.action_label.move_faces', 'Move faces')}
             </Button>
           </li>
         </ul>
