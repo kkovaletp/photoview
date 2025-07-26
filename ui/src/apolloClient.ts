@@ -6,6 +6,7 @@ import {
   HttpLink,
   ServerError,
   FieldMergeFunction,
+  Reference,
 } from '@apollo/client'
 import { getMainDefinition } from '@apollo/client/utilities'
 import { onError } from '@apollo/client/link/error'
@@ -22,6 +23,12 @@ export const API_ENDPOINT = import.meta.env.REACT_APP_API_ENDPOINT
   : urlJoin(location.origin, '/api')
 
 export const GRAPHQL_ENDPOINT = urlJoin(API_ENDPOINT, '/graphql')
+
+type CachedItem = Reference | {
+  id: string
+  __typename: string
+  [key: string]: unknown
+}
 
 const httpLink = new HttpLink({
   uri: GRAPHQL_ENDPOINT,
@@ -162,12 +169,16 @@ export const paginateCache = (keyArgs: string[]) =>
       // For subsequent pages, merge while avoiding duplicates
       const existingItems = existing ? existing.slice(0) : []
       const existingIds = new Set(
-        existingItems.map((item: any) => item.id || item.__ref).filter(Boolean)
+        existingItems.map((item) => {
+          const cachedItem = item as CachedItem
+          return '__ref' in cachedItem ? cachedItem.__ref : cachedItem.id
+        }).filter(Boolean)
       )
 
       // Only add items that don't already exist
-      const newItems = incoming.filter((item: any) => {
-        const itemId = item.id || item.__ref
+      const newItems = incoming.filter((item) => {
+        const cachedItem = item as CachedItem
+        const itemId = '__ref' in cachedItem ? cachedItem.__ref : cachedItem.id
         return itemId ? !existingIds.has(itemId) : true
       })
 
