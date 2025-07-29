@@ -14,10 +14,42 @@ vi.mock('react-i18next', () => ({
 }))
 
 // Mock styled-components
-vi.mock('styled-components', () => ({
-    default: (component: any) => component,
-    __esModule: true,
-}))
+vi.mock('styled-components', () => {
+    type MockStyledComponentType = React.ForwardRefExoticComponent<any> & {
+        attrs: (attrs: any) => MockStyledComponentType
+        withConfig: (config: any) => MockStyledComponentType
+        displayName?: string
+    }
+
+    const mockStyledComponent = (tag: any): MockStyledComponentType => {
+        const StyledComponent = React.forwardRef((props: any, ref: any) => {
+            const { children, ...rest } = props
+            return React.createElement(tag, { ...rest, ref }, children)
+        }) as MockStyledComponentType
+
+        StyledComponent.attrs = (attrs: any) => mockStyledComponent(tag)
+        StyledComponent.withConfig = (config: any) => mockStyledComponent(tag)
+        StyledComponent.displayName = `Styled(${typeof tag === 'string' ? tag : tag.displayName || tag.name})`
+
+        return StyledComponent
+    }
+
+    return {
+        __esModule: true,
+        default: new Proxy(mockStyledComponent, {
+            get: (target, prop) => {
+                if (typeof prop === 'string') {
+                    return mockStyledComponent(prop)
+                }
+                return undefined
+            }
+        }),
+        css: () => '',
+        keyframes: () => '',
+        createGlobalStyle: () => () => null,
+        ThemeProvider: ({ children }: { children: React.ReactNode }) => children,
+    }
+})
 
 // Test data setup
 const mockFaceGroups: myFaces_myFaceGroups[] = [

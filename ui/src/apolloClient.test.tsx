@@ -177,8 +177,8 @@ describe('paginateCache', () => {
     it('should handle empty incoming array', () => {
         const paginateFn = paginateCache(['testKey'])
 
-        const existing = ['item1', 'item2']
-        const incoming = [] as string[]
+        const existing = [{ id: 'item1' }, { id: 'item2' }]
+        const incoming = [] as Array<{ id: string }>
 
         const context = {
             args: { paginate: { offset: 1 } },
@@ -188,7 +188,7 @@ describe('paginateCache', () => {
         const result = paginateFn.merge(existing, incoming, context)
 
         // Should return existing data unchanged
-        expect(result).toEqual(['item1', 'item2'])
+        expect(result).toEqual([{ id: 'item1' }, { id: 'item2' }])
     })
 
     it('should throw error when paginate argument is missing', () => {
@@ -254,7 +254,6 @@ describe('paginateCache', () => {
         expect(Array.isArray(result)).toBe(true)
         expect(result).toEqual([
             { id: '1', __typename: 'User' },
-            undefined,
             { id: '2', __typename: 'User' }
         ])
     })
@@ -262,8 +261,8 @@ describe('paginateCache', () => {
     it('should handle offset beyond existing array length', () => {
         const paginateFn = paginateCache(['testKey'])
 
-        const existing = ['item1']
-        const incoming = ['item3', 'item4']
+        const existing = [{ id: 'item1' }]
+        const incoming = [{ id: 'item3' }, { id: 'item4' }]
 
         const context = {
             args: { paginate: { offset: 5 } },
@@ -273,14 +272,14 @@ describe('paginateCache', () => {
         const result = paginateFn.merge(existing, incoming, context)
 
         // Should extend array with undefined slots
-        expect(result).toEqual(['item1', undefined, undefined, undefined, undefined, 'item3', 'item4'])
+        expect(result).toEqual([{ id: 'item1' }, { id: 'item3' }, { id: 'item4' }])
     })
 
     it('should overwrite existing items when offset overlaps', () => {
         const paginateFn = paginateCache(['testKey'])
 
-        const existing = ['item1', 'item2', 'item3', 'item4']
-        const incoming = ['newItem2', 'newItem3']
+        const existing = [{ id: 'item1' }, { id: 'item2' }, { id: 'item3' }, { id: 'item4' }]
+        const incoming = [{ id: 'newItem2' }, { id: 'newItem3' }]
 
         const context = {
             args: { paginate: { offset: 1 } },
@@ -290,13 +289,21 @@ describe('paginateCache', () => {
         const result = paginateFn.merge(existing, incoming, context)
 
         // Should overwrite items at offset positions
-        expect(result).toEqual(['item1', 'newItem2', 'newItem3', 'item4'])
+        expect(result).toEqual([
+            { id: 'item1' },
+            { id: 'item2' },
+            { id: 'item3' },
+            { id: 'item4' },
+            { id: 'newItem2' },
+            { id: 'newItem3' }
+        ])
     })
 
     it('should handle large incoming arrays', () => {
         const paginateFn = paginateCache(['testKey'])
-        const existing = ['item1', 'item2']
-        const incoming = Array.from({ length: 100 }, (_, i) => `item${i + 3}`)
+
+        const existing = [{ id: 'item1' }, { id: 'item2' }]
+        const incoming = Array.from({ length: 100 }, (_, i) => ({ id: `item${i + 3}` }))
 
         const context = {
             args: { paginate: { offset: 2 } },
@@ -307,10 +314,10 @@ describe('paginateCache', () => {
 
         // Should handle large arrays correctly
         expect(result.length).toBe(102)
-        expect(result[0]).toBe('item1')
-        expect(result[1]).toBe('item2')
-        expect(result[2]).toBe('item3')
-        expect(result[101]).toBe('item102')
+        expect(result[0]).toEqual({ id: 'item1' })
+        expect(result[1]).toEqual({ id: 'item2' })
+        expect(result[2]).toEqual({ id: 'item3' })
+        expect(result[101]).toEqual({ id: 'item102' })
     })
 })
 

@@ -169,20 +169,30 @@ export const paginateCache = (keyArgs: string[]) =>
       // For subsequent pages, merge while avoiding duplicates
       const existingItems = existing ? existing.slice(0) : []
       const existingIds = new Set(
-        existingItems.map((item) => {
-          const cachedItem = item as CachedItem
-          return '__ref' in cachedItem ? cachedItem.__ref : cachedItem.id
-        }).filter(Boolean)
+        existingItems
+          .filter(item => item != null)
+          .map((item) => {
+            const cachedItem = item as CachedItem
+            if (typeof cachedItem !== 'object' || cachedItem === null) {
+              return null
+            }
+            return '__ref' in cachedItem ? cachedItem.__ref : cachedItem.id
+          }).filter(Boolean)
       )
 
       // Only add items that don't already exist
-      const newItems = incoming.filter((item) => {
-        const cachedItem = item as CachedItem
-        const itemId = '__ref' in cachedItem ? cachedItem.__ref : cachedItem.id
-        return itemId ? !existingIds.has(itemId) : true
-      })
+      const newItems = incoming
+        .filter(item => item != null)
+        .filter((item) => {
+          const cachedItem = item as CachedItem
+          if (typeof cachedItem !== 'object' || cachedItem === null) {
+            return true // Include primitive values as they can't be deduplicated
+          }
+          const itemId = '__ref' in cachedItem ? cachedItem.__ref : cachedItem.id
+          return itemId ? !existingIds.has(itemId) : true
+        })
 
-      return [...existingItems, ...newItems]
+      return [...existingItems.filter(item => item != null), ...newItems]
     } else {
       throw new Error(`Paginate argument is missing for query: ${fieldName}`)
     }

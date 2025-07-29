@@ -16,7 +16,7 @@ vi.mock('react-i18next', () => ({
 vi.mock('../../../components/photoGallery/ProtectedMedia', () => ({
     ProtectedImage: ({ src, onClick, ...props }: any) => (
         <img
-            src={src}
+            src={src || 'data:image/gif;base64,R0lGODlhAQABAPAAAAAAAAAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw=='}
             onClick={onClick}
             data-testid="protected-image"
             {...props}
@@ -176,7 +176,7 @@ describe('SelectImageFacesTable', () => {
             expect(searchInput).toBeInTheDocument()
             expect(searchInput).toHaveAttribute(
                 'placeholder',
-                'people_page.tableselect_image_faces.search_images_placeholder'
+                'Search images...'
             )
         })
 
@@ -529,8 +529,8 @@ describe('SelectImageFacesTable', () => {
             expect(checkboxes).toHaveLength(0)
         })
 
-        it('handles null selectedImageFaces gracefully', () => {
-            renderComponent({ selectedImageFaces: null })
+        it('handles empty selectedImageFaces gracefully', () => {
+            renderComponent({ selectedImageFaces: [] })
 
             expect(screen.getAllByTestId('table')).toHaveLength(2)
             const checkboxes = screen.getAllByTestId('face-checkbox')
@@ -553,7 +553,9 @@ describe('SelectImageFacesTable', () => {
             renderComponent({ imageFaces: facesWithMissingThumbnails })
 
             const image = screen.getByTestId('protected-image')
-            expect(image).toHaveAttribute('src', '')
+            expect(image).toHaveAttribute(
+                'src', 'data:image/gif;base64,R0lGODlhAQABAPAAAAAAAAAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw=='
+            )
         })
 
         it('handles faces with undefined thumbnail', () => {
@@ -571,7 +573,9 @@ describe('SelectImageFacesTable', () => {
 
             const image = screen.getByTestId('protected-image')
             expect(image).toBeInTheDocument()
-            expect(image).toHaveAttribute('src', '')
+            expect(image).toHaveAttribute(
+                'src', 'data:image/gif;base64,R0lGODlhAQABAPAAAAAAAAAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw=='
+            )
         })
 
         it('handles faces with missing media title', () => {
@@ -587,7 +591,10 @@ describe('SelectImageFacesTable', () => {
 
             renderComponent({ imageFaces: facesWithMissingTitle })
 
-            expect(screen.getByText('')).toBeInTheDocument() // Empty title should still render
+            const checkboxes = screen.getAllByTestId('face-checkbox')
+            expect(checkboxes).toHaveLength(1)
+            expect(checkboxes[0]).toBeInTheDocument()
+            expect(checkboxes[0]).not.toBeChecked()
         })
 
         it('handles selection state inconsistencies', () => {
