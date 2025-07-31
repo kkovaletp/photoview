@@ -139,118 +139,91 @@ describe('SelectFaceGroupTable', () => {
         vi.restoreAllMocks()
     })
 
-    describe('Basic Rendering', () => {
-        it('should render the component without crashing', () => {
+    describe('Rendering and Layout', () => {
+        it('should render all essential components with proper structure and styling', () => {
             render(<SelectFaceGroupTable {...defaultProps} />)
 
-            expect(screen.getAllByRole('table')).toHaveLength(2) // Header table and body table
-        })
+            // Table structure
+            expect(screen.getAllByRole('table')).toHaveLength(2) // Header and body tables
+            expect(document.querySelector('.overflow-auto.max-h-\\[500px\\]')).toBeInTheDocument()
 
-        it('should render the title in table header', () => {
-            render(<SelectFaceGroupTable {...defaultProps} />)
-
+            // Header and search
             expect(screen.getByText('Face Groups')).toBeInTheDocument()
-        })
+            const searchInput = screen.getByPlaceholderText('Search faces...')
+            expect(searchInput).toBeInTheDocument()
+            expect(searchInput).toHaveClass('w-full')
 
-        it('should render search input field', () => {
-            render(<SelectFaceGroupTable {...defaultProps} />)
-
-            expect(screen.getByPlaceholderText('Search faces...')).toBeInTheDocument()
-        })
-
-        it('should render all face groups in the table', () => {
-            render(<SelectFaceGroupTable {...defaultProps} />)
-
+            // Face group content
             expect(screen.getByText('John Doe')).toBeInTheDocument()
             expect(screen.getByText('Jane Smith')).toBeInTheDocument()
             expect(screen.getByText('Unlabeled')).toBeInTheDocument()
+
+            // Unlabeled styling
+            expect(screen.getByText('Unlabeled')).toHaveClass('text-gray-600', 'italic')
+
+            // Images
+            expect(screen.getAllByRole('img')).toHaveLength(3)
+
+            // Table styling
+            screen.getAllByRole('table').forEach(table => {
+                expect(table).toHaveClass('w-full')
+            })
         })
 
-        it('should render with custom title', () => {
+        it('should render with custom title and handle empty states', () => {
+            // Custom title
             const customProps = { ...defaultProps, title: 'Custom Title' }
-            render(<SelectFaceGroupTable {...customProps} />)
-
+            const { rerender } = render(<SelectFaceGroupTable {...customProps} />)
             expect(screen.getByText('Custom Title')).toBeInTheDocument()
+
+            // Empty face groups
+            rerender(<SelectFaceGroupTable {...defaultProps} faceGroups={[]} />)
+            expect(screen.getByText('Face Groups')).toBeInTheDocument()
+            expect(screen.getByPlaceholderText('Search faces...')).toBeInTheDocument()
+            expect(screen.queryByText('John Doe')).not.toBeInTheDocument()
+
+            // Face groups with empty imageFaces
+            const faceGroupWithoutImages: myFaces_myFaceGroups = {
+                __typename: 'FaceGroup',
+                id: 'empty-faces',
+                label: 'No Images',
+                imageFaceCount: 0,
+                imageFaces: [],
+            }
+            rerender(<SelectFaceGroupTable {...defaultProps} faceGroups={[faceGroupWithoutImages]} />)
+            expect(screen.getByText('No Images')).toBeInTheDocument()
         })
     })
 
-    describe('Face Group Display', () => {
-        it('should display labeled face groups correctly', () => {
-            render(<SelectFaceGroupTable {...defaultProps} />)
-
-            expect(screen.getByText('John Doe')).toBeInTheDocument()
-            expect(screen.getByText('Jane Smith')).toBeInTheDocument()
-        })
-
-        it('should display "Unlabeled" for face groups without labels', () => {
-            render(<SelectFaceGroupTable {...defaultProps} />)
-
-            expect(screen.getByText('Unlabeled')).toBeInTheDocument()
-        })
-
-        it('should render FaceCircleImage for each face group', () => {
-            render(<SelectFaceGroupTable {...defaultProps} />)
-
-            // Should have 3 face circle images (one per face group)
-            const faceImages = screen.getAllByRole('img')
-            expect(faceImages).toHaveLength(3)
-        })
-
-        it('should apply correct styling to unlabeled face groups', () => {
-            render(<SelectFaceGroupTable {...defaultProps} />)
-
-            const unlabeledText = screen.getByText('Unlabeled')
-            expect(unlabeledText).toHaveClass('text-gray-600', 'italic')
-        })
-    })
-
-    describe('Selection Functionality', () => {
-        it('should call toggleSelectedFaceGroup when a face group row is clicked', () => {
+    describe('Selection Behavior', () => {
+        it('should handle selection interactions and highlighting correctly', () => {
             const mockToggle = vi.fn()
-            const props = { ...defaultProps, toggleSelectedFaceGroup: mockToggle }
+            const selectedSet = new Set([mockFaceGroups[0], mockFaceGroups[1]])
+            const props = {
+                ...defaultProps,
+                toggleSelectedFaceGroup: mockToggle,
+                selectedFaceGroups: selectedSet
+            }
 
             render(<SelectFaceGroupTable {...props} />)
 
-            const johnDoeRow = screen.getByText('John Doe').closest('tr')
-            fireEvent.click(johnDoeRow!)
-
-            expect(mockToggle).toHaveBeenCalledWith(mockFaceGroups[0])
-        })
-
-        it('should highlight selected face groups', () => {
-            const selectedSet = new Set([mockFaceGroups[0]])
-            const props = { ...defaultProps, selectedFaceGroups: selectedSet }
-
-            render(<SelectFaceGroupTable {...props} />)
-
+            // Selection highlighting
             expect(screen.getByText('John Doe').closest('td')).toHaveClass('brightness-110')
             expect(screen.getByText('John Doe')).toHaveClass('font-semibold', 'text-slate-100')
-        })
+            expect(screen.getByText('Jane Smith').closest('td')).toHaveClass('brightness-110')
 
-        it('should show cursor-pointer for selectable rows when not frozen', () => {
-            render(<SelectFaceGroupTable {...defaultProps} />)
+            // Click handling
+            fireEvent.click(screen.getByText('John Doe').closest('tr')!)
+            expect(mockToggle).toHaveBeenCalledWith(mockFaceGroups[0])
 
-            const rows = screen.getAllByRole('row')
-            // Skip header rows and check body rows
-            const bodyRows = rows.slice(2)
+            // Cursor styles for interactive state
+            const bodyRows = screen.getAllByRole('row').slice(2) // Skip header rows
             bodyRows.forEach(row => {
                 expect(row).toHaveClass('cursor-pointer')
             })
         })
 
-        it('should show cursor-not-allowed for rows when frozen', () => {
-            const frozenProps = { ...defaultProps, frozen: true }
-            render(<SelectFaceGroupTable {...frozenProps} />)
-
-            const rows = screen.getAllByRole('row')
-            // Skip header rows and check body rows
-            const bodyRows = rows.slice(2)
-            bodyRows.forEach(row => {
-                expect(row).toHaveClass('cursor-not-allowed')
-            })
-        })
-
-        it('should not call toggleSelectedFaceGroup when frozen and row is clicked', () => {
+        it('should handle frozen state correctly', () => {
             const mockToggle = vi.fn()
             const frozenProps = {
                 ...defaultProps,
@@ -260,61 +233,47 @@ describe('SelectFaceGroupTable', () => {
 
             render(<SelectFaceGroupTable {...frozenProps} />)
 
-            const johnDoeRow = screen.getByText('John Doe').closest('tr')
-            fireEvent.click(johnDoeRow!)
+            // Frozen cursor styles
+            const bodyRows = screen.getAllByRole('row').slice(2) // Skip header rows
+            bodyRows.forEach(row => {
+                expect(row).toHaveClass('cursor-not-allowed')
+            })
 
+            // No click handling when frozen
+            fireEvent.click(screen.getByText('John Doe').closest('tr')!)
             expect(mockToggle).not.toHaveBeenCalled()
-        })
-
-        it('should handle multiple selections correctly', () => {
-            const selectedSet = new Set([mockFaceGroups[0], mockFaceGroups[1]])
-            const props = { ...defaultProps, selectedFaceGroups: selectedSet }
-
-            render(<SelectFaceGroupTable {...props} />)
-
-            expect(screen.getByText('John Doe').closest('td')).toHaveClass('brightness-110')
-            expect(screen.getByText('Jane Smith').closest('td')).toHaveClass('brightness-110')
         })
     })
 
     describe('Search Functionality', () => {
-        it('should filter face groups based on search input', async () => {
+        it('should filter face groups with comprehensive search patterns', async () => {
             render(<SelectFaceGroupTable {...defaultProps} />)
-
             const searchInput = screen.getByPlaceholderText('Search faces...')
-            fireEvent.change(searchInput, { target: { value: 'John' } })
 
+            // Case insensitive search
+            fireEvent.change(searchInput, { target: { value: 'JOHN' } })
             await waitFor(() => {
                 expect(screen.getByText('John Doe')).toBeInTheDocument()
                 expect(screen.queryByText('Jane Smith')).not.toBeInTheDocument()
                 expect(screen.queryByText('Unlabeled')).not.toBeInTheDocument()
             })
-        })
 
-        it('should be case insensitive when searching', async () => {
-            render(<SelectFaceGroupTable {...defaultProps} />)
-
-            const searchInput = screen.getByPlaceholderText('Search faces...')
-            fireEvent.change(searchInput, { target: { value: 'JOHN' } })
-
+            // Partial match
+            fireEvent.change(searchInput, { target: { value: 'Doe' } })
             await waitFor(() => {
                 expect(screen.getByText('John Doe')).toBeInTheDocument()
                 expect(screen.queryByText('Jane Smith')).not.toBeInTheDocument()
             })
-        })
 
-        it('should show all face groups when search is empty', async () => {
-            render(<SelectFaceGroupTable {...defaultProps} />)
-
-            const searchInput = screen.getByPlaceholderText('Search faces...')
-
-            // First filter
-            fireEvent.change(searchInput, { target: { value: 'John' } })
+            // No results
+            fireEvent.change(searchInput, { target: { value: 'NonexistentName' } })
             await waitFor(() => {
+                expect(screen.queryByText('John Doe')).not.toBeInTheDocument()
                 expect(screen.queryByText('Jane Smith')).not.toBeInTheDocument()
+                expect(screen.queryByText('Unlabeled')).not.toBeInTheDocument()
             })
 
-            // Clear filter
+            // Clear search - show all
             fireEvent.change(searchInput, { target: { value: '' } })
             await waitFor(() => {
                 expect(screen.getByText('John Doe')).toBeInTheDocument()
@@ -323,107 +282,111 @@ describe('SelectFaceGroupTable', () => {
             })
         })
 
-        it('should show no results when search matches nothing', async () => {
+        it('should handle unlabeled groups and rapid state changes correctly', async () => {
             render(<SelectFaceGroupTable {...defaultProps} />)
-
             const searchInput = screen.getByPlaceholderText('Search faces...')
-            fireEvent.change(searchInput, { target: { value: 'NonexistentName' } })
 
-            await waitFor(() => {
-                expect(screen.queryByText('John Doe')).not.toBeInTheDocument()
-                expect(screen.queryByText('Jane Smith')).not.toBeInTheDocument()
-                expect(screen.queryByText('Unlabeled')).not.toBeInTheDocument()
-            })
-        })
-
-        it('should not filter unlabeled face groups (they have no searchable label)', async () => {
-            render(<SelectFaceGroupTable {...defaultProps} />)
-
-            const searchInput = screen.getByPlaceholderText('Search faces...')
+            // Unlabeled groups should not be searchable
             fireEvent.change(searchInput, { target: { value: 'Unlabeled' } })
-
             await waitFor(() => {
-                expect(screen.queryByText('John Doe')).not.toBeInTheDocument()
-                expect(screen.queryByText('Jane Smith')).not.toBeInTheDocument()
                 expect(screen.queryByText('Unlabeled')).not.toBeInTheDocument()
             })
-        })
 
-        it('should handle partial matches in search', async () => {
-            render(<SelectFaceGroupTable {...defaultProps} />)
-
-            const searchInput = screen.getByPlaceholderText('Search faces...')
-            fireEvent.change(searchInput, { target: { value: 'Doe' } })
+            // Rapid typing simulation with state persistence
+            fireEvent.change(searchInput, { target: { value: 'J' } })
+            fireEvent.change(searchInput, { target: { value: 'Jo' } })
+            fireEvent.change(searchInput, { target: { value: 'Joh' } })
+            fireEvent.change(searchInput, { target: { value: 'John' } })
 
             await waitFor(() => {
+                expect(searchInput).toHaveValue('John')
                 expect(screen.getByText('John Doe')).toBeInTheDocument()
                 expect(screen.queryByText('Jane Smith')).not.toBeInTheDocument()
             })
-        })
-    })
 
-    describe('Empty State Handling', () => {
-        it('should handle empty face groups array', () => {
-            const emptyProps = { ...defaultProps, faceGroups: [] }
-            render(<SelectFaceGroupTable {...emptyProps} />)
-
-            expect(screen.getByText('Face Groups')).toBeInTheDocument()
-            expect(screen.getByPlaceholderText('Search faces...')).toBeInTheDocument()
-            // No face group rows should be present
-            expect(screen.queryByText('John Doe')).not.toBeInTheDocument()
-        })
-
-        it('should handle face groups with empty imageFaces arrays', () => {
-            const faceGroupWithoutImages: myFaces_myFaceGroups = {
-                __typename: 'FaceGroup',
-                id: 'empty-faces',
-                label: 'No Images',
-                imageFaceCount: 0,
-                imageFaces: [],
-            }
-
-            const propsWithEmptyFaces = {
-                ...defaultProps,
-                faceGroups: [faceGroupWithoutImages],
-            }
-
-            render(<SelectFaceGroupTable {...propsWithEmptyFaces} />)
-
-            expect(screen.getByText('No Images')).toBeInTheDocument()
-        })
-    })
-
-    describe('Component Layout and Structure', () => {
-        it('should have proper table structure with header and scrollable body', () => {
-            render(<SelectFaceGroupTable {...defaultProps} />)
-
-            const tables = screen.getAllByRole('table')
-            expect(tables).toHaveLength(2)
-
-            // Check for scrollable container
-            const scrollableDiv = document.querySelector('.overflow-auto.max-h-\\[500px\\]')
-            expect(scrollableDiv).toBeInTheDocument()
-        })
-
-        it('should render search input with full width', () => {
-            render(<SelectFaceGroupTable {...defaultProps} />)
-
-            const searchInput = screen.getByPlaceholderText('Search faces...')
-            expect(searchInput).toHaveClass('w-full')
-        })
-
-        it('should apply correct spacing and styling classes', () => {
-            render(<SelectFaceGroupTable {...defaultProps} />)
-
-            const tables = screen.getAllByRole('table')
-            tables.forEach(table => {
-                expect(table).toHaveClass('w-full')
+            // State reset verification
+            fireEvent.change(searchInput, { target: { value: 'Jane' } })
+            await waitFor(() => {
+                expect(searchInput).toHaveValue('Jane')
+                expect(screen.getByText('Jane Smith')).toBeInTheDocument()
+                expect(screen.queryByText('John Doe')).not.toBeInTheDocument()
             })
         })
     })
 
     describe('Performance and Edge Cases', () => {
-        it('should handle large number of face groups efficiently', () => {
+        it('should handle special data scenarios gracefully', () => {
+            const specialFaceGroups: myFaces_myFaceGroups[] = [
+                {
+                    __typename: 'FaceGroup',
+                    id: 'special-chars',
+                    label: 'José García-López & María O\'Connor',
+                    imageFaceCount: 1,
+                    imageFaces: [
+                        {
+                            __typename: 'ImageFace',
+                            id: 'face-special',
+                            rectangle: {
+                                __typename: 'FaceRectangle',
+                                minX: 0.1,
+                                maxX: 0.5,
+                                minY: 0.1,
+                                maxY: 0.5,
+                            },
+                            media: {
+                                __typename: 'Media',
+                                id: 'media-special',
+                                title: 'Special Photo',
+                                thumbnail: {
+                                    __typename: 'MediaURL',
+                                    url: 'http://test.com/special.jpg',
+                                    width: 150,
+                                    height: 150,
+                                },
+                            },
+                        },
+                    ],
+                },
+                {
+                    __typename: 'FaceGroup',
+                    id: 'long-label',
+                    label: 'A'.repeat(200),
+                    imageFaceCount: 1,
+                    imageFaces: [
+                        {
+                            __typename: 'ImageFace',
+                            id: 'face-long',
+                            rectangle: {
+                                __typename: 'FaceRectangle',
+                                minX: 0.1,
+                                maxX: 0.5,
+                                minY: 0.1,
+                                maxY: 0.5,
+                            },
+                            media: {
+                                __typename: 'Media',
+                                id: 'media-long',
+                                title: 'Long Label Photo',
+                                thumbnail: {
+                                    __typename: 'MediaURL',
+                                    url: 'http://test.com/long.jpg',
+                                    width: 150,
+                                    height: 150,
+                                },
+                            },
+                        },
+                    ],
+                },
+            ]
+
+            const specialProps = { ...defaultProps, faceGroups: specialFaceGroups }
+            render(<SelectFaceGroupTable {...specialProps} />)
+
+            expect(screen.getByText('José García-López & María O\'Connor')).toBeInTheDocument()
+            expect(screen.getByText('A'.repeat(200))).toBeInTheDocument()
+        })
+
+        it('should handle large datasets efficiently and missing image data', () => {
             const largeFaceGroupList: myFaces_myFaceGroups[] = Array.from({ length: 100 }, (_, i) => ({
                 __typename: 'FaceGroup',
                 id: `face-group-${i}`,
@@ -468,121 +431,12 @@ describe('SelectFaceGroupTable', () => {
             expect(endTime - startTime).toBeLessThan(1000)
 
             // Should render all items
-            expect(screen.getByText('Person 0')).toBeInTheDocument()
-            expect(screen.getByText('Person 99')).toBeInTheDocument()
+            for (let i = 0; i < 100; i++) {
+                expect(screen.getByText(`Person ${i}`)).toBeInTheDocument()
+            }
         })
 
-        it('should handle face groups with special characters in labels', () => {
-            const specialCharsFaceGroups: myFaces_myFaceGroups[] = [
-                {
-                    __typename: 'FaceGroup',
-                    id: 'special-chars',
-                    label: 'José García-López & María O\'Connor',
-                    imageFaceCount: 1,
-                    imageFaces: [
-                        {
-                            __typename: 'ImageFace',
-                            id: 'face-special',
-                            rectangle: {
-                                __typename: 'FaceRectangle',
-                                minX: 0.1,
-                                maxX: 0.5,
-                                minY: 0.1,
-                                maxY: 0.5,
-                            },
-                            media: {
-                                __typename: 'Media',
-                                id: 'media-special',
-                                title: 'Special Photo',
-                                thumbnail: {
-                                    __typename: 'MediaURL',
-                                    url: 'http://test.com/special.jpg',
-                                    width: 150,
-                                    height: 150,
-                                },
-                            },
-                        },
-                    ],
-                },
-            ]
-
-            const specialProps = { ...defaultProps, faceGroups: specialCharsFaceGroups }
-            render(<SelectFaceGroupTable {...specialProps} />)
-
-            expect(screen.getByText('José García-López & María O\'Connor')).toBeInTheDocument()
-        })
-
-        it('should handle very long labels gracefully', () => {
-            const longLabelFaceGroups: myFaces_myFaceGroups[] = [
-                {
-                    __typename: 'FaceGroup',
-                    id: 'long-label',
-                    label: 'A'.repeat(200),
-                    imageFaceCount: 1,
-                    imageFaces: [
-                        {
-                            __typename: 'ImageFace',
-                            id: 'face-long',
-                            rectangle: {
-                                __typename: 'FaceRectangle',
-                                minX: 0.1,
-                                maxX: 0.5,
-                                minY: 0.1,
-                                maxY: 0.5,
-                            },
-                            media: {
-                                __typename: 'Media',
-                                id: 'media-long',
-                                title: 'Long Label Photo',
-                                thumbnail: {
-                                    __typename: 'MediaURL',
-                                    url: 'http://test.com/long.jpg',
-                                    width: 150,
-                                    height: 150,
-                                },
-                            },
-                        },
-                    ],
-                },
-            ]
-
-            const longProps = { ...defaultProps, faceGroups: longLabelFaceGroups }
-            render(<SelectFaceGroupTable {...longProps} />)
-
-            // Should handle long labels gracefully
-            expect(screen.getByText('A'.repeat(200))).toBeInTheDocument()
-        })
-
-        it('should maintain search state during rapid typing', async () => {
-            render(<SelectFaceGroupTable {...defaultProps} />)
-
-            const searchInput = screen.getByPlaceholderText('Search faces...')
-
-            // Rapid typing simulation
-            fireEvent.change(searchInput, { target: { value: 'J' } })
-            fireEvent.change(searchInput, { target: { value: 'Jo' } })
-            fireEvent.change(searchInput, { target: { value: 'Joh' } })
-            fireEvent.change(searchInput, { target: { value: 'John' } })
-
-            await waitFor(() => {
-                expect(searchInput).toHaveValue('John')
-                expect(screen.getByText('John Doe')).toBeInTheDocument()
-                expect(screen.queryByText('Jane Smith')).not.toBeInTheDocument()
-            })
-        })
-    })
-
-    describe('Integration with FaceCircleImage', () => {
-        it('should pass correct props to FaceCircleImage', () => {
-            render(<SelectFaceGroupTable {...defaultProps} />)
-
-            // FaceCircleImage should be rendered with proper props
-            // We can test this by ensuring the images are rendered
-            const images = screen.getAllByRole('img')
-            expect(images).toHaveLength(3)
-        })
-
-        it('should handle missing imageFaces gracefully', () => {
+        it('should integrate with FaceCircleImage and handle missing image data gracefully', () => {
             const faceGroupWithoutFirstImage: myFaces_myFaceGroups = {
                 __typename: 'FaceGroup',
                 id: 'no-first-image',
@@ -596,58 +450,16 @@ describe('SelectFaceGroupTable', () => {
                 faceGroups: [faceGroupWithoutFirstImage],
             }
 
-            // This should not crash even if imageFaces[0] is undefined
+            // Should not crash with missing image data
             expect(() => {
                 render(<SelectFaceGroupTable {...propsWithMissingImage} />)
             }).not.toThrow()
 
             expect(screen.getByText('No First Image')).toBeInTheDocument()
-        })
-    })
 
-    describe('State Management', () => {
-        it('should maintain internal search state correctly', async () => {
+            // Verify FaceCircleImage integration with normal data
             render(<SelectFaceGroupTable {...defaultProps} />)
-
-            const searchInput = screen.getByPlaceholderText('Search faces...')
-
-            // Set search value
-            fireEvent.change(searchInput, { target: { value: 'Jane' } })
-
-            await waitFor(() => {
-                expect(searchInput).toHaveValue('Jane')
-                expect(screen.getByText('Jane Smith')).toBeInTheDocument()
-                expect(screen.queryByText('John Doe')).not.toBeInTheDocument()
-            })
-
-            // Change search value
-            fireEvent.change(searchInput, { target: { value: 'John' } })
-
-            await waitFor(() => {
-                expect(searchInput).toHaveValue('John')
-                expect(screen.getByText('John Doe')).toBeInTheDocument()
-                expect(screen.queryByText('Jane Smith')).not.toBeInTheDocument()
-            })
-        })
-
-        it('should reset to show all groups when search is cleared', async () => {
-            render(<SelectFaceGroupTable {...defaultProps} />)
-
-            const searchInput = screen.getByPlaceholderText('Search faces...')
-
-            // Apply filter
-            fireEvent.change(searchInput, { target: { value: 'John' } })
-            await waitFor(() => {
-                expect(screen.queryByText('Jane Smith')).not.toBeInTheDocument()
-            })
-
-            // Clear filter
-            fireEvent.change(searchInput, { target: { value: '' } })
-            await waitFor(() => {
-                expect(screen.getByText('John Doe')).toBeInTheDocument()
-                expect(screen.getByText('Jane Smith')).toBeInTheDocument()
-                expect(screen.getByText('Unlabeled')).toBeInTheDocument()
-            })
+            expect(screen.getAllByRole('img')).toHaveLength(3)
         })
     })
 })
