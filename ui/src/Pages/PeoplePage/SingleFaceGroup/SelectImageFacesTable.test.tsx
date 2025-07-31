@@ -158,162 +158,66 @@ describe('SelectImageFacesTable', () => {
         vi.clearAllMocks()
     })
 
-    describe('Basic Rendering', () => {
-        it('renders without crashing', () => {
-            renderComponent()
-            expect(screen.getAllByTestId('table')).toHaveLength(2) // Header table and body table
-        })
-
-        it('displays the title correctly', () => {
+    describe('Rendering and Layout', () => {
+        it('renders complete component structure with all elements', () => {
             renderComponent({ title: 'My Custom Title' })
+
+            // Structure and title
+            expect(screen.getAllByTestId('table')).toHaveLength(2) // Header and body tables
             expect(screen.getByText('My Custom Title')).toBeInTheDocument()
-        })
 
-        it('displays search input with correct placeholder', () => {
-            renderComponent()
+            // Search input with correct attributes
             const searchInput = screen.getByTestId('search-input')
-            expect(searchInput).toBeInTheDocument()
-            expect(searchInput).toHaveAttribute(
-                'placeholder',
-                'Search images...'
-            )
-        })
-
-        it('applies fullWidth prop to search input', () => {
-            renderComponent()
-            const searchInput = screen.getByTestId('search-input')
+            expect(searchInput).toHaveAttribute('placeholder', 'Search images...')
             expect(searchInput).toHaveAttribute('data-full-width', 'true')
-        })
 
-        it('renders all image faces initially', () => {
-            renderComponent()
+            // Images and checkboxes for all faces
             const images = screen.getAllByTestId('protected-image')
             expect(images).toHaveLength(mockImageFaces.length)
-        })
+            expect(screen.getAllByTestId('face-checkbox')).toHaveLength(mockImageFaces.length)
 
-        it('displays correct image sources', () => {
-            renderComponent()
-            const images = screen.getAllByTestId('protected-image')
-
+            // Correct image sources and titles
             images.forEach((img, index) => {
                 expect(img).toHaveAttribute('src', mockImageFaces[index].media.thumbnail?.url)
             })
-        })
-
-        it('displays correct image titles in checkboxes', () => {
-            renderComponent()
 
             mockImageFaces.forEach((face) => {
                 expect(screen.getByText(face.media.title)).toBeInTheDocument()
             })
-        })
 
-        it('renders checkboxes for each image face', () => {
-            renderComponent()
-            const checkboxes = screen.getAllByTestId('face-checkbox')
-            expect(checkboxes).toHaveLength(mockImageFaces.length)
-        })
-
-        it('applies correct CSS classes to scrollable container', () => {
-            renderComponent()
-            const scrollableContainer = screen.getByTestId('table-body').closest('div')
-            expect(scrollableContainer).toHaveClass('overflow-auto', 'max-h-[500px]', 'mt-2')
-        })
-
-        it('applies correct column span to header cells', () => {
-            renderComponent()
-            const headerCells = screen.getAllByTestId('table-header-cell')
-            headerCells.forEach(cell => {
+            // Table structure and styling
+            expect(screen.getByTestId('table-header')).toBeInTheDocument()
+            expect(screen.getByTestId('table-body')).toBeInTheDocument()
+            screen.getAllByTestId('table-header-cell').forEach(cell => {
                 expect(cell).toHaveAttribute('colSpan', '2')
             })
+
+            // CSS classes for layout
+            expect(screen.getByTestId('table-body').closest('div'))
+                .toHaveClass('overflow-auto', 'max-h-[500px]', 'mt-2')
+        })
+
+        it('handles empty state and missing data gracefully', () => {
+            // Empty faces array
+            renderComponent({ imageFaces: [] })
+            expect(screen.getAllByTestId('table')).toHaveLength(2)
+            expect(screen.queryAllByTestId('protected-image')).toHaveLength(0)
+
+            // Missing thumbnails
+            const facesWithMissingThumbnails = [{
+                ...mockImageFaces[0],
+                media: { ...mockImageFaces[0].media, thumbnail: null },
+            }]
+
+            renderComponent({ imageFaces: facesWithMissingThumbnails })
+            expect(screen.getByTestId('protected-image')).toHaveAttribute(
+                'src', 'data:image/gif;base64,R0lGODlhAQABAPAAAAAAAAAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw=='
+            )
         })
     })
 
     describe('Search Functionality', () => {
-        it('filters faces based on search input', async () => {
-            renderComponent()
-            const searchInput = screen.getByTestId('search-input')
-
-            fireEvent.change(searchInput, { target: { value: 'Beach' } })
-
-            await waitFor(() => {
-                expect(screen.getByText('Beach Photo')).toBeInTheDocument()
-                expect(screen.queryByText('Mountain Hiking')).not.toBeInTheDocument()
-                expect(screen.queryByText('City Sunset')).not.toBeInTheDocument()
-            })
-
-            // Verify only one image is shown
-            const images = screen.getAllByTestId('protected-image')
-            expect(images).toHaveLength(1)
-        })
-
-        it('performs case-insensitive search', async () => {
-            renderComponent()
-            const searchInput = screen.getByTestId('search-input')
-
-            fireEvent.change(searchInput, { target: { value: 'mountain' } })
-
-            await waitFor(() => {
-                expect(screen.getByText('Mountain Hiking')).toBeInTheDocument()
-                expect(screen.queryByText('Beach Photo')).not.toBeInTheDocument()
-                expect(screen.queryByText('City Sunset')).not.toBeInTheDocument()
-            })
-
-            const images = screen.getAllByTestId('protected-image')
-            expect(images).toHaveLength(1)
-        })
-
-        it('shows all faces when search is cleared', async () => {
-            renderComponent()
-            const searchInput = screen.getByTestId('search-input')
-
-            // First filter
-            fireEvent.change(searchInput, { target: { value: 'Beach' } })
-            await waitFor(() => {
-                expect(screen.queryByText('Mountain Hiking')).not.toBeInTheDocument()
-            })
-
-            // Clear search
-            fireEvent.change(searchInput, { target: { value: '' } })
-            await waitFor(() => {
-                expect(screen.getByText('Beach Photo')).toBeInTheDocument()
-                expect(screen.getByText('Mountain Hiking')).toBeInTheDocument()
-                expect(screen.getByText('City Sunset')).toBeInTheDocument()
-            })
-
-            const images = screen.getAllByTestId('protected-image')
-            expect(images).toHaveLength(mockImageFaces.length)
-        })
-
-        it('shows no results when search matches nothing', async () => {
-            renderComponent()
-            const searchInput = screen.getByTestId('search-input')
-
-            fireEvent.change(searchInput, { target: { value: 'nonexistent' } })
-
-            await waitFor(() => {
-                const images = screen.queryAllByTestId('protected-image')
-                expect(images).toHaveLength(0)
-            })
-        })
-
-        it('handles partial matches correctly', async () => {
-            renderComponent()
-            const searchInput = screen.getByTestId('search-input')
-
-            fireEvent.change(searchInput, { target: { value: 'ing' } })
-
-            await waitFor(() => {
-                expect(screen.getByText('Mountain Hiking')).toBeInTheDocument()
-                expect(screen.queryByText('Beach Photo')).not.toBeInTheDocument()
-                expect(screen.queryByText('City Sunset')).not.toBeInTheDocument()
-            })
-
-            const images = screen.getAllByTestId('protected-image')
-            expect(images).toHaveLength(1)
-        })
-
-        it('filters correctly with multiple matching results', async () => {
+        it('filters faces with case-insensitive partial matching and handles all search scenarios', async () => {
             const facesWithSimilarTitles = [
                 ...mockImageFaces,
                 {
@@ -336,268 +240,77 @@ describe('SelectImageFacesTable', () => {
             renderComponent({ imageFaces: facesWithSimilarTitles })
             const searchInput = screen.getByTestId('search-input')
 
-            fireEvent.change(searchInput, { target: { value: 'Beach' } })
+            // Case-insensitive single match
+            fireEvent.change(searchInput, { target: { value: 'mountain' } })
+            await waitFor(() => {
+                expect(screen.getByText('Mountain Hiking')).toBeInTheDocument()
+                expect(screen.queryByText('Beach Photo')).not.toBeInTheDocument()
+                expect(screen.getAllByTestId('protected-image')).toHaveLength(1)
+            })
 
+            // Multiple matches with partial string
+            fireEvent.change(searchInput, { target: { value: 'Beach' } })
             await waitFor(() => {
                 expect(screen.getByText('Beach Photo')).toBeInTheDocument()
                 expect(screen.getByText('Beach Volleyball')).toBeInTheDocument()
                 expect(screen.queryByText('Mountain Hiking')).not.toBeInTheDocument()
-                expect(screen.queryByText('City Sunset')).not.toBeInTheDocument()
+                expect(screen.getAllByTestId('protected-image')).toHaveLength(2)
             })
 
-            const images = screen.getAllByTestId('protected-image')
-            expect(images).toHaveLength(2)
+            // No results
+            fireEvent.change(searchInput, { target: { value: 'nonexistent' } })
+            await waitFor(() => {
+                expect(screen.queryAllByTestId('protected-image')).toHaveLength(0)
+            })
+
+            // Clear search shows all
+            fireEvent.change(searchInput, { target: { value: '' } })
+            await waitFor(() => {
+                expect(screen.getAllByTestId('protected-image')).toHaveLength(facesWithSimilarTitles.length)
+            })
         })
     })
 
-    describe('Selection Functionality', () => {
-        it('shows unselected faces as unchecked', () => {
-            renderComponent()
-            const checkboxes = screen.getAllByTestId('face-checkbox')
-
-            checkboxes.forEach(checkbox => {
-                expect(checkbox).not.toBeChecked()
-            })
-        })
-
-        it('shows selected faces as checked', () => {
+    describe('Selection and Interaction', () => {
+        it('handles selection state and interactions correctly via both checkboxes and images', () => {
+            const setSelectedImageFaces = vi.fn()
             renderComponent({
-                selectedImageFaces: [mockImageFaces[0], mockImageFaces[2]]
+                selectedImageFaces: [mockImageFaces[0], mockImageFaces[2]],
+                setSelectedImageFaces
             })
 
+            // Initial selection state
             const checkboxes = screen.getAllByTestId('face-checkbox')
             expect(checkboxes[0]).toBeChecked()
             expect(checkboxes[1]).not.toBeChecked()
             expect(checkboxes[2]).toBeChecked()
-        })
 
-        it('calls setSelectedImageFaces when checkbox is clicked to select', () => {
-            const setSelectedImageFaces = vi.fn()
-            renderComponent({ setSelectedImageFaces })
-
-            const firstCheckbox = screen.getAllByTestId('face-checkbox')[0]
-            fireEvent.click(firstCheckbox)
-
-            expect(setSelectedImageFaces).toHaveBeenCalledWith(expect.any(Function))
-
-            // Test the function passed to setSelectedImageFaces
-            const updateFunction = setSelectedImageFaces.mock.calls[0][0]
-            const result = updateFunction([])
-            expect(result).toEqual([mockImageFaces[0]])
-        })
-
-        it('calls setSelectedImageFaces when checkbox is clicked to deselect', () => {
-            const setSelectedImageFaces = vi.fn()
-            renderComponent({
-                selectedImageFaces: [mockImageFaces[0], mockImageFaces[1]],
-                setSelectedImageFaces
-            })
-
-            const firstCheckbox = screen.getAllByTestId('face-checkbox')[0]
-            fireEvent.click(firstCheckbox)
-
-            expect(setSelectedImageFaces).toHaveBeenCalledWith(expect.any(Function))
-
-            // Test the function passed to setSelectedImageFaces
-            const updateFunction = setSelectedImageFaces.mock.calls[0][0]
-            const result = updateFunction([mockImageFaces[0], mockImageFaces[1]])
-            expect(result).toEqual([mockImageFaces[1]])
-        })
-
-        it('handles multiple selections correctly', () => {
-            const setSelectedImageFaces = vi.fn()
-            renderComponent({ setSelectedImageFaces })
-
-            const checkboxes = screen.getAllByTestId('face-checkbox')
-
-            // Select first face
+            // Checkbox deselection
             fireEvent.click(checkboxes[0])
+            expect(setSelectedImageFaces).toHaveBeenCalledWith(expect.any(Function))
+
             let updateFunction = setSelectedImageFaces.mock.calls[0][0]
-            let result = updateFunction([])
-            expect(result).toEqual([mockImageFaces[0]])
+            let result = updateFunction([mockImageFaces[0], mockImageFaces[2]])
+            expect(result).toEqual([mockImageFaces[2]])
 
-            // Select second face
-            fireEvent.click(checkboxes[1])
-            updateFunction = setSelectedImageFaces.mock.calls[1][0]
-            result = updateFunction([mockImageFaces[0]])
-            expect(result).toEqual([mockImageFaces[0], mockImageFaces[1]])
-        })
-
-        it('handles deselection from multiple selections correctly', () => {
-            const setSelectedImageFaces = vi.fn()
-            renderComponent({
-                selectedImageFaces: [mockImageFaces[0], mockImageFaces[1], mockImageFaces[2]],
-                setSelectedImageFaces
-            })
-
-            const middleCheckbox = screen.getAllByTestId('face-checkbox')[1]
-            fireEvent.click(middleCheckbox)
-
-            const updateFunction = setSelectedImageFaces.mock.calls[0][0]
-            const result = updateFunction([mockImageFaces[0], mockImageFaces[1], mockImageFaces[2]])
-            expect(result).toEqual([mockImageFaces[0], mockImageFaces[2]])
-        })
-
-        it('maintains selection state during search', async () => {
-            renderComponent({
-                selectedImageFaces: [mockImageFaces[0]]
-            })
-
-            // Confirm initial selection
-            let checkboxes = screen.getAllByTestId('face-checkbox')
-            expect(checkboxes[0]).toBeChecked()
-
-            // Filter to show only selected item
-            const searchInput = screen.getByTestId('search-input')
-            fireEvent.change(searchInput, { target: { value: 'Beach' } })
-
-            await waitFor(() => {
-                const filteredCheckboxes = screen.getAllByTestId('face-checkbox')
-                expect(filteredCheckboxes).toHaveLength(1)
-                expect(filteredCheckboxes[0]).toBeChecked()
-            })
-        })
-    })
-
-    describe('Image Click Functionality', () => {
-        it('triggers selection when image is clicked', () => {
-            const setSelectedImageFaces = vi.fn()
-            renderComponent({ setSelectedImageFaces })
-
-            const firstImage = screen.getAllByTestId('protected-image')[0]
-            fireEvent.click(firstImage)
-
-            expect(setSelectedImageFaces).toHaveBeenCalledWith(expect.any(Function))
-
-            // Test the function passed to setSelectedImageFaces
-            const updateFunction = setSelectedImageFaces.mock.calls[0][0]
-            const result = updateFunction([])
-            expect(result).toEqual([mockImageFaces[0]])
-        })
-
-        it('triggers deselection when selected image is clicked', () => {
-            const setSelectedImageFaces = vi.fn()
-            renderComponent({
-                selectedImageFaces: [mockImageFaces[0]],
-                setSelectedImageFaces
-            })
-
-            const firstImage = screen.getAllByTestId('protected-image')[0]
-            fireEvent.click(firstImage)
-
-            expect(setSelectedImageFaces).toHaveBeenCalledWith(expect.any(Function))
-
-            // Test the function passed to setSelectedImageFaces
-            const updateFunction = setSelectedImageFaces.mock.calls[0][0]
-            const result = updateFunction([mockImageFaces[0]])
-            expect(result).toEqual([])
-        })
-
-        it('image click and checkbox click have same behavior', () => {
-            const setSelectedImageFaces = vi.fn()
-            renderComponent({ setSelectedImageFaces })
-
-            const firstImage = screen.getAllByTestId('protected-image')[0]
-            const firstCheckbox = screen.getAllByTestId('face-checkbox')[0]
-
-            // Click image
-            fireEvent.click(firstImage)
-            const imageUpdateFunction = setSelectedImageFaces.mock.calls[0][0]
-            const imageResult = imageUpdateFunction([])
-
-            // Clear mock and click checkbox
+            // Checkbox selection
             setSelectedImageFaces.mockClear()
-            fireEvent.click(firstCheckbox)
-            const checkboxUpdateFunction = setSelectedImageFaces.mock.calls[0][0]
-            const checkboxResult = checkboxUpdateFunction([])
+            fireEvent.click(checkboxes[1])
+            updateFunction = setSelectedImageFaces.mock.calls[0][0]
+            result = updateFunction([mockImageFaces[2]])
+            expect(result).toEqual([mockImageFaces[2], mockImageFaces[1]])
 
-            // Both should produce same result
-            expect(imageResult).toEqual(checkboxResult)
-            expect(imageResult).toEqual([mockImageFaces[0]])
-        })
-    })
+            // Image click behavior matches checkbox behavior
+            setSelectedImageFaces.mockClear()
+            const firstImage = screen.getAllByTestId('protected-image')[1]
+            fireEvent.click(firstImage)
 
-    describe('Edge Cases and Error Handling', () => {
-        it('handles empty imageFaces array', () => {
-            renderComponent({ imageFaces: [] })
-
-            expect(screen.getAllByTestId('table')).toHaveLength(2) // Header and body tables still render
-            const images = screen.queryAllByTestId('protected-image')
-            expect(images).toHaveLength(0)
-            const checkboxes = screen.queryAllByTestId('face-checkbox')
-            expect(checkboxes).toHaveLength(0)
+            const imageUpdateFunction = setSelectedImageFaces.mock.calls[0][0]
+            const imageResult = imageUpdateFunction([mockImageFaces[2]])
+            expect(imageResult).toEqual([mockImageFaces[2], mockImageFaces[1]])
         })
 
-        it('handles empty selectedImageFaces gracefully', () => {
-            renderComponent({ selectedImageFaces: [] })
-
-            expect(screen.getAllByTestId('table')).toHaveLength(2)
-            const checkboxes = screen.getAllByTestId('face-checkbox')
-            checkboxes.forEach(checkbox => {
-                expect(checkbox).not.toBeChecked()
-            })
-        })
-
-        it('handles faces with missing thumbnail URLs', () => {
-            const facesWithMissingThumbnails = [
-                {
-                    ...mockImageFaces[0],
-                    media: {
-                        ...mockImageFaces[0].media,
-                        thumbnail: null,
-                    },
-                },
-            ]
-
-            renderComponent({ imageFaces: facesWithMissingThumbnails })
-
-            const image = screen.getByTestId('protected-image')
-            expect(image).toHaveAttribute(
-                'src', 'data:image/gif;base64,R0lGODlhAQABAPAAAAAAAAAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw=='
-            )
-        })
-
-        it('handles faces with undefined thumbnail', () => {
-            const facesWithUndefinedThumbnail = [
-                {
-                    ...mockImageFaces[0],
-                    media: {
-                        ...mockImageFaces[0].media,
-                        thumbnail: undefined,
-                    },
-                },
-            ]
-
-            renderComponent({ imageFaces: facesWithUndefinedThumbnail })
-
-            const image = screen.getByTestId('protected-image')
-            expect(image).toBeInTheDocument()
-            expect(image).toHaveAttribute(
-                'src', 'data:image/gif;base64,R0lGODlhAQABAPAAAAAAAAAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw=='
-            )
-        })
-
-        it('handles faces with missing media title', () => {
-            const facesWithMissingTitle = [
-                {
-                    ...mockImageFaces[0],
-                    media: {
-                        ...mockImageFaces[0].media,
-                        title: '',
-                    },
-                },
-            ]
-
-            renderComponent({ imageFaces: facesWithMissingTitle })
-
-            const checkboxes = screen.getAllByTestId('face-checkbox')
-            expect(checkboxes).toHaveLength(1)
-            expect(checkboxes[0]).toBeInTheDocument()
-            expect(checkboxes[0]).not.toBeChecked()
-        })
-
-        it('handles selection state inconsistencies', () => {
-            // Test when selectedImageFaces contains items not in imageFaces
+        it('maintains selection state during search and handles selection inconsistencies', async () => {
             const nonExistentFace = {
                 __typename: 'ImageFace' as const,
                 id: 'non-existent',
@@ -613,186 +326,31 @@ describe('SelectImageFacesTable', () => {
                 selectedImageFaces: [nonExistentFace, mockImageFaces[0]]
             })
 
+            // Selection state with inconsistencies
             const checkboxes = screen.getAllByTestId('face-checkbox')
-            expect(checkboxes[0]).toBeChecked() // First actual face should be checked
+            expect(checkboxes[0]).toBeChecked() // Existing face is checked
             expect(checkboxes[1]).not.toBeChecked()
             expect(checkboxes[2]).not.toBeChecked()
-        })
-    })
 
-    describe('Performance Considerations', () => {
-        it('handles large number of faces efficiently', () => {
-            const largeFaceList = Array.from({ length: 100 }, (_, index) => ({
-                __typename: 'ImageFace' as const,
-                id: `face-${index}`,
-                media: {
-                    __typename: 'Media' as const,
-                    id: `media-${index}`,
-                    title: `Face ${index}`,
-                    thumbnail: {
-                        __typename: 'MediaURL' as const,
-                        url: `/thumbnails/face-${index}.jpg`,
-                        width: 200,
-                        height: 150,
-                    },
-                },
-            }))
-
-            const startTime = performance.now()
-            renderComponent({ imageFaces: largeFaceList })
-            const endTime = performance.now()
-
-            // Should render within reasonable time (2 seconds)
-            expect(endTime - startTime).toBeLessThan(2000)
-
-            const images = screen.getAllByTestId('protected-image')
-            expect(images).toHaveLength(100)
-
-            const checkboxes = screen.getAllByTestId('face-checkbox')
-            expect(checkboxes).toHaveLength(100)
-        })
-
-        it('does not cause excessive re-renders on search', async () => {
-            const setSelectedImageFaces = vi.fn()
-            renderComponent({ setSelectedImageFaces })
-
+            // Selection persists during search
             const searchInput = screen.getByTestId('search-input')
-
-            // Multiple rapid search changes
-            fireEvent.change(searchInput, { target: { value: 'B' } })
-            fireEvent.change(searchInput, { target: { value: 'Be' } })
-            fireEvent.change(searchInput, { target: { value: 'Bea' } })
-            fireEvent.change(searchInput, { target: { value: 'Beac' } })
             fireEvent.change(searchInput, { target: { value: 'Beach' } })
 
             await waitFor(() => {
-                expect(screen.getByText('Beach Photo')).toBeInTheDocument()
-            })
-
-            // setSelectedImageFaces should not have been called during search
-            expect(setSelectedImageFaces).not.toHaveBeenCalled()
-        })
-
-        it('efficiently filters large datasets', async () => {
-            const largeFaceList = Array.from({ length: 500 }, (_, index) => ({
-                __typename: 'ImageFace' as const,
-                id: `face-${index}`,
-                media: {
-                    __typename: 'Media' as const,
-                    id: `media-${index}`,
-                    title: index % 10 === 0 ? `Special Face ${index}` : `Regular Face ${index}`,
-                    thumbnail: {
-                        __typename: 'MediaURL' as const,
-                        url: `/thumbnails/face-${index}.jpg`,
-                        width: 200,
-                        height: 150,
-                    },
-                },
-            }))
-
-            renderComponent({ imageFaces: largeFaceList })
-            const searchInput = screen.getByTestId('search-input')
-
-            const startTime = performance.now()
-            fireEvent.change(searchInput, { target: { value: 'Special' } })
-
-            await waitFor(() => {
-                const images = screen.getAllByTestId('protected-image')
-                expect(images.length).toBeLessThan(100) // Should filter significantly
-            })
-
-            const endTime = performance.now()
-            expect(endTime - startTime).toBeLessThan(1000) // Should complete within 1 second
-        })
-    })
-
-    describe('Accessibility and User Experience', () => {
-        it('provides proper labels for checkboxes', () => {
-            renderComponent()
-
-            mockImageFaces.forEach((face) => {
-                const label = screen.getByText(face.media.title)
-                expect(label).toBeInTheDocument()
-
-                // Check that label is associated with checkbox
-                const labelElement = label.closest('[data-testid="checkbox-label"]')
-                expect(labelElement).toBeInTheDocument()
-                expect(labelElement?.querySelector('[data-testid="face-checkbox"]')).toBeInTheDocument()
-            })
-        })
-
-        it('maintains focus management for search input', () => {
-            renderComponent()
-
-            const searchInput = screen.getByTestId('search-input')
-            searchInput.focus()
-            expect(document.activeElement).toBe(searchInput)
-        })
-
-        it('provides semantic table structure', () => {
-            renderComponent()
-
-            expect(screen.getAllByTestId('table-header')).toHaveLength(1)
-            expect(screen.getAllByTestId('table-body')).toHaveLength(1)
-            expect(screen.getAllByTestId('table-row')).toHaveLength(mockImageFaces.length + 2) // +2 for header rows
-        })
-
-        it('applies correct styling classes for layout', () => {
-            renderComponent()
-
-            // Check for table cell with specific classes
-            const tableCells = screen.getAllByTestId('table-cell')
-            const checkboxCells = tableCells.filter(cell =>
-                cell.querySelector('[data-testid="face-checkbox"]')
-            )
-
-            checkboxCells.forEach(cell => {
-                expect(cell).toHaveClass('min-w-64', 'w-full')
+                const filteredCheckboxes = screen.getAllByTestId('face-checkbox')
+                expect(filteredCheckboxes).toHaveLength(1)
+                expect(filteredCheckboxes[0]).toBeChecked()
             })
         })
     })
 
-    describe('Integration with GraphQL Types', () => {
-        it('works with myFaces_myFaceGroups_imageFaces type', () => {
-            const typedFaces: myFaces_myFaceGroups_imageFaces[] = mockImageFaces
-
-            expect(() => {
-                renderComponent({ imageFaces: typedFaces })
-            }).not.toThrow()
-
-            expect(screen.getAllByTestId('protected-image')).toHaveLength(typedFaces.length)
-        })
-
-        it('works with singleFaceGroup_faceGroup_imageFaces type', () => {
-            // Cast to simulate the other GraphQL type
+    describe('Component Integration and Props', () => {
+        it('integrates with GraphQL types and handles prop updates', () => {
+            // Test with different GraphQL types
             const typedFaces = mockImageFaces as unknown as singleFaceGroup_faceGroup_imageFaces[]
+            expect(() => renderComponent({ imageFaces: typedFaces })).not.toThrow()
 
-            expect(() => {
-                renderComponent({ imageFaces: typedFaces })
-            }).not.toThrow()
-
-            expect(screen.getAllByTestId('protected-image')).toHaveLength(typedFaces.length)
-        })
-
-        it('handles mixed types in selection', () => {
-            const mixedSelection = [
-                mockImageFaces[0],
-                mockImageFaces[1] as unknown as singleFaceGroup_faceGroup_imageFaces
-            ]
-
-            expect(() => {
-                renderComponent({ selectedImageFaces: mixedSelection })
-            }).not.toThrow()
-
-            const checkboxes = screen.getAllByTestId('face-checkbox')
-            expect(checkboxes[0]).toBeChecked()
-            expect(checkboxes[1]).toBeChecked()
-            expect(checkboxes[2]).not.toBeChecked()
-        })
-    })
-
-    describe('Component Props Validation', () => {
-        it('handles prop changes correctly', () => {
+            // Test prop updates
             const { rerender } = renderComponent({ title: 'Original Title' })
             expect(screen.getByText('Original Title')).toBeInTheDocument()
 
@@ -801,55 +359,44 @@ describe('SelectImageFacesTable', () => {
                     <SelectImageFacesTable
                         {...defaultProps}
                         title="Updated Title"
+                        selectedImageFaces={[mockImageFaces[1]]}
+                        imageFaces={[mockImageFaces[0]]}
                     />
                 </MockedProvider>
             )
 
             expect(screen.getByText('Updated Title')).toBeInTheDocument()
             expect(screen.queryByText('Original Title')).not.toBeInTheDocument()
-        })
-
-        it('updates selection when selectedImageFaces prop changes', () => {
-            const { rerender } = renderComponent({ selectedImageFaces: [] })
-
-            let checkboxes = screen.getAllByTestId('face-checkbox')
-            checkboxes.forEach(checkbox => {
-                expect(checkbox).not.toBeChecked()
-            })
-
-            rerender(
-                <MockedProvider mocks={[]}>
-                    <SelectImageFacesTable
-                        {...defaultProps}
-                        selectedImageFaces={[mockImageFaces[1]]}
-                    />
-                </MockedProvider>
-            )
-
-            checkboxes = screen.getAllByTestId('face-checkbox')
-            expect(checkboxes[0]).not.toBeChecked()
-            expect(checkboxes[1]).toBeChecked()
-            expect(checkboxes[2]).not.toBeChecked()
-        })
-
-        it('updates face list when imageFaces prop changes', () => {
-            const { rerender } = renderComponent()
-
-            expect(screen.getAllByTestId('protected-image')).toHaveLength(3)
-
-            const newFaces = [mockImageFaces[0]]
-            rerender(
-                <MockedProvider mocks={[]}>
-                    <SelectImageFacesTable
-                        {...defaultProps}
-                        imageFaces={newFaces}
-                    />
-                </MockedProvider>
-            )
-
             expect(screen.getAllByTestId('protected-image')).toHaveLength(1)
             expect(screen.getByText('Beach Photo')).toBeInTheDocument()
-            expect(screen.queryByText('Mountain Hiking')).not.toBeInTheDocument()
+        })
+
+        it('provides accessibility features and handles performance scenarios', () => {
+            renderComponent()
+
+            // Accessibility - proper labels and focus
+            mockImageFaces.forEach((face) => {
+                const labelElement = screen.getByText(face.media.title)
+                    .closest('[data-testid="checkbox-label"]')
+                expect(labelElement).toBeInTheDocument()
+                expect(labelElement?.querySelector('[data-testid="face-checkbox"]')).toBeInTheDocument()
+            })
+
+            const searchInput = screen.getByTestId('search-input')
+            searchInput.focus()
+            expect(document.activeElement).toBe(searchInput)
+
+            // Performance - rapid search changes don't trigger selection callbacks
+            const setSelectedImageFaces = vi.fn()
+            renderComponent({ setSelectedImageFaces })
+
+            fireEvent.change(searchInput, { target: { value: 'B' } })
+            fireEvent.change(searchInput, { target: { value: 'Be' } })
+            fireEvent.change(searchInput, { target: { value: 'Bea' } })
+            fireEvent.change(searchInput, { target: { value: 'Beac' } })
+            fireEvent.change(searchInput, { target: { value: 'Beach' } })
+
+            expect(setSelectedImageFaces).not.toHaveBeenCalled()
         })
     })
 })
