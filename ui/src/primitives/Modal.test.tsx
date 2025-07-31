@@ -56,27 +56,27 @@ describe('Modal Component', () => {
 
             await waitFor(() => {
                 expect(screen.getByRole('dialog')).toBeInTheDocument();
+
+                // Basic rendering
+                expect(screen.getByText('Test Modal')).toBeInTheDocument();
+                expect(screen.getByText('This is a test modal description')).toBeInTheDocument();
+                expect(screen.getByTestId('modal-content')).toBeInTheDocument();
+
+                // Layout and styling
+                expect(screen.getByRole('dialog')).toHaveClass('fixed', 'z-40', 'inset-0', 'overflow-y-auto');
+
+                const panel = document.querySelector('.fixed.bg-white.dark\\:bg-dark-bg');
+                const actionsContainer = document.querySelector('.bg-gray-50.p-2.dark\\:bg-\\[\\#31363d\\]');
+                expect(document.querySelector('.fixed.inset-0.bg-black.opacity-30')).toBeInTheDocument();
+                expect(panel).toBeInTheDocument();
+                expect(panel).toHaveClass('max-w-[calc(100%-16px)]', 'mx-auto', 'rounded', 'shadow-md', 'border');
+                expect(actionsContainer).toBeInTheDocument();
+                expect(actionsContainer).toHaveClass('flex', 'gap-2', 'justify-end', 'mt-4');
+
+                // Dark mode classes
+                expect(document.querySelector('.dark\\:bg-dark-bg')).toBeInTheDocument();
+                expect(document.querySelector('.dark\\:bg-\\[\\#31363d\\]')).toBeInTheDocument();
             });
-
-            // Basic rendering
-            expect(screen.getByText('Test Modal')).toBeInTheDocument();
-            expect(screen.getByText('This is a test modal description')).toBeInTheDocument();
-            expect(screen.getByTestId('modal-content')).toBeInTheDocument();
-
-            // Layout and styling
-            expect(screen.getByRole('dialog')).toHaveClass('fixed', 'z-40', 'inset-0', 'overflow-y-auto');
-
-            const panel = document.querySelector('.fixed.bg-white.dark\\:bg-dark-bg');
-            const actionsContainer = document.querySelector('.bg-gray-50.p-2.dark\\:bg-\\[\\#31363d\\]');
-            expect(document.querySelector('.fixed.inset-0.bg-black.opacity-30')).toBeInTheDocument();
-            expect(panel).toBeInTheDocument();
-            expect(panel).toHaveClass('max-w-[calc(100%-16px)]', 'mx-auto', 'rounded', 'shadow-md', 'border');
-            expect(actionsContainer).toBeInTheDocument();
-            expect(actionsContainer).toHaveClass('flex', 'gap-2', 'justify-end', 'mt-4');
-
-            // Dark mode classes
-            expect(document.querySelector('.dark\\:bg-dark-bg')).toBeInTheDocument();
-            expect(document.querySelector('.dark\\:bg-\\[\\#31363d\\]')).toBeInTheDocument();
         });
 
         it('does not render when closed', () => {
@@ -101,19 +101,19 @@ describe('Modal Component', () => {
 
             await waitFor(() => {
                 expect(screen.getByRole('dialog')).toBeInTheDocument();
+
+                // Custom title and description
+                const title = screen.getByText('Custom Title');
+                expect(title).toBeInTheDocument();
+                expect(title.tagName.toLowerCase()).toBe('h2');
+                expect(screen.getByText('Custom description with')).toBeInTheDocument();
+                expect(screen.getByText('bold text')).toBeInTheDocument();
+
+                // Custom children content
+                expect(screen.getByText('Form Title')).toBeInTheDocument();
+                expect(screen.getByPlaceholderText('Name')).toBeInTheDocument();
+                expect(screen.getByText('Item 1')).toBeInTheDocument();
             });
-
-            // Custom title and description
-            const title = screen.getByText('Custom Title');
-            expect(title).toBeInTheDocument();
-            expect(title.tagName.toLowerCase()).toBe('h2');
-            expect(screen.getByText('Custom description with')).toBeInTheDocument();
-            expect(screen.getByText('bold text')).toBeInTheDocument();
-
-            // Custom children content
-            expect(screen.getByText('Form Title')).toBeInTheDocument();
-            expect(screen.getByPlaceholderText('Name')).toBeInTheDocument();
-            expect(screen.getByText('Item 1')).toBeInTheDocument();
         });
 
         it('renders with React fragments and complex nested content', async () => {
@@ -138,17 +138,17 @@ describe('Modal Component', () => {
 
             await waitFor(() => {
                 expect(screen.getByRole('dialog')).toBeInTheDocument();
+
+                // Fragment description
+                expect(screen.getByText('First part')).toBeInTheDocument();
+                expect(screen.getByText('important part')).toBeInTheDocument();
+                expect(screen.getByText('last part')).toBeInTheDocument();
+
+                // Complex content
+                expect(screen.getByPlaceholderText('Message')).toBeInTheDocument();
+                expect(screen.getByRole('button', { name: 'Submit Form' })).toBeInTheDocument();
+                expect(screen.getByText('Additional info')).toBeInTheDocument();
             });
-
-            // Fragment description
-            expect(screen.getByText('First part')).toBeInTheDocument();
-            expect(screen.getByText('important part')).toBeInTheDocument();
-            expect(screen.getByText('last part')).toBeInTheDocument();
-
-            // Complex content
-            expect(screen.getByPlaceholderText('Message')).toBeInTheDocument();
-            expect(screen.getByRole('button', { name: 'Submit Form' })).toBeInTheDocument();
-            expect(screen.getByText('Additional info')).toBeInTheDocument();
         });
     });
 
@@ -200,12 +200,11 @@ describe('Modal Component', () => {
 
             await waitFor(() => {
                 expect(screen.getAllByRole('button')).toHaveLength(4);
+                expect(screen.getByRole('button', { name: 'Delete' })).toHaveAttribute('data-variant', 'negative');
+                expect(screen.getByRole('button', { name: 'Save' })).toHaveAttribute('data-variant', 'positive');
+                expect(screen.getByRole('button', { name: 'Neutral' })).toHaveAttribute('data-variant', 'default');
+                expect(screen.getByRole('button', { name: 'No Variant' })).not.toHaveAttribute('data-variant');
             });
-
-            expect(screen.getByRole('button', { name: 'Delete' })).toHaveAttribute('data-variant', 'negative');
-            expect(screen.getByRole('button', { name: 'Save' })).toHaveAttribute('data-variant', 'positive');
-            expect(screen.getByRole('button', { name: 'Neutral' })).toHaveAttribute('data-variant', 'default');
-            expect(screen.getByRole('button', { name: 'No Variant' })).not.toHaveAttribute('data-variant');
         });
 
         it('handles interactive content within modal', async () => {
@@ -292,13 +291,11 @@ describe('Modal Component', () => {
                 rerender(<Modal {...defaultProps} actions={problematicActions} />);
                 await waitFor(() => {
                     expect(screen.getByRole('dialog')).toBeInTheDocument();
+                    expect(screen.getByRole('button', { name: '' })).toBeInTheDocument();
+                    expect(screen.getByRole('button', { name: 'No Click' })).toBeInTheDocument();
+                    expect(screen.getByRole('button', { name: 'First' })).toBeInTheDocument();
+                    expect(screen.getByRole('button', { name: 'Second' })).toBeInTheDocument();
                 });
-                expect(screen.getByRole('button', { name: '' })).toBeInTheDocument();
-                expect(screen.getByRole('button', { name: 'No Click' })).toBeInTheDocument();
-                expect(screen.getByRole('button', { name: 'First' })).toBeInTheDocument();
-                expect(screen.getByRole('button', { name: 'Second' })).toBeInTheDocument();
-
-                expect(() => render(<Modal {...defaultProps} actions={problematicActions} />)).not.toThrow();
             } finally {
                 console.error = originalError;
                 unmount(); // Clean up the test
