@@ -345,11 +345,17 @@ describe('SelectImageFacesTable', () => {
     })
 
     describe('Component Integration and Props', () => {
-        it('integrates with GraphQL types and handles prop updates', () => {
+        it('integrates with different GraphQL types', () => {
             // Test with different GraphQL types
             const typedFaces = mockImageFaces as unknown as singleFaceGroup_faceGroup_imageFaces[]
             expect(() => renderComponent({ imageFaces: typedFaces })).not.toThrow()
 
+            // Verify it renders correctly with the typed faces
+            expect(screen.getAllByTestId('protected-image')).toHaveLength(mockImageFaces.length)
+            expect(screen.getByText('Test Face Group')).toBeInTheDocument()
+        })
+
+        it('handles prop updates', () => {
             // Test prop updates
             const { unmount } = renderComponent({ title: 'Original Title' })
             expect(screen.getByText('Original Title')).toBeInTheDocument()
