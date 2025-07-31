@@ -17,23 +17,6 @@ vi.mock('./form/Input', () => ({
     )
 }));
 
-const suppressReactWarnings = (warnings: string[], testFn: () => void) => {
-    const originalError = console.error;
-    console.error = (...args: any[]) => {
-        const message = args[0];
-        if (typeof message === 'string' && warnings.some(warning => message.includes(warning))) {
-            return; // Suppress specified warnings
-        }
-        originalError(...args);
-    };
-
-    try {
-        testFn();
-    } finally {
-        console.error = originalError;
-    }
-};
-
 describe('Modal Component', () => {
     const mockActions: ModalAction[] = [
         {
@@ -277,27 +260,35 @@ describe('Modal Component', () => {
 
     describe('Edge Cases and Error Handling', () => {
         it('handles problematic configurations gracefully', async () => {
-            suppressReactWarnings(['Encountered two children with the same key'], async () => {
-                const problematicActions: ModalAction[] = [
-                    { key: 'empty-label', label: '', onClick: vi.fn() },
-                    { key: 'no-onclick', label: 'No Click' } as ModalAction,
-                    { key: 'duplicate', label: 'First', onClick: vi.fn() },
-                    { key: 'duplicate', label: 'Second', onClick: vi.fn() },
-                ];
+            const problematicActions: ModalAction[] = [
+                { key: 'empty-label', label: '', onClick: vi.fn() },
+                { key: 'no-onclick', label: 'No Click' } as ModalAction,
+                { key: 'duplicate', label: 'First', onClick: vi.fn() },
+                { key: 'duplicate', label: 'Second', onClick: vi.fn() },
+            ];
 
-                // Test various edge cases without crashing
-                expect(() => render(<Modal {...defaultProps} actions={[]} />)).not.toThrow();
-                expect(() => render(<Modal {...defaultProps}>{null}</Modal>)).not.toThrow();
-                expect(() => render(<Modal {...defaultProps}>{undefined}</Modal>)).not.toThrow();
-                expect(() => render(<Modal {...defaultProps} actions={problematicActions} />)).not.toThrow();
+            // Test various edge cases without crashing
+            expect(() => render(<Modal {...defaultProps} actions={[]} />)).not.toThrow();
+            expect(() => render(<Modal {...defaultProps}>{null}</Modal>)).not.toThrow();
+            expect(() => render(<Modal {...defaultProps}>{undefined}</Modal>)).not.toThrow();
 
-                // Verify edge case behavior
-                const { rerender } = render(<Modal {...defaultProps} actions={[]} />);
-                await waitFor(() => {
-                    expect(screen.getByRole('dialog')).toBeInTheDocument();
-                });
-                expect(screen.queryAllByRole('button')).toHaveLength(0);
+            // Verify edge case behavior
+            const { rerender, unmount } = render(<Modal {...defaultProps} actions={[]} />);
+            await waitFor(() => {
+                expect(screen.getByRole('dialog')).toBeInTheDocument();
+            });
+            expect(screen.queryAllByRole('button')).toHaveLength(0);
 
+            const originalError = console.error;
+            console.error = (...args: any[]) => {
+                const message = args[0];
+                if (typeof message === 'string' && message.includes('Encountered two children with the same key')) {
+                    return; // Suppress duplicate key warnings
+                }
+                originalError(...args);
+            };
+
+            try {
                 rerender(<Modal {...defaultProps} actions={problematicActions} />);
                 await waitFor(() => {
                     expect(screen.getByRole('dialog')).toBeInTheDocument();
@@ -306,7 +297,12 @@ describe('Modal Component', () => {
                 expect(screen.getByRole('button', { name: 'No Click' })).toBeInTheDocument();
                 expect(screen.getByRole('button', { name: 'First' })).toBeInTheDocument();
                 expect(screen.getByRole('button', { name: 'Second' })).toBeInTheDocument();
-            });
+
+                expect(() => render(<Modal {...defaultProps} actions={problematicActions} />)).not.toThrow();
+            } finally {
+                console.error = originalError;
+                unmount(); // Clean up the test
+            }
         });
     });
 
@@ -349,7 +345,7 @@ describe('Modal Component', () => {
     describe('Headless UI Integration', () => {
         it('integrates correctly with Headless UI Dialog and maintains proper structure', async () => {
             const onCloseMock = vi.fn();
-            const { rerender } = render(<Modal {...defaultProps} open={true} onClose={onCloseMock} />);
+            render(<Modal {...defaultProps} open={true} onClose={onCloseMock} />);
 
             // Verify integration and content structure
             await waitFor(() => {
