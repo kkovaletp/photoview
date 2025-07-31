@@ -351,19 +351,15 @@ describe('SelectImageFacesTable', () => {
             expect(() => renderComponent({ imageFaces: typedFaces })).not.toThrow()
 
             // Test prop updates
-            const { rerender } = renderComponent({ title: 'Original Title' })
+            const { unmount } = renderComponent({ title: 'Original Title' })
             expect(screen.getByText('Original Title')).toBeInTheDocument()
+            unmount()
 
-            rerender(
-                <MockedProvider mocks={[]}>
-                    <SelectImageFacesTable
-                        {...defaultProps}
-                        title="Updated Title"
-                        selectedImageFaces={[mockImageFaces[1]]}
-                        imageFaces={[mockImageFaces[0]]}
-                    />
-                </MockedProvider>
-            )
+            renderComponent({
+                title: "Updated Title",
+                selectedImageFaces: [mockImageFaces[1]],
+                imageFaces: [mockImageFaces[0]]
+            })
 
             expect(screen.getByText('Updated Title')).toBeInTheDocument()
             expect(screen.queryByText('Original Title')).not.toBeInTheDocument()
