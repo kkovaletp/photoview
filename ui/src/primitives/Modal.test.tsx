@@ -17,6 +17,23 @@ vi.mock('./form/Input', () => ({
     )
 }));
 
+const suppressReactWarnings = (warnings: string[], testFn: () => void) => {
+    const originalError = console.error;
+    console.error = (...args: any[]) => {
+        const message = args[0];
+        if (typeof message === 'string' && warnings.some(warning => message.includes(warning))) {
+            return; // Suppress specified warnings
+        }
+        originalError(...args);
+    };
+
+    try {
+        testFn();
+    } finally {
+        console.error = originalError;
+    }
+};
+
 describe('Modal Component', () => {
     const mockActions: ModalAction[] = [
         {
@@ -260,34 +277,36 @@ describe('Modal Component', () => {
 
     describe('Edge Cases and Error Handling', () => {
         it('handles problematic configurations gracefully', async () => {
-            const problematicActions: ModalAction[] = [
-                { key: 'empty-label', label: '', onClick: vi.fn() },
-                { key: 'no-onclick', label: 'No Click' } as ModalAction,
-                { key: 'duplicate', label: 'First', onClick: vi.fn() },
-                { key: 'duplicate', label: 'Second', onClick: vi.fn() },
-            ];
+            suppressReactWarnings(['Encountered two children with the same key'], async () => {
+                const problematicActions: ModalAction[] = [
+                    { key: 'empty-label', label: '', onClick: vi.fn() },
+                    { key: 'no-onclick', label: 'No Click' } as ModalAction,
+                    { key: 'duplicate', label: 'First', onClick: vi.fn() },
+                    { key: 'duplicate', label: 'Second', onClick: vi.fn() },
+                ];
 
-            // Test various edge cases without crashing
-            expect(() => render(<Modal {...defaultProps} actions={[]} />)).not.toThrow();
-            expect(() => render(<Modal {...defaultProps}>{null}</Modal>)).not.toThrow();
-            expect(() => render(<Modal {...defaultProps}>{undefined}</Modal>)).not.toThrow();
-            expect(() => render(<Modal {...defaultProps} actions={problematicActions} />)).not.toThrow();
+                // Test various edge cases without crashing
+                expect(() => render(<Modal {...defaultProps} actions={[]} />)).not.toThrow();
+                expect(() => render(<Modal {...defaultProps}>{null}</Modal>)).not.toThrow();
+                expect(() => render(<Modal {...defaultProps}>{undefined}</Modal>)).not.toThrow();
+                expect(() => render(<Modal {...defaultProps} actions={problematicActions} />)).not.toThrow();
 
-            // Verify edge case behavior
-            const { rerender } = render(<Modal {...defaultProps} actions={[]} />);
-            await waitFor(() => {
-                expect(screen.getByRole('dialog')).toBeInTheDocument();
+                // Verify edge case behavior
+                const { rerender } = render(<Modal {...defaultProps} actions={[]} />);
+                await waitFor(() => {
+                    expect(screen.getByRole('dialog')).toBeInTheDocument();
+                });
+                expect(screen.queryAllByRole('button')).toHaveLength(0);
+
+                rerender(<Modal {...defaultProps} actions={problematicActions} />);
+                await waitFor(() => {
+                    expect(screen.getByRole('dialog')).toBeInTheDocument();
+                });
+                expect(screen.getByRole('button', { name: '' })).toBeInTheDocument();
+                expect(screen.getByRole('button', { name: 'No Click' })).toBeInTheDocument();
+                expect(screen.getByRole('button', { name: 'First' })).toBeInTheDocument();
+                expect(screen.getByRole('button', { name: 'Second' })).toBeInTheDocument();
             });
-            expect(screen.queryAllByRole('button')).toHaveLength(0);
-
-            rerender(<Modal {...defaultProps} actions={problematicActions} />);
-            await waitFor(() => {
-                expect(screen.getByRole('dialog')).toBeInTheDocument();
-            });
-            expect(screen.getByRole('button', { name: '' })).toBeInTheDocument();
-            expect(screen.getByRole('button', { name: 'No Click' })).toBeInTheDocument();
-            expect(screen.getByRole('button', { name: 'First' })).toBeInTheDocument();
-            expect(screen.getByRole('button', { name: 'Second' })).toBeInTheDocument();
         });
     });
 
