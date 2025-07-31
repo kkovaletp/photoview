@@ -1,4 +1,3 @@
-import React from 'react'
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest'
 import '@testing-library/jest-dom'
@@ -21,6 +20,7 @@ vi.mock('../../../primitives/form/Input', () => ({
             value={value}
             onChange={onChange}
             placeholder={placeholder}
+            className={fullWidth ? 'w-full' : ''}
             data-testid="search-input"
             data-full-width={fullWidth}
             {...props}
@@ -223,11 +223,8 @@ describe('SelectFaceGroupTable', () => {
 
             render(<SelectFaceGroupTable {...props} />)
 
-            const selectedRow = screen.getByText('John Doe').closest('tr')
-            expect(selectedRow).toHaveClass('brightness-110')
-
-            const selectedText = screen.getByText('John Doe')
-            expect(selectedText).toHaveClass('font-semibold', 'text-slate-100')
+            expect(screen.getByText('John Doe').closest('td')).toHaveClass('brightness-110')
+            expect(screen.getByText('John Doe')).toHaveClass('font-semibold', 'text-slate-100')
         })
 
         it('should show cursor-pointer for selectable rows when not frozen', () => {
@@ -275,11 +272,8 @@ describe('SelectFaceGroupTable', () => {
 
             render(<SelectFaceGroupTable {...props} />)
 
-            const johnRow = screen.getByText('John Doe').closest('tr')
-            const janeRow = screen.getByText('Jane Smith').closest('tr')
-
-            expect(johnRow).toHaveClass('brightness-110')
-            expect(janeRow).toHaveClass('brightness-110')
+            expect(screen.getByText('John Doe').closest('td')).toHaveClass('brightness-110')
+            expect(screen.getByText('Jane Smith').closest('td')).toHaveClass('brightness-110')
         })
     })
 
