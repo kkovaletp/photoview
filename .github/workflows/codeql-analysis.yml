@@ -262,7 +262,8 @@ jobs:
   coverity:
     name: Coverity Scan
     runs-on: ubuntu-22.04
-    if: github.repository == 'kkovaletp/photoview' && github.event_name != 'pull_request'
+    if: github.repository == 'kkovaletp/photoview'
+    #&& github.event_name != 'pull_request'
     env:
       COV_PROJECT: kkovaletp%2Fphotoview
     steps:
@@ -332,6 +333,9 @@ jobs:
         shell: bash
         working-directory: ui
         run: |
+          cov-build --version
+          cov-build --help
+          cov-build -?
           cov-build --dir ${{ github.workspace }}/cov-int \
             --return-emit-failures \
             --fs-capture-search ./ npm run build -- --base=/ || (\
