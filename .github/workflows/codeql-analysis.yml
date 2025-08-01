@@ -333,9 +333,9 @@ jobs:
         shell: bash
         working-directory: ui
         run: |
-          cov-build --version
           cov-build --help
           cov-build -?
+          cov-build --version
           cov-build --dir ${{ github.workspace }}/cov-int \
             --return-emit-failures \
             --fs-capture-search ./ npm run build -- --base=/ || (\
