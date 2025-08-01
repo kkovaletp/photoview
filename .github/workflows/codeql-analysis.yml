@@ -329,40 +329,28 @@ jobs:
         run: npm ci --omit=dev --ignore-scripts
 
       # Build and capture UI code
-      - name: Build UI with cov-build
+      - name: Build UI with Coverity Capture
         shell: bash
         working-directory: ui
         run: |
-          find ${{ github.workspace }}/cov-analysis -type f -name cov-help -print
           coverity capture --dir ${{ github.workspace }}/cov-int \
             -- npm run build -- --base=/ || (\
               cat ${{ github.workspace }}/cov-int/build-log.txt && \
               exit 1 \
             )
-          cov-build --help
-          cov-build -h
-          cov-build --version
-          cov-build --dir ${{ github.workspace }}/cov-int \
-            --return-emit-failures \
-            --fs-capture-search ./ npm run build -- --base=/ || (\
-              cat ${{ github.workspace }}/cov-int/build-log.txt && \
-              exit 1 \
-            )
+          echo ======================================================
+          cat ${{ github.workspace }}/cov-int/build-log.txt
 
       # Run FS capture for the rest of the files in the project
-      - name: Scan whole project with fs-capture
+      - name: Scan whole project with Coverity Capture
         shell: bash
         run: |
           coverity capture --dir ${{ github.workspace }}/cov-int || (\
               cat ${{ github.workspace }}/cov-int/build-log.txt && \
               exit 1 \
             )
-          cov-build --dir ${{ github.workspace }}/cov-int \
-            --return-emit-failures --no-command \
-            --fs-capture-search ./ || (\
-              cat ${{ github.workspace }}/cov-int/build-log.txt && \
-              exit 1 \
-            )
+          echo ======================================================
+          cat ${{ github.workspace }}/cov-int/build-log.txt
 
       # Remove unnecessary captures from the Coverity results before sending them for analysis
       # Extract 'git blame' info for captured files
