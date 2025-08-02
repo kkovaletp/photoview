@@ -338,7 +338,7 @@ jobs:
               && ( coverity capture --dir /app/cov-int \
                 --language go \
                 --file-exclude-regex ".*_test\.go|.*/go/pkg/.*" \
-                -- go build -v -o photoview .
+                -- go build -v -o photoview . \
               || (\
                 cat /app/cov-int/build-log.txt && \
                 exit 1 \
