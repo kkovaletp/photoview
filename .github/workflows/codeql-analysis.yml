@@ -316,27 +316,31 @@ jobs:
         run: |
           echo "${{ github.workspace }}/cov-analysis/bin" >> $GITHUB_PATH
 
-      - name: Setup Node.js 18
-        uses: actions/setup-node@v4
+      - name: Build UI image
+        uses: docker/build-push-action@v6
         with:
-          node-version: 18
-          cache: 'npm'
-          cache-dependency-path: ui/package-lock.json
-
-      - name: Install UI dependencies
-        shell: bash
-        working-directory: ui
-        run: npm ci --omit=dev --ignore-scripts
+          pull:       true
+          push:       false
+          load:       true
+          target:     ui
+          tags:       photoview/ui
+          cache-from: type=gha,scope=ui-${{ hashFiles('ui/package-lock.json') }}
+          build-args: |
+            NODE_ENV=production
 
       # Build and capture UI code
       - name: Build UI with Coverity Capture
         shell: bash
         working-directory: ui
         run: |
+          docker run --name cov-ui photoview/ui echo "Container started from the UI build image"
+          docker cp cov-ui:/app/ui/dist ./
+          echo "Dist directory copied from the container"
+          echo ======================================================
           coverity capture --dir ${{ github.workspace }}/cov-int \
             --language javascript \
             --file-exclude-regex ".*/node_modules/.*|.*/testing/.*|.*\.test\.tsx" \
-            -- npm run build -- --base=/ || (\
+            || (\
               cat ${{ github.workspace }}/cov-int/build-log.txt && \
               exit 1 \
             )
