@@ -334,10 +334,10 @@ jobs:
               --user "$(id -u):$(id -g)" \
               -v "${{ github.workspace }}:/app:delegated" \
             photoview/api \
-              bash -c "ls -ld /app/scripts && stat /app/scripts" && \
+              bash -c "ls -ld /app/scripts && stat /app/scripts && \
               ls -lah /app && ls -lah /app/scripts \
               && chmod +x /app/scripts/coverity-capture-api.sh \
-              && /app/scripts/coverity-capture-api.sh
+              && /app/scripts/coverity-capture-api.sh"
           ls -lah ${{ github.workspace }}/cov-int
           echo ======================================================
           docker cp cov-ui:/app/cov-int ${{ github.workspace }}/
