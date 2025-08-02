@@ -316,32 +316,6 @@ jobs:
         run: |
           echo "${{ github.workspace }}/cov-analysis/bin" >> $GITHUB_PATH
 
-      - name: Build API image
-        uses: docker/build-push-action@v6
-        with:
-          pull:       true
-          push:       false
-          load:       true
-          target:     api
-          tags:       photoview/api
-          cache-from: |
-            type=gha,scope=test-api-${{ hashFiles('api/go.sum', 'scripts/install_*.sh', 'dependencies/*') }}
-
-      - name: Build API with Coverity Capture
-        shell: bash
-        run: |
-          docker run --name cov-api \
-              --user "$(id -u):$(id -g)" \
-              -v "${{ github.workspace }}:/app:delegated" \
-            photoview/api \
-              bash -c "chmod +x /app/scripts/coverity-capture-api.sh \
-              && /app/scripts/coverity-capture-api.sh"
-          ls -lah ${{ github.workspace }}/cov-int
-          echo ======================================================
-          docker cp cov-ui:/app/cov-int ${{ github.workspace }}/
-          echo "cov-int directory copied from the container"
-          ls -lah ${{ github.workspace }}/cov-int
-
       - name: Build UI image
         uses: docker/build-push-action@v6
         with:
@@ -355,36 +329,21 @@ jobs:
             NODE_ENV=production
 
       # Build and capture UI code
-      - name: Coverity Capture UI code
+      - name: Coverity Capture code
         shell: bash
-        working-directory: ui
         run: |
           docker run --name cov-ui photoview/ui echo "Container started from the UI build image"
-          docker cp cov-ui:/app/ui/dist ./
-          echo "Dist directory copied from the container"
+          docker cp cov-ui:/app/ui/dist ${{ github.workspace }}/
+          echo "Dist directory copied from the UI container"
           echo ======================================================
           coverity capture --dir ${{ github.workspace }}/cov-int \
-            --language javascript \
-            --file-exclude-regex ".*/node_modules/.*|.*/testing/.*|.*\.test\.tsx" \
+            --file-exclude-regex ".*/node_modules/.*|.*/testing/.*|.*\.test\.tsx|.*_test\.go|.*/go/pkg/.*|.*/\.vscode/.*|.*/cov-analysis/.*|.*/dev-compose.yaml" \
             || (\
               cat ${{ github.workspace }}/cov-int/build-log.txt && \
               exit 1 \
             )
           echo ======================================================
           ls -lah ${{ github.workspace }}/cov-int/*-log.txt
-
-      # Run FS capture for the rest of the files in the project
-      - name: Scan remaining project files with Coverity Capture
-        shell: bash
-        run: |
-          coverity capture --dir ${{ github.workspace }}/cov-int \
-            --file-exclude-regex ".*/ui/.*|.*/api/.*|.*/\.vscode/.*|.*/cov-analysis/.*|.*/dev-compose.yaml" \
-            || (\
-              cat ${{ github.workspace }}/cov-int/build-log.txt && \
-              exit 1 \
-            )
-          echo ======================================================
-          cat ${{ github.workspace }}/cov-int/build-log.txt
 
       # Remove unnecessary captures from the Coverity results before sending them for analysis
       # Extract 'git blame' info for captured files
