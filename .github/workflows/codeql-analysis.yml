@@ -332,7 +332,7 @@ jobs:
         run: |
           docker run --name cov-api \
               --user "$(id -u):$(id -g)" \
-              -v "${{ github.workspace }}:/app" \
+              -v "${{ github.workspace }}:/app:delegated" \
             photoview/api \
               bash -c "ls -ld /app/scripts && stat /app/scripts" && \
               ls -lah /app && ls -lah /app/scripts \
