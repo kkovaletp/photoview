@@ -262,7 +262,8 @@ jobs:
   coverity:
     name: Coverity Scan
     runs-on: ubuntu-22.04
-    if: github.repository == 'kkovaletp/photoview' && github.event_name != 'pull_request'
+    if: github.repository == 'kkovaletp/photoview'
+    #&& github.event_name != 'pull_request'
     env:
       COV_PROJECT: kkovaletp%2Fphotoview
     steps:
@@ -307,7 +308,7 @@ jobs:
           tar -xzf ./cov-analysis.tar.gz --strip 1 -C ./cov-analysis
           rm ./cov-analysis.tar.gz
           export PATH="${{ github.workspace }}/cov-analysis/bin:${PATH}"
-          cov-configure --comptype go --compiler $(which go)
+          #cov-configure --comptype go --compiler $(which go)
 
       # Register Coverity executables in system PATH
       - name: Add Coverity Analysis Tool to PATH
@@ -315,40 +316,34 @@ jobs:
         run: |
           echo "${{ github.workspace }}/cov-analysis/bin" >> $GITHUB_PATH
 
-      - name: Setup Node.js 18
-        uses: actions/setup-node@v4
+      - name: Build UI image
+        uses: docker/build-push-action@v6
         with:
-          node-version: 18
-          cache: 'npm'
-          cache-dependency-path: ui/package-lock.json
-
-      - name: Install UI dependencies
-        shell: bash
-        working-directory: ui
-        run: npm ci --omit=dev --ignore-scripts
+          pull:       true
+          push:       false
+          load:       true
+          target:     ui
+          tags:       photoview/ui
+          cache-from: type=gha,scope=ui-${{ hashFiles('ui/package-lock.json') }}
+          build-args: |
+            NODE_ENV=production
 
       # Build and capture UI code
-      - name: Build UI with cov-build
+      - name: Coverity Capture code
         shell: bash
-        working-directory: ui
         run: |
-          cov-build --dir ${{ github.workspace }}/cov-int \
-            --return-emit-failures \
-            --fs-capture-search ./ npm run build -- --base=/ || (\
+          docker run --name cov-ui photoview/ui echo "Container started from the UI build image"
+          docker cp cov-ui:/app/ui/dist ${{ github.workspace }}/
+          echo "Dist directory copied from the UI container"
+          echo ======================================================
+          coverity capture --dir ${{ github.workspace }}/cov-int \
+            --file-exclude-regex ".*/node_modules/.*|.*/testing/.*|.*\.test\.tsx|.*_test\.go|.*/go/pkg/.*|.*/\.vscode/.*|.*/cov-analysis/.*|.*/dev-compose.yaml" \
+            || (\
               cat ${{ github.workspace }}/cov-int/build-log.txt && \
               exit 1 \
             )
-
-      # Run FS capture for the rest of the files in the project
-      - name: Scan whole project with fs-capture
-        shell: bash
-        run: |
-          cov-build --dir ${{ github.workspace }}/cov-int \
-            --return-emit-failures --no-command \
-            --fs-capture-search ./ || (\
-              cat ${{ github.workspace }}/cov-int/build-log.txt && \
-              exit 1 \
-            )
+          echo ======================================================
+          ls -lah ${{ github.workspace }}/cov-int/*-log.txt
 
       # Remove unnecessary captures from the Coverity results before sending them for analysis
       # Extract 'git blame' info for captured files
