@@ -333,9 +333,10 @@ jobs:
           docker run --name cov-api \
               -v "${{ github.workspace }}:/app" \
             photoview/api \
-              /app/cov-analysis/bin/cov-configure --comptype go --compiler $(which go) \
+              set \
+              && /app/cov-analysis/bin/cov-configure --comptype go --compiler $(which go) \
               && ( /app/cov-analysis/bin/coverity capture \
-                --dir /app/cov-int --language go \
+                --dir /app/cov-int --language go --project-dir /app/api \
                 --file-exclude-regex ".*_test\.go|.*/go/pkg/.*" \
                 -- go build -v -o photoview . \
               || (\
