@@ -334,10 +334,8 @@ jobs:
         working-directory: ui
         run: |
           coverity capture --dir ${{ github.workspace }}/cov-int \
-            --language javascript --language typescript \
-            --file-exclude-regex ".*/node_modules/.*" \
-            --file-exclude-regex ".*/testing/.*" \
-            --file-exclude-regex ".*\.test\.tsx" \
+            --language javascript \
+            --file-exclude-regex ".*/node_modules/.*|.*/testing/.*|.*\.test\.tsx" \
             -- npm run build -- --base=/ || (\
               cat ${{ github.workspace }}/cov-int/build-log.txt && \
               exit 1 \
@@ -350,11 +348,7 @@ jobs:
         shell: bash
         run: |
           coverity capture --dir ${{ github.workspace }}/cov-int \
-            --file-exclude-regex ".*/ui/.*" \
-            --file-exclude-regex ".*/api/.*" \
-            --file-exclude-regex ".*/\.vscode/.*" \
-            --file-exclude-regex ".*/cov-analysis/.*" \
-            --file-exclude-regex ".*/dev-compose.yaml" \
+            --file-exclude-regex ".*/ui/.*|.*/api/.*|.*/\.vscode/.*|.*/cov-analysis/.*|.*/dev-compose.yaml" \
             || (\
               cat ${{ github.workspace }}/cov-int/build-log.txt && \
               exit 1 \
