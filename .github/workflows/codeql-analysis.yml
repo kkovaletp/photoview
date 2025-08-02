@@ -308,13 +308,46 @@ jobs:
           tar -xzf ./cov-analysis.tar.gz --strip 1 -C ./cov-analysis
           rm ./cov-analysis.tar.gz
           export PATH="${{ github.workspace }}/cov-analysis/bin:${PATH}"
-          cov-configure --comptype go --compiler $(which go)
+          #cov-configure --comptype go --compiler $(which go)
 
       # Register Coverity executables in system PATH
       - name: Add Coverity Analysis Tool to PATH
         shell: bash
         run: |
           echo "${{ github.workspace }}/cov-analysis/bin" >> $GITHUB_PATH
+
+      - name: Build API image
+        uses: docker/build-push-action@v6
+        with:
+          pull:       true
+          push:       false
+          load:       true
+          target:     api
+          tags:       photoview/api
+          cache-from: |
+            type=gha,scope=test-api-${{ hashFiles('api/go.sum', 'scripts/install_*.sh', 'dependencies/*') }}
+
+      - name: Build API with Coverity Capture
+        shell: bash
+        run: |
+          docker run --name cov-api \
+              -v "${{ github.workspace }}:/app" \
+            photoview/api \
+              export PATH="/app/cov-analysis/bin:${PATH}" \
+              && cov-configure --comptype go --compiler $(which go) \
+              && ( coverity capture --dir /app/cov-int \
+                --language go \
+                --file-exclude-regex ".*_test\.go|.*/go/pkg/.*" \
+                -- go build -v -o photoview .
+              || (\
+                cat /app/cov-int/build-log.txt && \
+                exit 1 \
+              ))
+          ls -lah ${{ github.workspace }}/cov-int
+          echo ======================================================
+          docker cp cov-ui:/app/cov-int ${{ github.workspace }}/
+          echo "cov-int directory copied from the container"
+          ls -lah ${{ github.workspace }}/cov-int
 
       - name: Build UI image
         uses: docker/build-push-action@v6
@@ -329,7 +362,7 @@ jobs:
             NODE_ENV=production
 
       # Build and capture UI code
-      - name: Build UI with Coverity Capture
+      - name: Coverity Capture UI code
         shell: bash
         working-directory: ui
         run: |
@@ -345,10 +378,10 @@ jobs:
               exit 1 \
             )
           echo ======================================================
-          cat ${{ github.workspace }}/cov-int/build-log.txt
+          ls -lah ${{ github.workspace }}/cov-int/*-log.txt
 
       # Run FS capture for the rest of the files in the project
-      - name: Scan whole project with Coverity Capture
+      - name: Scan remaining project files with Coverity Capture
         shell: bash
         run: |
           coverity capture --dir ${{ github.workspace }}/cov-int \
