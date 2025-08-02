@@ -331,8 +331,10 @@ jobs:
         shell: bash
         run: |
           docker run --name cov-api \
+              --user "$(id -u):$(id -g)" \
               -v "${{ github.workspace }}:/app" \
             photoview/api \
+              bash -c "ls -ld /app/scripts && stat /app/scripts" && \
               ls -lah /app && ls -lah /app/scripts \
               && chmod +x /app/scripts/coverity-capture-api.sh \
               && /app/scripts/coverity-capture-api.sh
