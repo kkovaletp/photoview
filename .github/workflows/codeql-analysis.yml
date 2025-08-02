@@ -333,7 +333,8 @@ jobs:
           docker run --name cov-api \
               -v "${{ github.workspace }}:/app" \
             photoview/api \
-              chmod +x /app/scripts/coverity-capture-api.sh \
+              ls -lah /app && ls -lah /app/scripts \
+              && chmod +x /app/scripts/coverity-capture-api.sh \
               && /app/scripts/coverity-capture-api.sh
           ls -lah ${{ github.workspace }}/cov-int
           echo ======================================================
