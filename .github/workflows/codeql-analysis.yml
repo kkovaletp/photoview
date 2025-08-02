@@ -308,13 +308,10 @@ jobs:
           tar -xzf ./cov-analysis.tar.gz --strip 1 -C ./cov-analysis
           rm ./cov-analysis.tar.gz
           export PATH="${{ github.workspace }}/cov-analysis/bin:${PATH}"
-          #cov-configure --comptype go --compiler $(which go)
-
-      # Register Coverity executables in system PATH
-      - name: Add Coverity Analysis Tool to PATH
-        shell: bash
-        run: |
-          echo "${{ github.workspace }}/cov-analysis/bin" >> $GITHUB_PATH
+          echo "${{ github.workspace }}/cov-analysis/bin" >> "$GITHUB_PATH"
+          cov-configure --comptype go --file-regex "^.*\.go$|^.*\.mod$|^.*\.sum$" --force
+          cov-configure --javascript
+          cov-configure --list-configured-compilers json
 
       - name: Build UI image
         uses: docker/build-push-action@v6
@@ -340,10 +337,21 @@ jobs:
             --file-exclude-regex ".*/node_modules/.*|.*/testing/.*|.*\.test\.tsx|.*_test\.go|.*/go/pkg/.*|.*/\.vscode/.*|.*/cov-analysis/.*|.*/dev-compose.yaml" \
             || (\
               cat ${{ github.workspace }}/cov-int/build-log.txt && \
+              cat ${{ github.workspace }}/cov-int/capture-files-log.txt && \
               exit 1 \
             )
-          echo ======================================================
-          ls -lah ${{ github.workspace }}/cov-int/*-log.txt
+
+      - name: Coverity Build log
+        shell: bash
+        run: cat ${{ github.workspace }}/cov-int/build-log.txt
+
+      - name: Coverity Capture files log
+        shell: bash
+        run: cat ${{ github.workspace }}/cov-int/capture-files-log.txt
+
+      - name: Coverity Security DA log
+        shell: bash
+        run: cat ${{ github.workspace }}/cov-int/security-da-log.txt
 
       # Remove unnecessary captures from the Coverity results before sending them for analysis
       # Extract 'git blame' info for captured files
