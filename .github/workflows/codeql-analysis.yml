@@ -315,7 +315,7 @@ jobs:
         run: |
           export PATH="${{ github.workspace }}/cov-analysis/bin:${PATH}"
           echo "${{ github.workspace }}/cov-analysis/bin" >> "$GITHUB_PATH"
-          cov-configure --comptype go --file-regex "^.*\.go$|^.*\.mod$|^.*\.sum$" --force
+          cov-configure --comptype go --compiler $(which true)
           cov-configure --javascript
           cov-configure --list-configured-compilers json
 
