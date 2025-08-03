@@ -349,7 +349,7 @@ jobs:
         shell: bash
         run: |
           cov-emit-go --dir ${{ github.workspace }}/cov-int ${{ github.workspace }}/api/* \
-          || (\
+            --enable-api-stubs true || (\
               cat ${{ github.workspace }}/cov-int/build-log.txt && \
               cat ${{ github.workspace }}/cov-int/capture-files-log.txt && \
               exit 1 \
