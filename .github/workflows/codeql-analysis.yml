@@ -357,15 +357,15 @@ jobs:
 
       - name: Coverity Build log
         shell: bash
-        run: cat ${{ github.workspace }}/cov-int/build-log.txt
+        run: cat ${{ github.workspace }}/cov-int/build-log.txt || echo "No build log found"
 
       - name: Coverity Capture files log
         shell: bash
-        run: cat ${{ github.workspace }}/cov-int/capture-files-log.txt
+        run: cat ${{ github.workspace }}/cov-int/capture-files-log.txt || echo "No capture files log found"
 
       - name: Coverity Security DA log
         shell: bash
-        run: cat ${{ github.workspace }}/cov-int/security-da-log.txt
+        run: cat ${{ github.workspace }}/cov-int/security-da-log.txt || echo "No security DA log found"
 
       # Remove unnecessary captures from the Coverity results before sending them for analysis
       # Extract 'git blame' info for captured files
@@ -376,6 +376,7 @@ jobs:
             --verbose 2 \
             --tu-pattern "file('/.vscode/')" \
             --tu-pattern "file('_test.go')" \
+            --tu-pattern "file('generated.go')" \
             --tu-pattern "file('/node_modules/')" \
             --tu-pattern "file('/testing/')" \
             --tu-pattern "file('.test.tsx')" \
@@ -387,6 +388,7 @@ jobs:
             --verbose 2 \
             --tu-pattern "file('/.vscode/')" \
             --tu-pattern "file('_test.go')" \
+            --tu-pattern "file('generated.go')" \
             --tu-pattern "file('/node_modules/')" \
             --tu-pattern "file('/testing/')" \
             --tu-pattern "file('.test.tsx')" \
