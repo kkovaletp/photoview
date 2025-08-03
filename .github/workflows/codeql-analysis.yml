@@ -315,6 +315,8 @@ jobs:
         run: |
           export PATH="${{ github.workspace }}/cov-analysis/bin:${PATH}"
           echo "${{ github.workspace }}/cov-analysis/bin" >> "$GITHUB_PATH"
+          cov-configure --delete-compiler-config go-config-0 -c config/coverity_config.xml
+          cov-configure --delete-compiler-config template-go-config-0 -c config/coverity_config.xml
           cov-configure --comptype go --compiler $(which true)
           cov-configure --javascript
           cov-configure --list-configured-compilers json
