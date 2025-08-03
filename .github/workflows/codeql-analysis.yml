@@ -262,8 +262,7 @@ jobs:
   coverity:
     name: Coverity Scan
     runs-on: ubuntu-22.04
-    if: github.repository == 'kkovaletp/photoview'
-    #&& github.event_name != 'pull_request'
+    if: github.repository == 'kkovaletp/photoview' && github.event_name != 'pull_request'
     env:
       COV_PROJECT: kkovaletp%2Fphotoview
     steps:
@@ -308,7 +307,6 @@ jobs:
           tar -xzf ./cov-analysis.tar.gz --strip 1 -C ./cov-analysis
           rm ./cov-analysis.tar.gz
 
-
       # Register Coverity executables in system PATH
       - name: Configure Coverity Analysis tool
         shell: bash
@@ -338,7 +336,7 @@ jobs:
           echo "Dist directory copied from the UI container"
           echo ======================================================
           coverity capture --dir ${{ github.workspace }}/cov-int --exclude-language go \
-            --file-exclude-regex "^.*/node_modules/.*$|^.*/testing/.*$|^.*\.test\.tsx$|^.*/\.vscode/.*$|^.*/cov-analysis/.*$|^dev-compose.yaml$"
+            --file-exclude-regex "^.*\.test\.tsx$|^dev-compose.yaml$"
 
       # - name: Coverity emit GO code
       #   shell: bash
