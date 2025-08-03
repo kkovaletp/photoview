@@ -315,11 +315,7 @@ jobs:
         run: |
           export PATH="${{ github.workspace }}/cov-analysis/bin:${PATH}"
           echo "${{ github.workspace }}/cov-analysis/bin" >> "$GITHUB_PATH"
-          cov-configure --delete-compiler-config go-config-0 -c cov-analysis/config/coverity_config.xml
-          cov-configure --delete-compiler-config template-go-config-0 -c cov-analysis/config/coverity_config.xml
-          cov-configure --comptype go --compiler $(which true)
           cov-configure --javascript
-          cov-configure --list-configured-compilers json
 
       - name: Build UI image
         uses: docker/build-push-action@v6
@@ -341,9 +337,19 @@ jobs:
           docker cp cov-ui:/app/ui/dist ${{ github.workspace }}/
           echo "Dist directory copied from the UI container"
           echo ======================================================
-          coverity capture --dir ${{ github.workspace }}/cov-int \
-            --file-exclude-regex ".*/node_modules/.*|.*/testing/.*|.*\.test\.tsx|.*_test\.go|.*/go/pkg/.*|.*/\.vscode/.*|.*/cov-analysis/.*|.*/dev-compose.yaml" \
+          coverity capture --dir ${{ github.workspace }}/cov-int --exclude-language go \
+            --file-exclude-regex "^.*/node_modules/.*$|^.*/testing/.*$|^.*\.test\.tsx$|^.*/\.vscode/.*$|^.*/cov-analysis/.*$|^.*/dev-compose.yaml$" \
             || (\
+              cat ${{ github.workspace }}/cov-int/build-log.txt && \
+              cat ${{ github.workspace }}/cov-int/capture-files-log.txt && \
+              exit 1 \
+            )
+
+      - name: Coverity emit GO code
+        shell: bash
+        run: |
+          cov-emit-go --dir ${{ github.workspace }}/cov-int ${{ github.workspace }}/api/* \
+          || (\
               cat ${{ github.workspace }}/cov-int/build-log.txt && \
               cat ${{ github.workspace }}/cov-int/capture-files-log.txt && \
               exit 1 \
