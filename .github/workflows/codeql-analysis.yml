@@ -307,6 +307,12 @@ jobs:
           mkdir ./cov-analysis
           tar -xzf ./cov-analysis.tar.gz --strip 1 -C ./cov-analysis
           rm ./cov-analysis.tar.gz
+
+
+      # Register Coverity executables in system PATH
+      - name: Configure Coverity Analysis tool
+        shell: bash
+        run: |
           export PATH="${{ github.workspace }}/cov-analysis/bin:${PATH}"
           echo "${{ github.workspace }}/cov-analysis/bin" >> "$GITHUB_PATH"
           cov-configure --comptype go --file-regex "^.*\.go$|^.*\.mod$|^.*\.sum$" --force
