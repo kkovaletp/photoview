@@ -306,49 +306,59 @@ jobs:
           mkdir ./cov-analysis
           tar -xzf ./cov-analysis.tar.gz --strip 1 -C ./cov-analysis
           rm ./cov-analysis.tar.gz
-          export PATH="${{ github.workspace }}/cov-analysis/bin:${PATH}"
-          cov-configure --comptype go --compiler $(which go)
 
       # Register Coverity executables in system PATH
-      - name: Add Coverity Analysis Tool to PATH
+      - name: Configure Coverity Analysis tool
         shell: bash
         run: |
-          echo "${{ github.workspace }}/cov-analysis/bin" >> $GITHUB_PATH
+          export PATH="${{ github.workspace }}/cov-analysis/bin:${PATH}"
+          echo "${{ github.workspace }}/cov-analysis/bin" >> "$GITHUB_PATH"
+          cov-configure --javascript
 
-      - name: Setup Node.js 18
-        uses: actions/setup-node@v4
+      - name: Build UI image
+        uses: docker/build-push-action@v6
         with:
-          node-version: 18
-          cache: 'npm'
-          cache-dependency-path: ui/package-lock.json
-
-      - name: Install UI dependencies
-        shell: bash
-        working-directory: ui
-        run: npm ci --omit=dev --ignore-scripts
+          pull:       true
+          push:       false
+          load:       true
+          target:     ui
+          tags:       photoview/ui
+          cache-from: type=gha,scope=ui-${{ hashFiles('ui/package-lock.json') }}
+          build-args: |
+            NODE_ENV=production
 
       # Build and capture UI code
-      - name: Build UI with cov-build
+      - name: Coverity Capture code
         shell: bash
-        working-directory: ui
         run: |
-          cov-build --dir ${{ github.workspace }}/cov-int \
-            --return-emit-failures \
-            --fs-capture-search ./ npm run build -- --base=/ || (\
-              cat ${{ github.workspace }}/cov-int/build-log.txt && \
-              exit 1 \
-            )
+          docker run --name cov-ui photoview/ui echo "Container started from the UI build image"
+          docker cp cov-ui:/app/ui/dist ${{ github.workspace }}/
+          echo "Dist directory copied from the UI container"
+          echo ======================================================
+          coverity capture --dir ${{ github.workspace }}/cov-int --exclude-language go \
+            --file-exclude-regex "^.*\.test\.tsx$|^dev-compose.yaml$"
 
-      # Run FS capture for the rest of the files in the project
-      - name: Scan whole project with fs-capture
+      # - name: Coverity emit GO code
+      #   shell: bash
+      #   run: |
+      #     find "${{ github.workspace }}/api" -type f -name '*.go' ! -name '*_test.go' \
+      #       -not -path "${{ github.workspace }}/api/graphql/resolvers/*" \
+      #       -exec dirname {} \; | sort -u | while read -r pkg_dir; do
+      #         echo "[INFO] Emitting for package: $pkg_dir"
+      #         cov-emit-go --dir ${{ github.workspace }}/cov-int --enable-api-stubs "$pkg_dir"
+      #     done
+
+      - name: Coverity Build log
         shell: bash
-        run: |
-          cov-build --dir ${{ github.workspace }}/cov-int \
-            --return-emit-failures --no-command \
-            --fs-capture-search ./ || (\
-              cat ${{ github.workspace }}/cov-int/build-log.txt && \
-              exit 1 \
-            )
+        run: cat ${{ github.workspace }}/cov-int/build-log.txt || echo "No build log found"
+
+      - name: Coverity Capture files log
+        shell: bash
+        run: cat ${{ github.workspace }}/cov-int/capture-files-log.txt || echo "No capture files log found"
+
+      - name: Coverity Security DA log
+        shell: bash
+        run: cat ${{ github.workspace }}/cov-int/security-da-log.txt || echo "No security DA log found"
 
       # Remove unnecessary captures from the Coverity results before sending them for analysis
       # Extract 'git blame' info for captured files
@@ -359,8 +369,10 @@ jobs:
             --verbose 2 \
             --tu-pattern "file('/.vscode/')" \
             --tu-pattern "file('_test.go')" \
+            --tu-pattern "file('generated.go')" \
             --tu-pattern "file('/node_modules/')" \
             --tu-pattern "file('/testing/')" \
+            --tu-pattern "file('/__generated__/')" \
             --tu-pattern "file('.test.tsx')" \
             --tu-pattern "file('/cov-analysis/')" \
             --tu-pattern "file('/cov-int/')" \
@@ -370,8 +382,10 @@ jobs:
             --verbose 2 \
             --tu-pattern "file('/.vscode/')" \
             --tu-pattern "file('_test.go')" \
+            --tu-pattern "file('generated.go')" \
             --tu-pattern "file('/node_modules/')" \
             --tu-pattern "file('/testing/')" \
+            --tu-pattern "file('/__generated__/')" \
             --tu-pattern "file('.test.tsx')" \
             --tu-pattern "file('/cov-analysis/')" \
             --tu-pattern "file('/cov-int/')" \
