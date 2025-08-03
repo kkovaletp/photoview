@@ -348,12 +348,14 @@ jobs:
       - name: Coverity emit GO code
         shell: bash
         run: |
-          cov-emit-go --dir ${{ github.workspace }}/cov-int --enable-api-stubs true ${{ github.workspace }}/api/* \
-            || (\
-              cat ${{ github.workspace }}/cov-int/build-log.txt && \
-              cat ${{ github.workspace }}/cov-int/capture-files-log.txt && \
-              exit 1 \
-            )
+          find "${{ github.workspace }}/api" -type f -name '*.go' ! -name '*_test.go' \
+            -not -path "${{ github.workspace }}/api/graphql/resolvers/*" \
+            -exec dirname {} \; | sort -u | while read -r pkg_dir; do
+              echo "[INFO] Emitting for package: $pkg_dir"
+              cov-emit-go --dir ${{ github.workspace }}/cov-int --enable-api-stubs true "$pkg_dir"
+          done
+          echo "[INFO] Emitting for api/server.go"
+          cov-emit-go --dir ${{ github.workspace }}/cov-int --enable-api-stubs true ${{ github.workspace }}/api/server.go \
 
       - name: Coverity Build log
         shell: bash
