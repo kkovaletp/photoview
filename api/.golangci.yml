@@ -36,6 +36,7 @@ linters:
     - gomoddirectives
     - gomodguard
     - goprintffuncname
+    - gosec
     - grouper
     - inamedparam
     - interfacebloat
@@ -52,14 +53,10 @@ linters:
     - predeclared
     - promlinter
     - tagalign
-    - testpackage
     - usestdlibvars
     - whitespace
     - wsl
   disable:
-    - errcheck
-    - govet
-    - staticcheck
     - unused
   exclusions:
     rules:
@@ -74,7 +71,7 @@ linters:
         path-except: _test\.go
       - linters:
           - lll
-        source: '^//go:generate '
+        source: "^//go:generate "
     paths:
       - third_party$
       - builtin$
