@@ -5,11 +5,23 @@ import { defineConfig } from 'vite'
 import svgr from 'vite-plugin-svgr'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
+import { compress } from 'vite-plugin-compression'
 
 export default defineConfig({
   plugins: [
     react(),
     svgr(),
+    compress({
+      filter: /\.(jpg|jpeg)$/,
+      algorithm: 'brotliCompress',
+      ext: '.br',
+      deleteOriginFile: false,
+    }, {
+      filter: /\.(jpg|jpeg)$/,
+      algorithm: 'gzip',
+      ext: '.gz',
+      deleteOriginFile: false,
+    }),
     VitePWA({
       strategies: 'injectManifest',
       srcDir: 'src',

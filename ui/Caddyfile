@@ -1,0 +1,138 @@
+{
+    # Disable admin endpoint, so config changes require restart of the container
+    admin off
+
+    # The time, during which Caddy will wait for connections to finish before shutting down.
+    grace_period 10s
+    shutdown_delay 5s # additional 5-second warning phase before grace_period starts
+
+    # Auto-generate self-signed HTTPS certificate locally. Replace these with your certificate provider integration if any.
+    local_certs
+    skip_install_trust # Required for running as a non-root user
+    key_type p384 # A stronger key type for better security, but uses a bit more CPU. Change to `p256` for lower CPU usage.
+
+    # Per port configurations
+    servers :8080 {
+        name "HTTP Listener 8080"
+    }
+    servers :8443 {
+        name "HTTPS Listener 8443"
+        listener_wrappers {
+			http_redirect
+			tls
+		}
+    }
+}
+
+# HTTP on 8080 — redirect to HTTPS
+:8080 {
+    log {
+        output file /var/log/caddy/access_8080.log {
+            mode 644
+            roll_local_time
+            roll_size 10MiB
+            roll_keep 5
+            roll_keep_for 720h # 30 days
+        }
+    }
+
+    @withPort host_regexp withport ^(?P<hostonly>[^:]+):\d+$
+    redir @withPort https://{re.withport.hostonly}:{$HTTPS_PORT:8443}{uri} permanent
+
+    @noPort not host_regexp withport ^[^:]+:\d+$
+    redir @noPort https://{host}:{$HTTPS_PORT:8443}{uri} permanent
+}
+
+# HTTPS on 8443
+:8443 {
+    experimental_http3
+    encode # Both zstd and gzip allowed
+    root * /srv
+
+    log {
+        output file /var/log/caddy/access_8443.log {
+            mode 644
+            roll_local_time
+            roll_size 10MiB
+            roll_keep 5
+            roll_keep_for 720h # 30 days
+        }
+    }
+
+    # Health check endpoint
+    handle /health-check {
+        @goingDown vars {http.shutting_down} true
+        respond @goingDown "Shutting down in {http.time_until_shutdown}" 503 {
+            close
+        }
+
+        @healthy file /srv/index.html
+        respond @healthy "OK" 200 {
+            close
+        }
+
+        respond "Static site unavailable" 500 {
+            close
+        }
+    }
+
+    # Security headers
+    header {
+        # Prevents browsers from MIME-sniffing instead of using declared Content-Type
+        X-Content-Type-Options nosniff
+        # Enable cross-site scripting protection in old browsers (harmless in new ones)
+        X-XSS-Protection "0"
+        # Limit information leakage about server
+        Server ""
+        # Enforce HTTPS on all subdomains for 6 months.
+        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+        # Content Security Policy to prevent XSS attacks
+        Content-Security-Policy "
+            default-src 'self';
+            script-src 'self' https://api.mapbox.com;
+            style-src 'self' 'unsafe-inline' https://api.mapbox.com;
+            img-src 'self' data: blob: https://api.mapbox.com https://events.mapbox.com https://*.tiles.mapbox.com;
+            connect-src 'self' https://api.mapbox.com https://events.mapbox.com https://*.tiles.mapbox.com;
+            worker-src 'self' blob: https://api.mapbox.com;
+            child-src 'self' blob: https://api.mapbox.com;
+            font-src 'self' https://api.mapbox.com;
+            object-src 'none';
+            base-uri 'self';
+            frame-ancestors 'none';
+        "
+        # Stops leaking too much referrer info to third parties.
+        Referrer-Policy strict-origin-when-cross-origin
+        # Restricts the use of features that can access user devices.
+        Permissions-Policy "microphone=(), camera=()"
+    }
+    # Handle fingerprinted immutable assets
+	@immutable path /assets/*
+	header @immutable {
+        Cache-Control "public, max-age=31536000, immutable"
+        # Allow assets to be fetched from other origins (e.g., CDNs, embed scenarios)
+        Access-Control-Allow-Origin *
+    }
+    # Handle non-fingerprinted static files with revalidation
+	@revalidate {
+        file
+        not path /assets/*
+    }
+	header @revalidate Cache-Control "public, must-revalidate"
+    # Prevent caching errors
+    header {
+        -Cache-Control
+        match status 500
+    }
+
+    # Reverse proxy to backend
+    handle /api/* {
+        reverse_proxy photoview-api:8080 {
+            header_up Host {host}
+        }
+    }
+
+    # Serve frontend static website
+    file_server {
+        precompressed br gzip
+    }
+}
