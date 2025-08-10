@@ -5,23 +5,14 @@ import { defineConfig } from 'vite'
 import svgr from 'vite-plugin-svgr'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
-import { compress } from 'vite-plugin-compression'
+import { compression } from 'vite-plugin-compression2'
+
+const isProd = process.env.NODE_ENV === 'production'
 
 export default defineConfig({
   plugins: [
     react(),
     svgr(),
-    compress({
-      filter: /\.(jpg|jpeg)$/,
-      algorithm: 'brotliCompress',
-      ext: '.br',
-      deleteOriginFile: false,
-    }, {
-      filter: /\.(jpg|jpeg)$/,
-      algorithm: 'gzip',
-      ext: '.gz',
-      deleteOriginFile: false,
-    }),
     VitePWA({
       strategies: 'injectManifest',
       srcDir: 'src',
@@ -31,12 +22,23 @@ export default defineConfig({
       injectManifest: {
         injectionPoint: undefined
       }
-    })],
+    }),
+    ...(isProd
+      ? [
+        compression({
+          algorithms: ['gzip', 'brotliCompress'],
+          include: /\.(js|mjs|json|css|html|svg|txt|xml|wasm)$/i,
+          exclude: /\.(jpe?g|png|gif|webp|avif|mp4|mp3|woff2?)$/i
+        })
+      ]
+      : [])
+  ],
   envPrefix: ['VITE_', 'REACT_APP_'],
   server: {
     port: 1234,
   },
   esbuild: {
+    target: 'es2017', // Ensure compatibility with browsers, not older than 2018
     logOverride: { 'this-is-undefined-in-esm': 'silent' },
   },
   test: {

@@ -65,12 +65,10 @@
         respond @goingDown "Shutting down in {http.time_until_shutdown}" 503 {
             close
         }
-
         @healthy file /srv/index.html
         respond @healthy "OK" 200 {
             close
         }
-
         respond "Static site unavailable" 500 {
             close
         }
@@ -92,7 +90,7 @@
             script-src 'self' https://api.mapbox.com;
             style-src 'self' 'unsafe-inline' https://api.mapbox.com;
             img-src 'self' data: blob: https://api.mapbox.com https://events.mapbox.com https://*.tiles.mapbox.com;
-            connect-src 'self' https://api.mapbox.com https://events.mapbox.com https://*.tiles.mapbox.com;
+            connect-src 'self' https://api.mapbox.com https://events.mapbox.com https://*.tiles.mapbox.com wss:;
             worker-src 'self' blob: https://api.mapbox.com;
             child-src 'self' blob: https://api.mapbox.com;
             font-src 'self' https://api.mapbox.com;
@@ -119,10 +117,8 @@
     }
 	header @revalidate Cache-Control "public, must-revalidate"
     # Prevent caching errors
-    header {
-        -Cache-Control
-        match status 500
-    }
+    @err expression {http.error.status_code} >= 400
+    header @err Cache-Control "no-store"
 
     # Reverse proxy to backend
     handle /api/* {

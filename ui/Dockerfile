@@ -69,14 +69,16 @@ ARG COMMIT_SHA=NoCommit
 RUN find /srv/assets -type f -name "SettingsPage.*.js" \
         -exec sed -i "s/=\"-=<GitHub-CI-commit-sha-placeholder>=-\";/=\"${COMMIT_SHA}\";/g" {} \; \
     # Set correct ownership for Caddy's runtime dirs
-    && mkdir -p /data /config \
-    && chown -R 999:999 /data /config /etc/caddy
+    && mkdir -p /data /config /var/log/caddy \
+    && chown -R 999:999 /data /config /etc/caddy /var/log/caddy \
+    # Install cURL for health checks
+    && apk add --no-cache curl
 
 # Expose unprivileged ports
 EXPOSE 8080 8443 8443/udp
 
 HEALTHCHECK --interval=60s --timeout=5s --start-period=10s --retries=2 \
-    CMD curl --fail https://localhost:8443/health-check \
+    CMD curl -kfsS https://localhost:8443/health-check \
     || exit 1
 
 # Switch to non-root user
