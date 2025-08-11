@@ -34,7 +34,7 @@ jobs:
         language: ${{ fromJSON(needs.create-matrix.outputs.matrix) }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       # Initializes the CodeQL tools for scanning.
       - name: Initialize CodeQL
@@ -63,7 +63,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Generate report
         id: scan
@@ -186,7 +186,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Lint Dockerfile
         id: hadolint
@@ -267,7 +267,7 @@ jobs:
       COV_PROJECT: kkovaletp%2Fphotoview
     steps:
       - name: Check out code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Fetch branches
         shell: bash
