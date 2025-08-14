@@ -27,3 +27,15 @@ updates:
       interval: "weekly"
     ignore:
       - dependency-name: "node"
+
+  # Maintain dependencies for Dependencies Dockerfile
+  - package-ecosystem: "docker"
+    directory: "/dependencies"
+    schedule:
+      interval: "weekly"
+
+  # Maintain dependencies for UI Dockerfile
+  - package-ecosystem: "docker"
+    directory: "/ui"
+    schedule:
+      interval: "weekly"
