@@ -22,7 +22,7 @@ require (
 	github.com/wsxiaoys/terminal v0.0.0-20160513160801-0940f3fc43a0
 	github.com/xor-gate/goexif2 v1.1.0
 	golang.org/x/crypto v0.40.0
-	golang.org/x/text v0.27.0
+	golang.org/x/text v0.28.0
 	gopkg.in/gographics/imagick.v3 v3.7.2
 	gopkg.in/vansante/go-ffprobe.v2 v2.2.1
 	gorm.io/driver/mysql v1.6.0
