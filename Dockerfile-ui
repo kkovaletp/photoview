@@ -38,17 +38,14 @@ RUN export BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%S+00:00(UTC)'); \
     npm run build -- --base="${UI_PUBLIC_URL}"
 
 ### Build Caddy with plugins ###
-FROM caddy:2.10-builder AS builder
+FROM caddy:2.10-builder AS cady
 RUN xcaddy build \
     # Public DNS providers
     --with github.com/caddy-dns/cloudflare \
-    --with github.com/caddy-dns/route53 \
     --with github.com/caddy-dns/digitalocean \
     --with github.com/caddy-dns/duckdns \
     --with github.com/caddy-dns/godaddy \
-    --with github.com/caddy-dns/namecheap \
     --with github.com/caddy-dns/googleclouddns \
-    --with github.com/caddy-dns/linode \
     --with github.com/caddy-dns/vultr \
     # Local DNS servers case
     --with github.com/caddy-dns/rfc2136
@@ -56,23 +53,28 @@ RUN xcaddy build \
 ### Build release image ###
 FROM caddy:2.10 AS release
 
-RUN addgroup -g 999 -S caddyuser \
-    && adduser  -u 999 -S -D -G caddyuser caddyuser
+RUN addgroup -g 9999 -S caddyuser \
+    && adduser  -u 9999 -S -D -G caddyuser caddyuser
 
-COPY --from=builder /usr/bin/caddy /usr/bin/caddy
-COPY --chown=999:999 Caddyfile /etc/caddy/Caddyfile
-COPY --from=ui --chown=999:999 /app/ui/dist /srv
+COPY --from=cady /usr/bin/caddy /usr/bin/caddy
+COPY --chown=9999:9999 ui/Caddyfile /etc/caddy/Caddyfile
+COPY --from=ui --chown=9999:9999 /app/ui/dist /srv
 
 # This is a w/a for letting the UI build stage to be cached
 # and not rebuilt every new commit because of the build_arg value change.
 ARG COMMIT_SHA=NoCommit
-RUN find /srv/assets -type f -name "SettingsPage.*.js" \
-        -exec sed -i "s/=\"-=<GitHub-CI-commit-sha-placeholder>=-\";/=\"${COMMIT_SHA}\";/g" {} \; \
+RUN apk add --no-cache curl gzip brotli bash \
+    && find /srv/assets -type f -name "SettingsPage.*.js" \
+        -exec sh -c 'sed -i "s/=\"-=<GitHub-CI-commit-sha-placeholder>=-\";/=\"${COMMIT_SHA}\";/g" "$1" \
+        && rm -f "$1.gz" "$1.br" \
+        && gzip -k -f -9 "$1" \
+        && brotli -f -q 11 "$1"' sh {} \; \
+    # Archive the `service-worker.js` file
+    && gzip -k -f -9 /srv/service-worker.js \
+    && brotli -f -q 11 /srv/service-worker.js \
     # Set correct ownership for Caddy's runtime dirs
     && mkdir -p /data /config /var/log/caddy \
-    && chown -R 999:999 /data /config /etc/caddy /var/log/caddy \
-    # Install cURL for health checks
-    && apk add --no-cache curl
+    && chown -R 9999:9999 /data /config /etc/caddy /var/log/caddy
 
 # Expose unprivileged ports
 EXPOSE 8080 8443 8443/udp

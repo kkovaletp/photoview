@@ -23,16 +23,11 @@ export default defineConfig({
         injectionPoint: undefined
       }
     }),
-    ...(isProd
-      ? [
-        compression({
-          algorithms: ['gzip', 'brotliCompress'],
-          include: /\.(js|mjs|json|css|html|svg|txt|xml|wasm)$/i,
-          exclude: /\.(jpe?g|png|gif|webp|avif|mp4|mp3|woff2?)$/i
-        })
-      ]
-      : [])
-  ],
+    compression({
+      algorithms: ['gzip', 'brotliCompress'],
+      include: /\.(js|mjs|json|css|html|svg|txt|xml|wasm)$/i,
+      exclude: /\.(jpe?g|png|gif|webp|avif|mp4|mp3|woff2?)$/i
+    })],
   envPrefix: ['VITE_', 'REACT_APP_'],
   server: {
     port: 1234,

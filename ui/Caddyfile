@@ -1,4 +1,7 @@
 {
+    # If you'd like to modify this default configuration, please make sure to read the
+    # Caddy documentation at https://caddyserver.com/docs/caddyfile
+
     # Disable admin endpoint, so config changes require restart of the container
     admin off
 
@@ -13,7 +16,7 @@
 
     # Per port configurations
     servers :8080 {
-        name "HTTP Listener 8080"
+        name "HTTP Listener  8080"
     }
     servers :8443 {
         name "HTTPS Listener 8443"
@@ -123,7 +126,16 @@
     # Reverse proxy to backend
     handle /api/* {
         reverse_proxy photoview-api:8080 {
-            header_up Host {host}
+            health_uri /api/graphql
+            health_method POST
+            health_headers {
+                Content-Type application/json
+            }
+            health_request_body '{"operationName":"CheckInitialSetup","variables":{},"query":"query CheckInitialSetup { siteInfo { initialSetup }}"}'
+            health_status 2xx
+            health_interval 60s
+            health_timeout 10s
+            #header_up Host {host}
         }
     }
 
