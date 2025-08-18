@@ -74,10 +74,10 @@ jobs:
           ]'
 
           # Merge tags + images into final matrix
-          MATRIX=$(jq -n \
+          MATRIX=$(jq -c -n \
             --argjson tags "$TAGS" \
             --argjson images "$IMAGES" \
-            '[foreach $images[] as $img ([]; .; . + ($tags | map(. + $img)))]'
+            '[ $images[] as $img | $tags[] | . + $img ]'
           )
 
           echo "matrix=$MATRIX" | tee -a $GITHUB_OUTPUT
