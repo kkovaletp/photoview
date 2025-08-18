@@ -131,8 +131,8 @@ RUN find /app/ui/assets -type f -name "SettingsPage.*.js" \
         && gzip -k -f -9 "$1" \
         && brotli -f -q 11 "$1"' sh {} \; \
     # Archive the `service-worker.js` file
-    && gzip -k -f -9 /srv/service-worker.js \
-    && brotli -f -q 11 /srv/service-worker.js
+    && gzip -k -f -9 /app/ui/service-worker.js \
+    && brotli -f -q 11 /app/ui/service-worker.js
 
 WORKDIR /home/photoview
 
