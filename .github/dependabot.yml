@@ -19,23 +19,17 @@ updates:
     schedule:
       interval: "weekly"
     open-pull-requests-limit: 999
+    groups:
+      typescript-eslint:
+        patterns:
+          - "@typescript-eslint/*"
 
-  # Maintain dependencies for Dockerfile
-  - package-ecosystem: "docker"
-    directory: "/"
+  # Maintain dependencies for Dockerfiles
+  - package-ecosystem: "docker-compose"
+    directories:
+      - "/"
+      - "/dependencies"
     schedule:
       interval: "weekly"
     ignore:
       - dependency-name: "node"
-
-  # Maintain dependencies for Dependencies Dockerfile
-  - package-ecosystem: "docker"
-    directory: "/dependencies"
-    schedule:
-      interval: "weekly"
-
-  # Maintain dependencies for UI Dockerfile
-  - package-ecosystem: "docker"
-    directory: "/ui"
-    schedule:
-      interval: "weekly"
