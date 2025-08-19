@@ -123,14 +123,9 @@ services:
   ## Comment out both `postgres` services if PHOTOVIEW_DATABASE_DRIVER is set to `mysql` or `sqlite` in the .env
   postgres-autoupgrade:
     image: pgautoupgrade/pgautoupgrade:17-alpine
-    labels:
-      - "com.centurylinklabs.watchtower.enable=true"
     hostname: pgsql-upg
     container_name: pgsql-upg
-    ## Security options for some restricted systems
-    security_opt:
-      - seccomp:unconfined
-      - apparmor:unconfined
+    restart: "no"
     environment:
       POSTGRES_DB: ${PGSQL_DATABASE}
       POSTGRES_USER: ${PGSQL_USER}
