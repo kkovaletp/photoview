@@ -55,9 +55,10 @@ jobs:
         id: versions
         working-directory: dependencies
         shell: bash
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
-          GITHUB_TOKEN="${{ secrets.GITHUB_TOKEN }}"
           # Fetch latest version tags from GitHub releases
           LIBRAW_VERSION=$(curl -fsSL --retry 2 --retry-delay 5 --retry-max-time 60 \
             ${GITHUB_TOKEN:+-H "Authorization: Bearer ${GITHUB_TOKEN}"} \

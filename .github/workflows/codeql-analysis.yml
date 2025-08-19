@@ -265,6 +265,8 @@ jobs:
     if: github.repository == 'kkovaletp/photoview' && github.event_name != 'pull_request'
     env:
       COV_PROJECT: kkovaletp%2Fphotoview
+      COV_TOKEN: ${{ secrets.COVERITY_SCAN_TOKEN }}
+      COV_EMAIL: ${{ secrets.COVERITY_SCAN_EMAIL }}
     steps:
       - name: Check out code
         uses: actions/checkout@v5
@@ -283,7 +285,7 @@ jobs:
         shell: bash
         run: |
           echo "hash=$(curl https://scan.coverity.com/download/other/linux64 \
-            --data "token=${{ secrets.COVERITY_SCAN_TOKEN }}&project=${{ env.COV_PROJECT }}&md5=1")" >> $GITHUB_OUTPUT
+            --data "token=${{ env.COV_TOKEN }}&project=${{ env.COV_PROJECT }}&md5=1")" >> $GITHUB_OUTPUT
 
       # Try to cache the tool to avoid downloading 1GB+ archive on every run.
       # Cache miss will add ~30s to create, but cache hit will save minutes.
@@ -302,7 +304,7 @@ jobs:
           curl https://scan.coverity.com/download/other/linux64 \
             --no-progress-meter \
             --output cov-analysis.tar.gz \
-            --data "token=${{ secrets.COVERITY_SCAN_TOKEN }}&project=${{ env.COV_PROJECT }}"
+            --data "token=${{ env.COV_TOKEN }}&project=${{ env.COV_PROJECT }}"
           mkdir ./cov-analysis
           tar -xzf ./cov-analysis.tar.gz --strip 1 -C ./cov-analysis
           rm ./cov-analysis.tar.gz
@@ -401,8 +403,8 @@ jobs:
         run: |
           tar -czvf ./cov-int.tgz ./cov-int
           curl \
-            --form token="${{ secrets.COVERITY_SCAN_TOKEN }}" \
-            --form email="${{ secrets.COVERITY_SCAN_EMAIL }}" \
+            --form token="${{ env.COV_TOKEN }}" \
+            --form email="${{ env.COV_EMAIL }}" \
             --form file=@cov-int.tgz \
             --form version="${{ github.sha }}" \
             --form description="coverity-scan-action ${{ github.repository }} / ${{ github.ref }}" \
