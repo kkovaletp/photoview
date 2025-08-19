@@ -265,8 +265,6 @@ jobs:
     if: github.repository == 'kkovaletp/photoview' && github.event_name != 'pull_request'
     env:
       COV_PROJECT: kkovaletp%2Fphotoview
-      COV_TOKEN: ${{ secrets.COVERITY_SCAN_TOKEN }}
-      COV_EMAIL: ${{ secrets.COVERITY_SCAN_EMAIL }}
     steps:
       - name: Check out code
         uses: actions/checkout@v5
@@ -283,8 +281,10 @@ jobs:
       - name: Lookup Coverity Build Tool hash
         id: coverity-cache-lookup
         shell: bash
+        env:
+          COV_TOKEN: ${{ secrets.COVERITY_SCAN_TOKEN }}
         run: |
-          echo "hash=$(curl https://scan.coverity.com/download/other/linux64 \
+          echo "hash=$(curl -fsSL https://scan.coverity.com/download/other/linux64 \
             --data "token=${{ env.COV_TOKEN }}&project=${{ env.COV_PROJECT }}&md5=1")" >> $GITHUB_OUTPUT
 
       # Try to cache the tool to avoid downloading 1GB+ archive on every run.
@@ -300,9 +300,10 @@ jobs:
       - name: Install Coverity Analysis Tool
         if: steps.cov-analysis-cache.outputs.cache-hit != 'true'
         shell: bash
+        env:
+          COV_TOKEN: ${{ secrets.COVERITY_SCAN_TOKEN }}
         run: |
-          curl https://scan.coverity.com/download/other/linux64 \
-            --no-progress-meter \
+          curl -fsSL https://scan.coverity.com/download/other/linux64 \
             --output cov-analysis.tar.gz \
             --data "token=${{ env.COV_TOKEN }}&project=${{ env.COV_PROJECT }}"
           mkdir ./cov-analysis
@@ -400,9 +401,12 @@ jobs:
       # Archive and send all the results to the Coverity server
       - name: Submit results to Coverity Scan
         shell: bash
+        env:
+          COV_TOKEN: ${{ secrets.COVERITY_SCAN_TOKEN }}
+          COV_EMAIL: ${{ secrets.COVERITY_SCAN_EMAIL }}
         run: |
           tar -czvf ./cov-int.tgz ./cov-int
-          curl \
+          curl -fsSL \
             --form token="${{ env.COV_TOKEN }}" \
             --form email="${{ env.COV_EMAIL }}" \
             --form file=@cov-int.tgz \
