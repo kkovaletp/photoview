@@ -13,18 +13,6 @@
     local_certs
     skip_install_trust # Required for running as a non-root user
     key_type p384 # A stronger key type for better security, but uses a bit more CPU. Change to `p256` for lower CPU usage.
-
-    # Per port configurations
-    servers :8080 {
-        name "HTTP Listener  8080"
-    }
-    servers :8443 {
-        name "HTTPS Listener 8443"
-        listener_wrappers {
-			http_redirect
-			tls
-		}
-    }
 }
 
 # HTTP on 8080 — redirect to HTTPS
@@ -39,16 +27,19 @@
         }
     }
 
-    @withPort host_regexp withport ^(?P<hostonly>[^:]+):\d+$
-    redir @withPort https://{re.withport.hostonly}:{$HTTPS_PORT:8443}{uri} permanent
+    @httpsDefault expression {env.HTTPS_PORT} == "" || {env.HTTPS_PORT} == "443"
+	@httpsCustom  expression {env.HTTPS_PORT} != "" && {env.HTTPS_PORT} != "443"
 
-    @noPort not host_regexp withport ^[^:]+:\d+$
-    redir @noPort https://{host}:{$HTTPS_PORT:8443}{uri} permanent
+	# When port is default/unspecified, omit port in Location
+	redir @httpsDefault https://{host}{uri} permanent
+
+	# When port is custom, include it in Location
+	redir @httpsCustom  https://{host}:{env.HTTPS_PORT}{uri} permanent
 }
 
 # HTTPS on 8443
 :8443 {
-    experimental_http3
+    tls internal
     encode # Both zstd and gzip allowed
     root * /srv
 
@@ -125,13 +116,15 @@
 
     # Reverse proxy to backend
     handle /api/* {
-        reverse_proxy photoview-api:8080 {
+        reverse_proxy photoview:8080 {
             health_uri /api/graphql
             health_method POST
             health_headers {
                 Content-Type application/json
             }
-            health_request_body '{"operationName":"CheckInitialSetup","variables":{},"query":"query CheckInitialSetup { siteInfo { initialSetup }}"}'
+            health_request_body <<EOF
+{"operationName":"CheckInitialSetup","variables":{},"query":"query CheckInitialSetup { siteInfo { initialSetup }}"}
+EOF
             health_status 2xx
             health_interval 60s
             health_timeout 10s

@@ -181,7 +181,7 @@ jobs:
             NODE_ENV=production
             VERSION=${{ github.ref_name }}
             COMMIT_SHA=${{ steps.git.outputs.COMMIT_SHORT_SHA }}
-            REACT_APP_API_ENDPOINT=${{ matrix.matrix.image == 'kkoval/photoveiw-ui' && 'http://photoview-api:8080/api' || '' }}
+            REACT_APP_API_ENDPOINT=${{ matrix.matrix.image == 'kkoval/photoveiw-ui' && 'http://photoview:8080/api' || '' }}
 
   dockle:
     name: Dockle Container Analysis
