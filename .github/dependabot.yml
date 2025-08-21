@@ -25,10 +25,19 @@ updates:
           - "@typescript-eslint/*"
 
   # Maintain dependencies for Dockerfiles
-  - package-ecosystem: "docker-compose"
+  - package-ecosystem: "docker"
     directories:
       - "/"
       - "/dependencies"
+    schedule:
+      interval: "weekly"
+    ignore:
+      - dependency-name: "node"
+
+  # Maintain dependencies for Docker Compose
+  - package-ecosystem: "docker-compose"
+    directories:
+      - "/docker-compose example"
     schedule:
       interval: "weekly"
     ignore:
