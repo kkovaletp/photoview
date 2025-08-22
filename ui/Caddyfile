@@ -13,12 +13,14 @@
     local_certs
     skip_install_trust # Required for running as a non-root user
     key_type p384 # A stronger key type for better security, but uses a bit more CPU. Change to `p256` for lower CPU usage.
+
+    debug
 }
 
 # HTTP on 8080 — redirect to HTTPS
 :8080 {
-    log {
-        output file /var/log/caddy/access_8080.log {
+    log "HTTP 8080" {
+        output file /var/log/caddy/access_8080.json {
             mode 644
             roll_local_time
             roll_size 10MiB
@@ -39,12 +41,15 @@
 
 # HTTPS on 8443
 :8443 {
-    tls internal
+    tls {
+        issuer internal
+        on_demand
+    }
     encode # Both zstd and gzip allowed
     root * /srv
 
-    log {
-        output file /var/log/caddy/access_8443.log {
+    log "HTTPS 8443" {
+        output file /var/log/caddy/access_8443.json {
             mode 644
             roll_local_time
             roll_size 10MiB
@@ -111,8 +116,11 @@
     }
 	header @revalidate Cache-Control "public, must-revalidate"
     # Prevent caching errors
-    @err expression {http.error.status_code} >= 400
-    header @err Cache-Control "no-store"
+    header {
+        -Cache-Control
+        Cache-Control "no-store, no-cache, must-revalidate, max-age=0"
+        match status 4xx 5xx
+    }
 
     # Reverse proxy to backend
     handle /api/* {

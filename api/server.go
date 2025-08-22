@@ -118,7 +118,7 @@ func main() {
 		}
 
 	}
-
+	//TODO: how to enable detailed/debug logging http requests and responses?
 	srv := &http.Server{
 		Addr:    apiListenURL.Host,
 		Handler: handlers.CompressHandler(rootRouter),
