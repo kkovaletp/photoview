@@ -79,12 +79,12 @@ func IsDirSymlink(path string) (bool, error) {
 	if fileInfo.Mode()&os.ModeSymlink == os.ModeSymlink {
 		resolvedPath, err := filepath.EvalSymlinks(path)
 		if err != nil {
-			return false, errors.Wrapf(err, "Cannot resolve linktarget of %s, ignoring it", path)
+			return false, errors.Wrapf(err, "cannot resolve linktarget of %s, ignoring it", path)
 		}
 
 		resolvedFile, err := os.Stat(resolvedPath)
 		if err != nil {
-			return false, fmt.Errorf("Cannot get fileinfo of linktarget %s of symlink %s, ignoring it: %w",
+			return false, fmt.Errorf("cannot get fileinfo of linktarget %s of symlink %s, ignoring it: %w",
 				resolvedPath, path, err)
 		}
 		isDirSymlink = resolvedFile.IsDir()

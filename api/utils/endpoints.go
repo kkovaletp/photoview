@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 	"net/url"
-	"path"
 	"strconv"
 )
 
@@ -39,26 +38,15 @@ func ApiListenUrl() *url.URL {
 }
 
 func ApiEndpointUrl() *url.URL {
-	var apiEndpointStr string
-
-	shouldServeUI := ShouldServeUI()
-	if shouldServeUI {
-		apiEndpointStr = "/"
-	} else {
-		apiEndpointStr = EnvAPIEndpoint.GetValue()
-		if apiEndpointStr == "" {
-			apiEndpointStr = "/"
-		}
+	apiEndpointStr := EnvAPIEndpoint.GetValue()
+	if apiEndpointStr == "" {
+		apiEndpointStr = "/api"
 	}
 
 	apiEndpointURL, err := url.Parse(apiEndpointStr)
 	if err != nil {
-		log.Fatalf("ERROR: Environment variable %s is not a proper url (%s)",
+		log.Fatalf("ERROR: Environment variable %s contains not a proper URI (%s)",
 			EnvAPIEndpoint.GetName(), EnvAPIEndpoint.GetValue())
-	}
-
-	if shouldServeUI {
-		apiEndpointURL.Path = path.Join(apiEndpointURL.Path, "/api")
 	}
 
 	return apiEndpointURL
