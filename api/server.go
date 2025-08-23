@@ -67,6 +67,10 @@ func main() {
 		log.Panicf("Could not initialize face detector: %s\n", err)
 	}
 
+	if err := server.InitializeLogging(); err != nil {
+		log.Printf("Warning: Could not initialize access logging: %s", err)
+	}
+
 	rootRouter := mux.NewRouter()
 	rootRouter.Use(dataloader.Middleware(db))
 	rootRouter.Use(auth.Middleware(db))
@@ -118,7 +122,6 @@ func main() {
 		}
 
 	}
-	//TODO: how to enable detailed/debug logging http requests and responses?
 	srv := &http.Server{
 		Addr:    apiListenURL.Host,
 		Handler: handlers.CompressHandler(rootRouter),
@@ -131,7 +134,7 @@ func main() {
 	}
 }
 
-func setupGracefulShutdown(server *http.Server) {
+func setupGracefulShutdown(http_server *http.Server) {
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
 
@@ -145,7 +148,9 @@ func setupGracefulShutdown(server *http.Server) {
 		periodic_scanner.ShutdownPeriodicScanner()
 		scanner_queue.CloseScannerQueue()
 
-		if err := server.Shutdown(ctx); err != nil {
+		server.CloseLogging()
+
+		if err := http_server.Shutdown(ctx); err != nil {
 			log.Printf("Server shutdown error: %s", err)
 		} else {
 			log.Println("Shutdown complete")

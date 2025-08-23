@@ -17,7 +17,8 @@ env:
   DOCKER_REGISTRY: ${{ github.repository != 'kkovaletp/photoview' && 'ghcr.io/' || '' }}
   DOCKER_USERNAME: kkoval
   DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
-  PLATFORMS: linux/amd64,linux/arm64
+  DOCKER_PLATFORMS: linux/amd64,linux/arm64
+  QEMU_PLATFORMS: amd64,arm64
 
 jobs:
   prepare:
@@ -92,15 +93,15 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        matrix: ${{ fromJson(needs.prepare.outputs.matrix) }}
+        entry: ${{ fromJson(needs.prepare.outputs.matrix) }}
     steps:
       - name: Delete huge unnecessary tools folder
         run: rm -rf /opt/hostedtoolcache
 
-      - name: Checkout ${{ matrix.matrix.ref }}
+      - name: Checkout ${{ matrix.entry.ref }}
         uses: actions/checkout@v5
         with:
-          ref: ${{ matrix.matrix.ref }}
+          ref: ${{ matrix.entry.ref }}
 
       - name: Fetch branches
         id: git
@@ -129,7 +130,7 @@ jobs:
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
         with:
-          platforms: ${{ env.PLATFORMS }}
+          platforms: ${{ env.QEMU_PLATFORMS }}
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
@@ -142,18 +143,18 @@ jobs:
           username: ${{ env.DOCKER_REGISTRY == 'ghcr.io/' && github.actor || env.DOCKER_USERNAME }}
           password: ${{ env.DOCKER_REGISTRY == 'ghcr.io/' && github.token || env.DOCKER_PASSWORD }}
 
-      - name: "Docker meta - ${{ matrix.matrix.image }}:${{ matrix.matrix.tag }}"
+      - name: "Docker meta - ${{ matrix.entry.image }}:${{ matrix.entry.tag }}"
         id: docker_meta
         uses: docker/metadata-action@v5
         with:
           context: "git"
-          images: ${{ env.DOCKER_REGISTRY }}${{ matrix.matrix.image }}
+          images: ${{ env.DOCKER_REGISTRY }}${{ matrix.entry.image }}
           tags: |
-            ${{ github.event_name == 'schedule' && matrix.matrix.tag != 'master' && 'type=semver,pattern={{version}}' || '' }}
-            ${{ github.event_name == 'schedule' && matrix.matrix.tag != 'master' && 'type=semver,pattern={{major}}.{{minor}}' || '' }}
-            ${{ github.event_name == 'schedule' && matrix.matrix.tag != 'master' && 'type=semver,pattern={{major}}' || '' }}
-            ${{ github.event_name == 'schedule' && matrix.matrix.tag == 'master' && 'type=ref,event=branch' || '' }}
-            ${{ github.event_name == 'schedule' && matrix.matrix.tag == 'master' && 'type=sha' || '' }}
+            ${{ github.event_name == 'schedule' && matrix.entry.tag != 'master' && 'type=semver,pattern={{version}}' || '' }}
+            ${{ github.event_name == 'schedule' && matrix.entry.tag != 'master' && 'type=semver,pattern={{major}}.{{minor}}' || '' }}
+            ${{ github.event_name == 'schedule' && matrix.entry.tag != 'master' && 'type=semver,pattern={{major}}' || '' }}
+            ${{ github.event_name == 'schedule' && matrix.entry.tag == 'master' && 'type=ref,event=branch' || '' }}
+            ${{ github.event_name == 'schedule' && matrix.entry.tag == 'master' && 'type=sha' || '' }}
             ${{ github.event_name != 'schedule' && 'type=ref,event=branch' || '' }}
             ${{ github.event_name != 'schedule' && 'type=ref,event=pr' || '' }}
             ${{ github.event_name != 'schedule' && 'type=semver,pattern={{version}}' || '' }}
@@ -161,27 +162,27 @@ jobs:
             ${{ github.event_name != 'schedule' && 'type=semver,pattern={{major}}' || '' }}
             ${{ github.event_name != 'schedule' && 'type=sha' || '' }}
 
-      - name: "Build and Push - ${{ matrix.matrix.image }}:${{ matrix.matrix.tag }}"
+      - name: "Build and Push - ${{ matrix.entry.image }}:${{ matrix.entry.tag }}"
         id: docker_buildx
         uses: docker/build-push-action@v6
         with:
           context:     .
-          target:      ${{ matrix.matrix.build_target }}
+          target:      ${{ matrix.entry.build_target }}
           sbom:        true
           provenance:  mode=max
-          platforms:   ${{ env.PLATFORMS }}
+          platforms:   ${{ env.DOCKER_PLATFORMS }}
           pull:        true
           push:        ${{ env.IS_PUSHING_IMAGES }}
           tags:        ${{ steps.docker_meta.outputs.tags }}
           labels:      ${{ steps.docker_meta.outputs.labels }}
           annotations: ${{ steps.docker_meta.outputs.annotations }}
-          cache-from:  type=gha,scope=${{ matrix.matrix.cache_scope }}
-          cache-to:    type=gha,mode=max,scope=${{ matrix.matrix.cache_scope }}
+          cache-from:  type=gha,scope=${{ matrix.entry.cache_scope }}
+          cache-to:    type=gha,mode=max,scope=${{ matrix.entry.cache_scope }}
           build-args: |
             NODE_ENV=production
             VERSION=${{ github.ref_name }}
             COMMIT_SHA=${{ steps.git.outputs.COMMIT_SHORT_SHA }}
-            REACT_APP_API_ENDPOINT=${{ matrix.matrix.image == 'kkoval/photoveiw-ui' && 'http://photoview:8080/api' || '' }}
+            REACT_APP_API_ENDPOINT=${{ matrix.entry.image == 'kkoval/photoview-ui' && 'http://photoview:8080/api' || '' }}
 
   dockle:
     name: Dockle Container Analysis
@@ -192,14 +193,14 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        matrix: ${{ fromJson(needs.prepare.outputs.matrix) }}
+        entry: ${{ fromJson(needs.prepare.outputs.matrix) }}
     if: ${{ github.repository == 'kkovaletp/photoview' && github.event_name != 'pull_request' }}
     steps:
       # Makes sure your .dockleignore file is available to the next step
-      - name: Checkout ${{ matrix.matrix.ref }}
+      - name: Checkout ${{ matrix.entry.ref }}
         uses: actions/checkout@v5
         with:
-          ref: ${{ matrix.matrix.ref }}
+          ref: ${{ matrix.entry.ref }}
 
       - name: Docker Login
         uses: docker/login-action@v3
@@ -208,14 +209,14 @@ jobs:
           username: ${{ env.DOCKER_REGISTRY == 'ghcr.io/' && github.actor || env.DOCKER_USERNAME }}
           password: ${{ env.DOCKER_REGISTRY == 'ghcr.io/' && github.token || env.DOCKER_PASSWORD }}
 
-      - name: Run Dockle for '${{ env.DOCKER_REGISTRY }}${{ matrix.matrix.image }}:${{ matrix.matrix.tag }}'
+      - name: Run Dockle for '${{ env.DOCKER_REGISTRY }}${{ matrix.entry.image }}:${{ matrix.entry.tag }}'
         id: dockle
-        if: ${{ matrix.matrix.tag != '' }}
+        if: ${{ matrix.entry.tag != '' }}
         continue-on-error: true
         uses: erzz/dockle-action@v1
         with:
-          image:             '${{ env.DOCKER_REGISTRY }}${{ matrix.matrix.image }}:${{ matrix.matrix.tag }}'
-          report-name:       dockle-results-${{ matrix.matrix.tag }}
+          image:             '${{ env.DOCKER_REGISTRY }}${{ matrix.entry.image }}:${{ matrix.entry.tag }}'
+          report-name:       dockle-results-${{ matrix.entry.tag }}
           report-format:     sarif
           failure-threshold: fatal
           exit-code:         1
@@ -225,4 +226,4 @@ jobs:
         if: ${{ steps.dockle.conclusion == 'success' || steps.dockle.conclusion == 'failure' }}
         uses: github/codeql-action/upload-sarif@v3
         with:
-          sarif_file: dockle-results-${{ matrix.matrix.tag }}.sarif
+          sarif_file: dockle-results-${{ matrix.entry.tag }}.sarif

@@ -10,13 +10,7 @@ import (
 
 func ApiListenUrl() *url.URL {
 	const defaultPort = "4001"
-
-	shouldServeUI := ShouldServeUI()
-
-	apiPrefix := "/"
-	if shouldServeUI {
-		apiPrefix = "/api"
-	}
+	apiPrefix := "/api"
 
 	var listenAddr string
 
@@ -52,6 +46,9 @@ func ApiEndpointUrl() *url.URL {
 		apiEndpointStr = "/"
 	} else {
 		apiEndpointStr = EnvAPIEndpoint.GetValue()
+		if apiEndpointStr == "" {
+			apiEndpointStr = "/"
+		}
 	}
 
 	apiEndpointURL, err := url.Parse(apiEndpointStr)

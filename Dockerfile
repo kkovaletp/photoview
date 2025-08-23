@@ -106,6 +106,9 @@ RUN --mount=type=bind,from=api,source=/dependencies/,target=/dependencies/ \
     # Create a user to run Photoview server
     && groupadd -g 999 photoview \
     && useradd -r -u 999 -g photoview -m photoview \
+    # Create log folder
+    && mkdir -p /var/log/photoview \
+    && chown -R photoview:photoview /var/log/photoview \
     # Install required dependencies
     && /app/scripts/install_runtime_dependencies.sh \
     # Install self-building libs
@@ -131,6 +134,7 @@ RUN find /app/ui/assets -type f -name "SettingsPage.*.js" \
         && gzip -k -f -9 "$1" \
         && brotli -f -q 11 "$1"' sh {} \; \
     # Archive the `service-worker.js` file
+    #TODO: zstd all
     && gzip -k -f -9 /app/ui/service-worker.js \
     && brotli -f -q 11 /app/ui/service-worker.js
 
@@ -141,6 +145,7 @@ ENV PHOTOVIEW_LISTEN_PORT=8080
 
 ENV PHOTOVIEW_SERVE_UI=1
 ENV PHOTOVIEW_UI_PATH=/app/ui
+ENV PHOTOVIEW_ACCESS_LOG_PATH=/var/log/photoview/access.log
 ENV PHOTOVIEW_FACE_RECOGNITION_MODELS_PATH=/app/data/models
 ENV PHOTOVIEW_MEDIA_CACHE=/home/photoview/media-cache
 
@@ -182,6 +187,7 @@ COPY --from=ui --chown=9999:9999 /app/ui/dist /srv
 # This is a w/a for letting the UI build stage to be cached
 # and not rebuilt every new commit because of the build_arg value change.
 ARG COMMIT_SHA=NoCommit
+# hadolint ignore=DL3018
 RUN apk add --no-cache curl gzip brotli bash \
     && find /srv/assets -type f -name "SettingsPage.*.js" \
         -exec sh -c 'sed -i "s/=\"-=<GitHub-CI-commit-sha-placeholder>=-\";/=\"${COMMIT_SHA}\";/g" "$1" \
@@ -189,6 +195,7 @@ RUN apk add --no-cache curl gzip brotli bash \
         && gzip -k -f -9 "$1" \
         && brotli -f -q 11 "$1"' sh {} \; \
     # Archive the `service-worker.js` file
+    #TODO: zstd all
     && gzip -k -f -9 /srv/service-worker.js \
     && brotli -f -q 11 /srv/service-worker.js \
     # Set correct ownership for Caddy's runtime dirs
