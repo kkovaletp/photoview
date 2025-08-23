@@ -1,15 +1,15 @@
 package utils
 
 import (
+	"context"
 	"crypto/rand"
 	"fmt"
-	"log"
 	"math/big"
 	"os"
 	"path"
 	"path/filepath"
 
-	"github.com/pkg/errors"
+	"github.com/kkovaletp/photoview/api/log"
 )
 
 func GenerateToken() string {
@@ -23,7 +23,8 @@ func GenerateToken() string {
 
 		n, err := rand.Int(rand.Reader, charLen)
 		if err != nil {
-			log.Fatalf("Could not generate random number: %s\n", err)
+			log.Error(context.Background(), "Could not generate random number", "error", err)
+			os.Exit(1)
 		}
 		b[i] = charset[n.Int64()]
 	}
@@ -40,7 +41,7 @@ func (e PhotoviewError) Error() string {
 }
 
 func HandleError(message string, err error) PhotoviewError {
-	log.Printf("ERROR: %s: %s", message, err)
+	log.Error(context.Background(), message, "error", err)
 	return PhotoviewError{
 		message:  message,
 		original: err,
@@ -67,25 +68,25 @@ func FaceRecognitionModelsPath() string {
 
 // IsDirSymlink checks that the given path is a symlink and resolves to a
 // directory.
-func IsDirSymlink(path string) (bool, error) {
+func IsDirSymlink(linkPath string) (bool, error) {
 	isDirSymlink := false
 
-	fileInfo, err := os.Lstat(path)
+	fileInfo, err := os.Lstat(linkPath)
 	if err != nil {
-		return false, errors.Wrapf(err, "could not stat %s", path)
+		return false, fmt.Errorf("could not stat %s: %w", linkPath, err)
 	}
 
 	//Resolve symlinks
 	if fileInfo.Mode()&os.ModeSymlink == os.ModeSymlink {
-		resolvedPath, err := filepath.EvalSymlinks(path)
+		resolvedPath, err := filepath.EvalSymlinks(linkPath)
 		if err != nil {
-			return false, errors.Wrapf(err, "cannot resolve linktarget of %s, ignoring it", path)
+			return false, fmt.Errorf("cannot resolve link target for %s, skipping it: %w", linkPath, err)
 		}
 
 		resolvedFile, err := os.Stat(resolvedPath)
 		if err != nil {
-			return false, fmt.Errorf("cannot get fileinfo of linktarget %s of symlink %s, ignoring it: %w",
-				resolvedPath, path, err)
+			return false, fmt.Errorf("cannot get fileinfo of link target %s of symlink %s, skipping it: %w",
+				resolvedPath, linkPath, err)
 		}
 		isDirSymlink = resolvedFile.IsDir()
 

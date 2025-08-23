@@ -25,12 +25,18 @@ var (
 	logFile   *os.File
 	logMutex  sync.RWMutex
 	logWriter io.Writer
+	logLevel  string
 )
 
 // InitializeLogging sets up the logging system with optional file output
 func InitializeLogging() error {
 	logMutex.Lock()
 	defer logMutex.Unlock()
+
+	logLevel = strings.ToLower(utils.AccessLogLevel())
+	if logLevel == "" {
+		logLevel = "info"
+	}
 
 	// Default to console output
 	logWriter = os.Stdout
@@ -43,11 +49,11 @@ func InitializeLogging() error {
 		}
 		logFile = file
 		logWriter = io.MultiWriter(os.Stdout, file)
-		log.Info(context.TODO(), "Access logging enabled to file", "logfile", logPath)
+		log.Info(context.Background(), "Access logging enabled to file", "logfile", logPath)
 	}
 
-	if strings.ToLower(utils.AccessLogLevel()) == "debug" {
-		log.Warn(context.TODO(), "Debug access logging enabled")
+	if logLevel == "debug" {
+		log.Warn(context.Background(), "Debug access logging enabled")
 	}
 
 	return nil
@@ -59,15 +65,17 @@ func CloseLogging() {
 	defer logMutex.Unlock()
 
 	if logFile != nil {
-		logFile.Close()
+		if err := logFile.Close(); err != nil {
+			log.Error(context.Background(), "Failed to close log file", "error", err)
+		}
 		logFile = nil
 	}
 }
 
 // Thread-safe log writing
 func writeLog(format string, args ...interface{}) {
-	logMutex.RLock()
-	defer logMutex.RUnlock()
+	logMutex.Lock()
+	defer logMutex.Unlock()
 
 	if logWriter != nil {
 		fmt.Fprintf(logWriter, format, args...)
@@ -77,13 +85,13 @@ func writeLog(format string, args ...interface{}) {
 func LoggingMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		start := time.Now()
-		debugEnabled := strings.ToLower(utils.AccessLogLevel()) == "debug"
+		debugEnabled := logLevel == "debug"
 
 		// Debug logging: incoming request
 		if debugEnabled {
-			writeLog("\n=== INCOMING REQUEST [%d ms] ===\n", time.Now().UnixMilli())
+			writeLog("\n=== INCOMING REQUEST [%d ms] ===\n", time.Now().UnixMilli()) //TODO: replace with human-readable time
 			writeLog("Method: %s\n", r.Method)
-			writeLog("URL: %s\n", r.URL.String())
+			writeLog("URI: %s\n", r.URL.RequestURI())
 			writeLog("Host: %s\n", r.Host)
 			writeLog("RemoteAddr: %s\n", r.RemoteAddr)
 			writeLog("User-Agent: %s\n", r.UserAgent())
@@ -93,7 +101,11 @@ func LoggingMiddleware(next http.Handler) http.Handler {
 			writeLog("Headers:\n")
 			for name, values := range r.Header {
 				for _, value := range values {
-					writeLog("  %s: %s\n", name, value)
+					if isSensitiveHeader(name) {
+						writeLog("  %s: [REDACTED]\n", name)
+					} else {
+						writeLog("  %s: %s\n", name, value)
+					}
 				}
 			}
 
@@ -103,10 +115,10 @@ func LoggingMiddleware(next http.Handler) http.Handler {
 				if err == nil {
 					r.Body = io.NopCloser(bytes.NewReader(bodyBytes))
 					// Only log text-like content types
-					if isBinaryData(bodyBytes) {
-						writeLog("Body: [binary content, %d bytes]\n", len(bodyBytes))
-					} else {
+					if isTextualContent(r.Header, bodyBytes) {
 						writeLog("Body: %s\n", string(bodyBytes))
+					} else {
+						writeLog("Body: [binary content, %d bytes]\n", len(bodyBytes))
 					}
 				}
 			} else if r.ContentLength >= 50000 {
@@ -125,7 +137,7 @@ func LoggingMiddleware(next http.Handler) http.Handler {
 			elapsedMs := elapsed.Nanoseconds() / 1e6 // Convert to milliseconds
 
 			// Debug logging: response
-			writeLog("=== RESPONSE [%d ms] ===\n", time.Now().UnixMilli())
+			writeLog("=== RESPONSE [%d ms] ===\n", time.Now().UnixMilli()) //TODO: replace with human-readable time
 			writeLog("Status: %d\n", debugWriter.status)
 			writeLog("Duration: %d ms\n", elapsedMs)
 			writeLog("Response-Size: %d bytes\n", debugWriter.bodySize)
@@ -135,7 +147,11 @@ func LoggingMiddleware(next http.Handler) http.Handler {
 				writeLog("Response Headers:\n")
 				for name, values := range debugWriter.capturedHeaders {
 					for _, value := range values {
-						writeLog("  %s: %s\n", name, value)
+						if isSensitiveHeader(name) {
+							writeLog("  %s: [REDACTED]\n", name)
+						} else {
+							writeLog("  %s: %s\n", name, value)
+						}
 					}
 				}
 			}
@@ -143,10 +159,10 @@ func LoggingMiddleware(next http.Handler) http.Handler {
 			// Log response body with same binary detection
 			if debugWriter.bodyBuffer.Len() > 0 {
 				responseBody := debugWriter.bodyBuffer.Bytes()
-				if isBinaryData(responseBody) {
-					writeLog("Response Body: [binary content, %d bytes]\n", len(responseBody))
-				} else {
+				if isTextualContent(debugWriter.capturedHeaders, responseBody) {
 					writeLog("Response Body: %s\n", string(responseBody))
+				} else {
+					writeLog("Response Body: [binary content, %d bytes]\n", len(responseBody))
 				}
 			} else if debugWriter.bodySize > 50000 {
 				writeLog("Response Body: [large content, %d bytes - not logged]\n", debugWriter.bodySize)
@@ -211,11 +227,35 @@ func logStandardRequest(r *http.Request, status int, elapsedMs int64) {
 	}
 
 	statusText := color.Sprintf("%s%s %s%d", methodColor, r.Method, statusColor, status)
-	requestText := fmt.Sprintf("%s%s", r.Host, r.URL.Path)
-	durationText := color.Sprintf("@c%s", elapsedMs)
+	requestText := fmt.Sprintf("%s%s", r.Host, r.URL.RequestURI())
+	durationText := color.Sprintf("@c%dms", elapsedMs)
 
-	fmt.Printf("%s %s %s %s %s\n", date, statusText, requestText, durationText, userText)
+	writeLog("%s %s %s %s %s\n", date, statusText, requestText, durationText, userText)
+}
 
+func isTextualContent(headers http.Header, body []byte) bool {
+	res := false
+
+	for name, values := range headers {
+		if name == "Content-Type" {
+			for _, value := range values {
+				value = strings.ToLower(value)
+				res = strings.HasPrefix(value, "text/") ||
+					strings.Contains(value, "json") ||
+					strings.Contains(value, "xml") ||
+					strings.Contains(value, "form-") ||
+					strings.Contains(value, "utf-8")
+				if res {
+					break
+				}
+			}
+		}
+	}
+
+	if !res {
+		return !isBinaryData(body)
+	}
+	return res
 }
 
 func isBinaryData(data []byte) bool {
@@ -228,37 +268,25 @@ func isBinaryData(data []byte) bool {
 	if checkSize > 512 {
 		checkSize = 512
 	}
-
-	// Method 1: Check for null bytes (most binary files contain null bytes)
-	for i := 0; i < checkSize; i++ {
-		if data[i] == 0 {
-			return true
-		}
-	}
-
-	// Method 2: Check if it's valid UTF-8 text
+	// Check if it's valid UTF-8 text
 	// If it's not valid UTF-8, it's likely binary
 	if !utf8.Valid(data[:checkSize]) {
 		return true
 	}
+	return false
+}
 
-	// Method 3: Check for high ratio of non-printable characters
-	nonPrintable := 0
-	for i := 0; i < checkSize; i++ {
-		b := data[i]
-		// Consider bytes outside printable ASCII range (excluding common whitespace)
-		if b < 32 && b != 9 && b != 10 && b != 13 {
-			nonPrintable++
-		} else if b > 126 {
-			// Allow extended UTF-8, but count high values
-			if b > 240 { // Very high values suggest binary
-				nonPrintable++
-			}
-		}
+// Detect sensitive headers
+func isSensitiveHeader(name string) bool {
+	n := strings.ToLower(name)
+	if n == "authorization" ||
+		n == "cookie" ||
+		n == "set-cookie" ||
+		n == "proxy-authorization" ||
+		n == "x-api-key" {
+		return true
 	}
-
-	// If more than 10% non-printable, consider it binary
-	return float64(nonPrintable)/float64(checkSize) > 0.1
+	return strings.HasPrefix(n, "x-api-key")
 }
 
 type simpleStatusResponseWriter struct {
@@ -326,6 +354,10 @@ func (w *simpleStatusResponseWriter) Write(b []byte) (int, error) {
 func (w *debugStatusResponseWriter) Write(b []byte) (int, error) {
 	if w.status == 0 {
 		w.status = 200
+		// Capture headers on implicit WriteHeader
+		for k, v := range w.ResponseWriter.Header() {
+			w.capturedHeaders[k] = v
+		}
 	}
 
 	// Capture response body (with size limit for memory safety)

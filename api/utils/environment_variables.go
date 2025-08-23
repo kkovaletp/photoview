@@ -120,7 +120,7 @@ func AccessLogMaxSize() int64 {
 	if size := EnvAccessLogMaxSize.GetInt(); size > 0 {
 		return int64(size) * 1024 * 1024 // Convert MB to bytes
 	}
-	return 10 * 1024 * 1024 // Default 100MB
+	return 10 * 1024 * 1024
 }
 
 func AccessLogMaxFiles() int {
