@@ -68,6 +68,7 @@ func CloseLogging() {
 		if err := logFile.Close(); err != nil {
 			log.Error(context.Background(), "Failed to close log file", "error", err)
 		}
+		logWriter = os.Stdout
 		logFile = nil
 	}
 }
@@ -85,7 +86,10 @@ func writeLog(format string, args ...interface{}) {
 func LoggingMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		start := time.Now()
-		debugEnabled := logLevel == "debug"
+
+		logMutex.RLock()
+		debugEnabled := (logLevel == "debug")
+		logMutex.RUnlock()
 
 		// Debug logging: incoming request
 		if debugEnabled {
@@ -190,6 +194,8 @@ func LoggingMiddleware(next http.Handler) http.Handler {
 
 func logStandardRequest(r *http.Request, status int, elapsedMs int64) {
 	date := time.Now().Format("2006/01/02 15:04:05")
+	user := auth.UserFromContext(r.Context())
+	requestText := fmt.Sprintf("%s%s", r.Host, r.URL.RequestURI())
 
 	// Color coding for status (preserve existing logic)
 	var statusColor string
@@ -220,42 +226,46 @@ func logStandardRequest(r *http.Request, status int, elapsedMs int64) {
 		methodColor = color.Colorize("r")
 	}
 
-	user := auth.UserFromContext(r.Context())
 	userText := "unauthenticated"
 	if user != nil {
 		userText = color.Sprintf("@ruser: %s", user.Username)
 	}
 
 	statusText := color.Sprintf("%s%s %s%d", methodColor, r.Method, statusColor, status)
-	requestText := fmt.Sprintf("%s%s", r.Host, r.URL.RequestURI())
 	durationText := color.Sprintf("@c%dms", elapsedMs)
 
 	writeLog("%s %s %s %s %s\n", date, statusText, requestText, durationText, userText)
 }
 
 func isTextualContent(headers http.Header, body []byte) bool {
-	res := false
+	looksTextual := false
 
-	for name, values := range headers {
-		if name == "Content-Type" {
-			for _, value := range values {
-				value = strings.ToLower(value)
-				res = strings.HasPrefix(value, "text/") ||
-					strings.Contains(value, "json") ||
-					strings.Contains(value, "xml") ||
-					strings.Contains(value, "form-") ||
-					strings.Contains(value, "utf-8")
-				if res {
-					break
-				}
+	if values, ok := headers["Content-Type"]; ok {
+		for _, value := range values {
+			value = strings.ToLower(value)
+			if strings.HasPrefix(value, "multipart/") ||
+				strings.HasPrefix(value, "image/") ||
+				strings.HasPrefix(value, "audio/") ||
+				strings.HasPrefix(value, "video/") ||
+				strings.Contains(value, "octet-stream") {
+				return false
+			}
+			if strings.HasPrefix(value, "text/") ||
+				strings.Contains(value, "json") ||
+				strings.Contains(value, "xml") ||
+				strings.Contains(value, "x-www-form-urlencoded") ||
+				strings.Contains(value, "charset=") ||
+				strings.Contains(value, "utf-8") {
+				looksTextual = true
+				break
 			}
 		}
 	}
 
-	if !res {
+	if !looksTextual {
 		return !isBinaryData(body)
 	}
-	return res
+	return looksTextual
 }
 
 func isBinaryData(data []byte) bool {
@@ -268,9 +278,12 @@ func isBinaryData(data []byte) bool {
 	if checkSize > 512 {
 		checkSize = 512
 	}
-	// Check if it's valid UTF-8 text
-	// If it's not valid UTF-8, it's likely binary
+	// Check if it's valid UTF-8 text. If it's not, it's likely binary
 	if !utf8.Valid(data[:checkSize]) {
+		return true
+	}
+	// NUL byte is a strong binary signal
+	if bytes.IndexByte(data[:checkSize], 0x00) != -1 {
 		return true
 	}
 	return false

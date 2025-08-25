@@ -23,8 +23,7 @@ func GenerateToken() string {
 
 		n, err := rand.Int(rand.Reader, charLen)
 		if err != nil {
-			log.Error(context.Background(), "Could not generate random number", "error", err)
-			os.Exit(1)
+			panic(fmt.Errorf("cannot generate random number: %w", err))
 		}
 		b[i] = charset[n.Int64()]
 	}
@@ -36,6 +35,7 @@ type PhotoviewError struct {
 	original error
 }
 
+// TODO: check for dead code
 func (e PhotoviewError) Error() string {
 	return fmt.Sprintf("%s: %s", e.message, e.original)
 }
@@ -73,19 +73,19 @@ func IsDirSymlink(linkPath string) (bool, error) {
 
 	fileInfo, err := os.Lstat(linkPath)
 	if err != nil {
-		return false, fmt.Errorf("could not stat %s: %w", linkPath, err)
+		return false, fmt.Errorf("cannot get fileinfo of link %q: %w", linkPath, err)
 	}
 
 	//Resolve symlinks
 	if fileInfo.Mode()&os.ModeSymlink == os.ModeSymlink {
 		resolvedPath, err := filepath.EvalSymlinks(linkPath)
 		if err != nil {
-			return false, fmt.Errorf("cannot resolve link target for %s, skipping it: %w", linkPath, err)
+			return false, fmt.Errorf("cannot resolve link target for %q, skipping it: %w", linkPath, err)
 		}
 
 		resolvedFile, err := os.Stat(resolvedPath)
 		if err != nil {
-			return false, fmt.Errorf("cannot get fileinfo of link target %s of symlink %s, skipping it: %w",
+			return false, fmt.Errorf("cannot get fileinfo of link target %q of symlink %q, skipping it: %w",
 				resolvedPath, linkPath, err)
 		}
 		isDirSymlink = resolvedFile.IsDir()

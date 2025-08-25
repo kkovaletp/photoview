@@ -29,7 +29,9 @@ func ApiListenUrl() *url.URL {
 	listenPort, err := strconv.Atoi(listenPortStr)
 	if err != nil {
 		log.Error(context.Background(),
-			fmt.Sprintf("%s must be a number: '%s'", EnvListenPort.GetName(), listenPortStr),
+			"invalid listen port (not a number)",
+			"environment variable", EnvListenPort.GetName(),
+			"value", listenPortStr,
 			"error", err,
 		)
 		os.Exit(1)
@@ -37,7 +39,12 @@ func ApiListenUrl() *url.URL {
 
 	apiUrl, err := url.Parse(fmt.Sprintf("http://%s:%d", listenAddr, listenPort))
 	if err != nil {
-		log.Error(context.Background(), "could not format API url", "error", err)
+		log.Error(context.Background(),
+			"could not format API url",
+			"listen address", listenAddr,
+			"listen port", listenPort,
+			"error", err,
+		)
 		os.Exit(1)
 	}
 	apiUrl.Path = apiPrefix
@@ -54,8 +61,9 @@ func ApiEndpointUrl() *url.URL {
 	apiEndpointURL, err := url.Parse(apiEndpointStr)
 	if err != nil {
 		log.Error(context.Background(),
-			fmt.Sprintf("environment variable %s contains not proper URI (%s)",
-				EnvAPIEndpoint.GetName(), EnvAPIEndpoint.GetValue()),
+			"environment variable is not a proper URI",
+			"environment variable", EnvAPIEndpoint.GetName(),
+			"value", EnvAPIEndpoint.GetValue(),
 			"error", err,
 		)
 		os.Exit(1)
@@ -73,8 +81,9 @@ func UiEndpointUrl() *url.URL {
 	uiEndpointURL, err := url.Parse(EnvUIEndpoint.GetValue())
 	if err != nil {
 		log.Error(context.Background(),
-			fmt.Sprintf("environment variable %s contains not proper URI (%s)",
-				EnvUIEndpoint.GetName(), EnvUIEndpoint.GetValue()),
+			"environment variable is not a proper URI",
+			"environment variable", EnvUIEndpoint.GetName(),
+			"value", EnvUIEndpoint.GetValue(),
 			"error", err,
 		)
 		os.Exit(1)
