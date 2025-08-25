@@ -3,6 +3,7 @@ set -eu
 
 : ${DEB_HOST_ARCH=`dpkg --print-architecture`}
 echo Arch: ${DEB_HOST_ARCH}
+export DEBIAN_FRONTEND=noninteractive
 apt-get update
 
 # Install libheif dependencies

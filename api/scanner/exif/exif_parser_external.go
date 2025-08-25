@@ -80,7 +80,8 @@ func extractValidGpsData(fileInfo *exiftool.FileMetadata, mediaPath string) (*fl
 	}
 
 	// GPS data validation
-	if (GPSLat != nil && math.Abs(*GPSLat) > 90) || (GPSLong != nil && math.Abs(*GPSLong) > 180) {
+	if (GPSLat != nil && !isFloatReal(*GPSLat)) || (GPSLong != nil && !isFloatReal(*GPSLong)) ||
+		(GPSLat != nil && math.Abs(*GPSLat) > 90) || (GPSLong != nil && math.Abs(*GPSLong) > 180) {
 		latStr := "<empty>"
 		if GPSLat != nil {
 			latStr = fmt.Sprintf("%f", *GPSLat)

@@ -68,6 +68,7 @@ services:
       ## Only `qsv` is verified with `/dev/dri` devices (see below `devices`).
       PHOTOVIEW_VIDEO_HARDWARE_ACCELERATION: ${PHOTOVIEW_VIDEO_HARDWARE_ACCELERATION}
     ## Share hardware devices with FFmpeg (optional):
+    # gpus: all
     # devices:
       ## Uncomment next devices mappings if they are available in your host system
       ## Intel QSV

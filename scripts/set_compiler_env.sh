@@ -19,6 +19,7 @@ then
   fi
 fi
 
+export DEBIAN_FRONTEND=noninteractive
 dpkg --add-architecture $DEBIAN_ARCH
 apt-get update
 apt-get install -y git curl crossbuild-essential-${DEBIAN_ARCH} libc-dev:${DEBIAN_ARCH} autoconf automake libtool m4 pkg-config cmake dpkg-dev

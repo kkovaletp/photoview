@@ -10,6 +10,7 @@ if [ "$TARGETARCH" = "arm" ]; then
   DEBIAN_ARCH=armel
 fi
 
+export DEBIAN_FRONTEND=noninteractive
 dpkg --add-architecture "$DEBIAN_ARCH"
 apt-get update
 apt-get install -y \
