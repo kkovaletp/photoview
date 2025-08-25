@@ -1,6 +1,7 @@
 package exif
 
 import (
+	"fmt"
 	"log"
 	"math"
 	"time"
@@ -79,18 +80,19 @@ func extractValidGpsData(fileInfo *exiftool.FileMetadata, mediaPath string) (*fl
 	}
 
 	// GPS data validation
-	if (GPSLat != nil && math.Abs(*GPSLat) > 90) || (GPSLong != nil && math.Abs(*GPSLong) > 180) {
-		latVal := interface{}("<nil>")
+	if (GPSLat != nil && !isFloatReal(*GPSLat)) || (GPSLong != nil && !isFloatReal(*GPSLong)) ||
+		(GPSLat != nil && math.Abs(*GPSLat) > 90) || (GPSLong != nil && math.Abs(*GPSLong) > 180) {
+		latStr := "<empty>"
 		if GPSLat != nil {
-			latVal = *GPSLat
+			latStr = fmt.Sprintf("%f", *GPSLat)
 		}
-		longVal := interface{}("<nil>")
+		longStr := "<empty>"
 		if GPSLong != nil {
-			longVal = *GPSLong
+			longStr = fmt.Sprintf("%f", *GPSLong)
 		}
 		log.Printf(
-			"Incorrect GPS data in the %s Exif data: %v, %v, while expected latitude between '-90' and '90', and longitude between '-180' and '180'. Ignoring GPS data.",
-			mediaPath, latVal, longVal)
+			"Incorrect GPS data in the %s Exif metadata: %s, %s, (expected latitude '-90'..'90' / longitude '-180'..'180'). Ignoring GPS data.",
+			mediaPath, latStr, longStr)
 		return nil, nil
 	}
 	return GPSLat, GPSLong

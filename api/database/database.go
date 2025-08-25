@@ -34,6 +34,13 @@ func GetMysqlAddress(addressString string) (string, error) {
 	config.MultiStatements = true
 	config.ParseTime = true
 
+	// Set charset and collation via Params map
+	if config.Params == nil {
+		config.Params = make(map[string]string)
+	}
+	config.Params["charset"] = "utf8mb4"
+	config.Params["collation"] = "utf8mb4_unicode_ci"
+
 	return config.FormatDSN(), nil
 }
 
