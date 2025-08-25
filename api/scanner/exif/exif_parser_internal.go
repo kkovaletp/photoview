@@ -6,7 +6,6 @@ import (
 	"math"
 	"math/big"
 	"os"
-	"time"
 
 	"github.com/kkovaletp/photoview/api/graphql/models"
 	"github.com/pkg/errors"
@@ -31,19 +30,21 @@ func (p internalExifParser) ParseExif(mediaPath string) (returnExif *models.Medi
 	if err != nil {
 		return nil, err
 	}
+	defer photoFile.Close()
 
 	exif.RegisterParsers(mknote.All...)
 
 	// Recover if exif.Decode panics
 	defer func() {
 		if err := recover(); err != nil {
-			log.Printf("Recovered from panic: Exif decoding: %s\n", err)
-			returnErr = errors.New(fmt.Sprintf("Exif decoding panicked: %s\n", err))
+			log.Printf("Recovered from panic: EXIF decoding: %v\n", err)
+			returnErr = fmt.Errorf("EXIF decoding panicked: %v", err)
 		}
 	}()
 
 	exifTags, err := exif.Decode(photoFile)
 	if err != nil {
+		log.Printf("WARN: Could not decode EXIF for %s: %v\n", mediaPath, err)
 		return nil, nil
 		// return nil, errors.Wrap(err, "Could not decode EXIF")
 	}
@@ -72,8 +73,7 @@ func (p internalExifParser) ParseExif(mediaPath string) (returnExif *models.Medi
 
 	date, err := exifTags.DateTime()
 	if err == nil {
-		_, tz := date.Zone()
-		dateUTC := date.Add(time.Duration(tz) * time.Second).UTC()
+		dateUTC := date.UTC()
 		newExif.DateShot = &dateUTC
 	}
 

@@ -80,6 +80,7 @@ func GenerateBlurhashFromThumbnail(thumbnail *models.MediaURL) (string, error) {
 	if err != nil {
 		return "", fmt.Errorf("open %s error: %w", thumbnail_path, err)
 	}
+	defer imageFile.Close()
 
 	imageData, _, err := image.Decode(imageFile)
 	if err != nil {
