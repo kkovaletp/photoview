@@ -1,22 +1,18 @@
 package utils
 
 import (
+	"context"
 	"fmt"
-	"log"
 	"net/url"
-	"path"
+	"os"
 	"strconv"
+
+	"github.com/kkovaletp/photoview/api/log"
 )
 
 func ApiListenUrl() *url.URL {
 	const defaultPort = "4001"
-
-	shouldServeUI := ShouldServeUI()
-
-	apiPrefix := "/"
-	if shouldServeUI {
-		apiPrefix = "/api"
-	}
+	const apiPrefix = "/api"
 
 	var listenAddr string
 
@@ -32,12 +28,24 @@ func ApiListenUrl() *url.URL {
 
 	listenPort, err := strconv.Atoi(listenPortStr)
 	if err != nil {
-		log.Fatalf("%s must be a number: '%s'\n%s", EnvListenPort.GetName(), listenPortStr, err)
+		log.Error(context.Background(),
+			"invalid listen port (not a number)",
+			"environment variable", EnvListenPort.GetName(),
+			"value", listenPortStr,
+			"error", err,
+		)
+		os.Exit(1)
 	}
 
 	apiUrl, err := url.Parse(fmt.Sprintf("http://%s:%d", listenAddr, listenPort))
 	if err != nil {
-		log.Fatalf("Could not format api url: %s", err)
+		log.Error(context.Background(),
+			"could not format API url",
+			"listen address", listenAddr,
+			"listen port", listenPort,
+			"error", err,
+		)
+		os.Exit(1)
 	}
 	apiUrl.Path = apiPrefix
 
@@ -45,23 +53,20 @@ func ApiListenUrl() *url.URL {
 }
 
 func ApiEndpointUrl() *url.URL {
-	var apiEndpointStr string
-
-	shouldServeUI := ShouldServeUI()
-	if shouldServeUI {
-		apiEndpointStr = "/"
-	} else {
-		apiEndpointStr = EnvAPIEndpoint.GetValue()
+	apiEndpointStr := EnvAPIEndpoint.GetValue()
+	if apiEndpointStr == "" {
+		apiEndpointStr = "/api"
 	}
 
 	apiEndpointURL, err := url.Parse(apiEndpointStr)
 	if err != nil {
-		log.Fatalf("ERROR: Environment variable %s is not a proper url (%s)",
-			EnvAPIEndpoint.GetName(), EnvAPIEndpoint.GetValue())
-	}
-
-	if shouldServeUI {
-		apiEndpointURL.Path = path.Join(apiEndpointURL.Path, "/api")
+		log.Error(context.Background(),
+			"environment variable is not a proper URI",
+			"environment variable", EnvAPIEndpoint.GetName(),
+			"value", EnvAPIEndpoint.GetValue(),
+			"error", err,
+		)
+		os.Exit(1)
 	}
 
 	return apiEndpointURL
@@ -75,8 +80,13 @@ func UiEndpointUrl() *url.URL {
 
 	uiEndpointURL, err := url.Parse(EnvUIEndpoint.GetValue())
 	if err != nil {
-		log.Fatalf("ERROR: Environment variable %s is not a proper url (%s)",
-			EnvUIEndpoint.GetName(), EnvUIEndpoint.GetValue())
+		log.Error(context.Background(),
+			"environment variable is not a proper URI",
+			"environment variable", EnvUIEndpoint.GetName(),
+			"value", EnvUIEndpoint.GetValue(),
+			"error", err,
+		)
+		os.Exit(1)
 	}
 
 	return uiEndpointURL
