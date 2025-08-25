@@ -46,7 +46,7 @@ func NewThumbnailMediaURLLoader(db *gorm.DB) *MediaURLLoader {
 		maxBatch: 100,
 		wait:     5 * time.Millisecond,
 		fetch: makeMediaURLLoader(db, func(query *gorm.DB) *gorm.DB {
-			return query.Where("purpose = ? OR purpose = ?", models.PhotoThumbnail, models.VideoThumbnail)
+			return query.Where("purpose IN ?", []string{string(models.PhotoThumbnail), string(models.VideoThumbnail)})
 		}),
 	}
 }
@@ -56,7 +56,7 @@ func NewHighresMediaURLLoader(db *gorm.DB) *MediaURLLoader {
 		maxBatch: 100,
 		wait:     5 * time.Millisecond,
 		fetch: makeMediaURLLoader(db, func(query *gorm.DB) *gorm.DB {
-			return query.Where("purpose = ? OR (purpose = ? AND content_type IN ?)", models.PhotoHighRes, models.MediaOriginal, media_type.WebMimetypes)
+			return query.Where("(purpose = ? OR (purpose = ? AND content_type IN ?))", models.PhotoHighRes, models.MediaOriginal, media_type.WebMimetypes)
 		}),
 	}
 }
@@ -66,7 +66,7 @@ func NewVideoWebMediaURLLoader(db *gorm.DB) *MediaURLLoader {
 		maxBatch: 100,
 		wait:     5 * time.Millisecond,
 		fetch: makeMediaURLLoader(db, func(query *gorm.DB) *gorm.DB {
-			return query.Where("purpose = ? OR purpose = ?", models.VideoWeb, models.MediaOriginal)
+			return query.Where("purpose IN ?", []string{string(models.VideoWeb), string(models.MediaOriginal)})
 		}),
 	}
 }

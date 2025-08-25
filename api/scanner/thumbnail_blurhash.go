@@ -23,12 +23,10 @@ func GenerateBlurhashes(db *gorm.DB) error {
 		Preload("MediaURL").
 		Joins("INNER JOIN media_urls ON media.id = media_urls.media_id").
 		Where("blurhash IS NULL").
-		Where("media_urls.purpose = 'thumbnail' OR media_urls.purpose = 'video-thumbnail'")
+		Where("media_urls.purpose IN ?", []string{"thumbnail", "video-thumbnail"})
 
 	err := query.FindInBatches(&results, 50, func(tx *gorm.DB, batch int) error {
 		log.Printf("generating %d blurhashes", len(results))
-
-		hashes := make([]*string, len(results))
 
 		for i, row := range results {
 
@@ -46,14 +44,12 @@ func GenerateBlurhashes(db *gorm.DB) error {
 				continue
 			}
 
-			hashes[i] = &hashStr
 			results[i].Blurhash = &hashStr
 		}
 
-		tx.Save(results)
-		// if err := db.Update("blurhash", hashes).Error; err != nil {
-		// 	return err
-		// }
+		if err := tx.Save(results).Error; err != nil {
+			return err
+		}
 
 		return nil
 	}).Error
@@ -69,27 +65,27 @@ func GenerateBlurhashes(db *gorm.DB) error {
 	}
 }
 
-// GenerateBlurhashFromThumbnail generates a blurhash for a single media and stores it in the database
+// GenerateBlurhashFromThumbnail generates a blurhash for the given thumbnail
 func GenerateBlurhashFromThumbnail(thumbnail *models.MediaURL) (string, error) {
-	thumbnail_path, err := thumbnail.CachedPath()
+	thumbnailPath, err := thumbnail.CachedPath()
 	if err != nil {
 		return "", fmt.Errorf("get path of media id=%d error: %w", thumbnail.MediaID, err)
 	}
 
-	imageFile, err := os.Open(thumbnail_path)
+	imageFile, err := os.Open(thumbnailPath)
 	if err != nil {
-		return "", fmt.Errorf("open %s error: %w", thumbnail_path, err)
+		return "", fmt.Errorf("open %s error: %w", thumbnailPath, err)
 	}
 	defer imageFile.Close()
 
 	imageData, _, err := image.Decode(imageFile)
 	if err != nil {
-		return "", fmt.Errorf("decode %q error: %w", thumbnail_path, err)
+		return "", fmt.Errorf("decode %q error: %w", thumbnailPath, err)
 	}
 
 	hashStr, err := blurhash.Encode(4, 3, imageData)
 	if err != nil {
-		return "", fmt.Errorf("encode blurhash of %q error: %w", thumbnail_path, err)
+		return "", fmt.Errorf("encode blurhash of %q error: %w", thumbnailPath, err)
 	}
 
 	// if err := db.Model(&models.Media{}).Where("id = ?", thumbnail.MediaID).Update("blurhash", hashStr).Error; err != nil {
