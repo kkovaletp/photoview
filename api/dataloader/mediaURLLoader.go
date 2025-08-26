@@ -16,7 +16,7 @@ func makeMediaURLLoader(db *gorm.DB, filter func(query *gorm.DB) *gorm.DB) func(
 		var urls []*models.MediaURL
 		query := db.Where("media_id IN (?)", mediaIDs)
 
-		filter(query)
+		query = filter(query)
 
 		if err := query.Find(&urls).Error; err != nil {
 			return nil, []error{errors.Wrap(err, "media url loader database query")}
@@ -66,7 +66,13 @@ func NewVideoWebMediaURLLoader(db *gorm.DB) *MediaURLLoader {
 		maxBatch: 100,
 		wait:     5 * time.Millisecond,
 		fetch: makeMediaURLLoader(db, func(query *gorm.DB) *gorm.DB {
-			return query.Where("purpose IN ?", []string{string(models.VideoWeb), string(models.MediaOriginal)})
+			return query.
+				Where("purpose IN ?", []string{string(models.VideoWeb), string(models.MediaOriginal)}).
+				//VideoWeb consistently wins ordering when both exist, which is preferred for web delivery
+				Order("media_id ASC, CASE purpose WHEN '" +
+					string(models.MediaOriginal) + "' THEN 0 WHEN '" +
+					string(models.VideoWeb) + "' THEN 1 END ASC")
+
 		}),
 	}
 }
