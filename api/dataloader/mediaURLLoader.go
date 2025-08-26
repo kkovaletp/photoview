@@ -56,7 +56,12 @@ func NewHighresMediaURLLoader(db *gorm.DB) *MediaURLLoader {
 		maxBatch: 100,
 		wait:     5 * time.Millisecond,
 		fetch: makeMediaURLLoader(db, func(query *gorm.DB) *gorm.DB {
-			return query.Where("(purpose = ? OR (purpose = ? AND content_type IN ?))", models.PhotoHighRes, models.MediaOriginal, media_type.WebMimetypes)
+			return query.
+				Where("(purpose = ? OR (purpose = ? AND content_type IN ?))", models.PhotoHighRes, models.MediaOriginal, media_type.WebMimetypes).
+				//PhotoHighRes consistently wins ordering when both exist, which is preferred for web delivery
+				Order("media_id ASC, CASE purpose WHEN '" +
+					string(models.MediaOriginal) + "' THEN 0 WHEN '" +
+					string(models.PhotoHighRes) + "' THEN 1 END ASC")
 		}),
 	}
 }

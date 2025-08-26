@@ -23,12 +23,12 @@ func GenerateBlurhashes(db *gorm.DB) error {
 		Preload("MediaURL").
 		Joins("INNER JOIN media_urls ON media.id = media_urls.media_id").
 		Where("blurhash IS NULL").
-		Where("media_urls.purpose IN ?", []string{"thumbnail", "video-thumbnail"})
+		Where("media_urls.purpose IN ?", []string{string(models.PhotoThumbnail), string(models.VideoThumbnail)})
 
 	err := query.FindInBatches(&results, 50, func(tx *gorm.DB, batch int) error {
 		log.Printf("generating %d blurhashes", len(results))
 
-		updates := make(map[int]*string)
+		updates := make(map[int]string)
 
 		for _, row := range results {
 			thumbnail, err := row.GetThumbnail()
@@ -45,7 +45,7 @@ func GenerateBlurhashes(db *gorm.DB) error {
 				continue
 			}
 
-			updates[row.ID] = &hashStr
+			updates[row.ID] = hashStr
 		}
 
 		// Batch update using a single UPDATE with CASE WHEN
@@ -53,11 +53,11 @@ func GenerateBlurhashes(db *gorm.DB) error {
 			// Build CASE WHEN statement for batch update
 			caseSQL := "CASE id "
 			args := make([]interface{}, 0, len(updates)*2)
-			ids := make([]interface{}, 0, len(updates))
+			ids := make([]int, 0, len(updates))
 
 			for id, hash := range updates {
 				caseSQL += "WHEN ? THEN ? "
-				args = append(args, id, *hash)
+				args = append(args, id, hash)
 				ids = append(ids, id)
 			}
 			caseSQL += "END"
