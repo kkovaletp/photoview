@@ -21,7 +21,7 @@
     "prepare": "(cd .. && ./ui/node_modules/.bin/husky install)"
   },
   "dependencies": {
-    "@apollo/client": "~3.13.9",
+    "@apollo/client": "~4.0.1",
     "@babel/preset-typescript": "^7.27.1",
     "@dr.pogodin/react-helmet": "^3.0.2",
     "@headlessui/react": "^2.2.7",
