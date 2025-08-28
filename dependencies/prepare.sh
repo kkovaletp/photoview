@@ -10,6 +10,7 @@ if [ "$TARGETARCH" = "arm" ]; then
   DEBIAN_ARCH=armel
 fi
 
+export DEBIAN_FRONTEND=noninteractive
 dpkg --add-architecture "$DEBIAN_ARCH"
 apt-get update
 apt-get install -y \
@@ -18,6 +19,7 @@ apt-get install -y \
   ca-certificates \
   crossbuild-essential-"${DEBIAN_ARCH}" \
   libc-dev:"${DEBIAN_ARCH}" \
+  dpkg-dev \
   autoconf \
   automake \
   libtool \

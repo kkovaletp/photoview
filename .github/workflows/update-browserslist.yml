@@ -1,0 +1,57 @@
+name: Update Browserslist Database
+
+on:
+  schedule:
+    # Runs every Fri at 01:18 AM UTC
+    - cron: '18 1 * * 5'
+  workflow_dispatch: # Allows manual triggering
+
+jobs:
+  update-browserslist:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v5
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        working-directory: ./ui
+        run: npm ci
+
+      - name: Update browserslist database
+        working-directory: ./ui
+        run: npx update-browserslist-db@latest
+
+      - name: Check for changes
+        id: changes
+        run: |
+          if git diff --quiet; then
+            echo "changes=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "changes=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Create Pull Request
+        if: steps.changes.outputs.changes == 'true'
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.COMMENT_TOKEN }}
+          commit-message: 'chore: update browserslist database'
+          title: 'chore: update browserslist database'
+          branch: update-browserslist-db
+          delete-branch: true
+          labels: 'dependencies, javascript'
+          reviewers: ${{ github.repository == 'kkovaletp/photoview' && github.repository_owner || '' }}
+          body: |
+            This PR updates the browserslist database to the latest version.
+
+            Changes:
+            - Updated caniuse-lite to latest version
+            - Refreshed browser compatibility data
+
+            This is an automated update similar to Dependabot PRs.

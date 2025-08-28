@@ -1,15 +1,13 @@
 package utils
 
 import (
-	"context"
 	"crypto/rand"
 	"fmt"
+	"log"
 	"math/big"
 	"os"
 	"path"
 	"path/filepath"
-
-	"github.com/kkovaletp/photoview/api/log"
 )
 
 func GenerateToken() string {
@@ -23,7 +21,7 @@ func GenerateToken() string {
 
 		n, err := rand.Int(rand.Reader, charLen)
 		if err != nil {
-			panic(fmt.Errorf("cannot generate random number: %w", err))
+			log.Panicf("Could not generate random number: %v", err)
 		}
 		b[i] = charset[n.Int64()]
 	}
@@ -41,7 +39,7 @@ func (e PhotoviewError) Error() string {
 }
 
 func HandleError(message string, err error) PhotoviewError {
-	log.Error(context.Background(), message, "error", err)
+	log.Printf("ERROR: %s: %s", message, err)
 	return PhotoviewError{
 		message:  message,
 		original: err,

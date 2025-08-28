@@ -1,13 +1,10 @@
 package utils
 
 import (
-	"context"
 	"fmt"
+	"log"
 	"net/url"
-	"os"
 	"strconv"
-
-	"github.com/kkovaletp/photoview/api/log"
 )
 
 func ApiListenUrl() *url.URL {
@@ -28,24 +25,12 @@ func ApiListenUrl() *url.URL {
 
 	listenPort, err := strconv.Atoi(listenPortStr)
 	if err != nil {
-		log.Error(context.Background(),
-			"invalid listen port (not a number)",
-			"environment variable", EnvListenPort.GetName(),
-			"value", listenPortStr,
-			"error", err,
-		)
-		os.Exit(1)
+		log.Panicf("%q must be a number %q: %v", EnvListenPort.GetName(), listenPortStr, err)
 	}
 
 	apiUrl, err := url.Parse(fmt.Sprintf("http://%s:%d", listenAddr, listenPort))
 	if err != nil {
-		log.Error(context.Background(),
-			"could not format API url",
-			"listen address", listenAddr,
-			"listen port", listenPort,
-			"error", err,
-		)
-		os.Exit(1)
+		log.Panicf("Could not format api url: %v", err)
 	}
 	apiUrl.Path = apiPrefix
 
@@ -60,13 +45,8 @@ func ApiEndpointUrl() *url.URL {
 
 	apiEndpointURL, err := url.Parse(apiEndpointStr)
 	if err != nil {
-		log.Error(context.Background(),
-			"environment variable is not a proper URI",
-			"environment variable", EnvAPIEndpoint.GetName(),
-			"value", EnvAPIEndpoint.GetValue(),
-			"error", err,
-		)
-		os.Exit(1)
+		log.Panicf("ERROR: Environment variable %s is not a proper url (%s): %v",
+			EnvAPIEndpoint.GetName(), EnvAPIEndpoint.GetValue(), err)
 	}
 
 	return apiEndpointURL
@@ -80,13 +60,8 @@ func UiEndpointUrl() *url.URL {
 
 	uiEndpointURL, err := url.Parse(EnvUIEndpoint.GetValue())
 	if err != nil {
-		log.Error(context.Background(),
-			"environment variable is not a proper URI",
-			"environment variable", EnvUIEndpoint.GetName(),
-			"value", EnvUIEndpoint.GetValue(),
-			"error", err,
-		)
-		os.Exit(1)
+		log.Panicf("ERROR: Environment variable %s is not a proper url (%s): %v",
+			EnvUIEndpoint.GetName(), EnvUIEndpoint.GetValue(), err)
 	}
 
 	return uiEndpointURL
