@@ -18,14 +18,6 @@ jobs:
         with:
           node-version: '18'
 
-      - name: Cache npm dependencies
-        uses: actions/cache@v4
-        with:
-          path: ./ui/node_modules
-          key: ${{ runner.os }}-node-${{ hashFiles('./ui/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-node-
-
       - name: Install dependencies
         working-directory: ./ui
         run: npm ci
@@ -44,12 +36,12 @@ jobs:
           fi
 
       - name: Create Pull Request
-        if: steps.changes.outputs.changes == 'true'
+        if: ${{ steps.changes.outputs.changes == 'true' }}
         uses: peter-evans/create-pull-request@v7
         with:
           token: ${{ secrets.COMMENT_TOKEN }}
-          commit-message: 'chore: update browserslist database'
-          title: 'chore: update browserslist database'
+          commit-message: 'Bump browserslist database'
+          title: 'Bump browserslist database'
           branch: update-browserslist-db
           delete-branch: true
           labels: 'dependencies, javascript'
