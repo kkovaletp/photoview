@@ -6,6 +6,10 @@ on:
     - cron: '18 1 * * 5'
   workflow_dispatch: # Allows manual triggering
 
+permissions:
+  contents: write
+  pull-requests: write
+
 jobs:
   update-browserslist:
     runs-on: ubuntu-latest
@@ -24,7 +28,7 @@ jobs:
 
       - name: Update browserslist database
         working-directory: ./ui
-        run: npx update-browserslist-db@latest
+        run: npx --yes update-browserslist-db@latest
 
       - name: Check for changes
         id: changes
