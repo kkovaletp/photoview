@@ -21,6 +21,8 @@ import (
 	"github.com/wsxiaoys/terminal/color"
 )
 
+const maxLogBodyBytes int64 = 50_000
+
 var (
 	logFile   *os.File
 	logMutex  sync.RWMutex
@@ -114,7 +116,7 @@ func LoggingMiddleware(next http.Handler) http.Handler {
 			}
 
 			// Log request body (with size limit for safety)
-			if r.Body != nil && r.ContentLength > 0 && r.ContentLength < 50000 { // 50KB limit
+			if r.Body != nil && r.ContentLength > 0 && r.ContentLength < maxLogBodyBytes {
 				bodyBytes, err := io.ReadAll(r.Body)
 				if err == nil {
 					r.Body = io.NopCloser(bytes.NewReader(bodyBytes))
@@ -125,7 +127,7 @@ func LoggingMiddleware(next http.Handler) http.Handler {
 						writeLog("Body: [binary content, %d bytes]\n", len(bodyBytes))
 					}
 				}
-			} else if r.ContentLength >= 50000 {
+			} else if r.ContentLength >= maxLogBodyBytes {
 				writeLog("Body: [large content, %d bytes - not logged]\n", r.ContentLength)
 			}
 			writeLog("=== PROCESSING ===\n")
@@ -168,7 +170,7 @@ func LoggingMiddleware(next http.Handler) http.Handler {
 				} else {
 					writeLog("Response Body: [binary content, %d bytes]\n", len(responseBody))
 				}
-			} else if debugWriter.bodySize > 50000 {
+			} else if debugWriter.bodySize > maxLogBodyBytes {
 				writeLog("Response Body: [large content, %d bytes - not logged]\n", debugWriter.bodySize)
 			} else if debugWriter.bodySize > 0 {
 				writeLog("Response Body: [content was written but not captured]\n")
@@ -382,8 +384,8 @@ func (w *debugStatusResponseWriter) Write(b []byte) (int, error) {
 	}
 
 	// Capture response body (with size limit for memory safety)
-	if w.bodySize < 50000 { // Same 50KB limit as request
-		remainingCapacity := 50000 - w.bodySize
+	if w.bodySize < maxLogBodyBytes {
+		remainingCapacity := maxLogBodyBytes - w.bodySize
 		if int64(len(b)) <= remainingCapacity {
 			w.bodyBuffer.Write(b)
 		} else {
