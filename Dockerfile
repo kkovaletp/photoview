@@ -185,8 +185,8 @@ RUN addgroup -g 9999 -S caddyuser \
     && adduser  -u 9999 -S -D -G caddyuser caddyuser
 
 COPY --from=cady /usr/bin/caddy /usr/bin/caddy
+COPY --from=ui /app/ui/dist /srv
 COPY --chown=9999:9999 ui/Caddyfile /etc/caddy/Caddyfile
-COPY --from=ui --chown=9999:9999 /app/ui/dist /srv
 
 # This is a w/a for letting the UI build stage to be cached
 # and not rebuilt every new commit because of the build_arg value change.
