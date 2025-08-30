@@ -14,7 +14,7 @@
     skip_install_trust # Required for running as a non-root user
     key_type p384 # A stronger key type for better security, but uses a bit more CPU. Change to `p256` for lower CPU usage.
 
-    debug
+    #debug
 }
 
 # HTTP on 8080 — redirect to HTTPS
@@ -130,9 +130,11 @@
             health_headers {
                 Content-Type application/json
             }
-            health_request_body <<EOF
-{"operationName":"CheckInitialSetup","variables":{},"query":"query CheckInitialSetup { siteInfo { initialSetup }}"}
-EOF
+            health_request_body `\{
+                "operationName":"CheckInitialSetup",
+                "variables":\{},
+                "query":"query CheckInitialSetup \{ siteInfo \{ initialSetup } }"
+            }`
             health_status 2xx
             health_interval 60s
             health_timeout 10s

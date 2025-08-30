@@ -292,14 +292,22 @@ func isBinaryData(data []byte) bool {
 // Detect sensitive headers
 func isSensitiveHeader(name string) bool {
 	n := strings.ToLower(name)
-	if n == "authorization" ||
-		n == "cookie" ||
-		n == "set-cookie" ||
-		n == "proxy-authorization" ||
-		n == "x-api-key" {
+	switch n {
+	case "authorization", "cookie", "set-cookie",
+		"proxy-authorization", "www-authenticate", "proxy-authenticate",
+		"x-api-key", "x-auth-token", "x-access-token",
+		"x-csrf-token", "x-xsrf-token":
 		return true
 	}
-	return strings.HasPrefix(n, "x-api-key")
+	// Heuristic patterns
+	for _, pat := range []string{
+		"api-key", "apikey", "auth", "token", "secret", "password", "session", "bearer", "jwt", "oauth",
+	} {
+		if strings.Contains(n, pat) {
+			return true
+		}
+	}
+	return false
 }
 
 type simpleStatusResponseWriter struct {
