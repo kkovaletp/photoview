@@ -9,7 +9,8 @@ ENV NODE_ENV=${NODE_ENV}
 WORKDIR /app/ui
 
 COPY ui/package.json ui/package-lock.json /app/ui/
-RUN npm install --global npm \
+# NPM 10.x is the latest supported version for Node.js 18.x
+RUN npm install --global npm@10 \
     && if [ "$NODE_ENV" = "production" ]; then \
         echo "Installing production dependencies only..."; \
         npm ci --omit=dev; \
