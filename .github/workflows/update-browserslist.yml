@@ -49,7 +49,6 @@ jobs:
           branch: update-browserslist-db
           delete-branch: true
           labels: 'dependencies, javascript'
-          reviewers: ${{ github.repository == 'kkovaletp/photoview' && github.repository_owner || '' }}
           body: |
             This PR updates the browserslist database to the latest version.
 
