@@ -31,14 +31,15 @@ ARG UI_PUBLIC_URL=/
 ENV UI_PUBLIC_URL=${UI_PUBLIC_URL}
 
 ARG VERSION=unknown-branch
+ENV VERSION=${VERSION}
 ARG TARGETARCH
+ENV TARGETARCH=${TARGETARCH}
 # hadolint ignore=SC2155
-RUN export BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%S+00:00(UTC)'); \
-    export REACT_APP_BUILD_DATE=${BUILD_DATE}; \
-    export COMMIT_SHA="-=<GitHub-CI-commit-sha-placeholder>=-"; \
-    export REACT_APP_BUILD_COMMIT_SHA=${COMMIT_SHA}; \
-    export VERSION="kkovaletp-2-${VERSION}-${TARGETARCH}"; \
-    export REACT_APP_BUILD_VERSION=${VERSION}; \
+RUN REACT_APP_BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%S+00:00(UTC)') \
+    REACT_APP_BUILD_COMMIT_SHA="-=<GitHub-CI-commit-sha-placeholder>=-" \
+    REACT_APP_BUILD_VERSION="kkovaletp-2-${VERSION}-${TARGETARCH}" \
+    REACT_APP_API_ENDPOINT=${REACT_APP_API_ENDPOINT} \
+    echo ">>> NODE_ENV=$NODE_ENV >>> REACT_APP_API_ENDPOINT=$REACT_APP_API_ENDPOINT >>> REACT_APP_BUILD_VERSION=$REACT_APP_BUILD_VERSION >>> REACT_APP_BUILD_COMMIT_SHA=$REACT_APP_BUILD_COMMIT_SHA >>> REACT_APP_BUILD_DATE=$REACT_APP_BUILD_DATE" && \
     npm run build -- --base="${UI_PUBLIC_URL}"
 
 ### Build API ###
@@ -191,6 +192,8 @@ COPY --chown=9999:9999 ui/Caddyfile /etc/caddy/Caddyfile
 # This is a w/a for letting the UI build stage to be cached
 # and not rebuilt every new commit because of the build_arg value change.
 ARG COMMIT_SHA=NoCommit
+#ARG REACT_APP_API_ENDPOINT
+#ENV REACT_APP_API_ENDPOINT=${REACT_APP_API_ENDPOINT}
 # hadolint ignore=DL3018
 RUN apk add --no-cache curl gzip brotli bash \
     && find /srv/assets -type f -name "SettingsPage.*.js" \
