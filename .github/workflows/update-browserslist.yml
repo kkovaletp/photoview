@@ -6,6 +6,10 @@ on:
     - cron: '18 1 * * 5'
   workflow_dispatch: # Allows manual triggering
 
+permissions:
+  contents: write
+  pull-requests: write
+
 jobs:
   update-browserslist:
     runs-on: ubuntu-latest
@@ -17,7 +21,6 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '18'
-          cache: 'npm'
 
       - name: Install dependencies
         working-directory: ./ui
@@ -25,7 +28,7 @@ jobs:
 
       - name: Update browserslist database
         working-directory: ./ui
-        run: npx update-browserslist-db@latest
+        run: npx --yes update-browserslist-db@latest
 
       - name: Check for changes
         id: changes
@@ -37,16 +40,15 @@ jobs:
           fi
 
       - name: Create Pull Request
-        if: steps.changes.outputs.changes == 'true'
+        if: ${{ steps.changes.outputs.changes == 'true' }}
         uses: peter-evans/create-pull-request@v7
         with:
           token: ${{ secrets.COMMENT_TOKEN }}
-          commit-message: 'chore: update browserslist database'
-          title: 'chore: update browserslist database'
+          commit-message: 'Bump browserslist database'
+          title: 'Bump browserslist database'
           branch: update-browserslist-db
           delete-branch: true
           labels: 'dependencies, javascript'
-          reviewers: ${{ github.repository == 'kkovaletp/photoview' && github.repository_owner || '' }}
           body: |
             This PR updates the browserslist database to the latest version.
 
