@@ -39,8 +39,7 @@ RUN export REACT_APP_BUILD_DATE="$(date -u +'%Y-%m-%dT%H:%M:%S+00:00(UTC)')"; \
     export REACT_APP_BUILD_COMMIT_SHA="-=<GitHub-CI-commit-sha-placeholder>=-"; \
     export REACT_APP_BUILD_VERSION="kkovaletp-2-${VERSION}-${TARGETARCH}"; \
     export REACT_APP_API_ENDPOINT="${REACT_APP_API_ENDPOINT}"; \
-    npm run build -- --base="${UI_PUBLIC_URL}" && \
-    echo ">>> NODE_ENV=$NODE_ENV >>> REACT_APP_API_ENDPOINT=$REACT_APP_API_ENDPOINT >>> REACT_APP_BUILD_VERSION=$REACT_APP_BUILD_VERSION >>> REACT_APP_BUILD_COMMIT_SHA=$REACT_APP_BUILD_COMMIT_SHA >>> REACT_APP_BUILD_DATE=$REACT_APP_BUILD_DATE"
+    npm run build$( [ "$NODE_ENV" = "production" ] || echo ":dev" ) -- --base="${UI_PUBLIC_URL}"
 
 ### Build API ###
 FROM --platform=${BUILDPLATFORM:-linux/amd64} golang:1.25-trixie AS api

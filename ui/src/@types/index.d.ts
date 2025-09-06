@@ -5,7 +5,7 @@ declare module '*.svg' {
   export { ReactComponent }
   // export default content
 }
-//TODO: clarify how PROD, DEV, and NODE_ENV are set and used
+
 interface ImportMetaEnv {
   readonly REACT_APP_API_ENDPOINT?: string | undefined
   readonly REACT_APP_BUILD_VERSION: string | undefined
