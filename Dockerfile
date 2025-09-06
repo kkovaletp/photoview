@@ -35,12 +35,12 @@ ENV VERSION=${VERSION}
 ARG TARGETARCH
 ENV TARGETARCH=${TARGETARCH}
 # hadolint ignore=SC2155
-RUN (export REACT_APP_BUILD_DATE=$(date -u +'%Y-%m-%dT%H:%M:%S+00:00(UTC)'); \
+RUN export REACT_APP_BUILD_DATE="$(date -u +'%Y-%m-%dT%H:%M:%S+00:00(UTC)')"; \
     export REACT_APP_BUILD_COMMIT_SHA="-=<GitHub-CI-commit-sha-placeholder>=-"; \
     export REACT_APP_BUILD_VERSION="kkovaletp-2-${VERSION}-${TARGETARCH}"; \
-    export REACT_APP_API_ENDPOINT=${REACT_APP_API_ENDPOINT}; \
+    export REACT_APP_API_ENDPOINT="${REACT_APP_API_ENDPOINT}"; \
     npm run build -- --base="${UI_PUBLIC_URL}" && \
-    echo ">>> NODE_ENV=$NODE_ENV >>> REACT_APP_API_ENDPOINT=$REACT_APP_API_ENDPOINT >>> REACT_APP_BUILD_VERSION=$REACT_APP_BUILD_VERSION >>> REACT_APP_BUILD_COMMIT_SHA=$REACT_APP_BUILD_COMMIT_SHA >>> REACT_APP_BUILD_DATE=$REACT_APP_BUILD_DATE")
+    echo ">>> NODE_ENV=$NODE_ENV >>> REACT_APP_API_ENDPOINT=$REACT_APP_API_ENDPOINT >>> REACT_APP_BUILD_VERSION=$REACT_APP_BUILD_VERSION >>> REACT_APP_BUILD_COMMIT_SHA=$REACT_APP_BUILD_COMMIT_SHA >>> REACT_APP_BUILD_DATE=$REACT_APP_BUILD_DATE"
 
 ### Build API ###
 FROM --platform=${BUILDPLATFORM:-linux/amd64} golang:1.25-trixie AS api
@@ -195,7 +195,8 @@ ARG COMMIT_SHA=NoCommit
 #ARG REACT_APP_API_ENDPOINT
 #ENV REACT_APP_API_ENDPOINT=${REACT_APP_API_ENDPOINT}
 # hadolint ignore=DL3018
-RUN apk add --no-cache curl gzip brotli bash \
+RUN apk add --no-cache curl bash \
+    && apk add --no-cache --virtual .build-compress gzip brotli zstd \
     && find /srv/assets -type f -name "SettingsPage.*.js" \
         -exec sh -c 'sed -i "s/=\"-=<GitHub-CI-commit-sha-placeholder>=-\";/=\"${COMMIT_SHA}\";/g" "$1" \
         && rm -f "$1.gz" "$1.br" \
@@ -205,6 +206,7 @@ RUN apk add --no-cache curl gzip brotli bash \
     #TODO: zstd all
     && gzip -k -f -9 /srv/service-worker.js \
     && brotli -f -q 11 /srv/service-worker.js \
+    && apk del .build-compress \
     # Set correct ownership for Caddy's runtime dirs
     && mkdir -p /data /config /var/log/caddy \
     && chown -R 9999:9999 /data /config /etc/caddy /var/log/caddy
