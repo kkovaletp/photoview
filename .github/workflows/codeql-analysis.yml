@@ -135,7 +135,7 @@ jobs:
           json-file: vulns.json
 
       - name: Update Pull Request
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         if: github.event_name == 'pull_request'
         with:
           github-token: ${{ secrets.COMMENT_TOKEN }}
@@ -198,7 +198,7 @@ jobs:
           failure-threshold: error
 
       - name: Update Pull Request
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         if: ${{ ( steps.hadolint.conclusion == 'success' || steps.hadolint.conclusion == 'failure' ) && github.event_name == 'pull_request' }}
         with:
           github-token: ${{ secrets.COMMENT_TOKEN }}
