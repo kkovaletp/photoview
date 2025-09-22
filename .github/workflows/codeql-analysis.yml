@@ -190,7 +190,7 @@ jobs:
 
       - name: Lint Dockerfile
         id: hadolint
-        uses: hadolint/hadolint-action@v3.2.0
+        uses: hadolint/hadolint-action@v3.3.0
         with:
           dockerfile: Dockerfile
           config: ${{ github.workspace }}/.hadolint.yaml
@@ -243,7 +243,7 @@ jobs:
             });
 
       - name: Generate report
-        uses: hadolint/hadolint-action@v3.2.0
+        uses: hadolint/hadolint-action@v3.3.0
         id: hadolint-report
         if: always()
         with:
