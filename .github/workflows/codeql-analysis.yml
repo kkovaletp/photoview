@@ -60,7 +60,6 @@ jobs:
     name: Anchore scan code dependencies
     if: github.repository == 'kkovaletp/photoview'
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
@@ -183,7 +182,6 @@ jobs:
     name: Hadolint Dockerfile
     if: github.repository == 'kkovaletp/photoview'
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5

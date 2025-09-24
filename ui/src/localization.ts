@@ -121,16 +121,20 @@ export const loadTranslations = () => {
         })
         return
       case LanguageTranslation.TraditionalChineseTW:
-        import('./extractedTranslations/zh-TW/translation.json').then(language => {
-          i18n.addResourceBundle('zh-TW', 'translation', language)
-          i18n.changeLanguage('zh-TW')
-        })
+        import('./extractedTranslations/zh-TW/translation.json').then(
+          language => {
+            i18n.addResourceBundle('zh-TW', 'translation', language)
+            i18n.changeLanguage('zh-TW')
+          }
+        )
         return
       case LanguageTranslation.TraditionalChineseHK:
-        import('./extractedTranslations/zh-HK/translation.json').then(language => {
-          i18n.addResourceBundle('zh-HK', 'translation', language)
-          i18n.changeLanguage('zh-HK')
-        })
+        import('./extractedTranslations/zh-HK/translation.json').then(
+          language => {
+            i18n.addResourceBundle('zh-HK', 'translation', language)
+            i18n.changeLanguage('zh-HK')
+          }
+        )
         return
       case LanguageTranslation.SimplifiedChinese:
         import('./extractedTranslations/zh-CN/translation.json').then(
@@ -156,6 +160,12 @@ export const loadTranslations = () => {
         import('./extractedTranslations/tr/translation.json').then(language => {
           i18n.addResourceBundle('tr', 'translation', language)
           i18n.changeLanguage('tr')
+        })
+        return
+      case LanguageTranslation.Japanese:
+        import('./extractedTranslations/ja/translation.json').then(language => {
+          i18n.addResourceBundle('ja', 'translation', language)
+          i18n.changeLanguage('ja')
         })
         return
     }
