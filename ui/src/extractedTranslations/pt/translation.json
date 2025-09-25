@@ -3,8 +3,13 @@
     "only_favorites": "Mostrar apenas os favoritos",
     "sort": "Ordenar",
     "sort_by": "Ordenado por",
+    "sort_direction": "Direção da ordenação",
+    "order_direction": {
+      "ascending": "Crescente",
+      "descending": "Decrescente"
+    },
     "sorting_options": {
-      "date_imported": "Data de importação",
+      "date_imported": "Direção de classificação",
       "date_shot": "Data da foto",
       "title": "Título",
       "type": "Tipo"
