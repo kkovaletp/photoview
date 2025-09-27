@@ -77,7 +77,6 @@ func NewVideoWebMediaURLLoader(db *gorm.DB) *MediaURLLoader {
 				Order("media_id ASC, CASE purpose WHEN '" +
 					string(models.MediaOriginal) + "' THEN 0 WHEN '" +
 					string(models.VideoWeb) + "' THEN 1 END ASC")
-
 		}),
 	}
 }

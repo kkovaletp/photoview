@@ -2,7 +2,8 @@ import { useEffect } from 'react'
 import { siteTranslation } from './__generated__/siteTranslation'
 import { gql, useLazyQuery } from '@apollo/client'
 import i18n from 'i18next'
-import { initReactI18next, TFunction } from 'react-i18next'
+import { initReactI18next } from 'react-i18next'
+import type { TFunction } from 'i18next'
 import { LanguageTranslation } from './__generated__/globalTypes'
 import { authToken } from './helpers/authentication'
 import { exhaustiveCheck, isNil } from './helpers/utils'
@@ -121,16 +122,20 @@ export const loadTranslations = () => {
         })
         return
       case LanguageTranslation.TraditionalChineseTW:
-        import('./extractedTranslations/zh-TW/translation.json').then(language => {
-          i18n.addResourceBundle('zh-TW', 'translation', language)
-          i18n.changeLanguage('zh-TW')
-        })
+        import('./extractedTranslations/zh-TW/translation.json').then(
+          language => {
+            i18n.addResourceBundle('zh-TW', 'translation', language)
+            i18n.changeLanguage('zh-TW')
+          }
+        )
         return
       case LanguageTranslation.TraditionalChineseHK:
-        import('./extractedTranslations/zh-HK/translation.json').then(language => {
-          i18n.addResourceBundle('zh-HK', 'translation', language)
-          i18n.changeLanguage('zh-HK')
-        })
+        import('./extractedTranslations/zh-HK/translation.json').then(
+          language => {
+            i18n.addResourceBundle('zh-HK', 'translation', language)
+            i18n.changeLanguage('zh-HK')
+          }
+        )
         return
       case LanguageTranslation.SimplifiedChinese:
         import('./extractedTranslations/zh-CN/translation.json').then(
@@ -156,6 +161,12 @@ export const loadTranslations = () => {
         import('./extractedTranslations/tr/translation.json').then(language => {
           i18n.addResourceBundle('tr', 'translation', language)
           i18n.changeLanguage('tr')
+        })
+        return
+      case LanguageTranslation.Japanese:
+        import('./extractedTranslations/ja/translation.json').then(language => {
+          i18n.addResourceBundle('ja', 'translation', language)
+          i18n.changeLanguage('ja')
         })
         return
     }
@@ -192,13 +203,17 @@ export const SetMapLanguages = (map: mapboxgl.Map) => {
     case LanguageTranslation.Polish:
       map.addControl(new MapboxLanguage({ defaultLanguage: 'pl' }))
       return
+    case LanguageTranslation.Ukrainian:
+      map.addControl(new MapboxLanguage({ defaultLanguage: 'uk' }))
+      return
     case LanguageTranslation.German:
       map.addControl(new MapboxLanguage({ defaultLanguage: 'de' }))
       return
     case LanguageTranslation.Russian:
       map.addControl(new MapboxLanguage({ defaultLanguage: 'ru' }))
       return
-    case LanguageTranslation.TraditionalChinese:
+    case LanguageTranslation.TraditionalChineseTW:
+    case LanguageTranslation.TraditionalChineseHK:
       map.addControl(new MapboxLanguage({ defaultLanguage: 'zh-Hant' }))
       return
     case LanguageTranslation.SimplifiedChinese:
@@ -213,5 +228,12 @@ export const SetMapLanguages = (map: mapboxgl.Map) => {
     case LanguageTranslation.Turkish:
       map.addControl(new MapboxLanguage({ defaultLanguage: 'tr' }))
       return
+    case LanguageTranslation.Japanese:
+      map.addControl(new MapboxLanguage({ defaultLanguage: 'ja' }))
+      return
+    default:
+      // Throw the error if we have an unhandled language
+      exhaustiveCheck(map_language)
   }
+
 }

@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/joho/godotenv"
+	"github.com/kkovaletp/photoview/api/scanner/externaltools/exif"
 	"github.com/kkovaletp/photoview/api/scanner/media_encoding/executable_worker"
 	"github.com/kkovaletp/photoview/api/test_utils/flags"
 	"github.com/kkovaletp/photoview/api/utils"
@@ -45,6 +46,12 @@ func IntegrationTestRun(m *testing.M) {
 
 	faceModelsPath := PathFromAPIRoot("data", "models")
 	utils.ConfigureTestFaceRecognitionModelsPath(faceModelsPath)
+
+	exifCleanup, err := exif.Initialize()
+	if err != nil {
+		log.Panicf("init exif error: %v", err)
+	}
+	defer exifCleanup()
 
 	terminateWorkers := executable_worker.Initialize()
 	defer terminateWorkers()
