@@ -13,7 +13,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        database: ['sqlite', 'mysql', 'postgres']
+        database: ["sqlite", "mysql", "postgres"]
 
     services:
       mariadb:
@@ -33,7 +33,7 @@ jobs:
           - 3306:3306
 
       postgres:
-        image: postgres:17-alpine
+        image: postgres:18-alpine
         env:
           POSTGRES_USER: photoview
           POSTGRES_PASSWORD: photosecret
@@ -47,200 +47,200 @@ jobs:
           - 5432:5432
 
     steps:
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v3
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
-    - name: Checkout repo
-      uses: actions/checkout@v5
+      - name: Checkout repo
+        uses: actions/checkout@v5
 
-    - name: Git fetch blame information
-      run: git fetch --unshallow
+      - name: Git fetch blame information
+        run: git fetch --unshallow
 
-    - name: Build test image
-      uses: docker/build-push-action@v6
-      with:
-        pull:       true
-        push:       false
-        load:       true
-        target:     api
-        tags:       photoview/api
-        cache-from: type=gha,scope=test-api-${{ hashFiles('api/go.sum', 'scripts/install_*.sh', 'dependencies/*') }}
+      - name: Build test image
+        uses: docker/build-push-action@v6
+        with:
+          pull: true
+          push: false
+          load: true
+          target: api
+          tags: photoview/api
+          cache-from: type=gha,scope=test-api-${{ hashFiles('api/go.sum', 'scripts/install_*.sh', 'dependencies/*') }}
 
-    - name: Test
-      id: test
-      run: |
-        docker run --name test --network host \
-            -v "${{ github.workspace }}:/app" \
-            -e PHOTOVIEW_DATABASE_DRIVER=${{ matrix.database }} \
-            -e PHOTOVIEW_MYSQL_URL='photoview:photosecret@tcp(localhost:3306)/photoview_test' \
-            -e PHOTOVIEW_POSTGRES_URL='postgres://photoview:photosecret@localhost:5432/photoview_test' \
-            -e PHOTOVIEW_SQLITE_PATH=/tmp/photoview.db \
-          photoview/api \
-          /app/scripts/test_all.sh
-        docker cp test:/app/api/coverage.txt ./api/
-        docker cp test:/app/api/test-api-coverage-report.xml ./api/
+      - name: Test
+        id: test
+        run: |
+          docker run --name test --network host \
+              -v "${{ github.workspace }}:/app" \
+              -e PHOTOVIEW_DATABASE_DRIVER=${{ matrix.database }} \
+              -e PHOTOVIEW_MYSQL_URL='photoview:photosecret@tcp(localhost:3306)/photoview_test' \
+              -e PHOTOVIEW_POSTGRES_URL='postgres://photoview:photosecret@localhost:5432/photoview_test' \
+              -e PHOTOVIEW_SQLITE_PATH=/tmp/photoview.db \
+            photoview/api \
+            /app/scripts/test_all.sh
+          docker cp test:/app/api/coverage.txt ./api/
+          docker cp test:/app/api/test-api-coverage-report.xml ./api/
 
-    - name: Upload coverage
-      uses: codecov/codecov-action@v5
-      if: ${{ steps.test.conclusion == 'success' || steps.test.conclusion == 'failure' }}
-      with:
-        token: ${{ secrets.CODECOV_TKN }}
-        flags: api-${{ matrix.database }}
+      - name: Upload coverage
+        uses: codecov/codecov-action@v5
+        if: ${{ steps.test.conclusion == 'success' || steps.test.conclusion == 'failure' }}
+        with:
+          token: ${{ secrets.CODECOV_TKN }}
+          flags: api-${{ matrix.database }}
 
-    - name: Upload test execution results
-      uses: codecov/test-results-action@v1
-      if: ${{ steps.test.conclusion == 'success' || steps.test.conclusion == 'failure' }}
-      with:
-        token: ${{ secrets.CODECOV_TKN }}
-        flags: api-${{ matrix.database }}
-        files: ./api/test-api-coverage-report.xml
+      - name: Upload test execution results
+        uses: codecov/test-results-action@v1
+        if: ${{ steps.test.conclusion == 'success' || steps.test.conclusion == 'failure' }}
+        with:
+          token: ${{ secrets.CODECOV_TKN }}
+          flags: api-${{ matrix.database }}
+          files: ./api/test-api-coverage-report.xml
 
-    - name: SonarCloud Scan
-      uses: SonarSource/sonarqube-scan-action@master
-      if: ${{ steps.test.conclusion == 'success' || steps.test.conclusion == 'failure' }} && github.repository == 'kkovaletp/photoview'
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
-        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_API }}
-      with:
-        projectBaseDir: api/
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarqube-scan-action@master
+        if: ${{ steps.test.conclusion == 'success' || steps.test.conclusion == 'failure' }} && github.repository == 'kkovaletp/photoview'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Needed to get PR information, if any
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_API }}
+        with:
+          projectBaseDir: api/
 
   test-ui:
     name: Test UI
     runs-on: ubuntu-latest
 
     steps:
-    - name: Set up Docker Buildx
-      uses: docker/setup-buildx-action@v3
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
-    - name: Checkout repo
-      uses: actions/checkout@v5
+      - name: Checkout repo
+        uses: actions/checkout@v5
 
-    - name: Git fetch blame information
-      run: git fetch --unshallow
+      - name: Git fetch blame information
+        run: git fetch --unshallow
 
-    - name: Build test image
-      uses: docker/build-push-action@v6
-      with:
-        pull:       true
-        push:       false
-        load:       true
-        target:     ui
-        tags:       photoview/ui
-        cache-from: type=gha,scope=test-ui-${{ hashFiles('ui/package-lock.json') }}
-        cache-to:   type=gha,mode=max,scope=test-ui-${{ hashFiles('ui/package-lock.json') }}
-        build-args: |
-          NODE_ENV=testing
+      - name: Build test image
+        uses: docker/build-push-action@v6
+        with:
+          pull: true
+          push: false
+          load: true
+          target: ui
+          tags: photoview/ui
+          cache-from: type=gha,scope=test-ui-${{ hashFiles('ui/package-lock.json') }}
+          cache-to: type=gha,mode=max,scope=test-ui-${{ hashFiles('ui/package-lock.json') }}
+          build-args: |
+            NODE_ENV=testing
 
-    - name: Test
-      id: test
-      run: |
-        docker run --name test photoview/ui npm run test:ci
-        docker cp test:/app/ui/coverage ./ui/
-        docker cp test:/app/ui/junit-report.xml ./ui/
+      - name: Test
+        id: test
+        run: |
+          docker run --name test photoview/ui npm run test:ci
+          docker cp test:/app/ui/coverage ./ui/
+          docker cp test:/app/ui/junit-report.xml ./ui/
 
-    - name: Upload coverage
-      uses: codecov/codecov-action@v5
-      if: ${{ steps.test.conclusion == 'success' || steps.test.conclusion == 'failure' }}
-      with:
-        token: ${{ secrets.CODECOV_TKN }}
-        flags: ui
+      - name: Upload coverage
+        uses: codecov/codecov-action@v5
+        if: ${{ steps.test.conclusion == 'success' || steps.test.conclusion == 'failure' }}
+        with:
+          token: ${{ secrets.CODECOV_TKN }}
+          flags: ui
 
-    - name: Upload test execution results
-      uses: codecov/test-results-action@v1
-      if: ${{ steps.test.conclusion == 'success' || steps.test.conclusion == 'failure' }}
-      with:
-        token: ${{ secrets.CODECOV_TKN }}
-        flags: ui
-        directory: ./ui
+      - name: Upload test execution results
+        uses: codecov/test-results-action@v1
+        if: ${{ steps.test.conclusion == 'success' || steps.test.conclusion == 'failure' }}
+        with:
+          token: ${{ secrets.CODECOV_TKN }}
+          flags: ui
+          directory: ./ui
 
-    - name: Run ESLint
-      id: eslint
-      working-directory: ui
-      run: |
-        echo "--------------------------"
-        echo "ESLint execution results :"
-        echo "--------------------------"
-        docker run --name eslint photoview/ui npm run lint:ci || true
-        echo "--------------------------"
-        docker cp eslint:/app/ui/eslint-report.txt ./
-        docker cp eslint:/app/ui/eslint-report.json ./
-        # Fix the difference in paths in the JSON report to be correct outside the container
-        jq --arg workspace "${{ github.workspace }}/ui/" '
-          map(
-            if has("filePath") and (.filePath | startswith("/app/ui/")) then
-              .filePath = ($workspace + (.filePath | sub("^/app/ui/"; "")))
-            else
-              .
-            end
-          )
-        ' ./eslint-report.json > ./eslint-report-fixed.json
-        mv ./eslint-report-fixed.json ./eslint-report.json
-        jq empty ./eslint-report.json || { echo "Invalid JSON file"; exit 1; }
+      - name: Run ESLint
+        id: eslint
+        working-directory: ui
+        run: |
+          echo "--------------------------"
+          echo "ESLint execution results :"
+          echo "--------------------------"
+          docker run --name eslint photoview/ui npm run lint:ci || true
+          echo "--------------------------"
+          docker cp eslint:/app/ui/eslint-report.txt ./
+          docker cp eslint:/app/ui/eslint-report.json ./
+          # Fix the difference in paths in the JSON report to be correct outside the container
+          jq --arg workspace "${{ github.workspace }}/ui/" '
+            map(
+              if has("filePath") and (.filePath | startswith("/app/ui/")) then
+                .filePath = ($workspace + (.filePath | sub("^/app/ui/"; "")))
+              else
+                .
+              end
+            )
+          ' ./eslint-report.json > ./eslint-report-fixed.json
+          mv ./eslint-report-fixed.json ./eslint-report.json
+          jq empty ./eslint-report.json || { echo "Invalid JSON file"; exit 1; }
 
-    - name: ESLint artifact
-      id: eslint-artifact
-      uses: actions/upload-artifact@v4
-      if: ${{ steps.eslint.conclusion == 'success' || steps.eslint.conclusion == 'failure' }}
-      with:
-        name: ESLint-report
-        path: ./ui/eslint-report*
-        if-no-files-found: warn
-        compression-level: 9
-        overwrite: true
+      - name: ESLint artifact
+        id: eslint-artifact
+        uses: actions/upload-artifact@v4
+        if: ${{ steps.eslint.conclusion == 'success' || steps.eslint.conclusion == 'failure' }}
+        with:
+          name: ESLint-report
+          path: ./ui/eslint-report*
+          if-no-files-found: warn
+          compression-level: 9
+          overwrite: true
 
-    - name: Publish ESlint report in PR comment
-      uses: actions/github-script@v8
-      if: github.event_name == 'pull_request'
-      with:
-        github-token: ${{ secrets.COMMENT_TOKEN }}
-        script: |
-          let ESLintResults = "${{ steps.eslint-artifact.outputs.artifact-url }}";
-          let output = '';
+      - name: Publish ESlint report in PR comment
+        uses: actions/github-script@v8
+        if: github.event_name == 'pull_request'
+        with:
+          github-token: ${{ secrets.COMMENT_TOKEN }}
+          script: |
+            let ESLintResults = "${{ steps.eslint-artifact.outputs.artifact-url }}";
+            let output = '';
 
-          const comments = await github.rest.issues.listComments({
-            issue_number: context.issue.number,
-            owner: context.repo.owner,
-            repo: context.repo.repo
-          });
-
-          const botComment = comments.data.find(
-            comment => comment.body.includes('UI: ESLint issues:')
-          );
-
-          if (ESLintResults) {
-            output += '#### UI: ESLint issues:\n';
-            output += 'ESLint detected issues in the UI code.\n';
-            output += '\n[ESLint execution report](' + ESLintResults + ')\n';
-            output += '\nMake sure that you are logged in to be able to access the report.';
-            output += '\nThe report is accessible by this link within 90 days after the last ';
-            output += 'UI testing workflow execution time.';
-            output += '\nAfter that time you need to go to the ESLint execution step in the ';
-            output += 'Actions tab to see the same results.';
-          } else {
-            output += '#### UI: ESLint issues:\n';
-            output += 'ESLint did not return any results.\n';
-            output += 'This means that probably the ESLint job failed. Please check it.\n';
-          }
-
-          if (botComment) {
-            await github.rest.issues.deleteComment({
-              comment_id: botComment.id,
+            const comments = await github.rest.issues.listComments({
+              issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo
             });
-          }
-          await github.rest.issues.createComment({
-            issue_number: context.issue.number,
-            owner: context.repo.owner,
-            repo: context.repo.repo,
-            body: output
-          })
 
-    - name: SonarCloud Scan
-      uses: SonarSource/sonarqube-scan-action@master
-      if: ${{ steps.test.conclusion == 'success' || steps.test.conclusion == 'failure' }} && github.repository == 'kkovaletp/photoview'
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Needed to get PR information, if any
-        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_UI }}
-      with:
-        projectBaseDir: ui/
+            const botComment = comments.data.find(
+              comment => comment.body.includes('UI: ESLint issues:')
+            );
+
+            if (ESLintResults) {
+              output += '#### UI: ESLint issues:\n';
+              output += 'ESLint detected issues in the UI code.\n';
+              output += '\n[ESLint execution report](' + ESLintResults + ')\n';
+              output += '\nMake sure that you are logged in to be able to access the report.';
+              output += '\nThe report is accessible by this link within 90 days after the last ';
+              output += 'UI testing workflow execution time.';
+              output += '\nAfter that time you need to go to the ESLint execution step in the ';
+              output += 'Actions tab to see the same results.';
+            } else {
+              output += '#### UI: ESLint issues:\n';
+              output += 'ESLint did not return any results.\n';
+              output += 'This means that probably the ESLint job failed. Please check it.\n';
+            }
+
+            if (botComment) {
+              await github.rest.issues.deleteComment({
+                comment_id: botComment.id,
+                owner: context.repo.owner,
+                repo: context.repo.repo
+              });
+            }
+            await github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: output
+            })
+
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarqube-scan-action@master
+        if: ${{ steps.test.conclusion == 'success' || steps.test.conclusion == 'failure' }} && github.repository == 'kkovaletp/photoview'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Needed to get PR information, if any
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_UI }}
+        with:
+          projectBaseDir: ui/

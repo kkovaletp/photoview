@@ -129,22 +129,22 @@ services:
   ## Tip: Back up the Photoview data before autoupgrade to a new PostgreSQL version.
   ## It is an optional service to simplify the upgrade process. You can also upgrade PostgreSQL manually.
   ## It is safe to keep it enabled, as if it detects no upgrade is needed, it exits immediately.
-#   postgres-autoupgrade:
-#     image: pgautoupgrade/pgautoupgrade:17-alpine
-#     hostname: pgsql-upg
-#     container_name: pgsql-upg
-#     restart: "no"
-#     environment:
-#       POSTGRES_DB: ${PGSQL_DATABASE}
-#       POSTGRES_USER: ${PGSQL_USER}
-#       POSTGRES_PASSWORD: ${PGSQL_PASSWORD}
-#       PGAUTO_ONESHOT: "yes"
-#     volumes:
-#       ## Example:
-#       ## - "/host/folder:/container/folder"
-#       - "/etc/localtime:/etc/localtime:ro" ## use local time from host
-#       - "/etc/timezone:/etc/timezone:ro"   ## use timezone from host
-#       - "${HOST_PHOTOVIEW_LOCATION}/database/postgres:/var/lib/postgresql/data" ## DO NOT REMOVE
+  #   postgres-autoupgrade:
+  #     image: pgautoupgrade/pgautoupgrade:18-alpine
+  #     hostname: pgsql-upg
+  #     container_name: pgsql-upg
+  #     restart: "no"
+  #     environment:
+  #       POSTGRES_DB: ${PGSQL_DATABASE}
+  #       POSTGRES_USER: ${PGSQL_USER}
+  #       POSTGRES_PASSWORD: ${PGSQL_PASSWORD}
+  #       PGAUTO_ONESHOT: "yes"
+  #     volumes:
+  #       ## Example:
+  #       ## - "/host/folder:/container/folder"
+  #       - "/etc/localtime:/etc/localtime:ro" ## use local time from host
+  #       - "/etc/timezone:/etc/timezone:ro"   ## use timezone from host
+  #       - "${HOST_PHOTOVIEW_LOCATION}/database/postgres:/var/lib/postgresql/data" ## DO NOT REMOVE
 
   ## Comment out the `postgres` service if PHOTOVIEW_DATABASE_DRIVER is set to `mysql` or `sqlite` in the .env
   postgres:
