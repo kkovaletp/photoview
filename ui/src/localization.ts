@@ -169,9 +169,14 @@ export const loadTranslations = () => {
           i18n.changeLanguage('ja')
         })
         return
+      default:
+        import('./extractedTranslations/en/translation.json').then(language => {
+          i18n.addResourceBundle('en', 'translation', language)
+          i18n.changeLanguage('en')
+        })
+        exhaustiveCheck(language)
     }
 
-    exhaustiveCheck(language)
   }, [data?.myUserPreferences.language])
 }
 
@@ -232,6 +237,7 @@ export const SetMapLanguages = (map: mapboxgl.Map) => {
       map.addControl(new MapboxLanguage({ defaultLanguage: 'ja' }))
       return
     default:
+      map.addControl(new MapboxLanguage({ defaultLanguage: 'en' }))
       // Throw the error if we have an unhandled language
       exhaustiveCheck(map_language)
   }

@@ -9,7 +9,7 @@
       "descending": "Decrescente"
     },
     "sorting_options": {
-      "date_imported": "Direção de classificação",
+      "date_imported": "Data de importação",
       "date_shot": "Data da foto",
       "title": "Título",
       "type": "Tipo"
@@ -183,11 +183,11 @@
     },
     "users": {
       "add_user": {
-        "submit": "Adiiconar utilizador"
+        "submit": "Adicionar utilizador"
       },
       "confirm_delete_user": {
         "action": "Apagar {{user}}",
-        "description": "<0>Tem a certeza que pretende aapagar <1></1>?</0><p>Esta ação não pode ser desfeita</p>",
+        "description": "<0>Tem a certeza que pretende apagar <1></1>?</0><p>Esta ação não pode ser desfeita</p>",
         "title": "Apagar utilizador"
       },
       "password_reset": {
