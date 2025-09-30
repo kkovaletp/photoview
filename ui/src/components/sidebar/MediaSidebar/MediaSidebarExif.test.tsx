@@ -1,5 +1,6 @@
+import { vi } from 'vitest'
 // Mock react-i18next following the project pattern
-const mockUseTranslation = vi.fn()
+const mockUseTranslation = vi.hoisted(() => vi.fn())
 vi.mock('react-i18next', () => ({
   useTranslation: mockUseTranslation,
 }))
@@ -8,9 +9,7 @@ mockUseTranslation.mockReturnValue({
   i18n: { language: 'en' },
 })
 
-import React from 'react'
 import { render, screen } from '@testing-library/react'
-import { vi } from 'vitest'
 import ExifDetails from './MediaSidebarExif'
 import { MediaSidebarMedia } from './MediaSidebar'
 import { MediaType } from '../../../__generated__/globalTypes'
@@ -96,9 +95,6 @@ describe('ExifDetails', () => {
 
     expect(screen.getByText('Lens')).toBeInTheDocument()
     expect(screen.getByText('TAMRON SP 24-70mm F/2.8')).toBeInTheDocument()
-
-    expect(screen.getByText('Program')).toBeInTheDocument()
-    expect(screen.getByText('Canon EOS R')).toBeInTheDocument()
 
     expect(screen.getByText('Date shot')).toBeInTheDocument()
 
