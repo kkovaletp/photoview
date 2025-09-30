@@ -60,7 +60,8 @@ export const MY_TIMELINE_QUERY = gql`
 `
 
 export type TimelineActiveIndex = {
-  albumGroup: number
+  date: number
+  album: number
   media: number
 }
 
@@ -91,9 +92,9 @@ const TimelineGallery = () => {
     presenting: false,
     timelineGroups: [],
     activeIndex: {
-      media: -1,
-      album: -1,
       date: -1,
+      album: -1,
+      media: -1,
     },
   })
 

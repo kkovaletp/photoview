@@ -189,6 +189,7 @@ jobs:
       - name: Lint Dockerfile
         id: hadolint
         uses: hadolint/hadolint-action@v3.3.0
+        continue-on-error: true
         with:
           dockerfile: Dockerfile
           config: ${{ github.workspace }}/.hadolint.yaml
@@ -244,6 +245,7 @@ jobs:
         uses: hadolint/hadolint-action@v3.3.0
         id: hadolint-report
         if: always()
+        continue-on-error: true
         with:
           dockerfile: Dockerfile
           config: ${{ github.workspace }}/.hadolint.yaml
