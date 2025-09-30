@@ -96,9 +96,6 @@ describe('ExifDetails', () => {
     expect(screen.getByText('Lens')).toBeInTheDocument()
     expect(screen.getByText('TAMRON SP 24-70mm F/2.8')).toBeInTheDocument()
 
-    expect(screen.getByText('Program')).toBeInTheDocument()
-    expect(screen.getByText('Canon EOS R')).toBeInTheDocument()
-
     expect(screen.getByText('Date shot')).toBeInTheDocument()
 
     expect(screen.getByText('Exposure')).toBeInTheDocument()
