@@ -20,7 +20,7 @@ import (
 	"github.com/kkovaletp/photoview/api/graphql/auth"
 	graphql_endpoint "github.com/kkovaletp/photoview/api/graphql/endpoint"
 	"github.com/kkovaletp/photoview/api/routes"
-	"github.com/kkovaletp/photoview/api/scanner/exif"
+	"github.com/kkovaletp/photoview/api/scanner/externaltools/exif"
 	"github.com/kkovaletp/photoview/api/scanner/face_detection"
 	"github.com/kkovaletp/photoview/api/scanner/media_encoding/executable_worker"
 	"github.com/kkovaletp/photoview/api/scanner/periodic_scanner"
@@ -53,6 +53,12 @@ func main() {
 		log.Panicf("Could not migrate database: %s\n", err)
 	}
 
+	exifCleanup, err := exif.Initialize()
+	if err != nil {
+		log.Panicf("Could not initialize exif parser: %s", err)
+	}
+	defer exifCleanup()
+
 	if err := scanner_queue.InitializeScannerQueue(db); err != nil {
 		log.Panicf("Could not initialize scanner queue: %s\n", err)
 	}
@@ -60,8 +66,6 @@ func main() {
 	if err := periodic_scanner.InitializePeriodicScanner(db); err != nil {
 		log.Panicf("Could not initialize periodic scanner: %s", err)
 	}
-
-	exif.InitializeEXIFParser()
 
 	if err := face_detection.InitializeFaceDetector(db); err != nil {
 		log.Panicf("Could not initialize face detector: %s\n", err)
