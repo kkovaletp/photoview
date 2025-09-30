@@ -1,3 +1,4 @@
+import { vi } from 'vitest'
 // Mock react-i18next following the project pattern
 const mockUseTranslation = vi.hoisted(() => vi.fn())
 vi.mock('react-i18next', () => ({
@@ -8,9 +9,7 @@ mockUseTranslation.mockReturnValue({
   i18n: { language: 'en' },
 })
 
-import React from 'react'
 import { render, screen } from '@testing-library/react'
-import { vi } from 'vitest'
 import ExifDetails from './MediaSidebarExif'
 import { MediaSidebarMedia } from './MediaSidebar'
 import { MediaType } from '../../../__generated__/globalTypes'
