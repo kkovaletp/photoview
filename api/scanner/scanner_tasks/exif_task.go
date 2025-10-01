@@ -37,9 +37,9 @@ func SaveEXIF(tx *gorm.DB, media *models.Media) error {
 		} else if err != gorm.ErrRecordNotFound {
 			return fmt.Errorf("failed to get EXIF for %q from database: %w", media.Path, err)
 		} else {
-			log.Error(
+			log.Warn(
 				tx.Statement.Context,
-				"EXIF metadata for %q not found in database. Parse it again", media.Path,
+				fmt.Sprintf("EXIF metadata for %q not found in database, will re-parse it again", media.Path),
 				"error", err,
 			)
 			media.ExifID = nil
