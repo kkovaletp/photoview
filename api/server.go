@@ -20,7 +20,7 @@ import (
 	"github.com/kkovaletp/photoview/api/graphql/auth"
 	graphql_endpoint "github.com/kkovaletp/photoview/api/graphql/endpoint"
 	"github.com/kkovaletp/photoview/api/routes"
-	"github.com/kkovaletp/photoview/api/scanner/exif"
+	"github.com/kkovaletp/photoview/api/scanner/externaltools/exif"
 	"github.com/kkovaletp/photoview/api/scanner/face_detection"
 	"github.com/kkovaletp/photoview/api/scanner/media_encoding/executable_worker"
 	"github.com/kkovaletp/photoview/api/scanner/periodic_scanner"
@@ -53,6 +53,12 @@ func main() {
 		log.Panicf("Could not migrate database: %s\n", err)
 	}
 
+	exifCleanup, err := exif.Initialize()
+	if err != nil {
+		log.Panicf("Could not initialize exif parser: %s", err)
+	}
+	defer exifCleanup()
+
 	if err := scanner_queue.InitializeScannerQueue(db); err != nil {
 		log.Panicf("Could not initialize scanner queue: %s\n", err)
 	}
@@ -60,8 +66,6 @@ func main() {
 	if err := periodic_scanner.InitializePeriodicScanner(db); err != nil {
 		log.Panicf("Could not initialize periodic scanner: %s", err)
 	}
-
-	exif.InitializeEXIFParser()
 
 	if err := face_detection.InitializeFaceDetector(db); err != nil {
 		log.Panicf("Could not initialize face detector: %s\n", err)
@@ -78,7 +82,7 @@ func main() {
 	endpointRouter := rootRouter.PathPrefix(apiListenURL.Path).Subrouter()
 
 	if devMode {
-		endpointRouter.Handle("/", playground.Handler("GraphQL playground", path.Join(apiListenURL.Path, "/graphql")))
+		endpointRouter.Handle("/", playground.Handler("GraphQL playground", path.Join(apiListenURL.Path, "graphql")))
 	} else {
 		endpointRouter.HandleFunc("/", func(w http.ResponseWriter, req *http.Request) {
 			w.Write([]byte("photoview api endpoint"))
@@ -114,7 +118,7 @@ func main() {
 		logUIendpointURL()
 
 		if !shouldServeUI {
-			log.Printf("Notice: UI is not served by the the api (%s=0)", utils.EnvServeUI.GetName())
+			log.Printf("Notice: UI is not served by the API (%s=0)", utils.EnvServeUI.GetName())
 		}
 
 	}
@@ -131,7 +135,7 @@ func main() {
 	}
 }
 
-func setupGracefulShutdown(server *http.Server) {
+func setupGracefulShutdown(svr *http.Server) {
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt, syscall.SIGTERM)
 
@@ -145,7 +149,7 @@ func setupGracefulShutdown(server *http.Server) {
 		periodic_scanner.ShutdownPeriodicScanner()
 		scanner_queue.CloseScannerQueue()
 
-		if err := server.Shutdown(ctx); err != nil {
+		if err := svr.Shutdown(ctx); err != nil {
 			log.Printf("Server shutdown error: %s", err)
 		} else {
 			log.Println("Shutdown complete")

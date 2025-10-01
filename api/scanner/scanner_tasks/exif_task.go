@@ -1,10 +1,13 @@
 package scanner_tasks
 
 import (
-	"log"
+	"fmt"
+
+	"gorm.io/gorm"
 
 	"github.com/kkovaletp/photoview/api/graphql/models"
-	"github.com/kkovaletp/photoview/api/scanner/exif"
+	"github.com/kkovaletp/photoview/api/log"
+	"github.com/kkovaletp/photoview/api/scanner/externaltools/exif"
 	"github.com/kkovaletp/photoview/api/scanner/scanner_task"
 )
 
@@ -13,14 +16,57 @@ type ExifTask struct {
 }
 
 func (t ExifTask) AfterMediaFound(ctx scanner_task.TaskContext, media *models.Media, newMedia bool) error {
-
 	if !newMedia {
 		return nil
 	}
 
-	_, err := exif.SaveEXIF(ctx.GetDB(), media)
+	if err := SaveEXIF(ctx.GetDB(), media); err != nil {
+		log.Warn(ctx, "SaveEXIF failed", "title", media.Title, "error", err, "path", media.Path)
+	}
+
+	return nil
+}
+
+// SaveEXIF scans the media file for exif metadata and saves it in the database if found
+func SaveEXIF(tx *gorm.DB, media *models.Media) error {
+	// Check if EXIF data already exists
+	if media.ExifID != nil {
+		var exifInDB models.MediaEXIF
+		if err := tx.First(&exifInDB, media.ExifID).Error; err == nil {
+			return nil
+		} else if err != gorm.ErrRecordNotFound {
+			return fmt.Errorf("failed to get EXIF for %q from database: %w", media.Path, err)
+		} else {
+			log.Warn(
+				tx.Statement.Context,
+				"EXIF metadata not found in database, will re-parse it",
+				"path", media.Path,
+				"error", err,
+			)
+			media.ExifID = nil
+		}
+	}
+
+	exifData, err := exif.Parse(media.Path)
 	if err != nil {
-		log.Printf("WARN: SaveEXIF for %s failed: %s\n", media.Title, err)
+		return fmt.Errorf("failed to parse exif data: %w", err)
+	}
+
+	if exifData == nil {
+		return nil
+	}
+
+	// Add EXIF to database and link to media
+	if err := tx.Model(media).Association("Exif").Replace(exifData); err != nil {
+		return fmt.Errorf("failed to save media exif to database: %w", err)
+	}
+
+	if exifData.DateShot != nil && !exifData.DateShot.Equal(media.DateShot) {
+		if err := tx.Model(media).Update("date_shot", *exifData.DateShot).Error; err != nil {
+			return fmt.Errorf("failed to update media date_shot: %w", err)
+		} else {
+			media.DateShot = *exifData.DateShot
+		}
 	}
 
 	return nil
