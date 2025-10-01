@@ -518,8 +518,9 @@ describe('ExifDetails dateShot formatting', () => {
         const media = createMediaWithDateShot(input)
         const { rerender } = render(<ExifDetails media={media} />)
 
-        // Should either format correctly or show original string if invalid
+        // Should show original string if invalid
         expect(screen.getByText('Date shot')).toBeInTheDocument()
+        expect(screen.getByText(input)).toBeInTheDocument()
 
         if (index < testCases.length - 1) {
           rerender(<div />)
