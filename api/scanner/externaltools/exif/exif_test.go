@@ -7,7 +7,7 @@ import (
 	_ "github.com/kkovaletp/photoview/api/test_utils/flags"
 )
 
-func ResetForTest() {
+func resetForTest() {
 	globalMu.Lock()
 	defer globalMu.Unlock()
 	if globalExifParser != nil {
@@ -19,7 +19,7 @@ func ResetForTest() {
 }
 
 func TestParseWithoutInit(t *testing.T) {
-	ResetForTest()
+	resetForTest()
 	if _, err := Parse("./test_data/bird.jpg"); err == nil {
 		t.Fatalf("Parse() without Init() doesn't return an error")
 	}

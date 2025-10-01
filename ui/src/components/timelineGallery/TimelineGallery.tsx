@@ -141,7 +141,7 @@ const TimelineGallery = () => {
 
   urlPresentModeSetupHook({
     dispatchMedia,
-    openPresentMode: event => {
+    openPresentMode: () => {
       dispatchMedia({
         type: 'openPresentMode',
         activeIndex: mediaState.activeIndex as unknown as TimelineMediaIndex,

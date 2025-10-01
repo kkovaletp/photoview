@@ -392,7 +392,7 @@ describe('ExifDetails dateShot formatting', () => {
 
       // Should handle empty string gracefully
       expect(screen.getByText('Date shot')).toBeInTheDocument()
-      expect(screen.getByText(/Jan 15, 2023.*12:00:00 PM.*\-05:00$/)).toBeInTheDocument()
+      expect(screen.getByText(/Jan 15, 2023.*12:00:00 PM.*-05:00$/)).toBeInTheDocument()
     })
 
     test('uses Russian (ru) translation language', () => {
