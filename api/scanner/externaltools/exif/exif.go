@@ -33,7 +33,7 @@ func Initialize() (func(), error) {
 		}
 
 		if err := globalExifParser.Close(); err != nil {
-			log.Error(context.Background(), "Cleanup exiftool error:", err)
+			log.Error(context.Background(), "Cleanup exiftool error", "error", err)
 			return
 		}
 		globalExifParser = nil

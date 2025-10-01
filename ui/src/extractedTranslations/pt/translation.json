@@ -3,7 +3,7 @@
     "only_favorites": "Mostrar apenas os favoritos",
     "sort": "Ordenar",
     "sort_by": "Ordenado por",
-    "sort_direction": "Direção da ordenação",
+    "sort_direction": "Sentido da ordenação",
     "order_direction": {
       "ascending": "Crescente",
       "descending": "Decrescente"

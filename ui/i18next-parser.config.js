@@ -18,7 +18,7 @@ module.exports = {
     'pt',
     'ru',
     'sv',
-    'ua',
+    'uk',
     'zh-CN',
     'zh-HK',
     'zh-TW',

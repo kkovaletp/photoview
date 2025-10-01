@@ -5,8 +5,8 @@
     "sort_by": "排序方式",
     "sort_direction": "排序方向",
     "order_direction": {
-      "ascending": "升序",
-      "descending": "降序"
+      "ascending": "遞增",
+      "descending": "遞減"
     },
     "sorting_options": {
       "date_imported": "匯入日期",

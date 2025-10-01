@@ -32,11 +32,11 @@ func SaveEXIF(tx *gorm.DB, media *models.Media) error {
 	// Check if EXIF data already exists
 	if media.ExifID != nil {
 		var exifInDB models.MediaEXIF
-		if err := tx.First(&exifInDB, media.ExifID).Error; err != nil {
-			return fmt.Errorf("failed to get EXIF for %q from database: %w", media.Path, err)
+		if err := tx.First(&exifInDB, media.ExifID).Error; err == nil {
+			return nil
+		} else {
+			log.Error(tx.Statement.Context, "failed to get EXIF for %q from database", media.Path, "error", err)
 		}
-
-		return nil
 	}
 
 	exifData, err := exif.Parse(media.Path)
