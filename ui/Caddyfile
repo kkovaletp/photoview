@@ -64,7 +64,7 @@
         respond @goingDown "Shutting down in {http.time_until_shutdown}" 503 {
             close
         }
-        @healthy file /srv/index.html
+        @healthy file index.html
         respond @healthy "OK" 200 {
             close
         }
