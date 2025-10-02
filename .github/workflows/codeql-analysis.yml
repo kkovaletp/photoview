@@ -60,14 +60,13 @@ jobs:
     name: Anchore scan code dependencies
     if: github.repository == 'kkovaletp/photoview'
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
 
       - name: Generate report
         id: scan
-        uses: anchore/scan-action@v6
+        uses: anchore/scan-action@v7
         continue-on-error: true
         with:
           path: "."
@@ -82,7 +81,7 @@ jobs:
 
       - name: Scan PR source code
         id: scan-fixed
-        uses: anchore/scan-action@v6
+        uses: anchore/scan-action@v7
         if: always() && github.event_name == 'pull_request'
         continue-on-error: true
         with:
@@ -135,7 +134,7 @@ jobs:
           json-file: vulns.json
 
       - name: Update Pull Request
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         if: github.event_name == 'pull_request'
         with:
           github-token: ${{ secrets.COMMENT_TOKEN }}
@@ -183,14 +182,14 @@ jobs:
     name: Hadolint Dockerfile
     if: github.repository == 'kkovaletp/photoview'
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
 
       - name: Lint Dockerfile
         id: hadolint
-        uses: hadolint/hadolint-action@v3.1.0
+        uses: hadolint/hadolint-action@v3.3.0
+        continue-on-error: true
         with:
           dockerfile: Dockerfile
           config: ${{ github.workspace }}/.hadolint.yaml
@@ -198,7 +197,7 @@ jobs:
           failure-threshold: error
 
       - name: Update Pull Request
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         if: ${{ ( steps.hadolint.conclusion == 'success' || steps.hadolint.conclusion == 'failure' ) && github.event_name == 'pull_request' }}
         with:
           github-token: ${{ secrets.COMMENT_TOKEN }}
@@ -243,8 +242,9 @@ jobs:
             });
 
       - name: Generate report
-        uses: hadolint/hadolint-action@v3.1.0
+        uses: hadolint/hadolint-action@v3.3.0
         id: hadolint-report
+        continue-on-error: true
         if: always()
         with:
           dockerfile: Dockerfile

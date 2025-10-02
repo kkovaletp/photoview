@@ -12,11 +12,17 @@ export type SetOrderingFn = (args: {
   orderDirection?: OrderDirection
 }) => void
 
-function useOrderingParams({ getParam, setParams }: UrlParams) {
-  const orderBy = getParam('orderBy', 'date_shot')
+function useOrderingParams(
+  { getParam, setParams }: UrlParams,
+  defaultOrderBy = 'date_shot'
+) {
+  const rawOrderBy = getParam('orderBy', defaultOrderBy)
+  const orderBy = rawOrderBy === null || rawOrderBy === '' ? defaultOrderBy : rawOrderBy
 
-  const orderDirStr = getParam('orderDirection', 'ASC') || 'hello'
-  const orderDirection = orderDirStr as OrderDirection
+  const rawOrderDir = getParam('orderDirection', OrderDirection.ASC)
+  const orderDirection =
+    Object.values(OrderDirection).includes(rawOrderDir as OrderDirection)
+      ? (rawOrderDir as OrderDirection) : OrderDirection.ASC
 
   const setOrdering: SetOrderingFn = useCallback(
     ({ orderBy, orderDirection }) => {
