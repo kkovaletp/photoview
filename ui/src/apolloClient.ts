@@ -23,7 +23,7 @@ export const API_ENDPOINT = import.meta.env.REACT_APP_API_ENDPOINT
   : urlJoin(location.origin, '/api')
 
 export const GRAPHQL_ENDPOINT = urlJoin(API_ENDPOINT, '/graphql')
-
+// TODO: fix deprecated hooks
 type CachedItem = Reference | {
   id: string
   __typename: string
