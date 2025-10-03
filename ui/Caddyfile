@@ -80,7 +80,8 @@
         # Enable cross-site scripting protection in old browsers (harmless in new ones)
         X-XSS-Protection "0"
         # Limit information leakage about server
-        Server ""
+        -Server
+        -via
         # Enforce HTTPS on all subdomains for 6 months.
         Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
         # Content Security Policy to prevent XSS attacks
@@ -105,13 +106,16 @@
 	header @revalidate Cache-Control "public, must-revalidate"
     # Prevent caching errors
     header {
-        -Cache-Control
         Cache-Control "no-store, no-cache, must-revalidate, max-age=0"
         match status 4xx 5xx
     }
 
     # Reverse proxy to backend
     handle /api/* {
+        @gql path /api/graphql
+        header @gql {
+            Cache-Control "no-store, no-cache, must-revalidate, max-age=0"
+        }
         reverse_proxy photoview:8080 {
             health_uri /api/graphql
             health_method POST
@@ -126,7 +130,6 @@
             health_status 2xx
             health_interval 60s
             health_timeout 10s
-            #header_up Host {host}
         }
     }
 

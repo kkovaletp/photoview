@@ -93,7 +93,7 @@ func main() {
 		})
 	}
 
-	endpointRouter.Handle("/graphql", graphql_endpoint.GraphqlEndpoint(db))
+	endpointRouter.Handle("/graphql", handlers.CompressHandler(graphql_endpoint.GraphqlEndpoint(db)))
 
 	photoRouter := endpointRouter.PathPrefix("/photo").Subrouter()
 	routes.RegisterPhotoRoutes(db, photoRouter)
@@ -108,7 +108,7 @@ func main() {
 
 	if shouldServeUI {
 		spa := routes.NewSpaHandler(utils.UIPath(), "index.html")
-		rootRouter.PathPrefix("/").Handler(spa)
+		rootRouter.PathPrefix("/").Handler(handlers.CompressHandler(spa))
 	}
 
 	if devMode {
@@ -129,7 +129,7 @@ func main() {
 
 	srv := &http.Server{
 		Addr:    apiListenURL.Host,
-		Handler: handlers.CompressHandler(rootRouter),
+		Handler: rootRouter,
 	}
 
 	setupGracefulShutdown(srv)
