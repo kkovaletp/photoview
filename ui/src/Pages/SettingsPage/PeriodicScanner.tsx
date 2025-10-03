@@ -105,7 +105,7 @@ const PeriodicScanner = () => {
   })
 
   const scanIntervalServerValue = useRef<number | null>(null)
-
+  // TODO: replace the deprecated `onCompleted` with `useEffect`: https://github.com/kkovaletp/photoview/pull/561#discussion_r2398321316
   const scanIntervalQuery = useQuery<scanIntervalQuery>(SCAN_INTERVAL_QUERY, {
     onCompleted(data) {
       const queryScanInterval = data.siteInfo.periodicScanInterval

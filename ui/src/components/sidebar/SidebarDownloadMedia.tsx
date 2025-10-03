@@ -6,7 +6,7 @@ import { TranslationFn } from '../../localization'
 import { useMessageState } from '../messages/MessageState'
 import { Message } from '../messages/SubscriptionsHook'
 import { MediaSidebarMedia } from './MediaSidebar/MediaSidebar'
-import React from 'react'
+import React, { useEffect } from 'react'
 import { SidebarSection, SidebarSectionTitle } from './SidebarComponents'
 import SidebarTable from './SidebarTable'
 import {
@@ -313,22 +313,22 @@ const SidebarMediaDownload = ({ media }: SidebarMediaDownladProps) => {
     sidebarDownloadQueryVariables
   >(SIDEBAR_DOWNLOAD_QUERY, {})
 
+  useEffect(() => {
+    if (media?.id && !media.downloads && !called) {
+      loadPhotoDownloads({
+        variables: { mediaId: media.id }
+      })
+    }
+  }, [media?.id, media?.downloads, called, loadPhotoDownloads])
+
   if (!media || !media.id) return null
 
   let downloads: sidebarDownloadQuery_media_downloads[] = []
 
-  if (called) {
-    if (!loading) {
-      downloads = (data && data.media.downloads) || []
-    }
-  } else {
-    if (!media.downloads) {
-      loadPhotoDownloads({
-        variables: { mediaId: media.id }
-      })
-    } else {
-      downloads = media.downloads
-    }
+  if (called && !loading) {
+    downloads = (data && data.media.downloads) || []
+  } else if (media.downloads) {
+    downloads = media.downloads
   }
 
   const downloadRows = downloads.map<SidebarDownloadTableRow>(x => ({
