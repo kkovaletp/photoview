@@ -5,7 +5,6 @@ import { defineConfig } from 'vite'
 import svgr from 'vite-plugin-svgr'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
-import { compression } from 'vite-plugin-compression2'
 
 export default defineConfig({
   plugins: [
@@ -20,11 +19,6 @@ export default defineConfig({
       injectManifest: {
         injectionPoint: undefined
       }
-    }),
-    compression({
-      algorithms: ['gzip', 'brotliCompress'],
-      include: /\.(js|mjs|json|css|html|svg|txt|xml|wasm)$/i,
-      exclude: /\.(jpe?g|png|gif|webp|avif|mp4|mp3|woff2?)$/i
     })],
   envPrefix: ['VITE_', 'REACT_APP_'],
   server: {

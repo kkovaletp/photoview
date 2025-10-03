@@ -198,14 +198,18 @@ ARG COMMIT_SHA=NoCommit
 RUN apk add --no-cache curl bash \
     && apk add --no-cache --virtual .build-compress gzip brotli zstd \
     && find /srv/assets -type f -name "SettingsPage.*.js" \
-        -exec sh -c 'sed -i "s/=\"-=<GitHub-CI-commit-sha-placeholder>=-\";/=\"${COMMIT_SHA}\";/g" "$1" \
-        && rm -f "$1.gz" "$1.br" \
-        && gzip -k -f -9 "$1" \
-        && brotli -f -q 11 "$1"' sh {} \; \
-    # Archive the `service-worker.js` file
-    #TODO: zstd all
-    && gzip -k -f -9 /srv/service-worker.js \
-    && brotli -f -q 11 /srv/service-worker.js \
+        -exec sh -c 'sed -i "s/=\"-=<GitHub-CI-commit-sha-placeholder>=-\";/=\"${COMMIT_SHA}\";/g" "$1"' sh {} \; \
+    # Archive static files for better performance
+    && find /srv -type f \( \
+            -name "*.js" -o -name "*.mjs" -o -name "*.json" \
+            -o -name "*.css" -o -name "*.html" -o -name "*.svg" \
+            -o -name "*.txt" -o -name "*.xml" -o -name "*.wasm" \
+            \) ! -name "*.gz" ! -name "*.br" ! -name "*.zst" \
+        -exec sh -c 'for file; do \
+            gzip -k -f -9 "$file"; \
+            brotli -f -q 11 "$file"; \
+            zstd -f -19 "$file"; \
+        done' sh {} + \
     && apk del .build-compress \
     # Set correct ownership for Caddy's runtime dirs
     && mkdir -p /data /config /var/log/caddy \

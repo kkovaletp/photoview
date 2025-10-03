@@ -132,6 +132,6 @@
 
     # Serve frontend static website
     file_server {
-        precompressed br gzip
+        precompressed
     }
 }
