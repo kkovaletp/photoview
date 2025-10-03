@@ -26,7 +26,7 @@ const ChangePasswordModal = ({
 }: ChangePasswordModalProps) => {
   const { t } = useTranslation()
   const [passwordInput, setPasswordInput] = useState('')
-
+  // TODO: replace the deprecated `onCompleted` with `useMutation`: https://github.com/kkovaletp/photoview/pull/561#discussion_r2398321316
   const [changePassword] = useMutation(changeUserPasswordMutation, {
     onCompleted: () => {
       onClose && onClose()

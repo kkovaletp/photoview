@@ -46,7 +46,7 @@ const LoginForm = () => {
     handleSubmit,
     formState: { errors: formErrors },
   } = useForm<LoginInputs>()
-
+  // TODO: replace the deprecated `onCompleted` with `useMutation`: https://github.com/kkovaletp/photoview/pull/561#discussion_r2398321316
   const [authorize, { loading, data }] = useMutation<Authorize, AuthorizeVariables>(
     authorizeMutation, {
     onCompleted: data => {

@@ -61,7 +61,7 @@ const InitialSetupPage = () => {
   useEffect(() => {
     if (notInitialSetup) navigate('/')
   }, [notInitialSetup])
-
+  // TODO: replace the deprecated `onCompleted` with `useMutation`: https://github.com/kkovaletp/photoview/pull/561#discussion_r2398321316
   const [authorize, { loading: authorizeLoading, data: authorizationData }] =
     useMutation<InitialSetup, InitialSetupVariables>(initialSetupMutation, {
       onCompleted: data => {

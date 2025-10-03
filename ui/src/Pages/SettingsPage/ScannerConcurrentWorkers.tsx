@@ -28,7 +28,7 @@ export const ScannerConcurrentWorkers = () => {
 
   const workerAmountServerValue = useRef<null | number>(null)
   const [workerAmount, setWorkerAmount] = useState(0)
-
+  // TODO: replace the deprecated `onCompleted` with `useEffect`: https://github.com/kkovaletp/photoview/pull/561#discussion_r2398321316
   const workerAmountQuery = useQuery<concurrentWorkersQuery>(
     CONCURRENT_WORKERS_QUERY,
     {

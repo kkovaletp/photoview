@@ -79,7 +79,7 @@ const UserRow = ({ user, refetchUsers }: UserRowProps) => {
 
   const [showConfirmDelete, setConfirmDelete] = useState(false)
   const [showChangePassword, setChangePassword] = useState(false)
-
+  // TODO: replace the deprecated `onCompleted` with `useMutation`: https://github.com/kkovaletp/photoview/pull/561#discussion_r2398321316
   const [updateUser, { loading: updateUserLoading }] = useMutation<
     updateUser,
     updateUserVariables
@@ -93,7 +93,7 @@ const UserRow = ({ user, refetchUsers }: UserRowProps) => {
       refetchUsers()
     },
   })
-
+  // TODO: replace the deprecated `onCompleted` with `useMutation`: https://github.com/kkovaletp/photoview/pull/561#discussion_r2398321316
   const [deleteUser] = useMutation<deleteUser, deleteUserVariables>(
     deleteUserMutation,
     {
@@ -102,7 +102,7 @@ const UserRow = ({ user, refetchUsers }: UserRowProps) => {
       },
     }
   )
-
+  // TODO: replace the deprecated `onCompleted` with `useMutation`: https://github.com/kkovaletp/photoview/pull/561#discussion_r2398321316
   const [scanUser, { called: scanUserCalled }] = useMutation<
     scanUser,
     scanUserVariables

@@ -50,7 +50,7 @@ const AddUserRow = ({ setShow, show, onUserAdded }: AddUserRowProps) => {
     setState(initialState)
     onUserAdded()
   }
-
+  // TODO: replace the deprecated `onCompleted` with `useMutation`: https://github.com/kkovaletp/photoview/pull/561#discussion_r2398321316
   const [addRootPath, { loading: addRootPathLoading }] = useMutation<
     userAddRootPath,
     userAddRootPathVariables
@@ -62,7 +62,7 @@ const AddUserRow = ({ setShow, show, onUserAdded }: AddUserRowProps) => {
       finished()
     },
   })
-
+  // TODO: replace the deprecated `onCompleted` with `useMutation`: https://github.com/kkovaletp/photoview/pull/561#discussion_r2398321316
   const [createUser, { loading: createUserLoading }] = useMutation<
     createUser,
     createUserVariables
