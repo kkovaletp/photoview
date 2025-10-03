@@ -84,19 +84,7 @@
         # Enforce HTTPS on all subdomains for 6 months.
         Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
         # Content Security Policy to prevent XSS attacks
-        Content-Security-Policy "
-            default-src 'self';
-            script-src 'self' https://api.mapbox.com;
-            style-src 'self' 'unsafe-inline' https://api.mapbox.com;
-            img-src 'self' data: blob: https://api.mapbox.com https://events.mapbox.com https://*.tiles.mapbox.com;
-            connect-src 'self' https://api.mapbox.com https://events.mapbox.com https://*.tiles.mapbox.com wss:;
-            worker-src 'self' blob: https://api.mapbox.com;
-            child-src 'self' blob: https://api.mapbox.com;
-            font-src 'self' https://api.mapbox.com;
-            object-src 'none';
-            base-uri 'self';
-            frame-ancestors 'none';
-        "
+        Content-Security-Policy "default-src 'self'; script-src 'self' https://api.mapbox.com; style-src 'self' 'unsafe-inline' https://api.mapbox.com; img-src 'self' data: blob: https://api.mapbox.com https://events.mapbox.com https://*.tiles.mapbox.com; connect-src 'self' https://api.mapbox.com https://events.mapbox.com https://*.tiles.mapbox.com wss:; worker-src 'self' blob: https://api.mapbox.com; child-src 'self' blob: https://api.mapbox.com; font-src 'self' https://api.mapbox.com; object-src 'none'; base-uri 'self'; frame-ancestors 'none';"
         # Stops leaking too much referrer info to third parties.
         Referrer-Policy strict-origin-when-cross-origin
         # Restricts the use of features that can access user devices.
