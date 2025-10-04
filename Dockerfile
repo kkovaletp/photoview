@@ -118,7 +118,7 @@ RUN --mount=type=bind,from=api,source=/dependencies/,target=/dependencies/ \
     # Install self-building libs
     && cp -a lib/*.so* /usr/local/lib/ \
     && ldconfig \
-    && apt-get install -y ./deb/jellyfin-ffmpeg.deb gzip brotli \
+    && apt-get install -y ./deb/jellyfin-ffmpeg.deb gzip brotli zstd \
     && ln -s /usr/lib/jellyfin-ffmpeg/ffmpeg /usr/local/bin/ \
     && ln -s /usr/lib/jellyfin-ffmpeg/ffprobe /usr/local/bin/ \
     # Cleanup
@@ -133,14 +133,18 @@ COPY --from=api /app/api/photoview /app/photoview
 # and not rebuilt every new commit because of the build_arg value change.
 ARG COMMIT_SHA=NoCommit
 RUN find /app/ui/assets -type f -name "SettingsPage.*.js" \
-        -exec sh -c 'sed -i "s/=\"-=<GitHub-CI-commit-sha-placeholder>=-\";/=\"${COMMIT_SHA}\";/g" "$1" \
-        && rm -f "$1.gz" "$1.br" \
-        && gzip -k -f -9 "$1" \
-        && brotli -f -q 11 "$1"' sh {} \; \
-    # Archive the `service-worker.js` file
-    #TODO: zstd all
-    && gzip -k -f -9 /app/ui/service-worker.js \
-    && brotli -f -q 11 /app/ui/service-worker.js
+        -exec sh -c 'sed -i "s/=\"-=<GitHub-CI-commit-sha-placeholder>=-\";/=\"${COMMIT_SHA}\";/g" "$1"' sh {} \; \
+    # Archive static files for better performance
+    && find /app/ui -type f \( \
+        -name "*.js" -o -name "*.mjs" -o -name "*.json" \
+        -o -name "*.css" -o -name "*.html" -o -name "*.svg" \
+        -o -name "*.txt" -o -name "*.xml" -o -name "*.wasm" \
+        \) ! -name "*.gz" ! -name "*.br" ! -name "*.zst" \
+    -exec sh -c 'for file; do \
+        gzip -k -f -9 "$file"; \
+        brotli -f -q 11 "$file"; \
+        zstd -f -19 "$file"; \
+    done' sh {} +
 
 WORKDIR /home/photoview
 
