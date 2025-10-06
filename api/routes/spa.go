@@ -238,7 +238,7 @@ func (h SpaHandler) setCacheHeaders(w http.ResponseWriter, requestPath string) {
 
 func isCompressedFormat(ext string) bool {
 	compressedExts := []string{
-		".jpg", ".jpeg", ".png", ".gif", ".webp",
+		".png", ".ico", ".jpg", ".jpeg", ".gif", ".webp",
 		".zip", ".gz", ".br", ".zst",
 		".woff", ".woff2",
 	}
