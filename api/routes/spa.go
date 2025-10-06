@@ -20,6 +20,9 @@ type SpaHandler struct {
 	indexPath  string
 }
 
+var fullPath string
+var relPath string
+
 func NewSpaHandler(staticPath string, indexPath string) SpaHandler {
 	staticPathAbs, err := filepath.Abs(staticPath)
 	if err != nil {
@@ -78,8 +81,12 @@ func (h SpaHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Internal server error", http.StatusInternalServerError)
 		return
 	}
+
 	absStaticPath, _ := filepath.Abs(h.staticPath)
-	absPath, err := filepath.Abs(filepath.Join(h.staticPath, filepath.Clean(r.URL.Path)))
+	relPath = filepath.Clean(r.URL.Path)
+	relPath = strings.TrimPrefix(relPath, "/")
+	fullPath = filepath.Join(h.staticPath, relPath)
+	absPath, err := filepath.Abs(fullPath)
 	if err != nil {
 		log.Error(
 			r.Context(),
@@ -91,6 +98,7 @@ func (h SpaHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Bad request", http.StatusBadRequest)
 		return
 	}
+
 	rel, err := filepath.Rel(absStaticPath, absPath)
 	if err != nil || strings.Contains(rel, "..") {
 		log.Error(
@@ -114,36 +122,30 @@ func (h SpaHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h SpaHandler) canServePrecompressed(w http.ResponseWriter, r *http.Request) bool {
-	// Clean the path and resolve to filesystem path
-	path := filepath.Join(h.staticPath, filepath.Clean(r.URL.Path))
-
 	// Check if the original file exists
-	if _, err := os.Stat(path); os.IsNotExist(err) {
+	if _, err := os.Stat(fullPath); os.IsNotExist(err) {
 		// File doesn't exist - let serveOriginal handle SPA routing
 		return false
 	}
 
 	// Don't compress already-compressed files
-	if isCompressedFormat(strings.ToLower(filepath.Ext(path))) {
+	if isCompressedFormat(strings.ToLower(filepath.Ext(fullPath))) {
 		return false
 	}
 
 	// Try to serve pre-compressed variant
-	return h.servePrecompressedFile(w, r, path, r.URL.Path)
+	return h.servePrecompressedFile(w, r)
 }
 
 func (h SpaHandler) serveOriginal(w http.ResponseWriter, r *http.Request) {
-	// Get the absolute path to prevent directory traversal
-	path := filepath.Join(h.staticPath, filepath.Clean(r.URL.Path))
-
 	// Check whether a file exists at the given path
-	_, err := os.Stat(path)
+	_, err := os.Stat(fullPath)
 	if os.IsNotExist(err) {
 		// File does not exist, serve index.html (SPA routing)
 		indexPath := filepath.Join(h.staticPath, h.indexPath)
 
 		// Try to serve pre-compressed index.html first
-		if h.servePrecompressedFile(w, r, indexPath, r.URL.Path) {
+		if h.servePrecompressedFile(w, r) {
 			return
 		}
 
@@ -162,13 +164,13 @@ func (h SpaHandler) serveOriginal(w http.ResponseWriter, r *http.Request) {
 	} else if err != nil {
 		// If we got an error (that wasn't that the file doesn't exist) stating the
 		// file, return a 500 internal server error and stop
-		log.Error(r.Context(), "Error stating file, requested by client", "file path", path, "error", err)
+		log.Error(r.Context(), "Error stating file, requested by client", "file path", fullPath, "error", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	// Set cache headers
-	h.setCacheHeaders(w, r.URL.Path)
+	h.setCacheHeaders(w)
 
 	// Use http.FileServer to serve the static file
 	// Note: CompressHandler will handle real-time compression if needed
@@ -177,9 +179,9 @@ func (h SpaHandler) serveOriginal(w http.ResponseWriter, r *http.Request) {
 
 // servePrecompressedFile attempts to serve a pre-compressed variant of the file
 // Returns true if a pre-compressed file was served, false otherwise
-func (h SpaHandler) servePrecompressedFile(w http.ResponseWriter, r *http.Request, pathOfFile string, requestPath string) bool {
+func (h SpaHandler) servePrecompressedFile(w http.ResponseWriter, r *http.Request) bool {
 	// Verify the file exists
-	if _, err := os.Stat(pathOfFile); os.IsNotExist(err) {
+	if _, err := os.Stat(fullPath); os.IsNotExist(err) {
 		return false
 	}
 
@@ -201,10 +203,10 @@ func (h SpaHandler) servePrecompressedFile(w http.ResponseWriter, r *http.Reques
 
 	for _, enc := range encodings {
 		if strings.Contains(acceptEncoding, enc.name) {
-			precompressedPath := pathOfFile + enc.extension
+			precompressedPath := fullPath + enc.extension
 			if stat, err := os.Stat(precompressedPath); err == nil && !stat.IsDir() {
 				// Detect Content-Type from the ORIGINAL file extension, not the compressed one
-				contentType := mime.TypeByExtension(filepath.Ext(pathOfFile))
+				contentType := mime.TypeByExtension(filepath.Ext(fullPath))
 				if contentType == "" {
 					// Fallback to octet-stream if we can't detect
 					contentType = "application/octet-stream"
@@ -214,7 +216,7 @@ func (h SpaHandler) servePrecompressedFile(w http.ResponseWriter, r *http.Reques
 				w.Header().Set("Content-Encoding", enc.name)
 				w.Header().Set("Vary", "Accept-Encoding")
 				// Set cache headers based on request path
-				h.setCacheHeaders(w, requestPath)
+				h.setCacheHeaders(w)
 
 				// Serve pre-compressed file
 				http.ServeFile(w, r, precompressedPath)
@@ -227,8 +229,8 @@ func (h SpaHandler) servePrecompressedFile(w http.ResponseWriter, r *http.Reques
 }
 
 // setCacheHeaders sets appropriate cache headers based on the request path
-func (h SpaHandler) setCacheHeaders(w http.ResponseWriter, requestPath string) {
-	if strings.HasPrefix(requestPath, "/assets/") {
+func (h SpaHandler) setCacheHeaders(w http.ResponseWriter) {
+	if strings.HasPrefix(relPath, "/assets/") {
 		// Long-term cache for fingerprinted assets
 		w.Header().Set("Cache-Control", "public, max-age=31536000, immutable")
 	} else {
