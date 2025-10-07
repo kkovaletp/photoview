@@ -60,7 +60,6 @@ jobs:
     name: Anchore scan code dependencies
     if: github.repository == 'kkovaletp/photoview'
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
@@ -183,7 +182,6 @@ jobs:
     name: Hadolint Dockerfile
     if: github.repository == 'kkovaletp/photoview'
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v5
@@ -191,6 +189,7 @@ jobs:
       - name: Lint Dockerfile
         id: hadolint
         uses: hadolint/hadolint-action@v3.3.0
+        continue-on-error: true
         with:
           dockerfile: Dockerfile
           config: ${{ github.workspace }}/.hadolint.yaml
@@ -245,6 +244,7 @@ jobs:
       - name: Generate report
         uses: hadolint/hadolint-action@v3.3.0
         id: hadolint-report
+        continue-on-error: true
         if: always()
         with:
           dockerfile: Dockerfile

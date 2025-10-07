@@ -59,11 +59,6 @@ export const MY_TIMELINE_QUERY = gql`
   }
 `
 
-export type TimelineActiveIndex = {
-  albumGroup: number
-  media: number
-}
-
 export type TimelineGroup = {
   date: string
   albums: TimelineGroupAlbum[]
@@ -91,9 +86,9 @@ const TimelineGallery = () => {
     presenting: false,
     timelineGroups: [],
     activeIndex: {
-      media: -1,
-      album: -1,
       date: -1,
+      album: -1,
+      media: -1,
     },
   })
 
@@ -146,10 +141,10 @@ const TimelineGallery = () => {
 
   urlPresentModeSetupHook({
     dispatchMedia,
-    openPresentMode: event => {
+    openPresentMode: () => {
       dispatchMedia({
         type: 'openPresentMode',
-        activeIndex: event.state.activeIndex as unknown as TimelineMediaIndex,
+        activeIndex: mediaState.activeIndex as unknown as TimelineMediaIndex,
       })
     },
   })
