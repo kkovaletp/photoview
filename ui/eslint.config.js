@@ -5,7 +5,6 @@ const reactPlugin = require('eslint-plugin-react');
 const reactHooksPlugin = require('eslint-plugin-react-hooks');
 const prettierConfig = require('eslint-config-prettier');
 const globals = require('globals');
-const path = require('path');
 
 module.exports = [
     // Global ignores
