@@ -1,5 +1,5 @@
 /* global __dirname */
-
+// TODO: migrate the eslint-plugin-react-hooks and fix the failure
 module.exports = {
   root: true,
   parser: '@typescript-eslint/parser',
