@@ -54,7 +54,7 @@
     "react-i18next": "16.0.0",
     "react-router-dom": "^6.3.0",
     "react-swipeable": "^7.0.2",
-    "react-test-renderer": "^19.1.1",
+    "react-test-renderer": "^19.2.0",
     "styled-components": "^5.3.11",
     "tailwind-override": "^0.6.1",
     "tailwindcss": "npm:@tailwindcss/postcss7-compat@^2.2.17",
