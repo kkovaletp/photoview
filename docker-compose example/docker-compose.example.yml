@@ -144,7 +144,7 @@ services:
   #       ## - "/host/folder:/container/folder"
   #       - "/etc/localtime:/etc/localtime:ro" ## use local time from host
   #       - "/etc/timezone:/etc/timezone:ro"   ## use timezone from host
-  #       - "${HOST_PHOTOVIEW_LOCATION}/database/postgres:/var/lib/postgresql/data" ## DO NOT REMOVE
+  #       - "${HOST_PHOTOVIEW_LOCATION}/database/postgres:/var/lib/postgresql" ## DO NOT REMOVE
 
   ## Comment out the `postgres` service if PHOTOVIEW_DATABASE_DRIVER is set to `mysql` or `sqlite` in the .env
   postgres:
@@ -175,8 +175,8 @@ services:
       ## Example:
       ## - "/host/folder:/container/folder"
       - "/etc/localtime:/etc/localtime:ro" ## use local time from host
-      - "/etc/timezone:/etc/timezone:ro"   ## use timezone from host
-      - "${HOST_PHOTOVIEW_LOCATION}/database/postgres:/var/lib/postgresql/data" ## DO NOT REMOVE
+      - "/etc/timezone:/etc/timezone:ro" ## use timezone from host
+      - "${HOST_PHOTOVIEW_LOCATION}/database/postgres:/var/lib/postgresql" ## DO NOT REMOVE
     healthcheck:
       test: pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB
       interval: 1m
