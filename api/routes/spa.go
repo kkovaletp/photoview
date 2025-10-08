@@ -20,8 +20,12 @@ type SpaHandler struct {
 	indexPath  string
 }
 
-var fullPath string
-var relPath string
+type contextKey string
+
+const (
+	ctxKeyFullPath contextKey = "fullPath"
+	ctxKeyRelPath  contextKey = "relPath"
+)
 
 func NewSpaHandler(staticPath string, indexPath string) SpaHandler {
 	staticPathAbs, err := filepath.Abs(staticPath)
@@ -83,9 +87,14 @@ func (h SpaHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 
 	absStaticPath, _ := filepath.Abs(h.staticPath)
-	relPath = filepath.Clean(r.URL.Path)
+	relPath := filepath.Clean(r.URL.Path)
 	relPath = strings.TrimPrefix(relPath, "/")
-	fullPath = filepath.Join(h.staticPath, relPath)
+	fullPath := filepath.Join(h.staticPath, relPath)
+
+	ctx := context.WithValue(r.Context(), ctxKeyFullPath, fullPath)
+	ctx = context.WithValue(ctx, ctxKeyRelPath, relPath)
+	r = r.WithContext(ctx)
+
 	absPath, err := filepath.Abs(fullPath)
 	if err != nil {
 		log.Error(
@@ -122,6 +131,8 @@ func (h SpaHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h SpaHandler) canServePrecompressed(w http.ResponseWriter, r *http.Request) bool {
+	fullPath := getFullPath(r.Context())
+
 	// Check if the original file exists
 	if _, err := os.Stat(fullPath); os.IsNotExist(err) {
 		// File doesn't exist - let serveOriginal handle SPA routing
@@ -138,6 +149,8 @@ func (h SpaHandler) canServePrecompressed(w http.ResponseWriter, r *http.Request
 }
 
 func (h SpaHandler) serveOriginal(w http.ResponseWriter, r *http.Request) {
+	fullPath := getFullPath(r.Context())
+
 	// Check whether a file exists at the given path
 	_, err := os.Stat(fullPath)
 	if os.IsNotExist(err) {
@@ -170,7 +183,7 @@ func (h SpaHandler) serveOriginal(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Set cache headers
-	h.setCacheHeaders(w)
+	h.setCacheHeaders(w, getRelPath(r.Context()))
 
 	// Use http.FileServer to serve the static file
 	// Note: CompressHandler will handle real-time compression if needed
@@ -180,6 +193,8 @@ func (h SpaHandler) serveOriginal(w http.ResponseWriter, r *http.Request) {
 // servePrecompressedFile attempts to serve a pre-compressed variant of the file
 // Returns true if a pre-compressed file was served, false otherwise
 func (h SpaHandler) servePrecompressedFile(w http.ResponseWriter, r *http.Request) bool {
+	fullPath := getFullPath(r.Context())
+
 	// Verify the file exists
 	if _, err := os.Stat(fullPath); os.IsNotExist(err) {
 		return false
@@ -207,16 +222,14 @@ func (h SpaHandler) servePrecompressedFile(w http.ResponseWriter, r *http.Reques
 			if stat, err := os.Stat(precompressedPath); err == nil && !stat.IsDir() {
 				// Detect Content-Type from the ORIGINAL file extension, not the compressed one
 				contentType := mime.TypeByExtension(filepath.Ext(fullPath))
-				if contentType == "" {
-					// Fallback to octet-stream if we can't detect
-					contentType = "application/octet-stream"
+				if contentType != "" {
+					w.Header().Set("Content-Type", contentType)
 				}
 
-				w.Header().Set("Content-Type", contentType)
 				w.Header().Set("Content-Encoding", enc.name)
 				w.Header().Set("Vary", "Accept-Encoding")
 				// Set cache headers based on request path
-				h.setCacheHeaders(w)
+				h.setCacheHeaders(w, getRelPath(r.Context()))
 
 				// Serve pre-compressed file
 				http.ServeFile(w, r, precompressedPath)
@@ -229,7 +242,7 @@ func (h SpaHandler) servePrecompressedFile(w http.ResponseWriter, r *http.Reques
 }
 
 // setCacheHeaders sets appropriate cache headers based on the request path
-func (h SpaHandler) setCacheHeaders(w http.ResponseWriter) {
+func (h SpaHandler) setCacheHeaders(w http.ResponseWriter, relPath string) {
 	if strings.HasPrefix(relPath, "/assets/") {
 		// Long-term cache for fingerprinted assets
 		w.Header().Set("Cache-Control", "public, max-age=31536000, immutable")
@@ -252,4 +265,18 @@ func isCompressedFormat(ext string) bool {
 		}
 	}
 	return false
+}
+
+func getFullPath(ctx context.Context) string {
+	if v := ctx.Value(ctxKeyFullPath); v != nil {
+		return v.(string)
+	}
+	return ""
+}
+
+func getRelPath(ctx context.Context) string {
+	if v := ctx.Value(ctxKeyRelPath); v != nil {
+		return v.(string)
+	}
+	return ""
 }
