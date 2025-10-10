@@ -84,7 +84,6 @@ const AddUserRow = ({ setShow, show, onUserAdded }: AddUserRowProps) => {
       finished()
     } catch (error) {
       console.error('Error adding user: ', error)
-      finished()
     }
   }
 

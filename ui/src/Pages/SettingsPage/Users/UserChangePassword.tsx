@@ -4,6 +4,7 @@ import { Trans, useTranslation } from 'react-i18next'
 import { settingsUsersQuery_user } from './__generated__/settingsUsersQuery'
 import Modal from '../../../primitives/Modal'
 import { TextField } from '../../../primitives/form/Input'
+import MessageBox from '../../../primitives/form/MessageBox'
 
 const changeUserPasswordMutation = gql`
   mutation changeUserPassword($userId: ID!, $password: String!) {
@@ -26,12 +27,8 @@ const ChangePasswordModal = ({
 }: ChangePasswordModalProps) => {
   const { t } = useTranslation()
   const [passwordInput, setPasswordInput] = useState('')
-  // TODO: replace the deprecated `onCompleted` with `useMutation`: https://github.com/kkovaletp/photoview/pull/561#discussion_r2398321316
-  const [changePassword] = useMutation(changeUserPasswordMutation, {
-    onCompleted: () => {
-      onClose && onClose()
-    },
-  })
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const [changePassword] = useMutation(changeUserPasswordMutation)
 
   return (
     <Modal
@@ -56,13 +53,20 @@ const ChangePasswordModal = ({
             'Change password'
           ),
           variant: 'positive',
-          onClick: () => {
-            changePassword({
-              variables: {
-                userId: user.id,
-                password: passwordInput,
-              },
-            })
+          onClick: async () => {
+            try {
+              setErrorMessage(null)
+              await changePassword({
+                variables: {
+                  userId: user.id,
+                  password: passwordInput,
+                },
+              })
+              onClose && onClose()
+            } catch (error) {
+              console.error('Failed to change password: ', error)
+              setErrorMessage(t('settings.users.password_reset.error', 'Failed to change password'))
+            }
           },
         },
       ]}
@@ -76,6 +80,11 @@ const ChangePasswordModal = ({
           )}
           onChange={e => setPasswordInput(e.target.value)}
           type="password"
+        />
+        <MessageBox
+          type="negative"
+          message={errorMessage}
+          show={!!errorMessage}
         />
       </div>
     </Modal>
