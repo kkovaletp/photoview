@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useQuery, gql, useMutation } from '@apollo/client'
 import { useForm } from 'react-hook-form'
 import { INITIAL_SETUP_QUERY, login } from './loginUtilities'
@@ -46,34 +46,38 @@ const LoginForm = () => {
     handleSubmit,
     formState: { errors: formErrors },
   } = useForm<LoginInputs>()
-  // TODO: replace the deprecated `onCompleted` with `useMutation`: https://github.com/kkovaletp/photoview/pull/561#discussion_r2398321316
-  const [authorize, { loading, data }] = useMutation<Authorize, AuthorizeVariables>(
-    authorizeMutation, {
-    onCompleted: data => {
-      const { success, token } = data.authorizeUser
 
-      if (success && token) {
-        login(token)
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
+
+  const [authorize, { loading }] = useMutation<Authorize, AuthorizeVariables>(authorizeMutation)
+
+  const onSubmit = handleSubmit(async (data) => {
+    try {
+      setErrorMessage(null)
+
+      const result = await authorize({
+        variables: {
+          username: data.username,
+          password: data.password,
+        },
+      })
+
+      const authData = result.data?.authorizeUser
+      if (authData?.success && authData.token) {
+        login(authData.token)
+      } else if (authData?.status) {
+        setErrorMessage(authData.status)
       }
-    },
+    } catch (error) {
+      console.error('Authorization failed: ', error)
+      setErrorMessage('An unexpected error occurred during login')
+    }
   })
-
-  const onSubmit = (data: LoginInputs) => {
-    authorize({
-      variables: {
-        username: data.username,
-        password: data.password,
-      },
-    })
-  }
-
-  const errorMessage =
-    data && !data.authorizeUser.success ? data.authorizeUser.status : null
 
   return (
     <form
       className="mx-auto max-w-[500px] px-4"
-      onSubmit={handleSubmit(onSubmit)}
+      onSubmit={onSubmit}
     // loading={loading || (data && data.authorizeUser.success)}
     >
       <TextField
