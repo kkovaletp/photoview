@@ -1,6 +1,5 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest'
-import '@testing-library/jest-dom'
 import SelectFaceGroupTable from './SelectFaceGroupTable'
 import { myFaces_myFaceGroups } from '../__generated__/myFaces'
 import { singleFaceGroup_faceGroup } from './__generated__/singleFaceGroup'
