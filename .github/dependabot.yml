@@ -26,6 +26,13 @@ updates:
       i18next:
         patterns:
           - "*i18next*"
+      react:
+        patterns:
+          - "react"
+          - "@types/react"
+          - "react-dom"
+          - "@types/react-dom"
+          - "react-test-renderer"
 
   # Maintain dependencies for Dockerfiles
   - package-ecosystem: "docker"
