@@ -85,6 +85,7 @@ const LoginForm = () => {
         wrapperClassName="my-6"
         className="w-full"
         label={t('login_page.field.username', 'Username')}
+        autoComplete="username"
         {...register('username', { required: true })}
         error={
           formErrors.username?.type === 'required'
@@ -98,6 +99,7 @@ const LoginForm = () => {
         className="w-full"
         type="password"
         label={t('login_page.field.password', 'Password')}
+        autoComplete="current-password"
         {...register('password')}
       />
       <input

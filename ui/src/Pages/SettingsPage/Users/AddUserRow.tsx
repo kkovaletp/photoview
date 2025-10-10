@@ -50,38 +50,43 @@ const AddUserRow = ({ setShow, show, onUserAdded }: AddUserRowProps) => {
     setState(initialState)
     onUserAdded()
   }
-  // TODO: replace the deprecated `onCompleted` with `useMutation`: https://github.com/kkovaletp/photoview/pull/561#discussion_r2398321316
+
   const [addRootPath, { loading: addRootPathLoading }] = useMutation<
     userAddRootPath,
     userAddRootPathVariables
-  >(USER_ADD_ROOT_PATH_MUTATION, {
-    onCompleted: () => {
-      finished()
-    },
-    onError: () => {
-      finished()
-    },
-  })
-  // TODO: replace the deprecated `onCompleted` with `useMutation`: https://github.com/kkovaletp/photoview/pull/561#discussion_r2398321316
+  >(USER_ADD_ROOT_PATH_MUTATION)
+
   const [createUser, { loading: createUserLoading }] = useMutation<
     createUser,
     createUserVariables
-  >(CREATE_USER_MUTATION, {
-    onCompleted: ({ createUser: { id } }) => {
-      if (state.rootPath) {
-        addRootPath({
+  >(CREATE_USER_MUTATION)
+
+  const loading = addRootPathLoading || createUserLoading
+
+  const handleAddUser = async () => {
+    try {
+      const result = await createUser({
+        variables: {
+          username: state.username,
+          admin: state.admin,
+        },
+      })
+
+      if (result.data?.createUser?.id && state.rootPath) {
+        await addRootPath({
           variables: {
-            id: id,
+            id: result.data.createUser.id,
             rootPath: state.rootPath,
           },
         })
-      } else {
-        finished()
       }
-    },
-  })
 
-  const loading = addRootPathLoading || createUserLoading
+      finished()
+    } catch (error) {
+      console.error('Error adding user: ', error)
+      finished()
+    }
+  }
 
   function updateInput(
     event: React.ChangeEvent<HTMLInputElement>,
@@ -137,14 +142,7 @@ const AddUserRow = ({ setShow, show, onUserAdded }: AddUserRowProps) => {
             type="submit"
             disabled={loading}
             variant="positive"
-            onClick={() => {
-              createUser({
-                variables: {
-                  username: state.username,
-                  admin: state.admin,
-                },
-              })
-            }}
+            onClick={handleAddUser}
           >
             {t('settings.users.add_user.submit', 'Add user')}
           </Button>
