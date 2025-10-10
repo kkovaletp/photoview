@@ -308,7 +308,7 @@ const SidebarMediaDownload = ({ media }: SidebarMediaDownladProps) => {
   const { t } = useTranslation()
   const { add, removeKey } = useMessageState()
 
-  const [loadPhotoDownloads, { called, loading, data }] = useLazyQuery<
+  const [loadPhotoDownloads, { called, loading, data, error }] = useLazyQuery<
     sidebarDownloadQuery,
     sidebarDownloadQueryVariables
   >(SIDEBAR_DOWNLOAD_QUERY, {})
@@ -322,6 +322,11 @@ const SidebarMediaDownload = ({ media }: SidebarMediaDownladProps) => {
   }, [media?.id, media?.downloads, called, loadPhotoDownloads])
 
   if (!media || !media.id) return null
+
+  if (error) {
+    console.error('Failed to load download options: ', error)
+    return null
+  }
 
   let downloads: sidebarDownloadQuery_media_downloads[] = []
 

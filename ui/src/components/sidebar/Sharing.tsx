@@ -165,6 +165,7 @@ const MorePopoverSectionPassword = ({
     sidebarProtectShareVariables
   >(PROTECT_SHARE_MUTATION, {
     refetchQueries: [{ query: query, variables: { id } }],
+    awaitRefetchQueries: true,
   })
 
   const hidePassword = (hide: boolean) => {
@@ -304,6 +305,7 @@ export const SidebarAlbumShare = ({ id }: SidebarShareAlbumProps) => {
     sidebarAlbumAddShareVariables
   >(ADD_ALBUM_SHARE_MUTATION, {
     refetchQueries: [{ query: SHARE_ALBUM_QUERY, variables: { id } }],
+    awaitRefetchQueries: true,
   })
 
   const loading = queryLoading || mutationLoading
@@ -345,6 +347,7 @@ export const SidebarPhotoShare = ({ id }: SidebarSharePhotoProps) => {
     sidebarPhotoAddShareVariables
   >(ADD_MEDIA_SHARE_MUTATION, {
     refetchQueries: [{ query: SHARE_PHOTO_QUERY, variables: { id } }],
+    awaitRefetchQueries: true,
   })
 
   useEffect(() => {
@@ -355,7 +358,7 @@ export const SidebarPhotoShare = ({ id }: SidebarSharePhotoProps) => {
         },
       })
     }
-  }, [])
+  }, [loadShares, id])
 
   const loading = queryLoading || mutationLoading
 
@@ -402,6 +405,7 @@ const SidebarShare = ({
     sidebareDeleteShareVariables
   >(DELETE_SHARE_MUTATION, {
     refetchQueries: [{ query: query, variables: { id } }],
+    awaitRefetchQueries: true,
   })
 
   if (shares === undefined) {
