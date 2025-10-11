@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react'
+import React, { useRef, useState, useEffect } from 'react'
 import { useQuery, useMutation, gql } from '@apollo/client'
 import { InputLabelTitle, InputLabelDescription } from './SettingsPage'
 import { useTranslation } from 'react-i18next'
@@ -28,16 +28,16 @@ export const ScannerConcurrentWorkers = () => {
 
   const workerAmountServerValue = useRef<null | number>(null)
   const [workerAmount, setWorkerAmount] = useState(0)
-  // TODO: replace the deprecated `onCompleted` with `useEffect`: https://github.com/kkovaletp/photoview/pull/561#discussion_r2398321316
-  const workerAmountQuery = useQuery<concurrentWorkersQuery>(
-    CONCURRENT_WORKERS_QUERY,
-    {
-      onCompleted(data) {
-        setWorkerAmount(data.siteInfo.concurrentWorkers)
-        workerAmountServerValue.current = data.siteInfo.concurrentWorkers
-      },
+
+  const workerAmountQuery = useQuery<concurrentWorkersQuery>(CONCURRENT_WORKERS_QUERY)
+
+  useEffect(() => {
+    if (workerAmountQuery.data) {
+      const workers = workerAmountQuery.data.siteInfo.concurrentWorkers
+      setWorkerAmount(workers)
+      workerAmountServerValue.current = workers
     }
-  )
+  }, [workerAmountQuery.data])
 
   const [setWorkersMutation, workersMutationData] = useMutation<
     setConcurrentWorkers,
