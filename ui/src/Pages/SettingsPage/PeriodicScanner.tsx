@@ -1,5 +1,5 @@
 import { gql } from '@apollo/client'
-import React, { useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { useMutation, useQuery } from '@apollo/client'
 import { InputLabelDescription, InputLabelTitle } from './SettingsPage'
 import { useTranslation } from 'react-i18next'
@@ -105,12 +105,18 @@ const PeriodicScanner = () => {
   })
 
   const scanIntervalServerValue = useRef<number | null>(null)
-  // TODO: replace the deprecated `onCompleted` with `useEffect`: https://github.com/kkovaletp/photoview/pull/561#discussion_r2398321316
-  const scanIntervalQuery = useQuery<scanIntervalQuery>(SCAN_INTERVAL_QUERY, {
-    onCompleted(data) {
+  const { data, loading, error } = useQuery<scanIntervalQuery>(SCAN_INTERVAL_QUERY)
+
+  useEffect(() => {
+    if (error) {
+      console.error('Failed to load periodic scan interval:', error)
+      return
+    }
+
+    if (data?.siteInfo?.periodicScanInterval !== undefined) {
       const queryScanInterval = data.siteInfo.periodicScanInterval
 
-      if (queryScanInterval == 0) {
+      if (queryScanInterval === 0) {
         setScanInterval({
           unit: TimeUnit.Second,
           value: 0,
@@ -125,8 +131,8 @@ const PeriodicScanner = () => {
       }
 
       setEnablePeriodicScanner(queryScanInterval > 0)
-    },
-  })
+    }
+  }, [data, error])
 
   const [setScanIntervalMutation, { loading: scanIntervalMutationLoading }] =
     useMutation<
@@ -189,7 +195,7 @@ const PeriodicScanner = () => {
           'settings.periodic_scanner.checkbox_label',
           'Enable periodic scanner'
         )}
-        disabled={scanIntervalQuery.loading}
+        disabled={loading}
         checked={enablePeriodicScanner}
         onChange={event =>
           onScanIntervalCheckboxChange(event.target.checked || false)
@@ -245,7 +251,7 @@ const PeriodicScanner = () => {
         </div>
       </div>
       <Loader
-        active={scanIntervalQuery.loading || scanIntervalMutationLoading}
+        active={loading || scanIntervalMutationLoading}
         size="small"
         style={{ marginLeft: 16 }}
       />
