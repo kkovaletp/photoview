@@ -109,7 +109,7 @@ const DELETE_SHARE_MUTATION = gql`
 export const ArrowPopoverPanel = styled.div.attrs({
   className:
     'absolute -top-3 bg-white dark:bg-dark-bg rounded shadow-md border border-gray-200 dark:border-dark-border z-10',
-})<{ width: number; flipped?: boolean }>`
+}) <{ width: number; flipped?: boolean }>`
   width: ${({ width }) => width}px;
 
   ${({ flipped }) =>
@@ -130,12 +130,12 @@ export const ArrowPopoverPanel = styled.div.attrs({
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 14'%3E%3Cpolyline stroke-width='1' stroke='%23E2E2E2' fill='%23FFFFFF' points='1 0 7 7 1 14'%3E%3C/polyline%3E%3C/svg%3E");
 
     ${({ flipped }) =>
-      flipped
-        ? `
+    flipped
+      ? `
       left: -7px;
       transform: rotate(180deg);
         `
-        : `
+      : `
       right: -7px;
     `}
   }
@@ -165,13 +165,7 @@ const MorePopoverSectionPassword = ({
     sidebarProtectShareVariables
   >(PROTECT_SHARE_MUTATION, {
     refetchQueries: [{ query: query, variables: { id } }],
-    onCompleted: data => {
-      hidePassword(data.protectShareToken.hasPassword)
-    },
-    // refetchQueries: [{ query: query, variables: { id } }],
-    variables: {
-      token: share.token,
-    },
+    awaitRefetchQueries: true,
   })
 
   const hidePassword = (hide: boolean) => {
@@ -186,28 +180,39 @@ const MorePopoverSectionPassword = ({
     setPasswordHidden(hide)
   }
 
-  const checkboxChange = () => {
+  const checkboxChange = async () => {
     const enable = !activated
     setAddingPassword(enable)
     if (!enable) {
-      setPassword({
-        variables: {
-          token: share.token,
-          password: null,
-        },
-      })
-      setPasswordInputValue('')
+      try {
+        await setPassword({
+          variables: {
+            token: share.token,
+            password: null,
+          },
+        })
+        setPasswordInputValue('')
+      } catch (error) {
+        console.error('Failed to remove password protection: ', error)
+      }
     }
   }
 
-  const updatePasswordAction = () => {
+  const updatePasswordAction = async () => {
     if (!passwordHidden && passwordInputValue != '') {
-      setPassword({
-        variables: {
-          token: share.token,
-          password: passwordInputValue,
-        },
-      })
+      try {
+        const result = await setPassword({
+          variables: {
+            token: share.token,
+            password: passwordInputValue,
+          },
+        })
+        if (result.data) {
+          hidePassword(result.data.protectShareToken.hasPassword)
+        }
+      } catch (error) {
+        console.error('Failed to update password: ', error)
+      }
     }
   }
 
@@ -300,6 +305,7 @@ export const SidebarAlbumShare = ({ id }: SidebarShareAlbumProps) => {
     sidebarAlbumAddShareVariables
   >(ADD_ALBUM_SHARE_MUTATION, {
     refetchQueries: [{ query: SHARE_ALBUM_QUERY, variables: { id } }],
+    awaitRefetchQueries: true,
   })
 
   const loading = queryLoading || mutationLoading
@@ -341,6 +347,7 @@ export const SidebarPhotoShare = ({ id }: SidebarSharePhotoProps) => {
     sidebarPhotoAddShareVariables
   >(ADD_MEDIA_SHARE_MUTATION, {
     refetchQueries: [{ query: SHARE_PHOTO_QUERY, variables: { id } }],
+    awaitRefetchQueries: true,
   })
 
   useEffect(() => {
@@ -351,7 +358,7 @@ export const SidebarPhotoShare = ({ id }: SidebarSharePhotoProps) => {
         },
       })
     }
-  }, [])
+  }, [loadShares, id])
 
   const loading = queryLoading || mutationLoading
 
@@ -398,6 +405,7 @@ const SidebarShare = ({
     sidebareDeleteShareVariables
   >(DELETE_SHARE_MUTATION, {
     refetchQueries: [{ query: query, variables: { id } }],
+    awaitRefetchQueries: true,
   })
 
   if (shares === undefined) {

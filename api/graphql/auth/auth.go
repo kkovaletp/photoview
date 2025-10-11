@@ -72,31 +72,32 @@ func UserFromContext(ctx context.Context) *models.User {
 	return raw
 }
 
-func AuthWebsocketInit(db *gorm.DB) func(context.Context, transport.InitPayload) (context.Context, error) {
-	return func(ctx context.Context, initPayload transport.InitPayload) (context.Context, error) {
+func AuthWebsocketInit(db *gorm.DB) func(context.Context, transport.InitPayload) (context.Context, *transport.InitPayload, error) {
+	return func(ctx context.Context, initPayload transport.InitPayload) (context.Context, *transport.InitPayload, error) {
 
 		bearer, exists := initPayload["Authorization"].(string)
 		if !exists {
-			return ctx, nil
+			return ctx, nil, nil
 		}
 
 		token, err := TokenFromBearer(&bearer)
 		if err != nil {
 			log.Printf("Invalid bearer format (websocket): %s\n", bearer)
-			return nil, err
+			return nil, nil, err
 		}
 
 		user, err := dataloader.For(ctx).UserFromAccessToken.Load(*token)
 		// user, err := models.VerifyTokenAndGetUser(db, *token)
 		if err != nil {
 			log.Printf("Invalid token in websocket: %s\n", err)
-			return nil, fmt.Errorf("invalid authorization token")
+			return nil, nil, fmt.Errorf("invalid authorization token")
 		}
 
 		// put it in context
 		userCtx := context.WithValue(ctx, userCtxKey, user)
 
 		// and return it so the resolvers can see it
-		return userCtx, nil
+		// Return nil for the InitPayload acknowledgment (no custom ack payload needed)
+		return userCtx, nil, nil
 	}
 }
