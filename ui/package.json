@@ -41,6 +41,7 @@
     "classnames": "^2.5.1",
     "connect-history-api-fallback": "^2.0.0",
     "copy-to-clipboard": "^3.3.3",
+    "graphql-ws": "^5.16.2",
     "i18next": "25.5.3",
     "luxon": "^3.7.2",
     "mapbox-gl": "~3.4.0",

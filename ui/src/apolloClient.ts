@@ -10,13 +10,14 @@ import {
 } from '@apollo/client'
 import { getMainDefinition } from '@apollo/client/utilities'
 import { onError } from '@apollo/client/link/error'
-import { WebSocketLink } from '@apollo/client/link/ws'
 
 import urlJoin from 'url-join'
-import { clearTokenCookie } from './helpers/authentication'
+import { authToken, clearTokenCookie } from './helpers/authentication'
 import { globalMessageHandler } from './components/messages/globalMessageHandler'
 import { Message } from './components/messages/SubscriptionsHook'
 import { NotificationType } from './__generated__/globalTypes'
+import { GraphQLWsLink } from '@apollo/client/link/subscriptions'
+import { createClient } from 'graphql-ws'
 
 export const API_ENDPOINT = import.meta.env.REACT_APP_API_ENDPOINT
   ? (import.meta.env.REACT_APP_API_ENDPOINT as string)
@@ -40,10 +41,29 @@ const apiProtocol = new URL(GRAPHQL_ENDPOINT).protocol
 const websocketUri = new URL(GRAPHQL_ENDPOINT)
 websocketUri.protocol = apiProtocol === 'https:' ? 'wss:' : 'ws:'
 
-const wsLink = new WebSocketLink({
-  uri: websocketUri.toString(),
-  // credentials: 'include',
-})
+const wsLink = new GraphQLWsLink(
+  createClient({
+    url: websocketUri.toString(),
+    connectionParams: () => {
+      const token = authToken()
+      // Only include authorization if token exists
+      if (token) {
+        return {
+          Authorization: `Bearer ${token}`,
+        }
+      }
+      return {}
+    },
+    // Reconnect on connection loss
+    shouldRetry: () => true,
+    // Handle connection errors
+    on: {
+      error: (error) => {
+        console.error('[WebSocket error]:', error)
+      },
+    },
+  })
+)
 
 const link = split(
   // split based on the operation type
