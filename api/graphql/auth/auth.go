@@ -30,9 +30,16 @@ func Middleware(db *gorm.DB) func(http.Handler) http.Handler {
 
 			if tokenCookie, err := r.Cookie("auth-token"); err == nil {
 				user, err := dataloader.For(r.Context()).UserFromAccessToken.Load(tokenCookie.Value)
-				// user, err := models.VerifyTokenAndGetUser(db, tokenCookie.Value)
+				// Check for dataloader errors (database failures, etc.)
 				if err != nil {
-					log.Printf("Invalid token: %s\n", err)
+					log.Printf("Error loading user from token: %s\n", err)
+					http.Error(w, "invalid authorization token", http.StatusForbidden)
+					return
+				}
+
+				// If user is nil, the token doesn't exist or is invalid
+				if user == nil {
+					log.Printf("Token not found in database: %s\n", tokenCookie.Value)
 					http.Error(w, "invalid authorization token", http.StatusForbidden)
 					return
 				}
@@ -87,9 +94,14 @@ func AuthWebsocketInit(db *gorm.DB) func(context.Context, transport.InitPayload)
 		}
 
 		user, err := dataloader.For(ctx).UserFromAccessToken.Load(*token)
-		// user, err := models.VerifyTokenAndGetUser(db, *token)
 		if err != nil {
-			log.Printf("Invalid token in websocket: %s\n", err)
+			log.Printf("Error loading user from token (websocket): %s\n", err)
+			return nil, nil, fmt.Errorf("invalid authorization token")
+		}
+
+		// NEW: Check if token exists in database
+		if user == nil {
+			log.Printf("Token not found in database (websocket): %s\n", *token)
 			return nil, nil, fmt.Errorf("invalid authorization token")
 		}
 
