@@ -197,11 +197,11 @@ func TestMiddleware(t *testing.T) {
 				capturedContext = r.Context()
 			})
 
-			ctx := dataloader.Middleware(db)(handler)
+			authHandler := auth.Middleware(db)(handler)
+			fullHandler := dataloader.Middleware(db)(authHandler)
 
 			recorder := httptest.NewRecorder()
-			middleware := auth.Middleware(db)(ctx)
-			middleware.ServeHTTP(recorder, req)
+			fullHandler.ServeHTTP(recorder, req)
 
 			assert.Equal(t, tc.expectStatus, recorder.Code)
 
@@ -209,6 +209,10 @@ func TestMiddleware(t *testing.T) {
 				retrievedUser := auth.UserFromContext(capturedContext)
 				assert.NotNil(t, retrievedUser)
 				assert.Equal(t, user.ID, retrievedUser.ID)
+			} else if recorder.Code == 200 {
+				// Handler was called, verify no user in context
+				retrievedUser := auth.UserFromContext(capturedContext)
+				assert.Nil(t, retrievedUser)
 			}
 		})
 	}
