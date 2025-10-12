@@ -63,6 +63,7 @@ const ChangePasswordModal = ({
                 },
               })
               onClose && onClose()
+              setPasswordInput('')
             } catch (error) {
               console.error('Failed to change password: ', error)
               setErrorMessage(t('settings.users.password_reset.error', 'Failed to change password'))
