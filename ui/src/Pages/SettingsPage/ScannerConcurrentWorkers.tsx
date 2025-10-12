@@ -32,12 +32,16 @@ export const ScannerConcurrentWorkers = () => {
   const workerAmountQuery = useQuery<concurrentWorkersQuery>(CONCURRENT_WORKERS_QUERY)
 
   useEffect(() => {
+    if (workerAmountQuery.error) {
+      console.error('Failed to load concurrent workers setting: ', workerAmountQuery.error)
+    }
+
     if (workerAmountQuery.data) {
       const workers = workerAmountQuery.data.siteInfo.concurrentWorkers
       setWorkerAmount(workers)
       workerAmountServerValue.current = workers
     }
-  }, [workerAmountQuery.data])
+  }, [workerAmountQuery.data, workerAmountQuery.error])
 
   const [setWorkersMutation, workersMutationData] = useMutation<
     setConcurrentWorkers,
@@ -53,6 +57,21 @@ export const ScannerConcurrentWorkers = () => {
         },
       })
     }
+  }
+
+  if (workerAmountQuery.error) {
+    return (
+      <div>
+        <label>
+          <InputLabelTitle>
+            {t('settings.concurrent_workers.title', 'Scanner concurrent workers')}
+          </InputLabelTitle>
+        </label>
+        <div className="text-red-600 dark:text-red-400 p-4 bg-red-50 dark:bg-red-900/20 rounded mt-2">
+          {t('settings.concurrent_workers.error', 'Failed to load concurrent workers setting')}: {workerAmountQuery.error.message}
+        </div>
+      </div>
+    )
   }
 
   return (

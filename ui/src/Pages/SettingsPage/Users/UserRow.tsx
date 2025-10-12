@@ -11,6 +11,8 @@ import { settingsUsersQuery_user } from './__generated__/settingsUsersQuery'
 import { scanUser, scanUserVariables } from './__generated__/scanUser'
 import { updateUser, updateUserVariables } from './__generated__/updateUser'
 import { deleteUser, deleteUserVariables } from './__generated__/deleteUser'
+import { useMessageState } from '../../../components/messages/MessageState'
+import { NotificationType } from '../../../__generated__/globalTypes'
 
 const updateUserMutation = gql`
   mutation updateUser($id: ID!, $username: String, $admin: Boolean) {
@@ -71,6 +73,7 @@ export type UserRowProps = {
 }
 
 const UserRow = ({ user, refetchUsers }: UserRowProps) => {
+  const { add } = useMessageState()
   const [state, setState] = useState<UserRowState>({
     ...user,
     editing: false,
@@ -108,6 +111,15 @@ const UserRow = ({ user, refetchUsers }: UserRowProps) => {
       return result
     } catch (error) {
       console.error('Failed to update user: ', error)
+      add({
+        key: Math.random().toString(26),
+        type: NotificationType.Message,
+        props: {
+          negative: true,
+          header: 'Failed to update user',
+          content: error instanceof Error ? error.message : 'An unexpected error occurred',
+        },
+      })
       throw error
     }
   }
@@ -124,6 +136,15 @@ const UserRow = ({ user, refetchUsers }: UserRowProps) => {
       return result
     } catch (error) {
       console.error('Failed to delete user: ', error)
+      add({
+        key: Math.random().toString(26),
+        type: NotificationType.Message,
+        props: {
+          negative: true,
+          header: 'Failed to delete user',
+          content: error instanceof Error ? error.message : 'An unexpected error occurred',
+        },
+      })
       throw error
     }
   }
@@ -140,6 +161,15 @@ const UserRow = ({ user, refetchUsers }: UserRowProps) => {
       return result
     } catch (error) {
       console.error('Failed to scan user: ', error)
+      add({
+        key: Math.random().toString(26),
+        type: NotificationType.Message,
+        props: {
+          negative: true,
+          header: 'Failed to scan user',
+          content: error instanceof Error ? error.message : 'An unexpected error occurred',
+        },
+      })
       throw error
     }
   }

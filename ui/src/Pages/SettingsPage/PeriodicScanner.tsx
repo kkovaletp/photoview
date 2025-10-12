@@ -184,6 +184,19 @@ const PeriodicScanner = () => {
     },
   ]
 
+  if (error) {
+    return (
+      <>
+        <h3 className="font-semibold text-lg mt-4 mb-2">
+          {t('settings.periodic_scanner.title', 'Periodic scanner')}
+        </h3>
+        <div className="text-red-600 dark:text-red-400 p-4 bg-red-50 dark:bg-red-900/20 rounded">
+          {t('settings.periodic_scanner.error', 'Failed to load periodic scanner settings')}: {error.message}
+        </div>
+      </>
+    )
+  }
+
   return (
     <>
       <h3 className="font-semibold text-lg mt-4 mb-2">

@@ -325,7 +325,16 @@ const SidebarMediaDownload = ({ media }: SidebarMediaDownladProps) => {
 
   if (error) {
     console.error('Failed to load download options: ', error)
-    return null
+    return (
+      <SidebarSection>
+        <SidebarSectionTitle>
+          {t('sidebar.download.title', 'Download')}
+        </SidebarSectionTitle>
+        <div className="text-red-600 dark:text-red-400 p-4 bg-red-50 dark:bg-red-900/20 rounded">
+          {t('sidebar.download.error', 'Failed to load download options')}: {error.message}
+        </div>
+      </SidebarSection>
+    )
   }
 
   let downloads: sidebarDownloadQuery_media_downloads[] = []

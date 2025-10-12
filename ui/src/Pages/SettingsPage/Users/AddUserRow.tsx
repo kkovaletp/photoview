@@ -9,6 +9,7 @@ import {
   userAddRootPath,
   userAddRootPathVariables,
 } from './__generated__/userAddRootPath'
+import MessageBox from '../../../primitives/form/MessageBox'
 
 export const CREATE_USER_MUTATION = gql`
   mutation createUser($username: String!, $admin: Boolean!) {
@@ -45,9 +46,11 @@ type AddUserRowProps = {
 const AddUserRow = ({ setShow, show, onUserAdded }: AddUserRowProps) => {
   const { t } = useTranslation()
   const [state, setState] = useState(initialState)
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
   const finished = () => {
     setState(initialState)
+    setErrorMessage(null)
     onUserAdded()
   }
 
@@ -64,6 +67,7 @@ const AddUserRow = ({ setShow, show, onUserAdded }: AddUserRowProps) => {
   const loading = addRootPathLoading || createUserLoading
 
   const handleAddUser = async () => {
+    setErrorMessage(null)
     try {
       const result = await createUser({
         variables: {
@@ -84,6 +88,11 @@ const AddUserRow = ({ setShow, show, onUserAdded }: AddUserRowProps) => {
       finished()
     } catch (error) {
       console.error('Error adding user: ', error)
+      setErrorMessage(
+        error instanceof Error
+          ? error.message
+          : t('settings.users.add_user.error', 'Failed to add user. Please try again.')
+      )
     }
   }
 
@@ -133,6 +142,11 @@ const AddUserRow = ({ setShow, show, onUserAdded }: AddUserRowProps) => {
         />
       </TableCell>
       <TableCell>
+        <MessageBox
+          type="negative"
+          message={errorMessage}
+          show={!!errorMessage}
+        />
         <ButtonGroup>
           <Button variant="negative" onClick={() => setShow(false)}>
             {t('general.action.cancel', 'Cancel')}

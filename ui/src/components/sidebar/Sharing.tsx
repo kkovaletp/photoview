@@ -46,6 +46,8 @@ import {
   sidebarProtectShare,
   sidebarProtectShareVariables,
 } from './__generated__/sidebarProtectShare'
+import { useMessageState } from '../messages/MessageState'
+import { NotificationType } from '../../__generated__/globalTypes'
 
 const SHARE_PHOTO_QUERY = gql`
   query sidebarGetPhotoShares($id: ID!) {
@@ -152,6 +154,7 @@ const MorePopoverSectionPassword = ({
   query,
   id,
 }: MorePopoverSectionPasswordProps) => {
+  const { add } = useMessageState()
   const [addingPassword, setAddingPassword] = useState(false)
   const activated = addingPassword || share.hasPassword
 
@@ -194,6 +197,15 @@ const MorePopoverSectionPassword = ({
         setPasswordInputValue('')
       } catch (error) {
         console.error('Failed to remove password protection: ', error)
+        add({
+          key: Math.random().toString(26),
+          type: NotificationType.Message,
+          props: {
+            negative: true,
+            header: 'Failed to remove password protection',
+            content: error instanceof Error ? error.message : 'An unexpected error occurred',
+          },
+        })
       }
     }
   }
@@ -212,6 +224,15 @@ const MorePopoverSectionPassword = ({
         }
       } catch (error) {
         console.error('Failed to update password: ', error)
+        add({
+          key: Math.random().toString(26),
+          type: NotificationType.Message,
+          props: {
+            negative: true,
+            header: 'Failed to update password',
+            content: error instanceof Error ? error.message : 'An unexpected error occurred',
+          },
+        })
       }
     }
   }
