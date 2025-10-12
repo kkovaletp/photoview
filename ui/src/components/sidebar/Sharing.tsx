@@ -211,7 +211,7 @@ const MorePopoverSectionPassword = ({
   }
 
   const updatePasswordAction = async () => {
-    if (!passwordHidden && passwordInputValue != '') {
+    if (!passwordHidden && passwordInputValue !== '') {
       try {
         const result = await setPassword({
           variables: {

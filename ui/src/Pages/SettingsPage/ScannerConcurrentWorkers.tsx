@@ -37,7 +37,7 @@ export const ScannerConcurrentWorkers = () => {
     }
 
     if (workerAmountQuery.data) {
-      const workers = workerAmountQuery.data.siteInfo.concurrentWorkers
+      const workers = workerAmountQuery.data.siteInfo?.concurrentWorkers
       setWorkerAmount(workers)
       workerAmountServerValue.current = workers
     }
