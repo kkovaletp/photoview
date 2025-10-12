@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"regexp"
+	"strings"
 
 	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/kkovaletp/photoview/api/dataloader"
@@ -39,7 +40,9 @@ func Middleware(db *gorm.DB) func(http.Handler) http.Handler {
 
 				// If user is nil, the token doesn't exist or is invalid
 				if user == nil {
-					log.Printf("Token not found in database: %s\n", tokenCookie.Value)
+					safeTokenValue := strings.ReplaceAll(tokenCookie.Value, "\n", "")
+					safeTokenValue = strings.ReplaceAll(safeTokenValue, "\r", "")
+					log.Printf("Token not found in database: %s\n", safeTokenValue)
 					http.Error(w, "invalid authorization token", http.StatusForbidden)
 					return
 				}
@@ -101,7 +104,9 @@ func AuthWebsocketInit(db *gorm.DB) func(context.Context, transport.InitPayload)
 
 		// NEW: Check if token exists in database
 		if user == nil {
-			log.Printf("Token not found in database (websocket): %s\n", *token)
+			safeTokenValue := strings.ReplaceAll(*token, "\n", "")
+			safeTokenValue = strings.ReplaceAll(safeTokenValue, "\r", "")
+			log.Printf("Token not found in database (websocket): %s\n", safeTokenValue)
 			return nil, nil, fmt.Errorf("invalid authorization token")
 		}
 
