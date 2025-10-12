@@ -53,7 +53,7 @@ const ChangePasswordModal = ({
             'Change password'
           ),
           variant: 'positive',
-          onClick: async () => {
+          onClick: () => void (async () => {
             try {
               setErrorMessage(null)
               await changePassword({
@@ -67,7 +67,7 @@ const ChangePasswordModal = ({
               console.error('Failed to change password: ', error)
               setErrorMessage(t('settings.users.password_reset.error', 'Failed to change password'))
             }
-          },
+          })()
         },
       ]}
     >
