@@ -1,7 +1,6 @@
 package utils_test
 
 import (
-	"os"
 	"path/filepath"
 	"testing"
 
@@ -45,8 +44,6 @@ func TestGetInt_Zero(t *testing.T) {
 }
 
 func TestGetInt_Unset(t *testing.T) {
-	t.Setenv("PHOTOVIEW_ACCESS_LOG_MAX_SIZE_MB", "")
-	os.Unsetenv("PHOTOVIEW_ACCESS_LOG_MAX_SIZE_MB")
 	result := utils.EnvAccessLogMaxSize.GetInt()
 	assert.Equal(t, 0, result)
 }
@@ -263,7 +260,5 @@ func TestGetValue_ReturnsValue(t *testing.T) {
 }
 
 func TestGetValue_ReturnsEmptyWhenUnset(t *testing.T) {
-	t.Setenv("PHOTOVIEW_ACCESS_LOG_PATH", "")
-	os.Unsetenv("PHOTOVIEW_ACCESS_LOG_PATH")
 	assert.Empty(t, utils.EnvAccessLogPath.GetValue())
 }
