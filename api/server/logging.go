@@ -28,6 +28,7 @@ var (
 	sensitiveKeys    = []string{
 		"access_token", "token", "auth", "authorization", "apikey", "api_key",
 		"password", "passwd", "secret", "signature", "session", "jwt", "code",
+		"refresh_token", "client_secret", "api_secret", "bearer", "private_key",
 	}
 )
 
@@ -35,6 +36,12 @@ var (
 func InitializeLogging() {
 	logMutex.Lock()
 	defer logMutex.Unlock()
+
+	// Close existing log file if already initialized (e.g. if called multiple times)
+	if logFile != nil {
+		logFile.Close()
+		logFile = nil
+	}
 
 	logGlobalContext = context.Background()
 
