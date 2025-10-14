@@ -88,9 +88,6 @@ func InitializeLogging() {
 		logFile = rotatingLogger
 		logWriter = io.MultiWriter(os.Stdout, logFile)
 
-		// Add log file and writer to global context to let them appear in the app log implicitly
-		logGlobalContext = log.WithAttrs(logGlobalContext, logFile, logWriter)
-
 		log.Info(
 			logGlobalContext,
 			"Access logging enabled to file",
@@ -155,28 +152,28 @@ func LoggingMiddleware(next http.Handler) http.Handler {
 func logStandardRequest(r *http.Request, status int, elapsedMs int64) {
 	date := time.Now().Format("2006 Jan 02, 15:04:05 (MST) -07:00")
 	user := auth.UserFromContext(r.Context())
-	requestText := fmt.Sprintf("%s%s", r.Host, sanitizeURI(r.URL))
+	requestText := fmt.Sprintf("%s%s", r.Host, sanitizeURL(r.URL))
 
 	userText := "unauthenticated"
 	if user != nil {
-		userText = fmt.Sprintf("@ruser: %s", user.Username)
+		userText = fmt.Sprintf("user: %s", user.Username)
 	}
 
 	statusText := fmt.Sprintf("%s %d", r.Method, status)
-	durationText := fmt.Sprintf("@c%dms", elapsedMs)
+	durationText := fmt.Sprintf("%dms", elapsedMs)
 
 	writeLog("%s %s %s %s %s\n", date, statusText, requestText, durationText, userText)
 }
 
 // sanitizeURL redacts sensitive query parameters in a URL
-func sanitizeURI(u *url.URL) string {
+func sanitizeURL(u *url.URL) string {
 	if u == nil {
 		return ""
 	}
-	cloneUrl := *u
-	queryString := cloneUrl.Query()
+	cloneURL := *u
+	queryString := cloneURL.Query()
 	if len(queryString) == 0 {
-		return cloneUrl.RequestURI()
+		return cloneURL.RequestURI()
 	}
 
 	for name := range queryString {
@@ -188,8 +185,8 @@ func sanitizeURI(u *url.URL) string {
 			}
 		}
 	}
-	cloneUrl.RawQuery = queryString.Encode()
-	return cloneUrl.RequestURI()
+	cloneURL.RawQuery = queryString.Encode()
+	return cloneURL.RequestURI()
 }
 
 type statusResponseWriter struct {
