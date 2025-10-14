@@ -31,7 +31,7 @@ func TestSanitizeURL_RedactsAccessToken(t *testing.T) {
 	assert.NotContains(t, result, "secret123")
 }
 
-func TestSanitizeURL_RedactsMultipleSensitiveKeys(t *testing.T) {
+func TestSanitizeURL_RedactsVariousSensitiveKeys(t *testing.T) {
 	testCases := []struct {
 		key string
 	}{
@@ -86,6 +86,16 @@ func TestSanitizeURL_MixedSensitiveAndNonSensitive(t *testing.T) {
 	assert.Contains(t, result, "page=5")
 	assert.Contains(t, result, "%5BREDACTED%5D")
 	assert.NotContains(t, result, "secret")
+}
+
+func TestSanitizeURL_RepeatedSensitiveParameters(t *testing.T) {
+	u, _ := url.Parse("https://example.com/api?token=a&token=b&token=c")
+	result := sanitizeURL(u)
+	assert.NotContains(t, result, "a")
+	assert.NotContains(t, result, "b")
+	assert.NotContains(t, result, "c")
+	// Expect three URL-encoded [REDACTED] markers
+	assert.Equal(t, 3, strings.Count(result, "%5BREDACTED%5D"))
 }
 
 func TestSanitizeURL_EmptyQueryString(t *testing.T) {
@@ -252,6 +262,14 @@ type mockHijackableResponseWriter struct {
 
 func (m *mockHijackableResponseWriter) Hijack() (net.Conn, *bufio.ReadWriter, error) {
 	return nil, nil, nil // Simple mock
+}
+
+func TestStatusResponseWriter_Hijack_WhenSupported(t *testing.T) {
+	mock := &mockHijackableResponseWriter{ResponseRecorder: httptest.NewRecorder()}
+	writer := newStatusResponseWriter(mock)
+	_, _, err := writer.Hijack()
+	// Presence of no error indicates supported path was used (not ErrNotSupported)
+	assert.NoError(t, err)
 }
 
 type mockFlushableResponseWriter struct {
