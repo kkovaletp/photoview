@@ -42,13 +42,14 @@ func InitializeLogging() {
 	if logPath, err := utils.AccessLogPath(); logPath != "" && err == nil {
 		logParentDir := filepath.Dir(logPath)
 		stat, err := os.Stat(logParentDir)
+		const LOG_PATH_STR = "log path"
 		if os.IsNotExist(err) {
 			if err := os.MkdirAll(logParentDir, 0755); err != nil {
 				log.Error(
 					logGlobalContext,
 					"failed to create log directory, defaulting to console logging",
 					"log directory", logParentDir,
-					"log path", logPath,
+					LOG_PATH_STR, logPath,
 					"error", err,
 				)
 				return
@@ -61,7 +62,7 @@ func InitializeLogging() {
 				logGlobalContext,
 				"failed to stat log directory, defaulting to console logging",
 				"log directory", logParentDir,
-				"log path", logPath,
+				LOG_PATH_STR, logPath,
 				"error", err,
 			)
 			return
@@ -71,7 +72,7 @@ func InitializeLogging() {
 				logGlobalContext,
 				"log files location is not a directory, defaulting to console logging",
 				"log files location", logParentDir,
-				"log path", logPath,
+				LOG_PATH_STR, logPath,
 			)
 			return
 		}
