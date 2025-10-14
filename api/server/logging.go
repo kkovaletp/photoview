@@ -39,7 +39,9 @@ func InitializeLogging() {
 
 	// Close existing log file if already initialized (e.g. if called multiple times)
 	if logFile != nil {
-		logFile.Close()
+		if err := logFile.Close(); err != nil {
+			log.Error(logGlobalContext, "Failed to close previous log file during reinitialization", "error", err)
+		}
 		logFile = nil
 	}
 
