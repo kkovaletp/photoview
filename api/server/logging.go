@@ -20,8 +20,6 @@ import (
 	"gopkg.in/natefinch/lumberjack.v2"
 )
 
-type contextKey string
-
 var (
 	logMutex         sync.RWMutex
 	logFile          io.WriteCloser
@@ -91,8 +89,7 @@ func InitializeLogging() {
 		logWriter = io.MultiWriter(os.Stdout, logFile)
 
 		// Add log file and writer to global context to let them appear in the app log implicitly
-		logGlobalContext = context.WithValue(logGlobalContext, contextKey("logFile"), logFile)
-		logGlobalContext = context.WithValue(logGlobalContext, contextKey("logWriter"), logWriter)
+		logGlobalContext = log.WithAttrs(logGlobalContext, logFile, logWriter)
 
 		log.Info(
 			logGlobalContext,
