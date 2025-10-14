@@ -180,7 +180,9 @@ func sanitizeURL(u *url.URL) string {
 		lowerName := strings.ToLower(name)
 		for _, sensitive := range sensitiveKeys {
 			if lowerName == sensitive {
-				queryString[name] = []string{"[REDACTED]"}
+				for i := range queryString[name] {
+					queryString[name][i] = "[REDACTED]"
+				}
 				break
 			}
 		}

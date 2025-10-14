@@ -89,11 +89,11 @@ func TestSanitizeURL_MixedSensitiveAndNonSensitive(t *testing.T) {
 }
 
 func TestSanitizeURL_RepeatedSensitiveParameters(t *testing.T) {
-	u, _ := url.Parse("https://example.com/api?token=a&token=b&token=c")
+	u, _ := url.Parse("https://example.com/api?token=f8PBn&token=jN5i5&token=N38fP")
 	result := sanitizeURL(u)
-	assert.NotContains(t, result, "a")
-	assert.NotContains(t, result, "b")
-	assert.NotContains(t, result, "c")
+	assert.NotContains(t, result, "f8PBn")
+	assert.NotContains(t, result, "jN5i5")
+	assert.NotContains(t, result, "N38fP")
 	// Expect three URL-encoded [REDACTED] markers
 	assert.Equal(t, 3, strings.Count(result, "%5BREDACTED%5D"))
 }
