@@ -146,8 +146,12 @@ func LoggingMiddleware(next http.Handler) http.Handler {
 		next.ServeHTTP(writer, r)
 
 		elapsedMs := time.Since(start).Nanoseconds() / 1e6
+		status := writer.status
+		if status == 0 {
+			status = http.StatusOK
+		}
 
-		logStandardRequest(r, writer.status, elapsedMs)
+		logStandardRequest(r, status, elapsedMs)
 	})
 }
 
@@ -181,7 +185,7 @@ func sanitizeURI(u *url.URL) string {
 	for name := range queryString {
 		lowerName := strings.ToLower(name)
 		for _, sensitive := range sensitiveKeys {
-			if lowerName == sensitive || strings.Contains(lowerName, sensitive) {
+			if lowerName == sensitive {
 				queryString[name] = []string{"[REDACTED]"}
 				break
 			}

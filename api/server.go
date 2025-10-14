@@ -150,13 +150,13 @@ func setupGracefulShutdown(svr *http.Server) {
 		periodic_scanner.ShutdownPeriodicScanner()
 		scanner_queue.CloseScannerQueue()
 
-		server.CloseLogging()
-
 		if err := svr.Shutdown(ctx); err != nil {
 			log.Printf("Server shutdown error: %s", err)
 		} else {
 			log.Println("Shutdown complete")
 		}
+
+		server.CloseLogging()
 	}()
 }
 

@@ -54,9 +54,10 @@ services:
       ## HTTP server's access logfile location inside the container. By default is under the /var/log/photoview/ folder.
       ## To disable writing to file, uncomment and set it to the empty value.
       # PHOTOVIEW_ACCESS_LOG_PATH: "/var/log/photoview"
-      ## Max logfile size in MB, should be >= 0, else falls back to default 10. If 0, log rotation is disabled.
+      ## Max logfile size in MB, should be > 0, else falls back to default 10.
       # PHOTOVIEW_ACCESS_LOG_MAX_SIZE_MB: 10
-      ## Max number of rotated files should be >= 0, else falls back to default 5. If 0, rotated files never get deleted.
+      ## Max number of rotated files should be > 0. If unset or 0, falls back to default 5.
+      ## If negative, rotated files never get deleted.
       # PHOTOVIEW_ACCESS_LOG_MAX_FILES: 5
       ## Max age in days, should be > 0, else falls back to default 0 (means no age limit)
       # PHOTOVIEW_ACCESS_LOG_MAX_DAYS: 0

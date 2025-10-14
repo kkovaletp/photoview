@@ -115,7 +115,7 @@ func UIPath() string {
 
 func AccessLogPath() (string, error) {
 	if logpath := EnvAccessLogPath.GetValue(); logpath != "" {
-		absPath, err := filepath.Abs(filepath.Clean(EnvAccessLogPath.GetValue()))
+		absPath, err := filepath.Abs(filepath.Clean(logpath))
 		return filepath.Join(absPath, "access.log"), err
 	}
 	// Default: no access logfile, only STDOUT
@@ -124,17 +124,23 @@ func AccessLogPath() (string, error) {
 
 func AccessLogMaxSize() int {
 	// Default: 10MB
-	if size := EnvAccessLogMaxSize.GetInt(); size >= 0 {
+	if size := EnvAccessLogMaxSize.GetInt(); size > 0 {
 		return size
 	}
 	return 10
 }
 
 func AccessLogMaxFiles() int {
-	// Default: keep 5 rotated files
-	if files := EnvAccessLogMaxFiles.GetInt(); files >= 0 {
+	files := EnvAccessLogMaxFiles.GetInt()
+	// Return user's positive value
+	if files > 0 {
 		return files
 	}
+	// Negative value means "keep all log files"
+	if files < 0 {
+		return 0
+	}
+	// Default for unset var or 0 value: keep 5 rotated files
 	return 5
 }
 
