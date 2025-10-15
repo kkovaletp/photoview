@@ -138,10 +138,7 @@ describe('Sharing Components', () => {
                 },
             ]
 
-            renderWithProviders(<SidebarPhotoShare id="photo-1" />, {
-                mocks,
-                apolloOptions: { addTypename: true }
-            })
+            renderWithProviders(<SidebarPhotoShare id="photo-1" />, { mocks })
 
             await waitFor(() => {
                 const links = screen.getAllByText(/Public Link/)
@@ -157,10 +154,7 @@ describe('Sharing Components', () => {
 
             const mocks: MockedResponse[] = []
 
-            renderWithProviders(<SidebarPhotoShare id="photo-1" />, {
-                mocks,
-                apolloOptions: { addTypename: true }
-            })
+            renderWithProviders(<SidebarPhotoShare id="photo-1" />, { mocks })
 
             // Should not show loading or make the query
             expect(screen.queryByText('Loading shares...')).not.toBeInTheDocument()
@@ -178,10 +172,7 @@ describe('Sharing Components', () => {
                 },
             ]
 
-            renderWithProviders(<SidebarPhotoShare id="photo-1" />, {
-                mocks,
-                apolloOptions: { addTypename: true }
-            })
+            renderWithProviders(<SidebarPhotoShare id="photo-1" />, { mocks })
 
             await waitFor(() => {
                 expect(screen.getByText(/Error: Network error/)).toBeInTheDocument()
@@ -239,10 +230,7 @@ describe('Sharing Components', () => {
                 },
             ]
 
-            renderWithProviders(<SidebarPhotoShare id="photo-1" />, {
-                mocks,
-                apolloOptions: { addTypename: true }
-            })
+            renderWithProviders(<SidebarPhotoShare id="photo-1" />, { mocks })
 
             await waitFor(() => {
                 expect(screen.getByText('abc123')).toBeInTheDocument()
@@ -267,10 +255,7 @@ describe('Sharing Components', () => {
                 },
             ]
 
-            renderWithProviders(<SidebarPhotoShare id="photo-1" />, {
-                mocks,
-                apolloOptions: { addTypename: true }
-            })
+            renderWithProviders(<SidebarPhotoShare id="photo-1" />, { mocks })
 
             await waitFor(() => {
                 expect(screen.getByText('abc123')).toBeInTheDocument()
@@ -296,10 +281,7 @@ describe('Sharing Components', () => {
                 },
             ]
 
-            renderWithProviders(<SidebarPhotoShare id="photo-2" />, {
-                mocks,
-                apolloOptions: { addTypename: true }
-            })
+            renderWithProviders(<SidebarPhotoShare id="photo-2" />, { mocks })
 
             await waitFor(() => {
                 expect(screen.getByText('No shares found')).toBeInTheDocument()
@@ -326,10 +308,7 @@ describe('Sharing Components', () => {
                 },
             ]
 
-            renderWithProviders(<SidebarAlbumShare id="album-1" />, {
-                mocks,
-                apolloOptions: { addTypename: true }
-            })
+            renderWithProviders(<SidebarAlbumShare id="album-1" />, { mocks })
 
             await waitFor(() => {
                 expect(screen.getByText('ghi789')).toBeInTheDocument()
@@ -354,10 +333,7 @@ describe('Sharing Components', () => {
                 },
             ]
 
-            renderWithProviders(<SidebarAlbumShare id="album-1" />, {
-                mocks,
-                apolloOptions: { addTypename: true }
-            })
+            renderWithProviders(<SidebarAlbumShare id="album-1" />, { mocks })
 
             await waitFor(() => {
                 expect(
@@ -416,10 +392,7 @@ describe('Sharing Components', () => {
                 },
             ]
 
-            renderWithProviders(<SidebarAlbumShare id="album-1" />, {
-                mocks,
-                apolloOptions: { addTypename: true }
-            })
+            renderWithProviders(<SidebarAlbumShare id="album-1" />, { mocks })
 
             await waitFor(() => {
                 expect(screen.getByText('ghi789')).toBeInTheDocument()
@@ -467,10 +440,7 @@ describe('Sharing Components', () => {
                 },
             ]
 
-            renderWithProviders(<SidebarAlbumShare id="album-1" />, {
-                mocks,
-                apolloOptions: { addTypename: true }
-            })
+            renderWithProviders(<SidebarAlbumShare id="album-1" />, { mocks })
 
             await waitFor(() => {
                 expect(screen.getByText('No shares found')).toBeInTheDocument()
@@ -499,10 +469,7 @@ describe('Sharing Components', () => {
                 },
             ]
 
-            renderWithProviders(<SidebarAlbumShare id="album-1" />, {
-                mocks,
-                apolloOptions: { addTypename: true }
-            })
+            renderWithProviders(<SidebarAlbumShare id="album-1" />, { mocks })
 
             await waitFor(() => {
                 expect(screen.getByText('ghi789')).toBeInTheDocument()
@@ -558,10 +525,7 @@ describe('Sharing Components', () => {
                 },
             ]
 
-            renderWithProviders(<SidebarAlbumShare id="album-1" />, {
-                mocks,
-                apolloOptions: { addTypename: true }
-            })
+            renderWithProviders(<SidebarAlbumShare id="album-1" />, { mocks })
 
             await waitFor(() => {
                 expect(screen.getByText('ghi789')).toBeInTheDocument()
@@ -597,10 +561,7 @@ describe('Sharing Components', () => {
                 },
             ]
 
-            renderWithProviders(<SidebarAlbumShare id="album-1" />, {
-                mocks,
-                apolloOptions: { addTypename: true }
-            })
+            renderWithProviders(<SidebarAlbumShare id="album-1" />, { mocks })
 
             await waitFor(() => {
                 expect(screen.getByText('ghi789')).toBeInTheDocument()
@@ -670,10 +631,7 @@ describe('Sharing Components', () => {
                 },
             ]
 
-            renderWithProviders(<SidebarAlbumShare id="album-1" />, {
-                mocks,
-                apolloOptions: { addTypename: true }
-            })
+            renderWithProviders(<SidebarAlbumShare id="album-1" />, { mocks })
 
             await waitFor(() => {
                 expect(screen.getByText('ghi789')).toBeInTheDocument()
@@ -751,10 +709,7 @@ describe('Sharing Components', () => {
                 },
             ]
 
-            renderWithProviders(<SidebarAlbumShare id="album-1" />, {
-                mocks,
-                apolloOptions: { addTypename: true }
-            })
+            renderWithProviders(<SidebarAlbumShare id="album-1" />, { mocks })
 
             await waitFor(() => {
                 expect(screen.getByText('ghi789')).toBeInTheDocument()
@@ -802,10 +757,7 @@ describe('Sharing Components', () => {
                 },
             ]
 
-            renderWithProviders(<SidebarAlbumShare id="album-1" />, {
-                mocks,
-                apolloOptions: { addTypename: true }
-            })
+            renderWithProviders(<SidebarAlbumShare id="album-1" />, { mocks })
 
             await waitFor(() => {
                 expect(screen.getByText('ghi789')).toBeInTheDocument()
@@ -873,10 +825,7 @@ describe('Sharing Components', () => {
                 },
             ]
 
-            renderWithProviders(<SidebarAlbumShare id="album-1" />, {
-                mocks,
-                apolloOptions: { addTypename: true }
-            })
+            renderWithProviders(<SidebarAlbumShare id="album-1" />, { mocks })
 
             await waitFor(() => {
                 expect(screen.getByText('ghi789')).toBeInTheDocument()
@@ -934,10 +883,7 @@ describe('Sharing Components', () => {
                 },
             ]
 
-            renderWithProviders(<SidebarAlbumShare id="album-1" />, {
-                mocks,
-                apolloOptions: { addTypename: true }
-            })
+            renderWithProviders(<SidebarAlbumShare id="album-1" />, { mocks })
 
             await waitFor(() => {
                 expect(screen.getByText('ghi789')).toBeInTheDocument()
@@ -989,10 +935,7 @@ describe('Sharing Components', () => {
                 },
             ]
 
-            renderWithProviders(<SidebarAlbumShare id="album-1" />, {
-                mocks,
-                apolloOptions: { addTypename: true }
-            })
+            renderWithProviders(<SidebarAlbumShare id="album-1" />, { mocks })
 
             await waitFor(() => {
                 expect(screen.getByText('ghi789')).toBeInTheDocument()

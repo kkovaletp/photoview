@@ -37,7 +37,7 @@ test('Add user with username and path', async () => {
   const setShow = vi.fn()
 
   render(
-    <MockedProvider addTypename={true} mocks={gqlMock}>
+    <MockedProvider mocks={gqlMock}>
       <table>
         <tbody>
           <AddUserRow onUserAdded={userAdded} setShow={setShow} show={true} />
@@ -66,7 +66,7 @@ test('Add user with only username', async () => {
   const setShow = vi.fn()
 
   render(
-    <MockedProvider addTypename={true} mocks={gqlMock}>
+    <MockedProvider mocks={gqlMock}>
       <table>
         <tbody>
           <AddUserRow onUserAdded={userAdded} setShow={setShow} show={true} />

@@ -34,8 +34,7 @@ test('Enable periodic scanner', async () => {
   ]
 
   renderWithProviders(<PeriodicScanner />, {
-    mocks: graphqlMocks,
-    apolloOptions: { addTypename: true }
+    mocks: graphqlMocks
   })
 
   const enableCheckbox = screen.getByLabelText('Enable periodic scanner')
