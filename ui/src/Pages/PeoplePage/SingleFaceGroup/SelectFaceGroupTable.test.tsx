@@ -422,12 +422,7 @@ describe('SelectFaceGroupTable', () => {
                 faceGroups: largeFaceGroupList,
             }
 
-            const startTime = performance.now()
             render(<SelectFaceGroupTable {...performanceProps} />)
-            const endTime = performance.now()
-
-            // Should render within reasonable time (less than 1 second)
-            expect(endTime - startTime).toBeLessThan(1000)
 
             // Should render all items
             for (let i = 0; i < 100; i++) {

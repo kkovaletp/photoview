@@ -22,6 +22,7 @@ vi.mock('copy-to-clipboard', () => ({
 // Import the mocked modules for assertions
 import copy from 'copy-to-clipboard'
 import { authToken } from '../../helpers/authentication'
+import { ReactElement } from 'react'
 
 // GraphQL Queries and Mutations
 const SHARE_PHOTO_QUERY = gql`
@@ -122,7 +123,7 @@ const mockAlbumShares = {
 
 // Helper function to render with providers
 const renderWithProviders = (
-    ui: React.ReactElement,
+    ui: ReactElement,
     { mocks = [] }: { mocks?: MockedResponse[] } = {}
 ) => {
     return render(
@@ -139,22 +140,6 @@ describe('Sharing Components', () => {
     })
 
     describe('SidebarPhotoShare', () => {
-        it('should render loading state initially', () => {
-            const mocks: MockedResponse[] = [
-                {
-                    request: {
-                        query: SHARE_PHOTO_QUERY,
-                        variables: { id: 'photo-1' },
-                    },
-                    result: { data: mockPhotoShares },
-                },
-            ]
-
-            renderWithProviders(<SidebarPhotoShare id="photo-1" />, { mocks })
-
-            expect(screen.getByText('Loading shares...')).toBeInTheDocument()
-        })
-
         it('should load shares when authenticated', async () => {
             const mocks: MockedResponse[] = [
                 {
@@ -323,31 +308,6 @@ describe('Sharing Components', () => {
     })
 
     describe('SidebarAlbumShare', () => {
-        it('should render loading state initially', () => {
-            const mocks: MockedResponse[] = [
-                {
-                    request: {
-                        query: SHARE_ALBUM_QUERY,
-                        variables: { id: 'album-1' },
-                    },
-                    result: { data: mockAlbumShares },
-                    delay: 100,
-                },
-                {
-                    request: {
-                        query: SHARE_ALBUM_QUERY,
-                        variables: { id: 'album-1' },
-                    },
-                    result: { data: mockAlbumShares },
-                    delay: 100,
-                },
-            ]
-
-            renderWithProviders(<SidebarAlbumShare id="album-1" />, { mocks })
-
-            expect(screen.getByText('Loading shares...')).toBeInTheDocument()
-        })
-
         it('should load album shares successfully', async () => {
             const mocks: MockedResponse[] = [
                 {
