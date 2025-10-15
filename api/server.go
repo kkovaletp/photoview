@@ -71,6 +71,8 @@ func main() {
 		log.Panicf("Could not initialize face detector: %s\n", err)
 	}
 
+	server.InitializeLogging()
+
 	rootRouter := mux.NewRouter()
 	rootRouter.Use(dataloader.Middleware(db))
 	rootRouter.Use(auth.Middleware(db))
@@ -120,7 +122,6 @@ func main() {
 		if !shouldServeUI {
 			log.Printf("Notice: UI is not served by the API (%s=0)", utils.EnvServeUI.GetName())
 		}
-
 	}
 
 	srv := &http.Server{
@@ -154,6 +155,8 @@ func setupGracefulShutdown(svr *http.Server) {
 		} else {
 			log.Println("Shutdown complete")
 		}
+
+		server.CloseLogging()
 	}()
 }
 
