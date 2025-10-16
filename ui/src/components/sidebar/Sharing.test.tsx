@@ -149,7 +149,7 @@ describe('Sharing Components', () => {
             expect(screen.getByText('def456')).toBeInTheDocument()
         })
 
-        it('should not load shares when not authenticated', () => {
+        it('should not render shares when not authenticated', () => {
             vi.mocked(authToken).mockReturnValue(null)
 
             const mocks: MockedResponse[] = []
@@ -282,13 +282,6 @@ describe('Sharing Components', () => {
                     },
                     result: { data: mockAlbumShares },
                 },
-                {
-                    request: {
-                        query: SHARE_ALBUM_QUERY,
-                        variables: { id: 'album-1' },
-                    },
-                    result: { data: mockAlbumShares },
-                },
             ]
 
             renderWithProviders(<SidebarAlbumShare id="album-1" />, { mocks })
@@ -300,13 +293,6 @@ describe('Sharing Components', () => {
 
         it('should display error when query fails', async () => {
             const mocks: MockedResponse[] = [
-                {
-                    request: {
-                        query: SHARE_ALBUM_QUERY,
-                        variables: { id: 'album-1' },
-                    },
-                    error: new Error('Failed to load album shares'),
-                },
                 {
                     request: {
                         query: SHARE_ALBUM_QUERY,
@@ -391,21 +377,6 @@ describe('Sharing Components', () => {
 
         it('should display "No shares found" when album has no shares', async () => {
             const mocks: MockedResponse[] = [
-                {
-                    request: {
-                        query: SHARE_ALBUM_QUERY,
-                        variables: { id: 'album-1' },
-                    },
-                    result: {
-                        data: {
-                            album: {
-                                id: 'album-1',
-                                shares: [],
-                                __typename: 'Album',
-                            },
-                        },
-                    },
-                },
                 {
                     request: {
                         query: SHARE_ALBUM_QUERY,
