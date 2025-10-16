@@ -8,7 +8,7 @@ import {
 } from '@apollo/client'
 import copy from 'copy-to-clipboard'
 import { useTranslation } from 'react-i18next'
-import { Popover } from '@headlessui/react'
+import { Popover, PopoverButton, PopoverPanel } from '@headlessui/react'
 import {
   sidebareDeleteShare,
   sidebareDeleteShareVariables,
@@ -245,6 +245,7 @@ const MorePopoverSectionPassword = ({
         onChange={checkboxChange}
       />
       <TextField
+        data-testid="share-password-input"
         disabled={!activated}
         type={passwordHidden ? 'password' : 'text'}
         value={passwordInputValue}
@@ -285,14 +286,14 @@ const MorePopover = ({ id, share, query }: MorePopoverProps) => {
 
   return (
     <Popover className="relative">
-      <Popover.Button
+      <PopoverButton
         className="align-middle p-1 ml-2"
         title={t('sidebar.sharing.more', 'More')}
       >
         <MoreIcon />
-      </Popover.Button>
+      </PopoverButton>
 
-      <Popover.Panel>
+      <PopoverPanel>
         <ArrowPopoverPanel width={260}>
           <MorePopoverSectionPassword id={id} share={share} query={query} />
           <div className="px-4 py-2 border-t border-gray-200 dark:border-dark-border mt-2 mb-2">
@@ -300,7 +301,7 @@ const MorePopover = ({ id, share, query }: MorePopoverProps) => {
             <TextField className="mt-2 w-full" />
           </div>
         </ArrowPopoverPanel>
-      </Popover.Panel>
+      </PopoverPanel>
     </Popover>
   )
 }

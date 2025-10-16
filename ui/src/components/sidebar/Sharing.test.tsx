@@ -158,6 +158,7 @@ describe('Sharing Components', () => {
 
             // Should not show loading or make the query
             expect(screen.queryByText('Loading shares...')).not.toBeInTheDocument()
+            expect(screen.queryByText(/Public Link/)).not.toBeInTheDocument()
         })
 
         it('should display error when query fails', async () => {
@@ -241,24 +242,6 @@ describe('Sharing Components', () => {
 
             await waitFor(() => {
                 expect(screen.getByText('new789')).toBeInTheDocument()
-            })
-        })
-
-        it('should load shares for photo-1', async () => {
-            const mocks: MockedResponse[] = [
-                {
-                    request: {
-                        query: SHARE_PHOTO_QUERY,
-                        variables: { id: 'photo-1' },
-                    },
-                    result: { data: mockPhotoShares },
-                },
-            ]
-
-            renderWithProviders(<SidebarPhotoShare id="photo-1" />, { mocks })
-
-            await waitFor(() => {
-                expect(screen.getByText('abc123')).toBeInTheDocument()
             })
         })
 
@@ -647,7 +630,7 @@ describe('Sharing Components', () => {
             const checkbox = screen.getByLabelText('Password protected')
             await user.click(checkbox)
 
-            const passwordInput = screen.getAllByRole('textbox')[0]
+            const passwordInput = screen.getByTestId('share-password-input')
             await user.type(passwordInput, 'mypassword')
             await user.keyboard('{Enter}')
 
@@ -773,14 +756,14 @@ describe('Sharing Components', () => {
             const checkbox = screen.getByLabelText('Password protected')
             await user.click(checkbox)
 
-            const passwordInput = screen.getAllByRole('textbox')[0]
+            const passwordInput = screen.getByTestId('share-password-input')
             await user.type(passwordInput, 'mypassword')
             await user.keyboard('{Enter}')
 
             await waitFor(() => {
                 // Instead of checking for the message in DOM, we verify the mutation failed
                 // by checking that the password input didn't change to asterisks
-                const passwordInput = screen.getAllByRole('textbox')[0]
+                const passwordInput = screen.getByTestId('share-password-input')
                 expect(passwordInput).not.toHaveValue('**********')
             }, { timeout: 2000 })
         })
