@@ -9,7 +9,7 @@ import { mockInitialSetupGraphql } from './loginTestHelpers'
 import { renderWithProviders } from '../../helpers/testUtils'
 import { gql } from '@apollo/client'
 
-vi.mock('../../helpers/authentication.ts')
+vi.mock('../../helpers/authentication')
 vi.mock('./loginUtilities', async () => {
   const actual = await vi.importActual('./loginUtilities') as object
   return {
@@ -69,11 +69,9 @@ describe('InitialSetupPage - Form Submission', () => {
       },
     }
 
-    await act(async () => {
-      await renderWithProviders(<InitialSetupPage />, {
-        mocks: [mockInitialSetupGraphql(true), setupMock],
-        history,
-      })
+    await renderWithProviders(<InitialSetupPage />, {
+      mocks: [mockInitialSetupGraphql(true), setupMock],
+      history,
     })
 
     const user = userEvent.setup()
@@ -84,7 +82,7 @@ describe('InitialSetupPage - Form Submission', () => {
     await user.type(screen.getByLabelText('Photo path'), '/photos')
 
     // Submit the form
-    await user.click(screen.getByDisplayValue('Setup Photoview'))
+    await user.click(screen.getByRole('button', { name: /setup photoview/i }))
 
     // Verify login was called with the token
     await waitFor(() => {
@@ -116,11 +114,9 @@ describe('InitialSetupPage - Form Submission', () => {
       },
     }
 
-    await act(async () => {
-      await renderWithProviders(<InitialSetupPage />, {
-        mocks: [mockInitialSetupGraphql(true), setupMock],
-        history,
-      })
+    await renderWithProviders(<InitialSetupPage />, {
+      mocks: [mockInitialSetupGraphql(true), setupMock],
+      history,
     })
 
     const user = userEvent.setup()
@@ -128,12 +124,10 @@ describe('InitialSetupPage - Form Submission', () => {
     await user.type(screen.getByLabelText('Username'), 'admin')
     await user.type(screen.getByLabelText('Password'), 'weak')
     await user.type(screen.getByLabelText('Photo path'), '/photos')
-    await user.click(screen.getByDisplayValue('Setup Photoview'))
+    await user.click(screen.getByRole('button', { name: /setup photoview/i }))
 
     // Verify error message is displayed
-    await waitFor(() => {
-      expect(screen.getByText('Password is too weak')).toBeInTheDocument()
-    })
+    expect(await screen.findByText(/password is too weak/i)).toBeInTheDocument()
 
     // Verify login was NOT called
     expect(login).not.toHaveBeenCalled()
@@ -155,11 +149,9 @@ describe('InitialSetupPage - Form Submission', () => {
       error: new Error('Network error'),
     }
 
-    await act(async () => {
-      await renderWithProviders(<InitialSetupPage />, {
-        mocks: [mockInitialSetupGraphql(true), setupMock],
-        history,
-      })
+    await renderWithProviders(<InitialSetupPage />, {
+      mocks: [mockInitialSetupGraphql(true), setupMock],
+      history,
     })
 
     const user = userEvent.setup()
@@ -167,14 +159,10 @@ describe('InitialSetupPage - Form Submission', () => {
     await user.type(screen.getByLabelText('Username'), 'admin')
     await user.type(screen.getByLabelText('Password'), 'password123')
     await user.type(screen.getByLabelText('Photo path'), '/photos')
-    await user.click(screen.getByDisplayValue('Setup Photoview'))
+    await user.click(screen.getByRole('button', { name: /setup photoview/i }))
 
     // Verify generic error message is displayed
-    await waitFor(() => {
-      expect(
-        screen.getByText('An unexpected error occurred during setup')
-      ).toBeInTheDocument()
-    })
+    expect(await screen.findByText(/an unexpected error occurred during setup/i)).toBeInTheDocument()
 
     expect(login).not.toHaveBeenCalled()
   })
@@ -204,15 +192,13 @@ describe('InitialSetupPage - Form Submission', () => {
       delay: 100, // Simulate network delay
     }
 
-    await act(async () => {
-      await renderWithProviders(<InitialSetupPage />, {
-        mocks: [mockInitialSetupGraphql(true), setupMock],
-        history,
-      })
+    await renderWithProviders(<InitialSetupPage />, {
+      mocks: [mockInitialSetupGraphql(true), setupMock],
+      history,
     })
 
     const user = userEvent.setup()
-    const submitButton = screen.getByDisplayValue('Setup Photoview')
+    const submitButton = screen.getByRole('button', { name: /setup photoview/i })
 
     await user.type(screen.getByLabelText('Username'), 'admin')
     await user.type(screen.getByLabelText('Password'), 'password123')
@@ -221,7 +207,7 @@ describe('InitialSetupPage - Form Submission', () => {
     // Submit and check if button is disabled
     await user.click(submitButton)
 
-    expect(submitButton).toBeDisabled()
+    await waitFor(() => expect(submitButton).toBeDisabled())
 
     // Wait for completion
     await waitFor(() => {
@@ -273,11 +259,9 @@ describe('InitialSetupPage - Form Submission', () => {
       },
     }
 
-    await act(async () => {
-      await renderWithProviders(<InitialSetupPage />, {
-        mocks: [mockInitialSetupGraphql(true), failedSetupMock, successSetupMock],
-        history,
-      })
+    await renderWithProviders(<InitialSetupPage />, {
+      mocks: [mockInitialSetupGraphql(true), failedSetupMock, successSetupMock],
+      history,
     })
 
     const user = userEvent.setup()
@@ -286,21 +270,19 @@ describe('InitialSetupPage - Form Submission', () => {
     await user.type(screen.getByLabelText('Username'), 'admin')
     await user.type(screen.getByLabelText('Password'), 'weak')
     await user.type(screen.getByLabelText('Photo path'), '/photos')
-    await user.click(screen.getByDisplayValue('Setup Photoview'))
+    await user.click(screen.getByRole('button', { name: /setup photoview/i }))
 
-    await waitFor(() => {
-      expect(screen.getByText('Password is too weak')).toBeInTheDocument()
-    })
+    expect(await screen.findByText(/password is too weak/i)).toBeInTheDocument()
 
     // Clear password and try again with strong password
     const passwordInput = screen.getByLabelText('Password')
     await user.clear(passwordInput)
     await user.type(passwordInput, 'strong-password-123')
-    await user.click(screen.getByDisplayValue('Setup Photoview'))
+    await user.click(screen.getByRole('button', { name: /setup photoview/i }))
 
     // Error should clear and login should succeed
+    expect(screen.queryByText('Password is too weak')).not.toBeInTheDocument()
     await waitFor(() => {
-      expect(screen.queryByText('Password is too weak')).not.toBeInTheDocument()
       expect(login).toHaveBeenCalledWith('test-token-123')
     })
   })
@@ -309,24 +291,20 @@ describe('InitialSetupPage - Form Submission', () => {
     const history = createMemoryHistory()
     history.push('/initialSetup')
 
-    await act(async () => {
-      await renderWithProviders(<InitialSetupPage />, {
-        mocks: [mockInitialSetupGraphql(true)],
-        history,
-      })
+    await renderWithProviders(<InitialSetupPage />, {
+      mocks: [mockInitialSetupGraphql(true)],
+      history,
     })
 
     const user = userEvent.setup()
 
     // Try to submit empty form
-    await user.click(screen.getByDisplayValue('Setup Photoview'))
+    await user.click(screen.getByRole('button', { name: /setup photoview/i }))
 
     // Validation errors should appear
-    await waitFor(() => {
-      expect(screen.getByText('Please enter a username')).toBeInTheDocument()
-      expect(screen.getByText('Please enter a password')).toBeInTheDocument()
-      expect(screen.getByText('Please enter a photo path')).toBeInTheDocument()
-    })
+    expect(await screen.findByText(/please enter a username/i)).toBeInTheDocument()
+    expect(await screen.findByText(/please enter a password/i)).toBeInTheDocument()
+    expect(await screen.findByText(/please enter a photo path/i)).toBeInTheDocument()
 
     // Login should not be called
     expect(login).not.toHaveBeenCalled()
@@ -336,11 +314,9 @@ describe('InitialSetupPage - Form Submission', () => {
     const history = createMemoryHistory()
     history.push('/initialSetup')
 
-    await act(async () => {
-      await renderWithProviders(<InitialSetupPage />, {
-        mocks: [mockInitialSetupGraphql(true)],
-        history,
-      })
+    await renderWithProviders(<InitialSetupPage />, {
+      mocks: [mockInitialSetupGraphql(true)],
+      history,
     })
 
     // MessageBox should not be visible initially
