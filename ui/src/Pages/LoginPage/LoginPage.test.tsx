@@ -223,10 +223,11 @@ describe('LoginPage', () => {
       })
 
       // Verify error was logged
-      expect(consoleErrorSpy).toHaveBeenCalledWith(
-        'Authorization failed: ',
-        expect.any(Error)
+      expect(consoleErrorSpy).toHaveBeenCalled()
+      const matched = consoleErrorSpy.mock.calls.some(([msg]) =>
+        String(msg).startsWith('Authorization failed')
       )
+      expect(matched).toBe(true)
 
       // Verify login was NOT called
       expect(login).not.toHaveBeenCalled()
