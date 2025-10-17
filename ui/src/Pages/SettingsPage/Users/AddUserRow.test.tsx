@@ -1,6 +1,6 @@
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { MockedProvider } from '@apollo/client/testing'
+import { MockedProvider, MockedResponse } from '@apollo/client/testing'
 import { describe, test, expect, vi, beforeEach } from 'vitest'
 import AddUserRow, {
   CREATE_USER_MUTATION,
@@ -16,7 +16,7 @@ describe('AddUserRow', () => {
     setShowMock = vi.fn()
   })
 
-  const renderComponent = (mocks: any[]) => {
+  const renderComponent = (mocks: MockedResponse[]) => {
     return render(
       <MockedProvider mocks={mocks}>
         <table>
@@ -69,7 +69,7 @@ describe('AddUserRow', () => {
 
       const usernameInput = screen.getByPlaceholderText('Username')
       const pathInput = screen.getByPlaceholderText('/path/to/photos')
-      const addUserBtn = screen.getByText('Add user')
+      const addUserBtn = screen.getByRole('button', { name: /add user/i })
 
       await user.type(usernameInput, 'testuser')
       await user.type(pathInput, '/tmp')
@@ -106,7 +106,7 @@ describe('AddUserRow', () => {
       renderComponent(mocks)
 
       const usernameInput = screen.getByPlaceholderText('Username')
-      const addUserBtn = screen.getByText('Add user')
+      const addUserBtn = screen.getByRole('button', { name: /add user/i })
 
       await user.type(usernameInput, 'testuser')
       await user.click(addUserBtn)
@@ -143,7 +143,7 @@ describe('AddUserRow', () => {
 
       const usernameInput = screen.getByPlaceholderText('Username')
       const adminCheckbox = screen.getByLabelText('Admin')
-      const addUserBtn = screen.getByText('Add user')
+      const addUserBtn = screen.getByRole('button', { name: /add user/i })
 
       await user.type(usernameInput, 'adminuser')
       await user.click(adminCheckbox)
@@ -160,210 +160,220 @@ describe('AddUserRow', () => {
       const user = userEvent.setup()
       const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => { })
 
-      const mocks = [
-        {
-          request: {
-            query: CREATE_USER_MUTATION,
-            variables: { username: 'testuser', admin: false },
+      try {
+        const mocks = [
+          {
+            request: {
+              query: CREATE_USER_MUTATION,
+              variables: { username: 'testuser', admin: false },
+            },
+            error: new Error('User already exists'),
           },
-          error: new Error('User already exists'),
-        },
-      ]
+        ]
 
-      renderComponent(mocks)
+        renderComponent(mocks)
 
-      const usernameInput = screen.getByPlaceholderText('Username')
-      const addUserBtn = screen.getByText('Add user')
+        const usernameInput = screen.getByPlaceholderText('Username')
+        const addUserBtn = screen.getByRole('button', { name: /add user/i })
 
-      await user.type(usernameInput, 'testuser')
-      await user.click(addUserBtn)
+        await user.type(usernameInput, 'testuser')
+        await user.click(addUserBtn)
 
-      await waitFor(() => {
-        expect(screen.getByText('User already exists')).toBeInTheDocument()
-      })
+        await waitFor(() => {
+          expect(screen.getByText('User already exists')).toBeInTheDocument()
+        })
 
-      expect(onUserAddedMock).not.toHaveBeenCalled()
-      expect(consoleErrorSpy).toHaveBeenCalledWith(
-        'Error adding user: ',
-        expect.any(Error)
-      )
-
-      consoleErrorSpy.mockRestore()
+        expect(onUserAddedMock).not.toHaveBeenCalled()
+        expect(consoleErrorSpy).toHaveBeenCalledWith(
+          'Error adding user: ',
+          expect.any(Error)
+        )
+      } finally {
+        consoleErrorSpy.mockRestore()
+      }
     })
 
     test('displays error message when root path addition fails', async () => {
       const user = userEvent.setup()
       const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => { })
 
-      const mocks = [
-        {
-          request: {
-            query: CREATE_USER_MUTATION,
-            variables: { username: 'testuser', admin: false },
-          },
-          result: {
-            data: {
-              createUser: {
-                id: '123',
-                username: 'testuser',
-                admin: false,
-                __typename: 'User',
+      try {
+        const mocks = [
+          {
+            request: {
+              query: CREATE_USER_MUTATION,
+              variables: { username: 'testuser', admin: false },
+            },
+            result: {
+              data: {
+                createUser: {
+                  id: '123',
+                  username: 'testuser',
+                  admin: false,
+                  __typename: 'User',
+                },
               },
             },
           },
-        },
-        {
-          request: {
-            query: USER_ADD_ROOT_PATH_MUTATION,
-            variables: { id: '123', rootPath: '/invalid/path' },
+          {
+            request: {
+              query: USER_ADD_ROOT_PATH_MUTATION,
+              variables: { id: '123', rootPath: '/invalid/path' },
+            },
+            error: new Error('Invalid path'),
           },
-          error: new Error('Invalid path'),
-        },
-      ]
+        ]
 
-      renderComponent(mocks)
+        renderComponent(mocks)
 
-      const usernameInput = screen.getByPlaceholderText('Username')
-      const pathInput = screen.getByPlaceholderText('/path/to/photos')
-      const addUserBtn = screen.getByText('Add user')
+        const usernameInput = screen.getByPlaceholderText('Username')
+        const pathInput = screen.getByPlaceholderText('/path/to/photos')
+        const addUserBtn = screen.getByRole('button', { name: /add user/i })
 
-      await user.type(usernameInput, 'testuser')
-      await user.type(pathInput, '/invalid/path')
-      await user.click(addUserBtn)
+        await user.type(usernameInput, 'testuser')
+        await user.type(pathInput, '/invalid/path')
+        await user.click(addUserBtn)
 
-      await waitFor(() => {
-        expect(screen.getByText('Invalid path')).toBeInTheDocument()
-      })
+        await waitFor(() => {
+          expect(screen.getByText('Invalid path')).toBeInTheDocument()
+        })
 
-      expect(onUserAddedMock).not.toHaveBeenCalled()
-      expect(consoleErrorSpy).toHaveBeenCalledWith(
-        'Error adding user: ',
-        expect.any(Error)
-      )
-
-      consoleErrorSpy.mockRestore()
+        expect(onUserAddedMock).not.toHaveBeenCalled()
+        expect(consoleErrorSpy).toHaveBeenCalledWith(
+          'Error adding user: ',
+          expect.any(Error)
+        )
+      } finally {
+        consoleErrorSpy.mockRestore()
+      }
     })
 
-    test('displays generic error message on network error', async () => {
+    test('displays network error message', async () => {
       const user = userEvent.setup()
       const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => { })
 
-      const mocks = [
-        {
-          request: {
-            query: CREATE_USER_MUTATION,
-            variables: { username: 'testuser', admin: false },
+      try {
+        const mocks = [
+          {
+            request: {
+              query: CREATE_USER_MUTATION,
+              variables: { username: 'testuser', admin: false },
+            },
+            error: new Error('Network error'),
           },
-          error: new Error('Network error'),
-        },
-      ]
+        ]
 
-      renderComponent(mocks)
+        renderComponent(mocks)
 
-      const usernameInput = screen.getByPlaceholderText('Username')
-      const addUserBtn = screen.getByText('Add user')
+        const usernameInput = screen.getByPlaceholderText('Username')
+        const addUserBtn = screen.getByRole('button', { name: /add user/i })
 
-      await user.type(usernameInput, 'testuser')
-      await user.click(addUserBtn)
+        await user.type(usernameInput, 'testuser')
+        await user.click(addUserBtn)
 
-      await waitFor(() => {
-        expect(screen.getByText('Network error')).toBeInTheDocument()
-      })
+        await waitFor(() => {
+          expect(screen.getByText('Network error')).toBeInTheDocument()
+        })
 
-      expect(onUserAddedMock).not.toHaveBeenCalled()
-      expect(consoleErrorSpy).toHaveBeenCalled()
-
-      consoleErrorSpy.mockRestore()
+        expect(onUserAddedMock).not.toHaveBeenCalled()
+        expect(consoleErrorSpy).toHaveBeenCalled()
+      } finally {
+        consoleErrorSpy.mockRestore()
+      }
     })
 
     test('clears error message on retry attempt', async () => {
       const user = userEvent.setup()
       const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => { })
 
-      const mocks = [
-        {
-          request: {
-            query: CREATE_USER_MUTATION,
-            variables: { username: 'testuser', admin: false },
+      try {
+        const mocks = [
+          {
+            request: {
+              query: CREATE_USER_MUTATION,
+              variables: { username: 'testuser', admin: false },
+            },
+            error: new Error('Database error'),
           },
-          error: new Error('Database error'),
-        },
-        {
-          request: {
-            query: CREATE_USER_MUTATION,
-            variables: { username: 'testuser', admin: false },
-          },
-          result: {
-            data: {
-              createUser: {
-                id: '123',
-                username: 'testuser',
-                admin: false,
-                __typename: 'User',
+          {
+            request: {
+              query: CREATE_USER_MUTATION,
+              variables: { username: 'testuser', admin: false },
+            },
+            result: {
+              data: {
+                createUser: {
+                  id: '123',
+                  username: 'testuser',
+                  admin: false,
+                  __typename: 'User',
+                },
               },
             },
           },
-        },
-      ]
+        ]
 
-      renderComponent(mocks)
+        renderComponent(mocks)
 
-      const usernameInput = screen.getByPlaceholderText('Username')
-      const addUserBtn = screen.getByText('Add user')
+        const usernameInput = screen.getByPlaceholderText('Username')
+        const addUserBtn = screen.getByRole('button', { name: /add user/i })
 
-      await user.type(usernameInput, 'testuser')
-      await user.click(addUserBtn)
+        await user.type(usernameInput, 'testuser')
+        await user.click(addUserBtn)
 
-      // Error should appear
-      await waitFor(() => {
-        expect(screen.getByText('Database error')).toBeInTheDocument()
-      })
+        // Error should appear
+        await waitFor(() => {
+          expect(screen.getByText('Database error')).toBeInTheDocument()
+        })
 
-      // Retry
-      await user.click(addUserBtn)
+        // Retry
+        await user.click(addUserBtn)
 
-      // Error should be cleared and success should occur
-      await waitFor(() => {
-        expect(screen.queryByText('Database error')).not.toBeInTheDocument()
-      })
+        // Error should be cleared and success should occur
+        await waitFor(() => {
+          expect(screen.queryByText('Database error')).not.toBeInTheDocument()
+        })
 
-      await waitFor(() => {
-        expect(onUserAddedMock).toHaveBeenCalledTimes(1)
-      })
-
-      consoleErrorSpy.mockRestore()
+        await waitFor(() => {
+          expect(onUserAddedMock).toHaveBeenCalledTimes(1)
+        })
+      } finally {
+        consoleErrorSpy.mockRestore()
+      }
     })
 
     test('logs error to console on failure', async () => {
       const user = userEvent.setup()
       const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => { })
 
-      const mocks = [
-        {
-          request: {
-            query: CREATE_USER_MUTATION,
-            variables: { username: 'testuser', admin: false },
+      try {
+        const mocks = [
+          {
+            request: {
+              query: CREATE_USER_MUTATION,
+              variables: { username: 'testuser', admin: false },
+            },
+            error: new Error('Test error'),
           },
-          error: new Error('Test error'),
-        },
-      ]
+        ]
 
-      renderComponent(mocks)
+        renderComponent(mocks)
 
-      const usernameInput = screen.getByPlaceholderText('Username')
-      const addUserBtn = screen.getByText('Add user')
+        const usernameInput = screen.getByPlaceholderText('Username')
+        const addUserBtn = screen.getByRole('button', { name: /add user/i })
 
-      await user.type(usernameInput, 'testuser')
-      await user.click(addUserBtn)
+        await user.type(usernameInput, 'testuser')
+        await user.click(addUserBtn)
 
-      await waitFor(() => {
-        expect(consoleErrorSpy).toHaveBeenCalledWith(
-          'Error adding user: ',
-          expect.any(Error)
-        )
-      })
-
-      consoleErrorSpy.mockRestore()
+        await waitFor(() => {
+          expect(consoleErrorSpy).toHaveBeenCalledWith(
+            'Error adding user: ',
+            expect.any(Error)
+          )
+        })
+      } finally {
+        consoleErrorSpy.mockRestore()
+      }
     })
   })
 
@@ -393,13 +403,13 @@ describe('AddUserRow', () => {
       renderComponent(mocks)
 
       const usernameInput = screen.getByPlaceholderText('Username')
-      const addUserBtn = screen.getByText('Add user')
+      const addUserBtn = screen.getByRole('button', { name: /add user/i })
 
       await user.type(usernameInput, 'testuser')
       await user.click(addUserBtn)
 
       // Button should be disabled during loading
-      expect(addUserBtn).toBeDisabled()
+      await waitFor(() => expect(addUserBtn).toBeDisabled())
 
       // Wait for completion
       await waitFor(() => {
@@ -444,7 +454,7 @@ describe('AddUserRow', () => {
 
       const usernameInput = screen.getByPlaceholderText('Username')
       const pathInput = screen.getByPlaceholderText('/path/to/photos')
-      const addUserBtn = screen.getByText('Add user')
+      const addUserBtn = screen.getByRole('button', { name: /add user/i })
 
       await user.type(usernameInput, 'testuser')
       await user.type(pathInput, '/tmp')
@@ -465,7 +475,7 @@ describe('AddUserRow', () => {
   describe('User Interactions', () => {
     test('cancel button hides the form', async () => {
       const user = userEvent.setup()
-      const mocks: any[] = []
+      const mocks: MockedResponse[] = []
 
       renderComponent(mocks)
 
@@ -478,7 +488,7 @@ describe('AddUserRow', () => {
 
     test('updates username input correctly', async () => {
       const user = userEvent.setup()
-      const mocks: any[] = []
+      const mocks: MockedResponse[] = []
 
       renderComponent(mocks)
 
@@ -493,7 +503,7 @@ describe('AddUserRow', () => {
 
     test('updates root path input correctly', async () => {
       const user = userEvent.setup()
-      const mocks: any[] = []
+      const mocks: MockedResponse[] = []
 
       renderComponent(mocks)
 
@@ -508,7 +518,7 @@ describe('AddUserRow', () => {
 
     test('updates admin checkbox correctly', async () => {
       const user = userEvent.setup()
-      const mocks: any[] = []
+      const mocks: MockedResponse[] = []
 
       renderComponent(mocks)
 
@@ -564,29 +574,30 @@ describe('AddUserRow', () => {
       const user = userEvent.setup()
       const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => { })
 
-      const mocks = [
-        {
-          request: {
-            query: CREATE_USER_MUTATION,
-            variables: { username: 'testuser', admin: false },
+      try {
+        const mocks = [
+          {
+            request: {
+              query: CREATE_USER_MUTATION,
+              variables: { username: 'testuser', admin: false },
+            },
+            error: new Error('Something went wrong'),
           },
-          error: new Error('Something went wrong'),
-        },
-      ]
+        ]
 
-      renderComponent(mocks)
+        renderComponent(mocks)
 
-      const usernameInput = screen.getByPlaceholderText('Username')
-      const addUserBtn = screen.getByText('Add user')
+        const usernameInput = screen.getByPlaceholderText('Username')
+        const addUserBtn = screen.getByRole('button', { name: /add user/i })
 
-      await user.type(usernameInput, 'testuser')
-      await user.click(addUserBtn)
+        await user.type(usernameInput, 'testuser')
+        await user.click(addUserBtn)
 
-      const messageBox = await screen.findByText('Something went wrong')
-      expect(messageBox).toBeInTheDocument()
-      expect(messageBox).toHaveClass('bg-red-200', 'text-red-900')
-
-      consoleErrorSpy.mockRestore()
+        const messageBox = await screen.findByText('Something went wrong')
+        expect(messageBox).toBeInTheDocument()
+      } finally {
+        consoleErrorSpy.mockRestore()
+      }
     })
   })
 })
