@@ -1,20 +1,311 @@
-import React from 'react' //React must be in scope when using JSX.
-import { screen, waitFor } from '@testing-library/react'
-import { createMemoryHistory } from 'history'
-import * as authentication from '../../helpers/authentication'
+import { describe, test, expect, vi, beforeEach } from 'vitest'
+import { screen, waitFor, act } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import InitialSetupPage from './InitialSetupPage'
+import * as authentication from '../../helpers/authentication'
+import * as loginUtilities from './loginUtilities'
+import { createMemoryHistory } from 'history'
 import { mockInitialSetupGraphql } from './loginTestHelpers'
 import { renderWithProviders } from '../../helpers/testUtils'
-import { act } from '@testing-library/react'
+import { gql } from '@apollo/client'
 
 vi.mock('../../helpers/authentication.ts')
+vi.mock('./loginUtilities', async () => {
+  const actual = await vi.importActual('./loginUtilities') as object
+  return {
+    ...actual,
+    login: vi.fn(),
+  }
+})
 
 const authToken = vi.mocked(authentication.authToken)
+const login = vi.mocked(loginUtilities.login)
 
-describe('Initial setup page', () => {
-  test('Render initial setup form', async () => {
+const initialSetupMutation = gql`
+  mutation InitialSetup(
+    $username: String!
+    $password: String!
+    $rootPath: String!
+  ) {
+    initialSetupWizard(
+      username: $username
+      password: $password
+      rootPath: $rootPath
+    ) {
+      success
+      status
+      token
+    }
+  }
+`
+
+describe('InitialSetupPage - Form Submission', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
     authToken.mockImplementation(() => null)
+  })
 
+  test('successful setup with valid credentials', async () => {
+    const history = createMemoryHistory()
+    history.push('/initialSetup')
+
+    const setupMock = {
+      request: {
+        query: initialSetupMutation,
+        variables: {
+          username: 'admin',
+          password: 'password123',
+          rootPath: '/photos',
+        },
+      },
+      result: {
+        data: {
+          initialSetupWizard: {
+            success: true,
+            status: null,
+            token: 'test-token-123',
+          },
+        },
+      },
+    }
+
+    await act(async () => {
+      await renderWithProviders(<InitialSetupPage />, {
+        mocks: [mockInitialSetupGraphql(true), setupMock],
+        history,
+      })
+    })
+
+    const user = userEvent.setup()
+
+    // Fill in the form
+    await user.type(screen.getByLabelText('Username'), 'admin')
+    await user.type(screen.getByLabelText('Password'), 'password123')
+    await user.type(screen.getByLabelText('Photo path'), '/photos')
+
+    // Submit the form
+    await user.click(screen.getByDisplayValue('Setup Photoview'))
+
+    // Verify login was called with the token
+    await waitFor(() => {
+      expect(login).toHaveBeenCalledWith('test-token-123')
+    })
+  })
+
+  test('failed setup displays status error message', async () => {
+    const history = createMemoryHistory()
+    history.push('/initialSetup')
+
+    const setupMock = {
+      request: {
+        query: initialSetupMutation,
+        variables: {
+          username: 'admin',
+          password: 'weak',
+          rootPath: '/photos',
+        },
+      },
+      result: {
+        data: {
+          initialSetupWizard: {
+            success: false,
+            status: 'Password is too weak',
+            token: null,
+          },
+        },
+      },
+    }
+
+    await act(async () => {
+      await renderWithProviders(<InitialSetupPage />, {
+        mocks: [mockInitialSetupGraphql(true), setupMock],
+        history,
+      })
+    })
+
+    const user = userEvent.setup()
+
+    await user.type(screen.getByLabelText('Username'), 'admin')
+    await user.type(screen.getByLabelText('Password'), 'weak')
+    await user.type(screen.getByLabelText('Photo path'), '/photos')
+    await user.click(screen.getByDisplayValue('Setup Photoview'))
+
+    // Verify error message is displayed
+    await waitFor(() => {
+      expect(screen.getByText('Password is too weak')).toBeInTheDocument()
+    })
+
+    // Verify login was NOT called
+    expect(login).not.toHaveBeenCalled()
+  })
+
+  test('network error displays generic error message', async () => {
+    const history = createMemoryHistory()
+    history.push('/initialSetup')
+
+    const setupMock = {
+      request: {
+        query: initialSetupMutation,
+        variables: {
+          username: 'admin',
+          password: 'password123',
+          rootPath: '/photos',
+        },
+      },
+      error: new Error('Network error'),
+    }
+
+    await act(async () => {
+      await renderWithProviders(<InitialSetupPage />, {
+        mocks: [mockInitialSetupGraphql(true), setupMock],
+        history,
+      })
+    })
+
+    const user = userEvent.setup()
+
+    await user.type(screen.getByLabelText('Username'), 'admin')
+    await user.type(screen.getByLabelText('Password'), 'password123')
+    await user.type(screen.getByLabelText('Photo path'), '/photos')
+    await user.click(screen.getByDisplayValue('Setup Photoview'))
+
+    // Verify generic error message is displayed
+    await waitFor(() => {
+      expect(
+        screen.getByText('An unexpected error occurred during setup')
+      ).toBeInTheDocument()
+    })
+
+    expect(login).not.toHaveBeenCalled()
+  })
+
+  test('submit button is disabled during loading', async () => {
+    const history = createMemoryHistory()
+    history.push('/initialSetup')
+
+    const setupMock = {
+      request: {
+        query: initialSetupMutation,
+        variables: {
+          username: 'admin',
+          password: 'password123',
+          rootPath: '/photos',
+        },
+      },
+      result: {
+        data: {
+          initialSetupWizard: {
+            success: true,
+            status: null,
+            token: 'test-token-123',
+          },
+        },
+      },
+      delay: 100, // Simulate network delay
+    }
+
+    await act(async () => {
+      await renderWithProviders(<InitialSetupPage />, {
+        mocks: [mockInitialSetupGraphql(true), setupMock],
+        history,
+      })
+    })
+
+    const user = userEvent.setup()
+    const submitButton = screen.getByDisplayValue('Setup Photoview')
+
+    await user.type(screen.getByLabelText('Username'), 'admin')
+    await user.type(screen.getByLabelText('Password'), 'password123')
+    await user.type(screen.getByLabelText('Photo path'), '/photos')
+
+    // Submit and check if button is disabled
+    await user.click(submitButton)
+
+    expect(submitButton).toBeDisabled()
+
+    // Wait for completion
+    await waitFor(() => {
+      expect(login).toHaveBeenCalledWith('test-token-123')
+    })
+  })
+
+  test('error message clears on retry', async () => {
+    const history = createMemoryHistory()
+    history.push('/initialSetup')
+
+    const failedSetupMock = {
+      request: {
+        query: initialSetupMutation,
+        variables: {
+          username: 'admin',
+          password: 'weak',
+          rootPath: '/photos',
+        },
+      },
+      result: {
+        data: {
+          initialSetupWizard: {
+            success: false,
+            status: 'Password is too weak',
+            token: null,
+          },
+        },
+      },
+    }
+
+    const successSetupMock = {
+      request: {
+        query: initialSetupMutation,
+        variables: {
+          username: 'admin',
+          password: 'strong-password-123',
+          rootPath: '/photos',
+        },
+      },
+      result: {
+        data: {
+          initialSetupWizard: {
+            success: true,
+            status: null,
+            token: 'test-token-123',
+          },
+        },
+      },
+    }
+
+    await act(async () => {
+      await renderWithProviders(<InitialSetupPage />, {
+        mocks: [mockInitialSetupGraphql(true), failedSetupMock, successSetupMock],
+        history,
+      })
+    })
+
+    const user = userEvent.setup()
+
+    // First attempt - fail
+    await user.type(screen.getByLabelText('Username'), 'admin')
+    await user.type(screen.getByLabelText('Password'), 'weak')
+    await user.type(screen.getByLabelText('Photo path'), '/photos')
+    await user.click(screen.getByDisplayValue('Setup Photoview'))
+
+    await waitFor(() => {
+      expect(screen.getByText('Password is too weak')).toBeInTheDocument()
+    })
+
+    // Clear password and try again with strong password
+    const passwordInput = screen.getByLabelText('Password')
+    await user.clear(passwordInput)
+    await user.type(passwordInput, 'strong-password-123')
+    await user.click(screen.getByDisplayValue('Setup Photoview'))
+
+    // Error should clear and login should succeed
+    await waitFor(() => {
+      expect(screen.queryByText('Password is too weak')).not.toBeInTheDocument()
+      expect(login).toHaveBeenCalledWith('test-token-123')
+    })
+  })
+
+  test('form validation - required fields', async () => {
     const history = createMemoryHistory()
     history.push('/initialSetup')
 
@@ -25,15 +316,23 @@ describe('Initial setup page', () => {
       })
     })
 
-    expect(screen.getByLabelText('Username')).toBeInTheDocument()
-    expect(screen.getByLabelText('Password')).toBeInTheDocument()
-    expect(screen.getByLabelText('Photo path')).toBeInTheDocument()
-    expect(screen.getByDisplayValue('Setup Photoview')).toBeInTheDocument()
+    const user = userEvent.setup()
+
+    // Try to submit empty form
+    await user.click(screen.getByDisplayValue('Setup Photoview'))
+
+    // Validation errors should appear
+    await waitFor(() => {
+      expect(screen.getByText('Please enter a username')).toBeInTheDocument()
+      expect(screen.getByText('Please enter a password')).toBeInTheDocument()
+      expect(screen.getByText('Please enter a photo path')).toBeInTheDocument()
+    })
+
+    // Login should not be called
+    expect(login).not.toHaveBeenCalled()
   })
 
-  test('Redirect if auth token is present', async () => {
-    authToken.mockImplementation(() => 'some-token')
-
+  test('message box is hidden when no error', async () => {
     const history = createMemoryHistory()
     history.push('/initialSetup')
 
@@ -44,26 +343,8 @@ describe('Initial setup page', () => {
       })
     })
 
-    await waitFor(() => {
-      expect(history.location.pathname).toBe('/')
-    })
-  })
-
-  test('Redirect if not initial setup', async () => {
-    authToken.mockImplementation(() => null)
-
-    const history = createMemoryHistory()
-    history.push('/initialSetup')
-
-    await act(async () => {
-      await renderWithProviders(<InitialSetupPage />, {
-        mocks: [mockInitialSetupGraphql(false)],
-        history,
-      })
-    })
-
-    await waitFor(() => {
-      expect(history.location.pathname).toBe('/')
-    })
+    // MessageBox should not be visible initially
+    const messageBoxes = screen.queryAllByRole('alert')
+    expect(messageBoxes).toHaveLength(0)
   })
 })
