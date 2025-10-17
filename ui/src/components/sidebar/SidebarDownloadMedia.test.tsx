@@ -15,12 +15,21 @@ vi.mock('../../helpers/authentication')
 const authToken = vi.mocked(authentication.authToken)
 
 // Mock global fetch for download tests
+const originalFetch = global.fetch as any
 const mockFetch = vi.fn()
 global.fetch = mockFetch
 
 // Mock URL methods for download blob handling
+const originalCreateObjectURL = global.URL.createObjectURL
+const originalRevokeObjectURL = global.URL.revokeObjectURL
 global.URL.createObjectURL = vi.fn(() => 'blob:mock-url')
 global.URL.revokeObjectURL = vi.fn()
+
+afterAll(() => {
+    global.fetch = originalFetch
+    global.URL.createObjectURL = originalCreateObjectURL
+    global.URL.revokeObjectURL = originalRevokeObjectURL
+})
 
 describe('SidebarMediaDownload', () => {
     const mockMedia: MediaSidebarMedia = {
@@ -221,7 +230,7 @@ describe('SidebarMediaDownload', () => {
 
             mockFetch.mockResolvedValue({
                 ok: true,
-                headers: new Map([
+                headers: new Headers([
                     ['content-length', '1000'],
                     ['content-type', 'image/jpeg'],
                 ]),
@@ -267,7 +276,7 @@ describe('SidebarMediaDownload', () => {
 
             mockFetch.mockResolvedValue({
                 ok: true,
-                headers: new Map([['content-type', 'image/jpeg']]),
+                headers: new Headers([['content-type', 'image/jpeg']]),
                 blob: async () => new Blob(['test'], { type: 'image/jpeg' }),
             } as any)
 
@@ -289,6 +298,12 @@ describe('SidebarMediaDownload', () => {
 
             const fetchCall = mockFetch.mock.calls[0][0]
             expect(fetchCall).toContain('/photo/original.jpg')
+
+            // Verify blob URL created and revoked
+            await waitFor(() => {
+                expect(global.URL.createObjectURL).toHaveBeenCalled()
+            })
+            expect(global.URL.revokeObjectURL).toHaveBeenCalled()
         })
     })
 
