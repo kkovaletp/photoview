@@ -1,5 +1,5 @@
 import { describe, test, expect, vi, beforeEach } from 'vitest'
-import { screen, waitFor, act } from '@testing-library/react'
+import { screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import InitialSetupPage from './InitialSetupPage'
 import * as authentication from '../../helpers/authentication'
@@ -281,8 +281,8 @@ describe('InitialSetupPage - Form Submission', () => {
     await user.click(screen.getByRole('button', { name: /setup photoview/i }))
 
     // Error should clear and login should succeed
-    expect(screen.queryByText('Password is too weak')).not.toBeInTheDocument()
     await waitFor(() => {
+      expect(screen.queryByText('Password is too weak')).not.toBeInTheDocument()
       expect(login).toHaveBeenCalledWith('test-token-123')
     })
   })
