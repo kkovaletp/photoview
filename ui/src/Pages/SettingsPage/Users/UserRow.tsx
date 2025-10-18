@@ -120,7 +120,7 @@ const UserRow = ({ user, refetchUsers }: UserRowProps) => {
           content: error instanceof Error ? error.message : 'An unexpected error occurred',
         },
       })
-      throw error
+      return { data: undefined, errors: [error] } as FetchResult<updateUser>
     }
   }
 
@@ -145,7 +145,7 @@ const UserRow = ({ user, refetchUsers }: UserRowProps) => {
           content: error instanceof Error ? error.message : 'An unexpected error occurred',
         },
       })
-      throw error
+      return { data: undefined, errors: [error] } as FetchResult<deleteUser>
     }
   }
 
@@ -170,7 +170,7 @@ const UserRow = ({ user, refetchUsers }: UserRowProps) => {
           content: error instanceof Error ? error.message : 'An unexpected error occurred',
         },
       })
-      throw error
+      return { data: undefined, errors: [error] } as FetchResult<scanUser>
     }
   }
 
