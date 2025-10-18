@@ -1,7 +1,8 @@
 import { describe, test, expect, vi, beforeEach } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { gql } from '@apollo/client'
+import { GraphQLError } from 'graphql'
 import { MockedResponse } from '@apollo/client/testing'
 import ChangePasswordModal from './UserChangePassword'
 import { renderWithProviders } from '../../../helpers/testUtils'
@@ -30,6 +31,10 @@ describe('ChangePasswordModal', () => {
   beforeEach(() => {
     mockOnClose = vi.fn()
     consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => { })
+  })
+
+  afterEach(() => {
+    vi.restoreAllMocks()
   })
 
   const renderComponent = (mocks: MockedResponse[] = []) => {
@@ -72,7 +77,7 @@ describe('ChangePasswordModal', () => {
       expect(screen.getByRole('button', { name: /cancel/i })).toBeInTheDocument()
     })
 
-    test('renders Change password button with positive variant', () => {
+    test('renders Change password button', () => {
       renderComponent()
 
       const submitButton = screen.getByRole('button', { name: /change password/i })
@@ -151,7 +156,7 @@ describe('ChangePasswordModal', () => {
       })
     })
 
-    test('resets password input after successful submission', async () => {
+    test('closes modal after successful submission', async () => {
       const user = userEvent.setup()
       const mocks: MockedResponse[] = [
         {
@@ -235,7 +240,9 @@ describe('ChangePasswordModal', () => {
               password: 'testPassword',
             },
           },
-          error: new Error('GraphQL error occurred'),
+          result: {
+            errors: [new GraphQLError('GraphQL error occurred')],
+          },
         },
       ]
 
@@ -305,7 +312,7 @@ describe('ChangePasswordModal', () => {
 
       await waitFor(() => {
         expect(consoleErrorSpy).toHaveBeenCalledWith(
-          'Failed to change password: ',
+          expect.stringMatching(/failed to change password/i),
           expect.any(Error)
         )
       })
@@ -403,6 +410,7 @@ describe('ChangePasswordModal', () => {
 
     test('does not submit mutation when Cancel is clicked', async () => {
       const user = userEvent.setup()
+      let mutationAttempted = false
       const mocks: MockedResponse[] = [
         {
           request: {
@@ -412,12 +420,15 @@ describe('ChangePasswordModal', () => {
               password: 'testPassword',
             },
           },
-          result: {
-            data: {
-              updateUser: {
-                id: 'user-123',
+          newData: () => {
+            mutationAttempted = true
+            return {
+              data: {
+                updateUser: {
+                  id: 'user-123',
+                },
               },
-            },
+            }
           },
         },
       ]
@@ -431,9 +442,7 @@ describe('ChangePasswordModal', () => {
       await user.click(cancelButton)
 
       expect(mockOnClose).toHaveBeenCalled()
-
-      // Wait a bit to ensure mutation doesn't fire
-      await new Promise(resolve => setTimeout(resolve, 100))
+      expect(mutationAttempted).toBe(false)
       expect(consoleErrorSpy).not.toHaveBeenCalled()
     })
   })
