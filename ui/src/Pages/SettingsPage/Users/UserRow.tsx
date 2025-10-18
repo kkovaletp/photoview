@@ -72,6 +72,22 @@ export type UserRowProps = {
   refetchUsers: () => void
 }
 
+function notifyMutationError(
+  add: ReturnType<typeof useMessageState>['add'],
+  header: string,
+  err: unknown
+) {
+  add({
+    key: (globalThis.crypto?.randomUUID?.() ?? Math.random().toString(36)),
+    type: NotificationType.Message,
+    props: {
+      negative: true,
+      header,
+      content: err instanceof Error ? err.message : 'An unexpected error occurred',
+    },
+  })
+}
+
 const UserRow = ({ user, refetchUsers }: UserRowProps) => {
   const { add } = useMessageState()
   const [state, setState] = useState<UserRowState>({
@@ -111,16 +127,8 @@ const UserRow = ({ user, refetchUsers }: UserRowProps) => {
       return result
     } catch (error) {
       console.error('Failed to update user: ', error)
-      add({
-        key: Math.random().toString(26),
-        type: NotificationType.Message,
-        props: {
-          negative: true,
-          header: 'Failed to update user',
-          content: error instanceof Error ? error.message : 'An unexpected error occurred',
-        },
-      })
-      return { data: undefined, errors: [error] } as FetchResult<updateUser>
+      notifyMutationError(add, 'Failed to update user', error)
+      return {} as FetchResult<updateUser>
     }
   }
 
@@ -136,16 +144,8 @@ const UserRow = ({ user, refetchUsers }: UserRowProps) => {
       return result
     } catch (error) {
       console.error('Failed to delete user: ', error)
-      add({
-        key: Math.random().toString(26),
-        type: NotificationType.Message,
-        props: {
-          negative: true,
-          header: 'Failed to delete user',
-          content: error instanceof Error ? error.message : 'An unexpected error occurred',
-        },
-      })
-      return { data: undefined, errors: [error] } as FetchResult<deleteUser>
+      notifyMutationError(add, 'Failed to delete user', error)
+      return {} as FetchResult<deleteUser>
     }
   }
 
@@ -161,16 +161,8 @@ const UserRow = ({ user, refetchUsers }: UserRowProps) => {
       return result
     } catch (error) {
       console.error('Failed to scan user: ', error)
-      add({
-        key: Math.random().toString(26),
-        type: NotificationType.Message,
-        props: {
-          negative: true,
-          header: 'Failed to scan user',
-          content: error instanceof Error ? error.message : 'An unexpected error occurred',
-        },
-      })
-      return { data: undefined, errors: [error] } as FetchResult<scanUser>
+      notifyMutationError(add, 'Failed to scan user', error)
+      return {} as FetchResult<scanUser>
     }
   }
 
