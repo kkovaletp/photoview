@@ -182,9 +182,7 @@ describe('AddUserRow', () => {
         await user.type(usernameInput, 'testuser')
         await user.click(addUserBtn)
 
-        await waitFor(() => {
-          expect(screen.getByText('User already exists')).toBeInTheDocument()
-        })
+        await screen.findByText('User already exists')
 
         expect(onUserAddedMock).not.toHaveBeenCalled()
         expect(consoleErrorSpy).toHaveBeenCalledWith(
@@ -239,9 +237,7 @@ describe('AddUserRow', () => {
         await user.type(pathInput, '/invalid/path')
         await user.click(addUserBtn)
 
-        await waitFor(() => {
-          expect(screen.getByText('Invalid path')).toBeInTheDocument()
-        })
+        await screen.findByText('Invalid path')
 
         expect(onUserAddedMock).not.toHaveBeenCalled()
         expect(consoleErrorSpy).toHaveBeenCalledWith(
@@ -276,12 +272,13 @@ describe('AddUserRow', () => {
         await user.type(usernameInput, 'testuser')
         await user.click(addUserBtn)
 
-        await waitFor(() => {
-          expect(screen.getByText('Network error')).toBeInTheDocument()
-        })
+        await screen.findByText('Network error')
 
         expect(onUserAddedMock).not.toHaveBeenCalled()
-        expect(consoleErrorSpy).toHaveBeenCalled()
+        expect(consoleErrorSpy).toHaveBeenCalledWith(
+          'Error adding user: ',
+          expect.any(Error)
+        )
       } finally {
         consoleErrorSpy.mockRestore()
       }
