@@ -1,11 +1,13 @@
-import { render, screen, waitFor } from '@testing-library/react'
+import { screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { MockedProvider, MockedResponse } from '@apollo/client/testing'
+import { MockedResponse } from '@apollo/client/testing'
 import { describe, test, expect, vi, beforeEach } from 'vitest'
+import { GraphQLError } from 'graphql'
 import AddUserRow, {
   CREATE_USER_MUTATION,
   USER_ADD_ROOT_PATH_MUTATION,
 } from './AddUserRow'
+import { renderWithProviders } from '../../../helpers/testUtils'
 
 describe('AddUserRow', () => {
   let onUserAddedMock: ReturnType<typeof vi.fn>
@@ -17,18 +19,17 @@ describe('AddUserRow', () => {
   })
 
   const renderComponent = (mocks: MockedResponse[]) => {
-    return render(
-      <MockedProvider mocks={mocks}>
-        <table>
-          <tbody>
-            <AddUserRow
-              onUserAdded={onUserAddedMock}
-              setShow={setShowMock}
-              show={true}
-            />
-          </tbody>
-        </table>
-      </MockedProvider>
+    return renderWithProviders(
+      <table>
+        <tbody>
+          <AddUserRow
+            onUserAdded={onUserAddedMock}
+            setShow={setShowMock}
+            show={true}
+          />
+        </tbody>
+      </table>,
+      { mocks }
     )
   }
 
@@ -167,7 +168,9 @@ describe('AddUserRow', () => {
               query: CREATE_USER_MUTATION,
               variables: { username: 'testuser', admin: false },
             },
-            error: new Error('User already exists'),
+            result: {
+              errors: [new GraphQLError('User already exists')],
+            },
           },
         ]
 
@@ -220,7 +223,9 @@ describe('AddUserRow', () => {
               query: USER_ADD_ROOT_PATH_MUTATION,
               variables: { id: '123', rootPath: '/invalid/path' },
             },
-            error: new Error('Invalid path'),
+            result: {
+              errors: [new GraphQLError('Invalid path')],
+            },
           },
         ]
 
@@ -293,7 +298,9 @@ describe('AddUserRow', () => {
               query: CREATE_USER_MUTATION,
               variables: { username: 'testuser', admin: false },
             },
-            error: new Error('Database error'),
+            result: {
+              errors: [new GraphQLError('Database error')],
+            },
           },
           {
             request: {
@@ -353,7 +360,9 @@ describe('AddUserRow', () => {
               query: CREATE_USER_MUTATION,
               variables: { username: 'testuser', admin: false },
             },
-            error: new Error('Test error'),
+            result: {
+              errors: [new GraphQLError('Test error')],
+            },
           },
         ]
 
@@ -415,6 +424,9 @@ describe('AddUserRow', () => {
       await waitFor(() => {
         expect(onUserAddedMock).toHaveBeenCalledTimes(1)
       })
+
+      //the button re-enables after completion
+      await waitFor(() => expect(addUserBtn).not.toBeDisabled())
     })
 
     test('disables submit button during root path addition', async () => {
@@ -469,6 +481,9 @@ describe('AddUserRow', () => {
       await waitFor(() => {
         expect(onUserAddedMock).toHaveBeenCalledTimes(1)
       })
+
+      //the button re-enables after completion
+      await waitFor(() => expect(addUserBtn).not.toBeDisabled())
     })
   })
 
@@ -479,7 +494,7 @@ describe('AddUserRow', () => {
 
       renderComponent(mocks)
 
-      const cancelBtn = screen.getByText('Cancel')
+      const cancelBtn = screen.getByRole('button', { name: /cancel/i })
       await user.click(cancelBtn)
 
       expect(setShowMock).toHaveBeenCalledWith(false)
@@ -534,18 +549,17 @@ describe('AddUserRow', () => {
 
   describe('Component Visibility', () => {
     test('returns null when show is false', () => {
-      const { container } = render(
-        <MockedProvider mocks={[]}>
-          <table>
-            <tbody>
-              <AddUserRow
-                onUserAdded={onUserAddedMock}
-                setShow={setShowMock}
-                show={false}
-              />
-            </tbody>
-          </table>
-        </MockedProvider>
+      const { container } = renderWithProviders(
+        <table>
+          <tbody>
+            <AddUserRow
+              onUserAdded={onUserAddedMock}
+              setShow={setShowMock}
+              show={false}
+            />
+          </tbody>
+        </table>,
+        { mocks: [] }
       )
 
       expect(container.querySelector('tr')).not.toBeInTheDocument()
@@ -555,7 +569,7 @@ describe('AddUserRow', () => {
       renderComponent([])
 
       expect(screen.getByPlaceholderText('Username')).toBeInTheDocument()
-      expect(screen.getByText('Add user')).toBeInTheDocument()
+      expect(screen.getByRole('button', { name: /add user/i })).toBeInTheDocument()
     })
   })
 
@@ -581,7 +595,9 @@ describe('AddUserRow', () => {
               query: CREATE_USER_MUTATION,
               variables: { username: 'testuser', admin: false },
             },
-            error: new Error('Something went wrong'),
+            result: {
+              errors: [new GraphQLError('Something went wrong')],
+            },
           },
         ]
 
