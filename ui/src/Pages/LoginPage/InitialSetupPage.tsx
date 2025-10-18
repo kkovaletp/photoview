@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { gql, useQuery, useMutation } from '@apollo/client'
 import { useNavigate } from 'react-router-dom'
 import { Container } from './loginUtilities'
@@ -62,33 +62,37 @@ const InitialSetupPage = () => {
     if (notInitialSetup) navigate('/')
   }, [notInitialSetup])
 
-  const [authorize, { loading: authorizeLoading, data: authorizationData }] =
-    useMutation<InitialSetup, InitialSetupVariables>(initialSetupMutation, {
-      onCompleted: data => {
-        if (!data.initialSetupWizard) return
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
-        const { success, token } = data.initialSetupWizard
-        if (success && token) login(token)
-      },
-    })
+  const [authorize, { loading: authorizeLoading }] =
+    useMutation<InitialSetup, InitialSetupVariables>(initialSetupMutation)
 
-  const signIn = handleSubmit(data => {
-    authorize({
-      variables: {
-        username: data.username,
-        password: data.password,
-        rootPath: data.rootPath,
-      },
-    })
+  const signIn = handleSubmit(async (data) => {
+    try {
+      setErrorMessage(null)
+
+      const result = await authorize({
+        variables: {
+          username: data.username,
+          password: data.password,
+          rootPath: data.rootPath,
+        },
+      })
+
+      const setupData = result.data?.initialSetupWizard
+      if (setupData?.success && setupData.token) {
+        login(setupData.token)
+      } else if (setupData?.status) {
+        setErrorMessage(setupData.status)
+      }
+    } catch (error) {
+      console.error('Initial setup failed:', error)
+      setErrorMessage('An unexpected error occurred during setup')
+    }
   })
 
   if (authToken() || notInitialSetup) {
     return null
-  }
-
-  let errorMessage = null
-  if (authorizationData && !authorizationData?.initialSetupWizard?.success) {
-    errorMessage = authorizationData?.initialSetupWizard?.status
   }
 
   return (

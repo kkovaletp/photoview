@@ -6,7 +6,7 @@ import { TranslationFn } from '../../localization'
 import { useMessageState } from '../messages/MessageState'
 import { Message } from '../messages/SubscriptionsHook'
 import { MediaSidebarMedia } from './MediaSidebar/MediaSidebar'
-import React from 'react'
+import React, { useEffect } from 'react'
 import { SidebarSection, SidebarSectionTitle } from './SidebarComponents'
 import SidebarTable from './SidebarTable'
 import {
@@ -308,27 +308,41 @@ const SidebarMediaDownload = ({ media }: SidebarMediaDownladProps) => {
   const { t } = useTranslation()
   const { add, removeKey } = useMessageState()
 
-  const [loadPhotoDownloads, { called, loading, data }] = useLazyQuery<
+  const [loadPhotoDownloads, { called, loading, data, error }] = useLazyQuery<
     sidebarDownloadQuery,
     sidebarDownloadQueryVariables
   >(SIDEBAR_DOWNLOAD_QUERY, {})
 
-  if (!media || !media.id) return null
-
-  let downloads: sidebarDownloadQuery_media_downloads[] = []
-
-  if (called) {
-    if (!loading) {
-      downloads = (data && data.media.downloads) || []
-    }
-  } else {
-    if (!media.downloads) {
+  useEffect(() => {
+    if (media?.id && !media.downloads && !called) {
       loadPhotoDownloads({
         variables: { mediaId: media.id }
       })
-    } else {
-      downloads = media.downloads
     }
+  }, [media?.id, media?.downloads, called, loadPhotoDownloads])
+
+  if (!media || !media.id) return null
+
+  if (error) {
+    console.error('Failed to load download options: ', error)
+    return (
+      <SidebarSection>
+        <SidebarSectionTitle>
+          {t('sidebar.download.title', 'Download')}
+        </SidebarSectionTitle>
+        <div className="text-red-600 dark:text-red-400 p-4 bg-red-50 dark:bg-red-900/20 rounded">
+          {t('sidebar.download.error', 'Failed to load download options')}: {error.message}
+        </div>
+      </SidebarSection>
+    )
+  }
+
+  let downloads: sidebarDownloadQuery_media_downloads[] = []
+
+  if (called && !loading) {
+    downloads = (data && data.media.downloads) || []
+  } else if (media.downloads) {
+    downloads = media.downloads
   }
 
   const downloadRows = downloads.map<SidebarDownloadTableRow>(x => ({
