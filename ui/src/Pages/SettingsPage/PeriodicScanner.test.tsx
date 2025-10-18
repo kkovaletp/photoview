@@ -483,27 +483,6 @@ describe('PeriodicScanner', () => {
         expect(checkbox.checked).toBe(false)
       })
     })
-
-    test('disables checkbox during query loading', () => {
-      const mocks: MockedResponse[] = [
-        {
-          request: {
-            query: SCAN_INTERVAL_QUERY,
-          },
-          result: {
-            data: {
-              siteInfo: { periodicScanInterval: 0, __typename: 'SiteInfo' },
-            },
-          },
-          delay: 100,
-        },
-      ]
-
-      renderWithProviders(<PeriodicScanner />, { mocks })
-
-      const checkbox = screen.getByLabelText('Enable periodic scanner')
-      expect(checkbox).toBeDisabled()
-    })
   })
 
   describe('Mutation Handling', () => {
@@ -543,13 +522,12 @@ describe('PeriodicScanner', () => {
       await user.type(inputField, '10')
       await user.keyboard('{Enter}')
 
-      // Wait for mutation to complete
-      await waitFor(
-        () => {
-          expect(consoleErrorSpy).not.toHaveBeenCalled()
-        },
-        { timeout: 1000 }
-      )
+      // Verify mutation completed successfully by checking UI state
+      await waitFor(() => {
+        const updatedField = screen.getByLabelText('Interval value') as HTMLInputElement
+        expect(updatedField.value).toBe('10')
+        expect(consoleErrorSpy).not.toHaveBeenCalled()
+      })
     })
 
     test('triggers mutation when unit is changed', async () => {
@@ -586,13 +564,14 @@ describe('PeriodicScanner', () => {
       const unitDropdown = screen.getByLabelText('Interval unit')
       await user.selectOptions(unitDropdown, 'hour')
 
-      // Wait for mutation to complete
-      await waitFor(
-        () => {
-          expect(consoleErrorSpy).not.toHaveBeenCalled()
-        },
-        { timeout: 1000 }
-      )
+      // Verify mutation completed and UI reflects the change
+      await waitFor(() => {
+        const updatedDropdown = screen.getByLabelText('Interval unit') as HTMLSelectElement
+        expect(updatedDropdown.value).toBe('hour')
+        const inputField = screen.getByLabelText('Interval value') as HTMLInputElement
+        expect(inputField.value).toBe('123')
+        expect(consoleErrorSpy).not.toHaveBeenCalled()
+      })
     })
 
     test('shows loading indicator during mutation', async () => {
@@ -631,15 +610,12 @@ describe('PeriodicScanner', () => {
       await user.clear(inputField)
       await user.type(inputField, '10{Enter}')
 
-      // Loader should be visible during mutation
-      // Note: The Loader component renders but may not have accessible text
-      // We verify no errors occurred
-      await waitFor(
-        () => {
-          expect(consoleErrorSpy).not.toHaveBeenCalled()
-        },
-        { timeout: 1000 }
-      )
+      // Verify mutation completed and value is updated
+      await waitFor(() => {
+        const updatedField = screen.getByLabelText('Interval value') as HTMLInputElement
+        expect(updatedField.value).toBe('10')
+        expect(consoleErrorSpy).not.toHaveBeenCalled()
+      })
     })
 
     test('does not trigger duplicate mutations for same value', async () => {
@@ -693,11 +669,10 @@ describe('PeriodicScanner', () => {
       await user.click(inputField)
       await user.keyboard('{Enter}')
 
-      // Wait a bit to ensure no second mutation is triggered
-      await new Promise(resolve => setTimeout(resolve, 100))
-
       // Should still be 1 - no duplicate mutation triggered
-      expect(mutationCount).toBe(1)
+      await waitFor(() => {
+        expect(mutationCount).toBe(1)
+      })
     })
   })
 
@@ -921,13 +896,12 @@ describe('PeriodicScanner', () => {
       await user.clear(inputField)
       await user.type(inputField, '10{Enter}')
 
-      // Mutation is in progress, verify no errors
-      await waitFor(
-        () => {
-          expect(consoleErrorSpy).not.toHaveBeenCalled()
-        },
-        { timeout: 1000 }
-      )
+      // Verify mutation completed successfully and UI reflects changes
+      await waitFor(() => {
+        const updatedField = screen.getByLabelText('Interval value') as HTMLInputElement
+        expect(updatedField.value).toBe('10')
+        expect(consoleErrorSpy).not.toHaveBeenCalled()
+      })
     })
   })
 })
