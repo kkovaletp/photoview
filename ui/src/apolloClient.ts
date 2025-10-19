@@ -45,6 +45,18 @@ const apiProtocol = new URL(GRAPHQL_ENDPOINT).protocol
 const websocketUri = new URL(GRAPHQL_ENDPOINT)
 websocketUri.protocol = apiProtocol === 'https:' ? 'wss:' : 'ws:'
 
+/**
+ * Calculates retry delay with exponential backoff and jitter.
+ * Pure function - no side effects.
+ */
+export const calculateRetryDelay = (retries: number): number => {
+  const BASE_DELAY = 1000
+  const MAX_DELAY = 30000
+  const exponentialDelay = Math.min(MAX_DELAY, BASE_DELAY * Math.pow(2, retries))
+  const jitter = exponentialDelay * (0.5 + Math.random())
+  return Math.min(jitter, MAX_DELAY)
+}
+
 const wsLink = new GraphQLWsLink(
   createClient({
     url: websocketUri.toString(),
@@ -120,18 +132,7 @@ const wsLink = new GraphQLWsLink(
     },
     // Control retry timing (exponential backoff with jitter)
     retryWait: async (retries) => {
-      const BASE_DELAY = 1000 // 1 second
-      const MAX_DELAY = 30000 // 30 seconds
-
-      // Calculate exponential backoff: 2^retries * BASE_DELAY
-      const exponentialDelay = Math.min(
-        MAX_DELAY,
-        BASE_DELAY * Math.pow(2, retries)
-      )
-
-      // Add jitter (randomize between 50% and 150%)
-      const jitter = exponentialDelay * (0.5 + Math.random())
-      const delay = Math.min(jitter, MAX_DELAY)
+      const delay = calculateRetryDelay(retries)
 
       console.log(
         `[WebSocket] Waiting ${Math.round(delay)}ms before retry ${retries + 1}/${MAX_RETRIES}`
@@ -171,7 +172,7 @@ const link = split(
  * @param networkError - The network error potentially containing server error details.
  * @returns An array of error objects from the server, or an empty array if none are found.
  */
-function getServerErrorMessages(networkError: Error | undefined): Error[] {
+export function getServerErrorMessages(networkError: Error | undefined): Error[] {
   if (!networkError) return [];
   if (!('result' in networkError)) return [];
 
@@ -185,11 +186,14 @@ function getServerErrorMessages(networkError: Error | undefined): Error[] {
   return [];
 }
 
+/**
+ * Formats GraphQL path for error messages.
+ */
+export const formatPath = (path: readonly (string | number)[] | undefined): string =>
+  path?.join('::') ?? 'undefined'
+
 const linkError = onError(({ graphQLErrors, networkError }) => {
   const errorMessages = []
-
-  const formatPath = (path: readonly (string | number)[] | undefined) =>
-    path?.join('::') ?? 'undefined'
 
   if (graphQLErrors) {
     graphQLErrors.map(({ message, locations, path }) =>

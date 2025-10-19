@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest'
-import { paginateCache } from './apolloClient'
+import { calculateRetryDelay, formatPath, getServerErrorMessages, paginateCache } from './apolloClient'
 
 describe('paginateCache', () => {
     let paginateFn: ReturnType<typeof paginateCache>
@@ -317,6 +317,113 @@ describe('paginateCache', () => {
                 { __ref: 'FaceGroup:2' },
                 { __ref: 'FaceGroup:3' }
             ])
+        })
+    })
+})
+
+describe('Pure Helper Functions', () => {
+    describe('formatPath', () => {
+        it('should format path with multiple segments', () => {
+            expect(formatPath(['query', 'user', 0])).toBe('query::user::0')
+        })
+
+        it('should return "undefined" for undefined path', () => {
+            expect(formatPath(undefined)).toBe('undefined')
+        })
+
+        it('should handle empty path', () => {
+            expect(formatPath([])).toBe('')
+        })
+    })
+
+    describe('calculateRetryDelay', () => {
+        it('should calculate exponential backoff for retry 0', () => {
+            const delay = calculateRetryDelay(0)
+            expect(delay).toBeGreaterThanOrEqual(500)
+            expect(delay).toBeLessThanOrEqual(1500)
+        })
+
+        it('should cap delay at 30s for high retry counts', () => {
+            const delay = calculateRetryDelay(10)
+            expect(delay).toBeLessThanOrEqual(30000)
+            expect(delay).toBeGreaterThanOrEqual(15000)
+        })
+
+        it('should apply jitter', () => {
+            const delays = Array.from({ length: 10 }, () => calculateRetryDelay(3))
+            const uniqueDelays = new Set(delays)
+            expect(uniqueDelays.size).toBeGreaterThan(1) // Jitter varies
+        })
+    })
+
+    describe('getServerErrorMessages', () => {
+        it('should extract errors from ServerError result', () => {
+            const networkError = Object.assign(
+                new Error('Server error'),
+                {
+                    result: {
+                        errors: [{ message: 'Error 1' }]
+                    }
+                }
+            )
+
+            const errors = getServerErrorMessages(networkError)
+            expect(errors).toHaveLength(1)
+            expect(errors[0]).toEqual({ message: 'Error 1' })
+        })
+
+        it('should return empty array for undefined', () => {
+            expect(getServerErrorMessages(undefined)).toEqual([])
+        })
+
+        it('should return empty array when no result property', () => {
+            const networkError = new Error('Network error')
+
+            const errors = getServerErrorMessages(networkError)
+            expect(errors).toEqual([])
+        })
+
+        it('should return empty array when result is null', () => {
+            const networkError = Object.assign(
+                new Error('Server error'),
+                { result: null }
+            )
+
+            const errors = getServerErrorMessages(networkError)
+            expect(errors).toEqual([])
+        })
+
+        it('should return empty array when no errors in result', () => {
+            const networkError = Object.assign(
+                new Error('Server error'),
+                {
+                    result: { data: null }
+                }
+            )
+
+            const errors = getServerErrorMessages(networkError)
+            expect(errors).toEqual([])
+        })
+
+        it('should handle multiple errors', () => {
+            const networkError = Object.assign(
+                new Error('Server error'),
+                {
+                    result: {
+                        errors: [
+                            { message: 'Error 1' },
+                            { message: 'Error 2' },
+                            { message: 'Error 3' }
+                        ]
+                    }
+                }
+            )
+
+            const errors = getServerErrorMessages(networkError)
+            expect(errors).toHaveLength(3)
+            expect(errors[0]).toEqual({ message: 'Error 1' })
+            expect(errors[1]).toEqual({ message: 'Error 2' })
+            expect(errors[2]).toEqual({ message: 'Error 3' })
         })
     })
 })
