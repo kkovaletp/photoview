@@ -28,34 +28,8 @@ describe('ScannerConcurrentWorkers', () => {
   })
 
   describe('Query Loading', () => {
-    test('should display loading state initially', () => {
-      const mocks: MockedResponse<concurrentWorkersQuery>[] = [
-        {
-          request: {
-            query: CONCURRENT_WORKERS_QUERY,
-          },
-          result: {
-            data: {
-              siteInfo: {
-                __typename: 'SiteInfo',
-                concurrentWorkers: 4,
-              },
-            },
-          },
-          delay: 100,
-        },
-      ]
-
-      renderWithProviders(<ScannerConcurrentWorkers />, { mocks })
-
-      const input = screen.getByRole('spinbutton', {
-        name: /scanner concurrent workers/i,
-      })
-      expect(input).toBeDisabled()
-    })
-
     test('should load and display concurrent workers value', async () => {
-      const mocks: MockedResponse<concurrentWorkersQuery>[] = [
+      const mocks: MockedResponse[] = [
         {
           request: {
             query: CONCURRENT_WORKERS_QUERY,
@@ -73,17 +47,17 @@ describe('ScannerConcurrentWorkers', () => {
 
       renderWithProviders(<ScannerConcurrentWorkers />, { mocks })
 
+      const input = (
+        await screen.findByRole('spinbutton', { name: /scanner concurrent workers/i })
+      ) as HTMLInputElement
       await waitFor(() => {
-        const input = screen.getByRole('spinbutton', {
-          name: /scanner concurrent workers/i,
-        }) as HTMLInputElement
         expect(input).not.toBeDisabled()
         expect(input.value).toBe('8')
       })
     })
 
     test('should enable input after data loads', async () => {
-      const mocks: MockedResponse<concurrentWorkersQuery>[] = [
+      const mocks: MockedResponse[] = [
         {
           request: {
             query: CONCURRENT_WORKERS_QUERY,
@@ -102,7 +76,7 @@ describe('ScannerConcurrentWorkers', () => {
       renderWithProviders(<ScannerConcurrentWorkers />, { mocks })
 
       await waitFor(() => {
-        const input = screen.getByRole('spinbutton')
+        const input = screen.getByRole('spinbutton', { name: /scanner concurrent workers/i })
         expect(input).not.toBeDisabled()
       })
     })
@@ -110,7 +84,7 @@ describe('ScannerConcurrentWorkers', () => {
 
   describe('Error Handling', () => {
     test('should display error message when query fails with GraphQL error', async () => {
-      const mocks: MockedResponse<concurrentWorkersQuery>[] = [
+      const mocks: MockedResponse[] = [
         {
           request: {
             query: CONCURRENT_WORKERS_QUERY,
@@ -134,7 +108,7 @@ describe('ScannerConcurrentWorkers', () => {
     })
 
     test('should display error message when query fails with network error', async () => {
-      const mocks: MockedResponse<concurrentWorkersQuery>[] = [
+      const mocks: MockedResponse[] = [
         {
           request: {
             query: CONCURRENT_WORKERS_QUERY,
@@ -154,7 +128,7 @@ describe('ScannerConcurrentWorkers', () => {
     })
 
     test('should log error to console when query fails', async () => {
-      const mocks: MockedResponse<concurrentWorkersQuery>[] = [
+      const mocks: MockedResponse[] = [
         {
           request: {
             query: CONCURRENT_WORKERS_QUERY,
@@ -176,7 +150,7 @@ describe('ScannerConcurrentWorkers', () => {
     })
 
     test('should hide input field when error occurs', async () => {
-      const mocks: MockedResponse<concurrentWorkersQuery>[] = [
+      const mocks: MockedResponse[] = [
         {
           request: {
             query: CONCURRENT_WORKERS_QUERY,
@@ -195,7 +169,7 @@ describe('ScannerConcurrentWorkers', () => {
     })
 
     test('should still display title when error occurs', async () => {
-      const mocks: MockedResponse<concurrentWorkersQuery>[] = [
+      const mocks: MockedResponse[] = [
         {
           request: {
             query: CONCURRENT_WORKERS_QUERY,
@@ -219,7 +193,7 @@ describe('ScannerConcurrentWorkers', () => {
   describe('User Interactions', () => {
     test('should update input value when user types', async () => {
       const user = userEvent.setup()
-      const mocks: MockedResponse<concurrentWorkersQuery>[] = [
+      const mocks: MockedResponse[] = [
         {
           request: {
             query: CONCURRENT_WORKERS_QUERY,
@@ -249,100 +223,96 @@ describe('ScannerConcurrentWorkers', () => {
 
     test('should trigger mutation on blur with different value', async () => {
       const user = userEvent.setup()
-      const mocks: MockedResponse<
-        concurrentWorkersQuery | setConcurrentWorkers,
-        setConcurrentWorkersVariables
-      >[] = [
-          {
-            request: {
-              query: CONCURRENT_WORKERS_QUERY,
-            },
-            result: {
-              data: {
-                siteInfo: {
-                  __typename: 'SiteInfo',
-                  concurrentWorkers: 4,
-                },
+      const mutationSpy = vi.fn()
+      const mocks: MockedResponse[] = [
+        {
+          request: {
+            query: CONCURRENT_WORKERS_QUERY,
+          },
+          result: {
+            data: {
+              siteInfo: {
+                __typename: 'SiteInfo',
+                concurrentWorkers: 4,
               },
             },
           },
-          {
-            request: {
-              query: SET_CONCURRENT_WORKERS_MUTATION,
-              variables: {
-                workers: 10,
-              },
-            },
-            result: {
-              data: {
-                setScannerConcurrentWorkers: 10,
-              },
+        },
+        {
+          request: {
+            query: SET_CONCURRENT_WORKERS_MUTATION,
+            variables: {
+              workers: 10,
             },
           },
-        ]
+          result: () => {
+            mutationSpy()
+            return {
+              data: { setScannerConcurrentWorkers: 10 }
+            }
+          },
+        },
+      ]
 
       renderWithProviders(<ScannerConcurrentWorkers />, { mocks })
 
-      const input = await screen.findByRole('spinbutton')
+      const input = await screen.findByRole('spinbutton', { name: /scanner concurrent workers/i })
 
       await user.clear(input)
       await user.type(input, '10')
       await user.tab()
 
-      await waitFor(() => {
-        expect(input).not.toBeDisabled()
-      })
+      await waitFor(() => expect(mutationSpy).toHaveBeenCalledTimes(1))
+      await waitFor(() => expect(input).not.toBeDisabled())
     })
 
     test('should trigger mutation on Enter key press', async () => {
       const user = userEvent.setup()
-      const mocks: MockedResponse<
-        concurrentWorkersQuery | setConcurrentWorkers,
-        setConcurrentWorkersVariables
-      >[] = [
-          {
-            request: {
-              query: CONCURRENT_WORKERS_QUERY,
-            },
-            result: {
-              data: {
-                siteInfo: {
-                  __typename: 'SiteInfo',
-                  concurrentWorkers: 4,
-                },
+      const mutationSpy = vi.fn()
+      const mocks: MockedResponse[] = [
+        {
+          request: {
+            query: CONCURRENT_WORKERS_QUERY,
+          },
+          result: {
+            data: {
+              siteInfo: {
+                __typename: 'SiteInfo',
+                concurrentWorkers: 4,
               },
             },
           },
-          {
-            request: {
-              query: SET_CONCURRENT_WORKERS_MUTATION,
-              variables: {
-                workers: 6,
-              },
-            },
-            result: {
-              data: {
-                setScannerConcurrentWorkers: 6,
-              },
+        },
+        {
+          request: {
+            query: SET_CONCURRENT_WORKERS_MUTATION,
+            variables: {
+              workers: 6,
             },
           },
-        ]
+          result: () => {
+            mutationSpy()
+            return {
+              data: { setScannerConcurrentWorkers: 6 }
+            }
+          },
+        },
+      ]
 
       renderWithProviders(<ScannerConcurrentWorkers />, { mocks })
 
-      const input = await screen.findByRole('spinbutton')
+      const input = await screen.findByRole('spinbutton', { name: /scanner concurrent workers/i })
 
       await user.clear(input)
       await user.type(input, '6')
       await user.keyboard('{Enter}')
 
-      await waitFor(() => {
-        expect(input).not.toBeDisabled()
-      })
+      await waitFor(() => expect(mutationSpy).toHaveBeenCalledTimes(1))
+      await waitFor(() => expect(input).not.toBeDisabled())
     })
 
     test('should respect min and max constraints', async () => {
-      const mocks: MockedResponse<concurrentWorkersQuery>[] = [
+      const mocks: MockedResponse[] = [
         {
           request: {
             query: CONCURRENT_WORKERS_QUERY,
@@ -360,7 +330,9 @@ describe('ScannerConcurrentWorkers', () => {
 
       renderWithProviders(<ScannerConcurrentWorkers />, { mocks })
 
-      const input = (await screen.findByRole('spinbutton')) as HTMLInputElement
+      const input = (
+        await screen.findByRole('spinbutton', { name: /scanner concurrent workers/i })
+      ) as HTMLInputElement
 
       expect(input).toHaveAttribute('min', '1')
       expect(input).toHaveAttribute('max', '24')
@@ -372,44 +344,41 @@ describe('ScannerConcurrentWorkers', () => {
       const user = userEvent.setup()
       const mutationMock = vi.fn()
 
-      const mocks: MockedResponse<
-        concurrentWorkersQuery | setConcurrentWorkers,
-        setConcurrentWorkersVariables
-      >[] = [
-          {
-            request: {
-              query: CONCURRENT_WORKERS_QUERY,
+      const mocks: MockedResponse[] = [
+        {
+          request: {
+            query: CONCURRENT_WORKERS_QUERY,
+          },
+          result: {
+            data: {
+              siteInfo: {
+                __typename: 'SiteInfo',
+                concurrentWorkers: 5,
+              },
             },
-            result: {
+          },
+        },
+        {
+          request: {
+            query: SET_CONCURRENT_WORKERS_MUTATION,
+            variables: {
+              workers: 5,
+            },
+          },
+          result: () => {
+            mutationMock()
+            return {
               data: {
-                siteInfo: {
-                  __typename: 'SiteInfo',
-                  concurrentWorkers: 5,
-                },
+                setScannerConcurrentWorkers: 5,
               },
-            },
+            }
           },
-          {
-            request: {
-              query: SET_CONCURRENT_WORKERS_MUTATION,
-              variables: {
-                workers: 5,
-              },
-            },
-            result: () => {
-              mutationMock()
-              return {
-                data: {
-                  setScannerConcurrentWorkers: 5,
-                },
-              }
-            },
-          },
-        ]
+        },
+      ]
 
       renderWithProviders(<ScannerConcurrentWorkers />, { mocks })
 
-      const input = await screen.findByRole('spinbutton')
+      const input = await screen.findByRole('spinbutton', { name: /scanner concurrent workers/i })
       await waitFor(() => {
         expect(input).toHaveValue(5)
       })
@@ -427,44 +396,41 @@ describe('ScannerConcurrentWorkers', () => {
       const user = userEvent.setup()
       const mutationMock = vi.fn()
 
-      const mocks: MockedResponse<
-        concurrentWorkersQuery | setConcurrentWorkers,
-        setConcurrentWorkersVariables
-      >[] = [
-          {
-            request: {
-              query: CONCURRENT_WORKERS_QUERY,
+      const mocks: MockedResponse[] = [
+        {
+          request: {
+            query: CONCURRENT_WORKERS_QUERY,
+          },
+          result: {
+            data: {
+              siteInfo: {
+                __typename: 'SiteInfo',
+                concurrentWorkers: 7,
+              },
             },
-            result: {
+          },
+        },
+        {
+          request: {
+            query: SET_CONCURRENT_WORKERS_MUTATION,
+            variables: {
+              workers: 7,
+            },
+          },
+          result: () => {
+            mutationMock()
+            return {
               data: {
-                siteInfo: {
-                  __typename: 'SiteInfo',
-                  concurrentWorkers: 7,
-                },
+                setScannerConcurrentWorkers: 7,
               },
-            },
+            }
           },
-          {
-            request: {
-              query: SET_CONCURRENT_WORKERS_MUTATION,
-              variables: {
-                workers: 7,
-              },
-            },
-            result: () => {
-              mutationMock()
-              return {
-                data: {
-                  setScannerConcurrentWorkers: 7,
-                },
-              }
-            },
-          },
-        ]
+        },
+      ]
 
       renderWithProviders(<ScannerConcurrentWorkers />, { mocks })
 
-      const input = await screen.findByRole('spinbutton')
+      const input = await screen.findByRole('spinbutton', { name: /scanner concurrent workers/i })
       await waitFor(() => {
         expect(input).toHaveValue(7)
       })
@@ -480,93 +446,88 @@ describe('ScannerConcurrentWorkers', () => {
 
     test('should successfully execute mutation with correct variables', async () => {
       const user = userEvent.setup()
-      const mocks: MockedResponse<
-        concurrentWorkersQuery | setConcurrentWorkers,
-        setConcurrentWorkersVariables
-      >[] = [
-          {
-            request: {
-              query: CONCURRENT_WORKERS_QUERY,
-            },
-            result: {
-              data: {
-                siteInfo: {
-                  __typename: 'SiteInfo',
-                  concurrentWorkers: 2,
-                },
+      const mutationSpy = vi.fn()
+      const mocks: MockedResponse[] = [
+        {
+          request: {
+            query: CONCURRENT_WORKERS_QUERY,
+          },
+          result: {
+            data: {
+              siteInfo: {
+                __typename: 'SiteInfo',
+                concurrentWorkers: 2,
               },
             },
           },
-          {
-            request: {
-              query: SET_CONCURRENT_WORKERS_MUTATION,
-              variables: {
-                workers: 16,
-              },
-            },
-            result: {
-              data: {
-                setScannerConcurrentWorkers: 16,
-              },
+        },
+        {
+          request: {
+            query: SET_CONCURRENT_WORKERS_MUTATION,
+            variables: {
+              workers: 16,
             },
           },
-        ]
+          result: () => {
+            mutationSpy()
+            return {
+              data: { setScannerConcurrentWorkers: 16 }
+            }
+          },
+        },
+      ]
 
       renderWithProviders(<ScannerConcurrentWorkers />, { mocks })
 
-      const input = await screen.findByRole('spinbutton')
+      const input = await screen.findByRole('spinbutton', { name: /scanner concurrent workers/i })
 
       await user.clear(input)
       await user.type(input, '16')
       await user.tab()
 
-      await waitFor(() => {
-        expect(input).not.toBeDisabled()
-      })
+      await waitFor(() => expect(mutationSpy).toHaveBeenCalledTimes(1))
+      await waitFor(() => expect(input).not.toBeDisabled())
     })
 
     test('should NOT trigger duplicate mutations for same value', async () => {
       const user = userEvent.setup()
       const mutationMock = vi.fn()
 
-      const mocks: MockedResponse<
-        concurrentWorkersQuery | setConcurrentWorkers,
-        setConcurrentWorkersVariables
-      >[] = [
-          {
-            request: {
-              query: CONCURRENT_WORKERS_QUERY,
+      const mocks: MockedResponse[] = [
+        {
+          request: {
+            query: CONCURRENT_WORKERS_QUERY,
+          },
+          result: {
+            data: {
+              siteInfo: {
+                __typename: 'SiteInfo',
+                concurrentWorkers: 3,
+              },
             },
-            result: {
+          },
+        },
+        {
+          request: {
+            query: SET_CONCURRENT_WORKERS_MUTATION,
+            variables: {
+              workers: 9,
+            },
+          },
+          result: () => {
+            mutationMock()
+            return {
               data: {
-                siteInfo: {
-                  __typename: 'SiteInfo',
-                  concurrentWorkers: 3,
-                },
+                setScannerConcurrentWorkers: 9,
               },
-            },
+            }
           },
-          {
-            request: {
-              query: SET_CONCURRENT_WORKERS_MUTATION,
-              variables: {
-                workers: 9,
-              },
-            },
-            result: () => {
-              mutationMock()
-              return {
-                data: {
-                  setScannerConcurrentWorkers: 9,
-                },
-              }
-            },
-          },
-        ]
+        },
+      ]
 
       renderWithProviders(<ScannerConcurrentWorkers />, { mocks })
 
-      const input = await screen.findByRole('spinbutton')
+      const input = await screen.findByRole('spinbutton', { name: /scanner concurrent workers/i })
 
       // Change to 9 and blur
       await user.clear(input)
@@ -587,65 +548,175 @@ describe('ScannerConcurrentWorkers', () => {
       })
     })
 
-    test('should handle mutation with various worker counts', async () => {
+    test.each([1, 12, 24])('should handle mutation with worker count %i', async (count) => {
       const user = userEvent.setup()
-      const workerCounts = [1, 12, 24]
 
-      for (const count of workerCounts) {
-        const mocks: MockedResponse<
-          concurrentWorkersQuery | setConcurrentWorkers,
-          setConcurrentWorkersVariables
-        >[] = [
-            {
-              request: {
-                query: CONCURRENT_WORKERS_QUERY,
-              },
-              result: {
-                data: {
-                  siteInfo: {
-                    __typename: 'SiteInfo',
-                    concurrentWorkers: 4,
-                  },
-                },
+      const mocks: MockedResponse[] = [
+        {
+          request: {
+            query: CONCURRENT_WORKERS_QUERY,
+          },
+          result: {
+            data: {
+              siteInfo: {
+                __typename: 'SiteInfo',
+                concurrentWorkers: 4,
               },
             },
-            {
-              request: {
-                query: SET_CONCURRENT_WORKERS_MUTATION,
-                variables: {
-                  workers: count,
-                },
-              },
-              result: {
-                data: {
-                  setScannerConcurrentWorkers: count,
-                },
+          },
+        },
+        {
+          request: {
+            query: SET_CONCURRENT_WORKERS_MUTATION,
+            variables: {
+              workers: count,
+            },
+          },
+          result: {
+            data: {
+              setScannerConcurrentWorkers: count,
+            },
+          },
+        },
+      ]
+
+      const { unmount } = renderWithProviders(<ScannerConcurrentWorkers />, {
+        mocks,
+      })
+
+      const input = await screen.findByRole('spinbutton', { name: /scanner concurrent workers/i })
+
+      await user.clear(input)
+      await user.type(input, count.toString())
+      await user.tab()
+
+      await waitFor(() => expect(input).not.toBeDisabled())
+
+      unmount()
+    })
+
+    test('should handle mutation GraphQL error and re-enable input', async () => {
+      const user = userEvent.setup()
+      const mocks: MockedResponse[] = [
+        {
+          request: {
+            query: CONCURRENT_WORKERS_QUERY,
+          },
+          result: {
+            data: {
+              siteInfo: {
+                __typename: 'SiteInfo',
+                concurrentWorkers: 4,
               },
             },
-          ]
+          },
+        },
+        {
+          request: {
+            query: SET_CONCURRENT_WORKERS_MUTATION,
+            variables: {
+              workers: 11,
+            },
+          },
+          result: {
+            errors: [new GraphQLError('Mutation failed')],
+          },
+        },
+      ]
 
-        const { unmount } = renderWithProviders(<ScannerConcurrentWorkers />, {
-          mocks,
-        })
+      renderWithProviders(<ScannerConcurrentWorkers />, {
+        mocks,
+        apolloOptions: {
+          defaultOptions: {
+            mutate: {
+              errorPolicy: 'all',
+            },
+          },
+        },
+      })
 
-        const input = await screen.findByRole('spinbutton')
+      const input = await screen.findByRole('spinbutton', {
+        name: /scanner concurrent workers/i,
+      })
 
-        await user.clear(input)
-        await user.type(input, count.toString())
-        await user.tab()
+      await user.clear(input)
+      await user.type(input, '11')
+      await user.tab()
 
-        await waitFor(() => {
-          expect(input).not.toBeDisabled()
-        })
+      // Input should re-enable after mutation error
+      await waitFor(() => {
+        expect(input).not.toBeDisabled()
+      })
+    })
 
-        unmount()
-      }
+    test('should handle mutation network error and re-enable input', async () => {
+      const user = userEvent.setup()
+
+      // Suppress unhandled rejection for this specific test
+      const originalOnError = window.onerror
+      const errorHandler = vi.fn()
+      window.onerror = errorHandler
+
+      const mocks: MockedResponse[] = [
+        {
+          request: {
+            query: CONCURRENT_WORKERS_QUERY,
+          },
+          result: {
+            data: {
+              siteInfo: {
+                __typename: 'SiteInfo',
+                concurrentWorkers: 4,
+              },
+            },
+          },
+        },
+        {
+          request: {
+            query: SET_CONCURRENT_WORKERS_MUTATION,
+            variables: {
+              workers: 13,
+            },
+          },
+          error: new Error('Network error'),
+        },
+      ]
+
+      const onError = vi.fn()
+
+      renderWithProviders(<ScannerConcurrentWorkers />, {
+        mocks,
+        apolloOptions: {
+          defaultOptions: {
+            mutate: {
+              errorPolicy: 'all',
+              onError,
+            },
+          },
+        },
+      })
+
+      const input = await screen.findByRole('spinbutton', {
+        name: /scanner concurrent workers/i,
+      })
+
+      await user.clear(input)
+      await user.type(input, '13')
+      await user.tab()
+
+      // Input should re-enable after network error
+      await waitFor(() => {
+        expect(input).not.toBeDisabled()
+      })
+
+      // Restore original error handler
+      window.onerror = originalOnError
     })
   })
 
   describe('Loading States', () => {
     test('should disable input during query loading', () => {
-      const mocks: MockedResponse<concurrentWorkersQuery>[] = [
+      const mocks: MockedResponse[] = [
         {
           request: {
             query: CONCURRENT_WORKERS_QUERY,
@@ -664,48 +735,45 @@ describe('ScannerConcurrentWorkers', () => {
 
       renderWithProviders(<ScannerConcurrentWorkers />, { mocks })
 
-      const input = screen.getByRole('spinbutton')
+      const input = screen.getByRole('spinbutton', { name: /scanner concurrent workers/i })
       expect(input).toBeDisabled()
     })
 
     test('should disable input during mutation loading', async () => {
       const user = userEvent.setup()
-      const mocks: MockedResponse<
-        concurrentWorkersQuery | setConcurrentWorkers,
-        setConcurrentWorkersVariables
-      >[] = [
-          {
-            request: {
-              query: CONCURRENT_WORKERS_QUERY,
-            },
-            result: {
-              data: {
-                siteInfo: {
-                  __typename: 'SiteInfo',
-                  concurrentWorkers: 4,
-                },
+      const mocks: MockedResponse[] = [
+        {
+          request: {
+            query: CONCURRENT_WORKERS_QUERY,
+          },
+          result: {
+            data: {
+              siteInfo: {
+                __typename: 'SiteInfo',
+                concurrentWorkers: 4,
               },
             },
           },
-          {
-            request: {
-              query: SET_CONCURRENT_WORKERS_MUTATION,
-              variables: {
-                workers: 8,
-              },
+        },
+        {
+          request: {
+            query: SET_CONCURRENT_WORKERS_MUTATION,
+            variables: {
+              workers: 8,
             },
-            result: {
-              data: {
-                setScannerConcurrentWorkers: 8,
-              },
-            },
-            delay: 100,
           },
-        ]
+          result: {
+            data: {
+              setScannerConcurrentWorkers: 8,
+            },
+          },
+          delay: 100,
+        },
+      ]
 
       renderWithProviders(<ScannerConcurrentWorkers />, { mocks })
 
-      const input = await screen.findByRole('spinbutton')
+      const input = await screen.findByRole('spinbutton', { name: /scanner concurrent workers/i })
 
       await user.clear(input)
       await user.type(input, '8')
@@ -724,44 +792,41 @@ describe('ScannerConcurrentWorkers', () => {
 
     test('should handle combined loading states (query + mutation)', async () => {
       const user = userEvent.setup()
-      const mocks: MockedResponse<
-        concurrentWorkersQuery | setConcurrentWorkers,
-        setConcurrentWorkersVariables
-      >[] = [
-          {
-            request: {
-              query: CONCURRENT_WORKERS_QUERY,
-            },
-            result: {
-              data: {
-                siteInfo: {
-                  __typename: 'SiteInfo',
-                  concurrentWorkers: 5,
-                },
-              },
-            },
-            delay: 50,
+      const mocks: MockedResponse[] = [
+        {
+          request: {
+            query: CONCURRENT_WORKERS_QUERY,
           },
-          {
-            request: {
-              query: SET_CONCURRENT_WORKERS_MUTATION,
-              variables: {
-                workers: 15,
+          result: {
+            data: {
+              siteInfo: {
+                __typename: 'SiteInfo',
+                concurrentWorkers: 5,
               },
             },
-            result: {
-              data: {
-                setScannerConcurrentWorkers: 15,
-              },
-            },
-            delay: 50,
           },
-        ]
+          delay: 50,
+        },
+        {
+          request: {
+            query: SET_CONCURRENT_WORKERS_MUTATION,
+            variables: {
+              workers: 15,
+            },
+          },
+          result: {
+            data: {
+              setScannerConcurrentWorkers: 15,
+            },
+          },
+          delay: 50,
+        },
+      ]
 
       renderWithProviders(<ScannerConcurrentWorkers />, { mocks })
 
       // Initially disabled during query
-      const input = screen.getByRole('spinbutton')
+      const input = screen.getByRole('spinbutton', { name: /scanner concurrent workers/i })
       expect(input).toBeDisabled()
 
       // Wait for query to complete
@@ -788,7 +853,7 @@ describe('ScannerConcurrentWorkers', () => {
 
   describe('Component Rendering', () => {
     test('should render title and description', async () => {
-      const mocks: MockedResponse<concurrentWorkersQuery>[] = [
+      const mocks: MockedResponse[] = [
         {
           request: {
             query: CONCURRENT_WORKERS_QUERY,
@@ -820,7 +885,7 @@ describe('ScannerConcurrentWorkers', () => {
     })
 
     test('should render input with correct type', async () => {
-      const mocks: MockedResponse<concurrentWorkersQuery>[] = [
+      const mocks: MockedResponse[] = [
         {
           request: {
             query: CONCURRENT_WORKERS_QUERY,
@@ -838,7 +903,7 @@ describe('ScannerConcurrentWorkers', () => {
 
       renderWithProviders(<ScannerConcurrentWorkers />, { mocks })
 
-      const input = await screen.findByRole('spinbutton')
+      const input = await screen.findByRole('spinbutton', { name: /scanner concurrent workers/i })
       expect(input).toHaveAttribute('type', 'number')
     })
   })

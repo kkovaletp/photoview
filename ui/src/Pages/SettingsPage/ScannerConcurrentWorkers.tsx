@@ -55,6 +55,12 @@ export const ScannerConcurrentWorkers = () => {
         variables: {
           workers: workerAmount,
         },
+      }).catch(error => {
+        console.error('Failed to update concurrent workers: ', error)
+        // Reset to server value on error
+        if (workerAmountServerValue.current !== null) {
+          setWorkerAmount(workerAmountServerValue.current)
+        }
       })
     }
   }
