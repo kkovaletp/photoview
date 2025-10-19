@@ -159,13 +159,13 @@ async function testMerge(destinationID: string, sourceIDs: string[]) {
 }
 
 test('merges a single source face group into a destination face group', async () => {
-    testMerge(mockFaceGroups[0].id, [mockFaceGroups[1].id])
+    await testMerge(mockFaceGroups[0].id, [mockFaceGroups[1].id])
 })
 
 test('merges all source face groups into a destination face group', async () => {
-    testMerge(mockFaceGroups[0].id, mockFaceGroups.slice(1).map(fg => fg.id))
+    await testMerge(mockFaceGroups[0].id, mockFaceGroups.slice(1).map(fg => fg.id))
 })
 
 test('merges multiple source face groups into a destination face group', async () => {
-    testMerge(mockFaceGroups[0].id, [mockFaceGroups[1], mockFaceGroups[2]].map(fg => fg.id))
+    await testMerge(mockFaceGroups[0].id, [mockFaceGroups[1], mockFaceGroups[2]].map(fg => fg.id))
 })

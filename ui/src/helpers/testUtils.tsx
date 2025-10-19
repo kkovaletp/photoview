@@ -21,7 +21,6 @@ interface RenderWithProvidersOptions {
     history?: History
     /** Apollo client configuration options */
     apolloOptions?: {
-        addTypename?: boolean
         defaultOptions?: any
     }
 }
@@ -54,7 +53,6 @@ export function renderWithProviders(
     const Wrapper = ({ children }: { children: React.ReactNode }) => (
         <MockedProvider
             mocks={mocks}
-            addTypename={apolloOptions.addTypename ?? false}
             defaultOptions={apolloOptions.defaultOptions}
         >
             {history ? (
