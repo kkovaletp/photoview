@@ -37,6 +37,7 @@ describe('ScannerConcurrentWorkers', () => {
           result: {
             data: {
               siteInfo: {
+                __typename: 'SiteInfo',
                 concurrentWorkers: 4,
               },
             },
@@ -62,6 +63,7 @@ describe('ScannerConcurrentWorkers', () => {
           result: {
             data: {
               siteInfo: {
+                __typename: 'SiteInfo',
                 concurrentWorkers: 8,
               },
             },
@@ -89,6 +91,7 @@ describe('ScannerConcurrentWorkers', () => {
           result: {
             data: {
               siteInfo: {
+                __typename: 'SiteInfo',
                 concurrentWorkers: 3,
               },
             },
@@ -224,6 +227,7 @@ describe('ScannerConcurrentWorkers', () => {
           result: {
             data: {
               siteInfo: {
+                __typename: 'SiteInfo',
                 concurrentWorkers: 4,
               },
             },
@@ -256,6 +260,7 @@ describe('ScannerConcurrentWorkers', () => {
             result: {
               data: {
                 siteInfo: {
+                  __typename: 'SiteInfo',
                   concurrentWorkers: 4,
                 },
               },
@@ -302,6 +307,7 @@ describe('ScannerConcurrentWorkers', () => {
             result: {
               data: {
                 siteInfo: {
+                  __typename: 'SiteInfo',
                   concurrentWorkers: 4,
                 },
               },
@@ -344,6 +350,7 @@ describe('ScannerConcurrentWorkers', () => {
           result: {
             data: {
               siteInfo: {
+                __typename: 'SiteInfo',
                 concurrentWorkers: 4,
               },
             },
@@ -376,6 +383,7 @@ describe('ScannerConcurrentWorkers', () => {
             result: {
               data: {
                 siteInfo: {
+                  __typename: 'SiteInfo',
                   concurrentWorkers: 5,
                 },
               },
@@ -402,16 +410,17 @@ describe('ScannerConcurrentWorkers', () => {
       renderWithProviders(<ScannerConcurrentWorkers />, { mocks })
 
       const input = await screen.findByRole('spinbutton')
-      expect(input).toHaveValue(5)
+      await waitFor(() => {
+        expect(input).toHaveValue(5)
+      })
 
       // Blur without changing value
       await user.click(input)
       await user.tab()
 
-      // Wait a bit to ensure no mutation is triggered
-      await new Promise(resolve => setTimeout(resolve, 100))
-
-      expect(mutationMock).not.toHaveBeenCalled()
+      await waitFor(() => {
+        expect(mutationMock).not.toHaveBeenCalled()
+      })
     })
 
     test('should NOT trigger mutation when value is unchanged on Enter', async () => {
@@ -429,6 +438,7 @@ describe('ScannerConcurrentWorkers', () => {
             result: {
               data: {
                 siteInfo: {
+                  __typename: 'SiteInfo',
                   concurrentWorkers: 7,
                 },
               },
@@ -455,16 +465,17 @@ describe('ScannerConcurrentWorkers', () => {
       renderWithProviders(<ScannerConcurrentWorkers />, { mocks })
 
       const input = await screen.findByRole('spinbutton')
-      expect(input).toHaveValue(7)
+      await waitFor(() => {
+        expect(input).toHaveValue(7)
+      })
 
       // Press Enter without changing value
       await user.click(input)
       await user.keyboard('{Enter}')
 
-      // Wait a bit to ensure no mutation is triggered
-      await new Promise(resolve => setTimeout(resolve, 100))
-
-      expect(mutationMock).not.toHaveBeenCalled()
+      await waitFor(() => {
+        expect(mutationMock).not.toHaveBeenCalled()
+      })
     })
 
     test('should successfully execute mutation with correct variables', async () => {
@@ -480,6 +491,7 @@ describe('ScannerConcurrentWorkers', () => {
             result: {
               data: {
                 siteInfo: {
+                  __typename: 'SiteInfo',
                   concurrentWorkers: 2,
                 },
               },
@@ -528,6 +540,7 @@ describe('ScannerConcurrentWorkers', () => {
             result: {
               data: {
                 siteInfo: {
+                  __typename: 'SiteInfo',
                   concurrentWorkers: 3,
                 },
               },
@@ -568,11 +581,10 @@ describe('ScannerConcurrentWorkers', () => {
       await user.click(input)
       await user.keyboard('{Enter}')
 
-      // Wait a bit
-      await new Promise(resolve => setTimeout(resolve, 100))
-
       // Should still be called only once
-      expect(mutationMock).toHaveBeenCalledTimes(1)
+      await waitFor(() => {
+        expect(mutationMock).toHaveBeenCalledTimes(1)
+      })
     })
 
     test('should handle mutation with various worker counts', async () => {
@@ -591,6 +603,7 @@ describe('ScannerConcurrentWorkers', () => {
               result: {
                 data: {
                   siteInfo: {
+                    __typename: 'SiteInfo',
                     concurrentWorkers: 4,
                   },
                 },
@@ -640,6 +653,7 @@ describe('ScannerConcurrentWorkers', () => {
           result: {
             data: {
               siteInfo: {
+                __typename: 'SiteInfo',
                 concurrentWorkers: 4,
               },
             },
@@ -667,6 +681,7 @@ describe('ScannerConcurrentWorkers', () => {
             result: {
               data: {
                 siteInfo: {
+                  __typename: 'SiteInfo',
                   concurrentWorkers: 4,
                 },
               },
@@ -720,6 +735,7 @@ describe('ScannerConcurrentWorkers', () => {
             result: {
               data: {
                 siteInfo: {
+                  __typename: 'SiteInfo',
                   concurrentWorkers: 5,
                 },
               },
@@ -780,6 +796,7 @@ describe('ScannerConcurrentWorkers', () => {
           result: {
             data: {
               siteInfo: {
+                __typename: 'SiteInfo',
                 concurrentWorkers: 4,
               },
             },
@@ -811,6 +828,7 @@ describe('ScannerConcurrentWorkers', () => {
           result: {
             data: {
               siteInfo: {
+                __typename: 'SiteInfo',
                 concurrentWorkers: 4,
               },
             },
