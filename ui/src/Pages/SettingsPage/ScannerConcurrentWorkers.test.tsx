@@ -1,6 +1,6 @@
 import { describe, test, expect, vi, beforeEach, afterEach } from 'vitest'
 import { renderWithProviders } from '../../helpers/testUtils'
-import { screen, waitFor } from '@testing-library/react'
+import { fireEvent, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { GraphQLError } from 'graphql'
 import type { MockedResponse } from '@apollo/client/testing'
@@ -215,8 +215,7 @@ describe('ScannerConcurrentWorkers', () => {
         name: /scanner concurrent workers/i,
       })
 
-      await user.clear(input)
-      await user.type(input, '12')
+      fireEvent.change(input, { target: { value: '12' } })
 
       expect(input).toHaveValue(12)
     })
@@ -258,9 +257,8 @@ describe('ScannerConcurrentWorkers', () => {
 
       const input = await screen.findByRole('spinbutton', { name: /scanner concurrent workers/i })
 
-      await user.clear(input)
-      await user.type(input, '10')
-      await user.tab()
+      fireEvent.change(input, { target: { value: '10' } })
+      fireEvent.blur(input)
 
       await waitFor(() => expect(mutationSpy).toHaveBeenCalledTimes(1))
       await waitFor(() => expect(input).not.toBeDisabled())
@@ -303,9 +301,8 @@ describe('ScannerConcurrentWorkers', () => {
 
       const input = await screen.findByRole('spinbutton', { name: /scanner concurrent workers/i })
 
-      await user.clear(input)
-      await user.type(input, '6')
-      await user.keyboard('{Enter}')
+      fireEvent.change(input, { target: { value: '6' } })
+      fireEvent.keyDown(input, { key: 'Enter' })
 
       await waitFor(() => expect(mutationSpy).toHaveBeenCalledTimes(1))
       await waitFor(() => expect(input).not.toBeDisabled())
@@ -481,9 +478,8 @@ describe('ScannerConcurrentWorkers', () => {
 
       const input = await screen.findByRole('spinbutton', { name: /scanner concurrent workers/i })
 
-      await user.clear(input)
-      await user.type(input, '16')
-      await user.tab()
+      fireEvent.change(input, { target: { value: '16' } })
+      fireEvent.blur(input)
 
       await waitFor(() => expect(mutationSpy).toHaveBeenCalledTimes(1))
       await waitFor(() => expect(input).not.toBeDisabled())
@@ -530,9 +526,8 @@ describe('ScannerConcurrentWorkers', () => {
       const input = await screen.findByRole('spinbutton', { name: /scanner concurrent workers/i })
 
       // Change to 9 and blur
-      await user.clear(input)
-      await user.type(input, '9')
-      await user.tab()
+      fireEvent.change(input, { target: { value: '9' } })
+      fireEvent.blur(input)
 
       await waitFor(() => {
         expect(mutationMock).toHaveBeenCalledTimes(1)
@@ -586,9 +581,8 @@ describe('ScannerConcurrentWorkers', () => {
 
       const input = await screen.findByRole('spinbutton', { name: /scanner concurrent workers/i })
 
-      await user.clear(input)
-      await user.type(input, count.toString())
-      await user.tab()
+      fireEvent.change(input, { target: { value: count.toString() } })
+      fireEvent.blur(input)
 
       await waitFor(() => expect(input).not.toBeDisabled())
 
@@ -630,9 +624,8 @@ describe('ScannerConcurrentWorkers', () => {
         name: /scanner concurrent workers/i,
       })
 
-      await user.clear(input)
-      await user.type(input, '11')
-      await user.tab()
+      fireEvent.change(input, { target: { value: '11' } })
+      fireEvent.blur(input)
 
       // Input should re-enable after mutation error
       await waitFor(() => {
@@ -686,9 +679,8 @@ describe('ScannerConcurrentWorkers', () => {
         name: /scanner concurrent workers/i,
       })
 
-      await user.clear(input)
-      await user.type(input, '13')
-      await user.tab()
+      fireEvent.change(input, { target: { value: '13' } })
+      fireEvent.blur(input)
 
       // Input should re-enable after network error
       await waitFor(() => {
@@ -763,9 +755,8 @@ describe('ScannerConcurrentWorkers', () => {
 
       const input = await screen.findByRole('spinbutton', { name: /scanner concurrent workers/i })
 
-      await user.clear(input)
-      await user.type(input, '8')
-      await user.tab()
+      fireEvent.change(input, { target: { value: '8' } })
+      fireEvent.blur(input)
 
       // Input should be disabled during mutation
       await waitFor(() => {
@@ -823,9 +814,8 @@ describe('ScannerConcurrentWorkers', () => {
       })
 
       // Trigger mutation
-      await user.clear(input)
-      await user.type(input, '15')
-      await user.tab()
+      fireEvent.change(input, { target: { value: '15' } })
+      fireEvent.blur(input)
 
       // Should be disabled during mutation
       await waitFor(() => {

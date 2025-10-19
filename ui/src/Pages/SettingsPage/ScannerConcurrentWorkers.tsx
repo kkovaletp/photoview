@@ -28,6 +28,7 @@ export const ScannerConcurrentWorkers = () => {
 
   const workerAmountServerValue = useRef<null | number>(null)
   const [workerAmount, setWorkerAmount] = useState(0)
+  const [inputValue, setInputValue] = useState('')
 
   const workerAmountQuery = useQuery<concurrentWorkersQuery>(CONCURRENT_WORKERS_QUERY)
 
@@ -39,6 +40,7 @@ export const ScannerConcurrentWorkers = () => {
     if (workerAmountQuery.data) {
       const workers = workerAmountQuery.data.siteInfo?.concurrentWorkers
       setWorkerAmount(workers)
+      setInputValue(String(workers))
       workerAmountServerValue.current = workers
     }
   }, [workerAmountQuery.data, workerAmountQuery.error])
@@ -56,13 +58,23 @@ export const ScannerConcurrentWorkers = () => {
         workers: next,
       },
     }).then(res => {
-      // trust server echo when available, else the requested value
-      workerAmountServerValue.current = res.data?.setScannerConcurrentWorkers ?? next
+      const newValue = res.data?.setScannerConcurrentWorkers ?? next
+      workerAmountServerValue.current = newValue
+      setWorkerAmount(newValue)
+      setInputValue(String(newValue))
     }).catch(error => {
       console.error('Failed to update concurrent workers: ', error)
       // Reset to server value on error
       setWorkerAmount(prev)
+      setInputValue(String(prev))
     })
+  }
+
+  const commitValue = () => {
+    const n = Number(inputValue)
+    const bounded = Math.min(24, Math.max(1, Number.isNaN(n) ? workerAmount : n))
+    setInputValue(String(bounded))
+    updateWorkerAmount(bounded)
   }
 
   if (workerAmountQuery.error) {
@@ -99,31 +111,12 @@ export const ScannerConcurrentWorkers = () => {
         min="1"
         max="24"
         id="scanner_concurrent_workers_field"
-        value={workerAmount}
-        onChange={e => {
-          const n = e.currentTarget.valueAsNumber
-          setWorkerAmount(prev => (Number.isNaN(n) ? prev : n))
-        }}
-        onBlur={e => {
-          const n = e.currentTarget.valueAsNumber
-          // Clamp the value between 1 and 24 before submitting
-          const bounded = Math.min(24, Math.max(1, Number.isNaN(n) ? workerAmount : n))
-          updateWorkerAmount(bounded)
-          if (bounded !== workerAmount) {
-            setWorkerAmount(bounded)
-          }
-        }}
+        value={inputValue}
+        onChange={e => setInputValue(e.target.value)}
+        onBlur={commitValue}
         onKeyDown={e => {
           if (e.key === 'Enter') {
-            const n = e.currentTarget.valueAsNumber
-            if (!Number.isNaN(n)) {
-              // Clamp the value before submitting
-              const bounded = Math.min(24, Math.max(1, n))
-              updateWorkerAmount(bounded)
-              if (bounded !== workerAmount) {
-                setWorkerAmount(bounded)
-              }
-            }
+            commitValue()
           }
         }}
       />
