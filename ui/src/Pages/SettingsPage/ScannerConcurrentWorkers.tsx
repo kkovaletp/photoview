@@ -27,6 +27,7 @@ export const ScannerConcurrentWorkers = () => {
   const { t } = useTranslation()
 
   const workerAmountServerValue = useRef<null | number>(null)
+  const inFlightNextRef = useRef<number | null>(null)
   const [workerAmount, setWorkerAmount] = useState(0)
   const [inputValue, setInputValue] = useState('')
 
@@ -53,6 +54,9 @@ export const ScannerConcurrentWorkers = () => {
   const updateWorkerAmount = (next: number) => {
     const prev = workerAmountServerValue.current
     if (prev === null || prev === next) return
+    if (inFlightNextRef.current === next) return
+    inFlightNextRef.current = next
+
     setWorkersMutation({
       variables: {
         workers: next,
@@ -67,6 +71,8 @@ export const ScannerConcurrentWorkers = () => {
       // Reset to server value on error
       setWorkerAmount(prev)
       setInputValue(String(prev))
+    }).finally(() => {
+      inFlightNextRef.current = null
     })
   }
 

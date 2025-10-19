@@ -28,7 +28,7 @@ describe('ScannerConcurrentWorkers', () => {
   })
 
   describe('Query Loading', () => {
-    test('should load and display concurrent workers value', async () => {
+    test('should load data and enable input with correct value', async () => {
       const mocks: MockedResponse[] = [
         {
           request: {
@@ -53,31 +53,6 @@ describe('ScannerConcurrentWorkers', () => {
       await waitFor(() => {
         expect(input).not.toBeDisabled()
         expect(input.value).toBe('8')
-      })
-    })
-
-    test('should enable input after data loads', async () => {
-      const mocks: MockedResponse[] = [
-        {
-          request: {
-            query: CONCURRENT_WORKERS_QUERY,
-          },
-          result: {
-            data: {
-              siteInfo: {
-                __typename: 'SiteInfo',
-                concurrentWorkers: 3,
-              },
-            },
-          },
-        },
-      ]
-
-      renderWithProviders(<ScannerConcurrentWorkers />, { mocks })
-
-      await waitFor(() => {
-        const input = screen.getByRole('spinbutton', { name: /scanner concurrent workers/i })
-        expect(input).not.toBeDisabled()
       })
     })
   })
@@ -192,7 +167,6 @@ describe('ScannerConcurrentWorkers', () => {
 
   describe('User Interactions', () => {
     test('should update input value when user types', async () => {
-      const user = userEvent.setup()
       const mocks: MockedResponse[] = [
         {
           request: {
@@ -221,7 +195,6 @@ describe('ScannerConcurrentWorkers', () => {
     })
 
     test('should trigger mutation on blur with different value', async () => {
-      const user = userEvent.setup()
       const mutationSpy = vi.fn()
       const mocks: MockedResponse[] = [
         {
@@ -265,7 +238,6 @@ describe('ScannerConcurrentWorkers', () => {
     })
 
     test('should trigger mutation on Enter key press', async () => {
-      const user = userEvent.setup()
       const mutationSpy = vi.fn()
       const mocks: MockedResponse[] = [
         {
@@ -442,7 +414,6 @@ describe('ScannerConcurrentWorkers', () => {
     })
 
     test('should successfully execute mutation with correct variables', async () => {
-      const user = userEvent.setup()
       const mutationSpy = vi.fn()
       const mocks: MockedResponse[] = [
         {
@@ -544,7 +515,6 @@ describe('ScannerConcurrentWorkers', () => {
     })
 
     test.each([1, 12, 24])('should handle mutation with worker count %i', async (count) => {
-      const user = userEvent.setup()
 
       const mocks: MockedResponse[] = [
         {
@@ -590,7 +560,6 @@ describe('ScannerConcurrentWorkers', () => {
     })
 
     test('should handle mutation GraphQL error and re-enable input', async () => {
-      const user = userEvent.setup()
       const mocks: MockedResponse[] = [
         {
           request: {
@@ -631,11 +600,12 @@ describe('ScannerConcurrentWorkers', () => {
       await waitFor(() => {
         expect(input).not.toBeDisabled()
       })
+      await waitFor(() => {
+        expect((input as HTMLInputElement).value).toBe('4')
+      })
     })
 
     test('should handle mutation network error and re-enable input', async () => {
-      const user = userEvent.setup()
-
       const mocks: MockedResponse[] = [
         {
           request: {
@@ -720,7 +690,6 @@ describe('ScannerConcurrentWorkers', () => {
     })
 
     test('should disable input during mutation loading', async () => {
-      const user = userEvent.setup()
       const mocks: MockedResponse[] = [
         {
           request: {
@@ -770,7 +739,6 @@ describe('ScannerConcurrentWorkers', () => {
     })
 
     test('should handle combined loading states (query + mutation)', async () => {
-      const user = userEvent.setup()
       const mocks: MockedResponse[] = [
         {
           request: {
@@ -883,6 +851,167 @@ describe('ScannerConcurrentWorkers', () => {
 
       const input = await screen.findByRole('spinbutton', { name: /scanner concurrent workers/i })
       expect(input).toHaveAttribute('type', 'number')
+    })
+  })
+
+  describe('In-flight Request Deduplication', () => {
+    test('prevents duplicate mutations for same value while one is in flight', async () => {
+      let mutationCallCount = 0
+
+      const mocks = [
+        {
+          request: {
+            query: CONCURRENT_WORKERS_QUERY,
+          },
+          result: {
+            data: {
+              siteInfo: {
+                concurrentWorkers: 4,
+              },
+            },
+          },
+        },
+        {
+          request: {
+            query: SET_CONCURRENT_WORKERS_MUTATION,
+            variables: { workers: 8 },
+          },
+          result: () => {
+            mutationCallCount++
+            return {
+              data: {
+                setScannerConcurrentWorkers: 8,
+              },
+            }
+          },
+          delay: 100, // Simulate slow network to ensure we can trigger blur multiple times
+        },
+      ]
+
+      const { getByLabelText } = renderWithProviders(
+        <ScannerConcurrentWorkers />,
+        { mocks }
+      )
+
+      // Wait for initial query to complete
+      const input = await waitFor(() => {
+        const el = getByLabelText(/scanner concurrent workers/i) as HTMLInputElement
+        expect(el).not.toBeDisabled()
+        expect(el.value).toBe('4')
+        return el
+      })
+
+      // Type new value
+      fireEvent.change(input, { target: { value: '8' } })
+
+      // Wait for DOM to reflect the change BEFORE triggering blur
+      await waitFor(() => {
+        expect(input.value).toBe('8')
+      })
+
+      // Trigger blur multiple times rapidly (simulating race condition)
+      fireEvent.blur(input)
+      fireEvent.blur(input)
+
+      // Also trigger Enter key
+      fireEvent.keyDown(input, { key: 'Enter' })
+
+      // Verify mutation was called exactly once despite multiple triggers after mutation is complete
+      await waitFor(() => {
+        expect(mutationCallCount).toBe(1)
+      }, { timeout: 1000 })
+    })
+
+    test('allows new mutation after previous completes', async () => {
+      let mutationCallCount = 0
+
+      const mocks = [
+        {
+          request: {
+            query: CONCURRENT_WORKERS_QUERY,
+          },
+          result: {
+            data: {
+              siteInfo: {
+                concurrentWorkers: 4,
+              },
+            },
+          },
+        },
+        {
+          request: {
+            query: SET_CONCURRENT_WORKERS_MUTATION,
+            variables: { workers: 8 },
+          },
+          result: () => {
+            mutationCallCount++
+            return {
+              data: {
+                setScannerConcurrentWorkers: 8,
+              },
+            }
+          },
+          delay: 50,
+        },
+        {
+          request: {
+            query: SET_CONCURRENT_WORKERS_MUTATION,
+            variables: { workers: 10 },
+          },
+          result: () => {
+            mutationCallCount++
+            return {
+              data: {
+                setScannerConcurrentWorkers: 10,
+              },
+            }
+          },
+        },
+      ]
+
+      const { getByLabelText } = renderWithProviders(
+        <ScannerConcurrentWorkers />,
+        { mocks }
+      )
+
+      await waitFor(() => {
+        expect(getByLabelText(/scanner concurrent workers/i)).not.toBeDisabled()
+      })
+
+      const input = await waitFor(() => {
+        const el = getByLabelText(/scanner concurrent workers/i) as HTMLInputElement
+        expect(el).not.toBeDisabled()
+        expect(el.value).toBe('4')
+        return el
+      })
+
+      // First mutation
+      fireEvent.change(input, { target: { value: '8' } })
+
+      // Wait for DOM update before blur
+      await waitFor(() => {
+        expect(input.value).toBe('8')
+      })
+      fireEvent.blur(input)
+
+      // Wait for first mutation to complete
+      await waitFor(() => {
+        expect(mutationCallCount).toBe(1)
+      }, { timeout: 500 })
+
+      // Second mutation (should be allowed after first completes)
+      fireEvent.change(input, { target: { value: '10' } })
+
+      // Wait for DOM update before blur
+      await waitFor(() => {
+        expect(input.value).toBe('10')
+      })
+      fireEvent.blur(input)
+
+      // Wait for second mutation to complete
+      await waitFor(() => {
+        expect(mutationCallCount).toBe(2)
+      }, { timeout: 500 })
     })
   })
 })
