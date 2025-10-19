@@ -48,27 +48,27 @@ export const ScannerConcurrentWorkers = () => {
     setConcurrentWorkersVariables
   >(SET_CONCURRENT_WORKERS_MUTATION)
 
-  const updateWorkerAmount = (workerAmount: number) => {
-    if (workerAmountServerValue.current != workerAmount) {
-      workerAmountServerValue.current = workerAmount
-      setWorkersMutation({
-        variables: {
-          workers: workerAmount,
-        },
-      }).catch(error => {
-        console.error('Failed to update concurrent workers: ', error)
-        // Reset to server value on error
-        if (workerAmountServerValue.current !== null) {
-          setWorkerAmount(workerAmountServerValue.current)
-        }
-      })
-    }
+  const updateWorkerAmount = (next: number) => {
+    const prev = workerAmountServerValue.current
+    if (prev === null || prev === next) return
+    setWorkersMutation({
+      variables: {
+        workers: next,
+      },
+    }).then(res => {
+      // trust server echo when available, else the requested value
+      workerAmountServerValue.current = res.data?.setScannerConcurrentWorkers ?? next
+    }).catch(error => {
+      console.error('Failed to update concurrent workers: ', error)
+      // Reset to server value on error
+      setWorkerAmount(prev)
+    })
   }
 
   if (workerAmountQuery.error) {
     return (
       <div>
-        <label>
+        <label htmlFor="scanner_concurrent_workers_field">
           <InputLabelTitle>
             {t('settings.concurrent_workers.title', 'Scanner concurrent workers')}
           </InputLabelTitle>
@@ -100,13 +100,32 @@ export const ScannerConcurrentWorkers = () => {
         max="24"
         id="scanner_concurrent_workers_field"
         value={workerAmount}
-        onChange={event => {
-          setWorkerAmount(parseInt(event.target.value))
+        onChange={e => {
+          const n = e.currentTarget.valueAsNumber
+          setWorkerAmount(prev => (Number.isNaN(n) ? prev : n))
         }}
-        onBlur={() => updateWorkerAmount(workerAmount)}
-        onKeyDown={event =>
-          event.key == 'Enter' && updateWorkerAmount(workerAmount)
-        }
+        onBlur={e => {
+          const n = e.currentTarget.valueAsNumber
+          // Clamp the value between 1 and 24 before submitting
+          const bounded = Math.min(24, Math.max(1, Number.isNaN(n) ? workerAmount : n))
+          updateWorkerAmount(bounded)
+          if (bounded !== workerAmount) {
+            setWorkerAmount(bounded)
+          }
+        }}
+        onKeyDown={e => {
+          if (e.key === 'Enter') {
+            const n = e.currentTarget.valueAsNumber
+            if (!Number.isNaN(n)) {
+              // Clamp the value before submitting
+              const bounded = Math.min(24, Math.max(1, n))
+              updateWorkerAmount(bounded)
+              if (bounded !== workerAmount) {
+                setWorkerAmount(bounded)
+              }
+            }
+          }
+        }}
       />
     </div>
   )

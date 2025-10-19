@@ -624,16 +624,7 @@ describe('ScannerConcurrentWorkers', () => {
         },
       ]
 
-      renderWithProviders(<ScannerConcurrentWorkers />, {
-        mocks,
-        apolloOptions: {
-          defaultOptions: {
-            mutate: {
-              errorPolicy: 'all',
-            },
-          },
-        },
-      })
+      renderWithProviders(<ScannerConcurrentWorkers />, { mocks })
 
       const input = await screen.findByRole('spinbutton', {
         name: /scanner concurrent workers/i,
@@ -651,11 +642,6 @@ describe('ScannerConcurrentWorkers', () => {
 
     test('should handle mutation network error and re-enable input', async () => {
       const user = userEvent.setup()
-
-      // Suppress unhandled rejection for this specific test
-      const originalOnError = window.onerror
-      const errorHandler = vi.fn()
-      window.onerror = errorHandler
 
       const mocks: MockedResponse[] = [
         {
@@ -709,8 +695,10 @@ describe('ScannerConcurrentWorkers', () => {
         expect(input).not.toBeDisabled()
       })
 
-      // Restore original error handler
-      window.onerror = originalOnError
+      // Rolls back to last confirmed server value (4)
+      await waitFor(() => {
+        expect((input as HTMLInputElement).value).toBe('4')
+      })
     })
   })
 
