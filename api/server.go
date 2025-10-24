@@ -91,7 +91,7 @@ func main() {
 		})
 	}
 
-	endpointRouter.Handle("/graphql", graphql_endpoint.GraphqlEndpoint(db))
+	endpointRouter.Handle("/graphql", handlers.CompressHandler(graphql_endpoint.GraphqlEndpoint(db)))
 
 	photoRouter := endpointRouter.PathPrefix("/photo").Subrouter()
 	routes.RegisterPhotoRoutes(db, photoRouter)
@@ -105,7 +105,10 @@ func main() {
 	shouldServeUI := utils.ShouldServeUI()
 
 	if shouldServeUI {
-		spa := routes.NewSpaHandler(utils.UIPath(), "index.html")
+		spa, err := routes.NewSpaHandler(utils.UIPath(), "index.html")
+		if err != nil {
+			log.Panicf("Could not configure UI handler: %s", err)
+		}
 		rootRouter.PathPrefix("/").Handler(spa)
 	}
 
@@ -126,7 +129,7 @@ func main() {
 
 	srv := &http.Server{
 		Addr:    apiListenURL.Host,
-		Handler: handlers.CompressHandler(rootRouter),
+		Handler: rootRouter,
 	}
 
 	setupGracefulShutdown(srv)
