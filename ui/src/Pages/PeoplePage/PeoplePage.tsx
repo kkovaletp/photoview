@@ -163,7 +163,7 @@ export const FaceDetails = ({
       <FaceDetailsWrapper
         className={tailwindClassNames(
           className,
-          'whitespace-nowrap inline-block overflow-hidden overflow-clip'
+          'whitespace-nowrap inline-block overflow-hidden text-clip'
         )}
         labeled={!!group.label}
         onClick={() => setEditLabel(true)}
@@ -324,7 +324,7 @@ export const PeoplePage = () => {
           </Button>
         </li>
       </ul>
-      
+
       <FaceGroupsWrapper ref={containerElem}>{faces}</FaceGroupsWrapper>
       <PaginateLoader
         active={!finishedLoadingMore && !loading}

@@ -54,7 +54,7 @@ export const AlbumBox = ({ album, customLink, ...props }: AlbumBoxProps) => {
         {...props}
       >
         <AlbumBoxImage src={album.thumbnail?.thumbnail?.url} />
-        <p className="whitespace-nowrap overflow-hidden overflow-ellipsis">
+        <p className="whitespace-nowrap overflow-hidden text-ellipsis">
           {album.title}
         </p>
       </Link>

@@ -23,7 +23,7 @@ const SidebarHeader = ({ title }: SidebarHeaderProps) => {
       >
         <CloseIcon className="m-2 text-[#1F2021] dark:text-[#abadaf]" />
       </button>
-      <span className="flex-grow -mt-1 ml-2">{title}</span>
+      <span className="grow -mt-1 ml-2">{title}</span>
       <button
         className="hidden lg:block"
         title="Pin sidebar"

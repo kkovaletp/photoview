@@ -1,7 +1,5 @@
 module.exports = {
-  mode: 'jit',
   content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
-  purge: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
   darkMode: 'class',
   theme: {
     extend: {
@@ -38,9 +36,6 @@ module.exports = {
         },
       },
     },
-  },
-  variants: {
-    extend: {},
   },
   plugins: [],
 }
