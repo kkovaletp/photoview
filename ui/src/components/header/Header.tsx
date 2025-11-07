@@ -15,7 +15,7 @@ const Header = () => {
         { 'mr-[404px]': pinned }
       )}
     >
-      <h1 className="mr-4 lg:mr-8 flex-shrink-0 flex items-center">
+      <h1 className="mr-4 lg:mr-8 shrink-0 flex items-center">
         <img
           className="h-12 lg:h-10"
           src={import.meta.env.BASE_URL + 'photoview-logo.svg'}

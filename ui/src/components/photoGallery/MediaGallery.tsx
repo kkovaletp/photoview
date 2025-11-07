@@ -31,7 +31,7 @@ const Gallery = styled.div`
 
 export const PhotoFiller = styled.div`
   height: 200px;
-  flex-grow: 999999;
+  grow: 999999;
 `
 
 export const MEDIA_GALLERY_FRAGMENT = gql`

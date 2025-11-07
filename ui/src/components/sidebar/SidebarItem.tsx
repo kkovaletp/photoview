@@ -8,7 +8,7 @@ type SidebarItemProps = {
 const SidebarItem = ({ name, value }: SidebarItemProps) => (
   <div className="flex items-baseline mb-1">
     <div
-      className="w-[110px] flex-shrink-0 font-semibold text-sm text-gray-500 dark:text-gray-400 text-right pr-2 truncate"
+      className="w-[110px] shrink-0 font-semibold text-sm text-gray-500 dark:text-gray-400 text-right pr-2 truncate"
       title={name}
     >
       {name}
