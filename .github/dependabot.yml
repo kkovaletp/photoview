@@ -26,6 +26,9 @@ updates:
       i18next:
         patterns:
           - "*i18next*"
+      workbox:
+        patterns:
+          - "workbox-*"
       react:
         patterns:
           - "react"
