@@ -19,7 +19,7 @@ require (
 	github.com/sabhiram/go-gitignore v0.0.0-20210923224102-525f6e181f06
 	github.com/stretchr/testify v1.11.1
 	github.com/vektah/gqlparser/v2 v2.5.31
-	golang.org/x/crypto v0.44.0
+	golang.org/x/crypto v0.45.0
 	golang.org/x/text v0.31.0
 	gopkg.in/gographics/imagick.v3 v3.7.2
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1
