@@ -100,8 +100,8 @@ backup-postgres:
 	tar -cJf ${HOST_PHOTOVIEW_BACKUP}/`date +%Y-%m-%d`/postgres_pg_dump.tar.xz ${HOST_PHOTOVIEW_BACKUP}/`date +%Y-%m-%d`/postgres_pg_dump.sql && rm ${HOST_PHOTOVIEW_BACKUP}/`date +%Y-%m-%d`/postgres_pg_dump.sql
 	@# 7zz a -mx=9 ${HOST_PHOTOVIEW_BACKUP}/`date +%Y-%m-%d`/postgres_pg_dump.7z ${HOST_PHOTOVIEW_BACKUP}/`date +%Y-%m-%d`/postgres_pg_dump.sql && rm ${HOST_PHOTOVIEW_BACKUP}/`date +%Y-%m-%d`/postgres_pg_dump.sql
 backup-mariadb:
-	$(DOCKER_COMPOSE) exec mariadb mysqlcheck -u root --password=${MARIADB_ROOT_PASSWORD} --check --check-upgrade --flush --process-views=YES --auto-repair --all-databases
-	$(DOCKER_COMPOSE) exec mariadb mysqlcheck -u root --password=${MARIADB_ROOT_PASSWORD} --optimize --flush --auto-repair --all-databases
+	$(DOCKER_COMPOSE) exec mariadb mariadbcheck -u root --password=${MARIADB_ROOT_PASSWORD} --check --check-upgrade --flush --process-views=YES --auto-repair --all-databases
+	$(DOCKER_COMPOSE) exec mariadb mariadbcheck -u root --password=${MARIADB_ROOT_PASSWORD} --optimize --flush --auto-repair --all-databases
 	$(DOCKER_COMPOSE) exec mariadb mariadb-dump -u root --password=${MARIADB_ROOT_PASSWORD} -e -x --all-databases -- > ${HOST_PHOTOVIEW_BACKUP}/`date +%Y-%m-%d`/mariaDB_mysql_dump.sql
 	tar -cJf ${HOST_PHOTOVIEW_BACKUP}/`date +%Y-%m-%d`/mariaDB_mysql_dump.tar.xz ${HOST_PHOTOVIEW_BACKUP}/`date +%Y-%m-%d`/mariaDB_mysql_dump.sql --remove-files
 	@# 7zz a -mx=9 ${HOST_PHOTOVIEW_BACKUP}/`date +%Y-%m-%d`/mariaDB_mysql_dump.7z ${HOST_PHOTOVIEW_BACKUP}/`date +%Y-%m-%d`/mariaDB_mysql_dump.sql && rm ${HOST_PHOTOVIEW_BACKUP}/`date +%Y-%m-%d`/mariaDB_mysql_dump.sql
