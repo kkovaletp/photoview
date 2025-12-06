@@ -43,6 +43,9 @@ models:
     model: github.com/kkovaletp/photoview/api/graphql/models.MediaURL
   MediaEXIF:
     model: github.com/kkovaletp/photoview/api/graphql/models.MediaEXIF
+    fields:
+      dateShot:
+        fieldName: DateShotWithOffset
   VideoMetadata:
     model: github.com/kkovaletp/photoview/api/graphql/models.VideoMetadata
   Album:

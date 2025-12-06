@@ -51,7 +51,7 @@ jobs:
         uses: docker/setup-buildx-action@v3
 
       - name: Checkout repo
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Git fetch blame information
         run: git fetch --unshallow
@@ -113,7 +113,7 @@ jobs:
         uses: docker/setup-buildx-action@v3
 
       - name: Checkout repo
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Git fetch blame information
         run: git fetch --unshallow
@@ -179,7 +179,7 @@ jobs:
 
       - name: ESLint artifact
         id: eslint-artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         if: ${{ steps.eslint.conclusion == 'success' || steps.eslint.conclusion == 'failure' }}
         with:
           name: ESLint-report

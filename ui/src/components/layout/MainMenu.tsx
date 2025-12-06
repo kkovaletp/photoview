@@ -92,7 +92,7 @@ export const MainMenu = () => {
     !faceDetectionEnabledQuery?.error
 
   return (
-    <div className="fixed w-full bottom-0 lg:bottom-auto lg:top-[84px] z-30 bg-white dark:bg-dark-bg shadow-separator lg:shadow-none lg:w-[240px] lg:ml-8 lg:mr-5 flex-shrink-0" data-testid="main-menu">
+    <div className="fixed w-full bottom-0 lg:bottom-auto lg:top-[84px] z-30 bg-white dark:bg-dark-bg shadow-separator lg:shadow-none lg:w-[240px] lg:ml-8 lg:mr-5 shrink-0" data-testid="main-menu">
       <ul className="flex justify-around py-2 px-2 max-w-lg mx-auto lg:flex-col lg:p-0" data-testid="menu-items">
         <MenuButton
           data-testid="menu-timeline"

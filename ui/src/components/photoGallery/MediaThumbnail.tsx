@@ -6,7 +6,7 @@ import { ReactComponent as VideoThumbnailIconSVG } from './icons/videoThumbnailI
 import { MediaGalleryFields } from './__generated__/MediaGalleryFields'
 
 const MediaContainer = styled.div`
-  flex-grow: 1;
+  grow: 1;
   flex-basis: 0;
   height: 200px;
   margin: 4px 2px;
@@ -211,7 +211,7 @@ export const MediaThumbnail = ({
 }
 
 export const MediaPlaceholder = styled.div`
-  flex-grow: 1;
+  grow: 1;
   height: 200px;
   width: 300px;
   margin: 4px 2px;
