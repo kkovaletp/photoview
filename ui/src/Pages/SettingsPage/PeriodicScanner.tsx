@@ -117,6 +117,7 @@ const PeriodicScanner = () => {
     if (data?.siteInfo?.periodicScanInterval !== undefined && !hasInitialized.current) {
       const queryScanInterval = data.siteInfo.periodicScanInterval
       hasInitialized.current = true
+      scanIntervalServerValue.current = queryScanInterval
 
       if (queryScanInterval === 0) {
         setScanInterval({
@@ -210,7 +211,7 @@ const PeriodicScanner = () => {
           'settings.periodic_scanner.checkbox_label',
           'Enable periodic scanner'
         )}
-        disabled={loading}
+        disabled={loading || scanIntervalMutationLoading}
         checked={enablePeriodicScanner}
         onChange={event =>
           onScanIntervalCheckboxChange(event.target.checked || false)
@@ -236,7 +237,7 @@ const PeriodicScanner = () => {
           <TextField
             id="periodic_scan_field"
             aria-label="Interval value"
-            disabled={!enablePeriodicScanner}
+            disabled={!enablePeriodicScanner || scanIntervalMutationLoading || loading}
             value={scanInterval.value}
             onChange={e => {
               setScanInterval(x => ({
@@ -250,7 +251,7 @@ const PeriodicScanner = () => {
           />
           <Dropdown
             aria-label="Interval unit"
-            disabled={!enablePeriodicScanner}
+            disabled={!enablePeriodicScanner || scanIntervalMutationLoading || loading}
             items={scanIntervalUnits}
             selected={scanInterval.unit}
             setSelected={value => {
