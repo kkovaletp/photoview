@@ -105,6 +105,7 @@ const PeriodicScanner = () => {
   })
 
   const scanIntervalServerValue = useRef<number | null>(null)
+  const hasInitialized = useRef(false)
   const { data, loading, error } = useQuery<scanIntervalQuery>(SCAN_INTERVAL_QUERY)
 
   useEffect(() => {
@@ -113,8 +114,9 @@ const PeriodicScanner = () => {
       return
     }
 
-    if (data?.siteInfo?.periodicScanInterval !== undefined) {
+    if (data?.siteInfo?.periodicScanInterval !== undefined && !hasInitialized.current) {
       const queryScanInterval = data.siteInfo.periodicScanInterval
+      hasInitialized.current = true
 
       if (queryScanInterval === 0) {
         setScanInterval({

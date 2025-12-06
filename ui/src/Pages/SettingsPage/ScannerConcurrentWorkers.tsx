@@ -28,6 +28,7 @@ export const ScannerConcurrentWorkers = () => {
 
   const workerAmountServerValue = useRef<null | number>(null)
   const inFlightNextRef = useRef<number | null>(null)
+  const initializedRef = useRef(false)
   const [workerAmount, setWorkerAmount] = useState(0)
   const [inputValue, setInputValue] = useState('')
 
@@ -38,11 +39,20 @@ export const ScannerConcurrentWorkers = () => {
       console.error('Failed to load concurrent workers setting: ', workerAmountQuery.error)
     }
 
-    if (workerAmountQuery.data) {
+    if (workerAmountQuery.data && !initializedRef.current) {
       const workers = workerAmountQuery.data.siteInfo?.concurrentWorkers
       setWorkerAmount(workers)
       setInputValue(String(workers))
       workerAmountServerValue.current = workers
+      initializedRef.current = true
+    } else if (workerAmountQuery.data && initializedRef.current) {
+      // Subsequent updates - only update if server value changed and we're not editing
+      const workers = workerAmountQuery.data.siteInfo?.concurrentWorkers
+      if (workers !== workerAmountServerValue.current && inFlightNextRef.current === null) {
+        setWorkerAmount(workers)
+        setInputValue(String(workers))
+        workerAmountServerValue.current = workers
+      }
     }
   }, [workerAmountQuery.data, workerAmountQuery.error])
 
