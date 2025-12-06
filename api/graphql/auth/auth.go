@@ -2,11 +2,10 @@ package auth
 
 import (
 	"context"
-	"fmt"
+	"errors"
 	"log"
 	"net/http"
 	"regexp"
-	"strings"
 
 	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/kkovaletp/photoview/api/dataloader"
@@ -14,7 +13,7 @@ import (
 	"gorm.io/gorm"
 )
 
-var ErrUnauthorized = fmt.Errorf("unauthorized")
+var ErrUnauthorized = errors.New("unauthorized")
 
 const INVALID_AUTH_TOKEN = "invalid authorization token"
 
@@ -42,9 +41,7 @@ func Middleware(db *gorm.DB) func(http.Handler) http.Handler {
 
 				// If user is nil, the token doesn't exist or is invalid
 				if user == nil {
-					safeTokenValue := strings.ReplaceAll(tokenCookie.Value, "\n", "")
-					safeTokenValue = strings.ReplaceAll(safeTokenValue, "\r", "")
-					log.Printf("Token not found in database: %s\n", safeTokenValue)
+					log.Println("Token not found in database")
 					http.Error(w, INVALID_AUTH_TOKEN, http.StatusForbidden)
 					return
 				}
@@ -71,7 +68,7 @@ func TokenFromBearer(bearer *string) (*string, error) {
 	regex, _ := regexp.Compile("^(?i)Bearer ([a-zA-Z0-9]{24})$")
 	matches := regex.FindStringSubmatch(*bearer)
 	if len(matches) != 2 {
-		return nil, fmt.Errorf("invalid bearer format")
+		return nil, errors.New("invalid bearer format")
 	}
 
 	token := matches[1]
@@ -101,15 +98,13 @@ func AuthWebsocketInit() func(context.Context, transport.InitPayload) (context.C
 		user, err := dataloader.For(ctx).UserFromAccessToken.Load(*token)
 		if err != nil {
 			log.Printf("Error loading user from token (websocket): %s\n", err)
-			return nil, nil, fmt.Errorf(INVALID_AUTH_TOKEN)
+			return nil, nil, errors.New(INVALID_AUTH_TOKEN)
 		}
 
 		// NEW: Check if token exists in database
 		if user == nil {
-			safeTokenValue := strings.ReplaceAll(*token, "\n", "")
-			safeTokenValue = strings.ReplaceAll(safeTokenValue, "\r", "")
-			log.Printf("Token not found in database (websocket): %s\n", safeTokenValue)
-			return nil, nil, fmt.Errorf(INVALID_AUTH_TOKEN)
+			log.Print("Token not found in database (websocket)\n")
+			return nil, nil, errors.New(INVALID_AUTH_TOKEN)
 		}
 
 		// put it in context
