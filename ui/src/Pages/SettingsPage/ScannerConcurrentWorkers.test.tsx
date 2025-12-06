@@ -662,6 +662,109 @@ describe('ScannerConcurrentWorkers', () => {
         expect((input as HTMLInputElement).value).toBe('4')
       })
     })
+
+    test('should handle non-numeric input by falling back to current value', async () => {
+      const mocks: MockedResponse[] = [
+        {
+          request: {
+            query: CONCURRENT_WORKERS_QUERY,
+          },
+          result: {
+            data: {
+              siteInfo: {
+                __typename: 'SiteInfo',
+                concurrentWorkers: 6,
+              },
+            },
+          },
+        },
+        {
+          request: {
+            query: SET_CONCURRENT_WORKERS_MUTATION,
+            variables: {
+              workers: 6,
+            },
+          },
+          result: {
+            data: {
+              setScannerConcurrentWorkers: 6,
+            },
+          },
+        },
+      ]
+
+      renderWithProviders(<ScannerConcurrentWorkers />, { mocks })
+
+      const input = await screen.findByRole('spinbutton', {
+        name: /scanner concurrent workers/i,
+      })
+
+      // Wait for initial value to load
+      await waitFor(() => {
+        expect(input).toHaveValue(6)
+      })
+
+      // Type non-numeric characters
+      fireEvent.change(input, { target: { value: 'abc' } })
+
+      // The input will show 'abc' temporarily
+      expect((input as HTMLInputElement).value).toBe('abc')
+
+      // Trigger commit via blur
+      fireEvent.blur(input)
+
+      // Should fall back to current workerAmount (6) due to NaN handling
+      await waitFor(() => {
+        expect((input as HTMLInputElement).value).toBe('6')
+      })
+    })
+
+    test('should handle server returning different value than requested', async () => {
+      const mocks: MockedResponse[] = [
+        {
+          request: {
+            query: CONCURRENT_WORKERS_QUERY,
+          },
+          result: {
+            data: {
+              siteInfo: {
+                __typename: 'SiteInfo',
+                concurrentWorkers: 4,
+              },
+            },
+          },
+        },
+        {
+          request: {
+            query: SET_CONCURRENT_WORKERS_MUTATION,
+            variables: {
+              workers: 10,
+            },
+          },
+          result: {
+            data: {
+              // Server returns 8 instead of requested 10 (e.g., due to server-side clamping)
+              setScannerConcurrentWorkers: 8,
+            },
+          },
+        },
+      ]
+
+      renderWithProviders(<ScannerConcurrentWorkers />, { mocks })
+
+      const input = await screen.findByRole('spinbutton', {
+        name: /scanner concurrent workers/i,
+      })
+
+      // Change to 10
+      fireEvent.change(input, { target: { value: '10' } })
+      fireEvent.blur(input)
+
+      // Should update to server's returned value (8), not the requested value (10)
+      await waitFor(() => {
+        expect((input as HTMLInputElement).value).toBe('8')
+      })
+    })
   })
 
   describe('Loading States', () => {
