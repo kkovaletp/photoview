@@ -198,7 +198,7 @@ const MorePopoverSectionPassword = ({
       } catch (error) {
         console.error('Failed to remove password protection: ', error)
         add({
-          key: Math.random().toString(26),
+          key: (globalThis.crypto?.randomUUID?.() ?? Math.random().toString(36)),
           type: NotificationType.Message,
           props: {
             negative: true,
@@ -225,7 +225,7 @@ const MorePopoverSectionPassword = ({
       } catch (error) {
         console.error('Failed to update password: ', error)
         add({
-          key: Math.random().toString(26),
+          key: (globalThis.crypto?.randomUUID?.() ?? Math.random().toString(36)),
           type: NotificationType.Message,
           props: {
             negative: true,
