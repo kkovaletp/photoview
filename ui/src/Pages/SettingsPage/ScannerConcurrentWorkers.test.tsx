@@ -10,11 +10,6 @@ import {
   SET_CONCURRENT_WORKERS_MUTATION,
   ScannerConcurrentWorkers,
 } from './ScannerConcurrentWorkers'
-import type { concurrentWorkersQuery } from './__generated__/concurrentWorkersQuery'
-import type {
-  setConcurrentWorkers,
-  setConcurrentWorkersVariables,
-} from './__generated__/setConcurrentWorkers'
 
 describe('ScannerConcurrentWorkers', () => {
   let consoleErrorSpy: ReturnType<typeof vi.spyOn>
