@@ -8,7 +8,7 @@ import {
 } from '@apollo/client'
 import copy from 'copy-to-clipboard'
 import { useTranslation } from 'react-i18next'
-import { Popover } from '@headlessui/react'
+import { Popover, PopoverButton, PopoverPanel } from '@headlessui/react'
 import {
   sidebareDeleteShare,
   sidebareDeleteShareVariables,
@@ -46,6 +46,8 @@ import {
   sidebarProtectShare,
   sidebarProtectShareVariables,
 } from './__generated__/sidebarProtectShare'
+import { useMessageState } from '../messages/MessageState'
+import { NotificationType } from '../../__generated__/globalTypes'
 
 const SHARE_PHOTO_QUERY = gql`
   query sidebarGetPhotoShares($id: ID!) {
@@ -109,7 +111,7 @@ const DELETE_SHARE_MUTATION = gql`
 export const ArrowPopoverPanel = styled.div.attrs({
   className:
     'absolute -top-3 bg-white dark:bg-dark-bg rounded shadow-md border border-gray-200 dark:border-dark-border z-10',
-})<{ width: number; flipped?: boolean }>`
+}) <{ width: number; flipped?: boolean }>`
   width: ${({ width }) => width}px;
 
   ${({ flipped }) =>
@@ -130,12 +132,12 @@ export const ArrowPopoverPanel = styled.div.attrs({
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 14'%3E%3Cpolyline stroke-width='1' stroke='%23E2E2E2' fill='%23FFFFFF' points='1 0 7 7 1 14'%3E%3C/polyline%3E%3C/svg%3E");
 
     ${({ flipped }) =>
-      flipped
-        ? `
+    flipped
+      ? `
       left: -7px;
       transform: rotate(180deg);
         `
-        : `
+      : `
       right: -7px;
     `}
   }
@@ -152,6 +154,7 @@ const MorePopoverSectionPassword = ({
   query,
   id,
 }: MorePopoverSectionPasswordProps) => {
+  const { add } = useMessageState()
   const [addingPassword, setAddingPassword] = useState(false)
   const activated = addingPassword || share.hasPassword
 
@@ -165,13 +168,7 @@ const MorePopoverSectionPassword = ({
     sidebarProtectShareVariables
   >(PROTECT_SHARE_MUTATION, {
     refetchQueries: [{ query: query, variables: { id } }],
-    onCompleted: data => {
-      hidePassword(data.protectShareToken.hasPassword)
-    },
-    // refetchQueries: [{ query: query, variables: { id } }],
-    variables: {
-      token: share.token,
-    },
+    awaitRefetchQueries: true,
   })
 
   const hidePassword = (hide: boolean) => {
@@ -186,28 +183,57 @@ const MorePopoverSectionPassword = ({
     setPasswordHidden(hide)
   }
 
-  const checkboxChange = () => {
+  const checkboxChange = async () => {
     const enable = !activated
     setAddingPassword(enable)
     if (!enable) {
-      setPassword({
-        variables: {
-          token: share.token,
-          password: null,
-        },
-      })
-      setPasswordInputValue('')
+      try {
+        await setPassword({
+          variables: {
+            token: share.token,
+            password: null,
+          },
+        })
+        setPasswordInputValue('')
+      } catch (error) {
+        console.error('Failed to remove password protection: ', error)
+        add({
+          key: (globalThis.crypto?.randomUUID?.() ?? Math.random().toString(36)),
+          type: NotificationType.Message,
+          props: {
+            negative: true,
+            header: 'Failed to remove password protection',
+            content: error instanceof Error ? error.message : 'An unexpected error occurred',
+          },
+        })
+      }
     }
   }
 
-  const updatePasswordAction = () => {
-    if (!passwordHidden && passwordInputValue != '') {
-      setPassword({
-        variables: {
-          token: share.token,
-          password: passwordInputValue,
-        },
-      })
+  const updatePasswordAction = async () => {
+    if (!passwordHidden && passwordInputValue !== '') {
+      try {
+        const result = await setPassword({
+          variables: {
+            token: share.token,
+            password: passwordInputValue,
+          },
+        })
+        if (result.data) {
+          hidePassword(result.data.protectShareToken.hasPassword)
+        }
+      } catch (error) {
+        console.error('Failed to update password: ', error)
+        add({
+          key: (globalThis.crypto?.randomUUID?.() ?? Math.random().toString(36)),
+          type: NotificationType.Message,
+          props: {
+            negative: true,
+            header: 'Failed to update password',
+            content: error instanceof Error ? error.message : 'An unexpected error occurred',
+          },
+        })
+      }
     }
   }
 
@@ -219,6 +245,7 @@ const MorePopoverSectionPassword = ({
         onChange={checkboxChange}
       />
       <TextField
+        data-testid="share-password-input"
         disabled={!activated}
         type={passwordHidden ? 'password' : 'text'}
         value={passwordInputValue}
@@ -259,14 +286,14 @@ const MorePopover = ({ id, share, query }: MorePopoverProps) => {
 
   return (
     <Popover className="relative">
-      <Popover.Button
+      <PopoverButton
         className="align-middle p-1 ml-2"
         title={t('sidebar.sharing.more', 'More')}
       >
         <MoreIcon />
-      </Popover.Button>
+      </PopoverButton>
 
-      <Popover.Panel>
+      <PopoverPanel>
         <ArrowPopoverPanel width={260}>
           <MorePopoverSectionPassword id={id} share={share} query={query} />
           <div className="px-4 py-2 border-t border-gray-200 dark:border-dark-border mt-2 mb-2">
@@ -274,7 +301,7 @@ const MorePopover = ({ id, share, query }: MorePopoverProps) => {
             <TextField className="mt-2 w-full" />
           </div>
         </ArrowPopoverPanel>
-      </Popover.Panel>
+      </PopoverPanel>
     </Popover>
   )
 }
@@ -300,6 +327,7 @@ export const SidebarAlbumShare = ({ id }: SidebarShareAlbumProps) => {
     sidebarAlbumAddShareVariables
   >(ADD_ALBUM_SHARE_MUTATION, {
     refetchQueries: [{ query: SHARE_ALBUM_QUERY, variables: { id } }],
+    awaitRefetchQueries: true,
   })
 
   const loading = queryLoading || mutationLoading
@@ -341,6 +369,7 @@ export const SidebarPhotoShare = ({ id }: SidebarSharePhotoProps) => {
     sidebarPhotoAddShareVariables
   >(ADD_MEDIA_SHARE_MUTATION, {
     refetchQueries: [{ query: SHARE_PHOTO_QUERY, variables: { id } }],
+    awaitRefetchQueries: true,
   })
 
   useEffect(() => {
@@ -351,7 +380,7 @@ export const SidebarPhotoShare = ({ id }: SidebarSharePhotoProps) => {
         },
       })
     }
-  }, [])
+  }, [loadShares, id])
 
   const loading = queryLoading || mutationLoading
 
@@ -398,6 +427,7 @@ const SidebarShare = ({
     sidebareDeleteShareVariables
   >(DELETE_SHARE_MUTATION, {
     refetchQueries: [{ query: query, variables: { id } }],
+    awaitRefetchQueries: true,
   })
 
   if (shares === undefined) {

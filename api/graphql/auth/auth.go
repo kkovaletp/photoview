@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"regexp"
+	"strings"
 
 	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/kkovaletp/photoview/api/dataloader"
@@ -14,6 +15,8 @@ import (
 )
 
 var ErrUnauthorized = fmt.Errorf("unauthorized")
+
+const INVALID_AUTH_TOKEN = "invalid authorization token"
 
 // A private key for context that only this package can access. This is important
 // to prevent collisions between different context uses
@@ -30,10 +33,19 @@ func Middleware(db *gorm.DB) func(http.Handler) http.Handler {
 
 			if tokenCookie, err := r.Cookie("auth-token"); err == nil {
 				user, err := dataloader.For(r.Context()).UserFromAccessToken.Load(tokenCookie.Value)
-				// user, err := models.VerifyTokenAndGetUser(db, tokenCookie.Value)
+				// Check for dataloader errors (database failures, etc.)
 				if err != nil {
-					log.Printf("Invalid token: %s\n", err)
-					http.Error(w, "invalid authorization token", http.StatusForbidden)
+					log.Printf("Error loading user from token: %s\n", err)
+					http.Error(w, INVALID_AUTH_TOKEN, http.StatusForbidden)
+					return
+				}
+
+				// If user is nil, the token doesn't exist or is invalid
+				if user == nil {
+					safeTokenValue := strings.ReplaceAll(tokenCookie.Value, "\n", "")
+					safeTokenValue = strings.ReplaceAll(safeTokenValue, "\r", "")
+					log.Printf("Token not found in database: %s\n", safeTokenValue)
+					http.Error(w, INVALID_AUTH_TOKEN, http.StatusForbidden)
 					return
 				}
 
@@ -72,31 +84,39 @@ func UserFromContext(ctx context.Context) *models.User {
 	return raw
 }
 
-func AuthWebsocketInit(db *gorm.DB) func(context.Context, transport.InitPayload) (context.Context, error) {
-	return func(ctx context.Context, initPayload transport.InitPayload) (context.Context, error) {
+func AuthWebsocketInit() func(context.Context, transport.InitPayload) (context.Context, *transport.InitPayload, error) {
+	return func(ctx context.Context, initPayload transport.InitPayload) (context.Context, *transport.InitPayload, error) {
 
 		bearer, exists := initPayload["Authorization"].(string)
 		if !exists {
-			return ctx, nil
+			return ctx, nil, nil
 		}
 
 		token, err := TokenFromBearer(&bearer)
 		if err != nil {
 			log.Printf("Invalid bearer format (websocket): %s\n", bearer)
-			return nil, err
+			return nil, nil, err
 		}
 
 		user, err := dataloader.For(ctx).UserFromAccessToken.Load(*token)
-		// user, err := models.VerifyTokenAndGetUser(db, *token)
 		if err != nil {
-			log.Printf("Invalid token in websocket: %s\n", err)
-			return nil, fmt.Errorf("invalid authorization token")
+			log.Printf("Error loading user from token (websocket): %s\n", err)
+			return nil, nil, fmt.Errorf(INVALID_AUTH_TOKEN)
+		}
+
+		// NEW: Check if token exists in database
+		if user == nil {
+			safeTokenValue := strings.ReplaceAll(*token, "\n", "")
+			safeTokenValue = strings.ReplaceAll(safeTokenValue, "\r", "")
+			log.Printf("Token not found in database (websocket): %s\n", safeTokenValue)
+			return nil, nil, fmt.Errorf(INVALID_AUTH_TOKEN)
 		}
 
 		// put it in context
 		userCtx := context.WithValue(ctx, userCtxKey, user)
 
 		// and return it so the resolvers can see it
-		return userCtx, nil
+		// Return nil for the InitPayload acknowledgment (no custom ack payload needed)
+		return userCtx, nil, nil
 	}
 }

@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react'
+import React, { useRef, useState, useEffect } from 'react'
 import { useQuery, useMutation, gql } from '@apollo/client'
 import { InputLabelTitle, InputLabelDescription } from './SettingsPage'
 import { useTranslation } from 'react-i18next'
@@ -27,32 +27,85 @@ export const ScannerConcurrentWorkers = () => {
   const { t } = useTranslation()
 
   const workerAmountServerValue = useRef<null | number>(null)
+  const inFlightNextRef = useRef<number | null>(null)
+  const initializedRef = useRef(false)
   const [workerAmount, setWorkerAmount] = useState(0)
+  const [inputValue, setInputValue] = useState('')
 
-  const workerAmountQuery = useQuery<concurrentWorkersQuery>(
-    CONCURRENT_WORKERS_QUERY,
-    {
-      onCompleted(data) {
-        setWorkerAmount(data.siteInfo.concurrentWorkers)
-        workerAmountServerValue.current = data.siteInfo.concurrentWorkers
-      },
+  const workerAmountQuery = useQuery<concurrentWorkersQuery>(CONCURRENT_WORKERS_QUERY)
+
+  useEffect(() => {
+    if (workerAmountQuery.error) {
+      console.error('Failed to load concurrent workers setting: ', workerAmountQuery.error)
     }
-  )
+
+    if (workerAmountQuery.data && !initializedRef.current) {
+      const workers = workerAmountQuery.data.siteInfo?.concurrentWorkers
+      setWorkerAmount(workers)
+      setInputValue(String(workers))
+      workerAmountServerValue.current = workers
+      initializedRef.current = true
+    } else if (workerAmountQuery.data && initializedRef.current) {
+      // Subsequent updates - only update if server value changed and we're not editing
+      const workers = workerAmountQuery.data.siteInfo?.concurrentWorkers
+      if (workers !== workerAmountServerValue.current && inFlightNextRef.current === null) {
+        setWorkerAmount(workers)
+        setInputValue(String(workers))
+        workerAmountServerValue.current = workers
+      }
+    }
+  }, [workerAmountQuery.data, workerAmountQuery.error])
 
   const [setWorkersMutation, workersMutationData] = useMutation<
     setConcurrentWorkers,
     setConcurrentWorkersVariables
   >(SET_CONCURRENT_WORKERS_MUTATION)
 
-  const updateWorkerAmount = (workerAmount: number) => {
-    if (workerAmountServerValue.current != workerAmount) {
-      workerAmountServerValue.current = workerAmount
-      setWorkersMutation({
-        variables: {
-          workers: workerAmount,
-        },
-      })
-    }
+  const updateWorkerAmount = (next: number) => {
+    const prev = workerAmountServerValue.current
+    if (prev === null || prev === next) return
+    if (inFlightNextRef.current === next) return
+    inFlightNextRef.current = next
+
+    setWorkersMutation({
+      variables: {
+        workers: next,
+      },
+    }).then(res => {
+      const newValue = res.data?.setScannerConcurrentWorkers ?? next
+      workerAmountServerValue.current = newValue
+      setWorkerAmount(newValue)
+      setInputValue(String(newValue))
+    }).catch(error => {
+      console.error('Failed to update concurrent workers: ', error)
+      // Reset to server value on error
+      setWorkerAmount(prev)
+      setInputValue(String(prev))
+    }).finally(() => {
+      inFlightNextRef.current = null
+    })
+  }
+
+  const commitValue = () => {
+    const n = Number(inputValue)
+    const bounded = Math.min(24, Math.max(1, Number.isNaN(n) ? workerAmount : n))
+    setInputValue(String(bounded))
+    updateWorkerAmount(bounded)
+  }
+
+  if (workerAmountQuery.error) {
+    return (
+      <div>
+        <label htmlFor="scanner_concurrent_workers_field">
+          <InputLabelTitle>
+            {t('settings.concurrent_workers.title', 'Scanner concurrent workers')}
+          </InputLabelTitle>
+        </label>
+        <div className="text-red-600 dark:text-red-400 p-4 bg-red-50 dark:bg-red-900/20 rounded mt-2">
+          {t('settings.concurrent_workers.error', 'Failed to load concurrent workers setting')}: {workerAmountQuery.error.message}
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -74,14 +127,14 @@ export const ScannerConcurrentWorkers = () => {
         min="1"
         max="24"
         id="scanner_concurrent_workers_field"
-        value={workerAmount}
-        onChange={event => {
-          setWorkerAmount(parseInt(event.target.value))
+        value={inputValue}
+        onChange={e => setInputValue(e.target.value)}
+        onBlur={commitValue}
+        onKeyDown={e => {
+          if (e.key === 'Enter') {
+            commitValue()
+          }
         }}
-        onBlur={() => updateWorkerAmount(workerAmount)}
-        onKeyDown={event =>
-          event.key == 'Enter' && updateWorkerAmount(workerAmount)
-        }
       />
     </div>
   )
