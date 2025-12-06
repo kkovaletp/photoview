@@ -16,6 +16,8 @@ import (
 
 var ErrUnauthorized = fmt.Errorf("unauthorized")
 
+const INVALID_AUTH_TOKEN = "invalid authorization token"
+
 // A private key for context that only this package can access. This is important
 // to prevent collisions between different context uses
 var userCtxKey = &contextKey{"user"}
@@ -34,7 +36,7 @@ func Middleware(db *gorm.DB) func(http.Handler) http.Handler {
 				// Check for dataloader errors (database failures, etc.)
 				if err != nil {
 					log.Printf("Error loading user from token: %s\n", err)
-					http.Error(w, "invalid authorization token", http.StatusForbidden)
+					http.Error(w, INVALID_AUTH_TOKEN, http.StatusForbidden)
 					return
 				}
 
@@ -43,7 +45,7 @@ func Middleware(db *gorm.DB) func(http.Handler) http.Handler {
 					safeTokenValue := strings.ReplaceAll(tokenCookie.Value, "\n", "")
 					safeTokenValue = strings.ReplaceAll(safeTokenValue, "\r", "")
 					log.Printf("Token not found in database: %s\n", safeTokenValue)
-					http.Error(w, "invalid authorization token", http.StatusForbidden)
+					http.Error(w, INVALID_AUTH_TOKEN, http.StatusForbidden)
 					return
 				}
 
@@ -82,7 +84,7 @@ func UserFromContext(ctx context.Context) *models.User {
 	return raw
 }
 
-func AuthWebsocketInit(db *gorm.DB) func(context.Context, transport.InitPayload) (context.Context, *transport.InitPayload, error) {
+func AuthWebsocketInit() func(context.Context, transport.InitPayload) (context.Context, *transport.InitPayload, error) {
 	return func(ctx context.Context, initPayload transport.InitPayload) (context.Context, *transport.InitPayload, error) {
 
 		bearer, exists := initPayload["Authorization"].(string)
@@ -99,7 +101,7 @@ func AuthWebsocketInit(db *gorm.DB) func(context.Context, transport.InitPayload)
 		user, err := dataloader.For(ctx).UserFromAccessToken.Load(*token)
 		if err != nil {
 			log.Printf("Error loading user from token (websocket): %s\n", err)
-			return nil, nil, fmt.Errorf("invalid authorization token")
+			return nil, nil, fmt.Errorf(INVALID_AUTH_TOKEN)
 		}
 
 		// NEW: Check if token exists in database
@@ -107,7 +109,7 @@ func AuthWebsocketInit(db *gorm.DB) func(context.Context, transport.InitPayload)
 			safeTokenValue := strings.ReplaceAll(*token, "\n", "")
 			safeTokenValue = strings.ReplaceAll(safeTokenValue, "\r", "")
 			log.Printf("Token not found in database (websocket): %s\n", safeTokenValue)
-			return nil, nil, fmt.Errorf("invalid authorization token")
+			return nil, nil, fmt.Errorf(INVALID_AUTH_TOKEN)
 		}
 
 		// put it in context
