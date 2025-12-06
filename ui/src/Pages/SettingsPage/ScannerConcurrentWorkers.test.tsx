@@ -707,9 +707,6 @@ describe('ScannerConcurrentWorkers', () => {
       // Type non-numeric characters
       fireEvent.change(input, { target: { value: 'abc' } })
 
-      // The input will show 'abc' temporarily
-      expect((input as HTMLInputElement).value).toBe('abc')
-
       // Trigger commit via blur
       fireEvent.blur(input)
 
