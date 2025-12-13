@@ -29,7 +29,6 @@
     "@headlessui/react": "^2.2.9",
     "@mapbox/mapbox-gl-language": "^1.0.0",
     "@types/geojson": "^7946.0.16",
-    "@types/jest": "^30.0.0",
     "@types/luxon": "^3.7.1",
     "@types/mapbox-gl": "^3.4.0",
     "@types/react": "19.2.7",
@@ -42,6 +41,7 @@
     "classnames": "^2.5.1",
     "connect-history-api-fallback": "^2.0.0",
     "copy-to-clipboard": "^3.3.3",
+    "graphql-ws": "^5.16.2",
     "i18next": "25.7.2",
     "luxon": "^3.7.2",
     "mapbox-gl": "~3.4.0",
@@ -91,7 +91,7 @@
     "vitest": "^0.33.0"
   },
   "overrides": {
-    "graphql": "^15.5.0"
+    "graphql": "^15.10.1"
   },
   "prettier": {
     "trailingComma": "es5",

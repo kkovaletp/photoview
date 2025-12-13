@@ -11,6 +11,8 @@ import { settingsUsersQuery_user } from './__generated__/settingsUsersQuery'
 import { scanUser, scanUserVariables } from './__generated__/scanUser'
 import { updateUser, updateUserVariables } from './__generated__/updateUser'
 import { deleteUser, deleteUserVariables } from './__generated__/deleteUser'
+import { useMessageState } from '../../../components/messages/MessageState'
+import { NotificationType } from '../../../__generated__/globalTypes'
 
 const updateUserMutation = gql`
   mutation updateUser($id: ID!, $username: String, $admin: Boolean) {
@@ -70,7 +72,24 @@ export type UserRowProps = {
   refetchUsers: () => void
 }
 
+function notifyMutationError(
+  add: ReturnType<typeof useMessageState>['add'],
+  header: string,
+  err: unknown
+) {
+  add({
+    key: (globalThis.crypto?.randomUUID?.() ?? Math.random().toString(36)),
+    type: NotificationType.Message,
+    props: {
+      negative: true,
+      header,
+      content: err instanceof Error ? err.message : 'An unexpected error occurred',
+    },
+  })
+}
+
 const UserRow = ({ user, refetchUsers }: UserRowProps) => {
+  const { add } = useMessageState()
   const [state, setState] = useState<UserRowState>({
     ...user,
     editing: false,
@@ -79,38 +98,73 @@ const UserRow = ({ user, refetchUsers }: UserRowProps) => {
 
   const [showConfirmDelete, setConfirmDelete] = useState(false)
   const [showChangePassword, setChangePassword] = useState(false)
-
-  const [updateUser, { loading: updateUserLoading }] = useMutation<
+  const [updateUserMutationFn, { loading: updateUserLoading }] = useMutation<
     updateUser,
     updateUserVariables
-  >(updateUserMutation, {
-    onCompleted: data => {
-      setState(state => ({
-        ...state,
-        ...data.updateUser,
-        editing: false,
-      }))
-      refetchUsers()
-    },
-  })
+  >(updateUserMutation)
 
-  const [deleteUser] = useMutation<deleteUser, deleteUserVariables>(
-    deleteUserMutation,
-    {
-      onCompleted: () => {
-        refetchUsers()
-      },
-    }
-  )
+  const [deleteUserMutationFn] = useMutation<deleteUser, deleteUserVariables>(deleteUserMutation)
 
-  const [scanUser, { called: scanUserCalled }] = useMutation<
+  const [scanUserMutationFn, { called: scanUserCalled }] = useMutation<
     scanUser,
     scanUserVariables
-  >(scanUserMutation, {
-    onCompleted: () => {
-      refetchUsers()
-    },
-  })
+  >(scanUserMutation)
+
+  const updateUser: ApolloMutationFn<updateUser, updateUserVariables> = async (
+    options
+  ) => {
+    try {
+      const result = await updateUserMutationFn(options)
+      const updatedUser = result.data?.updateUser
+      if (updatedUser) {
+        setState(state => ({
+          ...state,
+          ...updatedUser,
+          editing: false,
+        }))
+        refetchUsers()
+      }
+      return result
+    } catch (error) {
+      console.error('Failed to update user: ', error)
+      notifyMutationError(add, 'Failed to update user', error)
+      return {} as FetchResult<updateUser>
+    }
+  }
+
+  const deleteUser: ApolloMutationFn<deleteUser, deleteUserVariables> = async (
+    options
+  ) => {
+    try {
+      const result = await deleteUserMutationFn(options)
+      const deletedUser = result.data?.deleteUser
+      if (deletedUser) {
+        refetchUsers()
+      }
+      return result
+    } catch (error) {
+      console.error('Failed to delete user: ', error)
+      notifyMutationError(add, 'Failed to delete user', error)
+      return {} as FetchResult<deleteUser>
+    }
+  }
+
+  const scanUser: ApolloMutationFn<scanUser, scanUserVariables> = async (
+    options
+  ) => {
+    try {
+      const result = await scanUserMutationFn(options)
+      const scanResult = result.data?.scanUser
+      if (scanResult) {
+        refetchUsers()
+      }
+      return result
+    } catch (error) {
+      console.error('Failed to scan user: ', error)
+      notifyMutationError(add, 'Failed to scan user', error)
+      return {} as FetchResult<scanUser>
+    }
+  }
 
   const props: UserRowChildProps = {
     user,

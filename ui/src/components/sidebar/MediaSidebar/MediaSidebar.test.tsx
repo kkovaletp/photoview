@@ -145,7 +145,6 @@ describe('MediaSidebar', () => {
     renderWithProviders(<MediaSidebar media={media} />, {
       mocks: [mocks[0]],
       apolloOptions: {
-        addTypename: true,
         defaultOptions: {
           watchQuery: { fetchPolicy: 'no-cache' },
           query: { fetchPolicy: 'no-cache' }
@@ -172,7 +171,6 @@ describe('MediaSidebar', () => {
     renderWithProviders(<MediaSidebar media={media} />, {
       mocks: mocks,
       apolloOptions: {
-        addTypename: true,
         defaultOptions: {
           watchQuery: { fetchPolicy: 'no-cache' },
           query: { fetchPolicy: 'no-cache' }
