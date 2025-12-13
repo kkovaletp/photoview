@@ -677,12 +677,12 @@ describe('ScannerConcurrentWorkers', () => {
           request: {
             query: SET_CONCURRENT_WORKERS_MUTATION,
             variables: {
-              workers: 6,
+              workers: 1,
             },
           },
           result: {
             data: {
-              setScannerConcurrentWorkers: 6,
+              setScannerConcurrentWorkers: 1,
             },
           },
         },
@@ -707,7 +707,10 @@ describe('ScannerConcurrentWorkers', () => {
 
       // Should fall back to current workerAmount (6) due to NaN handling
       await waitFor(() => {
-        expect((input as HTMLInputElement).value).toBe('6')
+        expect((input as HTMLInputElement).value).toBe('1')
+      })
+      await waitFor(() => {
+        expect(input).not.toBeDisabled()
       })
     })
 

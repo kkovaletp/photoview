@@ -24,11 +24,22 @@ const originalCreateObjectURL = global.URL.createObjectURL
 const originalRevokeObjectURL = global.URL.revokeObjectURL
 global.URL.createObjectURL = vi.fn(() => 'blob:mock-url')
 global.URL.revokeObjectURL = vi.fn()
+const originalCreateElement = document.createElement.bind(document)
+const mockCreateElement = vi.fn((tagName: string) => {
+    if (tagName === 'a') {
+        const anchor = originalCreateElement('a') as HTMLAnchorElement
+        anchor.click = vi.fn() // Mock click to prevent jsdom navigation
+        return anchor
+    }
+    return originalCreateElement(tagName)
+})
+document.createElement = mockCreateElement as any
 
 afterAll(() => {
     global.fetch = originalFetch
     global.URL.createObjectURL = originalCreateObjectURL
     global.URL.revokeObjectURL = originalRevokeObjectURL
+    document.createElement = originalCreateElement
 })
 
 describe('SidebarMediaDownload', () => {
