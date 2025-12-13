@@ -291,7 +291,7 @@ jobs:
       # Cache miss will add ~30s to create, but cache hit will save minutes.
       - name: Cache Coverity Analysis Tool
         id: cov-analysis-cache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ${{ github.workspace }}/cov-analysis
           key: cov-analysis-linux64-${{ steps.coverity-cache-lookup.outputs.hash }}
