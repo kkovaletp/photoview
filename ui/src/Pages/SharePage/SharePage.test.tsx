@@ -42,6 +42,8 @@ import {
   waitForElementToBeRemoved,
 } from '@testing-library/react'
 
+import {clearSharePassword, saveSharePassword} from '../../helpers/authentication'
+
 import {
   SHARE_TOKEN_QUERY,
   TokenRoute,
@@ -57,6 +59,7 @@ afterEach(() => {
 
 describe('load correct share page, based on graphql query', () => {
   const token = 'TOKEN123'
+  const password = 'PASSWORD-123_@456\\'
 
   const historyMock = [{ pathname: `/share/${token}` }]
 
@@ -66,7 +69,7 @@ describe('load correct share page, based on graphql query', () => {
         query: VALIDATE_TOKEN_PASSWORD_QUERY,
         variables: {
           token,
-          password: null,
+          password,
         },
       },
       result: {
@@ -93,13 +96,21 @@ describe('load correct share page, based on graphql query', () => {
     },
   ]
 
+  beforeAll(() => {
+    saveSharePassword(token, password)
+  })
+
+  afterAll(() => {
+    clearSharePassword(token)
+  })
+
   test('load media share page', async () => {
     const mediaPageMock = {
       request: {
         query: SHARE_TOKEN_QUERY,
         variables: {
           token,
-          password: null,
+          password,
         },
       },
       result: {
@@ -148,7 +159,7 @@ describe('load correct share page, based on graphql query', () => {
           query: SHARE_TOKEN_QUERY,
           variables: {
             token,
-            password: null,
+            password,
           },
         },
         result: {
@@ -168,8 +179,8 @@ describe('load correct share page, based on graphql query', () => {
           query: SHARE_ALBUM_QUERY,
           variables: {
             id: '1',
-            token: token,
-            password: null,
+            token,
+            password,
             limit: 200,
             offset: 0,
             mediaOrderBy: 'date_shot',
@@ -223,7 +234,7 @@ describe('load correct share page, based on graphql query', () => {
           query: SHARE_TOKEN_QUERY,
           variables: {
             token,
-            password: null,
+            password,
           },
         },
         result: {
@@ -243,8 +254,8 @@ describe('load correct share page, based on graphql query', () => {
           query: SHARE_ALBUM_QUERY,
           variables: {
             id: subalbumID,
-            token: token,
-            password: null,
+            token,
+            password,
             limit: 200,
             offset: 0,
             mediaOrderBy: 'date_shot',

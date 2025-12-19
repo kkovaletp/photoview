@@ -3,19 +3,21 @@ package auth
 import (
 	"context"
 	"errors"
-	"log"
 	"net/http"
 	"regexp"
 
 	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/kkovaletp/photoview/api/dataloader"
 	"github.com/kkovaletp/photoview/api/graphql/models"
+	"github.com/kkovaletp/photoview/api/log"
 	"gorm.io/gorm"
 )
 
 var ErrUnauthorized = errors.New("unauthorized")
+var bearerRegex = regexp.MustCompile("^(?i)Bearer ([a-zA-Z0-9]{24})$")
 
 const INVALID_AUTH_TOKEN = "invalid authorization token"
+const INTERNAL_SERVER_ERROR = "internal server error"
 
 // A private key for context that only this package can access. This is important
 // to prevent collisions between different context uses
@@ -31,18 +33,25 @@ func Middleware(db *gorm.DB) func(http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 
 			if tokenCookie, err := r.Cookie("auth-token"); err == nil {
-				user, err := dataloader.For(r.Context()).UserFromAccessToken.Load(tokenCookie.Value)
+				loaders := dataloader.For(r.Context())
+				if loaders == nil {
+					log.Error(r.Context(), "Dataloader not available in HTTP context")
+					http.Error(w, INTERNAL_SERVER_ERROR, http.StatusInternalServerError)
+					return
+				}
+
+				user, err := loaders.UserFromAccessToken.Load(tokenCookie.Value)
 				// Check for dataloader errors (database failures, etc.)
 				if err != nil {
-					log.Printf("Error loading user from token: %s\n", err)
-					http.Error(w, INVALID_AUTH_TOKEN, http.StatusForbidden)
+					log.Error(r.Context(), "Error loading user from token", "error", err)
+					http.Error(w, INVALID_AUTH_TOKEN, http.StatusUnauthorized)
 					return
 				}
 
 				// If user is nil, the token doesn't exist or is invalid
 				if user == nil {
-					log.Println("Token not found in database")
-					http.Error(w, INVALID_AUTH_TOKEN, http.StatusForbidden)
+					log.Error(r.Context(), "Token not found in database")
+					http.Error(w, INVALID_AUTH_TOKEN, http.StatusUnauthorized)
 					return
 				}
 
@@ -52,7 +61,7 @@ func Middleware(db *gorm.DB) func(http.Handler) http.Handler {
 				// and call the next with our new context
 				r = r.WithContext(ctx)
 			} else {
-				log.Println("Did not find auth-token cookie")
+				log.Info(r.Context(), "Did not find auth-token cookie")
 			}
 
 			next.ServeHTTP(w, r)
@@ -65,8 +74,7 @@ func AddUserToContext(ctx context.Context, user *models.User) context.Context {
 }
 
 func TokenFromBearer(bearer *string) (*string, error) {
-	regex, _ := regexp.Compile("^(?i)Bearer ([a-zA-Z0-9]{24})$")
-	matches := regex.FindStringSubmatch(*bearer)
+	matches := bearerRegex.FindStringSubmatch(*bearer)
 	if len(matches) != 2 {
 		return nil, errors.New("invalid bearer format")
 	}
@@ -91,19 +99,25 @@ func AuthWebsocketInit() func(context.Context, transport.InitPayload) (context.C
 
 		token, err := TokenFromBearer(&bearer)
 		if err != nil {
-			log.Printf("Invalid bearer format (websocket): %s\n", bearer)
+			log.Error(ctx, "Invalid bearer format (websocket)", "error", err)
 			return nil, nil, err
 		}
 
-		user, err := dataloader.For(ctx).UserFromAccessToken.Load(*token)
+		loaders := dataloader.For(ctx)
+		if loaders == nil {
+			log.Error(ctx, "Dataloader not available in websocket context")
+			return nil, nil, errors.New(INTERNAL_SERVER_ERROR)
+		}
+
+		user, err := loaders.UserFromAccessToken.Load(*token)
 		if err != nil {
-			log.Printf("Error loading user from token (websocket): %s\n", err)
+			log.Error(ctx, "Error loading user from token (websocket)", "error", err)
 			return nil, nil, errors.New(INVALID_AUTH_TOKEN)
 		}
 
-		// NEW: Check if token exists in database
+		// Check if token exists in database
 		if user == nil {
-			log.Print("Token not found in database (websocket)\n")
+			log.Error(ctx, "Token not found in database (websocket)")
 			return nil, nil, errors.New(INVALID_AUTH_TOKEN)
 		}
 
