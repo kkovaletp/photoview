@@ -1,18 +1,16 @@
 import Cookies from 'js-cookie'
 
 // Helper function to validate domain format
-const validateDomain = (domain: string): boolean => {
-  if (!domain || domain.trim() === '') {
+export const validateDomain = (domain: string): boolean => {
+  if (!domain || domain === '') {
     return false
   }
-
-  const trimmedDomain = domain.trim()
 
   // Domain should start with a dot for subdomain sharing (e.g., '.example.com')
   // Regex: starts with dot, at least two segments, each segment 1-63 chars, no leading/trailing hyphens, valid chars
   const domainRegex = /^\.(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)*[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.?$/
 
-  if (!domainRegex.test(trimmedDomain)) {
+  if (!domainRegex.test(domain)) {
     console.warn(
       `Invalid cookie domain format: "${domain}". Domain will be ignored.`
     )
@@ -24,10 +22,10 @@ const validateDomain = (domain: string): boolean => {
 
 // Read cookie security configuration from environment variables
 const COOKIE_SECURE = import.meta.env.UI_COOKIE_SECURE === 'true'
-const COOKIE_DOMAIN = import.meta.env.UI_COOKIE_DOMAIN
+const COOKIE_DOMAIN = import.meta.env.UI_COOKIE_DOMAIN?.trim()
 
 // Build default cookie options with conditional security attributes
-const buildCookieOptions = (): Partial<Cookies.CookieAttributes> => {
+export const buildCookieOptions = (): Partial<Cookies.CookieAttributes> => {
   const options: Partial<Cookies.CookieAttributes> = {
     path: '/',
     sameSite: 'Lax',
