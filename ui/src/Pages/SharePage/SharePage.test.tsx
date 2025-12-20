@@ -42,7 +42,7 @@ import {
   waitForElementToBeRemoved,
 } from '@testing-library/react'
 
-import {clearSharePassword, saveSharePassword} from '../../helpers/authentication'
+import { clearSharePassword, saveSharePassword } from '../../helpers/authentication'
 
 import {
   SHARE_TOKEN_QUERY,
@@ -116,13 +116,16 @@ describe('load correct share page, based on graphql query', () => {
       result: {
         data: {
           shareToken: {
+            __typename: 'ShareToken',
             token: token,
             album: null,
             media: {
+              __typename: 'Media',
               id: '1',
               title: 'shared_image.jpg',
               type: 'Photo',
               highRes: {
+                __typename: 'MediaURL',
                 url: 'https://example.com/shared_image.jpg',
               },
             },
@@ -165,8 +168,10 @@ describe('load correct share page, based on graphql query', () => {
         result: {
           data: {
             shareToken: {
+              __typename: 'ShareToken',
               token: token,
               album: {
+                __typename: 'Album',
                 id: '1',
               },
               media: null,
@@ -190,10 +195,12 @@ describe('load correct share page, based on graphql query', () => {
         result: {
           data: {
             album: {
+              __typename: 'Album',
               id: '1',
               title: 'album_title',
               subAlbums: [],
               thumbnail: {
+                __typename: 'MediaURL',
                 url: 'https://photoview.example.com/album_thumbnail.jpg',
               },
               media: [],
@@ -209,7 +216,6 @@ describe('load correct share page, based on graphql query', () => {
       path: "/share/:token/*",
       route: <TokenRoute />,
       apolloOptions: {
-        addTypename: false,
         defaultOptions: {
           watchQuery: { fetchPolicy: 'no-cache' },
           query: { fetchPolicy: 'no-cache' }
@@ -240,8 +246,10 @@ describe('load correct share page, based on graphql query', () => {
         result: {
           data: {
             shareToken: {
+              __typename: 'ShareToken',
               token: token,
               album: {
+                __typename: 'Album',
                 id: subalbumID,
               },
               media: null,
@@ -265,10 +273,12 @@ describe('load correct share page, based on graphql query', () => {
         result: {
           data: {
             album: {
+              __typename: 'Album',
               id: '1',
               title: 'album_title',
               subAlbums: [],
               thumbnail: {
+                __typename: 'MediaURL',
                 url: 'https://photoview.example.com/album_thumbnail.jpg',
               },
               media: [],
@@ -281,7 +291,6 @@ describe('load correct share page, based on graphql query', () => {
     render(
       <MockedProvider
         mocks={[...graphqlMocks, ...subalbumPageMocks]}
-        addTypename={false}
         defaultOptions={{
           // disable cache, required to make fragments work
           watchQuery: { fetchPolicy: 'no-cache' },
@@ -312,7 +321,7 @@ describe('load correct share page, based on graphql query', () => {
         query: VALIDATE_TOKEN_PASSWORD_QUERY,
         variables: {
           token,
-          password: null,
+          password,
         },
       },
       error: new Error(),
@@ -346,7 +355,7 @@ describe('load correct share page, based on graphql query', () => {
           query: VALIDATE_TOKEN_PASSWORD_QUERY,
           variables: {
             token,
-            password: null,
+            password,
           },
         },
         result: {
@@ -360,7 +369,7 @@ describe('load correct share page, based on graphql query', () => {
           query: SHARE_TOKEN_QUERY,
           variables: {
             token,
-            password: null,
+            password,
           },
         },
         result: {
@@ -394,7 +403,7 @@ describe('load correct share page, based on graphql query', () => {
         query: VALIDATE_TOKEN_PASSWORD_QUERY,
         variables: {
           token,
-          password: null,
+          password,
         },
       },
       error: new Error('GraphQL error: share not found'),

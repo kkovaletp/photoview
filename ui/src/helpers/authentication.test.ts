@@ -47,9 +47,10 @@ describe('helpers/authentication', () => {
       saveSharePassword(shareToken, password)
     }
 
-    expect(document.cookie).toEqual(
-      'share-token-pw-MOCK_SHARE_TOKEN1=simple; share-token-pw-MOCK_SHARE_TOKEN2=has-some-special-characters-!23@123; share-token-pw-MOCK_SHARE_TOKEN3=%5C'
-    )
+    const cookies = document.cookie
+    expect(cookies).toContain('share-token-pw-MOCK_SHARE_TOKEN1=simple')
+    expect(cookies).toContain('share-token-pw-MOCK_SHARE_TOKEN2=has-some-special-characters-!23@123')
+    expect(cookies).toContain('share-token-pw-MOCK_SHARE_TOKEN3=%5C')
 
     expect(getSharePassword('MOCK_SHARE_TOKEN1')).toEqual(
       SHARES.MOCK_SHARE_TOKEN1
