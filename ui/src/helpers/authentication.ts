@@ -1,9 +1,52 @@
 import Cookies from 'js-cookie'
 
-const COOKIE_DEFAULT_OPTIONS = {
-  path: '/',
-  sameSite: 'Lax',
-} as Partial<Cookies.CookieAttributes>
+// Helper function to validate domain format
+const validateDomain = (domain: string): boolean => {
+  if (!domain || domain.trim() === '') {
+    return false
+  }
+
+  const trimmedDomain = domain.trim()
+
+  // Domain should start with a dot for subdomain sharing (e.g., '.example.com')
+  // Regex: starts with dot, at least two segments, each segment 1-63 chars, no leading/trailing hyphens, valid chars
+  const domainRegex = /^\.(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.)*[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\.?$/
+
+  if (!domainRegex.test(trimmedDomain)) {
+    console.warn(
+      `Invalid cookie domain format: "${domain}". Domain will be ignored.`
+    )
+    return false
+  }
+
+  return true
+}
+
+// Read cookie security configuration from environment variables
+const COOKIE_SECURE = import.meta.env.UI_COOKIE_SECURE === 'true'
+const COOKIE_DOMAIN = import.meta.env.UI_COOKIE_DOMAIN
+
+// Build default cookie options with conditional security attributes
+const buildCookieOptions = (): Partial<Cookies.CookieAttributes> => {
+  const options: Partial<Cookies.CookieAttributes> = {
+    path: '/',
+    sameSite: 'Lax',
+  }
+
+  // Add secure flag if explicitly enabled via environment variable
+  if (COOKIE_SECURE) {
+    options.secure = true
+  }
+
+  // Add domain attribute if configured via environment variable
+  if (COOKIE_DOMAIN && validateDomain(COOKIE_DOMAIN)) {
+    options.domain = COOKIE_DOMAIN
+  }
+
+  return options
+}
+
+const COOKIE_DEFAULT_OPTIONS = buildCookieOptions()
 
 const AUTH_TOKEN_MAX_AGE_IN_DAYS = 14
 const AUTH_TOKEN_COOKIE_NAME = 'auth-token'
@@ -21,7 +64,7 @@ export function saveTokenCookie(token: string) {
 }
 
 export function clearTokenCookie() {
-  Cookies.remove(AUTH_TOKEN_COOKIE_NAME)
+  Cookies.remove(AUTH_TOKEN_COOKIE_NAME, COOKIE_DEFAULT_OPTIONS)
 }
 
 export function authToken() {
@@ -37,7 +80,7 @@ export function saveSharePassword(shareToken: string, password: string) {
 export function clearSharePassword(shareToken: string) {
   const cookieName = SHARE_TOKEN_COOKIE_NAME(shareToken)
 
-  Cookies.remove(cookieName)
+  Cookies.remove(cookieName, COOKIE_DEFAULT_OPTIONS)
 }
 
 export function getSharePassword(shareToken: string) {

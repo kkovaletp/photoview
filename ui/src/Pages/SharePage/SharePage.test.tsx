@@ -88,6 +88,7 @@ describe('load correct share page, based on graphql query', () => {
       result: {
         data: {
           media: {
+            __typename: 'Media',
             id: '1',
             downloads: [],
           },
