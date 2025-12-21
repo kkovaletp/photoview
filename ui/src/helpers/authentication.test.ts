@@ -39,9 +39,14 @@ describe('helpers/authentication', () => {
     })
 
     test('rejects empty or whitespace-only strings', () => {
+      const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => { })
+
       expect(validateDomain('')).toBe(false)
       expect(validateDomain('   ')).toBe(false)
       expect(validateDomain('\t\n')).toBe(false)
+
+      expect(consoleSpy).toHaveBeenCalled()
+      consoleSpy.mockRestore()
     })
 
     test('rejects invalid domain formats', () => {
