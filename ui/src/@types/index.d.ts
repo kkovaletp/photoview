@@ -14,6 +14,8 @@ interface ImportMetaEnv {
   readonly BASE_URL: string | undefined
   readonly PROD: boolean | undefined
   readonly DEV: boolean | undefined
+  readonly UI_COOKIE_SECURE: string | undefined
+  readonly UI_COOKIE_DOMAIN: string | undefined
 }
 
 interface ImportMeta {
