@@ -34,11 +34,11 @@ jobs:
         language: ${{ fromJSON(needs.create-matrix.outputs.matrix) }}
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       # Initializes the CodeQL tools for scanning.
       - name: Initialize CodeQL
-        uses: github/codeql-action/init@v3
+        uses: github/codeql-action/init@v4
         with:
           languages: ${{ matrix.language }}
           # Run further tests
@@ -47,12 +47,12 @@ jobs:
 
       # Autobuild attempts to build any compiled languages (C/C++, C#, or Java).
       - name: Autobuild
-        uses: github/codeql-action/autobuild@v3
+        uses: github/codeql-action/autobuild@v4
         with:
           working-directory: ${{ ( matrix.language == 'go' && './api' ) || ( matrix.language == 'javascript' && './ui' ) || '.' }}
 
       - name: Perform CodeQL Analysis
-        uses: github/codeql-action/analyze@v3
+        uses: github/codeql-action/analyze@v4
         with:
           category: "/language:${{ matrix.language }}"
 
@@ -62,7 +62,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Generate report
         id: scan
@@ -74,7 +74,7 @@ jobs:
           add-cpes-if-none: true
 
       - name: Upload report
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v4
         if: ${{ steps.scan.conclusion == 'success' || steps.scan.conclusion == 'failure' }}
         with:
           sarif_file: ${{ steps.scan.outputs.sarif }}
@@ -184,7 +184,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Lint Dockerfile
         id: hadolint
@@ -254,7 +254,7 @@ jobs:
           no-fail: true
 
       - name: Upload report
-        uses: github/codeql-action/upload-sarif@v3
+        uses: github/codeql-action/upload-sarif@v4
         if: ${{ steps.hadolint-report.conclusion == 'success' || steps.hadolint-report.conclusion == 'failure' }}
         with:
           sarif_file: hadolint.sarif
@@ -267,7 +267,7 @@ jobs:
       COV_PROJECT: kkovaletp%2Fphotoview
     steps:
       - name: Check out code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Fetch branches
         shell: bash
@@ -291,7 +291,7 @@ jobs:
       # Cache miss will add ~30s to create, but cache hit will save minutes.
       - name: Cache Coverity Analysis Tool
         id: cov-analysis-cache
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ${{ github.workspace }}/cov-analysis
           key: cov-analysis-linux64-${{ steps.coverity-cache-lookup.outputs.hash }}

@@ -102,6 +102,8 @@ ARG TARGETPLATFORM
 
 # See for details: https://github.com/hadolint/hadolint/wiki/DL4006
 SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
+ENV PHOTOVIEW_ACCESS_LOG_PATH=/var/log/photoview
+ENV PHOTOVIEW_UI_PATH=/app/ui
 
 COPY scripts/install_runtime_dependencies.sh /app/scripts/
 WORKDIR /dependencies
@@ -111,8 +113,7 @@ RUN --mount=type=bind,from=api,source=/dependencies/,target=/dependencies/ \
     && groupadd -g 999 photoview \
     && useradd -r -u 999 -g photoview -m photoview \
     # Create log folder
-    && mkdir -p /var/log/photoview \
-    && chown -R photoview:photoview /var/log/photoview \
+    && install --directory -m 0755 -o photoview -g photoview "${PHOTOVIEW_ACCESS_LOG_PATH}" \
     # Install required dependencies
     && /app/scripts/install_runtime_dependencies.sh \
     # Install self-building libs
@@ -127,13 +128,13 @@ RUN --mount=type=bind,from=api,source=/dependencies/,target=/dependencies/ \
     && rm -rf /var/lib/apt/lists/*
 
 COPY api/data /app/data
-COPY --from=ui /app/ui/dist /app/ui
+COPY --from=ui /app/ui/dist "${PHOTOVIEW_UI_PATH}"
 COPY --from=api /app/api/photoview /app/photoview
 # This is a w/a for letting the UI build stage to be cached
 # and not rebuilt every new commit because of the build_arg value change.
 ARG COMMIT_SHA=NoCommit
-RUN find /app/ui/assets -type f -name "SettingsPage.*.js" \
-        -exec sh -c 'sed -i "s/=\"-=<GitHub-CI-commit-sha-placeholder>=-\";/=\"${COMMIT_SHA}\";/g" "$1"' sh {} \; \
+RUN find "${PHOTOVIEW_UI_PATH}/assets" -type f -name "SettingsPage.*.js" \
+        -exec sed -i "s/=\"-=<GitHub-CI-commit-sha-placeholder>=-\";/=\"${COMMIT_SHA}\";/g" {} \; \
     # Archive static files for better performance
     && find /app/ui -type f \( \
         -name "*.js" -o -name "*.mjs" -o -name "*.json" \
@@ -142,8 +143,8 @@ RUN find /app/ui/assets -type f -name "SettingsPage.*.js" \
         \) ! -name "*.gz" ! -name "*.br" ! -name "*.zst" \
     -exec sh -c 'for file; do \
         gzip -k -f -9 "$file"; \
-        brotli -f -q 11 "$file"; \
-        zstd -f -19 "$file"; \
+        brotli -k -f -q 11 -s "$file"; \
+        zstd -k -f -19 -T0 --no-progress "$file"; \
     done' sh {} +
 
 WORKDIR /home/photoview
@@ -153,8 +154,6 @@ ENV PHOTOVIEW_LISTEN_PORT=8080
 ENV PHOTOVIEW_API_ENDPOINT=/api
 
 ENV PHOTOVIEW_SERVE_UI=1
-ENV PHOTOVIEW_UI_PATH=/app/ui
-ENV PHOTOVIEW_ACCESS_LOG_PATH=/var/log/photoview/access.log
 ENV PHOTOVIEW_FACE_RECOGNITION_MODELS_PATH=/app/data/models
 ENV PHOTOVIEW_MEDIA_CACHE=/home/photoview/media-cache
 
@@ -202,7 +201,7 @@ ARG COMMIT_SHA=NoCommit
 RUN apk add --no-cache curl bash \
     && apk add --no-cache --virtual .build-compress gzip brotli zstd \
     && find /srv/assets -type f -name "SettingsPage.*.js" \
-        -exec sh -c 'sed -i "s/=\"-=<GitHub-CI-commit-sha-placeholder>=-\";/=\"${COMMIT_SHA}\";/g" "$1"' sh {} \; \
+        -exec sed -i "s/=\"-=<GitHub-CI-commit-sha-placeholder>=-\";/=\"${COMMIT_SHA}\";/g" {} \; \
     # Archive static files for better performance
     && find /srv -type f \( \
             -name "*.js" -o -name "*.mjs" -o -name "*.json" \

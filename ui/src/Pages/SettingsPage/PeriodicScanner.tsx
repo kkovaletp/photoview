@@ -1,5 +1,5 @@
 import { gql } from '@apollo/client'
-import React, { useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
 import { useMutation, useQuery } from '@apollo/client'
 import { InputLabelDescription, InputLabelTitle } from './SettingsPage'
 import { useTranslation } from 'react-i18next'
@@ -105,12 +105,21 @@ const PeriodicScanner = () => {
   })
 
   const scanIntervalServerValue = useRef<number | null>(null)
+  const hasInitialized = useRef(false)
+  const { data, loading, error } = useQuery<scanIntervalQuery>(SCAN_INTERVAL_QUERY)
 
-  const scanIntervalQuery = useQuery<scanIntervalQuery>(SCAN_INTERVAL_QUERY, {
-    onCompleted(data) {
+  useEffect(() => {
+    if (error) {
+      console.error('Failed to load periodic scan interval:', error)
+      return
+    }
+
+    if (data?.siteInfo?.periodicScanInterval !== undefined && !hasInitialized.current) {
       const queryScanInterval = data.siteInfo.periodicScanInterval
+      hasInitialized.current = true
+      scanIntervalServerValue.current = queryScanInterval
 
-      if (queryScanInterval == 0) {
+      if (queryScanInterval === 0) {
         setScanInterval({
           unit: TimeUnit.Second,
           value: 0,
@@ -125,8 +134,8 @@ const PeriodicScanner = () => {
       }
 
       setEnablePeriodicScanner(queryScanInterval > 0)
-    },
-  })
+    }
+  }, [data, error])
 
   const [setScanIntervalMutation, { loading: scanIntervalMutationLoading }] =
     useMutation<
@@ -178,6 +187,19 @@ const PeriodicScanner = () => {
     },
   ]
 
+  if (error) {
+    return (
+      <>
+        <h3 className="font-semibold text-lg mt-4 mb-2">
+          {t('settings.periodic_scanner.title', 'Periodic scanner')}
+        </h3>
+        <div className="text-red-600 dark:text-red-400 p-4 bg-red-50 dark:bg-red-900/20 rounded">
+          {t('settings.periodic_scanner.error', 'Failed to load periodic scanner settings')}: {error.message}
+        </div>
+      </>
+    )
+  }
+
   return (
     <>
       <h3 className="font-semibold text-lg mt-4 mb-2">
@@ -189,7 +211,7 @@ const PeriodicScanner = () => {
           'settings.periodic_scanner.checkbox_label',
           'Enable periodic scanner'
         )}
-        disabled={scanIntervalQuery.loading}
+        disabled={loading || scanIntervalMutationLoading}
         checked={enablePeriodicScanner}
         onChange={event =>
           onScanIntervalCheckboxChange(event.target.checked || false)
@@ -215,7 +237,7 @@ const PeriodicScanner = () => {
           <TextField
             id="periodic_scan_field"
             aria-label="Interval value"
-            disabled={!enablePeriodicScanner}
+            disabled={!enablePeriodicScanner || scanIntervalMutationLoading || loading}
             value={scanInterval.value}
             onChange={e => {
               setScanInterval(x => ({
@@ -229,7 +251,7 @@ const PeriodicScanner = () => {
           />
           <Dropdown
             aria-label="Interval unit"
-            disabled={!enablePeriodicScanner}
+            disabled={!enablePeriodicScanner || scanIntervalMutationLoading || loading}
             items={scanIntervalUnits}
             selected={scanInterval.unit}
             setSelected={value => {
@@ -245,7 +267,7 @@ const PeriodicScanner = () => {
         </div>
       </div>
       <Loader
-        active={scanIntervalQuery.loading || scanIntervalMutationLoading}
+        active={loading || scanIntervalMutationLoading}
         size="small"
         style={{ marginLeft: 16 }}
       />

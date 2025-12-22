@@ -1,9 +1,13 @@
 package utils
 
 import (
+	"context"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
+
+	"github.com/kkovaletp/photoview/api/log"
 )
 
 // EnvironmentVariable represents the name of an environment variable used to configure Photoview
@@ -20,10 +24,11 @@ const (
 
 // Logging
 const (
-	EnvAccessLogLevel    EnvironmentVariable = "PHOTOVIEW_ACCESS_LOG_LEVEL"
-	EnvAccessLogPath     EnvironmentVariable = "PHOTOVIEW_ACCESS_LOG_PATH"
-	EnvAccessLogMaxSize  EnvironmentVariable = "PHOTOVIEW_ACCESS_LOG_MAX_SIZE"
-	EnvAccessLogMaxFiles EnvironmentVariable = "PHOTOVIEW_ACCESS_LOG_MAX_FILES"
+	EnvAccessLogPath         EnvironmentVariable = "PHOTOVIEW_ACCESS_LOG_PATH"
+	EnvAccessLogMaxSize      EnvironmentVariable = "PHOTOVIEW_ACCESS_LOG_MAX_SIZE_MB"
+	EnvAccessLogMaxFiles     EnvironmentVariable = "PHOTOVIEW_ACCESS_LOG_MAX_FILES"
+	EnvAccessLogMaxDays      EnvironmentVariable = "PHOTOVIEW_ACCESS_LOG_MAX_DAYS"
+	EnvAccessLogIsCompressed EnvironmentVariable = "PHOTOVIEW_ACCESS_LOG_IS_COMPRESSED"
 )
 
 // Network related
@@ -82,6 +87,7 @@ func (v EnvironmentVariable) GetInt() int {
 	}
 	i, err := strconv.Atoi(value)
 	if err != nil {
+		log.Error(context.Background(), "invalid integer value for environment variable", v.GetName(), value)
 		return 0
 	}
 	return i
@@ -107,26 +113,41 @@ func UIPath() string {
 	return "./ui"
 }
 
-func AccessLogLevel() string {
-	return EnvAccessLogLevel.GetValue()
-}
-
-func AccessLogPath() string {
-	return EnvAccessLogPath.GetValue()
-}
-
-func AccessLogMaxSize() int64 {
-	// Default: 10MB in bytes
-	if size := EnvAccessLogMaxSize.GetInt(); size > 0 {
-		return int64(size) * 1024 * 1024 // Convert MB to bytes
+func AccessLogPath() (string, error) {
+	if logpath := EnvAccessLogPath.GetValue(); logpath != "" {
+		absPath, err := filepath.Abs(filepath.Clean(logpath))
+		return filepath.Join(absPath, "access.log"), err
 	}
-	return 10 * 1024 * 1024
+	// Default: no access logfile, only STDOUT
+	return "", nil
+}
+
+func AccessLogMaxSize() int {
+	// Default: 10MB
+	if size := EnvAccessLogMaxSize.GetInt(); size > 0 {
+		return size
+	}
+	return 10
 }
 
 func AccessLogMaxFiles() int {
-	// Default: keep 5 rotated files
-	if files := EnvAccessLogMaxFiles.GetInt(); files > 0 {
+	files := EnvAccessLogMaxFiles.GetInt()
+	// Return user's positive value
+	if files > 0 {
 		return files
 	}
+	// Negative value means "keep all log files"
+	if files < 0 {
+		return 0
+	}
+	// Default for unset var or 0 value: keep 5 rotated files
 	return 5
+}
+
+func AccessLogMaxDays() int {
+	// Default: 0 (never delete old logfiles)
+	if days := EnvAccessLogMaxDays.GetInt(); days > 0 {
+		return days
+	}
+	return 0
 }

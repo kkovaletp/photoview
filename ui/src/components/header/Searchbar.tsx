@@ -327,7 +327,7 @@ const SearchRow = ({
     >
       <NavLink to={link} className="flex items-center" tabIndex={-1}>
         {preview}
-        <span className="flex-grow pl-2 text-sm">{label}</span>
+        <span className="grow pl-2 text-sm">{label}</span>
       </NavLink>
     </li>
   )

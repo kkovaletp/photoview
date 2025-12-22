@@ -1,6 +1,7 @@
 package exif
 
 import (
+	"errors"
 	"fmt"
 	"math"
 	"time"
@@ -8,6 +9,9 @@ import (
 	"github.com/barasher/go-exiftool"
 	"github.com/kkovaletp/photoview/api/graphql/models"
 )
+
+const layout = "2006:01:02 15:04:05.999"
+const layoutWithOffset = "2006:01:02 15:04:05.999-07:00"
 
 // ExifParser is a parser to get exif data.
 type ExifParser struct {
@@ -34,15 +38,24 @@ func (p *ExifParser) Close() error {
 	return p.exiftool.Close()
 }
 
-// ParseExif returns the exif data.
-func (p *ExifParser) ParseExif(mediaPath string) (*models.MediaEXIF, ParseFailures, error) {
+func (p *ExifParser) loadMetaData(mediaPath string) (*exiftool.FileMetadata, error) {
 	fileInfos := p.exiftool.ExtractMetadata(mediaPath)
 	if l := len(fileInfos); l != 1 {
-		return nil, nil, fmt.Errorf("invalid file infos with %q, len(fileInfos) = %d", mediaPath, l)
+		return nil, fmt.Errorf("expected 1 metadata entry, got %d", l)
 	}
 
 	fileInfo := fileInfos[0]
 	if err := fileInfo.Err; err != nil {
+		return nil, err
+	}
+
+	return &fileInfo, nil
+}
+
+// ParseExif returns the exif data.
+func (p *ExifParser) ParseExif(mediaPath string) (*models.MediaEXIF, ParseFailures, error) {
+	fileInfo, err := p.loadMetaData(mediaPath)
+	if err != nil {
 		return nil, nil, fmt.Errorf("invalid parse %q exif: %w", mediaPath, err)
 	}
 
@@ -95,20 +108,15 @@ func (p *ExifParser) ParseExif(mediaPath string) (*models.MediaEXIF, ParseFailur
 	}
 
 	// Get time of photo
-	layout := "2006:01:02 15:04:05"
-	layoutWithOffset := "2006:01:02 15:04:05-07:00"
 CREATE_DATE:
 	for _, createDateKey := range []string{
 		// Keep the order for the priority to generate DateShot
-		"CreationDate",
+		"SubSecDateTimeOriginal",
+		"SubSecCreateDate",
 		"DateTimeOriginal",
 		"CreateDate",
 		"TrackCreateDate",
 		"MediaCreateDate",
-		"FileCreateDate",
-		"ModifyDate",
-		"TrackModifyDate",
-		"MediaModifyDate",
 		"FileModifyDate",
 	} {
 		dateStr, err := fileInfo.GetString(createDateKey)
@@ -116,7 +124,7 @@ CREATE_DATE:
 			continue
 		}
 
-		if date, err := time.Parse(layout, dateStr); err == nil {
+		if date, err := time.ParseInLocation(layout, dateStr, time.Local); err == nil {
 			retEXIF.DateShot = &date
 			foundExif = true
 			break CREATE_DATE
@@ -131,8 +139,44 @@ CREATE_DATE:
 		}
 	}
 
+	// Get timezone of photo
+TIMEZONE:
+	for _, field := range []string{
+		// Keep the order for the priority to generate TimezoneShot
+		"OffsetTimeOriginal",
+		"OffsetTime",
+		"TimeZone",
+	} {
+		str, err := fileInfo.GetString(field)
+		if err != nil {
+			continue TIMEZONE
+		}
+
+		t, err := time.Parse("-07:00", str)
+		if err != nil {
+			failures.Append(field, err)
+			continue TIMEZONE
+		}
+
+		_, offsetSecs := t.Zone()
+		retEXIF.OffsetSecShot = &offsetSecs
+		foundExif = true
+		break TIMEZONE
+	}
+
+	if retEXIF.OffsetSecShot == nil {
+		offset, errKeys, err := calculateOffsetFromGPS(fileInfo, retEXIF.DateShot)
+		if err != nil {
+			for _, key := range errKeys {
+				failures.Append(key, err)
+			}
+		} else {
+			retEXIF.OffsetSecShot = offset
+		}
+	}
+
 	// Get GPS data
-	lat, long, err := extractValidGPSData(&fileInfo)
+	lat, long, err := extractValidGPSData(fileInfo)
 	if err != nil {
 		failures.Append("gps", err)
 	} else {
@@ -212,4 +256,52 @@ func extractValidGPSData(fileInfo *exiftool.FileMetadata) (float64, float64, err
 	}
 
 	return *latitude, *longitude, nil
+}
+
+func calculateOffsetFromGPS(fileInfo *exiftool.FileMetadata, date *time.Time) (*int, []string, error) {
+	if date == nil {
+		// There is no original date, can't calculate the offset
+		return nil, nil, nil
+	}
+
+	const dateKey = "GPSDateStamp"
+	dateStr, err := fileInfo.GetString(dateKey)
+	if err != nil {
+		// Ignore finding-tag errors
+		return nil, nil, nil
+	}
+
+	const timeKey = "GPSTimeStamp"
+	timeStr, err := fileInfo.GetString(timeKey)
+	if err != nil {
+		// Ignore finding-tag errors
+		return nil, nil, nil
+	}
+
+	gpsDate, err := time.Parse(layout, dateStr+" "+timeStr)
+	if err != nil {
+		return nil, []string{dateKey, timeKey}, fmt.Errorf("parse gps date \"%s %s\" error: %w", dateStr, timeStr, err)
+	}
+
+	// GPS time is always UTC per EXIF spec
+	// offset = GPS UTC time - local time
+	offset := int(gpsDate.Sub(*date).Seconds())
+	return &offset, nil, nil
+}
+
+func (p *ExifParser) ParseMIMEType(mediaPath string) (string, error) {
+	fileInfo, err := p.loadMetaData(mediaPath)
+	if err != nil {
+		return "", fmt.Errorf("invalid parse %q exif: %w", mediaPath, err)
+	}
+
+	mime, err := fileInfo.GetString("MIMEType")
+	if err != nil {
+		if errors.Is(err, exiftool.ErrKeyNotFound) {
+			return "", nil // "" is media_type.TypeUnknown
+		}
+		return "", fmt.Errorf("invalid parse %q mimetype: %w", mediaPath, err)
+	}
+
+	return mime, nil
 }

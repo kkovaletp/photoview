@@ -56,9 +56,11 @@ start:
 	@# mkdir -p ${HOST_PHOTOVIEW_LOCATION}/database/mariadb
 	@## The next line is for SQLite
 	@# mkdir -p ${HOST_PHOTOVIEW_LOCATION}/database
-	@# If you don't want to give 777 permissions to this folder, create a group with GID=999 (or user with UID=999 and group
-	@# with GID=999 and that user) and make the folder being owned by it, so you can give the 570 or 750 permissions correspondingly.
+	@## If you don't want to give 777 permissions to this folder, create a group with GID=999 (or user with UID=999 and group
+	@## with GID=999 and that user) and make the folder being owned by it, so you can give the 570 or 750 permissions correspondingly.
 	mkdir -p ${HOST_PHOTOVIEW_LOCATION}/storage
+	@## Create log folder for Photoview access log, uncomment if you mapped it in the docker-compose.yml
+	@# mkdir -p ${HOST_PHOTOVIEW_LOCATION}/logs/api
 	$(DOCKER_COMPOSE) up -d --remove-orphans
 	@## Uncomment the next line if you want to run an automatic cleanup of Docker leftovers
 	@## Make sure to read the Docker documentation to understand how it works
@@ -98,8 +100,8 @@ backup-postgres:
 	tar -cJf ${HOST_PHOTOVIEW_BACKUP}/`date +%Y-%m-%d`/postgres_pg_dump.tar.xz ${HOST_PHOTOVIEW_BACKUP}/`date +%Y-%m-%d`/postgres_pg_dump.sql && rm ${HOST_PHOTOVIEW_BACKUP}/`date +%Y-%m-%d`/postgres_pg_dump.sql
 	@# 7zz a -mx=9 ${HOST_PHOTOVIEW_BACKUP}/`date +%Y-%m-%d`/postgres_pg_dump.7z ${HOST_PHOTOVIEW_BACKUP}/`date +%Y-%m-%d`/postgres_pg_dump.sql && rm ${HOST_PHOTOVIEW_BACKUP}/`date +%Y-%m-%d`/postgres_pg_dump.sql
 backup-mariadb:
-	$(DOCKER_COMPOSE) exec mariadb mysqlcheck -u root --password=${MARIADB_ROOT_PASSWORD} --check --check-upgrade --flush --process-views=YES --auto-repair --all-databases
-	$(DOCKER_COMPOSE) exec mariadb mysqlcheck -u root --password=${MARIADB_ROOT_PASSWORD} --optimize --flush --auto-repair --all-databases
+	$(DOCKER_COMPOSE) exec mariadb mariadbcheck -u root --password=${MARIADB_ROOT_PASSWORD} --check --check-upgrade --flush --process-views=YES --auto-repair --all-databases
+	$(DOCKER_COMPOSE) exec mariadb mariadbcheck -u root --password=${MARIADB_ROOT_PASSWORD} --optimize --flush --auto-repair --all-databases
 	$(DOCKER_COMPOSE) exec mariadb mariadb-dump -u root --password=${MARIADB_ROOT_PASSWORD} -e -x --all-databases -- > ${HOST_PHOTOVIEW_BACKUP}/`date +%Y-%m-%d`/mariaDB_mysql_dump.sql
 	tar -cJf ${HOST_PHOTOVIEW_BACKUP}/`date +%Y-%m-%d`/mariaDB_mysql_dump.tar.xz ${HOST_PHOTOVIEW_BACKUP}/`date +%Y-%m-%d`/mariaDB_mysql_dump.sql --remove-files
 	@# 7zz a -mx=9 ${HOST_PHOTOVIEW_BACKUP}/`date +%Y-%m-%d`/mariaDB_mysql_dump.7z ${HOST_PHOTOVIEW_BACKUP}/`date +%Y-%m-%d`/mariaDB_mysql_dump.sql && rm ${HOST_PHOTOVIEW_BACKUP}/`date +%Y-%m-%d`/mariaDB_mysql_dump.sql

@@ -70,11 +70,11 @@ func RegisterPhotoRoutes(db *gorm.DB, router *mux.Router) {
 			}
 		}
 
-		w.Header().Set("Content-Type", mediaURL.ContentType)
 		// Allow caching the resource
 		w.Header().Set("Cache-Control", "private, max-age=31536000, immutable")
-		// Tell that the content is served as-is, without further encoding
-		w.Header().Set("Content-Encoding", "identity")
+		if mediaURL.ContentType != "" {
+			w.Header().Set("Content-Type", mediaURL.ContentType)
+		}
 
 		http.ServeFile(w, r, cachedPath)
 	})

@@ -9,7 +9,11 @@ const globals = require('globals');
 module.exports = [
     // Global ignores
     {
-        ignores: ['node_modules/**', 'dist/**'],
+        ignores: [
+            'node_modules/**',
+            'dist/**',
+            'coverage/**',
+        ],
     },
 
     // Base ESLint recommended

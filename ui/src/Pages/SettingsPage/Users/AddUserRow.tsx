@@ -9,6 +9,7 @@ import {
   userAddRootPath,
   userAddRootPathVariables,
 } from './__generated__/userAddRootPath'
+import MessageBox from '../../../primitives/form/MessageBox'
 
 export const CREATE_USER_MUTATION = gql`
   mutation createUser($username: String!, $admin: Boolean!) {
@@ -45,43 +46,55 @@ type AddUserRowProps = {
 const AddUserRow = ({ setShow, show, onUserAdded }: AddUserRowProps) => {
   const { t } = useTranslation()
   const [state, setState] = useState(initialState)
+  const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
   const finished = () => {
     setState(initialState)
+    setErrorMessage(null)
     onUserAdded()
   }
 
   const [addRootPath, { loading: addRootPathLoading }] = useMutation<
     userAddRootPath,
     userAddRootPathVariables
-  >(USER_ADD_ROOT_PATH_MUTATION, {
-    onCompleted: () => {
-      finished()
-    },
-    onError: () => {
-      finished()
-    },
-  })
+  >(USER_ADD_ROOT_PATH_MUTATION)
 
   const [createUser, { loading: createUserLoading }] = useMutation<
     createUser,
     createUserVariables
-  >(CREATE_USER_MUTATION, {
-    onCompleted: ({ createUser: { id } }) => {
-      if (state.rootPath) {
-        addRootPath({
+  >(CREATE_USER_MUTATION)
+
+  const loading = addRootPathLoading || createUserLoading
+
+  const handleAddUser = async () => {
+    setErrorMessage(null)
+    try {
+      const result = await createUser({
+        variables: {
+          username: state.username,
+          admin: state.admin,
+        },
+      })
+
+      if (result.data?.createUser?.id && state.rootPath) {
+        await addRootPath({
           variables: {
-            id: id,
+            id: result.data.createUser.id,
             rootPath: state.rootPath,
           },
         })
-      } else {
-        finished()
       }
-    },
-  })
 
-  const loading = addRootPathLoading || createUserLoading
+      finished()
+    } catch (error) {
+      console.error('Error adding user: ', error)
+      setErrorMessage(
+        error instanceof Error
+          ? error.message
+          : t('settings.users.add_user.error', 'Failed to add user. Please try again.')
+      )
+    }
+  }
 
   function updateInput(
     event: React.ChangeEvent<HTMLInputElement>,
@@ -129,6 +142,11 @@ const AddUserRow = ({ setShow, show, onUserAdded }: AddUserRowProps) => {
         />
       </TableCell>
       <TableCell>
+        <MessageBox
+          type="negative"
+          message={errorMessage}
+          show={!!errorMessage}
+        />
         <ButtonGroup>
           <Button variant="negative" onClick={() => setShow(false)}>
             {t('general.action.cancel', 'Cancel')}
@@ -137,14 +155,7 @@ const AddUserRow = ({ setShow, show, onUserAdded }: AddUserRowProps) => {
             type="submit"
             disabled={loading}
             variant="positive"
-            onClick={() => {
-              createUser({
-                variables: {
-                  username: state.username,
-                  admin: state.admin,
-                },
-              })
-            }}
+            onClick={handleAddUser}
           >
             {t('settings.users.add_user.submit', 'Add user')}
           </Button>

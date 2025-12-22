@@ -6,13 +6,15 @@ services:
     container_name: photoview-prepare
     user: root
     entrypoint: []
-    command: /bin/bash -c "sleep 1 && chown -R photoview:photoview /home/photoview/media-cache"
+    command: /bin/bash -c "sleep 1 && chown -R photoview:photoview /home/photoview/media-cache /var/log/photoview"
     cap_add:
       - CHOWN
     volumes:
       - "/etc/localtime:/etc/localtime:ro" ## use local time from host
-      - "/etc/timezone:/etc/timezone:ro"   ## use timezone from host
+      - "/etc/timezone:/etc/timezone:ro" ## use timezone from host
       - "${HOST_PHOTOVIEW_LOCATION}/storage:/home/photoview/media-cache"
+      ## If you mounted the Photoview access log in the main Photoview service, uncomment the next line
+      # - "${HOST_PHOTOVIEW_LOCATION}/logs/api:/var/log/photoview"
 
   photoview:
     image: kkoval/photoview:master
@@ -31,7 +33,7 @@ services:
       photoview-prepare:
         condition: service_completed_successfully
       postgres:
-      #mariadb:
+        #mariadb:
         condition: service_healthy
     ## Security options for some restricted systems
     security_opt:
@@ -49,6 +51,18 @@ services:
       ## Uncomment the next variable and set a different value to change the port photoview uses inside the container.
       ## If you change this, remember to update the port mapping (under the `ports:`) above!
       # PHOTOVIEW_LISTEN_PORT: 8080
+      ## HTTP server's access logfile location inside the container. By default is under the /var/log/photoview/ folder.
+      ## To disable writing to file, uncomment and set it to the empty value.
+      # PHOTOVIEW_ACCESS_LOG_PATH: "/var/log/photoview"
+      ## Max logfile size in MB, should be > 0, else falls back to default 10.
+      # PHOTOVIEW_ACCESS_LOG_MAX_SIZE_MB: 10
+      ## Max number of rotated files should be > 0. If unset or 0, falls back to default 5.
+      ## If negative, rotated files never get deleted.
+      # PHOTOVIEW_ACCESS_LOG_MAX_FILES: 5
+      ## Max age in days, should be > 0, else falls back to default 0 (means no age limit)
+      # PHOTOVIEW_ACCESS_LOG_MAX_DAYS: 0
+      ## If true, rotated log files are gzipped. Accepts "true", 1 or "false", 0.
+      # PHOTOVIEW_ACCESS_LOG_IS_COMPRESSED: "false"
       ## Uncomment the next variable and set a different value to set the location of the media cache inside the container.
       ## Make sure that you know why you are doing this.
       ## If you change this, remember to update the corresponding paths in:
@@ -70,23 +84,25 @@ services:
     ## Share hardware devices with FFmpeg (optional):
     # gpus: all
     # devices:
-      ## Uncomment next devices mappings if they are available in your host system
-      ## Intel QSV
-      # - "/dev/dri:/dev/dri"
-      ## Nvidia CUDA
-      # - "/dev/nvidia0:/dev/nvidia0"
-      # - "/dev/nvidiactl:/dev/nvidiactl"
-      # - "/dev/nvidia-modeset:/dev/nvidia-modeset"
-      # - "/dev/nvidia-nvswitchctl:/dev/nvidia-nvswitchctl"
-      # - "/dev/nvidia-uvm:/dev/nvidia-uvm"
-      # - "/dev/nvidia-uvm-tools:/dev/nvidia-uvm-tools"
-      ## Video4Linux Video Encode Device (h264_v4l2m2m)
-      # - "/dev/video11:/dev/video11"
+    ## Uncomment next devices mappings if they are available in your host system
+    ## Intel QSV
+    # - "/dev/dri:/dev/dri"
+    ## Nvidia CUDA
+    # - "/dev/nvidia0:/dev/nvidia0"
+    # - "/dev/nvidiactl:/dev/nvidiactl"
+    # - "/dev/nvidia-modeset:/dev/nvidia-modeset"
+    # - "/dev/nvidia-nvswitchctl:/dev/nvidia-nvswitchctl"
+    # - "/dev/nvidia-uvm:/dev/nvidia-uvm"
+    # - "/dev/nvidia-uvm-tools:/dev/nvidia-uvm-tools"
+    ## Video4Linux Video Encode Device (h264_v4l2m2m)
+    # - "/dev/video11:/dev/video11"
     volumes:
       ## Example:
       ## - "/host/folder:/container/folder"
       - "/etc/localtime:/etc/localtime:ro" ## use local time from host
-      - "/etc/timezone:/etc/timezone:ro"   ## use timezone from host
+      - "/etc/timezone:/etc/timezone:ro" ## use timezone from host
+      ## Uncomment the next line if you want to access the Photoview access log on the host system
+      # - "${HOST_PHOTOVIEW_LOCATION}/logs/api:/var/log/photoview"
       ## Uncomment the next line if PHOTOVIEW_DATABASE_DRIVER is set to `sqlite` in the .env
       # - "${HOST_PHOTOVIEW_LOCATION}/database:/home/photoview/database"
       - "${HOST_PHOTOVIEW_LOCATION}/storage:/home/photoview/media-cache"
@@ -103,8 +119,10 @@ services:
       # - "${HOST_PHOTOVIEW_MEDIA_FAMILY}:/photos/Family:ro"
 
   ## Watchtower upgrades services automatically (optional)
+  ## WARNING: the automatic version upgrades may silently generate unexpected problems,
+  ##   so please periodically check the logs
   watchtower:
-    image: containrrr/watchtower:latest
+    image: nickfedor/watchtower:latest
     hostname: watchtower
     container_name: watchtower
     restart: unless-stopped
@@ -118,13 +136,13 @@ services:
     volumes:
       - "/var/run/docker.sock:/var/run/docker.sock"
       - "~/.docker/config.json:/config.json:ro" ## optional, for authentication if you have a Docker Hub account
-      - "/etc/localtime:/etc/localtime:ro"      ## use local time from host
-      - "/etc/timezone:/etc/timezone:ro"        ## use timezone from host
+      - "/etc/localtime:/etc/localtime:ro" ## use local time from host
+      - "/etc/timezone:/etc/timezone:ro" ## use timezone from host
 
   ## Uncomment the `postgres-autoupgrade` service if you want to upgrade PostgreSQL automatically, or follow the
   ## official PostgreSQL upgrade guide https://www.postgresql.org/docs/current/upgrading.html manually.
   ## Don't forget to uncomment the 3 `depends_on` lines in the `postgres` service.
-  ## This service will upgrade the PostgreSQL database to the version 17.
+  ## This service will upgrade the PostgreSQL database to the version, specified in the `image` tag.
   ## Read more on the https://hub.docker.com/r/pgautoupgrade/pgautoupgrade
   ## Tip: Back up the Photoview data before autoupgrade to a new PostgreSQL version.
   ## It is an optional service to simplify the upgrade process. You can also upgrade PostgreSQL manually.

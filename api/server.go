@@ -71,9 +71,7 @@ func main() {
 		log.Panicf("Could not initialize face detector: %s\n", err)
 	}
 
-	if err := server.InitializeLogging(); err != nil {
-		log.Printf("Warning: Could not initialize access logging: %s", err)
-	}
+	server.InitializeLogging()
 
 	rootRouter := mux.NewRouter()
 	rootRouter.Use(dataloader.Middleware(db))
@@ -107,7 +105,10 @@ func main() {
 	shouldServeUI := utils.ShouldServeUI()
 
 	if shouldServeUI {
-		spa := routes.NewSpaHandler(utils.UIPath(), "index.html")
+		spa, err := routes.NewSpaHandler(utils.UIPath(), "index.html")
+		if err != nil {
+			log.Panicf("Could not configure UI handler: %s", err)
+		}
 		rootRouter.PathPrefix("/").Handler(spa)
 	}
 
@@ -124,7 +125,6 @@ func main() {
 		if !shouldServeUI {
 			log.Printf("Notice: UI is not served by the API (%s=0)", utils.EnvServeUI.GetName())
 		}
-
 	}
 
 	srv := &http.Server{
@@ -153,13 +153,13 @@ func setupGracefulShutdown(svr *http.Server) {
 		periodic_scanner.ShutdownPeriodicScanner()
 		scanner_queue.CloseScannerQueue()
 
-		server.CloseLogging()
-
 		if err := svr.Shutdown(ctx); err != nil {
 			log.Printf("Server shutdown error: %s", err)
 		} else {
 			log.Println("Shutdown complete")
 		}
+
+		server.CloseLogging()
 	}()
 }
 
