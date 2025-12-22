@@ -204,15 +204,15 @@ RUN apk add --no-cache curl bash \
         -exec sed -i "s/=\"-=<GitHub-CI-commit-sha-placeholder>=-\";/=\"${COMMIT_SHA}\";/g" {} \; \
     # Archive static files for better performance
     && find /srv -type f \( \
-            -name "*.js" -o -name "*.mjs" -o -name "*.json" \
-            -o -name "*.css" -o -name "*.html" -o -name "*.svg" \
-            -o -name "*.txt" -o -name "*.xml" -o -name "*.wasm" \
-            \) ! -name "*.gz" ! -name "*.br" ! -name "*.zst" \
-        -exec sh -c 'for file; do \
-            gzip -k -f -9 "$file"; \
-            brotli -f -q 11 "$file"; \
-            zstd -f -19 "$file"; \
-        done' sh {} + \
+        -name "*.js" -o -name "*.mjs" -o -name "*.json" \
+        -o -name "*.css" -o -name "*.html" -o -name "*.svg" \
+        -o -name "*.txt" -o -name "*.xml" -o -name "*.wasm" \
+        \) ! -name "*.gz" ! -name "*.br" ! -name "*.zst" \
+    -exec sh -c 'for file; do \
+        gzip -k -f -9 "$file"; \
+        brotli -k -f -q 11 -s "$file"; \
+        zstd -k -f -19 -T0 --no-progress "$file"; \
+    done' sh {} + \
     && apk del .build-compress \
     # Set correct ownership for Caddy's runtime dirs
     && mkdir -p /data /config /var/log/caddy \
