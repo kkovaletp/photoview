@@ -14,7 +14,7 @@ export default defineConfig({
       strategies: 'injectManifest',
       srcDir: 'src',
       filename: 'service-worker.ts',
-      injectRegister: 'auto',
+      injectRegister: 'script',
       manifest: false,
       injectManifest: {
         injectionPoint: undefined

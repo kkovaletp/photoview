@@ -22,7 +22,6 @@ RUN npm install --global npm@10 \
 COPY ui/ /app/ui
 
 # Set environment variable REACT_APP_API_ENDPOINT from build args, uses "<web server>/api" as default
-# Make sure to set this variable to the correct API endpoint URL when building the Caddy proxy image.
 ARG REACT_APP_API_ENDPOINT
 ENV REACT_APP_API_ENDPOINT=${REACT_APP_API_ENDPOINT}
 
@@ -134,12 +133,12 @@ COPY --from=api /app/api/photoview /app/photoview
 # and not rebuilt every new commit because of the build_arg value change.
 ARG COMMIT_SHA=NoCommit
 RUN find "${PHOTOVIEW_UI_PATH}/assets" -type f -name "SettingsPage.*.js" \
-        -exec sed -i "s/=\"-=<GitHub-CI-commit-sha-placeholder>=-\";/=\"${COMMIT_SHA}\";/g" {} \; \
+        -exec sed -i 's/"-=<GitHub-CI-commit-sha-placeholder>=-"/"'"${COMMIT_SHA}"'"/g' {} \; \
     # Archive static files for better performance
     && find /app/ui -type f \( \
         -name "*.js" -o -name "*.mjs" -o -name "*.json" \
         -o -name "*.css" -o -name "*.html" -o -name "*.svg" \
-        -o -name "*.txt" -o -name "*.xml" -o -name "*.wasm" \
+        -o -name "*.txt" -o -name "*.xml" -o -name "*.wasm" -o -name "*.map" \
         \) ! -name "*.gz" ! -name "*.br" ! -name "*.zst" \
     -exec sh -c 'for file; do \
         gzip -k -f -9 "$file"; \
@@ -195,18 +194,16 @@ COPY --chown=9999:9999 ui/Caddyfile /etc/caddy/Caddyfile
 # This is a w/a for letting the UI build stage to be cached
 # and not rebuilt every new commit because of the build_arg value change.
 ARG COMMIT_SHA=NoCommit
-#ARG REACT_APP_API_ENDPOINT
-#ENV REACT_APP_API_ENDPOINT=${REACT_APP_API_ENDPOINT}
 # hadolint ignore=DL3018
 RUN apk add --no-cache curl bash \
     && apk add --no-cache --virtual .build-compress gzip brotli zstd \
     && find /srv/assets -type f -name "SettingsPage.*.js" \
-        -exec sed -i "s/=\"-=<GitHub-CI-commit-sha-placeholder>=-\";/=\"${COMMIT_SHA}\";/g" {} \; \
+        -exec sed -i 's/"-=<GitHub-CI-commit-sha-placeholder>=-"/"'"${COMMIT_SHA}"'"/g' {} \; \
     # Archive static files for better performance
     && find /srv -type f \( \
         -name "*.js" -o -name "*.mjs" -o -name "*.json" \
         -o -name "*.css" -o -name "*.html" -o -name "*.svg" \
-        -o -name "*.txt" -o -name "*.xml" -o -name "*.wasm" \
+        -o -name "*.txt" -o -name "*.xml" -o -name "*.wasm" -o -name "*.map" \
         \) ! -name "*.gz" ! -name "*.br" ! -name "*.zst" \
     -exec sh -c 'for file; do \
         gzip -k -f -9 "$file"; \
