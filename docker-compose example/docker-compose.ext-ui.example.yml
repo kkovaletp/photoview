@@ -150,8 +150,10 @@ services:
     networks:
       - ui_net
     ports:
-      - "8001:8080" ## HTTP port (host:container)
-      - "8002:8443" ## HTTPS port (host:container)
+      ## It is recommended keeping the host ports the same as the container ports to let Caddy headers work correctly
+      ## If the ports have to be changed, make sure to update the corresponding ports in the Caddyfile configuration
+      - "8080:8080" ## HTTP port (host:container)
+      - "8443:8443" ## HTTPS port (host:container)
     depends_on:
       photoview-ui-prepare:
         condition: service_completed_successfully
@@ -163,7 +165,7 @@ services:
       - apparmor:unconfined
     environment:
       ## The `HTTPS_PORT` must match the host HTTPS port defined in the `ports` section above
-      HTTPS_PORT: 8002
+      HTTPS_PORT: 8443
       ## The `PHOTOVIEW_BACKEND_HOST` must match the `container_name` of the `photoview` service
       PHOTOVIEW_BACKEND_HOST: "photoview"
       ## The `PHOTOVIEW_BACKEND_PORT` must match the container port used by the `photoview` service
