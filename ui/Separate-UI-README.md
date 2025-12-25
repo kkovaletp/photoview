@@ -210,7 +210,7 @@ curl -o ./ui/file/Caddyfile https://raw.githubusercontent.com/kkovaletp/photovie
 curl -o Makefile https://raw.githubusercontent.com/kkovaletp/photoview/master/docker-compose%20example/Makefile
 ```
 
-Note: If you decided to not use the Makefile, read it and use the commands from its corresponding sections,
+Note: If you decided not to use the Makefile, read it and use the commands from its corresponding sections,
 mentioned in this guide.
 
 #### Step 3: Configure Environment Variables
@@ -231,7 +231,7 @@ It is optional and you are free to not use it, but in any case, you'll need to r
 as the `Makefile` contains, so I'd recommend reading and understanding it.
 
 This guide contains `make ...` commands, which refer to the corresponding sections of the `Makefile`. If you decided
-to not use it, run the corresponding commands manually when asked.
+not to use it, run the corresponding commands manually when asked.
 
 #### Step 6: Configure the UI Service (if needed)
 
