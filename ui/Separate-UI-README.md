@@ -34,12 +34,12 @@ Glory to Ukraine! 🇺🇦
       - [Step 1: Prepare the main app directory](#step-1-prepare-the-main-app-directory)
       - [Step 2: Copy Example Files](#step-2-copy-example-files)
       - [Step 3: Configure Environment Variables](#step-3-configure-environment-variables)
-      - [Step 5: Read and optionally modify the `docker-compose.yml`](#step-5-read-and-optionally-modify-the-docker-composeyml)
-      - [Step 6: Read the `Makefile`](#step-6-read-the-makefile)
-      - [Step 7: Configure the UI Service (if needed)](#step-7-configure-the-ui-service-if-needed)
-      - [Step 8: Start the Services](#step-8-start-the-services)
-      - [Step 9: Access Photoview from your browser](#step-9-access-photoview-from-your-browser)
-      - [Step 7: Complete Initial Setup](#step-7-complete-initial-setup)
+      - [Step 4: Read and optionally modify the `docker-compose.yml`](#step-4-read-and-optionally-modify-the-docker-composeyml)
+      - [Step 5: Read and optionally modify the `Makefile`](#step-5-read-and-optionally-modify-the-makefile)
+      - [Step 6: Configure the UI Service (if needed)](#step-6-configure-the-ui-service-if-needed)
+      - [Step 7: Start the Services](#step-7-start-the-services)
+      - [Step 8: Access Photoview from your browser](#step-8-access-photoview-from-your-browser)
+      - [Step 9: Complete Initial Setup](#step-9-complete-initial-setup)
     - [Architecture 2: UI from This Repo + API from Upstream](#architecture-2-ui-from-this-repo--api-from-upstream)
       - [Modifications to docker-compose.yml](#modifications-to-docker-composeyml)
     - [Architecture 3: UI Container + API on Host](#architecture-3-ui-container--api-on-host)
@@ -50,6 +50,8 @@ Glory to Ukraine! 🇺🇦
     - [Configuration Steps](#configuration-steps)
       - [1. Obtain DNS Provider Credentials](#1-obtain-dns-provider-credentials)
       - [2. Update Caddyfile](#2-update-caddyfile)
+        - [Example: Cloudflare](#example-cloudflare)
+        - [Example: DigitalOcean](#example-digitalocean)
       - [3. Add Environment Variables](#3-add-environment-variables)
       - [4. Update Port Mapping](#4-update-port-mapping)
       - [5. Restart the Service](#5-restart-the-service)
@@ -64,6 +66,8 @@ Glory to Ukraine! 🇺🇦
       - [Step 1: Prepare Certificate Files](#step-1-prepare-certificate-files)
       - [Step 2: Update docker-compose.yml](#step-2-update-docker-composeyml)
       - [Step 3: Update Caddyfile](#step-3-update-caddyfile)
+        - [Option A: Single domain with manual certificates](#option-a-single-domain-with-manual-certificates)
+        - [Option B: Using port-based configuration (without domain)](#option-b-using-port-based-configuration-without-domain)
       - [Step 4: Update Port Mapping (if needed)](#step-4-update-port-mapping-if-needed)
       - [Step 5: Start/Restart the Service](#step-5-startrestart-the-service)
     - [Certificate Renewal](#certificate-renewal)
@@ -213,21 +217,23 @@ mentioned in this guide.
 
 Edit the `.env` file, read all its content, and set your values for the variables according to your needs.
 
-#### Step 5: Read and optionally modify the `docker-compose.yml`
+#### Step 4: Read and optionally modify the `docker-compose.yml`
 
 Read and understand the `docker-compose.yml` in the context of your `.env` file.
 Optionally make needed changes and alignments.
 
-#### Step 6: Read the `Makefile`
+#### Step 5: Read and optionally modify the `Makefile`
 
 Read and understand the `Makefile` in the context of the `.env` and `docker-compose.yml` files.
+You might need to uncomment and/or modify some lines according to your setup.
+
 It is optional and you are free to not use it, but in any case, you'll need to run the same commands
 as the `Makefile` contains, so I'd recommend reading and understanding it.
 
 This guide contains `make ...` commands, which refer to the corresponding sections of the `Makefile`. If you decided
 to not use it, run the corresponding commands manually when asked.
 
-#### Step 7: Configure the UI Service (if needed)
+#### Step 6: Configure the UI Service (if needed)
 
 The default Caddyfile works out of the box with self-signed certificates.
 If you need to customize, edit it with your preferred editor.
@@ -241,14 +247,14 @@ Common customizations:
 **Important**: The Caddyfile is mounted from the host, so changes take effect after restarting the container —
 **no image rebuild required**.
 
-#### Step 8: Start the Services
+#### Step 7: Start the Services
 
 ```bash
 cd /opt/photoview
 make all
 ```
 
-#### Step 9: Access Photoview from your browser
+#### Step 8: Access Photoview from your browser
 
 - **HTTPS**: `https://<your server>:<HTTPS port>`
 - **HTTP**: `http://<your server>:<HTTP port>` (automatically redirects to HTTPS)
@@ -257,7 +263,7 @@ make all
 proceed. For production, configure automatic certificate signing using a DNS provider (see below) or provide your own
 trusted certificates to the Caddy, placing them to the `/opt/photoview/ui/data/caddy/` corresponding sub-folders.
 
-#### Step 7: Complete Initial Setup
+#### Step 9: Complete Initial Setup
 
 Follow the [Photoview initial setup wizard](https://photoview.github.io/en/docs/getting-started/) to create your admin account and configure your photo library.
 
@@ -364,7 +370,7 @@ Each provider requires API tokens or credentials. Refer to your provider's docum
 
 Edit `${HOST_PHOTOVIEW_LOCATION}/ui/file/Caddyfile` and replace the global options section:
 
-**Example: Cloudflare**
+##### Example: Cloudflare
 
 ```caddy
 {
@@ -390,7 +396,7 @@ yourdomain.com {
 }
 ```
 
-**Example: DigitalOcean**
+##### Example: DigitalOcean
 
 ```caddy
 {
@@ -583,7 +589,7 @@ photoview-ui:
 
 Edit `${HOST_PHOTOVIEW_LOCATION}/ui/file/Caddyfile` to use your certificates:
 
-**Option A: Single domain with manual certificates**
+##### Option A: Single domain with manual certificates
 
 ```caddy
 {
@@ -612,7 +618,7 @@ yourdomain.com {
 }
 ```
 
-**Option B: Using port-based configuration (without domain)**
+##### Option B: Using port-based configuration (without domain)
 
 If you don't have a domain name and want to use the certificate with IP address or localhost:
 
@@ -881,7 +887,7 @@ domain2.com {
 **Solutions**:
 
 - Ensure prepare containers ran successfully: `docker compose ps`
-- Ceck the log of the `photoview-ui-prepare` container: `docker compose logs photoview-ui-prepare`
+- Check the log of the `photoview-ui-prepare` container: `docker compose logs photoview-ui-prepare`
 - Manually fix permissions:
 
   ```bash
@@ -957,7 +963,7 @@ If you encounter issues:
 
 1. Check the [troubleshooting section](#troubleshooting) above
 2. Review Caddy logs for specific error messages
-3. For anything, related to the Caddy functoinality, check the [Caddy documentation](https://caddyserver.com/docs/) and ask the Caddy support for help.
+3. For anything related to the Caddy functionality, check the [Caddy documentation](https://caddyserver.com/docs/) and ask the Caddy support for help.
 4. Consult the [Photoview FAQ](https://photoview.github.io/en/docs/faq/)
 5. Check if the issue is specific to the external UI image or can be reproduced in the main image UI.
 6. Open an issue on [GitHub](https://github.com/kkovaletp/photoview/issues) with:
