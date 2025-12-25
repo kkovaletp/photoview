@@ -70,8 +70,9 @@ By using this project or its source code, for any purpose and in any shape or fo
 - You agree that [Russia is a terrorist state](https://www.europarl.europa.eu/doceo/document/RC-9-2022-0482_EN.html);
 - You fully support Ukraine's territorial integrity, including its claims over [temporarily occupied territories](https://en.wikipedia.org/wiki/Russian-occupied_territories_of_Ukraine);
 - You reject false narratives perpetuated by Russian state propaganda.
+- If you are a citizen of Russia or Belarus and you are located on the territory of those countries or on the occupied Ukrainian territories, it is strictly forbidden to use this project or its parts in any way or form.
 
-To learn more about the war and how you can help, [click here](https://war.ukraine.ua/).
+To learn more about the war and how you can help, [visit the war.ukraine.ua](https://war.ukraine.ua/).
 
 Glory to Ukraine! 🇺🇦
 
@@ -87,6 +88,7 @@ Glory to Ukraine! 🇺🇦
   - [Getting started — Setup with Docker](#getting-started--setup-with-docker)
     - [Initial Setup](#initial-setup)
   - [Advanced setup](#advanced-setup)
+    - [Setup with Separate UI Container (Advanced)](#setup-with-separate-ui-container-advanced)
     - [Hardware Acceleration](#hardware-acceleration)
   - [Contributing](#contributing)
   - [Set up Docker development environment](#set-up-docker-development-environment)
@@ -240,6 +242,22 @@ Possible ways of securing a self-hosted service might be (but not limited to):
 8. Set up an **Intrusion Detection/Prevention System** to monitor network traffic for suspicious activity and issue alerts when such activity is discovered.
 
 Setting up and configuring of all these protections depends on and requires a lot of info about your local network and self-hosted services. Based on this info, the configuration flow and resulting services architecture might differ a lot between cases. That is why in the scope of this project, we can only provide you with this high-level list of possible ways of webservice protection. You'll need to investigate them, find the best combination and configuration for your case, and take responsibility to configure everything in the correct and consistent way. We cannot provide you support for such highly secured setups, as a lot of things might work differently because of security limitations.
+
+### Setup with Separate UI Container (Advanced)
+
+For advanced deployments requiring enhanced security, independent scaling, or simplified HTTPS configuration, Photoview can
+be run with the UI and API in separate containers. This setup uses Caddy as a reverse proxy with automatic HTTPS support.
+
+**Benefits:**
+
+- Built-in HTTPS with self-signed certificates (no configuration needed)
+- Support for multiple DNS providers for automatic certificate management
+- Enhanced security through container isolation
+- Enhanced performance powered by Caddy functionality
+- Independent scaling of UI and API components
+- Superior caching and compression
+
+**[→ Complete Separate UI Setup Guide](ui/Separate-UI-README.md)**
 
 ### Hardware Acceleration
 

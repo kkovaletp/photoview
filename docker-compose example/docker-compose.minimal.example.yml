@@ -4,24 +4,30 @@ services:
     image: kkoval/photoview:master
     hostname: photoview-prepare
     container_name: photoview-prepare
+    network_mode: "none"
     user: root
     entrypoint: []
-    command: /bin/bash -c "sleep 1 && chown -R photoview:photoview /home/photoview/media-cache"
+    command: /bin/bash -c "sleep 1 && chown -R photoview:photoview /home/photoview/media-cache /var/log/photoview"
     cap_add:
       - CHOWN
     volumes:
       - "/etc/localtime:/etc/localtime:ro" ## use local time from host
-      - "/etc/timezone:/etc/timezone:ro"   ## use timezone from host
+      - "/etc/timezone:/etc/timezone:ro" ## use timezone from host
       - "${HOST_PHOTOVIEW_LOCATION}/storage:/home/photoview/media-cache"
+      ## If you mounted the Photoview access log in the main Photoview service, uncomment the next line
+      # - "${HOST_PHOTOVIEW_LOCATION}/logs/api:/var/log/photoview"
 
   photoview:
     image: kkoval/photoview:master
     hostname: photoview
     container_name: photoview
+    networks:
+      - ui_net
+      - api_db_net
     restart: unless-stopped
     stop_grace_period: 10s
     ports:
-      - "8000:80" ## HTTP port (host:container)
+      - "8000:8080" ## HTTP port (host:container)
     ## This ensures that DB is initialized and ready for connections.
     ## Comment out the entire `depends_on` section if PHOTOVIEW_DATABASE_DRIVER is set to `sqlite` in the .env
     depends_on:
@@ -42,16 +48,21 @@ services:
       PHOTOVIEW_LISTEN_IP: "0.0.0.0"
       ## Optional: If you are using Samba/CIFS-Share and experience problems with "directory not found"
       ## Enable the following Godebug
-      # - GODEBUG=asyncpreemptoff=1
+      # GODEBUG: "asyncpreemptoff=1"
       ## Optional: To enable map related features, you need to create a mapbox token.
       ## A token can be generated for free here https://account.mapbox.com/access-tokens/
       ## It's a good idea to limit the scope of the token to your own domain, to prevent others from using it.
       MAPBOX_TOKEN: ${MAPBOX_TOKEN}
+      ## Read more about these options in the `.env` file. Uncomment if used.
+      # UI_COOKIE_SECURE: ${UI_COOKIE_SECURE}
+      # UI_COOKIE_DOMAIN: ${UI_COOKIE_DOMAIN}
     volumes:
       ## Example:
       ## - "/host/folder:/container/folder"
       - "/etc/localtime:/etc/localtime:ro" ## use local time from host
-      - "/etc/timezone:/etc/timezone:ro"   ## use timezone from host
+      - "/etc/timezone:/etc/timezone:ro" ## use timezone from host
+      ## Uncomment the next line if you want to access the Photoview access log on the host system
+      # - "${HOST_PHOTOVIEW_LOCATION}/logs/api:/var/log/photoview"
       ## Uncomment the next line if PHOTOVIEW_DATABASE_DRIVER is set to `sqlite` in the .env
       # - "${HOST_PHOTOVIEW_LOCATION}/database:/home/photoview/database"
       - "${HOST_PHOTOVIEW_LOCATION}/storage:/home/photoview/media-cache"
@@ -72,6 +83,8 @@ services:
     image: mariadb:lts
     hostname: photoview-mariadb
     container_name: photoview-mariadb
+    networks:
+      - api_db_net
     restart: unless-stopped
     stop_grace_period: 5s
     ## Optimized MariaDB startup command for better performance and compatibility
@@ -89,7 +102,7 @@ services:
       ## Example:
       ## - "/host/folder:/container/folder"
       - "/etc/localtime:/etc/localtime:ro" ## use local time from host
-      - "/etc/timezone:/etc/timezone:ro"   ## use timezone from host
+      - "/etc/timezone:/etc/timezone:ro" ## use timezone from host
       - "${HOST_PHOTOVIEW_LOCATION}/database/mariadb:/var/lib/mysql" ## DO NOT REMOVE
     healthcheck:
       test: healthcheck.sh --connect --innodb_initialized
@@ -97,3 +110,12 @@ services:
       timeout: 5s
       retries: 5
       start_period: 3m
+
+networks:
+  # Network for external communication
+  ui_net:
+    driver: bridge
+
+  # Network for Backend <-> DB communication (Internal only)
+  api_db_net:
+    internal: true

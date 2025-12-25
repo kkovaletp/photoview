@@ -1,0 +1,146 @@
+{
+    # If you'd like to modify this default configuration, please make sure to read the
+    # Caddy documentation at https://caddyserver.com/docs/caddyfile
+
+    # Disable admin endpoint, so config changes require restart of the container
+    admin off
+
+    # The time, during which Caddy will wait for connections to finish before shutting down.
+    grace_period 10s
+    shutdown_delay 5s # additional 5-second warning phase before grace_period starts
+
+    # Auto-generate self-signed HTTPS certificate locally. Replace these with your certificate provider integration if any.
+    local_certs
+    skip_install_trust # Required for running as a non-root user
+    key_type p384 # A stronger key type for better security, but uses a bit more CPU. Change to `p256` for lower CPU usage.
+
+    #debug
+}
+
+# HTTP on 8080 — redirect to HTTPS
+:8080 {
+    log "HTTP 8080" {
+        output file /var/log/caddy/access_8080.json {
+            mode 644
+            roll_local_time
+            roll_size 10MiB
+            roll_keep 5
+            roll_keep_for 720h # 30 days
+        }
+    }
+
+    @httpsDefault expression {env.HTTPS_PORT} == "" || {env.HTTPS_PORT} == "443"
+	@httpsCustom  expression {env.HTTPS_PORT} != "" && {env.HTTPS_PORT} != "443"
+
+	# When port is default/unspecified, omit port in Location
+	redir @httpsDefault https://{host}{uri} permanent
+
+	# When port is custom, include it in Location
+	redir @httpsCustom  https://{host}:{env.HTTPS_PORT}{uri} permanent
+}
+
+# HTTPS on 8443
+:8443 {
+    tls {
+        issuer internal
+        on_demand
+    }
+    encode # Both zstd and gzip allowed
+    root * /srv
+
+    log "HTTPS 8443" {
+        output file /var/log/caddy/access_8443.json {
+            mode 644
+            roll_local_time
+            roll_size 10MiB
+            roll_keep 5
+            roll_keep_for 720h # 30 days
+        }
+    }
+
+    # Health check endpoint
+    handle /health-check {
+        @goingDown vars {http.shutting_down} true
+        respond @goingDown "Shutting down in {http.time_until_shutdown}" 503 {
+            close
+        }
+        @healthy file index.html
+        respond @healthy "OK" 200 {
+            close
+        }
+        respond "Static site unavailable" 500 {
+            close
+        }
+    }
+
+    # Security headers
+    header {
+        defer
+        # Prevents browsers from MIME-sniffing instead of using declared Content-Type
+        X-Content-Type-Options nosniff
+        # Enable cross-site scripting protection in old browsers (harmless in new ones)
+        X-XSS-Protection "0"
+        # Limit information leakage about server
+        -Server
+        -via
+        # Enforce HTTPS on all subdomains for 6 months.
+        Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+        # Content Security Policy to prevent XSS attacks
+        Content-Security-Policy "default-src 'self'; script-src 'self' https://api.mapbox.com; style-src 'self' 'unsafe-inline' https://api.mapbox.com; img-src 'self' data: blob: https://api.mapbox.com https://events.mapbox.com https://*.tiles.mapbox.com; connect-src 'self' https://api.mapbox.com https://events.mapbox.com https://*.tiles.mapbox.com wss:; worker-src 'self' blob: https://api.mapbox.com; child-src 'self' blob: https://api.mapbox.com; font-src 'self' https://api.mapbox.com; object-src 'none'; base-uri 'self'; frame-ancestors 'none';"
+        # Stops leaking too much referrer info to third parties.
+        Referrer-Policy strict-origin-when-cross-origin
+        # Restricts the use of features that can access user devices.
+        Permissions-Policy "microphone=(), camera=()"
+    }
+    # Handle fingerprinted immutable assets
+	@immutable path /assets/*
+	header @immutable {
+        Cache-Control "public, max-age=31536000, immutable"
+        # Allow assets to be fetched from other origins (e.g., CDNs, embed scenarios)
+        Access-Control-Allow-Origin *
+        match status 2xx
+    }
+    # Handle non-fingerprinted static files with revalidation
+	@revalidate {
+        file
+        not path /assets/*
+    }
+	header @revalidate Cache-Control "public, must-revalidate"
+    # Prevent caching errors
+    header {
+        Cache-Control "no-store, no-cache, must-revalidate, max-age=0"
+        match status 4xx 5xx
+    }
+
+    # Reverse proxy to backend
+    handle /api/* {
+        @gql path /api/graphql
+        header @gql {
+            Cache-Control "no-store, no-cache, must-revalidate, max-age=0"
+        }
+        reverse_proxy {env.PHOTOVIEW_BACKEND_HOST:photoview}:{env.PHOTOVIEW_BACKEND_PORT:8080} {
+            health_uri /api/graphql
+            health_method POST
+            health_headers {
+                Content-Type application/json
+            }
+            health_request_body `\{
+                "operationName":"CheckInitialSetup",
+                "variables":\{},
+                "query":"query CheckInitialSetup \{ siteInfo \{ initialSetup } }"
+            }`
+            health_status 2xx
+            health_interval 60s
+            health_timeout 10s
+        }
+    }
+
+    # Serve frontend static website with SPA fallback
+    handle {
+        # Try to serve the file, or fallback to index.html for client-side routing
+        try_files {path} /index.html
+        file_server {
+            precompressed
+        }
+    }
+}

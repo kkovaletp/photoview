@@ -23,13 +23,11 @@ services:
       - "com.centurylinklabs.watchtower.enable=true"
     hostname: photoview
     container_name: photoview
-    restart: unless-stopped
-    stop_grace_period: 10s
     networks:
       - ui_net
       - api_db_net
-    ports:
-      - "8000:8080" ## HTTP port (host:container)
+    restart: unless-stopped
+    stop_grace_period: 10s
     ## This ensures that DB is initialized and ready for connections.
     ## Comment out the entire `depends_on` section if PHOTOVIEW_DATABASE_DRIVER is set to `sqlite` in the .env
     ## Or comment out the `postgres:` and uncomment the `mariadb:` if PHOTOVIEW_DATABASE_DRIVER is set to `mysql`
@@ -51,6 +49,8 @@ services:
       # PHOTOVIEW_MYSQL_URL: "${MARIADB_USER}:${MARIADB_PASSWORD}@tcp(photoview-mariadb)/${MARIADB_DATABASE}"
       ## Uncomment the next line if PHOTOVIEW_DATABASE_DRIVER is set to `sqlite` in the .env
       # PHOTOVIEW_SQLITE_PATH: ${PHOTOVIEW_SQLITE_PATH}
+      ## We don't need Photoview to serve the UI in this setup, as it will be handled by the separate `photoview-ui` service
+      PHOTOVIEW_SERVE_UI: "false"
       PHOTOVIEW_LISTEN_IP: "0.0.0.0"
       ## Uncomment the next variable and set a different value to change the port photoview uses inside the container.
       ## If you change this, remember to update the port mapping (under the `ports:`) above!
@@ -85,9 +85,6 @@ services:
       ## Support `qsv`, `vaapi`, `nvenc`.
       ## Only `qsv` is verified with `/dev/dri` devices (see below `devices`).
       PHOTOVIEW_VIDEO_HARDWARE_ACCELERATION: ${PHOTOVIEW_VIDEO_HARDWARE_ACCELERATION}
-      ## Read more about these options in the `.env` file. Uncomment if used.
-      # UI_COOKIE_SECURE: ${UI_COOKIE_SECURE}
-      # UI_COOKIE_DOMAIN: ${UI_COOKIE_DOMAIN}
     ## Share hardware devices with FFmpeg (optional):
     # gpus: all
     # devices:
@@ -124,6 +121,67 @@ services:
       ## *Additional* media folders can be mounted like this (set the variable in .env file)
       ## Note that a mount cannot be located in a subfolder of another mount.
       # - "${HOST_PHOTOVIEW_MEDIA_FAMILY}:/photos/Family:ro"
+
+  ## Makes sure that UI folders on the host are created with the correct permissions
+  photoview-ui-prepare:
+    image: kkoval/photoview-ui:master
+    hostname: photoview-ui-prepare
+    container_name: photoview-ui-prepare
+    network_mode: "none"
+    user: root
+    entrypoint: []
+    command: /bin/bash -c "sleep 1 && chown -R caddyuser:caddyuser /var/log/caddy /etc/caddy"
+    cap_add:
+      - CHOWN
+    volumes:
+      - "/etc/localtime:/etc/localtime:ro" ## use local time from host
+      - "/etc/timezone:/etc/timezone:ro" ## use timezone from host
+      - "${HOST_PHOTOVIEW_LOCATION}/logs/ui:/var/log/caddy"
+      - "${HOST_PHOTOVIEW_LOCATION}/ui:/etc/caddy"
+
+  photoview-ui:
+    image: kkoval/photoview-ui:master
+    labels:
+      - "com.centurylinklabs.watchtower.enable=true"
+    hostname: photoview-ui
+    container_name: photoview-ui
+    restart: unless-stopped
+    stop_grace_period: 20s
+    networks:
+      - ui_net
+    ports:
+      ## It is recommended keeping the host ports the same as the container ports to let Caddy headers work correctly
+      ## If the ports have to be changed, make sure to update the corresponding ports in the Caddyfile configuration
+      - "8080:8080" ## HTTP port (host:container)
+      - "8443:8443" ## HTTPS port (host:container)
+    depends_on:
+      photoview-ui-prepare:
+        condition: service_completed_successfully
+      photoview:
+        condition: service_healthy
+    ## Security options for some restricted systems
+    security_opt:
+      - seccomp:unconfined
+      - apparmor:unconfined
+    environment:
+      ## The `HTTPS_PORT` must match the host HTTPS port defined in the `ports` section above
+      HTTPS_PORT: 8443
+      ## The `PHOTOVIEW_BACKEND_HOST` must match the `container_name` of the `photoview` service
+      PHOTOVIEW_BACKEND_HOST: "photoview"
+      ## The `PHOTOVIEW_BACKEND_PORT` must match the container port used by the `photoview` service
+      PHOTOVIEW_BACKEND_PORT: 8080
+      ## Read more about these options in the `.env` file. Uncomment if used.
+      # UI_COOKIE_SECURE: ${UI_COOKIE_SECURE}
+      # UI_COOKIE_DOMAIN: ${UI_COOKIE_DOMAIN}
+    volumes:
+      ## Example:
+      ## - "/host/folder:/container/folder"
+      - "/etc/localtime:/etc/localtime:ro" ## use local time from host
+      - "/etc/timezone:/etc/timezone:ro" ## use timezone from host
+      - "${HOST_PHOTOVIEW_LOCATION}/logs/ui:/var/log/caddy"
+      - "${HOST_PHOTOVIEW_LOCATION}/ui/file:/etc/caddy"
+      - "${HOST_PHOTOVIEW_LOCATION}/ui/data:/data"
+      - "${HOST_PHOTOVIEW_LOCATION}/ui/config:/config"
 
   ## Watchtower upgrades services automatically (optional)
   ## WARNING: the automatic version upgrades may silently generate unexpected problems,
@@ -255,7 +313,7 @@ services:
 #      start_period: 3m
 
 networks:
-  # Network for external communication
+  # Network for Frontend <-> Backend communication
   ui_net:
     driver: bridge
 

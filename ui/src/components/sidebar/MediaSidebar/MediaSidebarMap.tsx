@@ -22,7 +22,6 @@ const MediaSidebarMap = ({ coordinates }: MediaSidebarMapProps) => {
       },
     },
     configureMapbox: (map, mapboxLibrary) => {
-      // todo
       map.addControl(
         new mapboxLibrary.NavigationControl({ showCompass: false })
       )

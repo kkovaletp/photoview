@@ -61,6 +61,11 @@ start:
 	mkdir -p ${HOST_PHOTOVIEW_LOCATION}/storage
 	@## Create log folder for Photoview access log, uncomment if you mapped it in the docker-compose.yml
 	@# mkdir -p ${HOST_PHOTOVIEW_LOCATION}/logs/api
+	@## Create folders for the external Photoview UI, uncomment if you use it in the docker-compose.yml
+	@# mkdir -p ${HOST_PHOTOVIEW_LOCATION}/logs/ui
+	@# mkdir -p ${HOST_PHOTOVIEW_LOCATION}/ui/file
+	@# mkdir -p ${HOST_PHOTOVIEW_LOCATION}/ui/data
+	@# mkdir -p ${HOST_PHOTOVIEW_LOCATION}/ui/config
 	$(DOCKER_COMPOSE) up -d --remove-orphans
 	@## Uncomment the next line if you want to run an automatic cleanup of Docker leftovers
 	@## Make sure to read the Docker documentation to understand how it works
@@ -115,5 +120,9 @@ backup-post:
 	cp ${HOST_PHOTOVIEW_LOCATION}/Makefile ${HOST_PHOTOVIEW_BACKUP}/`date +%Y-%m-%d`/
 	cp ${HOST_PHOTOVIEW_LOCATION}/docker-compose.yml ${HOST_PHOTOVIEW_BACKUP}/`date +%Y-%m-%d`/
 	cp ${HOST_PHOTOVIEW_LOCATION}/.env ${HOST_PHOTOVIEW_BACKUP}/`date +%Y-%m-%d`/
+	@## If you use the external Photoview UI, uncomment the next line
+	@# cp -r ${HOST_PHOTOVIEW_LOCATION}/ui ${HOST_PHOTOVIEW_BACKUP}/`date +%Y-%m-%d`/
+	@## If you mapped the Photoview access log on the host system, uncomment the next line
+	@# cp -r ${HOST_PHOTOVIEW_LOCATION}/logs ${HOST_PHOTOVIEW_BACKUP}/`date +%Y-%m-%d`/
 	tar -cJf ${HOST_PHOTOVIEW_BACKUP}/`date +%Y-%m-%d`/storage.tar.xz ${HOST_PHOTOVIEW_LOCATION}/storage
 	@# 7zz a -mx=9 ${HOST_PHOTOVIEW_BACKUP}/`date +%Y-%m-%d`/storage.7z ${HOST_PHOTOVIEW_LOCATION}/storage

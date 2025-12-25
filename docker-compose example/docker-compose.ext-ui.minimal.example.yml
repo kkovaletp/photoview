@@ -19,25 +19,19 @@ services:
 
   photoview:
     image: kkoval/photoview:master
-    labels:
-      - "com.centurylinklabs.watchtower.enable=true"
     hostname: photoview
     container_name: photoview
-    restart: unless-stopped
-    stop_grace_period: 10s
     networks:
       - ui_net
       - api_db_net
-    ports:
-      - "8000:8080" ## HTTP port (host:container)
+    restart: unless-stopped
+    stop_grace_period: 10s
     ## This ensures that DB is initialized and ready for connections.
     ## Comment out the entire `depends_on` section if PHOTOVIEW_DATABASE_DRIVER is set to `sqlite` in the .env
-    ## Or comment out the `postgres:` and uncomment the `mariadb:` if PHOTOVIEW_DATABASE_DRIVER is set to `mysql`
     depends_on:
       photoview-prepare:
         condition: service_completed_successfully
       postgres:
-        #mariadb:
         condition: service_healthy
     ## Security options for some restricted systems
     security_opt:
@@ -47,33 +41,11 @@ services:
       PHOTOVIEW_DATABASE_DRIVER: ${PHOTOVIEW_DATABASE_DRIVER}
       ## Comment out the next line if PHOTOVIEW_DATABASE_DRIVER is set to `mysql` or `sqlite` in the .env
       PHOTOVIEW_POSTGRES_URL: postgres://${PGSQL_USER}:${PGSQL_PASSWORD}@photoview-pgsql:5432/${PGSQL_DATABASE}?sslmode=${PGSQL_SSL_MODE}
-      ## Uncomment the next variable in the case PHOTOVIEW_DATABASE_DRIVER is set to `mysql` in the .env
-      # PHOTOVIEW_MYSQL_URL: "${MARIADB_USER}:${MARIADB_PASSWORD}@tcp(photoview-mariadb)/${MARIADB_DATABASE}"
       ## Uncomment the next line if PHOTOVIEW_DATABASE_DRIVER is set to `sqlite` in the .env
       # PHOTOVIEW_SQLITE_PATH: ${PHOTOVIEW_SQLITE_PATH}
+      ## We don't need Photoview to serve the UI in this setup, as it will be handled by the separate `photoview-ui` service
+      PHOTOVIEW_SERVE_UI: "false"
       PHOTOVIEW_LISTEN_IP: "0.0.0.0"
-      ## Uncomment the next variable and set a different value to change the port photoview uses inside the container.
-      ## If you change this, remember to update the port mapping (under the `ports:`) above!
-      # PHOTOVIEW_LISTEN_PORT: 8080
-      ## HTTP server's access logfile location inside the container. By default is under the /var/log/photoview/ folder.
-      ## To disable writing to file, uncomment and set it to the empty value.
-      # PHOTOVIEW_ACCESS_LOG_PATH: "/var/log/photoview"
-      ## Max logfile size in MB, should be > 0, else falls back to default 10.
-      # PHOTOVIEW_ACCESS_LOG_MAX_SIZE_MB: 10
-      ## Max number of rotated files should be > 0. If unset or 0, falls back to default 5.
-      ## If negative, rotated files never get deleted.
-      # PHOTOVIEW_ACCESS_LOG_MAX_FILES: 5
-      ## Max age in days, should be > 0, else falls back to default 0 (means no age limit)
-      # PHOTOVIEW_ACCESS_LOG_MAX_DAYS: 0
-      ## If true, rotated log files are gzipped. Accepts "true", 1 or "false", 0.
-      # PHOTOVIEW_ACCESS_LOG_IS_COMPRESSED: "false"
-      ## Uncomment the next variable and set a different value to set the location of the media cache inside the container.
-      ## Make sure that you know why you are doing this.
-      ## If you change this, remember to update the corresponding paths in:
-      ## - the command of the `photoview-prepare` service
-      ## - the `photoview-prepare` service's right side of the storage volume mount (under the `volumes:`)
-      ## - the right side of the storage volume mount (under the `volumes:`) below
-      # PHOTOVIEW_MEDIA_CACHE: "/home/photoview/media-cache"
       ## Optional: If you are using Samba/CIFS-Share and experience problems with "directory not found"
       ## Enable the following Godebug
       # GODEBUG: "asyncpreemptoff=1"
@@ -81,28 +53,6 @@ services:
       ## A token can be generated for free here https://account.mapbox.com/access-tokens/
       ## It's a good idea to limit the scope of the token to your own domain, to prevent others from using it.
       MAPBOX_TOKEN: ${MAPBOX_TOKEN}
-      ## If you want to use it, set the correct value in the .env file.
-      ## Support `qsv`, `vaapi`, `nvenc`.
-      ## Only `qsv` is verified with `/dev/dri` devices (see below `devices`).
-      PHOTOVIEW_VIDEO_HARDWARE_ACCELERATION: ${PHOTOVIEW_VIDEO_HARDWARE_ACCELERATION}
-      ## Read more about these options in the `.env` file. Uncomment if used.
-      # UI_COOKIE_SECURE: ${UI_COOKIE_SECURE}
-      # UI_COOKIE_DOMAIN: ${UI_COOKIE_DOMAIN}
-    ## Share hardware devices with FFmpeg (optional):
-    # gpus: all
-    # devices:
-    ## Uncomment next devices mappings if they are available in your host system
-    ## Intel QSV
-    # - "/dev/dri:/dev/dri"
-    ## Nvidia CUDA
-    # - "/dev/nvidia0:/dev/nvidia0"
-    # - "/dev/nvidiactl:/dev/nvidiactl"
-    # - "/dev/nvidia-modeset:/dev/nvidia-modeset"
-    # - "/dev/nvidia-nvswitchctl:/dev/nvidia-nvswitchctl"
-    # - "/dev/nvidia-uvm:/dev/nvidia-uvm"
-    # - "/dev/nvidia-uvm-tools:/dev/nvidia-uvm-tools"
-    ## Video4Linux Video Encode Device (h264_v4l2m2m)
-    # - "/dev/video11:/dev/video11"
     volumes:
       ## Example:
       ## - "/host/folder:/container/folder"
@@ -125,28 +75,64 @@ services:
       ## Note that a mount cannot be located in a subfolder of another mount.
       # - "${HOST_PHOTOVIEW_MEDIA_FAMILY}:/photos/Family:ro"
 
-  ## Watchtower upgrades services automatically (optional)
-  ## WARNING: the automatic version upgrades may silently generate unexpected problems,
-  ##   so please periodically check the logs
-  watchtower:
-    image: nickfedor/watchtower:latest
-    hostname: watchtower
-    container_name: watchtower
-    networks:
-      - ext_only_net
-    restart: unless-stopped
-    environment:
-      ## Comment out the next variable if you want Watchtower to auto-update all containers, running on the host,
-      ## while now it will update only those with the label "com.centurylinklabs.watchtower.enable=true"
-      WATCHTOWER_LABEL_ENABLE: true
-      WATCHTOWER_CLEANUP: ${WATCHTOWER_CLEANUP}
-      WATCHTOWER_POLL_INTERVAL: ${WATCHTOWER_POLL_INTERVAL}
-      WATCHTOWER_TIMEOUT: ${WATCHTOWER_TIMEOUT}
+  ## Makes sure that UI folders on the host are created with the correct permissions
+  photoview-ui-prepare:
+    image: kkoval/photoview-ui:master
+    hostname: photoview-ui-prepare
+    container_name: photoview-ui-prepare
+    network_mode: "none"
+    user: root
+    entrypoint: []
+    command: /bin/bash -c "sleep 1 && chown -R caddyuser:caddyuser /var/log/caddy /etc/caddy"
+    cap_add:
+      - CHOWN
     volumes:
-      - "/var/run/docker.sock:/var/run/docker.sock"
-      - "~/.docker/config.json:/config.json:ro" ## optional, for authentication if you have a Docker Hub account
       - "/etc/localtime:/etc/localtime:ro" ## use local time from host
       - "/etc/timezone:/etc/timezone:ro" ## use timezone from host
+      - "${HOST_PHOTOVIEW_LOCATION}/logs/ui:/var/log/caddy"
+      - "${HOST_PHOTOVIEW_LOCATION}/ui:/etc/caddy"
+
+  photoview-ui:
+    image: kkoval/photoview-ui:master
+    hostname: photoview-ui
+    container_name: photoview-ui
+    restart: unless-stopped
+    stop_grace_period: 20s
+    networks:
+      - ui_net
+    ports:
+      ## It is recommended keeping the host ports the same as the container ports to let Caddy headers work correctly
+      ## If the ports have to be changed, make sure to update the corresponding ports in the Caddyfile configuration
+      - "8080:8080" ## HTTP port (host:container)
+      - "8443:8443" ## HTTPS port (host:container)
+    depends_on:
+      photoview-ui-prepare:
+        condition: service_completed_successfully
+      photoview:
+        condition: service_healthy
+    ## Security options for some restricted systems
+    security_opt:
+      - seccomp:unconfined
+      - apparmor:unconfined
+    environment:
+      ## The `HTTPS_PORT` must match the host HTTPS port defined in the `ports` section above
+      HTTPS_PORT: 8443
+      ## The `PHOTOVIEW_BACKEND_HOST` must match the `container_name` of the `photoview` service
+      PHOTOVIEW_BACKEND_HOST: "photoview"
+      ## The `PHOTOVIEW_BACKEND_PORT` must match the container port used by the `photoview` service
+      PHOTOVIEW_BACKEND_PORT: 8080
+      ## Read more about these options in the `.env` file. Uncomment if used.
+      # UI_COOKIE_SECURE: ${UI_COOKIE_SECURE}
+      # UI_COOKIE_DOMAIN: ${UI_COOKIE_DOMAIN}
+    volumes:
+      ## Example:
+      ## - "/host/folder:/container/folder"
+      - "/etc/localtime:/etc/localtime:ro" ## use local time from host
+      - "/etc/timezone:/etc/timezone:ro" ## use timezone from host
+      - "${HOST_PHOTOVIEW_LOCATION}/logs/ui:/var/log/caddy"
+      - "${HOST_PHOTOVIEW_LOCATION}/ui/file:/etc/caddy"
+      - "${HOST_PHOTOVIEW_LOCATION}/ui/data:/data"
+      - "${HOST_PHOTOVIEW_LOCATION}/ui/config:/config"
 
   ## Uncomment the `postgres-autoupgrade` service if you want to upgrade PostgreSQL automatically, or follow the
   ## official PostgreSQL upgrade guide https://www.postgresql.org/docs/current/upgrading.html manually.
@@ -177,8 +163,6 @@ services:
   ## Comment out the `postgres` service if PHOTOVIEW_DATABASE_DRIVER is set to `mysql` or `sqlite` in the .env
   postgres:
     image: postgres:18-alpine
-    labels:
-      - "com.centurylinklabs.watchtower.enable=true"
     hostname: photoview-pgsql
     container_name: photoview-pgsql
     restart: unless-stopped
@@ -215,54 +199,11 @@ services:
       retries: 5
       start_period: 3m
 
-  ## Uncomment the `mariadb` service if PHOTOVIEW_DATABASE_DRIVER is set to `mysql` in the .env
-#  mariadb:
-#    image: mariadb:lts
-#    labels:
-#      - "com.centurylinklabs.watchtower.enable=true"
-#    hostname: photoview-mariadb
-#    container_name: photoview-mariadb
-#    restart: unless-stopped
-#    stop_grace_period: 5s
-#    ## Optimized MariaDB startup command for better performance and compatibility
-#    command: mariadbd --innodb-buffer-pool-size=512M --transaction-isolation=READ-COMMITTED --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci --max-connections=512 --innodb-rollback-on-timeout=OFF --innodb-lock-wait-timeout=120
-#    security_opt: ## see https://github.com/MariaDB/mariadb-docker/issues/434#issuecomment-1136151239
-#      - seccomp:unconfined
-#      - apparmor:unconfined
-#    networks:
-#      - api_db_net
-#    ## Comment the previous one and uncomment the following 3 lines if you want to access the database directly
-#    #  - ui_net
-#    # ports:
-#    #   - "3306:3306" ## host:container
-#    environment:
-#      MARIADB_AUTO_UPGRADE: "1"
-#      MARIADB_DATABASE: ${MARIADB_DATABASE}
-#      MARIADB_USER: ${MARIADB_USER}
-#      MARIADB_PASSWORD: ${MARIADB_PASSWORD}
-#      MARIADB_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD}
-#    volumes:
-#      ## Example:
-#      ## - "/host/folder:/container/folder"
-#      - "/etc/localtime:/etc/localtime:ro" ## use local time from host
-#      - "/etc/timezone:/etc/timezone:ro"   ## use timezone from host
-#      - "${HOST_PHOTOVIEW_LOCATION}/database/mariadb:/var/lib/mysql" ## DO NOT REMOVE
-#    healthcheck:
-#      test: healthcheck.sh --connect --innodb_initialized
-#      interval: 1m
-#      timeout: 5s
-#      retries: 5
-#      start_period: 3m
-
 networks:
-  # Network for external communication
+  # Network for Frontend <-> Backend communication
   ui_net:
     driver: bridge
 
   # Network for Backend <-> DB communication (Internal only)
   api_db_net:
     internal: true
-
-  # Network for the Watchtower that needs internet but no local services
-  ext_only_net:
-    driver: bridge

@@ -133,12 +133,12 @@ COPY --from=api /app/api/photoview /app/photoview
 # and not rebuilt every new commit because of the build_arg value change.
 ARG COMMIT_SHA=NoCommit
 RUN find "${PHOTOVIEW_UI_PATH}/assets" -type f -name "SettingsPage.*.js" \
-        -exec sed -i "s/=\"-=<GitHub-CI-commit-sha-placeholder>=-\";/=\"${COMMIT_SHA}\";/g" {} \; \
+        -exec sed -i 's/"-=<GitHub-CI-commit-sha-placeholder>=-"/"'"${COMMIT_SHA}"'"/g' {} \; \
     # Archive static files for better performance
     && find /app/ui -type f \( \
         -name "*.js" -o -name "*.mjs" -o -name "*.json" \
         -o -name "*.css" -o -name "*.html" -o -name "*.svg" \
-        -o -name "*.txt" -o -name "*.xml" -o -name "*.wasm" \
+        -o -name "*.txt" -o -name "*.xml" -o -name "*.wasm" -o -name "*.map" \
         \) ! -name "*.gz" ! -name "*.br" ! -name "*.zst" \
     -exec sh -c 'for file; do \
         gzip -k -f -9 "$file"; \
@@ -167,3 +167,62 @@ HEALTHCHECK --interval=60s --timeout=10s --start-period=10s --retries=2 \
 LABEL org.opencontainers.image.source=https://github.com/kkovaletp/photoview/
 USER photoview
 ENTRYPOINT ["/app/photoview"]
+
+### Build Caddy with plugins ###
+FROM caddy:2.10-builder AS cady
+RUN xcaddy build \
+    # Public DNS providers
+    --with github.com/caddy-dns/cloudflare \
+    --with github.com/caddy-dns/digitalocean \
+    --with github.com/caddy-dns/duckdns \
+    --with github.com/caddy-dns/godaddy \
+    --with github.com/caddy-dns/googleclouddns \
+    --with github.com/caddy-dns/vultr \
+    # Local DNS servers case
+    --with github.com/caddy-dns/rfc2136
+
+### Build release image ###
+FROM caddy:2.10 AS proxy
+
+RUN addgroup -g 9999 -S caddyuser \
+    && adduser  -u 9999 -S -D -G caddyuser caddyuser
+
+COPY --from=cady /usr/bin/caddy /usr/bin/caddy
+COPY --from=ui /app/ui/dist /srv
+COPY --chown=9999:9999 ui/Caddyfile /etc/caddy/Caddyfile
+
+# This is a w/a for letting the UI build stage to be cached
+# and not rebuilt every new commit because of the build_arg value change.
+ARG COMMIT_SHA=NoCommit
+# hadolint ignore=DL3018
+RUN apk add --no-cache curl bash \
+    && apk add --no-cache --virtual .build-compress gzip brotli zstd \
+    && find /srv/assets -type f -name "SettingsPage.*.js" \
+        -exec sed -i 's/"-=<GitHub-CI-commit-sha-placeholder>=-"/"'"${COMMIT_SHA}"'"/g' {} \; \
+    # Archive static files for better performance
+    && find /srv -type f \( \
+        -name "*.js" -o -name "*.mjs" -o -name "*.json" \
+        -o -name "*.css" -o -name "*.html" -o -name "*.svg" \
+        -o -name "*.txt" -o -name "*.xml" -o -name "*.wasm" -o -name "*.map" \
+        \) ! -name "*.gz" ! -name "*.br" ! -name "*.zst" \
+    -exec sh -c 'for file; do \
+        gzip -k -f -9 "$file"; \
+        brotli -k -f -q 11 -s "$file"; \
+        zstd -k -f -19 -T0 --no-progress "$file"; \
+    done' sh {} + \
+    && apk del .build-compress \
+    # Set correct ownership for Caddy's runtime dirs
+    && mkdir -p /data /config /var/log/caddy \
+    && chown -R 9999:9999 /data /config /etc/caddy /var/log/caddy
+
+# Expose unprivileged ports
+EXPOSE 8080 8443 8443/udp
+
+LABEL org.opencontainers.image.source=https://github.com/kkovaletp/photoview/
+
+HEALTHCHECK --interval=60s --timeout=5s --start-period=10s --retries=2 \
+    CMD curl -kfsS https://localhost:8443/health-check \
+    || exit 1
+
+# Switch to non-root user
+USER caddyuser
