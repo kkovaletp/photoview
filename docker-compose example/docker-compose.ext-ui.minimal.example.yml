@@ -59,7 +59,7 @@ services:
       - "/etc/localtime:/etc/localtime:ro" ## use local time from host
       - "/etc/timezone:/etc/timezone:ro" ## use timezone from host
       ## Uncomment the next line if you want to access the Photoview access log on the host system
-      - "${HOST_PHOTOVIEW_LOCATION}/logs/api:/var/log/photoview"
+      # - "${HOST_PHOTOVIEW_LOCATION}/logs/api:/var/log/photoview"
       ## Uncomment the next line if PHOTOVIEW_DATABASE_DRIVER is set to `sqlite` in the .env
       # - "${HOST_PHOTOVIEW_LOCATION}/database:/home/photoview/database"
       - "${HOST_PHOTOVIEW_LOCATION}/storage:/home/photoview/media-cache"
