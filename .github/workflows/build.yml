@@ -9,7 +9,7 @@ on:
     branches: [master]
   schedule:
     # At 01:18 every Thursday. Details in https://docs.github.com/en/actions/writing-workflows/choosing-when-your-workflow-runs/events-that-trigger-workflows#schedule
-    - cron: '18 1 * * 4'
+    - cron: "18 1 * * 4"
 
 env:
   IS_PUSHING_IMAGES: ${{ github.event_name != 'pull_request' && github.repository == 'kkovaletp/photoview' }}
@@ -28,7 +28,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
         with:
-          fetch-tags: 'true'
+          fetch-tags: "true"
           fetch-depth: 0
 
       - name: Prepare the Matrix
@@ -182,6 +182,17 @@ jobs:
             NODE_ENV=production
             VERSION=${{ github.ref_name }}
             COMMIT_SHA=${{ steps.git.outputs.COMMIT_SHORT_SHA }}
+
+      - name: Docker Scout
+        if: ${{ github.event_name == 'pull_request' }}
+        uses: docker/scout-action@v1
+        with:
+          command: compare
+          image: ${{ steps.docker_meta.outputs.tags }}
+          to-env: x64
+          ignore-unchanged: true
+          only-severities: critical,high
+          github-token: ${{ secrets.GITHUB_TOKEN }}
 
   dockle:
     name: Dockle Container Analysis
