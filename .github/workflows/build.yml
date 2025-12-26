@@ -185,22 +185,24 @@ jobs:
         uses: docker/scout-action@v1
         with:
           command: compare,recommendations
-          to: ${{ matrix.entry.image }}:master
+          to: docker.io/${{ matrix.entry.image }}:master
           ignore-unchanged: true
           only-severities: critical,high
           github-token: ${{ secrets.COMMENT_TOKEN }}
 
       - name: Docker Scout report
+        id: scout_report
         uses: docker/scout-action@v1
         with:
           command: cves
-          sarif-file: sarif.scout.json
+          sarif-file: sarif.scout.${{ matrix.entry.build_target }}.json
           summary: true
 
       - name: Upload SARIF result
+        if: ${{ steps.scout_report.conclusion == 'success' || steps.scout_report.conclusion == 'failure' }}
         uses: github/codeql-action/upload-sarif@v4
         with:
-          sarif_file: sarif.scout.json
+          sarif_file: sarif.scout.${{ matrix.entry.build_target }}.json
 
   dockle:
     name: Dockle Container Analysis
