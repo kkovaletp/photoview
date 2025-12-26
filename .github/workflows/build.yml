@@ -170,6 +170,7 @@ jobs:
           platforms: ${{ env.DOCKER_PLATFORMS }}
           pull: true
           push: ${{ env.IS_PUSHING_IMAGES }}
+          outputs: ${{ github.event_name == 'pull_request' && format('type=oci,dest=./image-{0},tar=false', matrix.entry.build_target) || '' }}
           tags: ${{ steps.docker_meta.outputs.tags }}
           labels: ${{ steps.docker_meta.outputs.labels }}
           annotations: ${{ steps.docker_meta.outputs.annotations }}
@@ -186,7 +187,7 @@ jobs:
         uses: docker/scout-action@v1
         with:
           command: cves
-          image: ${{ fromJSON(steps.docker_meta.outputs.json).tags[0] }}
+          image: ${{ github.event_name == 'pull_request' && format('oci-dir://./image-{0}', matrix.entry.build_target) || fromJSON(steps.docker_meta.outputs.json).tags[0] }}
           sarif-file: sarif.scout.${{ matrix.entry.build_target }}.json
           summary: true
 
