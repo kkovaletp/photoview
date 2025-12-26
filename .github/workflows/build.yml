@@ -185,7 +185,6 @@ jobs:
         uses: docker/scout-action@v1
         with:
           command: compare,recommendations
-          image: ${{ steps.docker_meta.outputs.tags }}
           to: ${{ matrix.entry.image }}:master
           ignore-unchanged: true
           only-severities: critical,high
@@ -195,7 +194,6 @@ jobs:
         uses: docker/scout-action@v1
         with:
           command: cves
-          image: ${{ steps.docker_meta.outputs.tags }}
           sarif-file: sarif.scout.json
           summary: true
 
