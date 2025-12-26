@@ -186,6 +186,7 @@ jobs:
         uses: docker/scout-action@v1
         with:
           command: cves
+          image: ${{ fromJSON(steps.docker_meta.outputs.json).tags[0] }}
           sarif-file: sarif.scout.${{ matrix.entry.build_target }}.json
           summary: true
 
