@@ -183,7 +183,7 @@ jobs:
 
       - name: Docker Scout report
         id: scout_report
-        if: ${{ steps.docker_buildx.conclusion == 'success'}}
+        if: ${{ steps.docker_buildx.conclusion == 'success' }}
         uses: docker/scout-action@v1
         with:
           command: cves
