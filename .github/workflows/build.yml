@@ -180,15 +180,6 @@ jobs:
             VERSION=${{ github.ref_name }}
             COMMIT_SHA=${{ steps.git.outputs.COMMIT_SHORT_SHA }}
 
-      - name: Docker Scout comment
-        if: ${{ github.event_name == 'pull_request' && steps.docker_buildx.conclusion == 'success' }}
-        uses: docker/scout-action@v1
-        with:
-          command: quickview,recommendations
-          ignore-unchanged: true
-          only-severities: critical,high
-          github-token: ${{ secrets.COMMENT_TOKEN }}
-
       - name: Docker Scout report
         id: scout_report
         if: ${{ steps.docker_buildx.conclusion == 'success'}}
