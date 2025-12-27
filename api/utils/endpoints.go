@@ -29,7 +29,9 @@ var (
 )
 
 func ApiListenUrl() *url.URL {
-	return cachedApiListenUrl()
+	cached := cachedApiListenUrl()
+	urlCopy := *cached
+	return &urlCopy
 }
 
 func computeApiListenUrl() *url.URL {
@@ -66,7 +68,9 @@ func computeApiListenUrl() *url.URL {
 }
 
 func ApiEndpointUrl() *url.URL {
-	return cachedApiEndpointUrl()
+	cached := cachedApiEndpointUrl()
+	urlCopy := *cached
+	return &urlCopy
 }
 
 func computeApiEndpointUrl() *url.URL {
@@ -99,7 +103,18 @@ func computeApiEndpointUrl() *url.URL {
 // UiEndpointUrls returns a list of allowed UI endpoints.
 // Returns nil if UI is served by this server (no external UI).
 func UiEndpointUrls() []*url.URL {
-	return cachedUiEndpointUrls()
+	cached := cachedUiEndpointUrls()
+	if cached == nil {
+		return nil
+	}
+
+	// Return copies of the URLs to prevent mutation
+	copies := make([]*url.URL, len(cached))
+	for i, u := range cached {
+		urlCopy := *u
+		copies[i] = &urlCopy
+	}
+	return copies
 }
 
 func computeUiEndpointUrls() []*url.URL {
