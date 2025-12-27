@@ -51,6 +51,8 @@ services:
       # PHOTOVIEW_MYSQL_URL: "${MARIADB_USER}:${MARIADB_PASSWORD}@tcp(photoview-mariadb)/${MARIADB_DATABASE}"
       ## Uncomment the next line if PHOTOVIEW_DATABASE_DRIVER is set to `sqlite` in the .env
       # PHOTOVIEW_SQLITE_PATH: ${PHOTOVIEW_SQLITE_PATH}
+      ## Uncomment the next variable if set in the `.env` file
+      # PHOTOVIEW_UI_ENDPOINTS: ${PHOTOVIEW_UI_ENDPOINTS}
       PHOTOVIEW_LISTEN_IP: "0.0.0.0"
       ## Uncomment the next variable and set a different value to change the port photoview uses inside the container.
       ## If you change this, remember to update the port mapping (under the `ports:`) above!

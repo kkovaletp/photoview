@@ -72,18 +72,47 @@ func ApiEndpointUrl() *url.URL {
 	return apiEndpointURL
 }
 
-// TODO: allow a list of UI endpoints, not a single one
-func UiEndpointUrl() *url.URL {
+// UiEndpointUrls returns a list of allowed UI endpoints.
+// Returns nil if UI is served by this server (no external UI).
+func UiEndpointUrls() []*url.URL {
 	shouldServeUI := ShouldServeUI()
 	if shouldServeUI {
 		return nil
 	}
 
-	uiEndpointURL, err := url.Parse(EnvUIEndpoint.GetValue())
-	if err != nil {
-		log.Panicf("ERROR: Environment variable %s is not a proper url (%s): %v",
-			EnvUIEndpoint.GetName(), EnvUIEndpoint.GetValue(), err)
+	endpointStr := EnvUIEndpoints.GetValue()
+	if endpointStr == "" {
+		log.Panic("ERROR: PHOTOVIEW_UI_ENDPOINTS must be set when PHOTOVIEW_SERVE_UI=0, but is empty or unset")
 	}
 
-	return uiEndpointURL
+	// Split by comma and trim whitespace
+	endpointStrings := strings.Split(endpointStr, ",")
+	endpoints := make([]*url.URL, 0, len(endpointStrings))
+
+	for _, urlStr := range endpointStrings {
+		urlStr = strings.TrimSpace(urlStr)
+		if urlStr == "" {
+			continue
+		}
+
+		parsedURL, err := url.Parse(urlStr)
+		if err != nil {
+			log.Printf("ERROR: Invalid URL in %s (%s): %v\n", EnvUIEndpoints.GetName(), urlStr, err)
+			continue
+		}
+
+		// Validate required components
+		if parsedURL.Scheme == "" || parsedURL.Host == "" {
+			log.Printf("ERROR: UI endpoint URL must include scheme and host: %s\n", urlStr)
+			continue
+		}
+
+		endpoints = append(endpoints, parsedURL)
+	}
+
+	if len(endpoints) == 0 {
+		log.Panicf("ERROR: No valid UI endpoints found in %s", EnvUIEndpoints.GetName())
+	}
+
+	return endpoints
 }
