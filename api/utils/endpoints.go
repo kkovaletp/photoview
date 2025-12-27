@@ -168,7 +168,7 @@ func computeUiEndpointUrls() []*url.URL {
 		return nil
 	}
 
-	endpointStr := EnvUIEndpoints.GetValue()
+	endpointStr := strings.ToLower(EnvUIEndpoints.GetValue())
 	if endpointStr == "" {
 		log.Panic("ERROR: PHOTOVIEW_UI_ENDPOINTS must be set when PHOTOVIEW_SERVE_UI=0, but is empty or unset")
 	}

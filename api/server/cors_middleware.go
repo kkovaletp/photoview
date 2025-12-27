@@ -9,6 +9,11 @@ import (
 	"github.com/kkovaletp/photoview/api/utils"
 )
 
+// Variable to allow mocking in tests
+var uiEndpointUrlsFunc = func() []*url.URL {
+	return utils.UiEndpointUrls()
+}
+
 func CORSMiddleware(devMode bool) mux.MiddlewareFunc {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, req *http.Request) {
@@ -21,7 +26,7 @@ func CORSMiddleware(devMode bool) mux.MiddlewareFunc {
 				w.Header().Set("Vary", "Origin")
 			} else {
 				// Production environment
-				uiEndpoints := utils.UiEndpointUrls()
+				uiEndpoints := uiEndpointUrlsFunc()
 				allowedOrigin = setAllowedCORSOrigin(uiEndpoints, req, w)
 			}
 
@@ -61,7 +66,7 @@ func findMatchingOrigin(requestOrigin string, allowedEndpoints []*url.URL) strin
 		return ""
 	}
 
-	requestOriginStr := requestURL.Scheme + "://" + requestURL.Host
+	requestOriginStr := strings.ToLower(requestURL.Scheme) + "://" + strings.ToLower(requestURL.Host)
 
 	for _, endpoint := range allowedEndpoints {
 		allowedOriginStr := endpoint.Scheme + "://" + endpoint.Host
