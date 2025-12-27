@@ -9,12 +9,11 @@ on:
     branches: [master]
   schedule:
     # At 01:18 every Thursday. Details in https://docs.github.com/en/actions/writing-workflows/choosing-when-your-workflow-runs/events-that-trigger-workflows#schedule
-    - cron: '18 1 * * 4'
+    - cron: "18 1 * * 4"
 
 env:
   IS_PUSHING_IMAGES: ${{ github.event_name != 'pull_request' && github.repository == 'kkovaletp/photoview' }}
   # IS_PUSHING_IMAGES: true # Switch on when pushing images with forked repos.
-  DOCKER_REGISTRY: ${{ github.repository != 'kkovaletp/photoview' && 'ghcr.io/' || '' }}
   DOCKER_USERNAME: kkoval
   DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
   DOCKER_PLATFORMS: linux/amd64,linux/arm64
@@ -28,7 +27,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
         with:
-          fetch-tags: 'true'
+          fetch-tags: "true"
           fetch-depth: 0
 
       - name: Prepare the Matrix
@@ -136,19 +135,17 @@ jobs:
         uses: docker/setup-buildx-action@v3
 
       - name: Docker Login
-        if: ${{ env.IS_PUSHING_IMAGES == 'true' }}
         uses: docker/login-action@v3
         with:
-          registry: ${{ env.DOCKER_REGISTRY == 'ghcr.io/' && 'ghcr.io' || '' }}
-          username: ${{ env.DOCKER_REGISTRY == 'ghcr.io/' && github.actor || env.DOCKER_USERNAME }}
-          password: ${{ env.DOCKER_REGISTRY == 'ghcr.io/' && github.token || env.DOCKER_PASSWORD }}
+          username: ${{ env.DOCKER_USERNAME }}
+          password: ${{ env.DOCKER_PASSWORD }}
 
       - name: "Docker meta - ${{ matrix.entry.image }}:${{ matrix.entry.tag }}"
         id: docker_meta
         uses: docker/metadata-action@v5
         with:
           context: "git"
-          images: ${{ env.DOCKER_REGISTRY }}${{ matrix.entry.image }}
+          images: ${{ matrix.entry.image }}
           tags: |
             ${{ github.event_name == 'schedule' && matrix.entry.tag != 'master' && 'type=semver,pattern={{version}}' || '' }}
             ${{ github.event_name == 'schedule' && matrix.entry.tag != 'master' && 'type=semver,pattern={{major}}.{{minor}}' || '' }}
@@ -173,6 +170,7 @@ jobs:
           platforms: ${{ env.DOCKER_PLATFORMS }}
           pull: true
           push: ${{ env.IS_PUSHING_IMAGES }}
+          outputs: ${{ github.event_name == 'pull_request' && format('type=oci,dest=./image-{0},tar=false', matrix.entry.build_target) || '' }}
           tags: ${{ steps.docker_meta.outputs.tags }}
           labels: ${{ steps.docker_meta.outputs.labels }}
           annotations: ${{ steps.docker_meta.outputs.annotations }}
@@ -182,6 +180,22 @@ jobs:
             NODE_ENV=production
             VERSION=${{ github.ref_name }}
             COMMIT_SHA=${{ steps.git.outputs.COMMIT_SHORT_SHA }}
+
+      - name: Docker Scout report
+        id: scout_report
+        if: ${{ steps.docker_buildx.conclusion == 'success' }}
+        uses: docker/scout-action@v1
+        with:
+          command: cves
+          image: ${{ github.event_name == 'pull_request' && format('oci-dir://./image-{0}', matrix.entry.build_target) || fromJSON(steps.docker_meta.outputs.json).tags[0] }}
+          sarif-file: sarif.scout.${{ matrix.entry.build_target }}.json
+          summary: true
+
+      - name: Upload SARIF result
+        if: ${{ steps.scout_report.conclusion == 'success' || steps.scout_report.conclusion == 'failure' }}
+        uses: github/codeql-action/upload-sarif@v4
+        with:
+          sarif_file: sarif.scout.${{ matrix.entry.build_target }}.json
 
   dockle:
     name: Dockle Container Analysis
@@ -204,17 +218,16 @@ jobs:
       - name: Docker Login
         uses: docker/login-action@v3
         with:
-          registry: ${{ env.DOCKER_REGISTRY == 'ghcr.io/' && 'ghcr.io' || '' }}
-          username: ${{ env.DOCKER_REGISTRY == 'ghcr.io/' && github.actor || env.DOCKER_USERNAME }}
-          password: ${{ env.DOCKER_REGISTRY == 'ghcr.io/' && github.token || env.DOCKER_PASSWORD }}
+          username: ${{ env.DOCKER_USERNAME }}
+          password: ${{ env.DOCKER_PASSWORD }}
 
-      - name: Run Dockle for '${{ env.DOCKER_REGISTRY }}${{ matrix.entry.image }}:${{ matrix.entry.tag }}'
+      - name: Run Dockle for '${{ matrix.entry.image }}:${{ matrix.entry.tag }}'
         id: dockle
         if: ${{ matrix.entry.tag != '' }}
         continue-on-error: true
         uses: erzz/dockle-action@v1
         with:
-          image: "${{ env.DOCKER_REGISTRY }}${{ matrix.entry.image }}:${{ matrix.entry.tag }}"
+          image: "${{ matrix.entry.image }}:${{ matrix.entry.tag }}"
           report-name: dockle-results-${{ matrix.entry.tag }}
           report-format: sarif
           failure-threshold: fatal
