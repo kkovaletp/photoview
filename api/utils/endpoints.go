@@ -40,9 +40,40 @@ var (
 func ConfigureTestEndpoints(apiEndpoint, apiListen *url.URL, uiEndpoints []*url.URL) {
 	testEndpointsLocker.Lock()
 	defer testEndpointsLocker.Unlock()
-	testApiEndpointUrl = apiEndpoint
-	testApiListenUrl = apiListen
-	testUiEndpointUrls = uiEndpoints
+	// Normalize apiEndpoint if provided
+	if apiEndpoint != nil {
+		normalized := *apiEndpoint
+		normalized.Scheme = strings.ToLower(normalized.Scheme)
+		normalized.Host = strings.ToLower(normalized.Host)
+		testApiEndpointUrl = &normalized
+	} else {
+		testApiEndpointUrl = nil
+	}
+
+	// Normalize apiListen if provided
+	if apiListen != nil {
+		normalized := *apiListen
+		normalized.Scheme = strings.ToLower(normalized.Scheme)
+		normalized.Host = strings.ToLower(normalized.Host)
+		testApiListenUrl = &normalized
+	} else {
+		testApiListenUrl = nil
+	}
+
+	// Normalize uiEndpoints if provided
+	if uiEndpoints != nil {
+		testUiEndpointUrls = make([]*url.URL, len(uiEndpoints))
+		for i, endpoint := range uiEndpoints {
+			if endpoint != nil {
+				normalized := *endpoint
+				normalized.Scheme = strings.ToLower(normalized.Scheme)
+				normalized.Host = strings.ToLower(normalized.Host)
+				testUiEndpointUrls[i] = &normalized
+			}
+		}
+	} else {
+		testUiEndpointUrls = nil
+	}
 }
 
 func ApiListenUrl() *url.URL {
@@ -193,6 +224,18 @@ func computeUiEndpointUrls() []*url.URL {
 		if parsedURL.Scheme == "" || parsedURL.Host == "" {
 			log.Printf("ERROR: UI endpoint URL must include scheme and host: %s\n", urlStr)
 			continue
+		}
+
+		if parsedURL.Port() == "" {
+			switch parsedURL.Scheme {
+			case "https":
+				parsedURL.Host = net.JoinHostPort(parsedURL.Host, "443")
+			case "http":
+				parsedURL.Host = net.JoinHostPort(parsedURL.Host, "80")
+			default:
+				log.Printf("ERROR: Unknown scheme in UI endpoint URL (must be http or https): %s\n", urlStr)
+				continue
+			}
 		}
 
 		endpoints = append(endpoints, parsedURL)
