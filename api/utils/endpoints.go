@@ -72,6 +72,7 @@ func ApiEndpointUrl() *url.URL {
 	return apiEndpointURL
 }
 
+// TODO: allow a list of UI endpoints, not a single one
 func UiEndpointUrl() *url.URL {
 	shouldServeUI := ShouldServeUI()
 	if shouldServeUI {
