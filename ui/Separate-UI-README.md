@@ -17,6 +17,8 @@ Glory to Ukraine! 🇺🇦
 
 ## Contents
 
+// TODO: Describe the use case when Caddy generates self-signed certs and how to import the root cert on client devices to let them trust Photoview
+
 - [Photoview Separate UI Container](#photoview-separate-ui-container)
   - [Terms of use](#terms-of-use)
   - [Contents](#contents)

@@ -46,7 +46,7 @@ func setAllowedCORSOrigin(uiEndpoints []*url.URL, req *http.Request, w http.Resp
 		requestOrigin := req.Header.Get("Origin")
 		if requestOrigin != "" {
 			// Check if request origin matches any allowed endpoint
-			if matchedOrigin := findMatchingOrigin(requestOrigin, uiEndpoints); matchedOrigin != "" {
+			if matchedOrigin = findMatchingOrigin(requestOrigin, uiEndpoints); matchedOrigin != "" {
 				w.Header().Set("Access-Control-Allow-Origin", matchedOrigin)
 				w.Header().Set("Vary", "Origin")
 			}
@@ -62,15 +62,9 @@ func findMatchingOrigin(requestOrigin string, allowedEndpoints []*url.URL) strin
 	}
 
 	requestOriginStr := requestURL.Scheme + "://" + requestURL.Host
-	if requestURL.Port() != "" {
-		requestOriginStr = requestOriginStr + ":" + requestURL.Port()
-	}
 
 	for _, endpoint := range allowedEndpoints {
 		allowedOriginStr := endpoint.Scheme + "://" + endpoint.Host
-		if endpoint.Port() != "" {
-			allowedOriginStr = allowedOriginStr + ":" + endpoint.Port()
-		}
 		if requestOriginStr == allowedOriginStr {
 			return allowedOriginStr
 		}

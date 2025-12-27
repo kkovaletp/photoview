@@ -6,13 +6,33 @@ import (
 	"net/url"
 	"strconv"
 	"strings"
+	"sync"
 )
 
 const defaultIP = "127.0.0.1"
 const defaultPort = "4001"
 const defaultAPIPrefix = "/api"
 
+// Cached endpoint functions using sync.OnceValue for thread-safe lazy initialization
+var (
+	cachedApiEndpointUrl = sync.OnceValue(func() *url.URL {
+		return computeApiEndpointUrl()
+	})
+
+	cachedApiListenUrl = sync.OnceValue(func() *url.URL {
+		return computeApiListenUrl()
+	})
+
+	cachedUiEndpointUrls = sync.OnceValue(func() []*url.URL {
+		return computeUiEndpointUrls()
+	})
+)
+
 func ApiListenUrl() *url.URL {
+	return cachedApiListenUrl()
+}
+
+func computeApiListenUrl() *url.URL {
 	apiPath := ApiEndpointUrl().Path
 
 	var listenAddr string
@@ -46,6 +66,10 @@ func ApiListenUrl() *url.URL {
 }
 
 func ApiEndpointUrl() *url.URL {
+	return cachedApiEndpointUrl()
+}
+
+func computeApiEndpointUrl() *url.URL {
 	apiEndpointStr := EnvAPIEndpoint.GetValue()
 	if apiEndpointStr == "" {
 		apiEndpointStr = defaultAPIPrefix
@@ -75,6 +99,10 @@ func ApiEndpointUrl() *url.URL {
 // UiEndpointUrls returns a list of allowed UI endpoints.
 // Returns nil if UI is served by this server (no external UI).
 func UiEndpointUrls() []*url.URL {
+	return cachedUiEndpointUrls()
+}
+
+func computeUiEndpointUrls() []*url.URL {
 	shouldServeUI := ShouldServeUI()
 	if shouldServeUI {
 		return nil
