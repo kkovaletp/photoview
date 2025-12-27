@@ -118,7 +118,7 @@
         header @gql {
             Cache-Control "no-store, no-cache, must-revalidate, max-age=0"
         }
-        reverse_proxy {env.PHOTOVIEW_BACKEND_HOST:photoview}:{env.PHOTOVIEW_BACKEND_PORT:8080} {
+        reverse_proxy {$PHOTOVIEW_BACKEND_HOST:photoview}:{$PHOTOVIEW_BACKEND_PORT:8080} {
             health_uri /api/graphql
             health_method POST
             health_headers {

@@ -81,6 +81,16 @@ Glory to Ukraine! 🇺🇦
       - [Certificate-Key Mismatch](#certificate-key-mismatch)
       - [Browser Still Shows Self-Signed Certificate](#browser-still-shows-self-signed-certificate)
     - [Reference Links](#reference-links)
+  - [Trusting Self-Signed Certificates](#trusting-self-signed-certificates)
+    - [Accessing the Root Certificate](#accessing-the-root-certificate)
+      - [Platform-Specific Import Instructions](#platform-specific-import-instructions)
+        - [Windows](#windows)
+        - [macOS](#macos)
+        - [Linux (Ubuntu/Debian)](#linux-ubuntudebian)
+        - [iOS/iPadOS](#iosipados)
+        - [Android](#android)
+      - [Verifying Certificate Installation](#verifying-certificate-installation)
+      - [When to Use Self-Signed vs. Production Certificates](#when-to-use-self-signed-vs-production-certificates)
   - [Advanced Configuration](#advanced-configuration)
     - [Custom Ports](#custom-ports)
     - [Security Headers Customization](#security-headers-customization)
@@ -210,8 +220,8 @@ curl -o ./ui/file/Caddyfile https://raw.githubusercontent.com/kkovaletp/photovie
 curl -o Makefile https://raw.githubusercontent.com/kkovaletp/photoview/master/docker-compose%20example/Makefile
 ```
 
-Note: If you decided not to use the Makefile, read it and use the commands from its corresponding sections,
-mentioned in this guide.
+> [!NOTE] If you decided not to use the Makefile, read it and use the commands from its corresponding sections,
+> mentioned in this guide.
 
 #### Step 3: Configure Environment Variables
 
@@ -259,9 +269,11 @@ make all
 - **HTTPS**: `https://<your server>:<HTTPS port>`
 - **HTTP**: `http://<your server>:<HTTP port>` (automatically redirects to HTTPS)
 
-**Note**: Your browser will show a security warning for self-signed certificates. This is expected—click "Advanced" and
-proceed. For production, configure automatic certificate signing using a DNS provider (see below) or provide your own
-trusted certificates to the Caddy, placing them to the `/opt/photoview/ui/data/caddy/` corresponding sub-folders.
+> [!NOTE] Your browser will show a security warning for self-signed certificates. For full functionality (including service
+> workers and PWA features), you should trust Caddy's root certificate on your client devices. See
+> [Trusting Self-Signed Certificates](#trusting-self-signed-certificates) below for platform-specific instructions.
+> For production deployments, configure automatic certificate signing using a DNS provider (see
+> [Automatic HTTPS with DNS Providers](#automatic-https-with-dns-providers)) or provide your own trusted certificates.
 
 #### Step 9: Complete Initial Setup
 
@@ -287,8 +299,8 @@ services:
     # ... rest of the configuration remains the same
 ```
 
-Note: This external UI image is compatible with the `photoview/photoview:master` as of now.
-It will be compatible with the `photoview/photoview` release version, newer than the current latest release: 2.4.0.
+> [!NOTE]: This external UI image is compatible with the `photoview/photoview:master` as of now.
+> It will be compatible with the `photoview/photoview` release version, newer than the current latest release: 2.4.0.
 
 **Align the `photoview/photoview` internal ports**
 
@@ -324,7 +336,8 @@ services:
       PHOTOVIEW_BACKEND_PORT: 8080
 ```
 
-**Note**: On Linux, you may need to add `--add-host=host.docker.internal:host-gateway` to your `docker compose up` command, or add this to your service:
+> [!NOTE]: On Linux, you may need to add `--add-host=host.docker.internal:host-gateway` to your
+> `docker compose up` command, or add this to your service:
 
 ```yaml
 photoview-ui:
@@ -788,6 +801,104 @@ openssl s_client -connect yourdomain.com:443 -servername yourdomain.com
 - [Caddy TLS Directive Documentation](https://caddyserver.com/docs/caddyfile/directives/tls)
 - [Caddy Manual HTTPS Guide](https://caddyserver.com/docs/automatic-https#manual-certificate-loading)
 - [OpenSSL Certificate Conversion](https://www.openssl.org/docs/man1.1.1/man1/openssl-x509.html)
+
+---
+
+## Trusting Self-Signed Certificates
+
+When using Caddy's automatic self-signed certificates for local/development deployments, you need to trust the root CA
+on client devices to enable full functionality (service workers, PWA features, and eliminate browser security warnings).
+
+### Accessing the Root Certificate
+
+Caddy's root CA certificate is located at: `${HOST_PHOTOVIEW_LOCATION}/ui/data/caddy/pki/authorities/local/root.crt`
+
+This file is mapped from the container's `/data/caddy/pki/authorities/local/root.crt` path.
+
+Alternatively, users can access the root CA certificate when they open the Photoview web UI on their client devices for
+the 1st time. Most browsers allow to click the -https- part of the address bar and get the certificate chain details.
+Please pay attention to export the root CA certificate from the chain. Not the intermediate or host one, as they are
+short-term and regularly regenerated.
+
+#### Platform-Specific Import Instructions
+
+##### Windows
+
+1. Copy `root.crt` to your Windows machine
+2. Open Command Prompt as Administrator
+3. Run: `certutil -addstore -f "Root" "C:\path\to\root.crt"`
+4. Restart your browser
+
+Alternatively, use the
+[MMC Certificates snap-in](https://learn.microsoft.com/en-us/troubleshoot/windows-server/windows-security/import-third-party-ca-to-enterprise-ntauth-store#method-1-use-the-certificates-snap-in)
+to import to Trusted Root Certification Authorities.
+
+##### macOS
+
+1. Copy `root.crt` to your Mac
+2. Double-click the file (opens Keychain Access) or run:
+
+   ```bash
+   sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain /path/to/root.crt
+   ```
+
+3. If using double-click method: find the cert, double-click → Trust → "Always Trust".Make sure that it is added under the System section.
+4. Restart your browser
+
+See [Apple's certificate trust guide](https://support.apple.com/guide/keychain-access/add-certificates-to-a-keychain-kyca2431/mac)
+for detailed steps.
+
+##### Linux (Ubuntu/Debian)
+
+1. Copy the certificate to the CA directory:
+
+   ```bash
+   sudo cp /path/to/root.crt /usr/local/share/ca-certificates/photoview-caddy.crt
+   ```
+
+2. Update the trust store:
+
+   ```bash
+   sudo update-ca-certificates
+   ```
+
+3. Restart your browser
+
+> [!NOTE] Firefox on Linux uses its own certificate store and requires
+> [separate import](https://support.mozilla.org/en-US/kb/setting-certificate-authorities-firefox) via Firefox
+> Settings → Privacy & Security → Certificates → View Certificates → Import.
+
+##### iOS/iPadOS
+
+1. Email `root.crt` to your device or open the Photoview UI and export the root CA cert, then open in Safari
+2. Tap the certificate → Install Profile → enter passcode → Install
+3. Go to Settings → General → About → Certificate Trust Settings
+4. Enable the toggle for the Photoview Caddy root certificate
+5. Restart Safari
+
+See [Apple's iOS certificate trust guide](https://support.apple.com/en-us/102390) for additional details.
+
+##### Android
+
+1. Transfer `root.crt` to your Android device (email, USB, download, or open the Photoview UI and export the root CA cert)
+2. Go to Settings → Security → Encryption & credentials (or "Install a certificate")
+3. Select "CA certificate" → "Install anyway" (if prompted)
+4. Select the `root.crt` file and give it a name (e.g., "Photoview Caddy")
+5. Confirm with your device PIN/password
+6. Verify under Settings → Security → Trusted credentials → User tab
+
+**Important**: Many modern Android apps (Android 7.0+) don't trust user-installed certificates by default.
+For full system-wide trust, you need root access or MDM deployment.
+
+#### Verifying Certificate Installation
+
+After installing, verify the certificate is trusted: restart your browser and visit the Photoview UI - it should show
+secure connection without warnings.
+
+#### When to Use Self-Signed vs. Production Certificates
+
+- **Self-signed certificates**: Suitable for local development, home labs, and internal networks where you control all client devices
+- **Production certificates**: Use [DNS provider integration](#automatic-https-with-dns-providers) or [external certificates](#using-externally-signed-certificates) for public-facing deployments or when you can't control client device trust settings
 
 ---
 
