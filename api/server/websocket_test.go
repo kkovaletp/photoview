@@ -2,10 +2,63 @@ package server
 
 import (
 	"net/http/httptest"
+	"net/url"
+	"os"
+	"strings"
 	"testing"
 
+	"github.com/kkovaletp/photoview/api/utils"
 	"github.com/stretchr/testify/assert"
 )
+
+// configureTestEndpointsFromEnv reads current env vars and configures test endpoints.
+// Returns a cleanup function that should be deferred.
+func configureTestEndpointsFromEnv(t *testing.T) {
+	t.Helper()
+
+	// Force recomputation by calling the internal compute functions
+	// This requires we make them accessible or duplicate the logic
+	// For simplicity, we'll parse from env vars directly
+
+	var apiEndpoint *url.URL
+	var uiEndpoints []*url.URL
+
+	// Parse API endpoint
+	apiEndpointStr := os.Getenv("PHOTOVIEW_API_ENDPOINT")
+	if apiEndpointStr == "" {
+		apiEndpointStr = "/api"
+	}
+	var err error
+	apiEndpoint, err = url.Parse(apiEndpointStr)
+	if err != nil {
+		t.Fatalf("Failed to parse API endpoint: %v", err)
+	}
+
+	// Parse UI endpoints if not serving UI
+	serveUI := os.Getenv("PHOTOVIEW_SERVE_UI")
+	if serveUI == "0" || serveUI == "false" {
+		uiEndpointsStr := os.Getenv("PHOTOVIEW_UI_ENDPOINTS")
+		if uiEndpointsStr != "" {
+			for _, urlStr := range strings.Split(uiEndpointsStr, ",") {
+				urlStr = strings.TrimSpace(urlStr)
+				if urlStr == "" {
+					continue
+				}
+				parsedURL, err := url.Parse(urlStr)
+				if err == nil && parsedURL.Scheme != "" && parsedURL.Host != "" {
+					uiEndpoints = append(uiEndpoints, parsedURL)
+				}
+			}
+		}
+	}
+
+	utils.ConfigureTestEndpoints(apiEndpoint, nil, uiEndpoints)
+
+	// Cleanup: reset to nil after test
+	t.Cleanup(func() {
+		utils.ConfigureTestEndpoints(nil, nil, nil)
+	})
+}
 
 // =============================================================================
 // WebsocketUpgrader CheckOrigin Tests
@@ -39,6 +92,7 @@ func TestWebsocketUpgraderDevModeAllowsAllOrigins(t *testing.T) {
 
 func TestWebsocketUpgraderShouldServeUIAllowsAllOrigins(t *testing.T) {
 	t.Setenv("PHOTOVIEW_SERVE_UI", "1")
+	configureTestEndpointsFromEnv(t)
 
 	upgrader := WebsocketUpgrader(false)
 
@@ -67,6 +121,7 @@ func TestWebsocketUpgraderShouldServeUIAllowsAllOrigins(t *testing.T) {
 func TestWebsocketUpgraderEmptyOriginAllowed(t *testing.T) {
 	t.Setenv("PHOTOVIEW_SERVE_UI", "0")
 	t.Setenv("PHOTOVIEW_UI_ENDPOINTS", "https://ui.example.com")
+	configureTestEndpointsFromEnv(t)
 
 	upgrader := WebsocketUpgrader(false)
 	req := httptest.NewRequest("GET", "/ws", nil)
@@ -79,6 +134,7 @@ func TestWebsocketUpgraderEmptyOriginAllowed(t *testing.T) {
 func TestWebsocketUpgraderInvalidOriginRejected(t *testing.T) {
 	t.Setenv("PHOTOVIEW_SERVE_UI", "0")
 	t.Setenv("PHOTOVIEW_UI_ENDPOINTS", "https://ui.example.com")
+	configureTestEndpointsFromEnv(t)
 
 	upgrader := WebsocketUpgrader(false)
 	req := httptest.NewRequest("GET", "/ws", nil)
@@ -91,6 +147,7 @@ func TestWebsocketUpgraderInvalidOriginRejected(t *testing.T) {
 func TestWebsocketUpgraderMatchingSingleEndpointAllowed(t *testing.T) {
 	t.Setenv("PHOTOVIEW_SERVE_UI", "0")
 	t.Setenv("PHOTOVIEW_UI_ENDPOINTS", "https://ui.example.com")
+	configureTestEndpointsFromEnv(t)
 
 	upgrader := WebsocketUpgrader(false)
 	req := httptest.NewRequest("GET", "/ws", nil)
@@ -103,6 +160,7 @@ func TestWebsocketUpgraderMatchingSingleEndpointAllowed(t *testing.T) {
 func TestWebsocketUpgraderMatchingMultipleEndpoints(t *testing.T) {
 	t.Setenv("PHOTOVIEW_SERVE_UI", "0")
 	t.Setenv("PHOTOVIEW_UI_ENDPOINTS", "https://ui1.example.com,https://ui2.example.com,https://ui3.example.com")
+	configureTestEndpointsFromEnv(t)
 
 	testCases := []struct {
 		name            string
@@ -132,6 +190,7 @@ func TestWebsocketUpgraderMatchingMultipleEndpoints(t *testing.T) {
 func TestWebsocketUpgraderNonMatchingOriginRejected(t *testing.T) {
 	t.Setenv("PHOTOVIEW_SERVE_UI", "0")
 	t.Setenv("PHOTOVIEW_UI_ENDPOINTS", "https://ui.example.com")
+	configureTestEndpointsFromEnv(t)
 
 	testCases := []struct {
 		name   string
@@ -158,6 +217,7 @@ func TestWebsocketUpgraderNonMatchingOriginRejected(t *testing.T) {
 func TestWebsocketUpgraderPortMatching(t *testing.T) {
 	t.Setenv("PHOTOVIEW_SERVE_UI", "0")
 	t.Setenv("PHOTOVIEW_UI_ENDPOINTS", "https://ui.example.com:8443")
+	configureTestEndpointsFromEnv(t)
 
 	testCases := []struct {
 		name            string
@@ -185,6 +245,7 @@ func TestWebsocketUpgraderPortMatching(t *testing.T) {
 func TestWebsocketUpgraderWhitespaceInEndpoints(t *testing.T) {
 	t.Setenv("PHOTOVIEW_SERVE_UI", "0")
 	t.Setenv("PHOTOVIEW_UI_ENDPOINTS", " https://ui1.example.com , https://ui2.example.com , https://ui3.example.com ")
+	configureTestEndpointsFromEnv(t)
 
 	testCases := []string{
 		"https://ui1.example.com",
@@ -207,6 +268,7 @@ func TestWebsocketUpgraderWhitespaceInEndpoints(t *testing.T) {
 func TestWebsocketUpgraderCaseSensitiveHostMatching(t *testing.T) {
 	t.Setenv("PHOTOVIEW_SERVE_UI", "0")
 	t.Setenv("PHOTOVIEW_UI_ENDPOINTS", "https://UI.EXAMPLE.COM")
+	configureTestEndpointsFromEnv(t)
 
 	testCases := []struct {
 		name            string
@@ -234,6 +296,7 @@ func TestWebsocketUpgraderCaseSensitiveHostMatching(t *testing.T) {
 func TestWebsocketUpgraderSanitizationOfMaliciousOrigin(t *testing.T) {
 	t.Setenv("PHOTOVIEW_SERVE_UI", "0")
 	t.Setenv("PHOTOVIEW_UI_ENDPOINTS", "https://ui.example.com")
+	configureTestEndpointsFromEnv(t)
 
 	testCases := []struct {
 		name   string
@@ -260,6 +323,7 @@ func TestWebsocketUpgraderSanitizationOfMaliciousOrigin(t *testing.T) {
 func TestWebsocketUpgraderIPv6Endpoints(t *testing.T) {
 	t.Setenv("PHOTOVIEW_SERVE_UI", "0")
 	t.Setenv("PHOTOVIEW_UI_ENDPOINTS", "https://[::1]:8080,https://[2001:db8::1]:443")
+	configureTestEndpointsFromEnv(t)
 
 	testCases := []struct {
 		name            string
@@ -288,6 +352,7 @@ func TestWebsocketUpgraderIPv6Endpoints(t *testing.T) {
 func TestWebsocketUpgraderPathsDoNotAffectMatching(t *testing.T) {
 	t.Setenv("PHOTOVIEW_SERVE_UI", "0")
 	t.Setenv("PHOTOVIEW_UI_ENDPOINTS", "https://ui.example.com")
+	configureTestEndpointsFromEnv(t)
 
 	testCases := []struct {
 		name   string

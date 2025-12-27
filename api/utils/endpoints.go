@@ -28,7 +28,32 @@ var (
 	})
 )
 
+var (
+	testApiEndpointUrl  *url.URL
+	testApiListenUrl    *url.URL
+	testUiEndpointUrls  []*url.URL
+	testEndpointsLocker sync.RWMutex
+)
+
+// ConfigureTestEndpoints sets test-specific endpoint values.
+// Used for testing to override cached values.
+func ConfigureTestEndpoints(apiEndpoint, apiListen *url.URL, uiEndpoints []*url.URL) {
+	testEndpointsLocker.Lock()
+	defer testEndpointsLocker.Unlock()
+	testApiEndpointUrl = apiEndpoint
+	testApiListenUrl = apiListen
+	testUiEndpointUrls = uiEndpoints
+}
+
 func ApiListenUrl() *url.URL {
+	testEndpointsLocker.RLock()
+	testUrl := testApiListenUrl
+	testEndpointsLocker.RUnlock()
+	if testUrl != nil {
+		urlCopy := *testUrl
+		return &urlCopy
+	}
+
 	cached := cachedApiListenUrl()
 	urlCopy := *cached
 	return &urlCopy
@@ -68,6 +93,14 @@ func computeApiListenUrl() *url.URL {
 }
 
 func ApiEndpointUrl() *url.URL {
+	testEndpointsLocker.RLock()
+	testUrl := testApiEndpointUrl
+	testEndpointsLocker.RUnlock()
+	if testUrl != nil {
+		urlCopy := *testUrl
+		return &urlCopy
+	}
+
 	cached := cachedApiEndpointUrl()
 	urlCopy := *cached
 	return &urlCopy
@@ -103,6 +136,18 @@ func computeApiEndpointUrl() *url.URL {
 // UiEndpointUrls returns a list of allowed UI endpoints.
 // Returns nil if UI is served by this server (no external UI).
 func UiEndpointUrls() []*url.URL {
+	testEndpointsLocker.RLock()
+	testUrls := testUiEndpointUrls
+	testEndpointsLocker.RUnlock()
+	if testUrls != nil {
+		copies := make([]*url.URL, len(testUrls))
+		for i, u := range testUrls {
+			urlCopy := *u
+			copies[i] = &urlCopy
+		}
+		return copies
+	}
+
 	cached := cachedUiEndpointUrls()
 	if cached == nil {
 		return nil
