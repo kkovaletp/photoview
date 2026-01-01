@@ -226,19 +226,14 @@ func computeUiEndpointUrls() []*url.URL {
 			continue
 		}
 
-		if parsedURL.Port() == "" {
-			switch parsedURL.Scheme {
-			case "https":
-				parsedURL.Host = net.JoinHostPort(parsedURL.Host, "443")
-			case "http":
-				parsedURL.Host = net.JoinHostPort(parsedURL.Host, "80")
-			default:
-				log.Printf("ERROR: Unknown scheme in UI endpoint URL (must be http or https): %s\n", urlStr)
-				continue
-			}
+		endpoints, skip := managePort(parsedURL, endpoints, urlStr)
+		if skip {
+			continue
 		}
 
-		endpoints = append(endpoints, parsedURL)
+		if !contains(endpoints, parsedURL) {
+			endpoints = append(endpoints, parsedURL)
+		}
 	}
 
 	if len(endpoints) == 0 {
@@ -246,4 +241,58 @@ func computeUiEndpointUrls() []*url.URL {
 	}
 
 	return endpoints
+}
+
+func managePort(parsedURL *url.URL, endpoints []*url.URL, urlStr string) ([]*url.URL, bool) {
+	// Add default ports for http/https if missing, or add host without port if standard port is specified
+	host := parsedURL.Hostname()
+	port := parsedURL.Port()
+	scheme := parsedURL.Scheme
+
+	switch scheme {
+	case "http":
+		switch port {
+		case "":
+			// Add with default port 80
+			extendedURL, _ := url.Parse("http://" + host + ":80")
+			if !contains(endpoints, extendedURL) {
+				endpoints = append(endpoints, extendedURL)
+			}
+		case "80":
+			// Add without port
+			simpleURL, _ := url.Parse("http://" + host)
+			if !contains(endpoints, simpleURL) {
+				endpoints = append(endpoints, simpleURL)
+			}
+		}
+	case "https":
+		switch port {
+		case "":
+			// Add with default port 443
+			extendedURL, _ := url.Parse("https://" + host + ":443")
+			if !contains(endpoints, extendedURL) {
+				endpoints = append(endpoints, extendedURL)
+			}
+		case "443":
+			// Add without port
+			simpleURL, _ := url.Parse("https://" + host)
+			if !contains(endpoints, simpleURL) {
+				endpoints = append(endpoints, simpleURL)
+			}
+		}
+	default:
+		log.Printf("ERROR: Unknown scheme in UI endpoint URL (must be http or https): %s\n", urlStr)
+		return endpoints, true
+	}
+	return endpoints, false
+}
+
+// contains checks if the given *url.URL is present in the slice.
+func contains(urls []*url.URL, target *url.URL) bool {
+	for _, u := range urls {
+		if u.String() == target.String() {
+			return true
+		}
+	}
+	return false
 }
