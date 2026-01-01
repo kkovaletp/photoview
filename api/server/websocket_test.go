@@ -16,10 +16,6 @@ import (
 func configureTestEndpointsFromEnv(t *testing.T) {
 	t.Helper()
 
-	// Force recomputation by calling the internal compute functions
-	// This requires we make them accessible or duplicate the logic
-	// For simplicity, we'll parse from env vars directly
-
 	var apiEndpoint *url.URL
 	var uiEndpoints []*url.URL
 
@@ -47,6 +43,34 @@ func configureTestEndpointsFromEnv(t *testing.T) {
 				parsedURL, err := url.Parse(urlStr)
 				if err == nil && parsedURL.Scheme != "" && parsedURL.Host != "" {
 					uiEndpoints = append(uiEndpoints, parsedURL)
+
+					// Replicate port normalization logic from production (managePort)
+					host := parsedURL.Hostname()
+					port := parsedURL.Port()
+					scheme := parsedURL.Scheme
+
+					switch scheme {
+					case "http":
+						if port == "" {
+							// Add variant with explicit port 80
+							withPort, _ := url.Parse("http://" + host + ":80")
+							uiEndpoints = append(uiEndpoints, withPort)
+						} else if port == "80" {
+							// Add variant without port
+							withoutPort, _ := url.Parse("http://" + host)
+							uiEndpoints = append(uiEndpoints, withoutPort)
+						}
+					case "https":
+						if port == "" {
+							// Add variant with explicit port 443
+							withPort, _ := url.Parse("https://" + host + ":443")
+							uiEndpoints = append(uiEndpoints, withPort)
+						} else if port == "443" {
+							// Add variant without port
+							withoutPort, _ := url.Parse("https://" + host)
+							uiEndpoints = append(uiEndpoints, withoutPort)
+						}
+					}
 				}
 			}
 		}
