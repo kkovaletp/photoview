@@ -34,7 +34,7 @@ func WebsocketUpgrader(devMode bool) websocket.Upgrader {
 
 			uiEndpoints := utils.UiEndpointUrls()
 			for _, uiEndpoint := range uiEndpoints {
-				if uiEndpoint.Host == strings.ToLower(originURL.Host) {
+				if uiEndpoint.Scheme+uiEndpoint.Host == strings.ToLower(originURL.Scheme+originURL.Host) {
 					return true
 				}
 			}

@@ -226,7 +226,8 @@ func computeUiEndpointUrls() []*url.URL {
 			continue
 		}
 
-		endpoints, skip := managePort(parsedURL, endpoints, urlStr)
+		var skip bool
+		endpoints, skip = managePort(parsedURL, endpoints, urlStr)
 		if skip {
 			continue
 		}
