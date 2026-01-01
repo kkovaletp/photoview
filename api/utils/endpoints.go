@@ -62,13 +62,13 @@ func ConfigureTestEndpoints(apiEndpoint, apiListen *url.URL, uiEndpoints []*url.
 
 	// Normalize uiEndpoints if provided
 	if uiEndpoints != nil {
-		testUiEndpointUrls = make([]*url.URL, len(uiEndpoints))
-		for i, endpoint := range uiEndpoints {
+		testUiEndpointUrls = make([]*url.URL, 0, len(uiEndpoints))
+		for _, endpoint := range uiEndpoints {
 			if endpoint != nil {
 				normalized := *endpoint
 				normalized.Scheme = strings.ToLower(normalized.Scheme)
 				normalized.Host = strings.ToLower(normalized.Host)
-				testUiEndpointUrls[i] = &normalized
+				testUiEndpointUrls = append(testUiEndpointUrls, &normalized)
 			}
 		}
 	} else {

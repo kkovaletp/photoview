@@ -159,7 +159,7 @@ ENV PHOTOVIEW_MEDIA_CACHE=/home/photoview/media-cache
 EXPOSE ${PHOTOVIEW_LISTEN_PORT}
 
 HEALTHCHECK --interval=60s --timeout=10s --start-period=10s --retries=2 \
-    CMD curl --fail http://localhost:${PHOTOVIEW_LISTEN_PORT}${PHOTOVIEW_API_ENDPOINT}/graphql \
+    CMD curl --fail "http://localhost:${PHOTOVIEW_LISTEN_PORT}${PHOTOVIEW_API_ENDPOINT}/graphql" \
         -X POST -H 'Content-Type: application/json' \
         --data-raw '{"operationName":"CheckInitialSetup","variables":{},"query":"query CheckInitialSetup { siteInfo { initialSetup }}"}' \
     || exit 1

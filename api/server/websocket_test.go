@@ -265,7 +265,7 @@ func TestWebsocketUpgraderWhitespaceInEndpoints(t *testing.T) {
 	}
 }
 
-func TestWebsocketUpgraderCaseSensitiveHostMatching(t *testing.T) {
+func TestWebsocketUpgraderCaseInsensitiveHostMatching(t *testing.T) {
 	t.Setenv("PHOTOVIEW_SERVE_UI", "0")
 	t.Setenv("PHOTOVIEW_UI_ENDPOINTS", "https://UI.EXAMPLE.COM")
 	configureTestEndpointsFromEnv(t)
@@ -276,8 +276,8 @@ func TestWebsocketUpgraderCaseSensitiveHostMatching(t *testing.T) {
 		shouldBeAllowed bool
 	}{
 		{"uppercase", "https://UI.EXAMPLE.COM", true},
-		{"lowercase", "https://ui.example.com", false},
-		{"mixed case", "https://Ui.Example.Com", false},
+		{"lowercase", "https://ui.example.com", true},
+		{"mixed case", "https://Ui.Example.Com", true},
 	}
 
 	for _, tc := range testCases {
@@ -288,7 +288,7 @@ func TestWebsocketUpgraderCaseSensitiveHostMatching(t *testing.T) {
 
 			result := upgrader.CheckOrigin(req)
 			assert.Equal(t, tc.shouldBeAllowed, result,
-				"Host matching should be case-sensitive per URL spec")
+				"Host matching should be case-insensitive per URL spec")
 		})
 	}
 }
