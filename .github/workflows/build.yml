@@ -12,7 +12,7 @@ on:
     - cron: "18 1 * * 4"
 
 env:
-  IS_PUSHING_IMAGES: ${{ github.event_name != 'pull_request' && github.repository == 'kkovaletp/photoview' }}
+  IS_PUSHING_IMAGES: ${{ github.event_name != 'pull_request_target' && github.repository == 'kkovaletp/photoview' }}
   # IS_PUSHING_IMAGES: true # Switch on when pushing images with forked repos.
   DOCKER_USERNAME: kkoval
   DOCKER_PASSWORD: ${{ secrets.DOCKER_PASSWORD }}
@@ -38,7 +38,7 @@ jobs:
 
           # Prepare the tags matrix
           case ${{ github.event_name }} in
-            pull_request)
+            pull_request_target)
               TAGS='[{"tag": "", "ref": "${{ github.ref }}"}]'
               ;;
             push)
@@ -121,7 +121,7 @@ jobs:
 
       - name: SonarCloud Scan
         uses: SonarSource/sonarqube-scan-action@master
-        if: github.repository == github.event.pull_request.head.repo.full_name
+        if: ${{ github.event_name != 'pull_request_target' || github.repository == github.event.pull_request.head.repo.full_name }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_DOCKER }}
@@ -171,7 +171,7 @@ jobs:
           platforms: ${{ env.DOCKER_PLATFORMS }}
           pull: true
           push: ${{ env.IS_PUSHING_IMAGES }}
-          outputs: ${{ github.event_name == 'pull_request' && format('type=oci,dest=./image-{0},tar=false', matrix.entry.build_target) || '' }}
+          outputs: ${{ github.event_name == 'pull_request_target' && format('type=oci,dest=./image-{0},tar=false', matrix.entry.build_target) || '' }}
           tags: ${{ steps.docker_meta.outputs.tags }}
           labels: ${{ steps.docker_meta.outputs.labels }}
           annotations: ${{ steps.docker_meta.outputs.annotations }}
@@ -188,7 +188,7 @@ jobs:
         uses: docker/scout-action@v1
         with:
           command: cves
-          image: ${{ github.event_name == 'pull_request' && format('oci-dir://./image-{0}', matrix.entry.build_target) || fromJSON(steps.docker_meta.outputs.json).tags[0] }}
+          image: ${{ github.event_name == 'pull_request_target' && format('oci-dir://./image-{0}', matrix.entry.build_target) || fromJSON(steps.docker_meta.outputs.json).tags[0] }}
           sarif-file: sarif.scout.${{ matrix.entry.build_target }}.json
           summary: true
 
@@ -208,7 +208,7 @@ jobs:
       fail-fast: false
       matrix:
         entry: ${{ fromJson(needs.prepare.outputs.matrix) }}
-    if: ${{ github.repository == github.event.pull_request.head.repo.full_name && github.event_name != 'pull_request' }}
+    if: ${{ github.repository == 'kkovaletp/photoview' && github.event_name != 'pull_request_target' }}
     steps:
       # Makes sure your .dockleignore file is available to the next step
       - name: Checkout ${{ matrix.entry.ref }}
