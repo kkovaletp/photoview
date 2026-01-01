@@ -39,7 +39,7 @@ jobs:
           # Prepare the tags matrix
           case ${{ github.event_name }} in
             pull_request_target)
-              TAGS='[{"tag": "", "ref": "${{ github.ref }}"}]'
+              TAGS='[{"tag": "", "ref": "refs/pull/${{ github.event.pull_request.number }}/head"}]'
               ;;
             push)
               TAGS='[{"tag": "${{ github.ref_name }}", "ref": "${{ github.ref }}"}]'
@@ -136,7 +136,7 @@ jobs:
 
       - name: Docker Login
         uses: docker/login-action@v3
-        if: github.repository == github.event.pull_request.head.repo.full_name
+        if: ${{ github.event_name != 'pull_request_target' || github.repository == github.event.pull_request.head.repo.full_name }}
         with:
           username: ${{ env.DOCKER_USERNAME }}
           password: ${{ env.DOCKER_PASSWORD }}
