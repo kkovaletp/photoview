@@ -13,7 +13,7 @@ import (
 // CORSMiddleware Tests
 // =============================================================================
 
-func TestCORSMiddleware_DevMode(t *testing.T) {
+func TestCORSMiddlewareDevMode(t *testing.T) {
 	t.Run("sets origin from request header", func(t *testing.T) {
 		middleware := CORSMiddleware(true)
 		handler := middleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -85,7 +85,7 @@ func TestCORSMiddleware_DevMode(t *testing.T) {
 	})
 }
 
-func TestCORSMiddleware_ProductionMode(t *testing.T) {
+func TestCORSMiddlewareProductionMode(t *testing.T) {
 	t.Run("allows request from matching UI endpoint", func(t *testing.T) {
 		// Mock utils.UiEndpointUrls to return test endpoints
 		testEndpoint, _ := url.Parse("https://example.com")
@@ -227,6 +227,32 @@ func TestCORSMiddleware_ProductionMode(t *testing.T) {
 		handler.ServeHTTP(rec, req)
 
 		assert.False(t, nextCalled, "next handler should not be called for OPTIONS")
+		assert.Equal(t, http.StatusOK, rec.Code)
+	})
+
+	t.Run("handles missing origin header", func(t *testing.T) {
+		testEndpoint, _ := url.Parse("https://example.com")
+		originalUiEndpointUrls := uiEndpointUrlsFunc
+		uiEndpointUrlsFunc = func() []*url.URL {
+			return []*url.URL{testEndpoint}
+		}
+		defer func() { uiEndpointUrlsFunc = originalUiEndpointUrls }()
+
+		middleware := CORSMiddleware(false)
+		handler := middleware(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			w.WriteHeader(http.StatusOK)
+		}))
+
+		req := httptest.NewRequest("GET", "/test", nil)
+		// No Origin header set
+		rec := httptest.NewRecorder()
+
+		handler.ServeHTTP(rec, req)
+
+		// Should not set CORS origin when no Origin header is present
+		assert.Empty(t, rec.Header().Get("Access-Control-Allow-Origin"))
+		// CORS methods should not be set when no origin matches
+		assert.Empty(t, rec.Header().Get("Access-Control-Allow-Methods"))
 		assert.Equal(t, http.StatusOK, rec.Code)
 	})
 }

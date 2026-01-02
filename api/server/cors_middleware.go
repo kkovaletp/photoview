@@ -71,7 +71,7 @@ func findMatchingOrigin(requestOrigin string, allowedEndpoints []*url.URL) strin
 	for _, endpoint := range allowedEndpoints {
 		allowedOriginStr := endpoint.Scheme + "://" + endpoint.Host
 		if requestOriginStr == allowedOriginStr {
-			return requestOrigin
+			return requestURL.Scheme + "://" + requestURL.Host
 		}
 	}
 
