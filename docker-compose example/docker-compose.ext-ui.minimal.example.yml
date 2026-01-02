@@ -45,6 +45,7 @@ services:
       # PHOTOVIEW_SQLITE_PATH: ${PHOTOVIEW_SQLITE_PATH}
       ## We don't need Photoview to serve the UI in this setup, as it will be handled by the separate `photoview-ui` service
       PHOTOVIEW_SERVE_UI: "false"
+      PHOTOVIEW_UI_ENDPOINTS: ${PHOTOVIEW_UI_ENDPOINTS}
       PHOTOVIEW_LISTEN_IP: "0.0.0.0"
       ## Optional: If you are using Samba/CIFS-Share and experience problems with "directory not found"
       ## Enable the following Godebug
