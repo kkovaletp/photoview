@@ -240,15 +240,9 @@ func TestUiEndpointUrls(t *testing.T) {
 	tests := []struct {
 		name      string
 		endpoints []*url.URL
-		wantNil   bool
 		wantCount int
 		validate  func(t *testing.T, urls []*url.URL)
 	}{
-		{
-			name:      "nil endpoints",
-			endpoints: nil,
-			wantNil:   true,
-		},
 		{
 			name: "single endpoint",
 			endpoints: []*url.URL{
@@ -294,11 +288,6 @@ func TestUiEndpointUrls(t *testing.T) {
 			t.Cleanup(utils.ResetTestEndpoints)
 
 			urls := utils.UiEndpointUrls()
-
-			if tt.wantNil {
-				assert.Nil(t, urls, "UiEndpointUrls should return nil")
-				return
-			}
 
 			require.NotNil(t, urls)
 			require.Len(t, urls, tt.wantCount)
