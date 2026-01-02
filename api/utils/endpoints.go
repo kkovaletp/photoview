@@ -76,6 +76,16 @@ func ConfigureTestEndpoints(apiEndpoint, apiListen *url.URL, uiEndpoints []*url.
 	}
 }
 
+// ResetTestEndpoints clears all test endpoint overrides.
+// Call this in t.Cleanup() or defer to ensure test isolation.
+func ResetTestEndpoints() {
+	testEndpointsLocker.Lock()
+	defer testEndpointsLocker.Unlock()
+	testApiEndpointUrl = nil
+	testApiListenUrl = nil
+	testUiEndpointUrls = nil
+}
+
 func ApiListenUrl() *url.URL {
 	testEndpointsLocker.RLock()
 	testUrl := testApiListenUrl
