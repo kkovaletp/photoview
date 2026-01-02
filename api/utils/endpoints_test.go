@@ -2,11 +2,7 @@ package utils_test
 
 import (
 	"fmt"
-	"net"
 	"net/url"
-	"os"
-	"strconv"
-	"strings"
 	"testing"
 
 	"github.com/kkovaletp/photoview/api/utils"
@@ -18,82 +14,6 @@ import (
 // Test Helper Functions
 // =============================================================================
 
-// configureEndpointsFromEnv reads environment variables and configures test endpoints.
-// This bypasses production computation and is suitable for accessor/copy tests.
-// For tests that need to verify production computation logic (panics, port normalization),
-// use resetAndCallProduction instead.
-func configureEndpointsFromEnv(t *testing.T) {
-	t.Helper()
-
-	// Parse API endpoint
-	apiEndpointStr := os.Getenv("PHOTOVIEW_API_ENDPOINT")
-	if apiEndpointStr == "" {
-		apiEndpointStr = "/api"
-	}
-	apiEndpoint, err := url.Parse(apiEndpointStr)
-	require.NoError(t, err, "Failed to parse API endpoint %q", apiEndpointStr)
-
-	// Handle absolute URL without path - default to /api
-	if apiEndpoint.Scheme != "" && apiEndpoint.Host != "" && apiEndpoint.Path == "" {
-		apiEndpoint.Path = "/api"
-	}
-	// Handle relative path without leading slash
-	if apiEndpoint.Scheme == "" && apiEndpoint.Host == "" && apiEndpoint.Path != "" && !strings.HasPrefix(apiEndpoint.Path, "/") {
-		apiEndpoint.Path = "/" + apiEndpoint.Path
-	}
-
-	// Parse and validate API listen URL
-	listenIP := os.Getenv("PHOTOVIEW_LISTEN_IP")
-	if listenIP == "" {
-		listenIP = "127.0.0.1"
-	}
-	require.NotNil(t, net.ParseIP(listenIP), "Invalid IP address: %s", listenIP)
-
-	listenPort := os.Getenv("PHOTOVIEW_LISTEN_PORT")
-	if listenPort == "" {
-		listenPort = "4001"
-	}
-	port, err := strconv.Atoi(listenPort)
-	require.NoError(t, err, "Invalid port number: %s", listenPort)
-	require.True(t, port >= 1 && port <= 65535, "Port out of range [1-65535]: %d", port)
-
-	listenURL := &url.URL{
-		Scheme: "http",
-		Host:   net.JoinHostPort(listenIP, listenPort),
-		Path:   apiEndpoint.Path,
-	}
-
-	// Parse UI endpoints if not serving UI
-	var uiEndpoints []*url.URL
-	shouldServeUI := strings.ToLower(os.Getenv("PHOTOVIEW_SERVE_UI"))
-	if shouldServeUI != "1" && shouldServeUI != "" {
-		uiEndpointsStr := os.Getenv("PHOTOVIEW_UI_ENDPOINTS")
-		require.NotEmpty(t, uiEndpointsStr, "PHOTOVIEW_UI_ENDPOINTS must be set when PHOTOVIEW_SERVE_UI=0")
-
-		for _, urlStr := range strings.Split(uiEndpointsStr, ",") {
-			urlStr = strings.TrimSpace(urlStr)
-			if urlStr == "" {
-				continue
-			}
-			parsedURL, err := url.Parse(urlStr)
-			if err != nil {
-				t.Logf("Skipping invalid URL: %s", urlStr)
-				continue
-			}
-			if parsedURL.Scheme == "" || parsedURL.Host == "" {
-				t.Logf("Skipping URL without scheme/host: %s", urlStr)
-				continue
-			}
-			uiEndpoints = append(uiEndpoints, parsedURL)
-		}
-
-		require.NotEmpty(t, uiEndpoints, "No valid UI endpoints found")
-	}
-
-	utils.ConfigureTestEndpoints(apiEndpoint, listenURL, uiEndpoints)
-	t.Cleanup(utils.ResetTestEndpoints)
-}
-
 // mustParseURL is a helper for constructing test URLs
 func mustParseURL(rawURL string) *url.URL {
 	u, err := url.Parse(rawURL)
@@ -104,51 +24,41 @@ func mustParseURL(rawURL string) *url.URL {
 }
 
 // =============================================================================
-// ApiListenUrl Tests
+// ApiListenUrl Tests - Using ConfigureTestEndpoints for accessor behavior
 // =============================================================================
 
 func TestApiListenUrl(t *testing.T) {
 	tests := []struct {
 		name       string
-		listenIP   string
-		listenPort string
-		apiPath    string
+		listenURL  *url.URL
 		wantScheme string
 		wantHost   string
 		wantPath   string
 	}{
 		{
 			name:       "default values",
-			listenIP:   "",
-			listenPort: "",
-			apiPath:    "",
+			listenURL:  mustParseURL("http://127.0.0.1:4001/api"),
 			wantScheme: "http",
 			wantHost:   "127.0.0.1:4001",
 			wantPath:   "/api",
 		},
 		{
 			name:       "custom IP and port",
-			listenIP:   "192.168.1.100",
-			listenPort: "8080",
-			apiPath:    "",
+			listenURL:  mustParseURL("http://192.168.1.100:8080/api"),
 			wantScheme: "http",
 			wantHost:   "192.168.1.100:8080",
 			wantPath:   "/api",
 		},
 		{
 			name:       "IPv6 address",
-			listenIP:   "::1",
-			listenPort: "4001",
-			apiPath:    "",
+			listenURL:  mustParseURL("http://[::1]:4001/api"),
 			wantScheme: "http",
 			wantHost:   "[::1]:4001",
 			wantPath:   "/api",
 		},
 		{
 			name:       "custom API path",
-			listenIP:   "",
-			listenPort: "",
-			apiPath:    "/custom",
+			listenURL:  mustParseURL("http://127.0.0.1:4001/custom"),
 			wantScheme: "http",
 			wantHost:   "127.0.0.1:4001",
 			wantPath:   "/custom",
@@ -157,13 +67,10 @@ func TestApiListenUrl(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			t.Setenv("PHOTOVIEW_LISTEN_IP", tt.listenIP)
-			t.Setenv("PHOTOVIEW_LISTEN_PORT", tt.listenPort)
-			t.Setenv("PHOTOVIEW_API_ENDPOINT", tt.apiPath)
+			utils.ConfigureTestEndpoints(nil, tt.listenURL, nil)
+			t.Cleanup(utils.ResetTestEndpoints)
 
-			configureEndpointsFromEnv(t)
 			url := utils.ApiListenUrl()
-
 			require.NotNil(t, url, "ApiListenUrl should return a URL")
 			assert.Equal(t, tt.wantScheme, url.Scheme, "Scheme mismatch")
 			assert.Equal(t, tt.wantHost, url.Host, "Host mismatch")
@@ -177,31 +84,37 @@ func TestApiListenUrlValidation(t *testing.T) {
 		name       string
 		listenIP   string
 		listenPort string
-		wantErrMsg string
+		wantPanic  bool
 	}{
 		{
 			name:       "invalid IP",
 			listenIP:   "invalid-ip",
 			listenPort: "4001",
-			wantErrMsg: "Invalid IP address: invalid-ip",
+			wantPanic:  true,
 		},
 		{
 			name:       "invalid port - non-numeric",
 			listenIP:   "127.0.0.1",
 			listenPort: "not-a-number",
-			wantErrMsg: "Invalid port number: not-a-number",
+			wantPanic:  true,
 		},
 		{
 			name:       "invalid port - too low",
 			listenIP:   "127.0.0.1",
 			listenPort: "0",
-			wantErrMsg: "Port out of range [1-65535]: 0",
+			wantPanic:  true,
 		},
 		{
 			name:       "invalid port - too high",
 			listenIP:   "127.0.0.1",
 			listenPort: "65536",
-			wantErrMsg: "Port out of range [1-65535]: 65536",
+			wantPanic:  true,
+		},
+		{
+			name:       "valid IP and port",
+			listenIP:   "127.0.0.1",
+			listenPort: "4001",
+			wantPanic:  false,
 		},
 	}
 
@@ -211,32 +124,33 @@ func TestApiListenUrlValidation(t *testing.T) {
 			t.Setenv("PHOTOVIEW_LISTEN_PORT", tt.listenPort)
 			t.Setenv("PHOTOVIEW_API_ENDPOINT", "/api")
 
-			// Helper validates and will fail the test with clear error message
-			// We're using a sub-test to capture the failure
-			result := t.Run("validation", func(t *testing.T) {
-				configureEndpointsFromEnv(t)
-			})
-			assert.False(t, result, "Expected validation to fail for test case: %s", tt.name)
+			if tt.wantPanic {
+				assert.Panics(t, func() {
+					utils.ComputeApiListenUrlForTest()
+				}, "Expected panic for invalid input")
+			} else {
+				assert.NotPanics(t, func() {
+					url := utils.ComputeApiListenUrlForTest()
+					assert.NotNil(t, url)
+				}, "Should not panic for valid input")
+			}
 		})
 	}
 }
 
 func TestApiListenUrlReturnsCopy(t *testing.T) {
-	t.Setenv("PHOTOVIEW_LISTEN_IP", "127.0.0.1")
-	t.Setenv("PHOTOVIEW_LISTEN_PORT", "4001")
-	t.Setenv("PHOTOVIEW_API_ENDPOINT", "/api")
-	configureEndpointsFromEnv(t)
+	testURL := mustParseURL("http://127.0.0.1:4001/api")
+	utils.ConfigureTestEndpoints(nil, testURL, nil)
+	t.Cleanup(utils.ResetTestEndpoints)
 
 	url1 := utils.ApiListenUrl()
 	url2 := utils.ApiListenUrl()
 
-	// Verify they are different pointers
+	require.NotNil(t, url1)
+	require.NotNil(t, url2)
 	assert.NotSame(t, url1, url2, "Should return different URL instances")
 
-	// Mutate one URL
 	url1.Path = "/modified"
-
-	// Verify the other is unchanged
 	assert.Equal(t, "/api", url2.Path, "Mutation of one URL should not affect another")
 
 	url3 := utils.ApiListenUrl()
@@ -250,49 +164,35 @@ func TestApiListenUrlReturnsCopy(t *testing.T) {
 func TestApiEndpointUrl(t *testing.T) {
 	tests := []struct {
 		name       string
-		endpoint   string
+		endpoint   *url.URL
 		wantScheme string
 		wantHost   string
 		wantPath   string
 	}{
 		{
 			name:       "default value",
-			endpoint:   "",
+			endpoint:   mustParseURL("/api"),
 			wantScheme: "",
 			wantHost:   "",
 			wantPath:   "/api",
 		},
 		{
 			name:       "custom relative path",
-			endpoint:   "/custom/api",
+			endpoint:   mustParseURL("/custom/api"),
 			wantScheme: "",
 			wantHost:   "",
 			wantPath:   "/custom/api",
 		},
 		{
-			name:       "relative path without leading slash",
-			endpoint:   "api",
-			wantScheme: "",
-			wantHost:   "",
-			wantPath:   "/api",
-		},
-		{
 			name:       "absolute URL with path",
-			endpoint:   "https://example.com/api",
-			wantScheme: "https",
-			wantHost:   "example.com",
-			wantPath:   "/api",
-		},
-		{
-			name:       "absolute URL without path defaults to /api",
-			endpoint:   "https://example.com",
+			endpoint:   mustParseURL("https://example.com/api"),
 			wantScheme: "https",
 			wantHost:   "example.com",
 			wantPath:   "/api",
 		},
 		{
 			name:       "absolute URL with port",
-			endpoint:   "http://example.com:8080/api",
+			endpoint:   mustParseURL("http://example.com:8080/api"),
 			wantScheme: "http",
 			wantHost:   "example.com:8080",
 			wantPath:   "/api",
@@ -301,13 +201,10 @@ func TestApiEndpointUrl(t *testing.T) {
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			t.Setenv("PHOTOVIEW_API_ENDPOINT", tt.endpoint)
-			t.Setenv("PHOTOVIEW_LISTEN_IP", "127.0.0.1")
-			t.Setenv("PHOTOVIEW_LISTEN_PORT", "4001")
+			utils.ConfigureTestEndpoints(tt.endpoint, nil, nil)
+			t.Cleanup(utils.ResetTestEndpoints)
 
-			configureEndpointsFromEnv(t)
 			url := utils.ApiEndpointUrl()
-
 			require.NotNil(t, url, "ApiEndpointUrl should return a URL")
 			assert.Equal(t, tt.wantScheme, url.Scheme, "Scheme mismatch")
 			assert.Equal(t, tt.wantHost, url.Host, "Host mismatch")
@@ -316,29 +213,18 @@ func TestApiEndpointUrl(t *testing.T) {
 	}
 }
 
-func TestApiEndpointUrlValidation(t *testing.T) {
-	t.Run("invalid URL", func(t *testing.T) {
-		t.Setenv("PHOTOVIEW_API_ENDPOINT", "ht!tp://invalid url")
-		t.Setenv("PHOTOVIEW_LISTEN_IP", "127.0.0.1")
-		t.Setenv("PHOTOVIEW_LISTEN_PORT", "4001")
-
-		result := t.Run("validation", func(t *testing.T) {
-			configureEndpointsFromEnv(t)
-		})
-		assert.False(t, result, "Expected validation to fail for invalid URL")
-	})
-}
-
 func TestApiEndpointUrlReturnsCopy(t *testing.T) {
-	t.Setenv("PHOTOVIEW_API_ENDPOINT", "/api")
-	t.Setenv("PHOTOVIEW_LISTEN_IP", "127.0.0.1")
-	t.Setenv("PHOTOVIEW_LISTEN_PORT", "4001")
-	configureEndpointsFromEnv(t)
+	testEndpoint := mustParseURL("/api")
+	utils.ConfigureTestEndpoints(testEndpoint, nil, nil)
+	t.Cleanup(utils.ResetTestEndpoints)
 
 	url1 := utils.ApiEndpointUrl()
 	url2 := utils.ApiEndpointUrl()
 
+	require.NotNil(t, url1)
+	require.NotNil(t, url2)
 	assert.NotSame(t, url1, url2, "Should return different URL instances")
+
 	url1.Path = "/modified"
 	assert.Equal(t, "/api", url2.Path, "Mutation of one URL should not affect another")
 
@@ -353,128 +239,69 @@ func TestApiEndpointUrlReturnsCopy(t *testing.T) {
 func TestUiEndpointUrls(t *testing.T) {
 	tests := []struct {
 		name      string
-		serveUI   string
-		endpoints string
+		endpoints []*url.URL
 		wantNil   bool
 		wantCount int
 		validate  func(t *testing.T, urls []*url.URL)
 	}{
 		{
-			name:      "returns nil when serving UI internally",
-			serveUI:   "1",
-			endpoints: "",
+			name:      "nil endpoints",
+			endpoints: nil,
 			wantNil:   true,
 		},
 		{
-			name:      "single endpoint",
-			serveUI:   "0",
-			endpoints: "https://ui.example.com",
+			name: "single endpoint",
+			endpoints: []*url.URL{
+				mustParseURL("https://ui.example.com"),
+			},
 			wantCount: 1,
 			validate: func(t *testing.T, urls []*url.URL) {
-				require.Len(t, urls, 1, "Should have 1 endpoint")
-				assert.Equal(t, "https", urls[0].Scheme, "Scheme mismatch")
-				assert.Equal(t, "ui.example.com", urls[0].Host, "Host mismatch")
+				assert.Equal(t, "https", urls[0].Scheme)
+				assert.Equal(t, "ui.example.com", urls[0].Host)
 			},
 		},
 		{
-			name:      "multiple endpoints",
-			serveUI:   "0",
-			endpoints: "https://ui1.example.com,https://ui2.example.com,http://localhost:3000",
+			name: "multiple endpoints",
+			endpoints: []*url.URL{
+				mustParseURL("https://ui1.example.com"),
+				mustParseURL("https://ui2.example.com"),
+				mustParseURL("http://localhost:3000"),
+			},
 			wantCount: 3,
 			validate: func(t *testing.T, urls []*url.URL) {
-				require.Len(t, urls, 3, "Should have 3 endpoints")
-				assert.Equal(t, "https", urls[0].Scheme, "First endpoint scheme mismatch")
-				assert.Equal(t, "ui1.example.com", urls[0].Host, "First endpoint host mismatch")
-				assert.Equal(t, "https", urls[1].Scheme, "Second endpoint scheme mismatch")
-				assert.Equal(t, "ui2.example.com", urls[1].Host, "Second endpoint host mismatch")
-				assert.Equal(t, "http", urls[2].Scheme, "Third endpoint scheme mismatch")
-				assert.Equal(t, "localhost:3000", urls[2].Host, "Third endpoint host mismatch")
+				assert.Equal(t, "ui1.example.com", urls[0].Host)
+				assert.Equal(t, "ui2.example.com", urls[1].Host)
+				assert.Equal(t, "localhost:3000", urls[2].Host)
 			},
 		},
 		{
-			name:      "trims whitespace",
-			serveUI:   "0",
-			endpoints: "  https://ui1.example.com  ,  https://ui2.example.com  ",
-			wantCount: 2,
-			validate: func(t *testing.T, urls []*url.URL) {
-				require.Len(t, urls, 2, "Should have 2 endpoints after trimming")
-				assert.Equal(t, "ui1.example.com", urls[0].Host, "First endpoint host mismatch")
-				assert.Equal(t, "ui2.example.com", urls[1].Host, "Second endpoint host mismatch")
+			name: "endpoints with paths",
+			endpoints: []*url.URL{
+				mustParseURL("https://ui.example.com/app"),
+				mustParseURL("https://ui2.example.com/photoview"),
 			},
-		},
-		{
-			name:      "skips empty entries",
-			serveUI:   "0",
-			endpoints: "https://ui1.example.com,,  ,https://ui2.example.com",
 			wantCount: 2,
 			validate: func(t *testing.T, urls []*url.URL) {
-				require.Len(t, urls, 2, "Should have 2 endpoints, skipping empty entries")
-			},
-		},
-		{
-			name:      "skips invalid URLs",
-			serveUI:   "0",
-			endpoints: "https://valid.com,ht!tp://invalid,https://another.com",
-			wantCount: 2,
-			validate: func(t *testing.T, urls []*url.URL) {
-				require.Len(t, urls, 2, "Should have 2 valid endpoints")
-				assert.Equal(t, "valid.com", urls[0].Host, "First valid endpoint host mismatch")
-				assert.Equal(t, "another.com", urls[1].Host, "Second valid endpoint host mismatch")
-			},
-		},
-		{
-			name:      "skips URLs without scheme",
-			serveUI:   "0",
-			endpoints: "https://valid.com,example.com,https://another.com",
-			wantCount: 2,
-			validate: func(t *testing.T, urls []*url.URL) {
-				require.Len(t, urls, 2, "Should skip URL without scheme")
-				assert.Equal(t, "valid.com", urls[0].Host, "First endpoint host mismatch")
-				assert.Equal(t, "another.com", urls[1].Host, "Second endpoint host mismatch")
-			},
-		},
-		{
-			name:      "skips URLs without host",
-			serveUI:   "0",
-			endpoints: "https://valid.com,/just/path,https://another.com",
-			wantCount: 2,
-			validate: func(t *testing.T, urls []*url.URL) {
-				require.Len(t, urls, 2, "Should skip URL without host")
-				assert.Equal(t, "valid.com", urls[0].Host, "First endpoint host mismatch")
-				assert.Equal(t, "another.com", urls[1].Host, "Second endpoint host mismatch")
-			},
-		},
-		{
-			name:      "preserves paths",
-			serveUI:   "0",
-			endpoints: "https://ui.example.com/app,https://ui2.example.com/photoview",
-			wantCount: 2,
-			validate: func(t *testing.T, urls []*url.URL) {
-				require.Len(t, urls, 2, "Should have 2 endpoints")
-				assert.Equal(t, "/app", urls[0].Path, "First endpoint path mismatch")
-				assert.Equal(t, "/photoview", urls[1].Path, "Second endpoint path mismatch")
+				assert.Equal(t, "/app", urls[0].Path)
+				assert.Equal(t, "/photoview", urls[1].Path)
 			},
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			t.Setenv("PHOTOVIEW_SERVE_UI", tt.serveUI)
-			t.Setenv("PHOTOVIEW_UI_ENDPOINTS", tt.endpoints)
-			t.Setenv("PHOTOVIEW_API_ENDPOINT", "/api")
-			t.Setenv("PHOTOVIEW_LISTEN_IP", "127.0.0.1")
-			t.Setenv("PHOTOVIEW_LISTEN_PORT", "4001")
+			utils.ConfigureTestEndpoints(nil, nil, tt.endpoints)
+			t.Cleanup(utils.ResetTestEndpoints)
 
-			configureEndpointsFromEnv(t)
 			urls := utils.UiEndpointUrls()
 
 			if tt.wantNil {
-				assert.Nil(t, urls, "UiEndpointUrls should return nil when serving UI internally")
+				assert.Nil(t, urls, "UiEndpointUrls should return nil")
 				return
 			}
 
-			require.NotNil(t, urls, "UiEndpointUrls should not return nil")
-			assert.Len(t, urls, tt.wantCount, "Endpoint count mismatch")
+			require.NotNil(t, urls)
+			require.Len(t, urls, tt.wantCount)
 
 			if tt.validate != nil {
 				tt.validate(t, urls)
@@ -488,19 +315,31 @@ func TestUiEndpointUrlsValidation(t *testing.T) {
 		name      string
 		serveUI   string
 		endpoints string
-		wantErr   string
+		wantPanic bool
 	}{
 		{
 			name:      "empty endpoints when not serving UI",
 			serveUI:   "0",
 			endpoints: "",
-			wantErr:   "PHOTOVIEW_UI_ENDPOINTS must be set when PHOTOVIEW_SERVE_UI=0",
+			wantPanic: true,
 		},
 		{
-			name:      "no valid URLs",
+			name:      "no valid URLs panics",
 			serveUI:   "0",
-			endpoints: "invalid,/just/path,ht!tp://bad",
-			wantErr:   "No valid UI endpoints found",
+			endpoints: "invalid,/just/path",
+			wantPanic: true,
+		},
+		{
+			name:      "valid URL does not panic",
+			serveUI:   "0",
+			endpoints: "https://valid.com",
+			wantPanic: false,
+		},
+		{
+			name:      "serving UI returns nil without panic",
+			serveUI:   "1",
+			endpoints: "",
+			wantPanic: false,
 		},
 	}
 
@@ -508,33 +347,41 @@ func TestUiEndpointUrlsValidation(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			t.Setenv("PHOTOVIEW_SERVE_UI", tt.serveUI)
 			t.Setenv("PHOTOVIEW_UI_ENDPOINTS", tt.endpoints)
-			t.Setenv("PHOTOVIEW_API_ENDPOINT", "/api")
 
-			result := t.Run("validation", func(t *testing.T) {
-				configureEndpointsFromEnv(t)
-			})
-			assert.False(t, result, "Expected validation to fail: %s", tt.wantErr)
+			if tt.wantPanic {
+				assert.Panics(t, func() {
+					utils.ComputeUiEndpointUrlsForTest()
+				}, "Expected panic for invalid configuration")
+			} else {
+				assert.NotPanics(t, func() {
+					urls := utils.ComputeUiEndpointUrlsForTest()
+					if tt.serveUI == "1" {
+						assert.Nil(t, urls, "Should return nil when serving UI")
+					} else {
+						assert.NotNil(t, urls, "Should return URLs when not serving UI")
+					}
+				}, "Should not panic for valid configuration")
+			}
 		})
 	}
 }
 
 func TestUiEndpointUrlsReturnsCopies(t *testing.T) {
-	t.Setenv("PHOTOVIEW_SERVE_UI", "0")
-	t.Setenv("PHOTOVIEW_UI_ENDPOINTS", "https://ui.example.com")
-	t.Setenv("PHOTOVIEW_API_ENDPOINT", "/api")
-	configureEndpointsFromEnv(t)
+	testEndpoints := []*url.URL{
+		mustParseURL("https://ui.example.com"),
+	}
+	utils.ConfigureTestEndpoints(nil, nil, testEndpoints)
+	t.Cleanup(utils.ResetTestEndpoints)
 
 	urls1 := utils.UiEndpointUrls()
 	urls2 := utils.UiEndpointUrls()
 
-	// Compare slice pointers
-	require.NotNil(t, urls1, "First call should return URLs")
-	require.NotNil(t, urls2, "Second call should return URLs")
-	assert.True(t, &urls1 != &urls2, "Should return different slice instances")
+	require.NotNil(t, urls1)
+	require.NotNil(t, urls2)
+	require.Len(t, urls1, 1)
+	require.Len(t, urls2, 1)
 
-	// Compare URL pointers
-	require.Len(t, urls1, 1, "Should have one URL")
-	require.Len(t, urls2, 1, "Should have one URL")
+	// Verify URL pointers are different (preventing mutation issues)
 	assert.NotSame(t, urls1[0], urls2[0], "Should return different URL instances")
 
 	// Mutate and verify isolation
@@ -542,12 +389,12 @@ func TestUiEndpointUrlsReturnsCopies(t *testing.T) {
 	assert.Empty(t, urls2[0].Path, "Mutation of one URL should not affect another copy")
 
 	urls3 := utils.UiEndpointUrls()
-	require.Len(t, urls3, 1, "Third call should return URLs")
+	require.Len(t, urls3, 1)
 	assert.Empty(t, urls3[0].Path, "Subsequent calls should return unmodified URLs")
 }
 
 // =============================================================================
-// Port Normalization Tests (testing production code behavior)
+// Port Normalization Tests - Testing production computation logic
 // =============================================================================
 
 func TestUiEndpointUrlsPortNormalization(t *testing.T) {
@@ -560,9 +407,8 @@ func TestUiEndpointUrlsPortNormalization(t *testing.T) {
 		{
 			name:      "http without port adds :80 variant",
 			endpoints: "http://example.com",
-			wantCount: 2, // both http://example.com and http://example.com:80
+			wantCount: 2,
 			validate: func(t *testing.T, urls []*url.URL) {
-				require.Len(t, urls, 2, "Should have 2 URLs (original + port variant)")
 				hosts := []string{urls[0].Host, urls[1].Host}
 				assert.Contains(t, hosts, "example.com", "Should contain host without port")
 				assert.Contains(t, hosts, "example.com:80", "Should contain host with :80")
@@ -573,7 +419,6 @@ func TestUiEndpointUrlsPortNormalization(t *testing.T) {
 			endpoints: "http://example.com:80",
 			wantCount: 2,
 			validate: func(t *testing.T, urls []*url.URL) {
-				require.Len(t, urls, 2, "Should have 2 URLs (original + simplified variant)")
 				hosts := []string{urls[0].Host, urls[1].Host}
 				assert.Contains(t, hosts, "example.com", "Should contain host without port")
 				assert.Contains(t, hosts, "example.com:80", "Should contain host with :80")
@@ -584,7 +429,6 @@ func TestUiEndpointUrlsPortNormalization(t *testing.T) {
 			endpoints: "https://example.com",
 			wantCount: 2,
 			validate: func(t *testing.T, urls []*url.URL) {
-				require.Len(t, urls, 2, "Should have 2 URLs (original + port variant)")
 				hosts := []string{urls[0].Host, urls[1].Host}
 				assert.Contains(t, hosts, "example.com", "Should contain host without port")
 				assert.Contains(t, hosts, "example.com:443", "Should contain host with :443")
@@ -595,7 +439,6 @@ func TestUiEndpointUrlsPortNormalization(t *testing.T) {
 			endpoints: "https://example.com:443",
 			wantCount: 2,
 			validate: func(t *testing.T, urls []*url.URL) {
-				require.Len(t, urls, 2, "Should have 2 URLs (original + simplified variant)")
 				hosts := []string{urls[0].Host, urls[1].Host}
 				assert.Contains(t, hosts, "example.com", "Should contain host without port")
 				assert.Contains(t, hosts, "example.com:443", "Should contain host with :443")
@@ -606,32 +449,25 @@ func TestUiEndpointUrlsPortNormalization(t *testing.T) {
 			endpoints: "http://example.com:8080",
 			wantCount: 1,
 			validate: func(t *testing.T, urls []*url.URL) {
-				require.Len(t, urls, 1, "Should have only 1 URL (no port normalization for non-standard ports)")
-				assert.Equal(t, "example.com:8080", urls[0].Host, "Host with non-standard port should be preserved")
+				assert.Equal(t, "example.com:8080", urls[0].Host, "Non-standard port should be preserved")
 			},
 		},
 	}
 
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			// Reset to ensure production code runs
-			utils.ResetTestEndpoints()
-
 			t.Setenv("PHOTOVIEW_SERVE_UI", "0")
 			t.Setenv("PHOTOVIEW_UI_ENDPOINTS", tt.endpoints)
 
-			// Call UiEndpointUrls which will trigger production computation
-			urls := utils.UiEndpointUrls()
+			// Call the exported test function to get fresh computation
+			urls := utils.ComputeUiEndpointUrlsForTest()
 
-			require.NotNil(t, urls, "UiEndpointUrls should return URLs")
-			assert.Len(t, urls, tt.wantCount, "Endpoint count mismatch for %s", tt.name)
+			require.NotNil(t, urls, "ComputeUiEndpointUrlsForTest should return URLs")
+			require.Len(t, urls, tt.wantCount, "Endpoint count mismatch")
 
 			if tt.validate != nil {
 				tt.validate(t, urls)
 			}
-
-			// Clean up for next test
-			t.Cleanup(utils.ResetTestEndpoints)
 		})
 	}
 }
@@ -641,10 +477,11 @@ func TestUiEndpointUrlsPortNormalization(t *testing.T) {
 // =============================================================================
 
 func TestApiListenUrlUsesApiEndpointPath(t *testing.T) {
-	t.Setenv("PHOTOVIEW_LISTEN_IP", "127.0.0.1")
-	t.Setenv("PHOTOVIEW_LISTEN_PORT", "4001")
-	t.Setenv("PHOTOVIEW_API_ENDPOINT", "/custom/endpoint")
-	configureEndpointsFromEnv(t)
+	apiEndpoint := mustParseURL("/custom/endpoint")
+	listenURL := mustParseURL("http://127.0.0.1:4001/custom/endpoint")
+
+	utils.ConfigureTestEndpoints(apiEndpoint, listenURL, nil)
+	t.Cleanup(utils.ResetTestEndpoints)
 
 	listenUrl := utils.ApiListenUrl()
 	apiUrl := utils.ApiEndpointUrl()
@@ -653,10 +490,11 @@ func TestApiListenUrlUsesApiEndpointPath(t *testing.T) {
 }
 
 func TestApiListenUrlWithAbsoluteApiEndpoint(t *testing.T) {
-	t.Setenv("PHOTOVIEW_LISTEN_IP", "127.0.0.1")
-	t.Setenv("PHOTOVIEW_LISTEN_PORT", "4001")
-	t.Setenv("PHOTOVIEW_API_ENDPOINT", "https://external.com/api")
-	configureEndpointsFromEnv(t)
+	apiEndpoint := mustParseURL("https://external.com/api")
+	listenURL := mustParseURL("http://127.0.0.1:4001/api")
+
+	utils.ConfigureTestEndpoints(apiEndpoint, listenURL, nil)
+	t.Cleanup(utils.ResetTestEndpoints)
 
 	listenUrl := utils.ApiListenUrl()
 	assert.Equal(t, "/api", listenUrl.Path, "Should use path from absolute API endpoint")
@@ -680,17 +518,17 @@ func TestConfigureTestEndpointsDirectly(t *testing.T) {
 
 	// Verify endpoints are set correctly
 	gotApi := utils.ApiEndpointUrl()
-	require.NotNil(t, gotApi, "ApiEndpointUrl should return a URL")
-	assert.Equal(t, "/test-api", gotApi.Path, "API endpoint path mismatch")
+	require.NotNil(t, gotApi)
+	assert.Equal(t, "/test-api", gotApi.Path)
 
 	gotListen := utils.ApiListenUrl()
-	require.NotNil(t, gotListen, "ApiListenUrl should return a URL")
-	assert.Equal(t, "10.0.0.1:9000", gotListen.Host, "Listen host mismatch")
+	require.NotNil(t, gotListen)
+	assert.Equal(t, "10.0.0.1:9000", gotListen.Host)
 
 	urls := utils.UiEndpointUrls()
-	require.Len(t, urls, 2, "Should have 2 UI endpoints")
-	assert.Equal(t, "test-ui1.com", urls[0].Host, "First UI endpoint host mismatch")
-	assert.Equal(t, "test-ui2.com", urls[1].Host, "Second UI endpoint host mismatch")
+	require.Len(t, urls, 2)
+	assert.Equal(t, "test-ui1.com", urls[0].Host)
+	assert.Equal(t, "test-ui2.com", urls[1].Host)
 }
 
 func TestResetTestEndpoints(t *testing.T) {
@@ -700,20 +538,21 @@ func TestResetTestEndpoints(t *testing.T) {
 
 	// Verify they're set
 	gotApi := utils.ApiEndpointUrl()
-	require.NotNil(t, gotApi, "ApiEndpointUrl should return a URL")
-	assert.Equal(t, "/test", gotApi.Path, "Test endpoint should be set")
+	require.NotNil(t, gotApi)
+	assert.Equal(t, "/test", gotApi.Path)
 
 	// Reset
 	utils.ResetTestEndpoints()
 
-	// Set production env var
-	t.Setenv("PHOTOVIEW_API_ENDPOINT", "/production")
-	t.Setenv("PHOTOVIEW_LISTEN_IP", "127.0.0.1")
-	t.Setenv("PHOTOVIEW_LISTEN_PORT", "4001")
-	configureEndpointsFromEnv(t)
+	// Now set new test endpoints
+	apiEndpoint2 := mustParseURL("/production")
+	utils.ConfigureTestEndpoints(apiEndpoint2, nil, nil)
 
 	// Should now use the new value
 	gotApi2 := utils.ApiEndpointUrl()
-	require.NotNil(t, gotApi2, "ApiEndpointUrl should return a URL")
-	assert.Equal(t, "/production", gotApi2.Path, "Should use new endpoint after reset")
+	require.NotNil(t, gotApi2)
+	assert.Equal(t, "/production", gotApi2.Path)
+
+	// Clean up
+	utils.ResetTestEndpoints()
 }

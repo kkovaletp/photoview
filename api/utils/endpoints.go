@@ -100,6 +100,12 @@ func ApiListenUrl() *url.URL {
 	return &urlCopy
 }
 
+// ComputeApiListenUrlForTest exposes computeApiListenUrl for testing.
+// This allows tests to verify validation logic without being affected by caching.
+func ComputeApiListenUrlForTest() *url.URL {
+	return computeApiListenUrl()
+}
+
 func computeApiListenUrl() *url.URL {
 	apiPath := ApiEndpointUrl().Path
 
@@ -145,6 +151,12 @@ func ApiEndpointUrl() *url.URL {
 	cached := cachedApiEndpointUrl()
 	urlCopy := *cached
 	return &urlCopy
+}
+
+// ComputeApiEndpointUrlForTest exposes computeApiEndpointUrl for testing.
+// This allows tests to verify validation logic without being affected by caching.
+func ComputeApiEndpointUrlForTest() *url.URL {
+	return computeApiEndpointUrl()
 }
 
 func computeApiEndpointUrl() *url.URL {
@@ -201,6 +213,12 @@ func UiEndpointUrls() []*url.URL {
 		copies[i] = &urlCopy
 	}
 	return copies
+}
+
+// ComputeUiEndpointUrlsForTest exposes computeUiEndpointUrls for testing.
+// This allows tests to verify validation and port normalization logic without being affected by caching.
+func ComputeUiEndpointUrlsForTest() []*url.URL {
+	return computeUiEndpointUrls()
 }
 
 func computeUiEndpointUrls() []*url.URL {
