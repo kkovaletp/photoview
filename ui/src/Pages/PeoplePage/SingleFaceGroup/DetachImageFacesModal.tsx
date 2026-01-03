@@ -1,4 +1,5 @@
-import { BaseMutationOptions, gql, useMutation } from '@apollo/client'
+import { BaseMutationOptions, gql } from '@apollo/client'
+import { useMutation } from '@apollo/client/react'
 import React, { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'

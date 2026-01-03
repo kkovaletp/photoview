@@ -1,5 +1,6 @@
 import { useEffect, useReducer } from 'react'
-import { useQuery, gql } from '@apollo/client'
+import { gql } from '@apollo/client'
+import { useQuery } from '@apollo/client/react'
 import TimelineGroupDate from './TimelineGroupDate'
 import PresentView from '../photoGallery/presentView/PresentView'
 import useURLParameters from '../../hooks/useURLParameters'

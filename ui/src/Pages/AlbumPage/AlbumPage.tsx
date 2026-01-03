@@ -1,5 +1,6 @@
 import { useCallback } from 'react'
-import { useQuery, gql } from '@apollo/client'
+import { gql } from '@apollo/client'
+import { useQuery } from '@apollo/client/react'
 import AlbumGallery, {
   ALBUM_GALLERY_FRAGMENT,
 } from '../../components/albumGallery/AlbumGallery'

@@ -3,8 +3,8 @@ import {
   FetchResult,
   gql,
   MutationFunctionOptions,
-  useMutation,
 } from '@apollo/client'
+import { useMutation } from '@apollo/client/react'
 import EditUserRow from './EditUserRow'
 import ViewUserRow from './ViewUserRow'
 import { settingsUsersQuery_user } from './__generated__/settingsUsersQuery'

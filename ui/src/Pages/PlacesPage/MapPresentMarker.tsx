@@ -1,6 +1,6 @@
 import { gql } from '@apollo/client'
 import React, { useEffect } from 'react'
-import { useLazyQuery } from '@apollo/client'
+import { useLazyQuery } from '@apollo/client/react'
 import PresentView from '../../components/photoGallery/presentView/PresentView'
 import type mapboxgl from 'mapbox-gl'
 import { PresentMarker } from './PlacesPage'

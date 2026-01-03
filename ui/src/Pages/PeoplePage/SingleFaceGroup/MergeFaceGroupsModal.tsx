@@ -1,4 +1,5 @@
-import { gql, PureQueryOptions, useMutation, useQuery } from '@apollo/client'
+import { gql, PureQueryOptions } from '@apollo/client'
+import { useMutation, useQuery } from '@apollo/client/react'
 import React, { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
@@ -136,11 +137,11 @@ const MergeFaceGroupsModal = ({
 
   // Show all face groups on the destination page, but filter out the destination group on the source page
   const filteredFaceGroups =
-  data?.myFaceGroups.filter(
-    x =>
-      state === MergeFaceGroupsModalState.SelectDestination ||
-      x.id != selectedDestinationFaceGroup?.id
-  ) ?? []
+    data?.myFaceGroups.filter(
+      x =>
+        state === MergeFaceGroupsModalState.SelectDestination ||
+        x.id != selectedDestinationFaceGroup?.id
+    ) ?? []
 
   const goNext = () => {
     if (isNil(selectedDestinationFaceGroup))
@@ -156,7 +157,7 @@ const MergeFaceGroupsModal = ({
 
     const sourceGroupIDs: string[] = [...selectedFaceGroups].filter(fc => fc !== null).map(fc => fc.id)
 
-    if(sourceGroupIDs.length < 1)
+    if (sourceGroupIDs.length < 1)
       throw new Error('No selected source face groups')
 
     combineFacesMutation({
@@ -234,10 +235,9 @@ const MergeFaceGroupsModal = ({
         'people_page.modal.merge_face_groups.sources_table.title',
         'Select one or more source faces to merge into:'
       ) +
-      ` ${
-        selectedDestinationFaceGroup?.label ??
-        t('people_page.face_group.unlabeled', 'Unlabeled') ??
-        'Unlabeled'
+      ` ${selectedDestinationFaceGroup?.label ??
+      t('people_page.face_group.unlabeled', 'Unlabeled') ??
+      'Unlabeled'
       }`,
   }
 
@@ -253,7 +253,7 @@ const MergeFaceGroupsModal = ({
         frozen={state === MergeFaceGroupsModalState.SelectDestination && preselectedDestinationFaceGroup !== undefined}
         faceGroups={filteredFaceGroups}
         selectedFaceGroups={selectedFaceGroups}
-        toggleSelectedFaceGroup={(face) => { if(face === null) return; handleFaceGroupToggled(face) }}
+        toggleSelectedFaceGroup={(face) => { if (face === null) return; handleFaceGroupToggled(face) }}
       />
     </Modal>
   )

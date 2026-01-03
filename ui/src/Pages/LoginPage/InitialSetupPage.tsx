@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react'
-import { gql, useQuery, useMutation } from '@apollo/client'
+import { gql } from '@apollo/client'
+import { useQuery, useMutation } from '@apollo/client/react'
 import { useNavigate } from 'react-router-dom'
 import { Container } from './loginUtilities'
 

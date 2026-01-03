@@ -1,4 +1,5 @@
-import { gql, useLazyQuery, useMutation } from '@apollo/client'
+import { gql } from '@apollo/client'
+import { useLazyQuery, useMutation } from '@apollo/client/react'
 import React, { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import SelectFaceGroupTable from './SelectFaceGroupTable'

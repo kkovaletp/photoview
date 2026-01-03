@@ -1,5 +1,6 @@
 import React, { createRef, useEffect, useState } from 'react'
-import { gql, useMutation, useQuery } from '@apollo/client'
+import { gql } from '@apollo/client'
+import { useMutation, useQuery } from '@apollo/client/react'
 import Layout from '../../components/layout/Layout'
 import styled from 'styled-components'
 import { Link, useParams } from 'react-router-dom'

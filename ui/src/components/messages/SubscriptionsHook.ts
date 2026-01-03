@@ -1,6 +1,7 @@
 import { notificationSubscription } from './__generated__/notificationSubscription'
 import React, { useEffect } from 'react'
-import { useSubscription, gql } from '@apollo/client'
+import { gql } from '@apollo/client'
+import { useSubscription } from '@apollo/client/react'
 import { authToken } from '../../helpers/authentication'
 import { NotificationType } from '../../__generated__/globalTypes'
 

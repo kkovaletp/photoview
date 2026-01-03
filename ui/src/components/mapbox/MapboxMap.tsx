@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect, forwardRef } from 'react'
-import { gql, useQuery } from '@apollo/client'
+import { gql } from '@apollo/client'
+import { useQuery } from '@apollo/client/react'
 import type mapboxgl from 'mapbox-gl'
 import styled from 'styled-components'
 

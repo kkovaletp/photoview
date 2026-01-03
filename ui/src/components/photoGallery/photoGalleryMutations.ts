@@ -1,5 +1,6 @@
 import { MediaGalleryFields } from './__generated__/MediaGalleryFields'
-import { gql, MutationFunction, useMutation } from '@apollo/client'
+import { gql, MutationFunction } from '@apollo/client'
+import { useMutation } from '@apollo/client/react'
 import {
   markMediaFavorite,
   markMediaFavoriteVariables,

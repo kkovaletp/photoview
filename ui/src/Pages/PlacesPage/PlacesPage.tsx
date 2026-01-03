@@ -1,4 +1,5 @@
-import { gql, useQuery } from '@apollo/client'
+import { gql } from '@apollo/client'
+import { useQuery } from '@apollo/client/react'
 import type mapboxgl from 'mapbox-gl'
 import React, { useReducer } from 'react'
 import { Helmet, HelmetProvider } from '@dr.pogodin/react-helmet'
@@ -103,40 +104,40 @@ const configureMapbox =
     mapboxData?: mediaGeoJson
     dispatchMarkerMedia: React.Dispatch<PlacesAction>
   }) =>
-  (map: mapboxgl.Map, mapboxLibrary: typeof mapboxgl) => {
-    // Add map navigation control
-    map.addControl(new mapboxLibrary.NavigationControl())
+    (map: mapboxgl.Map, mapboxLibrary: typeof mapboxgl) => {
+      // Add map navigation control
+      map.addControl(new mapboxLibrary.NavigationControl())
 
-    map.on('load', () => {
-      if (map == null) {
-        console.error('ERROR: map is null')
-        return
-      }
+      map.on('load', () => {
+        if (map == null) {
+          console.error('ERROR: map is null')
+          return
+        }
 
-      map.addSource('media', {
-        type: 'geojson',
-        data: mapboxData?.myMediaGeoJson as never,
-        cluster: true,
-        clusterRadius: 50,
-        clusterProperties: {
-          thumbnail: ['coalesce', ['get', 'thumbnail'], false],
-        },
+        map.addSource('media', {
+          type: 'geojson',
+          data: mapboxData?.myMediaGeoJson as never,
+          cluster: true,
+          clusterRadius: 50,
+          clusterProperties: {
+            thumbnail: ['coalesce', ['get', 'thumbnail'], false],
+          },
+        })
+
+        // Add dummy layer for features to be queryable
+        map.addLayer({
+          id: 'media-points',
+          type: 'circle',
+          source: 'media',
+          filter: ['!', true],
+        })
+
+        registerMediaMarkers({
+          map: map,
+          mapboxLibrary,
+          dispatchMarkerMedia,
+        })
       })
-
-      // Add dummy layer for features to be queryable
-      map.addLayer({
-        id: 'media-points',
-        type: 'circle',
-        source: 'media',
-        filter: ['!', true],
-      })
-
-      registerMediaMarkers({
-        map: map,
-        mapboxLibrary,
-        dispatchMarkerMedia,
-      })
-    })
-  }
+    }
 
 export default MapPage

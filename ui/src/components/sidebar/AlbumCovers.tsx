@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react'
-import { useMutation, gql } from '@apollo/client'
+import { gql } from '@apollo/client'
+import { useMutation } from '@apollo/client/react'
 import { useTranslation } from 'react-i18next'
 
 import { SidebarSection, SidebarSectionTitle } from './SidebarComponents'
