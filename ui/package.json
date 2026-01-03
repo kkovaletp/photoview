@@ -23,7 +23,7 @@
     "extractTranslations": "i18next -c i18next-parser.config.js"
   },
   "dependencies": {
-    "@apollo/client": "~3.14.0",
+    "@apollo/client": "~4.0.11",
     "@babel/preset-typescript": "^7.28.5",
     "@dr.pogodin/react-helmet": "^3.0.5",
     "@headlessui/react": "^2.2.9",
