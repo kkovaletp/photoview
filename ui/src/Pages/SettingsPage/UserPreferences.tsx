@@ -141,10 +141,6 @@ const UserPreferences = () => {
       </label>
       <Dropdown
         id="user_pref_change_language_field"
-        placeholder={t(
-          'settings.user_preferences.language_selector.placeholder',
-          'Select language'
-        )}
         items={sortedLanguagePrefs}
         setSelected={language => {
           changePrefs({

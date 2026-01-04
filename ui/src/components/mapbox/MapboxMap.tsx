@@ -22,8 +22,12 @@ const MapContainer = styled.div`
 `
 
 const ForwardedMapContainer = forwardRef<HTMLDivElement, React.HTMLProps<HTMLDivElement>>((props, ref) => (
-  <MapContainer {...props} ref={ref} />
+  <div {...props} ref={ref} className={props.className} />
 ))
+const StyledForwardedMapContainer = styled(ForwardedMapContainer)`
+  width: 100%;
+  height: 100%;
+`
 
 type MapboxMapProps = {
   configureMapbox(map: mapboxgl.Map, mapboxLibrary: typeof mapboxgl): void
@@ -81,7 +85,7 @@ const useMapboxMap = ({
   map.current?.resize()
 
   return {
-    mapContainer: <ForwardedMapContainer ref={mapContainer} />,
+    mapContainer: <StyledForwardedMapContainer ref={mapContainer} />,
     mapboxMap: map.current,
     mapboxLibrary,
     mapboxToken: mapboxData?.mapboxToken ?? null,

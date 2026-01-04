@@ -1,8 +1,8 @@
 import React, { useState } from 'react'
 import {
-  FetchResult,
+  ApolloLink,
   gql,
-  MutationFunctionOptions,
+  OperationVariables,
 } from '@apollo/client'
 import { useMutation } from '@apollo/client/react'
 import EditUserRow from './EditUserRow'
@@ -47,10 +47,10 @@ interface UserRowState extends settingsUsersQuery_user {
   oldState?: Omit<UserRowState, 'oldState'>
 }
 
-type ApolloMutationFn<MutationType, VariablesType> = (
-  options?: MutationFunctionOptions<MutationType, VariablesType>
+type ApolloMutationFn<MutationType, VariablesType extends OperationVariables> = (
+  options?: useMutation.MutationFunctionOptions<MutationType, VariablesType>
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-) => Promise<FetchResult<MutationType, any, any>>
+) => Promise<ApolloLink.Result<MutationType, any>>
 
 export type UserRowChildProps = {
   user: settingsUsersQuery_user
@@ -114,7 +114,17 @@ const UserRow = ({ user, refetchUsers }: UserRowProps) => {
     options
   ) => {
     try {
-      const result = await updateUserMutationFn(options)
+      if (!options?.variables?.id) {
+        throw new Error('updateUser mutation requires variables with at least an id')
+      }
+      const result = await updateUserMutationFn({
+        ...options,
+        variables: {
+          id: options.variables.id,
+          username: options.variables.username,
+          admin: options.variables.admin,
+        },
+      })
       const updatedUser = result.data?.updateUser
       if (updatedUser) {
         setState(state => ({
@@ -128,7 +138,7 @@ const UserRow = ({ user, refetchUsers }: UserRowProps) => {
     } catch (error) {
       console.error('Failed to update user: ', error)
       notifyMutationError(add, 'Failed to update user', error)
-      return {} as FetchResult<updateUser>
+      return {} as ApolloLink.Result<updateUser>
     }
   }
 
@@ -136,7 +146,15 @@ const UserRow = ({ user, refetchUsers }: UserRowProps) => {
     options
   ) => {
     try {
-      const result = await deleteUserMutationFn(options)
+      if (!options?.variables?.id) {
+        throw new Error('deleteUser mutation requires variables with at least an id')
+      }
+      const result = await deleteUserMutationFn({
+        ...options,
+        variables: {
+          id: options.variables.id,
+        },
+      })
       const deletedUser = result.data?.deleteUser
       if (deletedUser) {
         refetchUsers()
@@ -145,7 +163,7 @@ const UserRow = ({ user, refetchUsers }: UserRowProps) => {
     } catch (error) {
       console.error('Failed to delete user: ', error)
       notifyMutationError(add, 'Failed to delete user', error)
-      return {} as FetchResult<deleteUser>
+      return {} as ApolloLink.Result<deleteUser>
     }
   }
 
@@ -153,7 +171,15 @@ const UserRow = ({ user, refetchUsers }: UserRowProps) => {
     options
   ) => {
     try {
-      const result = await scanUserMutationFn(options)
+      if (!options?.variables?.userId) {
+        throw new Error('scanUser mutation requires variables with userId')
+      }
+      const result = await scanUserMutationFn({
+        ...options,
+        variables: {
+          userId: options.variables.userId,
+        },
+      })
       const scanResult = result.data?.scanUser
       if (scanResult) {
         refetchUsers()
@@ -162,7 +188,7 @@ const UserRow = ({ user, refetchUsers }: UserRowProps) => {
     } catch (error) {
       console.error('Failed to scan user: ', error)
       notifyMutationError(add, 'Failed to scan user', error)
-      return {} as FetchResult<scanUser>
+      return {} as ApolloLink.Result<scanUser>
     }
   }
 

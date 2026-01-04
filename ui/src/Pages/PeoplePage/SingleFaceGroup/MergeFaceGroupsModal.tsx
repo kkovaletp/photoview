@@ -1,4 +1,4 @@
-import { gql, PureQueryOptions } from '@apollo/client'
+import { ApolloClient, gql } from '@apollo/client'
 import { useMutation, useQuery } from '@apollo/client/react'
 import React, { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -42,7 +42,7 @@ type MergeFaceGroupsModalProps = {
     __typename: 'FaceGroup'
     id: string
   }
-  refetchQueries: PureQueryOptions[]
+  refetchQueries: ApolloClient.QueryOptions[]
 }
 
 type StateContent = {
@@ -253,7 +253,7 @@ const MergeFaceGroupsModal = ({
         frozen={state === MergeFaceGroupsModalState.SelectDestination && preselectedDestinationFaceGroup !== undefined}
         faceGroups={filteredFaceGroups}
         selectedFaceGroups={selectedFaceGroups}
-        toggleSelectedFaceGroup={(face) => { if (face === null) return; handleFaceGroupToggled(face) }}
+        toggleSelectedFaceGroup={(face) => { if (face === null) { return }; handleFaceGroupToggled(face) }}
       />
     </Modal>
   )

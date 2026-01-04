@@ -1,5 +1,5 @@
 import { useCallback } from 'react'
-import { gql } from '@apollo/client'
+import { ApolloQueryResult, gql, ObservableQuery } from '@apollo/client'
 import { useQuery } from '@apollo/client/react'
 import AlbumGallery, {
   ALBUM_GALLERY_FRAGMENT,
@@ -51,7 +51,7 @@ function AlbumPage() {
   const urlParams = useURLParameters()
   const orderParams = useOrderingParams(urlParams)
 
-  const onlyFavorites = urlParams.getParam('favorites') == '1' ? true : false
+  const onlyFavorites = urlParams.getParam('favorites') == '1'
   const setOnlyFavorites = useCallback((favorites: boolean) =>
     urlParams.setParam('favorites', favorites ? '1' : '0'),
     [urlParams]
@@ -74,7 +74,10 @@ function AlbumPage() {
   const { containerElem, finished: finishedLoadingMore } =
     useScrollPagination<albumQuery>({
       loading,
-      fetchMore,
+      fetchMore: ({ variables }) =>
+        fetchMore({
+          variables,
+        }) as Promise<ObservableQuery.Result<albumQuery>>,
       data,
       getItems: data => data.album.media,
     })
@@ -111,7 +114,7 @@ function AlbumPage() {
     >
       <AlbumGallery
         ref={containerElem}
-        album={data && data.album}
+        album={data?.album}
         loading={loading}
         setOnlyFavorites={toggleFavorites}
         onlyFavorites={onlyFavorites}

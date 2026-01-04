@@ -118,7 +118,7 @@ const AuthorizedTokenRoute = () => {
         throw new Error('Expected `subAlbum` param to be defined')
 
       return (
-        <AlbumSharePage albumID={subAlbum} token={token} password={password} />
+        <AlbumSharePage albumID={subAlbum} token={token} password={password as string} />
       )
     }
 
@@ -131,7 +131,7 @@ const AuthorizedTokenRoute = () => {
             <AlbumSharePage
               albumID={data.shareToken.album.id}
               token={token}
-              password={password}
+              password={password as string}
             />
           }
         />
@@ -184,7 +184,7 @@ export const TokenRoute = () => {
     return <div>{error.message}</div>
   }
 
-  if (data && data.shareTokenValidatePassword == false) {
+  if (data?.shareTokenValidatePassword == false) {
     return (
       <PasswordProtectedShare
         refetchWithPassword={password => {

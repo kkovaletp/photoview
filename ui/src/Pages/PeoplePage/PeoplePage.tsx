@@ -1,5 +1,5 @@
-import React, { createRef, useEffect, useState } from 'react'
-import { gql } from '@apollo/client'
+import React, { createRef, JSX, useEffect, useState } from 'react'
+import { gql, ObservableQuery } from '@apollo/client'
 import { useMutation, useQuery } from '@apollo/client/react'
 import Layout from '../../components/layout/Layout'
 import styled from 'styled-components'
@@ -154,7 +154,6 @@ export const FaceDetails = ({
   const onKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key == 'Escape') {
       resetLabel()
-      return
     }
   }
 
@@ -265,10 +264,19 @@ export const PeoplePage = () => {
   const [recognizeUnlabeled, { loading: recognizeUnlabeledLoading }] =
     useMutation<recognizeUnlabeledFaces>(RECOGNIZE_UNLABELED_FACES_MUTATION)
 
+  const wrappedFetchMore = async ({ variables }: { variables: { offset: number } }) => {
+    const result = await fetchMore({
+      variables,
+    })
+    // Apollo's fetchMore returns a QueryResult, but useScrollPagination expects ObservableQuery.Result
+    // So we return the 'data' property as ObservableQuery.Result
+    return result as unknown as ObservableQuery.Result<myFaces>
+  }
+
   const { containerElem, finished: finishedLoadingMore } =
     useScrollPagination<myFaces>({
       loading,
-      fetchMore,
+      fetchMore: wrappedFetchMore,
       data,
       getItems: data => data.myFaceGroups,
     })

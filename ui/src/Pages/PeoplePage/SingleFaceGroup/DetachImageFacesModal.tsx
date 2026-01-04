@@ -1,4 +1,4 @@
-import { BaseMutationOptions, gql } from '@apollo/client'
+import { gql } from '@apollo/client'
 import { useMutation } from '@apollo/client/react'
 import React, { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -30,7 +30,7 @@ const DETACH_IMAGE_FACES_MUTATION = gql`
 `
 
 export const useDetachImageFaces = (
-  mutationOptions: BaseMutationOptions<
+  mutationOptions: useMutation.MutationFunctionOptions<
     detachImageFaces,
     detachImageFacesVariables
   >

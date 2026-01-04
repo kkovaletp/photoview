@@ -1,5 +1,5 @@
 import { MediaGalleryFields } from './__generated__/MediaGalleryFields'
-import { gql, MutationFunction } from '@apollo/client'
+import { gql } from '@apollo/client'
 import { useMutation } from '@apollo/client/react'
 import {
   markMediaFavorite,
@@ -26,7 +26,7 @@ export const toggleFavoriteAction = ({
   markFavorite,
 }: {
   media: MediaGalleryFields
-  markFavorite: MutationFunction<markMediaFavorite, markMediaFavoriteVariables>
+  markFavorite: useMutation.MutationFunction<markMediaFavorite, markMediaFavoriteVariables>
 }) => {
   return markFavorite({
     variables: {

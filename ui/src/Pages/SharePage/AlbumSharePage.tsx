@@ -124,7 +124,10 @@ const AlbumSharePage = ({ albumID, token, password }: AlbumSharePageProps) => {
   const { containerElem, finished: finishedLoadingMore } =
     useScrollPagination<shareAlbumQuery>({
       loading,
-      fetchMore,
+      fetchMore: async ({ variables }) => {
+        const result = await fetchMore({ variables })
+        return result as any // Cast to satisfy the expected return type
+      },
       data,
       getItems: data => data.album.media,
     })
@@ -144,7 +147,7 @@ const AlbumSharePage = ({ albumID, token, password }: AlbumSharePageProps) => {
       >
         <AlbumGallery
           ref={containerElem}
-          album={album}
+          album={album} //how to fix type incompatibility here?
           customAlbumLink={albumId => `/share/${token}/${albumId}`}
           showFilter
           setOrdering={orderParams.setOrdering}
