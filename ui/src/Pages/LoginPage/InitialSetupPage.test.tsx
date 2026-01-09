@@ -4,7 +4,6 @@ import userEvent from '@testing-library/user-event'
 import InitialSetupPage from './InitialSetupPage'
 import * as authentication from '../../helpers/authentication'
 import * as loginUtilities from './loginUtilities'
-import { createMemoryHistory } from 'history'
 import { mockInitialSetupGraphql } from './loginTestHelpers'
 import { renderWithProviders } from '../../helpers/testUtils'
 import { gql } from '@apollo/client'
@@ -15,6 +14,16 @@ vi.mock('./loginUtilities', async () => {
   return {
     ...actual,
     login: vi.fn(),
+  }
+})
+
+// Mock useNavigate
+const mockNavigate = vi.fn()
+vi.mock('react-router-dom', async () => {
+  const actual = await vi.importActual('react-router-dom') as object
+  return {
+    ...actual,
+    useNavigate: () => mockNavigate,
   }
 })
 
@@ -42,13 +51,11 @@ const initialSetupMutation = gql`
 describe('InitialSetupPage - Form Submission', () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    authToken.mockImplementation(() => null)
+    authToken.mockImplementation(() => undefined)
+    mockNavigate.mockClear()
   })
 
   test('successful setup with valid credentials', async () => {
-    const history = createMemoryHistory()
-    history.push('/initialSetup')
-
     const setupMock = {
       request: {
         query: initialSetupMutation,
@@ -71,7 +78,7 @@ describe('InitialSetupPage - Form Submission', () => {
 
     await renderWithProviders(<InitialSetupPage />, {
       mocks: [mockInitialSetupGraphql(true), setupMock],
-      history,
+      initialEntries: ['/initialSetup'],
     })
 
     const user = userEvent.setup()
@@ -91,9 +98,6 @@ describe('InitialSetupPage - Form Submission', () => {
   })
 
   test('failed setup displays status error message', async () => {
-    const history = createMemoryHistory()
-    history.push('/initialSetup')
-
     const setupMock = {
       request: {
         query: initialSetupMutation,
@@ -116,7 +120,7 @@ describe('InitialSetupPage - Form Submission', () => {
 
     await renderWithProviders(<InitialSetupPage />, {
       mocks: [mockInitialSetupGraphql(true), setupMock],
-      history,
+      initialEntries: ['/initialSetup'],
     })
 
     const user = userEvent.setup()
@@ -134,9 +138,6 @@ describe('InitialSetupPage - Form Submission', () => {
   })
 
   test('network error displays generic error message', async () => {
-    const history = createMemoryHistory()
-    history.push('/initialSetup')
-
     const setupMock = {
       request: {
         query: initialSetupMutation,
@@ -151,7 +152,7 @@ describe('InitialSetupPage - Form Submission', () => {
 
     await renderWithProviders(<InitialSetupPage />, {
       mocks: [mockInitialSetupGraphql(true), setupMock],
-      history,
+      initialEntries: ['/initialSetup'],
     })
 
     const user = userEvent.setup()
@@ -168,9 +169,6 @@ describe('InitialSetupPage - Form Submission', () => {
   })
 
   test('submit button is disabled during loading', async () => {
-    const history = createMemoryHistory()
-    history.push('/initialSetup')
-
     const setupMock = {
       request: {
         query: initialSetupMutation,
@@ -194,7 +192,7 @@ describe('InitialSetupPage - Form Submission', () => {
 
     await renderWithProviders(<InitialSetupPage />, {
       mocks: [mockInitialSetupGraphql(true), setupMock],
-      history,
+      initialEntries: ['/initialSetup'],
     })
 
     const user = userEvent.setup()
@@ -216,9 +214,6 @@ describe('InitialSetupPage - Form Submission', () => {
   })
 
   test('error message clears on retry', async () => {
-    const history = createMemoryHistory()
-    history.push('/initialSetup')
-
     const failedSetupMock = {
       request: {
         query: initialSetupMutation,
@@ -261,7 +256,7 @@ describe('InitialSetupPage - Form Submission', () => {
 
     await renderWithProviders(<InitialSetupPage />, {
       mocks: [mockInitialSetupGraphql(true), failedSetupMock, successSetupMock],
-      history,
+      initialEntries: ['/initialSetup'],
     })
 
     const user = userEvent.setup()
@@ -288,12 +283,9 @@ describe('InitialSetupPage - Form Submission', () => {
   })
 
   test('form validation - required fields', async () => {
-    const history = createMemoryHistory()
-    history.push('/initialSetup')
-
     await renderWithProviders(<InitialSetupPage />, {
       mocks: [mockInitialSetupGraphql(true)],
-      history,
+      initialEntries: ['/initialSetup'],
     })
 
     const user = userEvent.setup()
@@ -311,12 +303,9 @@ describe('InitialSetupPage - Form Submission', () => {
   })
 
   test('message box is hidden when no error', async () => {
-    const history = createMemoryHistory()
-    history.push('/initialSetup')
-
     await renderWithProviders(<InitialSetupPage />, {
       mocks: [mockInitialSetupGraphql(true)],
-      history,
+      initialEntries: ['/initialSetup'],
     })
 
     // MessageBox should not be visible initially
