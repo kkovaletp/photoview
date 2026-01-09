@@ -4,7 +4,6 @@ import userEvent from '@testing-library/user-event'
 import LoginPage from './LoginPage'
 import * as authentication from '../../helpers/authentication'
 import * as loginUtilities from './loginUtilities'
-import { createMemoryHistory } from 'history'
 import { mockInitialSetupGraphql } from './loginTestHelpers'
 import { renderWithProviders } from '../../helpers/testUtils'
 import { gql } from '@apollo/client'
@@ -16,6 +15,16 @@ vi.mock('./loginUtilities', async () => {
   return {
     ...actual,
     login: vi.fn(),
+  }
+})
+
+// Mock useNavigate
+const mockNavigate = vi.fn()
+vi.mock('react-router', async () => {
+  const actual = await vi.importActual('react-router')
+  return {
+    ...actual,
+    useNavigate: () => mockNavigate,
   }
 })
 
@@ -36,49 +45,41 @@ const authorizeMutation = gql`
 describe('LoginPage', () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    authToken.mockImplementation(() => null)
+    authToken.mockImplementation(() => undefined)
+    mockNavigate.mockClear()
   })
 
   describe('Redirects', () => {
     test('redirects to root when auth token exists', async () => {
       authToken.mockImplementation(() => 'mock-token')
 
-      const history = createMemoryHistory()
-      history.push('/login')
-
       await renderWithProviders(<LoginPage />, {
         mocks: [mockInitialSetupGraphql(false)],
-        history,
+        initialEntries: ['/login'],
       })
 
       await waitFor(() => {
-        expect(history.location.pathname).toBe('/')
+        expect(mockNavigate).toHaveBeenCalledWith('/')
       })
     })
 
     test('redirects to initial setup when initialSetup is true', async () => {
-      const history = createMemoryHistory()
-      history.push('/login')
-
       await renderWithProviders(<LoginPage />, {
         mocks: [mockInitialSetupGraphql(true)],
-        history,
+        initialEntries: ['/login'],
       })
 
       await waitFor(() => {
-        expect(history.location.pathname).toBe('/initialSetup')
+        expect(mockNavigate).toHaveBeenCalledWith('/initialSetup')
       })
     })
   })
 
   describe('Form Rendering', () => {
     test('renders login form', async () => {
-      const history = createMemoryHistory()
-      history.push('/login')
-
       await renderWithProviders(<LoginPage />, {
         mocks: [mockInitialSetupGraphql(false)],
-        history,
+        initialEntries: ['/login'],
       })
 
       await waitFor(() => {
@@ -114,12 +115,9 @@ describe('LoginPage', () => {
         },
       }
 
-      const history = createMemoryHistory()
-      history.push('/login')
-
       await renderWithProviders(<LoginPage />, {
         mocks: [mockInitialSetupGraphql(false), authMock],
-        history,
+        initialEntries: ['/login'],
       })
 
       const user = userEvent.setup()
@@ -158,12 +156,9 @@ describe('LoginPage', () => {
         },
       }
 
-      const history = createMemoryHistory()
-      history.push('/login')
-
       await renderWithProviders(<LoginPage />, {
         mocks: [mockInitialSetupGraphql(false), authMock],
-        history,
+        initialEntries: ['/login'],
       })
 
       const user = userEvent.setup()
@@ -200,12 +195,9 @@ describe('LoginPage', () => {
         .spyOn(console, 'error')
         .mockImplementation(() => { })
 
-      const history = createMemoryHistory()
-      history.push('/login')
-
       await renderWithProviders(<LoginPage />, {
         mocks: [mockInitialSetupGraphql(false), authMock],
-        history,
+        initialEntries: ['/login'],
       })
 
       const user = userEvent.setup()
@@ -256,12 +248,9 @@ describe('LoginPage', () => {
         delay: 100, // Add delay to observe loading state
       }
 
-      const history = createMemoryHistory()
-      history.push('/login')
-
       await renderWithProviders(<LoginPage />, {
         mocks: [mockInitialSetupGraphql(false), authMock],
-        history,
+        initialEntries: ['/login'],
       })
 
       const user = userEvent.setup()
@@ -287,12 +276,9 @@ describe('LoginPage', () => {
     })
 
     test('form validation - required username field', async () => {
-      const history = createMemoryHistory()
-      history.push('/login')
-
       await renderWithProviders(<LoginPage />, {
         mocks: [mockInitialSetupGraphql(false)],
-        history,
+        initialEntries: ['/login'],
       })
 
       const user = userEvent.setup()
@@ -348,12 +334,9 @@ describe('LoginPage', () => {
         },
       }
 
-      const history = createMemoryHistory()
-      history.push('/login')
-
       await renderWithProviders(<LoginPage />, {
         mocks: [mockInitialSetupGraphql(false), failedAuthMock, successAuthMock],
-        history,
+        initialEntries: ['/login'],
       })
 
       const user = userEvent.setup()
@@ -385,12 +368,9 @@ describe('LoginPage', () => {
     })
 
     test('message box is hidden when no error exists', async () => {
-      const history = createMemoryHistory()
-      history.push('/login')
-
       await renderWithProviders(<LoginPage />, {
         mocks: [mockInitialSetupGraphql(false)],
-        history,
+        initialEntries: ['/login'],
       })
 
       // Initially, no error alert should be visible

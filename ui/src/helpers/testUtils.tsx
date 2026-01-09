@@ -1,9 +1,8 @@
 import { MockedProvider } from '@apollo/client/testing'
 import { render } from '@testing-library/react'
 import { MessageProvider } from '../components/messages/MessageState'
-import { MemoryRouter, Route, Routes, Location, Router } from 'react-router-dom'
+import { MemoryRouter, Route, Routes, Location } from 'react-router-dom'
 import React from 'react'
-import { History } from 'history'
 
 /**
  * Options for configuring the test environment in renderWithProviders.
@@ -17,8 +16,6 @@ interface RenderWithProvidersOptions {
     route?: React.ReactElement
     /** Path for the route */
     path?: string
-    /** History object for HistoryRouter */
-    history?: History
     /** Apollo client configuration options */
     apolloOptions?: {
         defaultOptions?: any
@@ -43,7 +40,6 @@ export function renderWithProviders(
         initialEntries = ['/'],
         route,
         path,
-        history,
         apolloOptions = {},
     }: RenderWithProvidersOptions = {}
 ) {
@@ -55,29 +51,20 @@ export function renderWithProviders(
             mocks={mocks}
             defaultOptions={apolloOptions.defaultOptions}
         >
-            {history ? (
-                <Router location={history.location} navigator={history}>
-                    <MessageProvider>{children}</MessageProvider>
-                </Router>
-            ) : (
-                <MemoryRouter initialEntries={initialEntries}>
-                    <MessageProvider>{children}</MessageProvider>
-                </MemoryRouter>
-            )}
+            <MemoryRouter initialEntries={initialEntries}>
+                <MessageProvider>{children}</MessageProvider>
+            </MemoryRouter>
         </MockedProvider>
     )
-    return {
-        ...render(
-            <Wrapper>
-                {route && path ? (
-                    <Routes>
-                        <Route path={path} element={route} />
-                    </Routes>
-                ) : (
-                    ui
-                )}
-            </Wrapper>
-        ),
-        history,
-    }
+    return render(
+        <Wrapper>
+            {route && path ? (
+                <Routes>
+                    <Route path={path} element={route} />
+                </Routes>
+            ) : (
+                ui
+            )}
+        </Wrapper>
+    )
 }
