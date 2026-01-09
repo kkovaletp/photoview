@@ -21,7 +21,7 @@ vi.mock('./loginUtilities', async () => {
 // Mock useNavigate
 const mockNavigate = vi.fn()
 vi.mock('react-router', async () => {
-  const actual = await vi.importActual('react-router')
+  const actual = await vi.importActual('react-router') as object
   return {
     ...actual,
     useNavigate: () => mockNavigate,
