@@ -1,5 +1,5 @@
 import { useCallback } from 'react'
-import { ApolloQueryResult, gql, ObservableQuery } from '@apollo/client'
+import { gql, ObservableQuery } from '@apollo/client'
 import { useQuery } from '@apollo/client/react'
 import AlbumGallery, {
   ALBUM_GALLERY_FRAGMENT,
