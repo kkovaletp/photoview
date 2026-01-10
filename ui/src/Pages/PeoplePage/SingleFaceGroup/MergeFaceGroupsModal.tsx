@@ -1,5 +1,6 @@
-import { gql, PureQueryOptions, useMutation, useQuery } from '@apollo/client'
-import React, { useEffect, useState } from 'react'
+import { ApolloClient, gql } from '@apollo/client'
+import { useMutation, useQuery } from '@apollo/client/react'
+import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import { isNil } from '../../../helpers/utils'
@@ -41,13 +42,15 @@ type MergeFaceGroupsModalProps = {
     __typename: 'FaceGroup'
     id: string
   }
-  refetchQueries: PureQueryOptions[]
+  refetchQueries: ApolloClient.QueryOptions[]
 }
 
 type StateContent = {
   props: ModalProps
   searchTitle: string
 }
+
+type FaceGroupType = myFaces_myFaceGroups | singleFaceGroup_faceGroup | null
 
 const MergeFaceGroupsModal = ({
   state,
@@ -68,18 +71,18 @@ const MergeFaceGroupsModal = ({
 
   // The destination face group
   const [selectedDestinationFaceGroup, setSelectedDestinationFaceGroup] =
-    useState<myFaces_myFaceGroups | singleFaceGroup_faceGroup | null>(null)
+    useState<FaceGroupType>(null)
 
   // The set of currently selected face groups, on the modal page
   const [selectedFaceGroups, setSelectedFaceGroups] = useState<
-    Set<myFaces_myFaceGroups | singleFaceGroup_faceGroup | null>
+    Set<FaceGroupType>
   >(new Set())
 
   const addSelectedFaceGroup = (
-    faceGroup: myFaces_myFaceGroups | singleFaceGroup_faceGroup | null
+    faceGroup: FaceGroupType
   ) => setSelectedFaceGroups(prev => new Set(prev).add(faceGroup))
   const removeSelectedFaceGroup = (
-    faceGroup: myFaces_myFaceGroups | singleFaceGroup_faceGroup | null
+    faceGroup: FaceGroupType
   ) => {
     setSelectedFaceGroups(prev => {
       const s = new Set(prev)
@@ -89,7 +92,7 @@ const MergeFaceGroupsModal = ({
   }
 
   const setDestinationFaceGroup = (
-    faceGroup: myFaces_myFaceGroups | singleFaceGroup_faceGroup | null
+    faceGroup: FaceGroupType
   ) => {
     if (isNil(faceGroup)) {
       setSelectedFaceGroups(new Set())
@@ -99,7 +102,7 @@ const MergeFaceGroupsModal = ({
 
     // Overwrite the selected face groups with a set containing only the selected group
     setSelectedFaceGroups(
-      new Set<myFaces_myFaceGroups | singleFaceGroup_faceGroup | null>().add(
+      new Set<FaceGroupType>().add(
         faceGroup
       )
     )
@@ -136,11 +139,11 @@ const MergeFaceGroupsModal = ({
 
   // Show all face groups on the destination page, but filter out the destination group on the source page
   const filteredFaceGroups =
-  data?.myFaceGroups.filter(
-    x =>
-      state === MergeFaceGroupsModalState.SelectDestination ||
-      x.id != selectedDestinationFaceGroup?.id
-  ) ?? []
+    data?.myFaceGroups.filter(
+      x =>
+        state === MergeFaceGroupsModalState.SelectDestination ||
+        x.id != selectedDestinationFaceGroup?.id
+    ) ?? []
 
   const goNext = () => {
     if (isNil(selectedDestinationFaceGroup))
@@ -156,7 +159,7 @@ const MergeFaceGroupsModal = ({
 
     const sourceGroupIDs: string[] = [...selectedFaceGroups].filter(fc => fc !== null).map(fc => fc.id)
 
-    if(sourceGroupIDs.length < 1)
+    if (sourceGroupIDs.length < 1)
       throw new Error('No selected source face groups')
 
     combineFacesMutation({
@@ -234,10 +237,9 @@ const MergeFaceGroupsModal = ({
         'people_page.modal.merge_face_groups.sources_table.title',
         'Select one or more source faces to merge into:'
       ) +
-      ` ${
-        selectedDestinationFaceGroup?.label ??
-        t('people_page.face_group.unlabeled', 'Unlabeled') ??
-        'Unlabeled'
+      ` ${selectedDestinationFaceGroup?.label ??
+      t('people_page.face_group.unlabeled', 'Unlabeled') ??
+      'Unlabeled'
       }`,
   }
 
@@ -253,7 +255,7 @@ const MergeFaceGroupsModal = ({
         frozen={state === MergeFaceGroupsModalState.SelectDestination && preselectedDestinationFaceGroup !== undefined}
         faceGroups={filteredFaceGroups}
         selectedFaceGroups={selectedFaceGroups}
-        toggleSelectedFaceGroup={(face) => { if(face === null) return; handleFaceGroupToggled(face) }}
+        toggleSelectedFaceGroup={(face) => { if (face === null) { return }; handleFaceGroupToggled(face) }}
       />
     </Modal>
   )

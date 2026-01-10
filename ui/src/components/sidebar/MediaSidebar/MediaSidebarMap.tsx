@@ -1,4 +1,3 @@
-import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { isNil } from '../../../helpers/utils'
 import useMapboxMap from '../../mapbox/MapboxMap'

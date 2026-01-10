@@ -11,7 +11,7 @@ export function debounce<F extends (...args: unknown[]) => unknown>(
   wait: number,
   triggerRising?: boolean
 ): DebouncedFn<F> {
-  let timeout: number | undefined = undefined
+  let timeout: ReturnType<typeof setTimeout> | undefined = undefined
 
   const debounced = (...args: Parameters<F>) => {
     if (timeout) {
@@ -21,7 +21,7 @@ export function debounce<F extends (...args: unknown[]) => unknown>(
       func(...args)
     }
 
-    timeout = window.setTimeout(() => {
+    timeout = globalThis.setTimeout(() => {
       timeout = undefined
       func(...args)
     }, wait)

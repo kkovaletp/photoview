@@ -1,5 +1,6 @@
 import React, { useRef, useState, useEffect } from 'react'
-import { useQuery, useMutation, gql } from '@apollo/client'
+import { gql } from '@apollo/client'
+import { useQuery, useMutation } from '@apollo/client/react'
 import { InputLabelTitle, InputLabelDescription } from './SettingsPage'
 import { useTranslation } from 'react-i18next'
 import { concurrentWorkersQuery } from './__generated__/concurrentWorkersQuery'

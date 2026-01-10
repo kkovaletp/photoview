@@ -1,5 +1,3 @@
-import React from 'react'
-
 type SidebarItemProps = {
   name: string
   value: string

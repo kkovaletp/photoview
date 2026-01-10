@@ -1,8 +1,9 @@
-import React from 'react'
+import { Dispatch } from 'react'
 import { myTimeline_myTimeline } from './__generated__/myTimeline'
 import { TimelineGroup, TimelineGroupAlbum } from './TimelineGallery'
 import { GalleryAction } from '../photoGallery/mediaGalleryReducer'
 import { isNil } from '../../helpers/utils'
+
 
 export interface TimelineMediaIndex {
   date: number
@@ -126,14 +127,14 @@ export function timelineGalleryReducer(
 
       if (activeIndex.date > 0) {
         const albumGroups = state.timelineGroups[activeIndex.date - 1].albums
-        const albumMedia = albumGroups[albumGroups.length - 1].media
+        const albumMedia = albumGroups?.at(-1)?.media
 
         return {
           ...state,
           activeIndex: {
             date: activeIndex.date - 1,
             album: albumGroups.length - 1,
-            media: albumMedia.length - 1,
+            media: albumMedia?.length ? - 1 : 0,
           },
         }
       }
@@ -262,7 +263,7 @@ export const openTimelinePresentMode = ({
   dispatchMedia,
   activeIndex,
 }: {
-  dispatchMedia: React.Dispatch<TimelineGalleryAction>
+  dispatchMedia: Dispatch<TimelineGalleryAction>
   activeIndex: TimelineMediaIndex
 }) => {
   dispatchMedia({

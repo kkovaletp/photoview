@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
-import { gql, useMutation } from '@apollo/client'
+import { gql } from '@apollo/client'
+import { useMutation } from '@apollo/client/react'
 import { USERS_QUERY } from './UsersTable'
 import { useTranslation } from 'react-i18next'
 import { USER_ADD_ROOT_PATH_MUTATION } from './AddUserRow'

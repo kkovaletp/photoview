@@ -139,7 +139,7 @@ describe('MediaSidebar', () => {
   ]
 
   test('render sample image, unauthorized', () => {
-    authToken.mockImplementation(() => null)
+    authToken.mockImplementation(() => undefined)
 
     // Only need the download query for unauthorized view
     renderWithProviders(<MediaSidebar media={media} />, {
@@ -194,7 +194,7 @@ describe('MediaSidebar', () => {
 
     // Mock loadMedia to show loading state
     const loadMediaMock = vi.fn()
-    vi.spyOn(require('@apollo/client'), 'useLazyQuery').mockReturnValue([
+    vi.spyOn(require('@apollo/client/react'), 'useLazyQuery').mockReturnValue([
       loadMediaMock,
       { loading: true, error: undefined, data: null }
     ])
@@ -210,7 +210,7 @@ describe('MediaSidebar', () => {
     authToken.mockImplementation(() => 'token-here')
 
     // Mock a GraphQL error
-    vi.spyOn(require('@apollo/client'), 'useLazyQuery').mockReturnValue([
+    vi.spyOn(require('@apollo/client/react'), 'useLazyQuery').mockReturnValue([
       vi.fn(),
       { loading: false, error: new Error('Failed to load media'), data: null }
     ])

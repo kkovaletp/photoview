@@ -1,8 +1,5 @@
 import classNames from 'classnames'
-import React, { DetailedHTMLProps, ImgHTMLAttributes } from 'react'
-import { useRef } from 'react'
-import { useState } from 'react'
-import { useEffect } from 'react'
+import { DetailedHTMLProps, ImgHTMLAttributes, useRef, useState, useEffect } from 'react'
 import { BlurhashCanvas } from 'react-blurhash'
 import { isNil } from '../../helpers/utils'
 
@@ -15,7 +12,7 @@ const getProtectedUrl = (url?: string) => {
 
   const imgUrl = new URL(url, location.origin)
 
-  const tokenRegex = location.pathname.match(/^\/share\/([\d\w]+)(\/?.*)$/)
+  const tokenRegex = /^\/share\/(\w+)(\/?.*)$/.exec(location.pathname)
   if (tokenRegex) {
     const token = tokenRegex[1]
     imgUrl.searchParams.set('token', token)
@@ -55,7 +52,7 @@ export const ProtectedImage = ({
 
   if (!lazyLoading) {
     return (
-      <img {...props} src={url} loading="eager" crossOrigin="use-credentials" />
+      <img {...props} src={url} loading="eager" crossOrigin="use-credentials" alt="" />
     )
   }
 
@@ -69,6 +66,7 @@ export const ProtectedImage = ({
       <img
         {...props}
         src={url}
+        alt=""
         loading="lazy"
         crossOrigin="use-credentials"
         onLoad={didLoad}
@@ -109,7 +107,7 @@ const FallbackLazyloadedImage = ({
     const imgElm = imgRef.current
     if (isNil(imgElm) || inView) return
 
-    if (window.IntersectionObserver === undefined) {
+    if (globalThis.IntersectionObserver === undefined) {
       setInView(true)
       return
     }
@@ -141,6 +139,7 @@ const FallbackLazyloadedImage = ({
           className="w-full h-full"
           {...props}
           src={src}
+          alt=""
           onLoad={didLoad}
           crossOrigin="use-credentials"
         />
@@ -166,7 +165,7 @@ const FallbackLazyloadedImage = ({
   }
 }
 
-export interface ProtectedVideoProps_Media {
+export interface ProtectedVideoPropsMedia {
   __typename: 'Media'
   id: string
   thumbnail?: null | {
@@ -180,7 +179,7 @@ export interface ProtectedVideoProps_Media {
 }
 
 export interface ProtectedVideoProps {
-  media: ProtectedVideoProps_Media
+  media: ProtectedVideoPropsMedia
 }
 
 export const ProtectedVideo = ({ media, ...props }: ProtectedVideoProps) => {
@@ -198,6 +197,7 @@ export const ProtectedVideo = ({ media, ...props }: ProtectedVideoProps) => {
       poster={getProtectedUrl(media.thumbnail?.url)}
     >
       <source src={getProtectedUrl(media.videoWeb.url)} type="video/mp4" />
+      <track kind="captions" />
     </video>
   )
 }

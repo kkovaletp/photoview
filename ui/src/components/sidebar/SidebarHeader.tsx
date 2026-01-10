@@ -1,4 +1,4 @@
-import React, { useContext } from 'react'
+import { useContext } from 'react'
 
 import { ReactComponent as CloseIcon } from './icons/closeSidebarIcon.svg'
 import { ReactComponent as PinIconOutline } from './icons/pinSidebarIconOutline.svg'

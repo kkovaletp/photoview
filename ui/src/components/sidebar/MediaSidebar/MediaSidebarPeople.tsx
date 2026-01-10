@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import { Dispatch, SetStateAction, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useNavigate } from 'react-router-dom'
 import FaceCircleImage from '../../../Pages/PeoplePage/FaceCircleImage'
@@ -7,7 +7,7 @@ import { MediaSidebarMedia, SIDEBAR_MEDIA_QUERY } from './MediaSidebar'
 import { sidebarMediaQuery_media_faces } from './__generated__/sidebarMediaQuery'
 
 import { ReactComponent as PeopleDotsIcon } from './icons/peopleDotsIcon.svg'
-import { Menu } from '@headlessui/react'
+import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react'
 import { Button } from '../../../primitives/form/Input'
 import { ArrowPopoverPanel } from '../Sharing'
 import { isNil, tailwindClassNames } from '../../../helpers/utils'
@@ -30,13 +30,12 @@ const PersonMoreMenuItem = ({
   onClick,
 }: PersonMoreMenuItemProps) => {
   return (
-    <Menu.Item>
-      {({ active }) => (
+    <MenuItem>
+      {({ focus }) => (
         <button
           onClick={onClick}
           className={tailwindClassNames(
-            `whitespace-normal w-full block py-1 cursor-pointer ${
-              active ? 'bg-gray-50 text-black' : 'text-gray-700'
+            `whitespace-normal w-full block py-1 cursor-pointer ${focus ? 'bg-gray-50 text-black' : 'text-gray-700'
             }`,
             className
           )}
@@ -44,13 +43,13 @@ const PersonMoreMenuItem = ({
           {label}
         </button>
       )}
-    </Menu.Item>
+    </MenuItem>
   )
 }
 
 type PersonMoreMenuProps = {
   face: sidebarMediaQuery_media_faces
-  setChangeLabel: React.Dispatch<React.SetStateAction<boolean>>
+  setChangeLabel: Dispatch<SetStateAction<boolean>>
   className?: string
   menuFlipped: boolean
 }
@@ -121,10 +120,10 @@ const PersonMoreMenu = ({
         as="div"
         className={tailwindClassNames('relative inline-block', className)}
       >
-        <Menu.Button as={Button} className="px-1.5 py-1.5 align-middle ml-1">
+        <MenuButton as={Button} className="px-1.5 py-1.5 align-middle ml-1">
           <PeopleDotsIcon className="text-gray-500" />
-        </Menu.Button>
-        <Menu.Items className="">
+        </MenuButton>
+        <MenuItems className="">
           <ArrowPopoverPanel width={120} flipped={menuFlipped}>
             <PersonMoreMenuItem
               onClick={() => setChangeLabel(true)}
@@ -151,7 +150,7 @@ const PersonMoreMenu = ({
               label={t('sidebar.people.action_label.move_face', 'Move face')}
             />
           </ArrowPopoverPanel>
-        </Menu.Items>
+        </MenuItems>
       </Menu>
       {modals}
     </>

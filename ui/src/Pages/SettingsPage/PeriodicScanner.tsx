@@ -1,6 +1,6 @@
 import { gql } from '@apollo/client'
 import React, { useEffect, useRef, useState } from 'react'
-import { useMutation, useQuery } from '@apollo/client'
+import { useMutation, useQuery } from '@apollo/client/react'
 import { InputLabelDescription, InputLabelTitle } from './SettingsPage'
 import { useTranslation } from 'react-i18next'
 import { scanIntervalQuery } from './__generated__/scanIntervalQuery'

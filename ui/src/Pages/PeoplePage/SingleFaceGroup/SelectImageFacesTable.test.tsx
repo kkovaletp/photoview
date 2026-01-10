@@ -1,5 +1,5 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
-import { MockedProvider } from '@apollo/client/testing'
+import { MockedProvider } from '@apollo/client/testing/react'
 import SelectImageFacesTable from './SelectImageFacesTable'
 import { myFaces_myFaceGroups_imageFaces } from '../__generated__/myFaces'
 import { singleFaceGroup_faceGroup_imageFaces } from './__generated__/singleFaceGroup'

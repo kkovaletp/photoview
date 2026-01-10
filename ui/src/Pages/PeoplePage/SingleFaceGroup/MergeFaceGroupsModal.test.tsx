@@ -1,9 +1,8 @@
 import { vi } from 'vitest'
 import { render, fireEvent, waitFor } from '@testing-library/react'
-import MergeFaceGroupsModal, { MergeFaceGroupsModalState } from './MergeFaceGroupsModal'
-import { MockedProvider } from '@apollo/client/testing'
+import MergeFaceGroupsModal, { MergeFaceGroupsModalState, COMBINE_FACES_MUTATION } from './MergeFaceGroupsModal'
+import { MockedProvider } from '@apollo/client/testing/react'
 import { MY_FACES_QUERY } from '../PeoplePage'
-import { COMBINE_FACES_MUTATION } from './MergeFaceGroupsModal'
 
 // Mock Modal component to prevent import issues
 vi.mock('../../../primitives/Modal', () => ({
@@ -41,7 +40,7 @@ vi.mock('react-router-dom', async () => {
 
 // Mock IntersectionObserver for tests
 beforeAll(() => {
-    global.IntersectionObserver = class {
+    globalThis.IntersectionObserver = class {
         constructor() { }
         observe() { }
         unobserve() { }
@@ -112,6 +111,7 @@ async function testMerge(destinationID: string, sourceIDs: string[]) {
     const combineFacesMock = getCombineFacesMock(destinationID, sourceIDs)
 
     // Render modal in SelectDestination state
+    //TODO: How to fix the "Property 'addTypename' does not exist on type 'IntrinsicAttributes & IntrinsicClassAttributes<MockedProvider> & Readonly<MockedProviderProps>'." here and later in this file?
     const { getByText, getByTestId, getByRole, rerender } = render(
         <MockedProvider mocks={[myFacesMock, combineFacesMock]} addTypename={false}>
             <MergeFaceGroupsModal

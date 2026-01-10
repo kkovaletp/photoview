@@ -1,4 +1,5 @@
-import { gql, useLazyQuery } from '@apollo/client'
+import { gql } from '@apollo/client'
+import { useLazyQuery } from '@apollo/client/react'
 import { useEffect, useContext } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
@@ -11,7 +12,7 @@ import { SidebarContext } from '../Sidebar'
 import {
   ProtectedImage,
   ProtectedVideo,
-  ProtectedVideoProps_Media,
+  ProtectedVideoPropsMedia,
 } from '../../photoGallery/ProtectedMedia'
 import { SidebarPhotoCover } from '../AlbumCovers'
 import { SidebarPhotoShare } from '../Sharing'
@@ -134,7 +135,7 @@ const PreviewVideo = styled(ProtectedVideo)`
   left: 0;
 `
 
-interface PreviewMediaPropsMedia extends ProtectedVideoProps_Media {
+interface PreviewMediaPropsMedia extends ProtectedVideoPropsMedia {
   type: MediaType
 }
 

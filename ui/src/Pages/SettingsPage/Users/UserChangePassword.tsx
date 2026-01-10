@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
-import { gql, useMutation } from '@apollo/client'
+import { gql } from '@apollo/client'
+import { useMutation } from '@apollo/client/react'
 import { Trans, useTranslation } from 'react-i18next'
 import { settingsUsersQuery_user } from './__generated__/settingsUsersQuery'
 import Modal from '../../../primitives/Modal'

@@ -1,11 +1,6 @@
-import React, { useEffect, useState } from 'react'
-import {
-  useMutation,
-  useQuery,
-  gql,
-  useLazyQuery,
-  DocumentNode,
-} from '@apollo/client'
+import { useEffect, useState } from 'react'
+import { gql, DocumentNode } from '@apollo/client'
+import { useQuery, useMutation, useLazyQuery } from '@apollo/client/react'
 import copy from 'copy-to-clipboard'
 import { useTranslation } from 'react-i18next'
 import { Popover, PopoverButton, PopoverPanel } from '@headlessui/react'
