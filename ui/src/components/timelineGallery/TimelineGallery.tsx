@@ -17,7 +17,7 @@ import {
   timelineGalleryReducer,
   TimelineMediaIndex,
 } from './timelineGalleryReducer'
-import { urlPresentModeSetupHook } from '../photoGallery/mediaGalleryReducer'
+import { useUrlPresentModeSetup } from '../photoGallery/mediaGalleryReducer'
 import TimelineFilters from './TimelineFilters'
 import client from '../../apolloClient'
 
@@ -156,7 +156,7 @@ const TimelineGallery = () => {
     })()
   }, [filterDate, onlyFavorites, refetch])
 
-  urlPresentModeSetupHook({
+  useUrlPresentModeSetup({
     dispatchMedia,
     openPresentMode: (_event) => {
       dispatchMedia({

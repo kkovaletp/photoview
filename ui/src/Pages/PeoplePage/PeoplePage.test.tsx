@@ -225,7 +225,7 @@ describe('FaceDetails component', () => {
     renderWithProviders(<FaceGroup group={faceGroup} />, {
       mocks: graphqlMocks,
       apolloOptions: {
-        addTypename: false
+        addTypename: false //TODO: How to fix the "Object literal may only specify known properties, and 'addTypename' does not exist in type '{ defaultOptions?: any; }'." here and below?
       }
     })
 

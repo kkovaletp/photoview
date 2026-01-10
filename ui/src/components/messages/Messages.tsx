@@ -1,4 +1,4 @@
-import React from 'react'
+import { FunctionComponent } from 'react'
 import styled from 'styled-components'
 import { authToken } from '../../helpers/authentication'
 import MessageProgress from './MessageProgress'
@@ -23,7 +23,7 @@ const Container = styled.div`
 const Messages = () => {
   const { messages, setMessages } = useMessageState()
 
-  const getMessageElement = (message: Message): React.FunctionComponent => {
+  const getMessageElement = (message: Message): FunctionComponent => {
     const dismissMessage = (message: Message) => {
       message.onDismiss?.()
       setMessages(prevMessages => prevMessages.filter(msg => msg.key != message.key))

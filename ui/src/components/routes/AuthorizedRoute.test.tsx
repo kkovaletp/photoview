@@ -3,7 +3,7 @@ import { render, screen, waitFor } from '@testing-library/react'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 
 import * as authentication from '../../helpers/authentication'
-import { MockedProvider } from '@apollo/client/testing' //TODO: How to fix the "Module '"@apollo/client/testing"' has no exported member 'MockedProvider'" error?
+import { MockedProvider } from '@apollo/client/testing/react'
 import { ADMIN_QUERY } from '../layout/Layout'
 
 vi.mock('../../helpers/authentication.ts')

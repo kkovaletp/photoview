@@ -1,6 +1,6 @@
 import { gql } from '@apollo/client'
 import { useLazyQuery, useMutation } from '@apollo/client/react'
-import React, { useEffect, useState } from 'react'
+import { Dispatch, SetStateAction, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import SelectFaceGroupTable from './SelectFaceGroupTable'
 import SelectImageFacesTable from './SelectImageFacesTable'
@@ -39,7 +39,7 @@ const MOVE_IMAGE_FACES_MUTATION = gql`
 
 type MoveImageFacesModalProps = {
   open: boolean
-  setOpen: React.Dispatch<React.SetStateAction<boolean>>
+  setOpen: Dispatch<SetStateAction<boolean>>
   faceGroup: singleFaceGroup_faceGroup
   preselectedImageFaces?: (
     | singleFaceGroup_faceGroup_imageFaces
@@ -100,7 +100,7 @@ const MoveImageFacesModal = ({
     }
   }, [open])
 
-  if (open == false) return null
+  if (!open) return null
 
   const moveImageFaces = () => {
     const faceIDs = selectedImageFaces.map(face => face.id)
@@ -123,19 +123,7 @@ const MoveImageFacesModal = ({
   const imageFaces = faceGroup.imageFaces
 
   let table = null
-  if (!imagesSelected) {
-    table = (
-      <SelectImageFacesTable
-        imageFaces={imageFaces}
-        selectedImageFaces={selectedImageFaces}
-        setSelectedImageFaces={setSelectedImageFaces}
-        title={t(
-          'people_page.modal.move_image_faces.image_select_table.title',
-          'Select images to move'
-        )}
-      />
-    )
-  } else {
+  if (imagesSelected) {
     if (faceGroupsData && faceGroup) {
       const filteredFaceGroups = faceGroupsData.myFaceGroups.filter(
         x => x.id != faceGroup.id
@@ -147,27 +135,29 @@ const MoveImageFacesModal = ({
             'Select destination face group'
           )}
           faceGroups={filteredFaceGroups}
-          selectedFaceGroup={selectedFaceGroup}
+          selectedFaceGroup={selectedFaceGroup} //TODO: How to fix the "Type '{ title: string; faceGroups: myFaces_myFaceGroups[]; selectedFaceGroup: myFaces_myFaceGroups | singleFaceGroup_faceGroup | null; setSelectedFaceGroup: Dispatch<...>; }' is not assignable to type 'IntrinsicAttributes & SelectFaceGroupTableProps'. Property 'selectedFaceGroup' does not exist on type 'IntrinsicAttributes & SelectFaceGroupTableProps'.Did you mean 'selectedFaceGroups' ? " error?
           setSelectedFaceGroup={setSelectedFaceGroup}
         />
       )
     } else {
       table = <div>{t('general.loading.default', 'Loading...')}</div>
     }
+  } else {
+    table = (
+      <SelectImageFacesTable
+        imageFaces={imageFaces}
+        selectedImageFaces={selectedImageFaces}
+        setSelectedImageFaces={setSelectedImageFaces}
+        title={t(
+          'people_page.modal.move_image_faces.image_select_table.title',
+          'Select images to move'
+        )}
+      />
+    )
   }
 
   let positiveButton: ModalAction
-  if (!imagesSelected) {
-    positiveButton = {
-      key: 'next',
-      label: t(
-        'people_page.modal.move_image_faces.image_select_table.next_action',
-        'Next'
-      ),
-      onClick: () => setImagesSelected(true),
-      variant: 'positive',
-    }
-  } else {
+  if (imagesSelected) {
     positiveButton = {
       key: 'move',
       label: t(
@@ -175,6 +165,16 @@ const MoveImageFacesModal = ({
         'Move image faces'
       ),
       onClick: () => moveImageFaces(),
+      variant: 'positive',
+    }
+  } else {
+    positiveButton = {
+      key: 'next',
+      label: t(
+        'people_page.modal.move_image_faces.image_select_table.next_action',
+        'Next'
+      ),
+      onClick: () => setImagesSelected(true),
       variant: 'positive',
     }
   }

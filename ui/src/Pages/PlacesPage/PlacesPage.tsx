@@ -1,14 +1,14 @@
 import { gql } from '@apollo/client'
 import { useQuery } from '@apollo/client/react'
 import type mapboxgl from 'mapbox-gl'
-import React, { useReducer } from 'react'
+import { Dispatch, useReducer } from 'react'
 import { Helmet, HelmetProvider } from '@dr.pogodin/react-helmet'
 import { useTranslation } from 'react-i18next'
 import styled from 'styled-components'
 import Layout from '../../components/layout/Layout'
 import { registerMediaMarkers } from '../../components/mapbox/mapboxHelperFunctions'
 import useMapboxMap from '../../components/mapbox/MapboxMap'
-import { urlPresentModeSetupHook } from '../../components/photoGallery/mediaGalleryReducer'
+import { useUrlPresentModeSetup } from '../../components/photoGallery/mediaGalleryReducer'
 import MapPresentMarker from './MapPresentMarker'
 import { PlacesAction, placesReducer } from './placesReducer'
 import { mediaGeoJson } from './__generated__/mediaGeoJson'
@@ -51,7 +51,7 @@ const MapPage = () => {
     },
   })
 
-  urlPresentModeSetupHook({
+  useUrlPresentModeSetup({
     dispatchMedia: dispatchMarkerMedia,
     openPresentMode: event => {
       dispatchMarkerMedia({
@@ -102,7 +102,7 @@ const configureMapbox =
     dispatchMarkerMedia,
   }: {
     mapboxData?: mediaGeoJson
-    dispatchMarkerMedia: React.Dispatch<PlacesAction>
+    dispatchMarkerMedia: Dispatch<PlacesAction>
   }) =>
     (map: mapboxgl.Map, mapboxLibrary: typeof mapboxgl) => {
       // Add map navigation control

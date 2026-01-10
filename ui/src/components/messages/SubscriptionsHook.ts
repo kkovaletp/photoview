@@ -1,5 +1,5 @@
 import { notificationSubscription } from './__generated__/notificationSubscription'
-import React, { useEffect } from 'react'
+import { Dispatch, SetStateAction, useEffect } from 'react'
 import { gql } from '@apollo/client'
 import { useSubscription } from '@apollo/client/react'
 import { authToken } from '../../helpers/authentication'
@@ -39,7 +39,7 @@ export interface Message {
 
 type SubscriptionHookProps = {
   messages: Message[]
-  setMessages: React.Dispatch<React.SetStateAction<Message[]>>
+  setMessages: Dispatch<SetStateAction<Message[]>>
 }
 
 export const SubscriptionsHook = ({

@@ -1,4 +1,14 @@
-import React, { createRef, JSX, useEffect, useState } from 'react'
+import {
+  createRef,
+  DetailedHTMLProps,
+  Dispatch,
+  HTMLAttributes,
+  JSX,
+  SetStateAction,
+  useEffect,
+  useState,
+  KeyboardEvent,
+} from 'react'
 import { gql, ObservableQuery } from '@apollo/client'
 import { useMutation, useQuery } from '@apollo/client/react'
 import Layout from '../../components/layout/Layout'
@@ -74,8 +84,8 @@ const RECOGNIZE_UNLABELED_FACES_MUTATION = gql`
 type FaceDetailsWrapperProps = {
   labeled: boolean
   className?: string
-} & React.DetailedHTMLProps<
-  React.HTMLAttributes<HTMLSpanElement>,
+} & DetailedHTMLProps<
+  HTMLAttributes<HTMLSpanElement>,
   HTMLSpanElement
 >
 
@@ -113,7 +123,7 @@ type FaceDetailsProps = {
   className?: string
   textFieldClassName?: string
   editLabel: boolean
-  setEditLabel: React.Dispatch<React.SetStateAction<boolean>>
+  setEditLabel: Dispatch<SetStateAction<boolean>>
 }
 
 export const FaceDetails = ({
@@ -151,31 +161,14 @@ export const FaceDetails = ({
     }
   }, [loading])
 
-  const onKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  const onKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key == 'Escape') {
       resetLabel()
     }
   }
 
   let label
-  if (!editLabel) {
-    label = (
-      <FaceDetailsWrapper
-        className={tailwindClassNames(
-          className,
-          'whitespace-nowrap inline-block overflow-hidden text-clip'
-        )}
-        labeled={!!group.label}
-        onClick={() => setEditLabel(true)}
-      >
-        <FaceImagesCount>{group.imageFaceCount}</FaceImagesCount>
-        <button className="">
-          {group.label ?? t('people_page.face_group.unlabeled', 'Unlabeled')}
-        </button>
-        {/* <EditIcon name="pencil" /> */}
-      </FaceDetailsWrapper>
-    )
-  } else {
+  if (editLabel) {
     label = (
       <FaceDetailsWrapper className={className} labeled={!!group.label}>
         <TextField
@@ -200,6 +193,23 @@ export const FaceDetails = ({
             resetLabel()
           }}
         />
+      </FaceDetailsWrapper>
+    )
+  } else {
+    label = (
+      <FaceDetailsWrapper
+        className={tailwindClassNames(
+          className,
+          'whitespace-nowrap inline-block overflow-hidden text-clip'
+        )}
+        labeled={!!group.label}
+        onClick={() => setEditLabel(true)}
+      >
+        <FaceImagesCount>{group.imageFaceCount}</FaceImagesCount>
+        <button className="">
+          {group.label ?? t('people_page.face_group.unlabeled', 'Unlabeled')}
+        </button>
+        {/* <EditIcon name="pencil" /> */}
       </FaceDetailsWrapper>
     )
   }

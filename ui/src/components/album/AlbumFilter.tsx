@@ -1,4 +1,4 @@
-import React from 'react'
+import { useMemo } from 'react'
 import { authToken } from '../../helpers/authentication'
 import { useTranslation } from 'react-i18next'
 import { OrderDirection } from '../../__generated__/globalTypes'
@@ -65,7 +65,7 @@ const SortingOptions = ({
     }
   }
 
-  const defaultOptions = React.useMemo(
+  const defaultOptions = useMemo(
     () => [
       {
         value: 'date_shot',

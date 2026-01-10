@@ -1,5 +1,5 @@
 import { gql } from '@apollo/client'
-import React, { useEffect } from 'react'
+import { Dispatch, useEffect } from 'react'
 import { useLazyQuery } from '@apollo/client/react'
 import PresentView from '../../components/photoGallery/presentView/PresentView'
 import type mapboxgl from 'mapbox-gl'
@@ -58,7 +58,7 @@ const getMediaFromMarker = (map: mapboxgl.Map, presentMarker: PresentMarker) =>
         ?.properties as MediaMarker | undefined
 
       if (media === undefined) {
-        reject('ERROR: media is undefined')
+        reject(new Error('ERROR: media is undefined'))
         return
       }
 
@@ -78,7 +78,7 @@ export interface MediaMarker {
 type MapPresetMarkerProps = {
   map: mapboxgl.Map | null
   markerMediaState: PlacesState
-  dispatchMarkerMedia: React.Dispatch<PlacesAction>
+  dispatchMarkerMedia: Dispatch<PlacesAction>
 }
 
 /**
@@ -116,7 +116,7 @@ const MapPresentMarker = ({
     const mediaList = loadedMedia?.mediaList || []
     dispatchMarkerMedia({
       type: 'replaceMedia',
-      media: mediaList,
+      media: mediaList, //TODO: How to fix the "Type 'placePageQueryMedia_mediaList[]' is not assignable to type 'MediaGalleryFields[]'. Property 'favorite' is missing in type 'placePageQueryMedia_mediaList' but required in type 'MediaGalleryFields'." error here?
     })
     if (mediaList.length > 0) {
       dispatchMarkerMedia({

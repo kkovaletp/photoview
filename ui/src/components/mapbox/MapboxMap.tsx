@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect, forwardRef } from 'react'
+import { useState, useRef, useEffect, forwardRef, HTMLProps } from 'react'
 import { gql } from '@apollo/client'
 import { useQuery } from '@apollo/client/react'
 import type mapboxgl from 'mapbox-gl'
@@ -21,7 +21,7 @@ const MapContainer = styled.div`
   height: 100%;
 `
 
-const ForwardedMapContainer = forwardRef<HTMLDivElement, React.HTMLProps<HTMLDivElement>>((props, ref) => (
+const ForwardedMapContainer = forwardRef<HTMLDivElement, HTMLProps<HTMLDivElement>>((props, ref) => (
   <div {...props} ref={ref} className={props.className} />
 ))
 const StyledForwardedMapContainer = styled(ForwardedMapContainer)`

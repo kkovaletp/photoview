@@ -1,5 +1,5 @@
 import type mapboxgl from 'mapbox-gl'
-import React from 'react'
+import { Dispatch } from 'react'
 import { createRoot } from 'react-dom/client'
 import MapClusterMarker from '../../Pages/PlacesPage/MapClusterMarker'
 import { MediaMarker } from '../../Pages/PlacesPage/MapPresentMarker'
@@ -11,7 +11,7 @@ let markersOnScreen: typeof markers = {}
 type registerMediaMarkersArgs = {
   map: mapboxgl.Map
   mapboxLibrary: typeof mapboxgl
-  dispatchMarkerMedia: React.Dispatch<PlacesAction>
+  dispatchMarkerMedia: Dispatch<PlacesAction>
 }
 
 type MarkerElement = HTMLDivElement & {
@@ -103,7 +103,7 @@ function createClusterPopupElement(
   {
     dispatchMarkerMedia,
   }: {
-    dispatchMarkerMedia: React.Dispatch<PlacesAction>
+    dispatchMarkerMedia: Dispatch<PlacesAction>
   }
 ) {
   try {

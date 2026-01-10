@@ -90,7 +90,7 @@ describe('SearchBar Component', () => {
         mockLoading = false;
 
         // Mock useLazyQuery to return our controlled variables
-        vi.spyOn(Apollo, 'useLazyQuery').mockImplementation(() => { //how to fix the "Argument of type '"useLazyQuery"' is not assignable to parameter of type error?
+        vi.spyOn(Apollo, 'useLazyQuery').mockImplementation(() => { //TODO: How to fix the "Argument of type '"useLazyQuery"' is not assignable to parameter of type error?
             return [
                 fetchSearchMock,
                 { loading: mockLoading, data: mockSearchData }

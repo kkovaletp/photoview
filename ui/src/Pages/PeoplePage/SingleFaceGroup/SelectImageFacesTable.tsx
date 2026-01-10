@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import { Dispatch, SetStateAction, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import styled from 'styled-components'
 import { ProtectedImage } from '../../../components/photoGallery/ProtectedMedia'
@@ -61,8 +61,8 @@ type SelectImageFacesTable = {
     | myFaces_myFaceGroups_imageFaces
     | singleFaceGroup_faceGroup_imageFaces
   )[]
-  setSelectedImageFaces: React.Dispatch<
-    React.SetStateAction<
+  setSelectedImageFaces: Dispatch<
+    SetStateAction<
       (myFaces_myFaceGroups_imageFaces | singleFaceGroup_faceGroup_imageFaces)[]
     >
   >

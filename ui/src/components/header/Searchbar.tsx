@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, ReactNode, ChangeEvent, Dispatch, SetStateAction } from 'react'
 import styled from 'styled-components'
 import { gql } from '@apollo/client'
 import { useLazyQuery } from '@apollo/client/react'
@@ -69,7 +69,7 @@ const SearchBar = () => {
     }
   }, [])
 
-  const fetchEvent = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const fetchEvent = (e: ChangeEvent<HTMLInputElement>) => {
     e.persist()
 
     setQuery(e.target.value)
@@ -198,7 +198,7 @@ type SearchResultsProps = {
   media: searchQuery_search_media[]
   loading: boolean
   selectedItem: number | null
-  setSelectedItem: React.Dispatch<React.SetStateAction<number | null>>
+  setSelectedItem: Dispatch<SetStateAction<number | null>>
   query: string
   expanded: boolean
 }
@@ -280,8 +280,8 @@ const SearchResults = ({
 type SearchRowProps = {
   id: string
   link: string
-  preview: React.ReactNode
-  label: React.ReactNode
+  preview: ReactNode
+  label: ReactNode
   selected: boolean
   setSelected(): void
 }

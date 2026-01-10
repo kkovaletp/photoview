@@ -1,4 +1,4 @@
-import { MockedProvider } from '@apollo/client/testing' //TODO: How to fix the "Module '"@apollo/client/testing"' has no exported member 'MockedProvider'" error?
+import { MockedProvider } from '@apollo/client/testing/react'
 import { render, screen } from '@testing-library/react'
 
 import * as authentication from '../../helpers/authentication'
@@ -53,7 +53,7 @@ test('Layout sidebar component', async () => {
       },
     },
   ]
-
+  //TODO: How to fix the "Property 'addTypename' does not exist on type 'IntrinsicAttributes & IntrinsicClassAttributes<MockedProvider> & Readonly<MockedProviderProps>'." here and later in this file?
   render(
     <MockedProvider mocks={mockedGraphql} addTypename={false}>
       <MemoryRouter>

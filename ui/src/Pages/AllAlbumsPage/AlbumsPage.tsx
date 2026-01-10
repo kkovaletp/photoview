@@ -1,4 +1,4 @@
-import React from 'react'
+import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import AlbumBoxes from '../../components/albumGallery/AlbumBoxes'
 import Layout from '../../components/layout/Layout'
@@ -44,7 +44,7 @@ const AlbumsPage = () => {
     }
   )
 
-  const sortingOptions = React.useMemo(
+  const sortingOptions = useMemo(
     () => [
       {
         value: 'updated_at' as const,

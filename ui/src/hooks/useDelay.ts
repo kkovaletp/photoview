@@ -2,13 +2,14 @@ import { useLayoutEffect, useState, useRef } from 'react'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function useDelay(wait: number, deps: any[] = []) {
-  const triggerUpdate = useState(false)[1] //TODO: How to fix the "useState call is not destructured into value + setter pair" error?
+  const [update, setUpdate] = useState(false)
+  const _ = update // to avoid "update is declared but its value is never read" warning
   const done = useRef(false)
 
   useLayoutEffect(() => {
     const handle = setTimeout(() => {
       done.current = true
-      triggerUpdate(x => !x)
+      setUpdate(x => !x)
     }, wait)
 
     return () => {

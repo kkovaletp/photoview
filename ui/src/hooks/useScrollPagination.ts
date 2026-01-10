@@ -43,7 +43,12 @@ const useScrollPagination: <D>(
             offset: itemCount,
           },
         }).then(result => {
-          const newItemCount = getItems(result.data).length //TODO: How to fix the "Argument of type 'D | DeepPartial<D> | undefined' is not assignable to parameter of type 'D'. 'D' could be instantiated with an arbitrary type which could be unrelated to 'D | DeepPartial<D> | undefined'." error?
+          if (!result.data) {
+            setFinished(true)
+            return
+          }
+
+          const newItemCount = getItems(result.data as Parameters<typeof getItems>[0]).length
           if (newItemCount == 0) {
             setFinished(true)
           }

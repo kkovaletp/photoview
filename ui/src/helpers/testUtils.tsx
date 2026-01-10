@@ -1,4 +1,4 @@
-import { MockedProvider } from '@apollo/client/testing' //TODO: How to fix the "Module '"@apollo/client/testing"' has no exported member 'MockedProvider'" error?
+import { MockedProvider } from '@apollo/client/testing/react'
 import { render } from '@testing-library/react'
 import { MessageProvider } from '../components/messages/MessageState'
 import { MemoryRouter, Route, Routes, Location } from 'react-router-dom'

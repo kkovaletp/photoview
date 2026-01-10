@@ -73,14 +73,14 @@ export interface MediaGalleryPopStateEvent extends PopStateEvent {
   state: MediaGalleryState
 }
 
-export const urlPresentModeSetupHook = ({
+export const useUrlPresentModeSetup = ({
   dispatchMedia,
   openPresentMode,
 }: {
   dispatchMedia: Dispatch<GalleryAction>
   openPresentMode: (event: MediaGalleryPopStateEvent) => void
 }) => {
-  useEffect(() => { //TODO: fix the "React Hook "useEffect" is called in function "urlPresentModeSetupHook" that is neither a React function component nor a custom React Hook function. React component names must start with an uppercase letter. React Hook names must start with the word "use".sonarqube(typescript:S6440)"
+  useEffect(() => {
     const urlChangeListener = (event: MediaGalleryPopStateEvent) => {
       if (event.state.presenting === true) {
         openPresentMode(event)
@@ -96,7 +96,7 @@ export const urlPresentModeSetupHook = ({
     return () => {
       globalThis.removeEventListener('popstate', urlChangeListener)
     }
-  }, [])
+  }, [dispatchMedia, openPresentMode])
 }
 
 export const openPresentModeAction = ({

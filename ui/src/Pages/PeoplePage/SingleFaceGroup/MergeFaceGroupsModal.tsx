@@ -1,6 +1,6 @@
 import { ApolloClient, gql } from '@apollo/client'
 import { useMutation, useQuery } from '@apollo/client/react'
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import { isNil } from '../../../helpers/utils'
@@ -50,6 +50,8 @@ type StateContent = {
   searchTitle: string
 }
 
+type FaceGroupType = myFaces_myFaceGroups | singleFaceGroup_faceGroup | null
+
 const MergeFaceGroupsModal = ({
   state,
   setState,
@@ -69,18 +71,18 @@ const MergeFaceGroupsModal = ({
 
   // The destination face group
   const [selectedDestinationFaceGroup, setSelectedDestinationFaceGroup] =
-    useState<myFaces_myFaceGroups | singleFaceGroup_faceGroup | null>(null)
+    useState<FaceGroupType>(null)
 
   // The set of currently selected face groups, on the modal page
   const [selectedFaceGroups, setSelectedFaceGroups] = useState<
-    Set<myFaces_myFaceGroups | singleFaceGroup_faceGroup | null>
+    Set<FaceGroupType>
   >(new Set())
 
   const addSelectedFaceGroup = (
-    faceGroup: myFaces_myFaceGroups | singleFaceGroup_faceGroup | null
+    faceGroup: FaceGroupType
   ) => setSelectedFaceGroups(prev => new Set(prev).add(faceGroup))
   const removeSelectedFaceGroup = (
-    faceGroup: myFaces_myFaceGroups | singleFaceGroup_faceGroup | null
+    faceGroup: FaceGroupType
   ) => {
     setSelectedFaceGroups(prev => {
       const s = new Set(prev)
@@ -90,7 +92,7 @@ const MergeFaceGroupsModal = ({
   }
 
   const setDestinationFaceGroup = (
-    faceGroup: myFaces_myFaceGroups | singleFaceGroup_faceGroup | null
+    faceGroup: FaceGroupType
   ) => {
     if (isNil(faceGroup)) {
       setSelectedFaceGroups(new Set())
@@ -100,7 +102,7 @@ const MergeFaceGroupsModal = ({
 
     // Overwrite the selected face groups with a set containing only the selected group
     setSelectedFaceGroups(
-      new Set<myFaces_myFaceGroups | singleFaceGroup_faceGroup | null>().add(
+      new Set<FaceGroupType>().add(
         faceGroup
       )
     )

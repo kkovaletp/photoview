@@ -1,10 +1,10 @@
-import React, { createContext, useContext, useState, ReactNode, useEffect, useMemo } from 'react'
+import { createContext, useContext, useState, ReactNode, useEffect, useMemo, Dispatch, SetStateAction } from 'react'
 import { Message } from './SubscriptionsHook'
 import { globalMessageHandler } from './globalMessageHandler'
 
 type MessageContextType = {
   messages: Message[]
-  setMessages: React.Dispatch<React.SetStateAction<Message[]>>
+  setMessages: Dispatch<SetStateAction<Message[]>>
   add: (message: Message) => void
   removeKey: (key: string) => void
 }
