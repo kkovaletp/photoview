@@ -96,9 +96,9 @@ const SearchBar = () => {
   media = media.slice(0, 5)
 
   const selectedItemId =
-    selectedItem !== null
-      ? [...albums.map(x => x.id), ...media.map(x => x.id)][selectedItem]
-      : null
+    selectedItem === null
+      ? null
+      : [...albums.map(x => x.id), ...media.map(x => x.id)][selectedItem]
 
   useEffect(() => {
     const elem = inputEl.current

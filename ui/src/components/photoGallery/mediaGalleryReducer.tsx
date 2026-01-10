@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import { Dispatch, useEffect } from 'react'
 import { MediaGalleryFields } from './__generated__/MediaGalleryFields'
 
 export interface MediaGalleryState {
@@ -77,10 +77,10 @@ export const urlPresentModeSetupHook = ({
   dispatchMedia,
   openPresentMode,
 }: {
-  dispatchMedia: React.Dispatch<GalleryAction>
+  dispatchMedia: Dispatch<GalleryAction>
   openPresentMode: (event: MediaGalleryPopStateEvent) => void
 }) => {
-  useEffect(() => {
+  useEffect(() => { //TODO: fix the "React Hook "useEffect" is called in function "urlPresentModeSetupHook" that is neither a React function component nor a custom React Hook function. React component names must start with an uppercase letter. React Hook names must start with the word "use".sonarqube(typescript:S6440)"
     const urlChangeListener = (event: MediaGalleryPopStateEvent) => {
       if (event.state.presenting === true) {
         openPresentMode(event)
@@ -89,12 +89,12 @@ export const urlPresentModeSetupHook = ({
       }
     }
 
-    window.addEventListener('popstate', urlChangeListener)
+    globalThis.addEventListener('popstate', urlChangeListener)
 
     history.replaceState({ presenting: false }, '')
 
     return () => {
-      window.removeEventListener('popstate', urlChangeListener)
+      globalThis.removeEventListener('popstate', urlChangeListener)
     }
   }, [])
 }
@@ -103,7 +103,7 @@ export const openPresentModeAction = ({
   dispatchMedia,
   activeIndex,
 }: {
-  dispatchMedia: React.Dispatch<PhotoGalleryAction>
+  dispatchMedia: Dispatch<PhotoGalleryAction>
   activeIndex: number
 }) => {
   dispatchMedia({
@@ -117,7 +117,7 @@ export const openPresentModeAction = ({
 export const closePresentModeAction = ({
   dispatchMedia,
 }: {
-  dispatchMedia: React.Dispatch<GalleryAction>
+  dispatchMedia: Dispatch<GalleryAction>
 }) => {
   dispatchMedia({
     type: 'closePresentMode',

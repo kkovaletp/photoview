@@ -1,4 +1,4 @@
-import React from 'react'
+import { Dispatch } from 'react'
 import TimelineGroupAlbum from './TimelineGroupAlbum'
 import { useTranslation } from 'react-i18next'
 import {
@@ -15,7 +15,7 @@ const dateFormatterOptions: Intl.DateTimeFormatOptions = {
 type TimelineGroupDateProps = {
   groupIndex: number
   mediaState: TimelineGalleryState
-  dispatchMedia: React.Dispatch<TimelineGalleryAction>
+  dispatchMedia: Dispatch<TimelineGalleryAction>
 }
 
 const TimelineGroupDate = ({

@@ -1,6 +1,5 @@
 import { useQuery } from '@apollo/client/react'
 import gql from 'graphql-tag'
-import React from 'react'
 import { useTranslation } from 'react-i18next'
 import Dropdown, { DropdownItem } from '../../primitives/form/Dropdown'
 import { FavoriteCheckboxProps, FavoritesCheckbox } from '../album/AlbumFilter'

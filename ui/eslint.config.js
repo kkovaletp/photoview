@@ -35,7 +35,7 @@ module.exports = [
             },
             globals: {
                 ...globals.browser,
-                ...globals.es2020,
+                ...globals.es2021,
                 Atomics: 'readonly',
                 SharedArrayBuffer: 'readonly',
                 process: 'readonly',

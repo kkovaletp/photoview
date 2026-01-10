@@ -1,4 +1,3 @@
-import React from 'react'
 import styled from 'styled-components'
 import { MediaType } from '../../../__generated__/globalTypes'
 import { exhaustiveCheck } from '../../../helpers/utils'
@@ -50,7 +49,7 @@ const PresentMedia = ({
             onLoad={e => {
               const elem = e.target as HTMLImageElement
               elem.style.display = 'initial'
-              imageLoaded && imageLoaded()
+              imageLoaded?.()
             }}
           />
         </div>

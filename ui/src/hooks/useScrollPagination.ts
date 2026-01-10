@@ -1,4 +1,4 @@
-import { ApolloQueryResult } from '@apollo/client'
+import { ObservableQuery } from '@apollo/client'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
 interface ScrollPaginationArgs<D> {
@@ -6,7 +6,7 @@ interface ScrollPaginationArgs<D> {
   data: D | undefined
   fetchMore: (args: {
     variables: { offset: number }
-  }) => Promise<ApolloQueryResult<D>>
+  }) => Promise<ObservableQuery.Result<D>>
   getItems: (data: D) => unknown[]
 }
 
@@ -36,14 +36,14 @@ const useScrollPagination: <D>(
 
     // configure new observer
     observer.current = new IntersectionObserver(entities => {
-      if (entities.find(x => x.isIntersecting == false)) {
-        const itemCount = data !== undefined ? getItems(data).length : 0
+      if (entities.some(x => !x.isIntersecting)) {
+        const itemCount = data === undefined ? 0 : getItems(data).length
         fetchMore({
           variables: {
             offset: itemCount,
           },
         }).then(result => {
-          const newItemCount = getItems(result.data).length
+          const newItemCount = getItems(result.data).length //TODO: How to fix the "Argument of type 'D | DeepPartial<D> | undefined' is not assignable to parameter of type 'D'. 'D' could be instantiated with an arbitrary type which could be unrelated to 'D | DeepPartial<D> | undefined'." error?
           if (newItemCount == 0) {
             setFinished(true)
           }

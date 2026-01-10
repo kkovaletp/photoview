@@ -21,7 +21,7 @@ export function debounce<F extends (...args: unknown[]) => unknown>(
       func(...args)
     }
 
-    timeout = window.setTimeout(() => {
+    timeout = globalThis.setTimeout(() => { //TODO: How to fix the "Type 'Timeout' is not assignable to type 'number'."?
       timeout = undefined
       func(...args)
     }, wait)

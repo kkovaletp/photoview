@@ -111,10 +111,10 @@ export const SubscriptionsHook = ({
     const notifyIndex = newMessages.findIndex(
       msg => msg.key == newNotification.key
     )
-    if (notifyIndex != -1) {
-      newMessages[notifyIndex] = newNotification
-    } else {
+    if (notifyIndex === -1) {
       newMessages.push(newNotification)
+    } else {
+      newMessages[notifyIndex] = newNotification
     }
 
     setMessages(newMessages)

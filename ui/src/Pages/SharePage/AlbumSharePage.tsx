@@ -136,7 +136,13 @@ const AlbumSharePage = ({ albumID, token, password }: AlbumSharePageProps) => {
     return <div>{error.message}</div>
   }
 
-  const album = data?.album
+  const album = data?.album ? {
+    ...data.album,
+    media: data.album.media.map(media => ({
+      ...media,
+      favorite: undefined, // This ensures no favorite button is shown
+    }))
+  } : undefined
 
   return (
     <AlbumSharePageWrapper data-testid="AlbumSharePage">
@@ -147,7 +153,7 @@ const AlbumSharePage = ({ albumID, token, password }: AlbumSharePageProps) => {
       >
         <AlbumGallery
           ref={containerElem}
-          album={album} //how to fix type incompatibility here?
+          album={album as any} // Type assertion needed due to GraphQL type vs component type mismatch
           customAlbumLink={albumId => `/share/${token}/${albumId}`}
           showFilter
           setOrdering={orderParams.setOrdering}

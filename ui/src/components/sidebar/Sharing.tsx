@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { gql, DocumentNode } from '@apollo/client'
 import { useQuery, useMutation, useLazyQuery } from '@apollo/client/react'
 import copy from 'copy-to-clipboard'

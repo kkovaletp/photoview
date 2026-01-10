@@ -55,18 +55,6 @@ const Messages = () => {
     }
   }
 
-  // const transitions = useTransition(messages.slice().reverse(), x => x.key, {
-  //   from: {
-  //     opacity: 0,
-  //     height: '0px',
-  //   },
-  //   enter: {
-  //     opacity: 1,
-  //     height: `100px`,
-  //   },
-  //   leave: { opacity: 0, height: '0px' },
-  // })
-
   const messageElems = messages.map(msg => {
     const Elem = getMessageElement(msg)
     return (

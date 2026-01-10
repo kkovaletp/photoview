@@ -1,5 +1,5 @@
 import { useLazyQuery } from '@apollo/client/react'
-import React, { useEffect } from 'react'
+import { useEffect, JSX, ReactNode } from 'react'
 import { Navigate } from 'react-router-dom'
 import { authToken } from '../../helpers/authentication'
 import { adminQuery } from '../../__generated__/adminQuery'
@@ -29,7 +29,7 @@ export const Authorized = ({ children }: { children: JSX.Element }) => {
 }
 
 interface AuthorizedRouteProps {
-  children: React.ReactNode
+  children: ReactNode
 }
 
 const AuthorizedRoute = ({ children }: AuthorizedRouteProps) => {

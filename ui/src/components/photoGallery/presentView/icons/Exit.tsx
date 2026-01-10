@@ -1,6 +1,6 @@
-import * as React from 'react'
+import { SVGProps } from 'react'
 
-function SvgExit(props: React.SVGProps<SVGSVGElement>) {
+function SvgExit(props: Readonly<SVGProps<SVGSVGElement>>) {
   return (
     <svg
       viewBox="0 0 36 36"

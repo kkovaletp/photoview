@@ -1,4 +1,4 @@
-import React, { useEffect, useContext } from 'react'
+import { useEffect, useContext } from 'react'
 import { Link } from 'react-router-dom'
 import styled from 'styled-components'
 import { SidebarContext } from '../sidebar/Sidebar'
@@ -55,7 +55,7 @@ const AlbumTitle = ({ album, disableLink = false }: AlbumTitleProps) => {
   useEffect(() => {
     if (!album) return
 
-    if (authToken() && disableLink == true) {
+    if (authToken() && disableLink) {
       fetchPath({
         variables: {
           id: album.id,

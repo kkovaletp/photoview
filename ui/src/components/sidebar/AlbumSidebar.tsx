@@ -1,4 +1,3 @@
-import React from 'react'
 import { gql } from '@apollo/client'
 import { useQuery } from '@apollo/client/react'
 import { SidebarAlbumShare } from './Sharing'

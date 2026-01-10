@@ -1,8 +1,8 @@
-import { MockedProvider } from '@apollo/client/testing'
+import { MockedProvider } from '@apollo/client/testing' //TODO: How to fix the "Module '"@apollo/client/testing"' has no exported member 'MockedProvider'" error?
 import { render } from '@testing-library/react'
 import { MessageProvider } from '../components/messages/MessageState'
 import { MemoryRouter, Route, Routes, Location } from 'react-router-dom'
-import React from 'react'
+import { ReactElement, ReactNode } from 'react'
 
 /**
  * Options for configuring the test environment in renderWithProviders.
@@ -13,7 +13,7 @@ interface RenderWithProvidersOptions {
     /** Initial router entries for MemoryRouter */
     initialEntries?: (string | Partial<Location>)[]
     /** Route element to render */
-    route?: React.ReactElement
+    route?: ReactElement
     /** Path for the route */
     path?: string
     /** Apollo client configuration options */
@@ -34,7 +34,7 @@ interface RenderWithProvidersOptions {
  * @returns The rendered component with testing utilities
  */
 export function renderWithProviders(
-    ui: React.ReactNode,
+    ui: ReactNode,
     {
         mocks = [],
         initialEntries = ['/'],
@@ -46,7 +46,7 @@ export function renderWithProviders(
     if ((route && !path) || (!route && path)) {
         throw new Error('Both route and path must be provided together');
     }
-    const Wrapper = ({ children }: { children: React.ReactNode }) => (
+    const Wrapper = ({ children }: { children: ReactNode }) => (
         <MockedProvider
             mocks={mocks}
             defaultOptions={apolloOptions.defaultOptions}

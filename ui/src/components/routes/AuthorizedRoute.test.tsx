@@ -1,10 +1,9 @@
-import React from 'react'
 import AuthorizedRoute, { useIsAdmin } from './AuthorizedRoute'
 import { render, screen, waitFor } from '@testing-library/react'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 
 import * as authentication from '../../helpers/authentication'
-import { MockedProvider } from '@apollo/client/testing'
+import { MockedProvider } from '@apollo/client/testing' //TODO: How to fix the "Module '"@apollo/client/testing"' has no exported member 'MockedProvider'" error?
 import { ADMIN_QUERY } from '../layout/Layout'
 
 vi.mock('../../helpers/authentication.ts')
@@ -15,7 +14,7 @@ describe('AuthorizedRoute component', () => {
   const AuthorizedComponent = () => <div>authorized content</div>
 
   test('not logged in', () => {
-    authToken.mockImplementation(() => null)
+    authToken.mockImplementation(() => undefined)
 
     render(
       <MemoryRouter initialEntries={['/authorized']}>
@@ -76,7 +75,7 @@ describe('useIsAdmin hook', () => {
   })
 
   test('not logged in', async () => {
-    authToken.mockImplementation(() => null)
+    authToken.mockImplementation(() => undefined)
 
     const TestComponent = () => {
       const isAdmin = useIsAdmin()

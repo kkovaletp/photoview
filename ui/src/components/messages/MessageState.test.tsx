@@ -11,7 +11,7 @@ describe('MessageState', () => {
         originalDateNow = Date.now
         try {
             vi.useFakeTimers()
-            clearIntervalSpy = vi.spyOn(window, 'clearInterval')
+            clearIntervalSpy = vi.spyOn(globalThis, 'clearInterval')
         } catch (error) {
             Date.now = originalDateNow
             throw error
