@@ -19,7 +19,7 @@ require (
 	github.com/stretchr/testify v1.11.1
 	github.com/vektah/gqlparser/v2 v2.5.31
 	golang.org/x/crypto v0.46.0
-	golang.org/x/text v0.32.0
+	golang.org/x/text v0.33.0
 	gopkg.in/gographics/imagick.v3 v3.7.2
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1
 	gopkg.in/vansante/go-ffprobe.v2 v2.2.1
