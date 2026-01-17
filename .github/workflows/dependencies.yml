@@ -7,7 +7,7 @@ on:
     branches: [master]
   schedule:
     # At 23:18 every Wednesday, 2 hours before `photoview`. Details in https://docs.github.com/en/actions/writing-workflows/choosing-when-your-workflow-runs/events-that-trigger-workflows#schedule
-    - cron: '18 23 * * 3'
+    - cron: "18 23 * * 3"
 
 env:
   IS_PUSHING_IMAGES: ${{ github.event_name != 'pull_request' && github.repository == 'kkovaletp/photoview' }}
@@ -71,9 +71,11 @@ jobs:
             -H 'User-Agent: photoview-deps-ci'
           )
           # Fetch latest version tags from GitHub releases
-          LIBRAW_VERSION=$(curl "${CURL_FLAGS[@]}" \
-            ${GITHUB_TOKEN:+-H "Authorization: Bearer ${GITHUB_TOKEN}"} \
-            "https://api.github.com/repos/LibRaw/LibRaw/releases/latest" | jq -er '.tag_name')
+          # Pin to 0.21.2 until ImageMagick supports LibRaw 0.22 API changes
+          LIBRAW_VERSION="0.21.2"
+          # LIBRAW_VERSION=$(curl "${CURL_FLAGS[@]}" \
+          #   ${GITHUB_TOKEN:+-H "Authorization: Bearer ${GITHUB_TOKEN}"} \
+          #   "https://api.github.com/repos/LibRaw/LibRaw/releases/latest" | jq -er '.tag_name')
           LIBHEIF_VERSION=$(curl "${CURL_FLAGS[@]}" \
             ${GITHUB_TOKEN:+-H "Authorization: Bearer ${GITHUB_TOKEN}"} \
             "https://api.github.com/repos/strukturag/libheif/releases/latest" | jq -er '.tag_name')
@@ -92,18 +94,18 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v6
         with:
-          context:     ./dependencies
-          platforms:   ${{ env.PLATFORMS }}
-          pull:        true
-          push:        ${{ env.IS_PUSHING_IMAGES }}
-          tags:        ${{ steps.docker_meta.outputs.tags }}
-          labels:      ${{ steps.docker_meta.outputs.labels }}
+          context: ./dependencies
+          platforms: ${{ env.PLATFORMS }}
+          pull: true
+          push: ${{ env.IS_PUSHING_IMAGES }}
+          tags: ${{ steps.docker_meta.outputs.tags }}
+          labels: ${{ steps.docker_meta.outputs.labels }}
           annotations: ${{ steps.docker_meta.outputs.annotations }}
-          sbom:        true
-          provenance:  mode=max
-          no-cache:    ${{ env.IS_CACHING != 'true' }}
-          cache-from:  type=gha,scope=dependencies
-          cache-to:    type=gha,mode=max,scope=dependencies
+          sbom: true
+          provenance: mode=max
+          no-cache: ${{ env.IS_CACHING != 'true' }}
+          cache-from: type=gha,scope=dependencies
+          cache-to: type=gha,mode=max,scope=dependencies
           secrets: |
             github_token=${{ secrets.GITHUB_TOKEN }}
           build-args: |
