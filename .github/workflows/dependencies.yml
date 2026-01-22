@@ -71,11 +71,9 @@ jobs:
             -H 'User-Agent: photoview-deps-ci'
           )
           # Fetch latest version tags from GitHub releases
-          # Pin to 0.21.2 until ImageMagick supports LibRaw 0.22 API changes
-          LIBRAW_VERSION="0.21.2"
-          # LIBRAW_VERSION=$(curl "${CURL_FLAGS[@]}" \
-          #   ${GITHUB_TOKEN:+-H "Authorization: Bearer ${GITHUB_TOKEN}"} \
-          #   "https://api.github.com/repos/LibRaw/LibRaw/releases/latest" | jq -er '.tag_name')
+          LIBRAW_VERSION=$(curl "${CURL_FLAGS[@]}" \
+            ${GITHUB_TOKEN:+-H "Authorization: Bearer ${GITHUB_TOKEN}"} \
+            "https://api.github.com/repos/LibRaw/LibRaw/releases/latest" | jq -er '.tag_name')
           LIBHEIF_VERSION=$(curl "${CURL_FLAGS[@]}" \
             ${GITHUB_TOKEN:+-H "Authorization: Bearer ${GITHUB_TOKEN}"} \
             "https://api.github.com/repos/strukturag/libheif/releases/latest" | jq -er '.tag_name')
