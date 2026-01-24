@@ -150,7 +150,7 @@ describe('Sharing Components', () => {
         })
 
         it('should not render shares when not authenticated', () => {
-            vi.mocked(authToken).mockReturnValue(null)
+            vi.mocked(authToken).mockReturnValue(undefined)
 
             const mocks: MockedResponse[] = []
 

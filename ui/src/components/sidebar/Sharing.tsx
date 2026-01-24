@@ -303,12 +303,26 @@ const MorePopoverSectionExpiration = ({
   // Verify whether the backend response includes an expiration time
   // Set it to true if share.expire exists; otherwise,set it to false
   const [enabled, setEnabled] = useState(!!share.expire)
-   useEffect(() => {
-   setEnabled(!!share.expire)
-   setDate(share.expire ? new Date(share.expire) : null)
+  useEffect(() => {
+    setEnabled(!!share.expire)
+    setDate(share.expire ? new Date(share.expire) : null)
   }, [share.expire])
   const { t, i18n } = useTranslation()
-  
+
+  const { add } = useMessageState()
+  const notifyError = (header: string, error: unknown) => {
+    console.error(`${header}: `, error)
+    add({
+      key: (globalThis.crypto?.randomUUID?.() ?? Math.random().toString(36)),
+      type: NotificationType.Message,
+      props: {
+        negative: true,
+        header,
+        content: error instanceof Error ? error.message : 'An unexpected error occurred',
+      },
+    })
+  }
+
   const dateFormatterOptions: Intl.DateTimeFormatOptions = {
     year: 'numeric',
     month: 'long',
@@ -318,9 +332,9 @@ const MorePopoverSectionExpiration = ({
     i18n.language,
     dateFormatterOptions
   )
-  const oldExpireDate = share.expire 
-  ? dateFormatter.format(new Date(share.expire.slice(0, 19).replace(' ', 'T'))) 
-  : '';
+  const oldExpireDate = share.expire
+    ? dateFormatter.format(new Date(share.expire.slice(0, 19).replace(' ', 'T')))
+    : '';
 
   const [date, setDate] = useState<Date | null>(
     share.expire ? new Date(share.expire) : null
@@ -331,15 +345,15 @@ const MorePopoverSectionExpiration = ({
   })
 
   const submit = () => {
-    if (!date && enabled) return 
-    const formatDate = date ? dayjs(date).endOf('day').format('YYYY-MM-DDTHH:mm:ss')+'Z' : null
+    if (!date && enabled) return
+    const formatDate = date ? dayjs(date).endOf('day').format('YYYY-MM-DDTHH:mm:ss') + 'Z' : null
     //Save the local time while treating it as UTC.
     setExpire({
       variables: {
         token: share.token,
         expire: formatDate,
       },
-    })
+    }).catch(error => notifyError('Failed to update expiration', error))
   }
 
   return (
@@ -359,7 +373,7 @@ const MorePopoverSectionExpiration = ({
                 token: share.token,
                 expire: null,
               },
-            })
+            }).catch(error => notifyError('Failed to clear expiration', error))
           }
         }}
       />
@@ -379,7 +393,7 @@ const MorePopoverSectionExpiration = ({
                 loading={loading}
               />
             }
-            
+
           />
         </div>
       )}

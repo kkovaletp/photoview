@@ -432,11 +432,10 @@ describe('load correct share page, based on graphql query', () => {
       },
       error: new Error('share expired'),
     };
-    
+
     render(
       <MockedProvider
         mocks={[expiredValidationMock]}
-        addTypename={false}
         defaultOptions={{
           watchQuery: { fetchPolicy: 'no-cache' },
           query: { fetchPolicy: 'no-cache' },
@@ -456,69 +455,74 @@ describe('load correct share page, based on graphql query', () => {
     expect(screen.getByText(/share expired/i)).toBeInTheDocument()
   })
 
-test(`test the normal`, async () => {
+  test(`test the normal`, async () => {
 
-  const shareTokenMock = {
-    request: {
-      query: SHARE_TOKEN_QUERY,
-      variables: { token: 'TOKEN123', password: "PASSWORD-123_@456\\" },
-    },
-    result: {
-      data: {
-        shareToken: {
-          token: 'TOKEN123',
-          album: { id: '1' }, 
-          media: null,
+    const shareTokenMock = {
+      request: {
+        query: SHARE_TOKEN_QUERY,
+        variables: { token: 'TOKEN123', password: "PASSWORD-123_@456\\" },
+      },
+      result: {
+        data: {
+          shareToken: {
+            __typename: 'ShareToken',
+            token: 'TOKEN123',
+            album: {
+              __typename: 'Album',
+              id: '1',
+            },
+            media: null,
+          },
         },
       },
-    },
-  };
+    };
 
-  const albumDataMock = {
-    request: {
-      query: SHARE_ALBUM_QUERY,
-      variables: {
-        id: '1',
-        token: 'TOKEN123',
-        password: "PASSWORD-123_@456\\",
-        limit: 200,
-        offset: 0,
-        mediaOrderBy: 'date_shot',
-        mediaOrderDirection: 'ASC',
-      },
-    },
-    result: {
-      data: {
-        album: {
+    const albumDataMock = {
+      request: {
+        query: SHARE_ALBUM_QUERY,
+        variables: {
           id: '1',
-          title: 'normal_album',
-          subAlbums: [],
-          thumbnail: { url: '...' },
-          media: [],
+          token: 'TOKEN123',
+          password: "PASSWORD-123_@456\\",
+          limit: 200,
+          offset: 0,
+          mediaOrderBy: 'date_shot',
+          mediaOrderDirection: 'ASC',
         },
       },
-    },
-  };
+      result: {
+        data: {
+          album: {
+            __typename: 'Album',
+            id: '1',
+            title: 'normal_album',
+            subAlbums: [],
+            thumbnail: {
+              __typename: 'MediaURL',
+              url: '...',
+            },
+            media: [],
+          },
+        },
+      },
+    };
 
-  render(
-    <MockedProvider
-      mocks={[...graphqlMocks, shareTokenMock, albumDataMock]}
-      addTypename={false}
-    >
-      <MemoryRouter initialEntries={historyMock}>
-        <Routes>
-          <Route path="/share/:token/*" element={<TokenRoute />} />
-        </Routes>
-      </MemoryRouter>
-    </MockedProvider>
-  )
+    render(
+      <MockedProvider
+        mocks={[...graphqlMocks, shareTokenMock, albumDataMock]}
+      >
+        <MemoryRouter initialEntries={historyMock}>
+          <Routes>
+            <Route path="/share/:token/*" element={<TokenRoute />} />
+          </Routes>
+        </MemoryRouter>
+      </MockedProvider>
+    )
 
-  expect(screen.getByText('Loading...')).toBeInTheDocument()
-  await waitForElementToBeRemoved(() => screen.queryByText('Loading...'))
+    expect(screen.getByText('Loading...')).toBeInTheDocument()
+    await waitForElementToBeRemoved(() => screen.queryByText('Loading...'))
 
-  expect(screen.getByTestId('Layout')).toBeInTheDocument()
-  expect(screen.getByTestId('AlbumSharePage')).toBeInTheDocument()
-})
-
-
+    expect(screen.getByTestId('Layout')).toBeInTheDocument()
+    expect(screen.getByTestId('AlbumSharePage')).toBeInTheDocument()
+  })
 })
