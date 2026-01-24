@@ -32,6 +32,7 @@ const SHARE_PHOTO_QUERY = gql`
                 id
                 token
                 hasPassword
+                expire
             }
         }
     }
@@ -40,12 +41,13 @@ const SHARE_PHOTO_QUERY = gql`
 const SHARE_ALBUM_QUERY = gql`
     query sidebarGetAlbumShares($id: ID!) {
         album(id: $id) {
-        id
-        shares {
             id
-            token
-            hasPassword
-        }
+            shares {
+                id
+                token
+                hasPassword
+                expire
+            }
         }
     }
 `
@@ -53,7 +55,7 @@ const SHARE_ALBUM_QUERY = gql`
 const ADD_MEDIA_SHARE_MUTATION = gql`
     mutation sidebarPhotoAddShare($id: ID!, $password: String, $expire: Time) {
         shareMedia(mediaId: $id, password: $password, expire: $expire) {
-        token
+            token
         }
     }
 `
@@ -61,7 +63,7 @@ const ADD_MEDIA_SHARE_MUTATION = gql`
 const ADD_ALBUM_SHARE_MUTATION = gql`
     mutation sidebarAlbumAddShare($id: ID!, $password: String, $expire: Time) {
         shareAlbum(albumId: $id, password: $password, expire: $expire) {
-        token
+            token
         }
     }
 `
@@ -71,6 +73,14 @@ const PROTECT_SHARE_MUTATION = gql`
         protectShareToken(token: $token, password: $password) {
         token
         hasPassword
+        }
+    }
+`
+
+const SET_EXPIRE_MUTATION = gql`
+    mutation sidebarSetExpireShare($token: String!, $expire: Time){
+        setExpireShareToken(token: $token, expire: $expire){
+            token
         }
     }
 `
@@ -92,12 +102,14 @@ const mockPhotoShares = {
                 id: 'share-1',
                 token: 'abc123',
                 hasPassword: false,
+                expire: null,
                 __typename: 'ShareToken',
             },
             {
                 id: 'share-2',
                 token: 'def456',
                 hasPassword: true,
+                expire: null,
                 __typename: 'ShareToken',
             },
         ],
@@ -113,6 +125,7 @@ const mockAlbumShares = {
                 id: 'share-3',
                 token: 'ghi789',
                 hasPassword: false,
+                expire: null,
                 __typename: 'ShareToken',
             },
         ],
@@ -221,6 +234,7 @@ describe('Sharing Components', () => {
                                         id: 'share-new',
                                         token: 'new789',
                                         hasPassword: false,
+                                        expire: null,
                                         __typename: 'ShareToken',
                                     },
                                 ],
@@ -351,6 +365,7 @@ describe('Sharing Components', () => {
                                         id: 'share-4',
                                         token: 'newalbum123',
                                         hasPassword: false,
+                                        expire: null,
                                         __typename: 'ShareToken',
                                     },
                                 ],
@@ -556,6 +571,7 @@ describe('Sharing Components', () => {
                             protectShareToken: {
                                 token: 'ghi789',
                                 hasPassword: true,
+                                expire: null,
                                 __typename: 'ShareToken',
                             },
                         },
@@ -575,6 +591,7 @@ describe('Sharing Components', () => {
                                         id: 'share-3',
                                         token: 'ghi789',
                                         hasPassword: true,
+                                        expire: null,
                                         __typename: 'ShareToken',
                                     },
                                 ],
@@ -649,6 +666,7 @@ describe('Sharing Components', () => {
                             protectShareToken: {
                                 token: 'ghi789',
                                 hasPassword: false,
+                                expire: null,
                                 __typename: 'ShareToken',
                             },
                         },
@@ -908,6 +926,342 @@ describe('Sharing Components', () => {
 
             await waitFor(() => {
                 expect(passwordInput).toHaveValue('a')
+            })
+        })
+    })
+
+    describe('Expiration Date', () => {
+        it('should enable expiration date', async () => {
+            const user = userEvent.setup()
+
+            const mocks: MockedResponse[] = [
+                {
+                    request: {
+                        query: SHARE_ALBUM_QUERY,
+                        variables: { id: 'album-1' },
+                    },
+                    result: { data: mockAlbumShares },
+                },
+            ]
+
+            renderWithProviders(<SidebarAlbumShare id="album-1" />, { mocks })
+
+            await waitFor(() => {
+                expect(screen.getByText('ghi789')).toBeInTheDocument()
+            })
+
+            const moreButton = screen.getByTitle('More')
+            await user.click(moreButton)
+
+            await waitFor(() => {
+                expect(screen.getByLabelText('Expiration date')).toBeInTheDocument()
+            })
+
+            const checkbox = screen.getByLabelText('Expiration date')
+            expect(checkbox).not.toBeChecked()
+        })
+
+        it('should set expiration date successfully', async () => {
+            const user = userEvent.setup()
+            const futureDate = new Date()
+            futureDate.setDate(futureDate.getDate() + 7)
+            const futureDateISO = futureDate.toISOString()
+
+            const mocks: MockedResponse[] = [
+                {
+                    request: {
+                        query: SHARE_ALBUM_QUERY,
+                        variables: { id: 'album-1' },
+                    },
+                    result: { data: mockAlbumShares },
+                },
+                {
+                    request: {
+                        query: SET_EXPIRE_MUTATION,
+                        variables: {
+                            token: 'ghi789',
+                            expire: expect.stringMatching(/^\d{4}-\d{2}-\d{2}T23:59:59Z$/),
+                        },
+                    },
+                    result: {
+                        data: {
+                            setExpireShareToken: {
+                                token: 'ghi789',
+                                __typename: 'ShareToken',
+                            },
+                        },
+                    },
+                },
+                {
+                    request: {
+                        query: SHARE_ALBUM_QUERY,
+                        variables: { id: 'album-1' },
+                    },
+                    result: {
+                        data: {
+                            album: {
+                                id: 'album-1',
+                                shares: [
+                                    {
+                                        id: 'share-3',
+                                        token: 'ghi789',
+                                        hasPassword: false,
+                                        expire: futureDateISO,
+                                        __typename: 'ShareToken',
+                                    },
+                                ],
+                                __typename: 'Album',
+                            },
+                        },
+                    },
+                },
+            ]
+
+            renderWithProviders(<SidebarAlbumShare id="album-1" />, { mocks })
+
+            await waitFor(() => {
+                expect(screen.getByText('ghi789')).toBeInTheDocument()
+            })
+
+            const moreButton = screen.getByTitle('More')
+            await user.click(moreButton)
+
+            await waitFor(() => {
+                expect(screen.getByLabelText('Expiration date')).toBeInTheDocument()
+            })
+
+            const checkbox = screen.getByLabelText('Expiration date')
+            await user.click(checkbox)
+
+            await waitFor(() => {
+                expect(checkbox).toBeChecked()
+            })
+        })
+
+        it('should clear expiration date successfully', async () => {
+            const user = userEvent.setup()
+            const futureDate = new Date()
+            futureDate.setDate(futureDate.getDate() + 7)
+
+            const mockAlbumWithExpiration = {
+                album: {
+                    id: 'album-1',
+                    shares: [
+                        {
+                            id: 'share-3',
+                            token: 'ghi789',
+                            hasPassword: false,
+                            expire: futureDate.toISOString(),
+                            __typename: 'ShareToken',
+                        },
+                    ],
+                    __typename: 'Album',
+                },
+            }
+
+            const mocks: MockedResponse[] = [
+                {
+                    request: {
+                        query: SHARE_ALBUM_QUERY,
+                        variables: { id: 'album-1' },
+                    },
+                    result: { data: mockAlbumWithExpiration },
+                },
+                {
+                    request: {
+                        query: SET_EXPIRE_MUTATION,
+                        variables: {
+                            token: 'ghi789',
+                            expire: null,
+                        },
+                    },
+                    result: {
+                        data: {
+                            setExpireShareToken: {
+                                token: 'ghi789',
+                                __typename: 'ShareToken',
+                            },
+                        },
+                    },
+                },
+                {
+                    request: {
+                        query: SHARE_ALBUM_QUERY,
+                        variables: { id: 'album-1' },
+                    },
+                    result: { data: mockAlbumShares },
+                },
+            ]
+
+            renderWithProviders(<SidebarAlbumShare id="album-1" />, { mocks })
+
+            await waitFor(() => {
+                expect(screen.getByText('ghi789')).toBeInTheDocument()
+            })
+
+            const moreButton = screen.getByTitle('More')
+            await user.click(moreButton)
+
+            await waitFor(() => {
+                expect(screen.getByLabelText('Expiration date')).toBeInTheDocument()
+            })
+
+            const checkbox = screen.getByLabelText('Expiration date')
+            expect(checkbox).toBeChecked()
+
+            await user.click(checkbox)
+
+            await waitFor(() => {
+                expect(checkbox).not.toBeChecked()
+            })
+        })
+
+        it('should display error when setting expiration fails', async () => {
+            const user = userEvent.setup()
+
+            const mocks: MockedResponse[] = [
+                {
+                    request: {
+                        query: SHARE_ALBUM_QUERY,
+                        variables: { id: 'album-1' },
+                    },
+                    result: { data: mockAlbumShares },
+                },
+                {
+                    request: {
+                        query: SET_EXPIRE_MUTATION,
+                        variables: {
+                            token: 'ghi789',
+                            expire: expect.stringMatching(/^\d{4}-\d{2}-\d{2}T23:59:59Z$/),
+                        },
+                    },
+                    result: {
+                        errors: [new GraphQLError('Failed to set expiration')],
+                    },
+                },
+            ]
+
+            renderWithProviders(<SidebarAlbumShare id="album-1" />, { mocks })
+
+            await waitFor(() => {
+                expect(screen.getByText('ghi789')).toBeInTheDocument()
+            })
+
+            const moreButton = screen.getByTitle('More')
+            await user.click(moreButton)
+
+            await waitFor(() => {
+                expect(screen.getByLabelText('Expiration date')).toBeInTheDocument()
+            })
+
+            const checkbox = screen.getByLabelText('Expiration date')
+            await user.click(checkbox)
+
+            await waitFor(() => {
+                expect(checkbox).toBeChecked()
+            })
+        })
+
+        it('should display error when clearing expiration fails', async () => {
+            const user = userEvent.setup()
+            const futureDate = new Date()
+            futureDate.setDate(futureDate.getDate() + 7)
+
+            const mockAlbumWithExpiration = {
+                album: {
+                    id: 'album-1',
+                    shares: [
+                        {
+                            id: 'share-3',
+                            token: 'ghi789',
+                            hasPassword: false,
+                            expire: futureDate.toISOString(),
+                            __typename: 'ShareToken',
+                        },
+                    ],
+                    __typename: 'Album',
+                },
+            }
+
+            const mocks: MockedResponse[] = [
+                {
+                    request: {
+                        query: SHARE_ALBUM_QUERY,
+                        variables: { id: 'album-1' },
+                    },
+                    result: { data: mockAlbumWithExpiration },
+                },
+                {
+                    request: {
+                        query: SET_EXPIRE_MUTATION,
+                        variables: {
+                            token: 'ghi789',
+                            expire: null,
+                        },
+                    },
+                    result: {
+                        errors: [new GraphQLError('Failed to clear expiration')],
+                    },
+                },
+            ]
+
+            renderWithProviders(<SidebarAlbumShare id="album-1" />, { mocks })
+
+            await waitFor(() => {
+                expect(screen.getByText('ghi789')).toBeInTheDocument()
+            })
+
+            const moreButton = screen.getByTitle('More')
+            await user.click(moreButton)
+
+            await waitFor(() => {
+                expect(screen.getByLabelText('Expiration date')).toBeInTheDocument()
+            })
+
+            const checkbox = screen.getByLabelText('Expiration date')
+            expect(checkbox).toBeChecked()
+
+            await user.click(checkbox)
+
+            await waitFor(() => {
+                // Checkbox should remain checked after error
+                expect(checkbox).toBeChecked()
+            }, { timeout: 2000 })
+        })
+
+        it('should show DatePicker when expiration is enabled', async () => {
+            const user = userEvent.setup()
+
+            const mocks: MockedResponse[] = [
+                {
+                    request: {
+                        query: SHARE_ALBUM_QUERY,
+                        variables: { id: 'album-1' },
+                    },
+                    result: { data: mockAlbumShares },
+                },
+            ]
+
+            renderWithProviders(<SidebarAlbumShare id="album-1" />, { mocks })
+
+            await waitFor(() => {
+                expect(screen.getByText('ghi789')).toBeInTheDocument()
+            })
+
+            const moreButton = screen.getByTitle('More')
+            await user.click(moreButton)
+
+            await waitFor(() => {
+                expect(screen.getByLabelText('Expiration date')).toBeInTheDocument()
+            })
+
+            const checkbox = screen.getByLabelText('Expiration date')
+            await user.click(checkbox)
+
+            await waitFor(() => {
+                // DatePicker input should be visible
+                const dateInputs = screen.getAllByRole('textbox')
+                expect(dateInputs.length).toBeGreaterThan(1)
             })
         })
     })
