@@ -332,13 +332,12 @@ const MorePopoverSectionExpiration = ({
     i18n.language,
     dateFormatterOptions
   )
-  const oldExpireDate = share.expire
-    ? dateFormatter.format(new Date(share.expire.slice(0, 19).replace(' ', 'T')))
-    : '';
 
   const [date, setDate] = useState<Date | null>(
     share.expire ? new Date(share.expire) : null
   )
+
+  const displayDate = date ? dateFormatter.format(date) : ''
 
   const [setExpire, { loading }] = useMutation(SET_EXPIRE_MUTATION, {
     refetchQueries: [{ query, variables: { id } }],
@@ -353,7 +352,11 @@ const MorePopoverSectionExpiration = ({
         token: share.token,
         expire: formatDate,
       },
-    }).catch(error => notifyError('Failed to update expiration', error))
+    }).catch(error => {
+      notifyError('Failed to update expiration', error)
+      // Revert to backend value on error
+      setDate(share.expire ? new Date(share.expire) : null)
+    })
   }
 
   return (
@@ -361,20 +364,28 @@ const MorePopoverSectionExpiration = ({
       <Checkbox
         label={t('sidebar.sharing.expiration_date', 'Expiration date')}
         checked={enabled}
-        onChange={() => {
+        onChange={async () => {
           const next = !enabled
-          setEnabled(next)
-
           if (!next) {
+            const previousDate = date
+            setEnabled(false)
             // If the checkbox is unchecked,set the expiration time to null.
             setDate(null)
-            setExpire({
-              variables: {
-                token: share.token,
-                expire: null,
-              },
-            }).catch(error => notifyError('Failed to clear expiration', error))
+            try {
+              await setExpire({
+                variables: {
+                  token: share.token,
+                  expire: null,
+                },
+              })
+            } catch (error) {
+              setEnabled(true)
+              setDate(previousDate)
+              notifyError('Failed to clear expiration', error)
+            }
+            return
           }
+          setEnabled(true)
         }}
       />
 
@@ -384,8 +395,8 @@ const MorePopoverSectionExpiration = ({
             selected={date}
             onChange={setDate}
             minDate={new Date()}
-            placeholderText={oldExpireDate}
-            value={oldExpireDate}
+            placeholderText={displayDate}
+            value={displayDate}
             customInput={
               <TextField
                 fullWidth
