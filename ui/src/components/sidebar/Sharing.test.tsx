@@ -77,14 +77,6 @@ const PROTECT_SHARE_MUTATION = gql`
     }
 `
 
-const SET_EXPIRE_MUTATION = gql`
-    mutation sidebarSetExpireShare($token: String!, $expire: Time){
-        setExpireShareToken(token: $token, expire: $expire){
-            token
-        }
-    }
-`
-
 const DELETE_SHARE_MUTATION = gql`
     mutation sidebareDeleteShare($token: String!) {
         deleteShareToken(token: $token) {
@@ -986,6 +978,10 @@ describe('Sharing Components', () => {
             const moreButton = screen.getByTitle('More')
             await user.click(moreButton)
 
+            await waitFor(() => {
+                expect(screen.getByLabelText('Expiration date')).toBeInTheDocument()
+            })
+
             const checkbox = screen.getByLabelText('Expiration date')
             expect(checkbox).not.toBeChecked()
 
@@ -1017,6 +1013,10 @@ describe('Sharing Components', () => {
 
             const moreButton = screen.getByTitle('More')
             await user.click(moreButton)
+
+            await waitFor(() => {
+                expect(screen.getByLabelText('Expiration date')).toBeInTheDocument()
+            })
 
             const checkbox = screen.getByLabelText('Expiration date')
             await user.click(checkbox)

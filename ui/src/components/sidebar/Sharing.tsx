@@ -303,6 +303,10 @@ const MorePopoverSectionExpiration = ({
   // Verify whether the backend response includes an expiration time
   // Set it to true if share.expire exists; otherwise,set it to false
   const [enabled, setEnabled] = useState(!!share.expire)
+  const [date, setDate] = useState<Date | null>(
+    share.expire ? new Date(share.expire) : null
+  )
+
   useEffect(() => {
     setEnabled(!!share.expire)
     setDate(share.expire ? new Date(share.expire) : null)
@@ -331,10 +335,6 @@ const MorePopoverSectionExpiration = ({
   const dateFormatter = new Intl.DateTimeFormat(
     i18n.language,
     dateFormatterOptions
-  )
-
-  const [date, setDate] = useState<Date | null>(
-    share.expire ? new Date(share.expire) : null
   )
 
   const displayDate = date ? dateFormatter.format(date) : ''
