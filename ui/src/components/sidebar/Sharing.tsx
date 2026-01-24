@@ -48,6 +48,9 @@ import {
 } from './__generated__/sidebarProtectShare'
 import { useMessageState } from '../messages/MessageState'
 import { NotificationType } from '../../__generated__/globalTypes'
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
+import dayjs from 'dayjs'
 
 const SHARE_PHOTO_QUERY = gql`
   query sidebarGetPhotoShares($id: ID!) {
@@ -57,12 +60,13 @@ const SHARE_PHOTO_QUERY = gql`
         id
         token
         hasPassword
+        expire
       }
     }
   }
 `
 
-const SHARE_ALBUM_QUERY = gql`
+export const SHARE_ALBUM_QUERY = gql`
   query sidebarGetAlbumShares($id: ID!) {
     album(id: $id) {
       id
@@ -70,6 +74,7 @@ const SHARE_ALBUM_QUERY = gql`
         id
         token
         hasPassword
+        expire
       }
     }
   }
@@ -96,6 +101,14 @@ const PROTECT_SHARE_MUTATION = gql`
     protectShareToken(token: $token, password: $password) {
       token
       hasPassword
+    }
+  }
+`
+
+export const SET_EXPIRE_MUTATION = gql`
+  mutation sidebarSetExpireShare($token: String!, $expire: Time){
+    setExpireShareToken(token: $token, expire: $expire){
+      token
     }
   }
 `
@@ -249,7 +262,8 @@ const MorePopoverSectionPassword = ({
         disabled={!activated}
         type={passwordHidden ? 'password' : 'text'}
         value={passwordInputValue}
-        className="mt-2 w-full"
+        className="w-full"
+        wrapperClassName="mt-2"
         onKeyDown={event => {
           if (
             event.shiftKey ||
@@ -275,6 +289,104 @@ const MorePopoverSectionPassword = ({
   )
 }
 
+type MorePopoverSectionExpirationProps = {
+  share: sidebarGetAlbumShares_album_shares
+  id: string
+  query: DocumentNode
+}
+
+const MorePopoverSectionExpiration = ({
+  share,
+  id,
+  query,
+}: MorePopoverSectionExpirationProps) => {
+  // Verify whether the backend response includes an expiration time
+  // Set it to true if share.expire exists; otherwise,set it to false
+  const [enabled, setEnabled] = useState(!!share.expire)
+   useEffect(() => {
+   setEnabled(!!share.expire)
+   setDate(share.expire ? new Date(share.expire) : null)
+  }, [share.expire])
+  const { t, i18n } = useTranslation()
+  
+  const dateFormatterOptions: Intl.DateTimeFormatOptions = {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  }
+  const dateFormatter = new Intl.DateTimeFormat(
+    i18n.language,
+    dateFormatterOptions
+  )
+  const oldExpireDate = share.expire 
+  ? dateFormatter.format(new Date(share.expire.slice(0, 19).replace(' ', 'T'))) 
+  : '';
+
+  const [date, setDate] = useState<Date | null>(
+    share.expire ? new Date(share.expire) : null
+  )
+
+  const [setExpire, { loading }] = useMutation(SET_EXPIRE_MUTATION, {
+    refetchQueries: [{ query, variables: { id } }],
+  })
+
+  const submit = () => {
+    if (!date && enabled) return 
+    const formatDate = date ? dayjs(date).endOf('day').format('YYYY-MM-DDTHH:mm:ss')+'Z' : null
+    //Save the local time while treating it as UTC.
+    setExpire({
+      variables: {
+        token: share.token,
+        expire: formatDate,
+      },
+    })
+  }
+
+  return (
+    <div className="px-4 py-2">
+      <Checkbox
+        label={t('sidebar.sharing.expiration_date', 'Expiration date')}
+        checked={enabled}
+        onChange={() => {
+          const next = !enabled
+          setEnabled(next)
+
+          if (!next) {
+            // If the checkbox is unchecked,set the expiration time to null.
+            setDate(null)
+            setExpire({
+              variables: {
+                token: share.token,
+                expire: null,
+              },
+            })
+          }
+        }}
+      />
+
+      {enabled && (
+        <div className="mt-2 w-full">
+          <DatePicker
+            selected={date}
+            onChange={setDate}
+            minDate={new Date()}
+            placeholderText={oldExpireDate}
+            value={oldExpireDate}
+            customInput={
+              <TextField
+                fullWidth
+                action={submit}
+                loading={loading}
+              />
+            }
+            
+          />
+        </div>
+      )}
+    </div>
+  )
+}
+
 type MorePopoverProps = {
   id: string
   query: DocumentNode
@@ -296,10 +408,7 @@ const MorePopover = ({ id, share, query }: MorePopoverProps) => {
       <PopoverPanel>
         <ArrowPopoverPanel width={260}>
           <MorePopoverSectionPassword id={id} share={share} query={query} />
-          <div className="px-4 py-2 border-t border-gray-200 dark:border-dark-border mt-2 mb-2">
-            <Checkbox label="Expiration date" />
-            <TextField className="mt-2 w-full" />
-          </div>
+          <MorePopoverSectionExpiration id={id} share={share} query={query} />
         </ArrowPopoverPanel>
       </PopoverPanel>
     </Popover>
