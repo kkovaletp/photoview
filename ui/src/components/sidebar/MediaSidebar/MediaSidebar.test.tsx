@@ -22,6 +22,7 @@ const SIDEBAR_GET_PHOTO_SHARES = gql`
         id
         token
         hasPassword
+        expire
       }
     }
   }
