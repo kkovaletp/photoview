@@ -571,7 +571,6 @@ describe('Sharing Components', () => {
                             protectShareToken: {
                                 token: 'ghi789',
                                 hasPassword: true,
-                                expire: null,
                                 __typename: 'ShareToken',
                             },
                         },
@@ -638,6 +637,7 @@ describe('Sharing Components', () => {
                             id: 'share-3',
                             token: 'ghi789',
                             hasPassword: true,
+                            expire: null,
                             __typename: 'ShareToken',
                         },
                     ],
