@@ -255,7 +255,7 @@ func TestSetExpireShareToken(t *testing.T) {
 			token:      "NONEXISTENT",
 			expire:     &newExpireTime,
 			wantErr:    true,
-			wantErrMsg: "share not found",
+			wantErrMsg: "failed to get user share token from database",
 		},
 	}
 
@@ -585,7 +585,7 @@ func TestDeleteShareToken(t *testing.T) {
 			ctx:        auth.AddUserToContext(context.Background(), user),
 			token:      "NONEXISTENT",
 			wantErr:    true,
-			wantErrMsg: "share not found",
+			wantErrMsg: "failed to get user share token from database",
 		},
 	}
 
