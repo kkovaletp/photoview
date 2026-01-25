@@ -144,7 +144,7 @@ describe('SelectFaceGroupTable', () => {
 
             // Table structure
             expect(screen.getAllByRole('table')).toHaveLength(2) // Header and body tables
-            expect(document.querySelector('.overflow-auto.max-h-\\[500px\\]')).toBeInTheDocument()
+            expect(document.querySelector(String.raw`.overflow-auto.max-h-\[500px\]`)).toBeInTheDocument()
 
             // Header and search
             expect(screen.getByText('Face Groups')).toBeInTheDocument()

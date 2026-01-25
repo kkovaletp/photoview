@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react'
-import { useMutation, gql } from '@apollo/client'
+import { useState, useEffect } from 'react'
+import { gql } from '@apollo/client'
+import { useMutation } from '@apollo/client/react'
 import { useTranslation } from 'react-i18next'
 
 import { SidebarSection, SidebarSectionTitle } from './SidebarComponents'
@@ -82,12 +83,10 @@ export const SidebarPhotoCover = ({ cover_id }: SidebarPhotoCoverProps) => {
                   className="disabled:opacity-50 text-green-500 font-bold uppercase text-xs"
                   disabled={buttonDisabled}
                   onClick={() => {
-                    setButtonDisabled(true),
-                      setAlbumCover({
-                        variables: {
-                          coverID: cover_id,
-                        },
-                      })
+                    setButtonDisabled(true)
+                    setAlbumCover({
+                      variables: { coverID: cover_id }
+                    })
                   }}
                 >
                   <span>
@@ -139,12 +138,10 @@ export const SidebarAlbumCover = ({ id }: SidebarAlbumCoverProps) => {
                   className="disabled:opacity-50 text-red-500 font-bold uppercase text-xs"
                   disabled={buttonDisabled}
                   onClick={() => {
-                    setButtonDisabled(true),
-                      resetAlbumCover({
-                        variables: {
-                          albumID: id,
-                        },
-                      })
+                    setButtonDisabled(true)
+                    resetAlbumCover({
+                      variables: { albumID: id, }
+                    })
                   }}
                 >
                   <span>

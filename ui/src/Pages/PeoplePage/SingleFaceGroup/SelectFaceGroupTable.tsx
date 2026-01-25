@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import { Dispatch, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import styled from 'styled-components'
 import { TextField } from '../../../primitives/form/Input'
@@ -73,7 +73,7 @@ type SelectFaceGroupTableProps = {
   selectedFaceGroups: Set<
     singleFaceGroup_faceGroup | myFaces_myFaceGroups | null
   >
-  toggleSelectedFaceGroup: React.Dispatch<
+  toggleSelectedFaceGroup: Dispatch<
     singleFaceGroup_faceGroup | myFaces_myFaceGroups | null
   >
   title: string,
@@ -95,7 +95,7 @@ const SelectFaceGroupTable = ({
     .filter(
       x =>
         searchValue == '' ||
-        (x.label && x.label.toLowerCase().includes(searchValue.toLowerCase()))
+        (x.label?.toLowerCase().includes(searchValue.toLowerCase()))
     )
     .map(face => (
       <FaceGroupRow

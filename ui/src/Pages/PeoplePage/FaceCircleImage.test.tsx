@@ -1,4 +1,3 @@
-import React from 'react'
 import { render, screen } from '@testing-library/react'
 import FaceCircleImage from './FaceCircleImage'
 import { myFaces_myFaceGroups_imageFaces } from './__generated__/myFaces'

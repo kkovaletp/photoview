@@ -1,6 +1,7 @@
-import React from 'react'
+import { ReactNode } from 'react'
 import { NavLink } from 'react-router-dom'
-import { useQuery, gql } from '@apollo/client'
+import { gql } from '@apollo/client'
+import { useQuery } from '@apollo/client/react'
 import { authToken } from '../../helpers/authentication'
 import { useTranslation } from 'react-i18next'
 import { mapboxEnabledQuery } from '../../__generated__/mapboxEnabledQuery'
@@ -28,7 +29,7 @@ type MenuButtonProps = {
   background: string
   activeClasses?: string
   className?: string
-  icon?: React.ReactNode
+  icon?: ReactNode
 }
 
 const MenuButton = ({

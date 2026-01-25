@@ -1,6 +1,6 @@
-import * as React from 'react'
+import { SVGProps } from 'react'
 
-function SvgPrevious(props: React.SVGProps<SVGSVGElement>) {
+function SvgPrevious(props: Readonly<SVGProps<SVGSVGElement>>) {
   return (
     <svg
       viewBox="0 0 28 52"

@@ -1,4 +1,4 @@
-import React from 'react'
+import { Dispatch } from 'react'
 import styled from 'styled-components'
 import imagePopupSrc from './image-popup.svg'
 import { MediaMarker } from './MapPresentMarker'
@@ -41,7 +41,7 @@ const PointCountCircle = styled.div`
 `
 
 type MapClusterMarkerProps = {
-  dispatchMarkerMedia: React.Dispatch<PlacesAction>
+  dispatchMarkerMedia: Dispatch<PlacesAction>
   marker: MediaMarker
 }
 

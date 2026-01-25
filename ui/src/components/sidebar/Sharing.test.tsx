@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { MockedResponse } from '@apollo/client/testing'
+import { MockLink } from '@apollo/client/testing'
 import { GraphQLError } from 'graphql'
 import {
     SidebarAlbumShare,
@@ -133,7 +133,7 @@ describe('Sharing Components', () => {
 
     describe('SidebarPhotoShare', () => {
         it('should display shares when authenticated', async () => {
-            const mocks: MockedResponse[] = [
+            const mocks: MockLink.MockedResponse[] = [
                 {
                     request: {
                         query: SHARE_PHOTO_QUERY,
@@ -157,7 +157,7 @@ describe('Sharing Components', () => {
         it('should not render shares when not authenticated', () => {
             vi.mocked(authToken).mockReturnValue(undefined)
 
-            const mocks: MockedResponse[] = []
+            const mocks: MockLink.MockedResponse[] = []
 
             renderWithProviders(<SidebarPhotoShare id="photo-1" />, { mocks })
 
@@ -168,7 +168,7 @@ describe('Sharing Components', () => {
 
         it('should display error when query fails', async () => {
             vi.mocked(authToken).mockReturnValue('test-token')
-            const mocks: MockedResponse[] = [
+            const mocks: MockLink.MockedResponse[] = [
                 {
                     request: {
                         query: SHARE_PHOTO_QUERY,
@@ -189,7 +189,7 @@ describe('Sharing Components', () => {
             vi.mocked(authToken).mockReturnValue('test-token')
             const user = userEvent.setup()
 
-            const mocks: MockedResponse[] = [
+            const mocks: MockLink.MockedResponse[] = [
                 {
                     request: {
                         query: SHARE_PHOTO_QUERY,
@@ -252,7 +252,7 @@ describe('Sharing Components', () => {
         })
 
         it('should load shares for photo-2', async () => {
-            const mocks: MockedResponse[] = [
+            const mocks: MockLink.MockedResponse[] = [
                 {
                     request: {
                         query: SHARE_PHOTO_QUERY,
@@ -280,7 +280,7 @@ describe('Sharing Components', () => {
 
     describe('SidebarAlbumShare', () => {
         it('should load album shares successfully', async () => {
-            const mocks: MockedResponse[] = [
+            const mocks: MockLink.MockedResponse[] = [
                 {
                     request: {
                         query: SHARE_ALBUM_QUERY,
@@ -298,7 +298,7 @@ describe('Sharing Components', () => {
         })
 
         it('should display error when query fails', async () => {
-            const mocks: MockedResponse[] = [
+            const mocks: MockLink.MockedResponse[] = [
                 {
                     request: {
                         query: SHARE_ALBUM_QUERY,
@@ -320,7 +320,7 @@ describe('Sharing Components', () => {
         it('should create a new album share', async () => {
             const user = userEvent.setup()
 
-            const mocks: MockedResponse[] = [
+            const mocks: MockLink.MockedResponse[] = [
                 {
                     request: {
                         query: SHARE_ALBUM_QUERY,
@@ -383,7 +383,7 @@ describe('Sharing Components', () => {
         })
 
         it('should display "No shares found" when album has no shares', async () => {
-            const mocks: MockedResponse[] = [
+            const mocks: MockLink.MockedResponse[] = [
                 {
                     request: {
                         query: SHARE_ALBUM_QUERY,
@@ -413,7 +413,7 @@ describe('Sharing Components', () => {
         it('should copy share link to clipboard', async () => {
             const user = userEvent.setup()
 
-            const mocks: MockedResponse[] = [
+            const mocks: MockLink.MockedResponse[] = [
                 {
                     request: {
                         query: SHARE_ALBUM_QUERY,
@@ -447,7 +447,7 @@ describe('Sharing Components', () => {
         it('should delete a share', async () => {
             const user = userEvent.setup()
 
-            const mocks: MockedResponse[] = [
+            const mocks: MockLink.MockedResponse[] = [
                 {
                     request: {
                         query: SHARE_ALBUM_QUERY,
@@ -505,7 +505,7 @@ describe('Sharing Components', () => {
         it('should enable password protection', async () => {
             const user = userEvent.setup()
 
-            const mocks: MockedResponse[] = [
+            const mocks: MockLink.MockedResponse[] = [
                 {
                     request: {
                         query: SHARE_ALBUM_QUERY,
@@ -542,7 +542,7 @@ describe('Sharing Components', () => {
         it('should update password successfully', async () => {
             const user = userEvent.setup()
 
-            const mocks: MockedResponse[] = [
+            const mocks: MockLink.MockedResponse[] = [
                 {
                     request: {
                         query: SHARE_ALBUM_QUERY,
@@ -637,7 +637,7 @@ describe('Sharing Components', () => {
                 },
             }
 
-            const mocks: MockedResponse[] = [
+            const mocks: MockLink.MockedResponse[] = [
                 {
                     request: {
                         query: SHARE_ALBUM_QUERY,
@@ -699,7 +699,7 @@ describe('Sharing Components', () => {
         it('should display error notification when password update fails', async () => {
             const user = userEvent.setup()
 
-            const mocks: MockedResponse[] = [
+            const mocks: MockLink.MockedResponse[] = [
                 {
                     request: {
                         query: SHARE_ALBUM_QUERY,
@@ -768,7 +768,7 @@ describe('Sharing Components', () => {
                 },
             }
 
-            const mocks: MockedResponse[] = [
+            const mocks: MockLink.MockedResponse[] = [
                 {
                     request: {
                         query: SHARE_ALBUM_QUERY,
@@ -832,7 +832,7 @@ describe('Sharing Components', () => {
                 },
             }
 
-            const mocks: MockedResponse[] = [
+            const mocks: MockLink.MockedResponse[] = [
                 {
                     request: {
                         query: SHARE_ALBUM_QUERY,
@@ -885,7 +885,7 @@ describe('Sharing Components', () => {
                 },
             }
 
-            const mocks: MockedResponse[] = [
+            const mocks: MockLink.MockedResponse[] = [
                 {
                     request: {
                         query: SHARE_ALBUM_QUERY,

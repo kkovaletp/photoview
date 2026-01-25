@@ -11,7 +11,7 @@ vi.mock('../../Pages/PlacesPage/MapClusterMarker', () => ({
 }));
 
 // Now import modules
-import React from 'react'
+import { Dispatch } from 'react'
 import { vi, describe, test, expect, beforeEach, afterEach } from 'vitest'
 import { registerMediaMarkers } from './mapboxHelperFunctions'
 import type { PlacesAction } from '../../Pages/PlacesPage/placesReducer'
@@ -25,7 +25,7 @@ type MarkerElement = HTMLDivElement & {
 }
 
 describe('mapboxHelperFunctions', () => {
-    let mockDispatch: React.Dispatch<PlacesAction>;
+    let mockDispatch: Dispatch<PlacesAction>;
     let consoleWarnSpy: ReturnType<typeof vi.spyOn>;
     let consoleErrorSpy: ReturnType<typeof vi.spyOn>;
     let mockMap: Record<string, any>;

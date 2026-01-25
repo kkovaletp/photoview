@@ -1,6 +1,7 @@
-import React, { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, ReactNode, ChangeEvent, Dispatch, SetStateAction } from 'react'
 import styled from 'styled-components'
-import { useLazyQuery, gql } from '@apollo/client'
+import { gql } from '@apollo/client'
+import { useLazyQuery } from '@apollo/client/react'
 import { debounce, DebouncedFn } from '../../helpers/utils'
 import { ProtectedImage } from '../photoGallery/ProtectedMedia'
 import { NavLink, useNavigate, useLocation } from 'react-router-dom'
@@ -68,7 +69,7 @@ const SearchBar = () => {
     }
   }, [])
 
-  const fetchEvent = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const fetchEvent = (e: ChangeEvent<HTMLInputElement>) => {
     e.persist()
 
     setQuery(e.target.value)
@@ -95,9 +96,9 @@ const SearchBar = () => {
   media = media.slice(0, 5)
 
   const selectedItemId =
-    selectedItem !== null
-      ? [...albums.map(x => x.id), ...media.map(x => x.id)][selectedItem]
-      : null
+    selectedItem === null
+      ? null
+      : [...albums.map(x => x.id), ...media.map(x => x.id)][selectedItem]
 
   useEffect(() => {
     const elem = inputEl.current
@@ -197,7 +198,7 @@ type SearchResultsProps = {
   media: searchQuery_search_media[]
   loading: boolean
   selectedItem: number | null
-  setSelectedItem: React.Dispatch<React.SetStateAction<number | null>>
+  setSelectedItem: Dispatch<SetStateAction<number | null>>
   query: string
   expanded: boolean
 }
@@ -279,8 +280,8 @@ const SearchResults = ({
 type SearchRowProps = {
   id: string
   link: string
-  preview: React.ReactNode
-  label: React.ReactNode
+  preview: ReactNode
+  label: ReactNode
   selected: boolean
   setSelected(): void
 }

@@ -1,4 +1,4 @@
-import { useMutation, useQuery } from '@apollo/client'
+import { useMutation, useQuery } from '@apollo/client/react'
 import gql from 'graphql-tag'
 import React, { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -141,10 +141,6 @@ const UserPreferences = () => {
       </label>
       <Dropdown
         id="user_pref_change_language_field"
-        placeholder={t(
-          'settings.user_preferences.language_selector.placeholder',
-          'Select language'
-        )}
         items={sortedLanguagePrefs}
         setSelected={language => {
           changePrefs({

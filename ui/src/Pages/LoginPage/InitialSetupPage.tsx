@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from 'react'
-import { gql, useQuery, useMutation } from '@apollo/client'
+import { useEffect, useState } from 'react'
+import { gql } from '@apollo/client'
+import { useQuery, useMutation } from '@apollo/client/react'
 import { useNavigate } from 'react-router-dom'
-import { Container } from './loginUtilities'
 
-import { INITIAL_SETUP_QUERY, login } from './loginUtilities'
+import { Container, INITIAL_SETUP_QUERY, login } from './loginUtilities'
 import { authToken } from '../../helpers/authentication'
 import { useTranslation } from 'react-i18next'
 import { CheckInitialSetup } from './__generated__/CheckInitialSetup'
