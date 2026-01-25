@@ -22,6 +22,7 @@ const SIDEBAR_GET_PHOTO_SHARES = gql`
         id
         token
         hasPassword
+        expire
       }
     }
   }
@@ -139,7 +140,7 @@ describe('MediaSidebar', () => {
   ]
 
   test('render sample image, unauthorized', () => {
-    authToken.mockImplementation(() => null)
+    authToken.mockImplementation(() => undefined)
 
     // Only need the download query for unauthorized view
     renderWithProviders(<MediaSidebar media={media} />, {

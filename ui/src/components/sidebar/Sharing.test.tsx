@@ -32,6 +32,7 @@ const SHARE_PHOTO_QUERY = gql`
                 id
                 token
                 hasPassword
+                expire
             }
         }
     }
@@ -40,12 +41,13 @@ const SHARE_PHOTO_QUERY = gql`
 const SHARE_ALBUM_QUERY = gql`
     query sidebarGetAlbumShares($id: ID!) {
         album(id: $id) {
-        id
-        shares {
             id
-            token
-            hasPassword
-        }
+            shares {
+                id
+                token
+                hasPassword
+                expire
+            }
         }
     }
 `
@@ -53,7 +55,7 @@ const SHARE_ALBUM_QUERY = gql`
 const ADD_MEDIA_SHARE_MUTATION = gql`
     mutation sidebarPhotoAddShare($id: ID!, $password: String, $expire: Time) {
         shareMedia(mediaId: $id, password: $password, expire: $expire) {
-        token
+            token
         }
     }
 `
@@ -61,7 +63,7 @@ const ADD_MEDIA_SHARE_MUTATION = gql`
 const ADD_ALBUM_SHARE_MUTATION = gql`
     mutation sidebarAlbumAddShare($id: ID!, $password: String, $expire: Time) {
         shareAlbum(albumId: $id, password: $password, expire: $expire) {
-        token
+            token
         }
     }
 `
@@ -92,12 +94,14 @@ const mockPhotoShares = {
                 id: 'share-1',
                 token: 'abc123',
                 hasPassword: false,
+                expire: null,
                 __typename: 'ShareToken',
             },
             {
                 id: 'share-2',
                 token: 'def456',
                 hasPassword: true,
+                expire: null,
                 __typename: 'ShareToken',
             },
         ],
@@ -113,6 +117,7 @@ const mockAlbumShares = {
                 id: 'share-3',
                 token: 'ghi789',
                 hasPassword: false,
+                expire: null,
                 __typename: 'ShareToken',
             },
         ],
@@ -150,7 +155,7 @@ describe('Sharing Components', () => {
         })
 
         it('should not render shares when not authenticated', () => {
-            vi.mocked(authToken).mockReturnValue(null)
+            vi.mocked(authToken).mockReturnValue(undefined)
 
             const mocks: MockedResponse[] = []
 
@@ -221,6 +226,7 @@ describe('Sharing Components', () => {
                                         id: 'share-new',
                                         token: 'new789',
                                         hasPassword: false,
+                                        expire: null,
                                         __typename: 'ShareToken',
                                     },
                                 ],
@@ -351,6 +357,7 @@ describe('Sharing Components', () => {
                                         id: 'share-4',
                                         token: 'newalbum123',
                                         hasPassword: false,
+                                        expire: null,
                                         __typename: 'ShareToken',
                                     },
                                 ],
@@ -575,6 +582,7 @@ describe('Sharing Components', () => {
                                         id: 'share-3',
                                         token: 'ghi789',
                                         hasPassword: true,
+                                        expire: null,
                                         __typename: 'ShareToken',
                                     },
                                 ],
@@ -621,6 +629,7 @@ describe('Sharing Components', () => {
                             id: 'share-3',
                             token: 'ghi789',
                             hasPassword: true,
+                            expire: null,
                             __typename: 'ShareToken',
                         },
                     ],
@@ -649,6 +658,7 @@ describe('Sharing Components', () => {
                             protectShareToken: {
                                 token: 'ghi789',
                                 hasPassword: false,
+                                expire: null,
                                 __typename: 'ShareToken',
                             },
                         },
@@ -750,6 +760,7 @@ describe('Sharing Components', () => {
                             id: 'share-3',
                             token: 'ghi789',
                             hasPassword: true,
+                            expire: null,
                             __typename: 'ShareToken',
                         },
                     ],
@@ -813,6 +824,7 @@ describe('Sharing Components', () => {
                             id: 'share-3',
                             token: 'ghi789',
                             hasPassword: true,
+                            expire: null,
                             __typename: 'ShareToken',
                         },
                     ],
@@ -865,6 +877,7 @@ describe('Sharing Components', () => {
                             id: 'share-3',
                             token: 'ghi789',
                             hasPassword: true,
+                            expire: null,
                             __typename: 'ShareToken',
                         },
                     ],
@@ -908,6 +921,243 @@ describe('Sharing Components', () => {
 
             await waitFor(() => {
                 expect(passwordInput).toHaveValue('a')
+            })
+        })
+    })
+
+    describe('Expiration Date', () => {
+        it('should show expiration date checkbox unchecked by default', async () => {
+            const user = userEvent.setup()
+
+            const mocks: MockedResponse[] = [
+                {
+                    request: {
+                        query: SHARE_ALBUM_QUERY,
+                        variables: { id: 'album-1' },
+                    },
+                    result: { data: mockAlbumShares },
+                },
+            ]
+
+            renderWithProviders(<SidebarAlbumShare id="album-1" />, { mocks })
+
+            await waitFor(() => {
+                expect(screen.getByText('ghi789')).toBeInTheDocument()
+            })
+
+            const moreButton = screen.getByTitle('More')
+            await user.click(moreButton)
+
+            await waitFor(() => {
+                expect(screen.getByLabelText('Expiration date')).toBeInTheDocument()
+            })
+
+            const checkbox = screen.getByLabelText('Expiration date')
+            expect(checkbox).not.toBeChecked()
+        })
+
+        it('should display existing expiration date as checked', async () => {
+            const user = userEvent.setup()
+
+            const futureDate = new Date()
+            futureDate.setDate(futureDate.getDate() + 7)
+
+            const mockAlbumWithExpiration = {
+                album: {
+                    id: 'album-1',
+                    shares: [
+                        {
+                            id: 'share-3',
+                            token: 'ghi789',
+                            hasPassword: false,
+                            expire: futureDate.toISOString(),
+                            __typename: 'ShareToken',
+                        },
+                    ],
+                    __typename: 'Album',
+                },
+            }
+
+            const mocks: MockedResponse[] = [
+                {
+                    request: {
+                        query: SHARE_ALBUM_QUERY,
+                        variables: { id: 'album-1' },
+                    },
+                    result: { data: mockAlbumWithExpiration },
+                },
+            ]
+
+            renderWithProviders(<SidebarAlbumShare id="album-1" />, { mocks })
+
+            await waitFor(() => {
+                expect(screen.getByText('ghi789')).toBeInTheDocument()
+            })
+
+            const moreButton = screen.getByTitle('More')
+            await user.click(moreButton)
+
+            await waitFor(() => {
+                const checkbox = screen.getByLabelText('Expiration date')
+                expect(checkbox).toBeChecked()
+            })
+        })
+
+        describe('SidebarAlbumShare', () => {
+            it('should show expiration date checkbox unchecked by default', async () => {
+                const user = userEvent.setup()
+
+                const mocks: MockedResponse[] = [
+                    {
+                        request: {
+                            query: SHARE_ALBUM_QUERY,
+                            variables: { id: 'album-1' },
+                        },
+                        result: { data: mockAlbumShares },
+                    },
+                ]
+
+                renderWithProviders(<SidebarAlbumShare id="album-1" />, { mocks })
+
+                await waitFor(() => {
+                    expect(screen.getByText('ghi789')).toBeInTheDocument()
+                })
+
+                const moreButton = screen.getByTitle('More')
+                await user.click(moreButton)
+
+                await waitFor(() => {
+                    expect(screen.getByLabelText('Expiration date')).toBeInTheDocument()
+                })
+
+                const checkbox = screen.getByLabelText('Expiration date')
+                expect(checkbox).not.toBeChecked()
+            })
+
+            it('should display existing expiration date as checked', async () => {
+                const user = userEvent.setup()
+
+                const futureDate = new Date()
+                futureDate.setDate(futureDate.getDate() + 7)
+
+                const mockAlbumWithExpiration = {
+                    album: {
+                        id: 'album-1',
+                        shares: [
+                            {
+                                id: 'share-3',
+                                token: 'ghi789',
+                                hasPassword: false,
+                                expire: futureDate.toISOString(),
+                                __typename: 'ShareToken',
+                            },
+                        ],
+                        __typename: 'Album',
+                    },
+                }
+
+                const mocks: MockedResponse[] = [
+                    {
+                        request: {
+                            query: SHARE_ALBUM_QUERY,
+                            variables: { id: 'album-1' },
+                        },
+                        result: { data: mockAlbumWithExpiration },
+                    },
+                ]
+
+                renderWithProviders(<SidebarAlbumShare id="album-1" />, { mocks })
+
+                await waitFor(() => {
+                    expect(screen.getByText('ghi789')).toBeInTheDocument()
+                })
+
+                const moreButton = screen.getByTitle('More')
+                await user.click(moreButton)
+
+                await waitFor(() => {
+                    const checkbox = screen.getByLabelText('Expiration date')
+                    expect(checkbox).toBeChecked()
+                })
+            })
+        })
+
+        describe('SidebarPhotoShare', () => {
+            it('should show expiration date checkbox unchecked by default', async () => {
+                const user = userEvent.setup()
+
+                const mocks: MockedResponse[] = [
+                    {
+                        request: {
+                            query: SHARE_PHOTO_QUERY,
+                            variables: { id: 'photo-1' },
+                        },
+                        result: { data: mockPhotoShares },
+                    },
+                ]
+
+                renderWithProviders(<SidebarPhotoShare id="photo-1" />, { mocks })
+
+                await waitFor(() => {
+                    expect(screen.getByText('abc123')).toBeInTheDocument()
+                })
+
+                const moreButton = screen.getAllByTitle('More')[0]
+                await user.click(moreButton)
+
+                await waitFor(() => {
+                    expect(screen.getByLabelText('Expiration date')).toBeInTheDocument()
+                })
+
+                const checkbox = screen.getByLabelText('Expiration date')
+                expect(checkbox).not.toBeChecked()
+            })
+
+            it('should display existing expiration date as checked', async () => {
+                const user = userEvent.setup()
+
+                const futureDate = new Date()
+                futureDate.setDate(futureDate.getDate() + 7)
+
+                const mockPhotoWithExpiration = {
+                    media: {
+                        id: 'photo-1',
+                        shares: [
+                            {
+                                id: 'share-1',
+                                token: 'abc123',
+                                hasPassword: false,
+                                expire: futureDate.toISOString(),
+                                __typename: 'ShareToken',
+                            },
+                        ],
+                        __typename: 'Media',
+                    },
+                }
+
+                const mocks: MockedResponse[] = [
+                    {
+                        request: {
+                            query: SHARE_PHOTO_QUERY,
+                            variables: { id: 'photo-1' },
+                        },
+                        result: { data: mockPhotoWithExpiration },
+                    },
+                ]
+
+                renderWithProviders(<SidebarPhotoShare id="photo-1" />, { mocks })
+
+                await waitFor(() => {
+                    expect(screen.getByText('abc123')).toBeInTheDocument()
+                })
+
+                const moreButton = screen.getAllByTitle('More')[0]
+                await user.click(moreButton)
+
+                await waitFor(() => {
+                    const checkbox = screen.getByLabelText('Expiration date')
+                    expect(checkbox).toBeChecked()
+                })
             })
         })
     })

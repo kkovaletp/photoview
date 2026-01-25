@@ -423,4 +423,33 @@ describe('load correct share page, based on graphql query', () => {
       expect(screen.getByText('Maybe the share has expired or has been deleted.')).toBeInTheDocument()
     })
   })
+
+  test('handles expired share token', async () => {
+    const token = 'TOKEN123'
+    const historyMock = [{ pathname: `/share/${token}` }]
+
+    const expiredMock = {
+      request: {
+        query: VALIDATE_TOKEN_PASSWORD_QUERY,
+        variables: {
+          token,
+          password,
+        },
+      },
+      error: new Error('share expired'),
+    }
+
+    renderWithProviders(<TokenRoute />, {
+      mocks: [expiredMock],
+      initialEntries: historyMock,
+      path: "/share/:token/*",
+      route: <TokenRoute />,
+    })
+
+    expect(screen.getByText('Loading...')).toBeInTheDocument()
+
+    await waitForElementToBeRemoved(() => screen.queryByText('Loading...'))
+
+    expect(screen.getByText(/share expired/i)).toBeInTheDocument()
+  })
 })
