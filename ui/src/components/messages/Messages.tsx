@@ -1,4 +1,4 @@
-import React from 'react'
+import { FunctionComponent } from 'react'
 import styled from 'styled-components'
 import { authToken } from '../../helpers/authentication'
 import MessageProgress from './MessageProgress'
@@ -23,7 +23,7 @@ const Container = styled.div`
 const Messages = () => {
   const { messages, setMessages } = useMessageState()
 
-  const getMessageElement = (message: Message): React.FunctionComponent => {
+  const getMessageElement = (message: Message): FunctionComponent => {
     const dismissMessage = (message: Message) => {
       message.onDismiss?.()
       setMessages(prevMessages => prevMessages.filter(msg => msg.key != message.key))
@@ -54,18 +54,6 @@ const Messages = () => {
         throw new Error(`Invalid message type: ${message.type}`)
     }
   }
-
-  // const transitions = useTransition(messages.slice().reverse(), x => x.key, {
-  //   from: {
-  //     opacity: 0,
-  //     height: '0px',
-  //   },
-  //   enter: {
-  //     opacity: 1,
-  //     height: `100px`,
-  //   },
-  //   leave: { opacity: 0, height: '0px' },
-  // })
 
   const messageElems = messages.map(msg => {
     const Elem = getMessageElement(msg)

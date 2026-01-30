@@ -1,5 +1,16 @@
-import React, { createRef, useEffect, useState } from 'react'
-import { gql, useMutation, useQuery } from '@apollo/client'
+import {
+  createRef,
+  DetailedHTMLProps,
+  Dispatch,
+  HTMLAttributes,
+  JSX,
+  SetStateAction,
+  useEffect,
+  useState,
+  KeyboardEvent,
+} from 'react'
+import { gql, ObservableQuery } from '@apollo/client'
+import { useMutation, useQuery } from '@apollo/client/react'
 import Layout from '../../components/layout/Layout'
 import styled from 'styled-components'
 import { Link, useParams } from 'react-router-dom'
@@ -73,8 +84,8 @@ const RECOGNIZE_UNLABELED_FACES_MUTATION = gql`
 type FaceDetailsWrapperProps = {
   labeled: boolean
   className?: string
-} & React.DetailedHTMLProps<
-  React.HTMLAttributes<HTMLSpanElement>,
+} & DetailedHTMLProps<
+  HTMLAttributes<HTMLSpanElement>,
   HTMLSpanElement
 >
 
@@ -112,7 +123,7 @@ type FaceDetailsProps = {
   className?: string
   textFieldClassName?: string
   editLabel: boolean
-  setEditLabel: React.Dispatch<React.SetStateAction<boolean>>
+  setEditLabel: Dispatch<SetStateAction<boolean>>
 }
 
 export const FaceDetails = ({
@@ -150,32 +161,14 @@ export const FaceDetails = ({
     }
   }, [loading])
 
-  const onKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  const onKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key == 'Escape') {
       resetLabel()
-      return
     }
   }
 
   let label
-  if (!editLabel) {
-    label = (
-      <FaceDetailsWrapper
-        className={tailwindClassNames(
-          className,
-          'whitespace-nowrap inline-block overflow-hidden text-clip'
-        )}
-        labeled={!!group.label}
-        onClick={() => setEditLabel(true)}
-      >
-        <FaceImagesCount>{group.imageFaceCount}</FaceImagesCount>
-        <button className="">
-          {group.label ?? t('people_page.face_group.unlabeled', 'Unlabeled')}
-        </button>
-        {/* <EditIcon name="pencil" /> */}
-      </FaceDetailsWrapper>
-    )
-  } else {
+  if (editLabel) {
     label = (
       <FaceDetailsWrapper className={className} labeled={!!group.label}>
         <TextField
@@ -200,6 +193,23 @@ export const FaceDetails = ({
             resetLabel()
           }}
         />
+      </FaceDetailsWrapper>
+    )
+  } else {
+    label = (
+      <FaceDetailsWrapper
+        className={tailwindClassNames(
+          className,
+          'whitespace-nowrap inline-block overflow-hidden text-clip'
+        )}
+        labeled={!!group.label}
+        onClick={() => setEditLabel(true)}
+      >
+        <FaceImagesCount>{group.imageFaceCount}</FaceImagesCount>
+        <button className="">
+          {group.label ?? t('people_page.face_group.unlabeled', 'Unlabeled')}
+        </button>
+        {/* <EditIcon name="pencil" /> */}
       </FaceDetailsWrapper>
     )
   }
@@ -264,10 +274,19 @@ export const PeoplePage = () => {
   const [recognizeUnlabeled, { loading: recognizeUnlabeledLoading }] =
     useMutation<recognizeUnlabeledFaces>(RECOGNIZE_UNLABELED_FACES_MUTATION)
 
+  const wrappedFetchMore = async ({ variables }: { variables: { offset: number } }) => {
+    const result = await fetchMore({
+      variables,
+    })
+    // Apollo's fetchMore returns a QueryResult, but useScrollPagination expects ObservableQuery.Result
+    // So we return the 'data' property as ObservableQuery.Result
+    return result as unknown as ObservableQuery.Result<myFaces>
+  }
+
   const { containerElem, finished: finishedLoadingMore } =
     useScrollPagination<myFaces>({
       loading,
-      fetchMore,
+      fetchMore: wrappedFetchMore,
       data,
       getItems: data => data.myFaceGroups,
     })

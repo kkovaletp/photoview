@@ -25,7 +25,7 @@ export default defineConfig({
     port: 1234,
   },
   esbuild: {
-    target: 'es2020', // Ensure compatibility with browsers, not older than from 2021
+    target: 'es2021', // Ensure compatibility with browsers, not older than from 2022
     logOverride: { 'this-is-undefined-in-esm': 'silent' },
   },
   test: {

@@ -158,7 +158,7 @@ test('filter by favorites', async () => {
   // Wait for filtered data to load
   await waitFor(() => {
     // Check URL parameter was updated first, as this happens immediately
-    expect(window.location.search).toContain('favorites=1');
+    expect(globalThis.location.search).toContain('favorites=1');
   }, { timeout: 1000 });
 
   // Longer timeout for image loading

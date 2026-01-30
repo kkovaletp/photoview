@@ -1,6 +1,7 @@
 import { useEffect } from 'react'
 import { siteTranslation } from './__generated__/siteTranslation'
-import { gql, useLazyQuery } from '@apollo/client'
+import { gql } from '@apollo/client'
+import { useLazyQuery } from '@apollo/client/react'
 import i18n from 'i18next'
 import { initReactI18next } from 'react-i18next'
 import type { TFunction } from 'i18next'

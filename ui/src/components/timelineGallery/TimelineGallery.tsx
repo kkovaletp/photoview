@@ -1,5 +1,6 @@
 import { useEffect, useReducer } from 'react'
-import { useQuery, gql } from '@apollo/client'
+import { gql, ObservableQuery } from '@apollo/client'
+import { useQuery } from '@apollo/client/react'
 import TimelineGroupDate from './TimelineGroupDate'
 import PresentView from '../photoGallery/presentView/PresentView'
 import useURLParameters from '../../hooks/useURLParameters'
@@ -16,7 +17,7 @@ import {
   timelineGalleryReducer,
   TimelineMediaIndex,
 } from './timelineGalleryReducer'
-import { urlPresentModeSetupHook } from '../photoGallery/mediaGalleryReducer'
+import { useUrlPresentModeSetup } from '../photoGallery/mediaGalleryReducer'
 import TimelineFilters from './TimelineFilters'
 import client from '../../apolloClient'
 
@@ -75,7 +76,7 @@ const TimelineGallery = () => {
 
   const { getParam, setParam } = useURLParameters()
 
-  const onlyFavorites = getParam('favorites') == '1' ? true : false
+  const onlyFavorites = getParam('favorites') == '1'
   const setOnlyFavorites = (favorites: boolean) =>
     setParam('favorites', favorites ? '1' : null)
 
@@ -99,17 +100,33 @@ const TimelineGallery = () => {
     variables: {
       onlyFavorites,
       fromDate: filterDate
-        ? `${parseInt(filterDate) + 1}-01-01T00:00:00Z`
+        ? `${Number.parseInt(filterDate) + 1}-01-01T00:00:00Z`
         : undefined,
       offset: 0,
       limit: 200,
     },
   })
 
+  const fetchMoreWrapper = async ({ variables }: { variables: { offset: number } }) => {
+    return fetchMore({
+      variables,
+      updateQuery: (prev, { fetchMoreResult }) => {
+        if (!fetchMoreResult) return prev
+        return {
+          ...fetchMoreResult,
+          myTimeline: [
+            ...(prev.myTimeline || []),
+            ...((fetchMoreResult.myTimeline || []))
+          ].filter((item): item is myTimeline_myTimeline => !!item),
+        }
+      },
+    }) as Promise<ObservableQuery.Result<myTimeline>>
+  }
+
   const { containerElem, finished: finishedLoadingMore } =
     useScrollPagination<myTimeline>({
       loading,
-      fetchMore,
+      fetchMore: fetchMoreWrapper,
       data,
       getItems: data => data.myTimeline,
     })
@@ -131,7 +148,7 @@ const TimelineGallery = () => {
       await refetch({
         onlyFavorites,
         fromDate: filterDate
-          ? `${parseInt(filterDate) + 1}-01-01T00:00:00Z`
+          ? `${Number.parseInt(filterDate) + 1}-01-01T00:00:00Z`
           : undefined,
         offset: 0,
         limit: 200,
@@ -139,7 +156,7 @@ const TimelineGallery = () => {
     })()
   }, [filterDate, onlyFavorites, refetch])
 
-  urlPresentModeSetupHook({
+  useUrlPresentModeSetup({
     dispatchMedia,
     openPresentMode: (_event) => {
       dispatchMedia({
@@ -153,9 +170,9 @@ const TimelineGallery = () => {
     return <div>{error.message}</div>
   }
 
-  const timelineGroups = mediaState.timelineGroups.map((_, i) => (
+  const timelineGroups = mediaState.timelineGroups.map((group, i) => (
     <TimelineGroupDate
-      key={i}
+      key={group.date}
       groupIndex={i}
       mediaState={mediaState}
       dispatchMedia={dispatchMedia}

@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import { Dispatch, useEffect } from 'react'
 import { MediaGalleryFields } from './__generated__/MediaGalleryFields'
 
 export interface MediaGalleryState {
@@ -73,11 +73,11 @@ export interface MediaGalleryPopStateEvent extends PopStateEvent {
   state: MediaGalleryState
 }
 
-export const urlPresentModeSetupHook = ({
+export const useUrlPresentModeSetup = ({
   dispatchMedia,
   openPresentMode,
 }: {
-  dispatchMedia: React.Dispatch<GalleryAction>
+  dispatchMedia: Dispatch<GalleryAction>
   openPresentMode: (event: MediaGalleryPopStateEvent) => void
 }) => {
   useEffect(() => {
@@ -89,21 +89,21 @@ export const urlPresentModeSetupHook = ({
       }
     }
 
-    window.addEventListener('popstate', urlChangeListener)
+    globalThis.addEventListener('popstate', urlChangeListener)
 
     history.replaceState({ presenting: false }, '')
 
     return () => {
-      window.removeEventListener('popstate', urlChangeListener)
+      globalThis.removeEventListener('popstate', urlChangeListener)
     }
-  }, [])
+  }, [dispatchMedia, openPresentMode])
 }
 
 export const openPresentModeAction = ({
   dispatchMedia,
   activeIndex,
 }: {
-  dispatchMedia: React.Dispatch<PhotoGalleryAction>
+  dispatchMedia: Dispatch<PhotoGalleryAction>
   activeIndex: number
 }) => {
   dispatchMedia({
@@ -117,7 +117,7 @@ export const openPresentModeAction = ({
 export const closePresentModeAction = ({
   dispatchMedia,
 }: {
-  dispatchMedia: React.Dispatch<GalleryAction>
+  dispatchMedia: Dispatch<GalleryAction>
 }) => {
   dispatchMedia({
     type: 'closePresentMode',

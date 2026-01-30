@@ -1,9 +1,10 @@
-import React, { useEffect, useContext } from 'react'
+import { useEffect, useContext } from 'react'
 import { Link } from 'react-router-dom'
 import styled from 'styled-components'
 import { SidebarContext } from '../sidebar/Sidebar'
 import AlbumSidebar from '../sidebar/AlbumSidebar'
-import { useLazyQuery, gql } from '@apollo/client'
+import { gql } from '@apollo/client'
+import { useLazyQuery } from '@apollo/client/react'
 import { authToken } from '../../helpers/authentication'
 import { albumPathQuery } from './__generated__/albumPathQuery'
 import useDelay from '../../hooks/useDelay'
@@ -15,7 +16,7 @@ import { buttonStyles } from '../../primitives/form/Input'
 export const BreadcrumbList = styled.ol<{ hideLastArrow?: boolean }>`
   &
     ${({ hideLastArrow }) =>
-      hideLastArrow ? 'li:not(:last-child)::after' : 'li::after'} {
+    hideLastArrow ? 'li:not(:last-child)::after' : 'li::after'} {
     content: '';
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='5px' height='6px' viewBox='0 0 5 6'%3E%3Cpolyline fill='none' stroke='%23979797' points='0.74 0.167710644 3.57228936 3 0.74 5.83228936' /%3E%3C/svg%3E");
     width: 5px;
@@ -54,7 +55,7 @@ const AlbumTitle = ({ album, disableLink = false }: AlbumTitleProps) => {
   useEffect(() => {
     if (!album) return
 
-    if (authToken() && disableLink == true) {
+    if (authToken() && disableLink) {
       fetchPath({
         variables: {
           id: album.id,
@@ -68,9 +69,8 @@ const AlbumTitle = ({ album, disableLink = false }: AlbumTitleProps) => {
   if (!album) {
     return (
       <div
-        className={`flex mb-6 flex-col h-14 transition-opacity animate-pulse ${
-          delay ? 'opacity-100' : 'opacity-0'
-        }`}
+        className={`flex mb-6 flex-col h-14 transition-opacity animate-pulse ${delay ? 'opacity-100' : 'opacity-0'
+          }`}
       >
         <div className="w-32 h-4 bg-gray-100 mb-2 mt-1"></div>
         <div className="w-72 h-6 bg-gray-100"></div>

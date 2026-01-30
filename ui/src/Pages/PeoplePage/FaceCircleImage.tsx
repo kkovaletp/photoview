@@ -1,4 +1,3 @@
-import React from 'react'
 import styled from 'styled-components'
 import {
   ProtectedImage,
@@ -33,17 +32,15 @@ const FaceImagePortrait = styled(FaceImage)`
   top: 50%;
   transform: translateY(-50%)
     ${({ origin, scale }) =>
-      `translate(${(0.5 - origin.x) * 100}%, ${
-        (0.5 - origin.y) * 100
-      }%) scale(${Math.max(scale * 0.8, 1)})`};
+    `translate(${(0.5 - origin.x) * 100}%, ${(0.5 - origin.y) * 100
+    }%) scale(${Math.max(scale * 0.8, 1)})`};
 
   ${({ selectable, origin, scale }) =>
     selectable
       ? `
     &:hover {
-      transform: translateY(-50%) translate(${(0.5 - origin.x) * 100}%, ${
-          (0.5 - origin.y) * 100
-        }%) scale(${Math.max(scale * 0.85, 1)})
+      transform: translateY(-50%) translate(${(0.5 - origin.x) * 100}%, ${(0.5 - origin.y) * 100
+      }%) scale(${Math.max(scale * 0.85, 1)})
       `
       : ''}
 `
@@ -53,17 +50,15 @@ const FaceImageLandscape = styled(FaceImage)`
   left: 50%;
   transform: translateX(-50%)
     ${({ origin, scale }) =>
-      `translate(${(0.5 - origin.x) * 100}%, ${
-        (0.5 - origin.y) * 100
-      }%) scale(${Math.max(scale * 0.8, 1)})`};
+    `translate(${(0.5 - origin.x) * 100}%, ${(0.5 - origin.y) * 100
+    }%) scale(${Math.max(scale * 0.8, 1)})`};
 
   ${({ selectable, origin, scale }) =>
     selectable
       ? `
     &:hover {
-      transform: translateX(-50%) translate(${(0.5 - origin.x) * 100}%, ${
-          (0.5 - origin.y) * 100
-        }%) scale(${Math.max(scale * 0.85, 1)})
+      transform: translateX(-50%) translate(${(0.5 - origin.x) * 100}%, ${(0.5 - origin.y) * 100
+      }%) scale(${Math.max(scale * 0.85, 1)})
       `
       : ''}
 `

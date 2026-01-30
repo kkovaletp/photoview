@@ -1,4 +1,5 @@
-import { gql, useLazyQuery } from '@apollo/client'
+import { gql } from '@apollo/client'
+import { useLazyQuery } from '@apollo/client/react'
 import { useTranslation } from 'react-i18next'
 import { NotificationType } from '../../__generated__/globalTypes'
 import { authToken } from '../../helpers/authentication'
@@ -6,7 +7,7 @@ import { TranslationFn } from '../../localization'
 import { useMessageState } from '../messages/MessageState'
 import { Message } from '../messages/SubscriptionsHook'
 import { MediaSidebarMedia } from './MediaSidebar/MediaSidebar'
-import React, { useEffect } from 'react'
+import { useEffect } from 'react'
 import { SidebarSection, SidebarSectionTitle } from './SidebarComponents'
 import SidebarTable from './SidebarTable'
 import {
@@ -64,13 +65,13 @@ const downloadMedia = (
   removeKey: (key: string) => void
 ) => async (url: string) => {
   const imgUrl = new URL(
-    `${import.meta.env.BASE_URL}${url}`.replace(/\/\//g, '/'),
+    `${import.meta.env.BASE_URL}${url}`.replaceAll('//', '/'),
     location.origin
   )
 
   if (authToken() == null) {
     // Get share token if not authorized
-    const token = location.pathname.match(/^\/share\/([\d\w]+)(\/?.*)$/)
+    const token = /^\/share\/(\w+)(\/?.*)$/.exec(location.pathname)
     if (token) {
       imgUrl.searchParams.set('token', token[1])
     }
@@ -91,7 +92,7 @@ const downloadMedia = (
     return
   }
 
-  const filenameMatch = url.match(/[^/]*$/)
+  const filenameMatch = /[^/]*$/.exec(url)
 
   if (filenameMatch == null) {
     console.error('Could not extract filename', url)
@@ -228,7 +229,7 @@ const downloadMediaShowProgress =
   }
 
 const downloadBlob = (blob: Blob, filename: string) => {
-  const objectUrl = window.URL.createObjectURL(blob)
+  const objectUrl = globalThis.URL.createObjectURL(blob)
 
   const anchor = document.createElement('a')
   document.body.appendChild(anchor)
@@ -239,7 +240,7 @@ const downloadBlob = (blob: Blob, filename: string) => {
 
   anchor.remove()
 
-  window.URL.revokeObjectURL(objectUrl)
+  globalThis.URL.revokeObjectURL(objectUrl)
 }
 
 type SidebarDownloadTableRow = {
@@ -321,7 +322,7 @@ const SidebarMediaDownload = ({ media }: SidebarMediaDownladProps) => {
     }
   }, [media?.id, media?.downloads, called, loadPhotoDownloads])
 
-  if (!media || !media.id) return null
+  if (!media?.id) return null
 
   if (error) {
     console.error('Failed to load download options: ', error)
@@ -340,7 +341,7 @@ const SidebarMediaDownload = ({ media }: SidebarMediaDownladProps) => {
   let downloads: sidebarDownloadQuery_media_downloads[] = []
 
   if (called && !loading) {
-    downloads = (data && data.media.downloads) || []
+    downloads = (data?.media?.downloads) || []
   } else if (media.downloads) {
     downloads = media.downloads
   }

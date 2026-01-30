@@ -1,4 +1,4 @@
-import React, { forwardRef } from 'react'
+import { ForwardedRef, forwardRef } from 'react'
 import MessagePlain, { MessageProps } from './Message'
 
 type MessageProgressProps = MessageProps & {
@@ -8,7 +8,7 @@ type MessageProgressProps = MessageProps & {
 const MessageProgress = forwardRef(
   (
     { header, content, percent = 0, ...props }: MessageProgressProps,
-    ref: React.ForwardedRef<HTMLDivElement>
+    ref: ForwardedRef<HTMLDivElement>
   ) => {
     const PROGRESS_LEVELS = {
       LOW: { threshold: 0, color: '#dc2625', state: 'low progress' },

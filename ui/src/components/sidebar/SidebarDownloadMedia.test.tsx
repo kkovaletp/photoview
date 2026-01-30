@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { MockedResponse } from '@apollo/client/testing'
+import { MockLink } from '@apollo/client/testing'
 import { GraphQLError } from 'graphql'
 import SidebarMediaDownload, { SIDEBAR_DOWNLOAD_QUERY } from './SidebarDownloadMedia'
 import { MediaSidebarMedia } from './MediaSidebar/MediaSidebar'
@@ -15,15 +15,15 @@ vi.mock('../../helpers/authentication')
 const authToken = vi.mocked(authentication.authToken)
 
 // Mock global fetch for download tests
-const originalFetch = global.fetch as any
+const originalFetch = globalThis.fetch as any
 const mockFetch = vi.fn()
-global.fetch = mockFetch
+globalThis.fetch = mockFetch
 
 // Mock URL methods for download blob handling
-const originalCreateObjectURL = global.URL.createObjectURL
-const originalRevokeObjectURL = global.URL.revokeObjectURL
-global.URL.createObjectURL = vi.fn(() => 'blob:mock-url')
-global.URL.revokeObjectURL = vi.fn()
+const originalCreateObjectURL = globalThis.URL.createObjectURL
+const originalRevokeObjectURL = globalThis.URL.revokeObjectURL
+globalThis.URL.createObjectURL = vi.fn(() => 'blob:mock-url')
+globalThis.URL.revokeObjectURL = vi.fn()
 const originalCreateElement = document.createElement.bind(document)
 const mockCreateElement = vi.fn((tagName: string) => {
     if (tagName === 'a') {
@@ -36,9 +36,9 @@ const mockCreateElement = vi.fn((tagName: string) => {
 document.createElement = mockCreateElement as any
 
 afterAll(() => {
-    global.fetch = originalFetch
-    global.URL.createObjectURL = originalCreateObjectURL
-    global.URL.revokeObjectURL = originalRevokeObjectURL
+    globalThis.fetch = originalFetch
+    globalThis.URL.createObjectURL = originalCreateObjectURL
+    globalThis.URL.revokeObjectURL = originalRevokeObjectURL
     document.createElement = originalCreateElement
 })
 
@@ -104,7 +104,7 @@ describe('SidebarMediaDownload', () => {
         })
 
         it('should trigger query when media has no downloads', async () => {
-            const mocks: MockedResponse[] = [
+            const mocks: MockLink.MockedResponse[] = [
                 {
                     request: {
                         query: SIDEBAR_DOWNLOAD_QUERY,
@@ -134,7 +134,7 @@ describe('SidebarMediaDownload', () => {
         })
 
         it('should display error when query fails', async () => {
-            const mocks: MockedResponse[] = [
+            const mocks: MockLink.MockedResponse[] = [
                 {
                     request: {
                         query: SIDEBAR_DOWNLOAD_QUERY,
@@ -179,7 +179,7 @@ describe('SidebarMediaDownload', () => {
 
     describe('Download Table Rendering', () => {
         it('should display download options with correct formatting', async () => {
-            const mocks: MockedResponse[] = [
+            const mocks: MockLink.MockedResponse[] = [
                 {
                     request: {
                         query: SIDEBAR_DOWNLOAD_QUERY,
@@ -312,9 +312,9 @@ describe('SidebarMediaDownload', () => {
 
             // Verify blob URL created and revoked
             await waitFor(() => {
-                expect(global.URL.createObjectURL).toHaveBeenCalled()
+                expect(globalThis.URL.createObjectURL).toHaveBeenCalled()
             })
-            expect(global.URL.revokeObjectURL).toHaveBeenCalled()
+            expect(globalThis.URL.revokeObjectURL).toHaveBeenCalled()
         })
     })
 

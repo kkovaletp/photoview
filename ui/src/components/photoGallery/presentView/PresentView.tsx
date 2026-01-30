@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import { Dispatch, useEffect } from 'react'
 import styled, { createGlobalStyle } from 'styled-components'
 import PresentNavigationOverlay from './PresentNavigationOverlay'
 import PresentMedia from './PresentMedia'
@@ -26,7 +26,7 @@ type PresentViewProps = {
   className?: string
   imageLoaded?(): void
   activeMedia: MediaGalleryFields
-  dispatchMedia: React.Dispatch<GalleryAction>
+  dispatchMedia: Dispatch<GalleryAction>
   disableSaveCloseInHistory?: boolean
 }
 

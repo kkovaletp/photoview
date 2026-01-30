@@ -1,4 +1,4 @@
-import React from 'react'
+import { MouseEvent } from 'react'
 import styled from 'styled-components'
 import { ProtectedImage } from './ProtectedMedia'
 import { MediaType } from '../../__generated__/globalTypes'
@@ -74,7 +74,7 @@ const HoverIcon = styled.button`
 
 type FavoriteIconProps = {
   favorite: boolean
-  onClick(e: React.MouseEvent<HTMLButtonElement, MouseEvent>): void
+  onClick(e: MouseEvent<HTMLButtonElement>): void
 }
 
 const FavoriteIcon = ({ favorite, onClick }: FavoriteIconProps) => {
@@ -102,7 +102,7 @@ const FavoriteIcon = ({ favorite, onClick }: FavoriteIconProps) => {
 }
 
 type SidebarIconProps = {
-  onClick(e: React.MouseEvent<HTMLButtonElement, MouseEvent>): void
+  onClick(e: MouseEvent<HTMLButtonElement>): void
 }
 
 const SidebarIcon = ({ onClick }: SidebarIconProps) => (

@@ -1,5 +1,6 @@
-import { BaseMutationOptions, gql, useMutation } from '@apollo/client'
-import React, { useEffect, useState } from 'react'
+import { gql } from '@apollo/client'
+import { useMutation } from '@apollo/client/react'
+import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import { isNil } from '../../../helpers/utils'
@@ -29,7 +30,7 @@ const DETACH_IMAGE_FACES_MUTATION = gql`
 `
 
 export const useDetachImageFaces = (
-  mutationOptions: BaseMutationOptions<
+  mutationOptions: useMutation.MutationFunctionOptions<
     detachImageFaces,
     detachImageFacesVariables
   >
@@ -107,7 +108,7 @@ const DetachImageFacesModal = ({
     }
   }, [open])
 
-  if (open == false) return null
+  if (!open) return null
 
   const imageFaces = faceGroup?.imageFaces ?? []
 

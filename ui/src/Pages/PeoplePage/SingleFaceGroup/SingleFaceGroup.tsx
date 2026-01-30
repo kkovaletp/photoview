@@ -1,4 +1,5 @@
-import { gql, useQuery } from '@apollo/client'
+import { gql, ObservableQuery } from '@apollo/client'
+import { useQuery } from '@apollo/client/react'
 import { useEffect, useReducer } from 'react'
 import { useTranslation } from 'react-i18next'
 import PaginateLoader from '../../../components/PaginateLoader'
@@ -69,10 +70,20 @@ const SingleFaceGroup = ({ faceGroupID }: SingleFaceGroupProps) => {
     media: [],
   })
 
+  const customFetchMore = async ({ variables }: { variables: { offset: number } }) => {
+    return fetchMore({
+      variables: {
+        ...variables,
+        id: faceGroupID,
+        limit: 200,
+      },
+    }) as Promise<ObservableQuery.Result<singleFaceGroup>>
+  }
+
   const { containerElem, finished: finishedLoadingMore } =
     useScrollPagination<singleFaceGroup>({
       loading,
-      fetchMore,
+      fetchMore: customFetchMore,
       data,
       getItems: data => data.faceGroup.imageFaces,
     })

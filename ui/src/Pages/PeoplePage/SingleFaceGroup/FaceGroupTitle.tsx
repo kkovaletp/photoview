@@ -1,5 +1,5 @@
-import { useMutation } from '@apollo/client'
-import React, {
+import { useMutation } from '@apollo/client/react'
+import {
   useState,
   useEffect,
   createRef,
@@ -61,49 +61,44 @@ const FaceGroupTitle = ({ faceGroup }: FaceGroupTitleProps) => {
   const onKeyDown: KeyboardEventHandler<HTMLInputElement> = e => {
     if (e.key == 'Escape') {
       resetLabel()
-      return
     }
   }
 
   let title
-  if (!editLabel) {
+  if (editLabel) {
     title = (
-      <>
-        <h1
-          className={`text-2xl font-semibold ${faceGroup?.label ? '' : 'text-gray-600 dark:text-gray-400'
-            }`}
-        >
-          {faceGroup?.label ??
-            t('people_page.face_group.unlabeled_person', 'Unlabeled person')}
-        </h1>
-      </>
+      <TextField
+        loading={setLabelLoading}
+        ref={inputRef}
+        placeholder={t('people_page.face_group.label_placeholder', 'Label')}
+        action={() => {
+          if (isNil(faceGroup))
+            throw new Error('Expected faceGroup to be defined')
+
+          setGroupLabel({
+            variables: {
+              groupID: faceGroup.id,
+              label: inputValue || null,
+            },
+          })
+        }}
+        value={inputValue}
+        onKeyDown={onKeyDown}
+        onChange={e => setInputValue(e.target.value)}
+        onBlur={() => {
+          resetLabel()
+        }}
+      />
     )
   } else {
     title = (
-      <>
-        <TextField
-          loading={setLabelLoading}
-          ref={inputRef}
-          placeholder={t('people_page.face_group.label_placeholder', 'Label')}
-          action={() => {
-            if (isNil(faceGroup))
-              throw new Error('Expected faceGroup to be defined')
-
-            setGroupLabel({
-              variables: {
-                groupID: faceGroup.id,
-                label: inputValue ? inputValue : null,
-              },
-            })
-          }}
-          value={inputValue}
-          onKeyDown={onKeyDown}
-          onChange={e => setInputValue(e.target.value)}
-          onBlur={() => {
-            resetLabel()
-          }}
-        />
-      </>
+      <h1
+        className={`text-2xl font-semibold ${faceGroup?.label ? '' : 'text-gray-600 dark:text-gray-400'
+          }`}
+      >
+        {faceGroup?.label ??
+          t('people_page.face_group.unlabeled_person', 'Unlabeled person')}
+      </h1>
     )
   }
 

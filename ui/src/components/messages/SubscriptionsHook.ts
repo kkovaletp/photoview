@@ -1,6 +1,7 @@
 import { notificationSubscription } from './__generated__/notificationSubscription'
-import React, { useEffect } from 'react'
-import { useSubscription, gql } from '@apollo/client'
+import { Dispatch, SetStateAction, useEffect } from 'react'
+import { gql } from '@apollo/client'
+import { useSubscription } from '@apollo/client/react'
 import { authToken } from '../../helpers/authentication'
 import { NotificationType } from '../../__generated__/globalTypes'
 
@@ -38,7 +39,7 @@ export interface Message {
 
 type SubscriptionHookProps = {
   messages: Message[]
-  setMessages: React.Dispatch<React.SetStateAction<Message[]>>
+  setMessages: Dispatch<SetStateAction<Message[]>>
 }
 
 export const SubscriptionsHook = ({
@@ -110,10 +111,10 @@ export const SubscriptionsHook = ({
     const notifyIndex = newMessages.findIndex(
       msg => msg.key == newNotification.key
     )
-    if (notifyIndex != -1) {
-      newMessages[notifyIndex] = newNotification
-    } else {
+    if (notifyIndex === -1) {
       newMessages.push(newNotification)
+    } else {
+      newMessages[notifyIndex] = newNotification
     }
 
     setMessages(newMessages)

@@ -2,7 +2,8 @@ import React from 'react'
 import Layout from '../../components/layout/Layout'
 import AlbumGallery from '../../components/albumGallery/AlbumGallery'
 import styled from 'styled-components'
-import { gql, useQuery } from '@apollo/client'
+import { gql } from '@apollo/client'
+import { useQuery } from '@apollo/client/react'
 import { useTranslation } from 'react-i18next'
 import useURLParameters from '../../hooks/useURLParameters'
 import useOrderingParams from '../../hooks/useOrderingParams'
@@ -123,7 +124,10 @@ const AlbumSharePage = ({ albumID, token, password }: AlbumSharePageProps) => {
   const { containerElem, finished: finishedLoadingMore } =
     useScrollPagination<shareAlbumQuery>({
       loading,
-      fetchMore,
+      fetchMore: async ({ variables }) => {
+        const result = await fetchMore({ variables })
+        return result as any // Cast to satisfy the expected return type
+      },
       data,
       getItems: data => data.album.media,
     })
@@ -132,7 +136,13 @@ const AlbumSharePage = ({ albumID, token, password }: AlbumSharePageProps) => {
     return <div>{error.message}</div>
   }
 
-  const album = data?.album
+  const album = data?.album ? {
+    ...data.album,
+    media: data.album.media.map(media => ({
+      ...media,
+      favorite: undefined, // This ensures no favorite button is shown
+    }))
+  } : undefined
 
   return (
     <AlbumSharePageWrapper data-testid="AlbumSharePage">
@@ -143,7 +153,7 @@ const AlbumSharePage = ({ albumID, token, password }: AlbumSharePageProps) => {
       >
         <AlbumGallery
           ref={containerElem}
-          album={album}
+          album={album as any} // Type assertion needed due to GraphQL type vs component type mismatch
           customAlbumLink={albumId => `/share/${token}/${albumId}`}
           showFilter
           setOrdering={orderParams.setOrdering}

@@ -23,7 +23,7 @@
     "extractTranslations": "i18next -c i18next-parser.config.js"
   },
   "dependencies": {
-    "@apollo/client": "~3.14.0",
+    "@apollo/client": "~4.0.11",
     "@babel/preset-typescript": "^7.28.5",
     "@dr.pogodin/react-helmet": "^3.0.5",
     "@headlessui/react": "^2.2.9",
@@ -59,6 +59,7 @@
     "react-router-dom": "^6.30.3",
     "react-swipeable": "^7.0.2",
     "react-test-renderer": "19.2.3",
+    "rxjs": "^7.8.2",
     "styled-components": "^5.3.11",
     "tailwind-override": "^0.6.1",
     "tailwindcss": "^3.4.19",
@@ -96,7 +97,7 @@
     "vitest": "^0.33.0"
   },
   "overrides": {
-    "graphql": "^15.10.1"
+    "graphql": "^16.12.0"
   },
   "prettier": {
     "trailingComma": "es5",
