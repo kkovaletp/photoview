@@ -1,5 +1,9 @@
 # Photoview Separate UI Container
 
+[![License](https://img.shields.io/github/license/kkovaletp/photoview)](./LICENSE.txt)
+[![Docker Pulls](https://img.shields.io/docker/pulls/kkoval/photoview-ui)](https://hub.docker.com/r/kkoval/photoview-ui)
+[![Docker builds](https://github.com/kkovaletp/photoview/actions/workflows/build.yml/badge.svg?branch=master)](https://github.com/kkovaletp/photoview/actions/workflows/build.yml)
+
 ## Terms of use
 
 By using this project or its source code, for any purpose and in any shape or form, you grant your **implicit agreement** to all of the following statements:
