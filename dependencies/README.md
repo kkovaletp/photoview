@@ -1,5 +1,8 @@
 # Dependencies
 
+[![Docker Pulls](https://img.shields.io/docker/pulls/kkoval/dependencies)](https://hub.docker.com/r/kkoval/dependencies)
+[![Docker builds](https://github.com/kkovaletp/photoview/actions/workflows/dependencies.yml/badge.svg?branch=master)](https://github.com/kkovaletp/photoview/actions/workflows/dependencies.yml)
+
 This directory contains scripts and Dockerfile to build third-party dependencies for Photoview. It is not intended for end-users or runtime execution.
 
 However, technically, it is runnable for debugging and investigative purposes.
