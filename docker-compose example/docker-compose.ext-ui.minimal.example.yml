@@ -116,6 +116,8 @@ services:
       - seccomp:unconfined
       - apparmor:unconfined
     environment:
+      ## Space-separated list of host:port sockets where the UI will listen for incoming connections
+      PHOTOVIEW_UI_SOCKETS: ${PHOTOVIEW_UI_SOCKETS}
       ## The `HTTPS_PORT` must match the host HTTPS port defined in the `ports` section above
       HTTPS_PORT: 8443
       ## The `PHOTOVIEW_BACKEND_HOST` must match the `container_name` of the `photoview` service

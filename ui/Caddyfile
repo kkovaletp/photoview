@@ -29,18 +29,18 @@
         }
     }
 
-    @httpsDefault expression {env.HTTPS_PORT} == "" || {env.HTTPS_PORT} == "443"
-	@httpsCustom  expression {env.HTTPS_PORT} != "" && {env.HTTPS_PORT} != "443"
+    @httpsDefault expression "{$HTTPS_PORT}" == "" || "{$HTTPS_PORT}" == "443"
+    @httpsCustom  expression "{$HTTPS_PORT}" != "" && "{$HTTPS_PORT}" != "443"
 
-	# When port is default/unspecified, omit port in Location
-	redir @httpsDefault https://{host}{uri} permanent
+    # When port is default/unspecified, omit port in Location
+    redir @httpsDefault https://{host}{uri} permanent
 
-	# When port is custom, include it in Location
-	redir @httpsCustom  https://{host}:{env.HTTPS_PORT}{uri} permanent
+    # When port is custom, include it in Location
+    redir @httpsCustom  https://{host}:{$HTTPS_PORT}{uri} permanent
 }
 
-# HTTPS on 8443
-:8443 {
+# HTTPS on a list of defined in the `.env` sockets
+{$PHOTOVIEW_UI_SOCKETS} {
     tls {
         issuer internal
         on_demand
@@ -48,8 +48,8 @@
     encode # Both zstd and gzip allowed
     root * /srv
 
-    log "HTTPS 8443" {
-        output file /var/log/caddy/access_8443.json {
+    log "HTTPS {$HTTPS_PORT}" {
+        output file /var/log/caddy/access_{$HTTPS_PORT}.json {
             mode 644
             roll_local_time
             roll_size 10MiB
