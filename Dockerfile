@@ -217,7 +217,7 @@ RUN apk add --no-cache curl bash \
 
 ENV HTTPS_PORT=8443
 # Expose unprivileged ports
-EXPOSE 8080 ${HTTPS_PORT} 8443/udp
+EXPOSE 8080 ${HTTPS_PORT} ${HTTPS_PORT}/udp
 
 LABEL org.opencontainers.image.source=https://github.com/kkovaletp/photoview/
 

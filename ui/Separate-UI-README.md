@@ -984,7 +984,7 @@ The UI service can listen on multiple domains/addresses simultaneously using the
 **In `.env`:**
 
 ```bash
-PHOTOVIEW_UI_SOCKETS=domain1.com domain2.com domain3.com
+PHOTOVIEW_UI_SOCKETS=domain1.com domain2.com domain3.com localhost:8443
 ```
 
 ---
