@@ -97,6 +97,7 @@ Glory to Ukraine! 🇺🇦
       - [When to Use Self-Signed vs. Production Certificates](#when-to-use-self-signed-vs-production-certificates)
   - [Advanced Configuration](#advanced-configuration)
     - [Custom Ports](#custom-ports)
+      - [Example: Change from 8443 to 9443](#example-change-from-8443-to-9443)
     - [Security Headers Customization](#security-headers-customization)
     - [Caching Strategy](#caching-strategy)
     - [Multiple Domains](#multiple-domains)
@@ -230,6 +231,22 @@ curl -o Makefile https://raw.githubusercontent.com/kkovaletp/photoview/master/do
 #### Step 3: Configure Environment Variables
 
 Edit the `.env` file, read all its content, and set your values for the variables according to your needs.
+
+**Important variables to configure (specific to the Separate UI setup):**
+
+- `PHOTOVIEW_UI_SOCKETS`: Defines where the UI service will listen for HTTPS connections
+  - Format: Space-separated list of `host:port` sockets
+  - Standard HTTPS port 443 can be omitted (Caddy assumes it by default)
+  - Examples:
+    - Single port on all interfaces: `:8443`
+    - Specific hosts: `myserver.local:8443 localhost:8443`
+    - Multiple domains: `gallery.example.com myserver:8443 localhost:8443`
+  - **Note**: Always include `localhost:8443` (or your chosen port) for health check to work properly
+  - **Warning**: Using only `:<port>` without hostnames will cause certificate hostname errors in browsers
+
+- `HTTPS_PORT`: The primary HTTPS port number (e.g., `8443`)
+  - Used for HTTP-to-HTTPS redirects and log file naming
+  - Should match the internal port in the docker-compose.yml > photoview-ui service definition.
 
 #### Step 4: Read and optionally modify the `docker-compose.yml`
 
@@ -383,6 +400,13 @@ Each provider requires API tokens or credentials. Refer to your provider's docum
 - **Google Cloud DNS**: [Service account guide](https://cloud.google.com/iam/docs/service-accounts-create)
 - **Vultr**: [API key guide](https://www.vultr.com/docs/vultr-api/)
 
+> [!TIP]
+> When using DNS providers with real certificates, update `PHOTOVIEW_UI_SOCKETS` in your `.env` to use your actual domain names:
+
+```bash
+PHOTOVIEW_UI_SOCKETS=yourdomain.com gallery.example.com
+```
+
 #### 2. Update Caddyfile
 
 Edit `${HOST_PHOTOVIEW_LOCATION}/ui/file/Caddyfile` and replace the global options section:
@@ -404,7 +428,7 @@ Edit `${HOST_PHOTOVIEW_LOCATION}/ui/file/Caddyfile` and replace the global optio
 }
 
 # Replace :8443 with your domain
-yourdomain.com {
+{$PHOTOVIEW_UI_SOCKETS} {
     tls {
         dns cloudflare {env.SP_API_TOKEN}
     }
@@ -425,7 +449,7 @@ yourdomain.com {
     email your-email@example.com
 }
 
-yourdomain.com {
+{$PHOTOVIEW_UI_SOCKETS} {
     tls {
         dns digitalocean {env.SP_API_TOKEN}
     }
@@ -608,6 +632,10 @@ Edit `${HOST_PHOTOVIEW_LOCATION}/ui/file/Caddyfile` to use your certificates:
 
 ##### Option A: Single domain with manual certificates
 
+> [!NOTE]
+> When using a specific domain with manual certificates, set `PHOTOVIEW_UI_SOCKETS=yourdomain.com localhost:8443`
+> in your `.env` file instead of using port-based configuration like `:8443`.
+
 ```caddy
 {
     admin off
@@ -623,7 +651,7 @@ Edit `${HOST_PHOTOVIEW_LOCATION}/ui/file/Caddyfile` to use your certificates:
 }
 
 # HTTPS on 8443 with manual certificates
-yourdomain.com {
+{$PHOTOVIEW_UI_SOCKETS} {
     # Specify manual certificate paths
     tls /certs/fullchain.pem /certs/privkey.pem
 
@@ -910,30 +938,30 @@ secure connection without warnings.
 
 ### Custom Ports
 
-To change the HTTPS port from 8443 to another value:
+The UI service uses two environment variables for port configuration:
 
-1. Update port mapping in `docker-compose.yml`:
+1. **PHOTOVIEW_UI_SOCKETS**: Defines where the UI listens (can be multiple sockets)
+2. **HTTPS_PORT**: Used for redirect logic and log file naming
 
-   ```yaml
-   photoview-ui:
-     ports:
-       - "9443:9443"
-     environment:
-       HTTPS_PORT: 9443
-   ```
+#### Example: Change from 8443 to 9443
 
-2. Update the port in the `Caddyfile`:
+**Update `.env` file:**
 
-   ```caddy
-   # HTTPS on 9443
-   :9443 {
-      # ...
-      log "HTTPS 9443" {
-          output file /var/log/caddy/access_9443.json {
-   # ... everything else is the same
-   ```
+```bash
+PHOTOVIEW_UI_SOCKETS=:9443 # or a list of hostnames with the port 9443 each
+```
 
-3. Restart: `docker compose restart photoview-ui`
+**Update docker-compose.yml port mapping:**
+
+```yaml
+  photoview-ui:
+    ports:
+      - "9443:9443"
+    environment:
+      HTTPS_PORT: 9443
+```
+
+**Restart**: `docker compose restart photoview-ui`
 
 ### Security Headers Customization
 
@@ -951,22 +979,12 @@ Modify the caching rules in the Caddyfile if needed. See [Caddy header matching 
 
 ### Multiple Domains
 
-To serve multiple domains, duplicate the `:8443` server block with different domain names:
+The UI service can listen on multiple domains/addresses simultaneously using the `PHOTOVIEW_UI_SOCKETS` environment variable.
 
-```caddy
-domain1.com {
-    tls {
-        dns cloudflare {env.SP_API_TOKEN}
-    }
-    # ... configuration
-}
+**In `.env`:**
 
-domain2.com {
-    tls {
-        dns cloudflare {env.SP_API_TOKEN}
-    }
-    # ... configuration
-}
+```bash
+PHOTOVIEW_UI_SOCKETS=domain1.com domain2.com domain3.com
 ```
 
 ---
