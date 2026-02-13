@@ -215,13 +215,14 @@ RUN apk add --no-cache curl bash \
     && mkdir -p /data /config /var/log/caddy \
     && chown -R 9999:9999 /data /config /etc/caddy /var/log/caddy
 
+ENV HTTPS_PORT=8443
 # Expose unprivileged ports
-EXPOSE 8080 8443 8443/udp
+EXPOSE 8080 ${HTTPS_PORT} ${HTTPS_PORT}/udp
 
 LABEL org.opencontainers.image.source=https://github.com/kkovaletp/photoview/
 
 HEALTHCHECK --interval=60s --timeout=5s --start-period=10s --retries=2 \
-    CMD curl -kfsS https://localhost:8443/health-check \
+    CMD curl -kfsS "https://localhost:${HTTPS_PORT}/health-check" \
     || exit 1
 
 # Switch to non-root user
