@@ -20,7 +20,7 @@ require (
 	github.com/vektah/gqlparser/v2 v2.5.31
 	golang.org/x/crypto v0.48.0
 	golang.org/x/text v0.34.0
-	gopkg.in/gographics/imagick.v3 v3.7.2
+	gopkg.in/gographics/imagick.v3 v3.7.3
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1
 	gopkg.in/vansante/go-ffprobe.v2 v2.3.0
 	gorm.io/driver/mysql v1.6.0
