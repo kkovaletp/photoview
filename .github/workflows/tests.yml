@@ -154,8 +154,8 @@ jobs:
         if: ${{ steps.test.conclusion == 'success' || steps.test.conclusion == 'failure' }}
         with:
           token: ${{ secrets.CODECOV_TKN }}
-          report_type: test_results
           flags: ui
+          report_type: test_results
           directory: ./ui
 
       - name: Run ESLint
