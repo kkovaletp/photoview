@@ -98,7 +98,7 @@ jobs:
 
       - name: SonarCloud Scan
         uses: SonarSource/sonarqube-scan-action@master
-        if: ${{ steps.test.conclusion == 'success' || steps.test.conclusion == 'failure' }} && github.repository == 'kkovaletp/photoview'
+        if: ${{ github.repository == 'kkovaletp/photoview' && ( steps.test.conclusion == 'success' || steps.test.conclusion == 'failure' ) }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_API }}
@@ -127,6 +127,7 @@ jobs:
           load: true
           target: ui
           tags: photoview/ui
+          # TODO: Optimize build cache
           cache-from: type=gha,scope=test-ui-${{ hashFiles('ui/package-lock.json') }}
           cache-to: type=gha,mode=max,scope=test-ui-${{ hashFiles('ui/package-lock.json') }}
           build-args: |
@@ -240,7 +241,7 @@ jobs:
 
       - name: SonarCloud Scan
         uses: SonarSource/sonarqube-scan-action@master
-        if: ${{ steps.test.conclusion == 'success' || steps.test.conclusion == 'failure' }} && github.repository == 'kkovaletp/photoview'
+        if: ${{ github.repository == 'kkovaletp/photoview' && ( steps.test.conclusion == 'success' || steps.test.conclusion == 'failure' ) }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_UI }}
