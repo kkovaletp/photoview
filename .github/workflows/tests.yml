@@ -64,7 +64,9 @@ jobs:
           load: true
           target: api
           tags: photoview/api
-          cache-from: type=gha,scope=test-api-${{ hashFiles('api/go.sum', 'scripts/install_*.sh', 'dependencies/*') }}
+          cache-from: |
+            type=gha,scope=api
+            type=gha,scope=ui
 
       - name: Test
         id: test
@@ -98,7 +100,7 @@ jobs:
 
       - name: SonarCloud Scan
         uses: SonarSource/sonarqube-scan-action@master
-        if: ${{ steps.test.conclusion == 'success' || steps.test.conclusion == 'failure' }} && github.repository == 'kkovaletp/photoview'
+        if: ${{ github.repository == 'kkovaletp/photoview' && ( steps.test.conclusion == 'success' || steps.test.conclusion == 'failure' ) }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_API }}
@@ -127,8 +129,9 @@ jobs:
           load: true
           target: ui
           tags: photoview/ui
-          cache-from: type=gha,scope=test-ui-${{ hashFiles('ui/package-lock.json') }}
-          cache-to: type=gha,mode=max,scope=test-ui-${{ hashFiles('ui/package-lock.json') }}
+          cache-from: |
+            type=gha,scope=ui
+            type=gha,scope=api
           build-args: |
             NODE_ENV=testing
 
@@ -240,7 +243,7 @@ jobs:
 
       - name: SonarCloud Scan
         uses: SonarSource/sonarqube-scan-action@master
-        if: ${{ steps.test.conclusion == 'success' || steps.test.conclusion == 'failure' }} && github.repository == 'kkovaletp/photoview'
+        if: ${{ github.repository == 'kkovaletp/photoview' && ( steps.test.conclusion == 'success' || steps.test.conclusion == 'failure' ) }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_UI }}

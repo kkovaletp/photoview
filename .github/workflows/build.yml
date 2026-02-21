@@ -66,11 +66,11 @@ jobs:
             {
               "image": "kkoval/photoview",
               "build_target": "release",
-              "cache_scope": "api-${{ hashFiles('api/go.sum', 'scripts/install_*.sh', 'dependencies/*', 'ui/package-lock.json') }}"
+              "cache_scope": "api"
             },{
               "image": "kkoval/photoview-ui",
               "build_target": "proxy",
-              "cache_scope": "ui-${{ hashFiles('ui/package-lock.json') }}"
+              "cache_scope": "ui"
             }
           ]'
 
@@ -176,7 +176,9 @@ jobs:
           tags: ${{ steps.docker_meta.outputs.tags }}
           labels: ${{ steps.docker_meta.outputs.labels }}
           annotations: ${{ steps.docker_meta.outputs.annotations }}
-          cache-from: type=gha,scope=${{ matrix.entry.cache_scope }}
+          cache-from: |
+            type=gha,scope=api
+            type=gha,scope=ui
           cache-to: type=gha,mode=max,scope=${{ matrix.entry.cache_scope }}
           build-args: |
             NODE_ENV=production
