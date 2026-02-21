@@ -64,6 +64,7 @@ jobs:
           load: true
           target: api
           tags: photoview/api
+          # TODO: Optimize build cache
           cache-from: type=gha,scope=test-api-${{ hashFiles('api/go.sum', 'scripts/install_*.sh', 'dependencies/*') }}
 
       - name: Test
