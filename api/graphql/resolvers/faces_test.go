@@ -89,17 +89,33 @@ func TestCombineFaceGroups(t *testing.T) {
 			}
 			ctx := auth.AddUserToContext(context.Background(), user)
 
-			combineFace, err := r.CombineFaceGroups(ctx, tt.dest, tt.src)
+			// Execute the merge operation
+			_, err := r.CombineFaceGroups(ctx, tt.dest, tt.src)
 			if err != nil {
-				t.Fatal("test CombineFaceGroups err:", err)
+				t.Fatal("CombineFaceGroups failed:", err)
 			}
 
-			m := make(map[int]struct{})
-			for _, imageface := range combineFace.ImageFaces {
-				if _, ok := m[imageface.MediaID]; ok {
-					t.Fatal("filtering failed at", imageface.MediaID)
+			// Query DB directly to verify deduplication
+			// (The returned FaceGroup object doesn't have ImageFaces populated
+			// because field resolvers only run in GraphQL context)
+			var imageFaces []*models.ImageFace
+			if err := db.Where("face_group_id = ?", tt.dest).Find(&imageFaces).Error; err != nil {
+				t.Fatal("failed to query image faces:", err)
+			}
+
+			// Verify no duplicate MediaIDs exist
+			seenMediaIDs := make(map[int]struct{})
+			for _, imageface := range imageFaces {
+				if _, exists := seenMediaIDs[imageface.MediaID]; exists {
+					t.Fatalf("deduplication failed: MediaID %d appears multiple times in destination group", imageface.MediaID)
 				}
-				m[imageface.MediaID] = struct{}{}
+				seenMediaIDs[imageface.MediaID] = struct{}{}
+			}
+
+			// Verify we actually have the expected media (not empty after merge)
+			expectedMediaCount := 4 // After merging groups with media 1,2,3,4
+			if len(imageFaces) != expectedMediaCount {
+				t.Fatalf("expected %d unique image faces after merge, got %d", expectedMediaCount, len(imageFaces))
 			}
 		})
 	}
