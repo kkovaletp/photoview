@@ -1,5 +1,5 @@
 ### Build UI ###
-FROM --platform=${BUILDPLATFORM:-linux/amd64} node:18 AS ui
+FROM --platform=${BUILDPLATFORM:-linux/amd64} node:20 AS ui
 # See for details: https://github.com/hadolint/hadolint/wiki/DL4006
 SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
 
@@ -9,8 +9,10 @@ ENV NODE_ENV=${NODE_ENV}
 WORKDIR /app/ui
 
 COPY ui/package.json ui/package-lock.json /app/ui/
-# NPM 10.x is the latest supported version for Node.js 18.x
-RUN npm install --global npm@10 \
+# hadolint ignore=DL3016
+RUN npm install --global npm \
+    # Project dependencies with install scripts (esbuild,core-js) are required for the build.
+    # Using `--ignore-scripts` is not an option.
     && if [ "$NODE_ENV" = "production" ]; then \
         echo "Installing production dependencies only..."; \
         npm ci --omit=dev --no-audit --no-fund; \

@@ -3,7 +3,7 @@ name: Update Browserslist Database
 on:
   schedule:
     # Runs every Fri at 01:18 AM UTC
-    - cron: '18 1 * * 5'
+    - cron: "18 1 * * 5"
   workflow_dispatch: # Allows manual triggering
 
 permissions:
@@ -20,7 +20,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: '18'
+          node-version: "20"
 
       - name: Install dependencies
         working-directory: ./ui
@@ -44,11 +44,11 @@ jobs:
         uses: peter-evans/create-pull-request@v8
         with:
           token: ${{ secrets.COMMENT_TOKEN }}
-          commit-message: 'Bump browserslist database'
-          title: 'Bump browserslist database'
+          commit-message: "Bump browserslist database"
+          title: "Bump browserslist database"
           branch: update-browserslist-db
           delete-branch: true
-          labels: 'dependencies, javascript'
+          labels: "dependencies, javascript"
           body: |
             This PR updates the browserslist database to the latest version.
 
