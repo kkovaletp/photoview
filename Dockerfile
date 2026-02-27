@@ -169,7 +169,7 @@ USER photoview
 ENTRYPOINT ["/app/photoview"]
 
 ### Build Caddy with plugins ###
-FROM caddy:2.10-builder AS cady
+FROM caddy:2.11-builder AS cady
 RUN xcaddy build \
     # Public DNS providers
     --with github.com/caddy-dns/cloudflare \
@@ -182,7 +182,7 @@ RUN xcaddy build \
     --with github.com/caddy-dns/rfc2136
 
 ### Build release image ###
-FROM caddy:2.10 AS proxy
+FROM caddy:2.11 AS proxy
 
 RUN addgroup -g 9999 -S caddyuser \
     && adduser  -u 9999 -S -D -G caddyuser caddyuser
