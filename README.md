@@ -390,8 +390,8 @@ Please follow the package manager guidance if you don't use `apt` or `homebrew`.
 For `node`, recommend to use [nvm](https://github.com/nvm-sh/nvm). Follow [Installing and Updating](https://github.com/nvm-sh/nvm?tab=readme-ov-file#installing-and-updating) to install `nvm` locally, then:
 
 ```console
-nvm install 18
-nvm use 18
+nvm install 20
+nvm use 20
 ```
 
 You can install `node` with other package manager if you like.
