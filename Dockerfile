@@ -9,7 +9,10 @@ ENV NODE_ENV=${NODE_ENV}
 WORKDIR /app/ui
 
 COPY ui/package.json ui/package-lock.json /app/ui/
+# hadolint ignore=DL3016
 RUN npm install --global npm \
+    # Project dependencies with install scripts (esbuild,core-js) are required for the build.
+    # Using `--ignore-scripts` is not an option.
     && if [ "$NODE_ENV" = "production" ]; then \
         echo "Installing production dependencies only..."; \
         npm ci --omit=dev --no-audit --no-fund; \

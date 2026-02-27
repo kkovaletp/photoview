@@ -367,7 +367,7 @@ We can't keep verifying below commands on each environment. People may need to s
     - `sqlite`: the SQLite DBMS, useful to interact with Photoview's SQLite DB directly if you use it in your development environment.
 - UI
   - Required packages:
-    - `node` = 18
+    - `node` = 20
 
 In Debian/Ubuntu, install dependencies:
 
