@@ -62,7 +62,7 @@
     "react-router-dom": "^6.30.3",
     "react-swipeable": "^7.0.2",
     "react-test-renderer": "19.2.4",
-    "styled-components": "^5.3.11",
+    "styled-components": "^6.3.11",
     "tailwind-override": "^0.6.1",
     "tailwindcss": "^3.4.19",
     "url-join": "^5.0.0",
