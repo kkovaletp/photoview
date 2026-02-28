@@ -6,7 +6,6 @@ import MediaSidebarPeople from './MediaSidebarPeople'
 import { renderWithProviders } from '../../../helpers/testUtils'
 import { MediaType } from '../../../__generated__/globalTypes'
 import { MediaSidebarMedia, SIDEBAR_MEDIA_QUERY } from './MediaSidebar'
-import { gql } from '@apollo/client'
 
 // Mock react-i18next
 vi.mock('react-i18next', () => ({
@@ -244,15 +243,17 @@ describe('MediaSidebarPeople', () => {
 
     it('should render menu button for each face', async () => {
         const media = createMockMedia(true)
-        const user = userEvent.setup()
+        userEvent.setup()
         renderWithProviders(<MediaSidebarPeople media={media} />)
 
-        const menuButtons = screen.getAllByRole('button')
-        // Filter to get only the menu buttons (not modal buttons)
-        const actualMenuButtons = menuButtons.filter(
-            (btn) => btn.querySelector('svg') !== null
-        )
-        expect(actualMenuButtons.length).toBeGreaterThan(0)
+        await waitFor(() => {
+            const menuButtons = screen.getAllByRole('button')
+            // Filter to get only the menu buttons (not modal buttons)
+            const actualMenuButtons = menuButtons.filter(
+                (btn) => btn.querySelector('svg') !== null
+            )
+            expect(actualMenuButtons.length).toBeGreaterThan(0)
+        })
     })
 
     it('should open menu and show all options when menu button is clicked', async () => {
