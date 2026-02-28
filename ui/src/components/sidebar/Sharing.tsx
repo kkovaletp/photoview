@@ -124,11 +124,11 @@ const DELETE_SHARE_MUTATION = gql`
 export const ArrowPopoverPanel = styled.div.attrs({
   className:
     'absolute -top-3 bg-white dark:bg-dark-bg rounded shadow-md border border-gray-200 dark:border-dark-border z-10',
-}) <{ width: number; flipped?: boolean }>`
-  width: ${({ width }) => width}px;
+}) <{ $width: number; $flipped?: boolean }>`
+  width: ${({ $width }) => $width}px;
 
-  ${({ flipped }) =>
-    flipped
+  ${({ $flipped }) =>
+    $flipped
       ? `
       left: 32px;
         `
@@ -144,8 +144,8 @@ export const ArrowPopoverPanel = styled.div.attrs({
     height: 14px;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 8 14'%3E%3Cpolyline stroke-width='1' stroke='%23E2E2E2' fill='%23FFFFFF' points='1 0 7 7 1 14'%3E%3C/polyline%3E%3C/svg%3E");
 
-    ${({ flipped }) =>
-    flipped
+    ${({ $flipped }) =>
+    $flipped
       ? `
       left: -7px;
       transform: rotate(180deg);
@@ -431,7 +431,7 @@ const MorePopover = ({ id, share, query }: MorePopoverProps) => {
       </PopoverButton>
 
       <PopoverPanel>
-        <ArrowPopoverPanel width={260}>
+        <ArrowPopoverPanel $width={260}>
           <MorePopoverSectionPassword id={id} share={share} query={query} />
           <MorePopoverSectionExpiration id={id} share={share} query={query} />
         </ArrowPopoverPanel>
