@@ -33,15 +33,15 @@ const LazyPhoto = (photoProps: LazyPhotoProps) => {
   return <StyledPhoto {...photoProps} lazyLoading />
 }
 
-const PhotoOverlay = styled.div<{ active: boolean }>`
+const PhotoOverlay = styled.div<{ $active: boolean }>`
   width: 100%;
   height: 100%;
   position: absolute;
   top: 0;
   left: 0;
 
-  ${({ active }) =>
-    active &&
+  ${({ $active }) =>
+    $active &&
     `
       outline: 4px solid rgba(65, 131, 196, 0.6);
       outline-offset: -4px;
@@ -196,7 +196,7 @@ export const MediaThumbnail = ({
       >
         <LazyPhoto src={media.thumbnail?.url} blurhash={media.blurhash} />
       </div>
-      <PhotoOverlay active={active}>
+      <PhotoOverlay $active={active}>
         {videoIcon}
         <SidebarIcon
           onClick={e => {

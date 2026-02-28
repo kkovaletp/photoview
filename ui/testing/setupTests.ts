@@ -9,3 +9,10 @@ import { setupLocalization } from '../src/localization'
 
 // setup localization to make it easier to select elements by text
 setupLocalization()
+
+// Mock ResizeObserver for Headless UI components
+global.ResizeObserver = class ResizeObserver {
+    observe() { }
+    unobserve() { }
+    disconnect() { }
+} as any

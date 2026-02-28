@@ -12,7 +12,7 @@ interface FaceBoxStyleProps {
   $maxX: number
 }
 
-const FaceBoxStyle = styled(Link)`
+const FaceBoxStyle = styled(Link) <FaceBoxStyleProps>`
   box-shadow: inset 0 0 2px 1px rgba(0, 0, 0, 0.3), 0 0 0 1px rgb(255, 255, 255);
   border-radius: 50%;
   position: absolute;
@@ -38,10 +38,10 @@ const FaceBox = ({ face /*media*/ }: FaceBoxProps) => {
   )
 }
 
-const SidebarFacesOverlayWrapper = styled.div<{ width: number }>`
+const SidebarFacesOverlayWrapper = styled.div<{ $width: number }>`
   position: absolute;
-  width: ${({ width }) => width * 100}%;
-  left: ${({ width }) => (100 - width * 100) / 2}%;
+  width: ${({ $width }) => $width * 100}%;
+  left: ${({ $width }) => (100 - $width * 100) / 2}%;
   height: 100%;
   top: 0;
   opacity: 0;
@@ -72,7 +72,7 @@ export const SidebarFacesOverlay = ({ media }: SidebarFaceOverlayProps) => {
   }
 
   return (
-    <SidebarFacesOverlayWrapper width={wrapperWidth}>
+    <SidebarFacesOverlayWrapper $width={wrapperWidth}>
       {faceBoxes}
     </SidebarFacesOverlayWrapper>
   )

@@ -203,7 +203,7 @@ const SidebarContent = ({ media, hidePreview }: SidebarContentProps) => {
         <h2 className="uppercase text-xs text-gray-900 dark:text-gray-300 font-semibold">
           {t('sidebar.media.album_path', 'Album path')}
         </h2>
-        <BreadcrumbList hideLastArrow={true}>{pathElms}</BreadcrumbList>
+        <BreadcrumbList $hideLastArrow={true}>{pathElms}</BreadcrumbList>
       </div>
     )
   }
