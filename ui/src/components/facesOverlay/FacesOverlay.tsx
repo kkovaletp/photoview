@@ -12,8 +12,7 @@ interface FaceBoxStyleProps {
   $maxX: number
 }
 
-// TODO: fix error
-const FaceBoxStyle = styled(Link)`
+const FaceBoxStyle = styled(Link) <FaceBoxStyleProps>`
   box-shadow: inset 0 0 2px 1px rgba(0, 0, 0, 0.3), 0 0 0 1px rgb(255, 255, 255);
   border-radius: 50%;
   position: absolute;
@@ -27,7 +26,6 @@ type FaceBoxProps = {
   face: sidebarMediaQuery_media_faces
 }
 
-// TODO: fix error
 const FaceBox = ({ face /*media*/ }: FaceBoxProps) => {
   return (
     <FaceBoxStyle
