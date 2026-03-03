@@ -6,56 +6,58 @@ import svgr from 'vite-plugin-svgr'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 
-// Conditionally import codecov plugin only if it's installed
-let codecovVitePlugin = null
-try {
-  const codecovModule = await import('@codecov/vite-plugin')
-  codecovVitePlugin = codecovModule.codecovVitePlugin
-} catch (e) {
-  // Plugin not installed (production build), skip it
-}
+export default defineConfig(async ({ command, mode }) => {
+  // Conditionally import codecov plugin only if it's installed
+  let codecovVitePlugin = null
+  try {
+    const codecovModule = await import('@codecov/vite-plugin')
+    codecovVitePlugin = codecovModule.codecovVitePlugin
+  } catch (e) {
+    // Plugin not installed (production build), skip it
+  }
 
-export default defineConfig({
-  plugins: [
-    react(),
-    svgr(),
-    VitePWA({
-      strategies: 'injectManifest',
-      srcDir: 'src',
-      filename: 'service-worker.ts',
-      injectRegister: 'script',
-      manifest: false,
-      injectManifest: {
-        injectionPoint: undefined
-      }
-    }),
-    // Only add codecov plugin if it's available
-    codecovVitePlugin && codecovVitePlugin({
-      enableBundleAnalysis: process.env.CODECOV_TKN !== undefined,
-      telemetry: false,
-      gitService: "github",
-      bundleName: `Photoview-UI-bundle-${process.env.TARGETARCH || 'unknown_arch'}`,
-      uploadToken: process.env.CODECOV_TKN,
-    }),
-  ].filter(Boolean), // Remove falsy values from plugins array
-  envPrefix: ['VITE_', 'REACT_APP_'],
-  server: {
-    port: 1234,
-  },
-  esbuild: {
-    target: 'es2020', // Ensure compatibility with browsers, not older than from 2021
-    logOverride: { 'this-is-undefined-in-esm': 'silent' },
-  },
-  test: {
-    globals: true,
-    environment: 'jsdom',
-    setupFiles: './testing/setupTests.ts',
-    reporters: ['verbose', 'junit'],
-    outputFile: {
-      junit: './junit-report.xml',
+  return {
+    plugins: [
+      react(),
+      svgr(),
+      VitePWA({
+        strategies: 'injectManifest',
+        srcDir: 'src',
+        filename: 'service-worker.ts',
+        injectRegister: 'script',
+        manifest: false,
+        injectManifest: {
+          injectionPoint: undefined
+        }
+      }),
+      // Only add codecov plugin if it's available
+      codecovVitePlugin && codecovVitePlugin({
+        enableBundleAnalysis: process.env.CODECOV_TKN !== undefined,
+        telemetry: false,
+        gitService: "github",
+        bundleName: `Photoview-UI-bundle-${process.env.TARGETARCH || 'unknown_arch'}`,
+        uploadToken: process.env.CODECOV_TKN,
+      }),
+    ].filter(Boolean), // Remove falsy values from plugins array
+    envPrefix: ['VITE_', 'REACT_APP_'],
+    server: {
+      port: 1234,
     },
-    coverage: {
-      reporter: ['text', 'lcov', 'json', 'html'],
+    esbuild: {
+      target: 'es2020', // Ensure compatibility with browsers, not older than from 2021
+      logOverride: { 'this-is-undefined-in-esm': 'silent' },
     },
-  },
+    test: {
+      globals: true,
+      environment: 'jsdom',
+      setupFiles: './testing/setupTests.ts',
+      reporters: ['verbose', 'junit'],
+      outputFile: {
+        junit: './junit-report.xml',
+      },
+      coverage: {
+        reporter: ['text', 'lcov', 'json', 'html'],
+      },
+    },
+  }
 })
