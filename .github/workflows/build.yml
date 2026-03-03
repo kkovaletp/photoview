@@ -198,8 +198,7 @@ jobs:
           export REACT_APP_BUILD_COMMIT_SHA=${{ steps.git.outputs.COMMIT_SHORT_SHA }}
           export REACT_APP_BUILD_VERSION="kkovaletp-2-${{ github.ref_name }}-${TARGETARCH}"
           export REACT_APP_API_ENDPOINT="/api"
-          export CODECOV_TKN=${{ secrets.CODECOV_TKN }}
-          npm run build -- --base="/"
+          CODECOV_TKN=${{ secrets.CODECOV_TKN }} npm run build -- --base="/"
 
   dockle:
     name: Dockle Container Analysis
