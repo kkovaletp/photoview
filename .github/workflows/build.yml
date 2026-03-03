@@ -196,17 +196,20 @@ jobs:
         entry: ${{ fromJson(needs.prepare.outputs.matrix) }}
     steps:
       - name: Checkout ${{ matrix.entry.ref }}
+        if: matrix.entry.build_target == 'release'
         uses: actions/checkout@v6
         with:
           ref: ${{ matrix.entry.ref }}
 
       - name: Setup Node.js
+        if: matrix.entry.build_target == 'release'
         uses: actions/setup-node@v6
         with:
           node-version: "20"
           check-latest: true
 
       - name: Build UI bundle for Codecov analysis
+        if: matrix.entry.build_target == 'release'
         working-directory: ./ui
         shell: bash
         env:
