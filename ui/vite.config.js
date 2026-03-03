@@ -25,7 +25,7 @@ export default defineConfig({
       enableBundleAnalysis: process.env.CODECOV_TKN !== undefined,
       telemetry: false,
       gitService: "github",
-      bundleName: "Photoview-UI-bundle",
+      bundleName: `Photoview-UI-bundle-${process.env.TARGETARCH || 'unknown_arch'}`,
       uploadToken: process.env.CODECOV_TKN,
     }),
   ],

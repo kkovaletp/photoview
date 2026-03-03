@@ -184,7 +184,22 @@ jobs:
             NODE_ENV=production
             VERSION=${{ github.ref_name }}
             COMMIT_SHA=${{ steps.git.outputs.COMMIT_SHORT_SHA }}
-            CODECOV_TKN=${{ secrets.CODECOV_TKN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "20"
+
+      - name: Build UI bundle for Codecov analysis
+        working-directory: ./ui
+        run: |
+          npm ci --no-audit --no-fund
+          export REACT_APP_BUILD_DATE="$(date -u +'%Y-%m-%dT%H:%M:%S+00:00(UTC)')"
+          export REACT_APP_BUILD_COMMIT_SHA=${{ steps.git.outputs.COMMIT_SHORT_SHA }}
+          export REACT_APP_BUILD_VERSION="kkovaletp-2-${{ github.ref_name }}-${TARGETARCH}"
+          export REACT_APP_API_ENDPOINT="/api"
+          export CODECOV_TKN=${{ secrets.CODECOV_TKN }}
+          npm run build -- --base="/"
 
   dockle:
     name: Dockle Container Analysis
