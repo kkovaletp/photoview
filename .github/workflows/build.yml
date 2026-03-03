@@ -184,6 +184,7 @@ jobs:
             NODE_ENV=production
             VERSION=${{ github.ref_name }}
             COMMIT_SHA=${{ steps.git.outputs.COMMIT_SHORT_SHA }}
+            CODECOV_TKN=${{ secrets.CODECOV_TKN }}
 
   dockle:
     name: Dockle Container Analysis

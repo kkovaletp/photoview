@@ -5,6 +5,7 @@ import { defineConfig } from 'vite'
 import svgr from 'vite-plugin-svgr'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
+import { codecovVitePlugin } from "@codecov/vite-plugin"
 
 export default defineConfig({
   plugins: [
@@ -19,7 +20,15 @@ export default defineConfig({
       injectManifest: {
         injectionPoint: undefined
       }
-    })],
+    }),
+    codecovVitePlugin({
+      enableBundleAnalysis: process.env.CODECOV_TKN !== undefined,
+      telemetry: false,
+      gitService: "github",
+      bundleName: "Photoview-UI-bundle",
+      uploadToken: process.env.CODECOV_TKN,
+    }),
+  ],
   envPrefix: ['VITE_', 'REACT_APP_'],
   server: {
     port: 1234,

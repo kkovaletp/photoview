@@ -134,6 +134,7 @@ jobs:
             type=gha,scope=api
           build-args: |
             NODE_ENV=testing
+            CODECOV_TKN=${{ secrets.CODECOV_TKN }}
 
       - name: Test
         id: test
