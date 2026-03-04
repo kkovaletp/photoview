@@ -2,7 +2,7 @@ import React from 'react'
 import styled from 'styled-components'
 import { ProtectedImage } from './ProtectedMedia'
 import { MediaType } from '../../__generated__/globalTypes'
-import { ReactComponent as VideoThumbnailIconSVG } from './icons/videoThumbnailIcon.svg'
+import VideoThumbnailIconSVG from './icons/videoThumbnailIcon.svg?react'
 import { MediaGalleryFields } from './__generated__/MediaGalleryFields'
 
 const MediaContainer = styled.div`

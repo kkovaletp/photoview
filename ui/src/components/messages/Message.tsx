@@ -1,6 +1,6 @@
 import React from 'react'
 import { forwardRef } from 'react'
-import { ReactComponent as DismissIcon } from './icons/dismissIcon.svg'
+import DismissIcon from './icons/dismissIcon.svg?react'
 
 export type MessageProps = {
   header: string

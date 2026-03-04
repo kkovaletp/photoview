@@ -6,7 +6,7 @@ import { SidebarSection, SidebarSectionTitle } from '../SidebarComponents'
 import { MediaSidebarMedia, SIDEBAR_MEDIA_QUERY } from './MediaSidebar'
 import { sidebarMediaQuery_media_faces } from './__generated__/sidebarMediaQuery'
 
-import { ReactComponent as PeopleDotsIcon } from './icons/peopleDotsIcon.svg'
+import PeopleDotsIcon from './icons/peopleDotsIcon.svg?react'
 import { MenuItem, MenuItems, MenuButton, Menu } from '@headlessui/react'
 import { Button } from '../../../primitives/form/Input'
 import { ArrowPopoverPanel } from '../Sharing'

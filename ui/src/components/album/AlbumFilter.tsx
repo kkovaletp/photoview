@@ -5,8 +5,8 @@ import { OrderDirection } from '../../__generated__/globalTypes'
 import { MediaOrdering, SetOrderingFn } from '../../hooks/useOrderingParams'
 import Checkbox from '../../primitives/form/Checkbox'
 
-import { ReactComponent as SortingIcon } from './icons/sorting.svg'
-import { ReactComponent as DirectionIcon } from './icons/direction-arrow.svg'
+import SortingIcon from './icons/sorting.svg?react'
+import DirectionIcon from './icons/direction-arrow.svg?react'
 
 import Dropdown from '../../primitives/form/Dropdown'
 import classNames from 'classnames'
