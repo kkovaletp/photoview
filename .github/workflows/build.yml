@@ -185,6 +185,36 @@ jobs:
             VERSION=${{ github.ref_name }}
             COMMIT_SHA=${{ steps.git.outputs.COMMIT_SHORT_SHA }}
 
+  bundle:
+    name: Measure UI bundle
+    if: github.repository == 'kkovaletp/photoview'
+    runs-on: ubuntu-latest
+    needs: prepare
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "20"
+          check-latest: true
+
+      - name: Build UI bundle for Codecov analysis
+        working-directory: ./ui
+        shell: bash
+        env:
+          REACT_APP_BUILD_VERSION: "kkovaletp-2-${{ github.ref_name }}"
+          REACT_APP_API_ENDPOINT: "/api"
+          CODECOV_TKN: "${{ secrets.CODECOV_TKN }}"
+        run: |
+          git fetch --all --unshallow
+          npm install --global npm
+          npm ci --no-audit --no-fund
+          export REACT_APP_BUILD_DATE="$(date -u +'%Y-%m-%dT%H:%M:%S+00:00(UTC)')"
+          export REACT_APP_BUILD_COMMIT_SHA="$(git rev-parse --short HEAD)"
+          npm run build -- --base="/"
+
   dockle:
     name: Dockle Container Analysis
     runs-on: ubuntu-latest
