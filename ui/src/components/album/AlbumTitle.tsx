@@ -8,7 +8,7 @@ import { authToken } from '../../helpers/authentication'
 import { albumPathQuery } from './__generated__/albumPathQuery'
 import useDelay from '../../hooks/useDelay'
 
-import { ReactComponent as GearIcon } from './icons/gear.svg'
+import GearIcon from './icons/gear.svg?react'
 import { tailwindClassNames } from '../../helpers/utils'
 import { buttonStyles } from '../../primitives/form/Input'
 

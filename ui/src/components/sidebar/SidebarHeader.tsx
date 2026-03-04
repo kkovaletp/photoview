@@ -1,8 +1,8 @@
 import React, { useContext } from 'react'
 
-import { ReactComponent as CloseIcon } from './icons/closeSidebarIcon.svg'
-import { ReactComponent as PinIconOutline } from './icons/pinSidebarIconOutline.svg'
-import { ReactComponent as PinIconFilled } from './icons/pinSidebarIconFilled.svg'
+import CloseIcon from './icons/closeSidebarIcon.svg?react'
+import PinIconOutline from './icons/pinSidebarIconOutline.svg?react'
+import PinIconFilled from './icons/pinSidebarIconFilled.svg?react'
 import { SidebarContext } from './Sidebar'
 
 type SidebarHeaderProps = {
