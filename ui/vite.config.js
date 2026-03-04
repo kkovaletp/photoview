@@ -35,8 +35,9 @@ export default defineConfig(async ({ command, mode }) => {
         enableBundleAnalysis: process.env.CODECOV_TKN !== undefined,
         telemetry: false,
         gitService: "github",
-        bundleName: `Photoview-UI-bundle-${process.env.TARGETARCH || 'unknown_arch'}`,
+        bundleName: "Photoview-UI-bundle",
         uploadToken: process.env.CODECOV_TKN,
+        debug: true,
       }),
     ].filter(Boolean), // Remove falsy values from plugins array
     envPrefix: ['VITE_', 'REACT_APP_'],
