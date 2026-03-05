@@ -56,6 +56,7 @@ export default defineConfig(async ({ command, mode }) => {
         junit: './junit-report.xml',
       },
       coverage: {
+        provider: 'v8',
         reporter: ['text', 'lcov', 'json', 'html'],
         reportOnFailure: true,
       },
