@@ -1,4 +1,4 @@
-import React, { createRef, useEffect, useState } from 'react'
+import React, { JSX, createRef, useEffect, useState } from 'react'
 import { gql, useMutation, useQuery } from '@apollo/client'
 import Layout from '../../components/layout/Layout'
 import styled from 'styled-components'
@@ -20,7 +20,7 @@ import {
 } from './__generated__/myFaces'
 import { recognizeUnlabeledFaces } from './__generated__/recognizeUnlabeledFaces'
 import { isNil, tailwindClassNames } from '../../helpers/utils'
-import classNames from 'classnames'
+import { clsx } from 'clsx'
 import MergeFaceGroupsModal, {
   MergeFaceGroupsModalState,
 } from './SingleFaceGroup/MergeFaceGroupsModal'
@@ -86,9 +86,9 @@ const FaceDetailsWrapperInner = ({
 }: FaceDetailsWrapperProps) => (
   <span
     {...otherProps}
-    className={classNames(
+    className={clsx(
       className,
-      `${labeled ? '' : 'text-gray-400 dark:text-gray-500'}`
+      labeled ? '' : 'text-gray-400 dark:text-gray-500'
     )}
   >
     {children}

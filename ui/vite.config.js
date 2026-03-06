@@ -4,6 +4,7 @@ import { defineConfig } from 'vite'
 import svgr from 'vite-plugin-svgr'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
+import tailwindcss from '@tailwindcss/vite'
 
 export default defineConfig(async ({ command, mode }) => {
   // Conditionally import codecov plugin only if it's installed
@@ -19,6 +20,7 @@ export default defineConfig(async ({ command, mode }) => {
     plugins: [
       react(),
       svgr(),
+      tailwindcss(),
       VitePWA({
         strategies: 'injectManifest',
         srcDir: 'src',

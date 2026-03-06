@@ -1,5 +1,5 @@
-import classNames, { Argument as ClassNamesArg } from 'classnames'
-import { overrideTailwindClasses } from 'tailwind-override'
+import { type ClassValue, clsx } from 'clsx'
+import { twMerge } from 'tailwind-merge'
 
 export interface DebouncedFn<F extends (...args: unknown[]) => unknown> {
   (...args: Parameters<F>): void
@@ -11,7 +11,7 @@ export function debounce<F extends (...args: unknown[]) => unknown>(
   wait: number,
   triggerRising?: boolean
 ): DebouncedFn<F> {
-  let timeout: number | undefined = undefined
+  let timeout: ReturnType<typeof globalThis.setTimeout> | undefined = undefined
 
   const debounced = (...args: Parameters<F>) => {
     if (timeout) {
@@ -21,7 +21,7 @@ export function debounce<F extends (...args: unknown[]) => unknown>(
       func(...args)
     }
 
-    timeout = window.setTimeout(() => {
+    timeout = globalThis.setTimeout(() => {
       timeout = undefined
       func(...args)
     }, wait)
@@ -56,7 +56,6 @@ export function exhaustiveCheck(value: never): never {
   throw new Error(`Exhaustive check failed with value: ${value}`)
 }
 
-export function tailwindClassNames(...args: ClassNamesArg[]) {
-  return overrideTailwindClasses(classNames(args))
-  // return classNames(args)
+export function tailwindClassNames(...args: ClassValue[]) {
+  return twMerge(clsx(...args))
 }

@@ -1,8 +1,5 @@
-import classNames from 'classnames'
-import React, { DetailedHTMLProps, ImgHTMLAttributes } from 'react'
-import { useRef } from 'react'
-import { useState } from 'react'
-import { useEffect } from 'react'
+import { clsx } from 'clsx'
+import React, { DetailedHTMLProps, ImgHTMLAttributes, useRef, useState, useEffect } from 'react'
 import { BlurhashCanvas } from 'react-blurhash'
 import { isNil } from '../../helpers/utils'
 
@@ -15,7 +12,7 @@ const getProtectedUrl = (url?: string) => {
 
   const imgUrl = new URL(url, location.origin)
 
-  const tokenRegex = location.pathname.match(/^\/share\/([\d\w]+)(\/?.*)$/)
+  const tokenRegex = new RegExp(/^\/share\/([\d\w]+)(\/?.*)$/).exec(location.pathname)
   if (tokenRegex) {
     const token = tokenRegex[1]
     imgUrl.searchParams.set('token', token)
@@ -109,7 +106,7 @@ const FallbackLazyloadedImage = ({
     const imgElm = imgRef.current
     if (isNil(imgElm) || inView) return
 
-    if (window.IntersectionObserver === undefined) {
+    if (globalThis.IntersectionObserver === undefined) {
       setInView(true)
       return
     }
@@ -154,7 +151,7 @@ const FallbackLazyloadedImage = ({
     )
   } else {
     return (
-      <div ref={imgRef} className={classNames(className, 'bg-[#eee]')}>
+      <div ref={imgRef} className={clsx(className, 'bg-[#eee]')}>
         {blurhash && (
           <BlurhashCanvas
             className="absolute w-full h-full top-0"

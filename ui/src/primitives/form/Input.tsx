@@ -1,5 +1,5 @@
 import React, { forwardRef } from 'react'
-import classNames, { Argument as ClassNamesArg } from 'classnames'
+import { clsx, type ClassValue } from 'clsx'
 import ActionArrowIcon from './icons/textboxActionArrow.svg?react'
 import LoadingSpinnerIcon from './icons/textboxLoadingSpinner.svg?react'
 import styled from 'styled-components'
@@ -8,8 +8,8 @@ import { tailwindClassNames } from '../../helpers/utils'
 type TextFieldProps = {
   label?: string
   error?: string
-  className?: ClassNamesArg
-  wrapperClassName?: ClassNamesArg
+  className?: ClassValue
+  wrapperClassName?: ClassValue
   sizeVariant?: 'default' | 'big'
   fullWidth?: boolean
   action?: () => void
@@ -56,7 +56,7 @@ export const TextField = forwardRef(
     let input = (
       <input
         onKeyUp={keyUpEvent}
-        className={classNames(
+        className={clsx(
           'block border rounded-md focus:ring-2 focus:outline-none px-2',
           'dark:bg-dark-input-bg dark:border-dark-input-border',
           variant,
@@ -82,7 +82,7 @@ export const TextField = forwardRef(
     } else if (action) {
       input = (
         <div
-          className={classNames('relative inline-block', {
+          className={clsx('relative inline-block', {
             'w-full': fullWidth,
           })}
         >
@@ -90,7 +90,7 @@ export const TextField = forwardRef(
           <button
             disabled={disabled}
             aria-label="Submit"
-            className={classNames(
+            className={clsx(
               'absolute top-1/2 right-0 -translate-y-1/2 p-2 text-gray-600 disabled:text-gray-400 disabled:cursor-default'
             )}
             onClick={e => {
@@ -101,7 +101,7 @@ export const TextField = forwardRef(
             }}
           >
             <ActionArrowIcon
-              className={classNames(
+              className={clsx(
                 sizeVariant == 'big' && 'w-4 h-4 mt-1 mr-1'
               )}
             />
@@ -113,14 +113,14 @@ export const TextField = forwardRef(
     let errorElm = null
     if (error) errorElm = <div className="text-red-800">{error}</div>
 
-    const wrapperClasses = classNames(
+    const wrapperClasses = clsx(
       sizeVariant == 'default' && 'text-sm',
       wrapperClassName
     )
 
     if (label) {
       return (
-        <label className={classNames(wrapperClasses, 'block')}>
+        <label className={clsx(wrapperClasses, 'block')}>
           <span className="block text-xs uppercase font-semibold mb-1">
             {label}
           </span>
@@ -146,7 +146,7 @@ type ButtonProps = {
 }
 
 export const buttonStyles = ({ variant, background }: ButtonProps) =>
-  classNames(
+  clsx(
     'px-6 py-0.5 rounded border border-gray-200 focus:outline-none focus:border-blue-300 text-[#222] hover:bg-gray-100 whitespace-nowrap',
     'dark:bg-dark-input-bg dark:border-dark-input-border dark:text-dark-input-text dark:focus:border-blue-300',
     variant == 'negative' &&
