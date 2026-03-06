@@ -10,7 +10,9 @@ describe('MessageState', () => {
     beforeEach(() => {
         originalDateNow = Date.now
         try {
-            vi.useFakeTimers()
+            vi.useFakeTimers({
+                toFake: ['setTimeout', 'setInterval', 'clearTimeout', 'clearInterval']
+            })
             clearIntervalSpy = vi.spyOn(window, 'clearInterval')
         } catch (error) {
             Date.now = originalDateNow
