@@ -2,7 +2,9 @@ import React from 'react'
 import PresentNavigationOverlay from './PresentNavigationOverlay'
 import { fireEvent, render, screen, act } from '@testing-library/react'
 
-vi.useFakeTimers()
+vi.useFakeTimers({
+  toFake: ['setTimeout', 'setInterval', 'clearTimeout', 'clearInterval']
+})
 
 describe('PresentNavigationOverlay component', () => {
   test('simple render', () => {
