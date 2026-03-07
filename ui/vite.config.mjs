@@ -13,7 +13,7 @@ export default defineConfig(async ({ command, mode }) => {
     const codecovModule = await import('@codecov/vite-plugin')
     codecovVitePlugin = codecovModule.codecovVitePlugin
   } catch (e) {
-    // Plugin not installed (production build), skip it
+    console.debug('Codecov Vite plugin not found, skipping code coverage upload in production build.', e)
   }
 
   return {
@@ -32,7 +32,7 @@ export default defineConfig(async ({ command, mode }) => {
         }
       }),
       // Only add codecov plugin if it's available
-      codecovVitePlugin && codecovVitePlugin({
+      codecovVitePlugin?.({
         enableBundleAnalysis: process.env.CODECOV_TKN !== undefined,
         telemetry: false,
         gitService: "github",
