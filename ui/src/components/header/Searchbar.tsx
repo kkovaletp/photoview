@@ -10,7 +10,7 @@ import {
   searchQuery_search_albums,
   searchQuery_search_media,
 } from './__generated__/searchQuery'
-import classNames from 'classnames'
+import { clsx } from 'clsx'
 
 const SEARCH_QUERY = gql`
   query searchQuery($query: String!) {
@@ -244,7 +244,7 @@ const SearchResults = ({
     <div
       id="search-results"
       role="listbox"
-      className={classNames(
+      className={clsx(
         'absolute bg-white dark:bg-dark-bg left-0 right-0 top-[72px] overflow-y-auto h-[calc(100vh-152px)] border dark:border-dark-border px-4 z-0',
         'lg:top-[40px] lg:shadow-md lg:rounded-b lg:max-h-[560px]',
         { hidden: !expanded }
@@ -321,7 +321,7 @@ const SearchRow = ({
       role="option"
       aria-selected={selected}
       onMouseOver={() => setSelected()}
-      className={classNames('rounded p-1 mt-1', {
+      className={clsx('rounded p-1 mt-1', {
         'bg-gray-100 dark:bg-dark-bg2': selected,
       })}
     >

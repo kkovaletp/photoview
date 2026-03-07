@@ -7,7 +7,7 @@ import ScannerSection from './ScannerSection'
 import UserPreferences from './UserPreferences'
 import UsersTable from './Users/UsersTable'
 import VersionInfo from './VersionInfo'
-import classNames from 'classnames'
+import { clsx } from 'clsx'
 
 type SectionTitleProps = {
   children: string
@@ -17,7 +17,7 @@ type SectionTitleProps = {
 export const SectionTitle = ({ children, nospace }: SectionTitleProps) => {
   return (
     <h2
-      className={classNames(
+      className={clsx(
         'pb-1 border-b border-gray-200 dark:border-dark-border text-xl mb-5',
         !nospace && 'mt-6'
       )}

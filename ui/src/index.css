@@ -1,3 +1,38 @@
+@import "tailwindcss";
+
+@theme {
+  /* Custom breakpoint (replaces screens: { xs: '480px' } in tailwind.config.js) */
+  --breakpoint-xs: 480px;
+
+  /* Custom box shadow (replaces boxShadow: { separator: '...' }) */
+  --shadow-separator: 0 0 4px 0 rgba(0, 0, 0, 0.1);
+
+  /* Custom green palette */
+  --color-green-50: `#f0ffee`;
+  --color-green-100: `#dcffd8`;
+  --color-green-200: `#b6fdb3`;
+  --color-green-300: `#7cf587`;
+  --color-green-400: `#56e263`;
+  --color-green-500: `#4abf3c`;
+  --color-green-600: `#30a23e`;
+  --color-green-700: `#168332`;
+  --color-green-800: `#006624`;
+  --color-green-900: `#00541d`;
+
+  /* Dark theme color tokens */
+  --color-dark-bg: `#24292e`;
+  --color-dark-bg2: `#30363e`;
+  --color-dark-text: `#eee`;
+  --color-dark-border: `#3b3b3b`;
+  --color-dark-border2: `#202020`;
+  --color-dark-input-bg: `#383e46`;
+  --color-dark-input-border: `#4a515a`;
+  --color-dark-input-text: `#ccdbe4`;
+}
+
+/* Replaces darkMode: 'class' in tailwind.config.js */
+@custom-variant dark (&:where(.dark, .dark *));
+
 * {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -12,17 +47,13 @@ html {
   font-family: 'Source Sans Pro', sans-serif;
 }
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
-@layer utilities {
-  .flip-y {
-    transform: scale(1, -1);
-  }
+/* `@utility` replaces `@layer` utilities { } for custom utilities in v4 */
+@utility flip-y {
+  transform: scale(1, -1);
 }
 
 @layer base {
+
   body.dark,
   html.dark {
     @apply bg-dark-bg text-dark-text;

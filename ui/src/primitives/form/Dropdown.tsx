@@ -1,4 +1,4 @@
-import classNames from 'classnames'
+import { clsx } from 'clsx'
 import React from 'react'
 import styled from 'styled-components'
 
@@ -31,7 +31,7 @@ const Dropdown = ({
 }: DropdownProps) => {
   const onChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     setSelected(e.target.value)
-    otherProps.onChange && otherProps.onChange(e)
+    otherProps.onChange?.(e)
   }
 
   const options = items.map(({ value, label }) => (
@@ -42,7 +42,7 @@ const Dropdown = ({
 
   return (
     <DropdownStyledSelect
-      className={classNames(
+      className={clsx(
         'bg-gray-50 px-2 py-0.5 pr-6 rounded border border-gray-200 focus:outline-none focus:border-blue-300 text-[#222] hover:bg-gray-100 disabled:hover:bg-gray-50 disabled:text-gray-500 disabled:cursor-default',
         'dark:bg-dark-input-bg dark:border-dark-input-border dark:text-dark-input-text dark:focus:border-blue-300',
         className

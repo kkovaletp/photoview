@@ -4,6 +4,7 @@ import { defineConfig } from 'vite'
 import svgr from 'vite-plugin-svgr'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
+import tailwindcss from '@tailwindcss/vite'
 
 export default defineConfig(async ({ command, mode }) => {
   // Conditionally import codecov plugin only if it's installed
@@ -12,13 +13,14 @@ export default defineConfig(async ({ command, mode }) => {
     const codecovModule = await import('@codecov/vite-plugin')
     codecovVitePlugin = codecovModule.codecovVitePlugin
   } catch (e) {
-    // Plugin not installed (production build), skip it
+    console.debug('Codecov Vite plugin not found, skipping code coverage upload in production build.', e)
   }
 
   return {
     plugins: [
       react(),
       svgr(),
+      tailwindcss(),
       VitePWA({
         strategies: 'injectManifest',
         srcDir: 'src',
@@ -30,7 +32,7 @@ export default defineConfig(async ({ command, mode }) => {
         }
       }),
       // Only add codecov plugin if it's available
-      codecovVitePlugin && codecovVitePlugin({
+      codecovVitePlugin?.({
         enableBundleAnalysis: process.env.CODECOV_TKN !== undefined,
         telemetry: false,
         gitService: "github",
