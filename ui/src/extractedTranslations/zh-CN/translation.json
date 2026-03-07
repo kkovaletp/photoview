@@ -1,13 +1,12 @@
 {
   "album_filter": {
     "only_favorites": "只显示喜爱",
-    "sort": "排序",
-    "sort_by": "排序方式",
-    "sort_direction": "排序方向",
     "order_direction": {
       "ascending": "升序",
       "descending": "降序"
     },
+    "sort": "排序",
+    "sort_direction": "排序方向",
     "sorting_options": {
       "date_imported": "加入日期",
       "date_shot": "拍摄日期",
@@ -31,7 +30,8 @@
         "media": "载入更多媒体"
       },
       "shares": "载入分享..."
-    }
+    },
+    "notFound": ""
   },
   "header": {
     "search": {
@@ -48,7 +48,8 @@
     "field": {
       "password": "密码",
       "submit": "登入",
-      "username": "用户名"
+      "username": "用户名",
+      "username_error": ""
     },
     "initial_setup": {
       "field": {
@@ -135,11 +136,13 @@
   "settings": {
     "concurrent_workers": {
       "description": "最多允许同时进行的扫描任务数目",
+      "error": "",
       "title": "同时扫描任务"
     },
     "logout": "登出",
     "periodic_scanner": {
       "checkbox_label": "启用周期性扫描",
+      "error": "",
       "field": {
         "description": "对全部用户自动扫描的频率",
         "label": "扫描频率"
@@ -183,6 +186,7 @@
     },
     "users": {
       "add_user": {
+        "error": "",
         "submit": "新增用户"
       },
       "confirm_delete_user": {
@@ -192,6 +196,7 @@
       },
       "password_reset": {
         "description": "更改 <1>{{username}}</1> 的密码",
+        "error": "",
         "form": {
           "label": "新密码",
           "placeholder": "密码",
@@ -260,16 +265,19 @@
       },
       "reset_cover": "重设封面照片",
       "set_cover": "设置为封面图片",
+      "title": "",
       "title_placeholder": "相册名称"
     },
     "download": {
+      "error": "",
       "filesize": {
+        "byte": "",
         "byte_one": "{{count}} 字节",
         "byte_other": "{{count}} 字节",
-        "giga_byte_other": "",
-        "kilo_byte_other": "",
-        "mega_byte_other": "",
-        "tera_byte_other": ""
+        "giga_byte": "",
+        "kilo_byte": "",
+        "mega_byte": "",
+        "tera_byte": ""
       },
       "table_columns": {
         "dimensions": "尺寸",
@@ -279,6 +287,7 @@
       },
       "title": "下载"
     },
+    "error": "",
     "location": {
       "title": "位置"
     },
@@ -338,6 +347,7 @@
       "add_share": "新增分享",
       "copy_link": "复制链接",
       "delete": "删除分享",
+      "expiration_date": "",
       "more": "更多",
       "no_shares_found": "没有分享",
       "public_link": "公开链接",
@@ -361,6 +371,7 @@
   "title": {
     "loading_album": "载入相册",
     "login": "登入",
+    "not_found": "",
     "people": "人物",
     "settings": "设置"
   }

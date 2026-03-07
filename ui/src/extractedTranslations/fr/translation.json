@@ -1,13 +1,12 @@
 {
   "album_filter": {
     "only_favorites": "Afficher seulement les favoris",
-    "sort": "Trier",
-    "sort_by": "Trier par",
-    "sort_direction": "Sens du tri",
     "order_direction": {
       "ascending": "Croissant",
       "descending": "Décroissant"
     },
+    "sort": "Trier",
+    "sort_direction": "Sens du tri",
     "sorting_options": {
       "date_imported": "Date d'importation",
       "date_shot": "Date de prise de vue",
@@ -31,7 +30,8 @@
         "media": "Charger plus de médias"
       },
       "shares": "Chargement des partages..."
-    }
+    },
+    "notFound": ""
   },
   "header": {
     "search": {
@@ -48,7 +48,8 @@
     "field": {
       "password": "Mot de passe",
       "submit": "Connexion",
-      "username": "Nom d'utilisateur"
+      "username": "Nom d'utilisateur",
+      "username_error": ""
     },
     "initial_setup": {
       "field": {
@@ -135,11 +136,13 @@
   "settings": {
     "concurrent_workers": {
       "description": "Nombre maximal de tâches d'analyse simultanées.",
+      "error": "",
       "title": "Tâches d'analyse simultanées"
     },
     "logout": "Se déconnecter",
     "periodic_scanner": {
       "checkbox_label": "Activer l'analyse périodique",
+      "error": "",
       "field": {
         "description": "Intervalle à laquelle l'analyse se déclenche pour tous les utilisateurs",
         "label": "Intervalle d'analyse périodique"
@@ -183,6 +186,7 @@
     },
     "users": {
       "add_user": {
+        "error": "",
         "submit": "Ajouter l'utilisateur"
       },
       "confirm_delete_user": {
@@ -192,6 +196,7 @@
       },
       "password_reset": {
         "description": "Modifier le mot de passe de <1>{{username}}</1>",
+        "error": "",
         "form": {
           "label": "Nouveau mot de passe",
           "placeholder": "mot de passe",
@@ -260,25 +265,19 @@
       },
       "reset_cover": "Réinitialiser la photo de couverture",
       "set_cover": "Définir une photo de couverture d'Album",
+      "title": "",
       "title_placeholder": "Titre de l'Album"
     },
     "download": {
+      "error": "",
       "filesize": {
+        "byte": "",
         "byte_one": "{{count}} Octet",
-        "byte_many": "",
         "byte_other": "{{count}} Octets",
-        "giga_byte_one": "{{count}} Go",
-        "giga_byte_many": "",
-        "giga_byte_other": "{{count}} Go",
-        "kilo_byte_one": "{{count}} Ko",
-        "kilo_byte_many": "",
-        "kilo_byte_other": "{{count}} Ko",
-        "mega_byte_one": "{{count}} Mo",
-        "mega_byte_many": "",
-        "mega_byte_other": "{{count}} Mo",
-        "tera_byte_one": "{{count}} To",
-        "tera_byte_many": "",
-        "tera_byte_other": "{{count}} To"
+        "giga_byte": "",
+        "kilo_byte": "",
+        "mega_byte": "",
+        "tera_byte": ""
       },
       "table_columns": {
         "dimensions": "Dimensions",
@@ -288,6 +287,7 @@
       },
       "title": "Télécharger"
     },
+    "error": "",
     "location": {
       "title": "Emplacement"
     },
@@ -347,6 +347,7 @@
       "add_share": "Ajouter un partage",
       "copy_link": "Copier le lien",
       "delete": "Supprimer",
+      "expiration_date": "",
       "more": "Plus",
       "no_shares_found": "Aucun partage trouvé",
       "public_link": "Lien public",
@@ -370,6 +371,7 @@
   "title": {
     "loading_album": "Chargement de l'album",
     "login": "Connexion",
+    "not_found": "",
     "people": "Personnes",
     "settings": "Paramètres"
   }

@@ -1,13 +1,12 @@
 {
   "album_filter": {
     "only_favorites": "Nur Favoriten anzeigen",
-    "sort": "Sortierung",
-    "sort_by": "Sortieren nach",
-    "sort_direction": "Sortierrichtung",
     "order_direction": {
       "ascending": "Aufsteigend",
       "descending": "Absteigend"
     },
+    "sort": "Sortierung",
+    "sort_direction": "Sortierrichtung",
     "sorting_options": {
       "date_imported": "Importdatum",
       "date_shot": "Aufnahmedatum",
@@ -31,7 +30,8 @@
         "media": "Lade mehr Medien"
       },
       "shares": "Lade Freigaben..."
-    }
+    },
+    "notFound": ""
   },
   "header": {
     "search": {
@@ -48,7 +48,8 @@
     "field": {
       "password": "Passwort",
       "submit": "Einloggen",
-      "username": "Benutzername"
+      "username": "Benutzername",
+      "username_error": ""
     },
     "initial_setup": {
       "field": {
@@ -135,11 +136,13 @@
   "settings": {
     "concurrent_workers": {
       "description": "Die maximale erlaubte Anzahl an gleichzeitig laufenden Scanner Jobs",
+      "error": "",
       "title": "Anzahl an Workern"
     },
     "logout": "Ausloggen",
     "periodic_scanner": {
       "checkbox_label": "Automatischen Scanner aktivieren",
+      "error": "",
       "field": {
         "description": "Intervall, in dem automatische Scans aller Nutzer wiederholt werden",
         "label": "Intervall - Automatischer Scanner"
@@ -183,6 +186,7 @@
     },
     "users": {
       "add_user": {
+        "error": "",
         "submit": "Benutzer hinzufügen"
       },
       "confirm_delete_user": {
@@ -192,6 +196,7 @@
       },
       "password_reset": {
         "description": "Passwort von diesem Benutzer zurücksetzen.",
+        "error": "",
         "form": {
           "label": "Neues Passwort",
           "placeholder": "Passwort",
@@ -260,20 +265,19 @@
       },
       "reset_cover": "Titelbild zurücksetzen",
       "set_cover": "Als Album Titelbild setzen",
+      "title": "",
       "title_placeholder": ""
     },
     "download": {
+      "error": "",
       "filesize": {
+        "byte": "",
         "byte_one": "",
         "byte_other": "",
-        "giga_byte_one": "",
-        "giga_byte_other": "",
-        "kilo_byte_one": "",
-        "kilo_byte_other": "",
-        "mega_byte_one": "",
-        "mega_byte_other": "",
-        "tera_byte_one": "",
-        "tera_byte_other": ""
+        "giga_byte": "",
+        "kilo_byte": "",
+        "mega_byte": "",
+        "tera_byte": ""
       },
       "table_columns": {
         "dimensions": "Auflösung",
@@ -283,6 +287,7 @@
       },
       "title": "Download"
     },
+    "error": "",
     "location": {
       "title": "Karte"
     },
@@ -342,6 +347,7 @@
       "add_share": "Freigabe hinzufügen",
       "copy_link": "Link kopieren",
       "delete": "Freigabe löschen",
+      "expiration_date": "",
       "more": "mehr infos",
       "no_shares_found": "Keine Freigaben gefunden",
       "public_link": "Öffentlicher Link",
@@ -365,6 +371,7 @@
   "title": {
     "loading_album": "Lade Album",
     "login": "Login",
+    "not_found": "",
     "people": "Personen",
     "settings": "Einstellungen"
   }

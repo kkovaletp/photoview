@@ -1,13 +1,12 @@
 {
   "album_filter": {
     "only_favorites": "Show only favorites",
-    "sort": "Sort",
-    "sort_by": "Sort by",
-    "sort_direction": "Sorting direction",
     "order_direction": {
       "ascending": "Ascending",
       "descending": "Descending"
     },
+    "sort": "Sort",
+    "sort_direction": "Sorting direction",
     "sorting_options": {
       "date_imported": "Date imported",
       "date_shot": "Date shot",
@@ -31,7 +30,8 @@
         "media": "Loading more media"
       },
       "shares": "Loading shares..."
-    }
+    },
+    "notFound": "Face group not found"
   },
   "header": {
     "search": {
@@ -48,7 +48,8 @@
     "field": {
       "password": "Password",
       "submit": "Sign in",
-      "username": "Username"
+      "username": "Username",
+      "username_error": "Please enter a username"
     },
     "initial_setup": {
       "field": {
@@ -135,11 +136,13 @@
   "settings": {
     "concurrent_workers": {
       "description": "The maximum amount of scanner jobs that is allowed to run at once",
+      "error": "Failed to load concurrent workers setting",
       "title": "Scanner concurrent workers"
     },
     "logout": "Log out",
     "periodic_scanner": {
       "checkbox_label": "Enable periodic scanner",
+      "error": "Failed to load periodic scanner settings",
       "field": {
         "description": "How often the scanner should perform automatic scans of all users",
         "label": "Periodic scan interval"
@@ -183,6 +186,7 @@
     },
     "users": {
       "add_user": {
+        "error": "Failed to add user. Please try again.",
         "submit": "Add user"
       },
       "confirm_delete_user": {
@@ -192,6 +196,7 @@
       },
       "password_reset": {
         "description": "Change password for <1>{{username}}</1>",
+        "error": "Failed to change password",
         "form": {
           "label": "New password",
           "placeholder": "password",
@@ -260,20 +265,19 @@
       },
       "reset_cover": "Reset cover photo",
       "set_cover": "Set as album cover photo",
+      "title": "Album options",
       "title_placeholder": "Album title"
     },
     "download": {
+      "error": "Failed to load download options",
       "filesize": {
+        "byte": "{{count}} Byte",
         "byte_one": "{{count}} Byte",
         "byte_other": "{{count}} Bytes",
-        "giga_byte_one": "{{count}} GB",
-        "giga_byte_other": "{{count}} GB",
-        "kilo_byte_one": "{{count}} KB",
-        "kilo_byte_other": "{{count}} KB",
-        "mega_byte_one": "{{count}} MB",
-        "mega_byte_other": "{{count}} MB",
-        "tera_byte_one": "{{count}} TB",
-        "tera_byte_other": "{{count}} TB"
+        "giga_byte": "{{count}} GB",
+        "kilo_byte": "{{count}} KB",
+        "mega_byte": "{{count}} MB",
+        "tera_byte": "{{count}} TB"
       },
       "table_columns": {
         "dimensions": "Dimensions",
@@ -283,6 +287,7 @@
       },
       "title": "Download"
     },
+    "error": "Error loading media details: {{message}}",
     "location": {
       "title": "Location"
     },
@@ -342,6 +347,7 @@
       "add_share": "Add shares",
       "copy_link": "Copy Link",
       "delete": "Delete",
+      "expiration_date": "Expiration date",
       "more": "More",
       "no_shares_found": "No shares found",
       "public_link": "Public Link",
@@ -365,6 +371,7 @@
   "title": {
     "loading_album": "Loading album",
     "login": "Login",
+    "not_found": "Not found",
     "people": "People",
     "settings": "Settings"
   }

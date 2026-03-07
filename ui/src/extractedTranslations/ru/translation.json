@@ -1,13 +1,12 @@
 {
   "album_filter": {
     "only_favorites": "Показать только избранные",
-    "sort": "Сортировка",
-    "sort_by": "Отсортировать по",
-    "sort_direction": "Направление сортировки",
     "order_direction": {
       "ascending": "По возрастанию",
       "descending": "По убыванию"
     },
+    "sort": "Сортировка",
+    "sort_direction": "Направление сортировки",
     "sorting_options": {
       "date_imported": "Дата импортирования",
       "date_shot": "Дата снимка",
@@ -31,7 +30,8 @@
         "media": "Загрузить еще медиа"
       },
       "shares": "Загрузка доступа..."
-    }
+    },
+    "notFound": "Не найдено"
   },
   "header": {
     "search": {
@@ -40,7 +40,7 @@
       "placeholder": "Поиск",
       "result_type": {
         "albums": "Альбомы",
-        "media": ""
+        "media": "Медиафайлы"
       }
     }
   },
@@ -48,7 +48,8 @@
     "field": {
       "password": "Пароль",
       "submit": "Войти",
-      "username": "Имя пользователя"
+      "username": "Имя пользователя",
+      "username_error": "Введите имя пользователя"
     },
     "initial_setup": {
       "field": {
@@ -67,11 +68,11 @@
   },
   "people_page": {
     "action_label": {
-      "change_label": "",
-      "detach_images": "",
-      "merge_face": "",
-      "merge_people": "",
-      "move_faces": ""
+      "change_label": "Изменить метку",
+      "detach_images": "Открепить фото",
+      "merge_face": "Объединить лицо",
+      "merge_people": "Объединить людей",
+      "move_faces": "Переместить лица"
     },
     "face_group": {
       "label_placeholder": "Метка",
@@ -81,7 +82,7 @@
     "modal": {
       "action": {
         "merge": "Объединить",
-        "next": ""
+        "next": "Следующее"
       },
       "detach_image_faces": {
         "action": {
@@ -92,13 +93,13 @@
         "title": "Отсоединить фото с лицами"
       },
       "merge_face_groups": {
-        "destination_description": "",
+        "destination_description": "Выберите группу, которая получит лица из исходной группы/групп",
         "destination_table": {
-          "title": "Выберете конечное лицо"
+          "title": "Выберете группу назначения для лиц"
         },
-        "sources_description": "",
+        "sources_description": "Выберите все группы, лица из которых будут перемещены в группу назначения",
         "sources_table": {
-          "title": ""
+          "title": "Выберите 1 или несколько групп для перемещения лиц"
         },
         "title": "Обьединить группы лиц"
       },
@@ -117,10 +118,10 @@
     },
     "recognize_unlabeled_faces_button": "Распознавать непомеченные лица",
     "tableselect_face_group": {
-      "search_faces_placeholder": ""
+      "search_faces_placeholder": "Искать лица..."
     },
     "tableselect_image_faces": {
-      "search_images_placeholder": ""
+      "search_images_placeholder": "Искать фото..."
     }
   },
   "photos_page": {
@@ -135,11 +136,13 @@
   "settings": {
     "concurrent_workers": {
       "description": "Максимальное количество задач по сканированию разрешённых работать одновременно",
+      "error": "Ошибка при обновлении количества одновременных задач",
       "title": "Количество одновременных задач"
     },
     "logout": "Выйти",
     "periodic_scanner": {
       "checkbox_label": "Включить переодическое сканирование",
+      "error": "Ошибка при обновлении состояния переодического сканирования",
       "field": {
         "description": "Как часто должно запускаться автоматическое сканирование для всех пользователей",
         "label": "Интервал переодического сканирования"
@@ -168,21 +171,22 @@
       },
       "theme": {
         "auto": {
-          "label": ""
+          "label": "Как в системе"
         },
         "dark": {
-          "label": ""
+          "label": "Темная"
         },
-        "description": "",
+        "description": "Изменить тему оформления сайта",
         "light": {
-          "label": ""
+          "label": "Светлая"
         },
-        "title": ""
+        "title": "Тема сайта"
       },
       "title": "Пользовательские настройки"
     },
     "users": {
       "add_user": {
+        "error": "Ошибка добавления пользователя",
         "submit": "Добавить пользователя"
       },
       "confirm_delete_user": {
@@ -192,6 +196,7 @@
       },
       "password_reset": {
         "description": "Поменять пароль для <1></1>",
+        "error": "Ошибка смены пароля",
         "form": {
           "label": "Новый пароль",
           "placeholder": "пароль",
@@ -202,7 +207,7 @@
       "table": {
         "column_names": {
           "action": "Действие",
-          "capabilities": "",
+          "capabilities": "Права",
           "photo_path": "Путь к фото",
           "username": "Имя пользователя"
         },
@@ -230,7 +235,7 @@
     },
     "protected_share": {
       "description": "Это общее медиа защищено паролем.",
-      "password_required_error": "",
+      "password_required_error": "Пароль обязателен",
       "title": "Защищённое медиа"
     },
     "share_not_found": "Общее медиа не найдено",
@@ -239,51 +244,40 @@
   },
   "sidebar": {
     "album": {
-      "album_cover": "",
+      "album_cover": "Обложка альбома",
       "download": {
         "high-resolutions": {
-          "description": "",
-          "title": ""
+          "description": "JPEG-файлы високого разрешения RAW-изображений",
+          "title": "Высокое разрешение"
         },
         "originals": {
-          "description": "",
-          "title": ""
+          "description": "Оригинальные фото и видео",
+          "title": "Оригиналы"
         },
         "thumbnails": {
-          "description": "",
-          "title": ""
+          "description": "Миниатюры фото",
+          "title": "Миниатюры"
         },
         "web-videos": {
-          "description": "",
-          "title": ""
+          "description": "Видео, оптимизированные для веб-трансляции",
+          "title": "Видео для веба"
         }
       },
-      "reset_cover": "",
-      "set_cover": "",
-      "title_placeholder": ""
+      "reset_cover": "Сбросить обложку",
+      "set_cover": "Установить обложку",
+      "title": "Настройки альбома",
+      "title_placeholder": "Название альбома"
     },
     "download": {
+      "error": "Ошибка загрузки настроек скачивания",
       "filesize": {
-        "byte_one": "",
-        "byte_few": "",
-        "byte_many": "",
-        "byte_other": "",
-        "giga_byte_one": "",
-        "giga_byte_few": "",
-        "giga_byte_many": "",
-        "giga_byte_other": "",
-        "kilo_byte_one": "",
-        "kilo_byte_few": "",
-        "kilo_byte_many": "",
-        "kilo_byte_other": "",
-        "mega_byte_one": "",
-        "mega_byte_few": "",
-        "mega_byte_many": "",
-        "mega_byte_other": "",
-        "tera_byte_one": "",
-        "tera_byte_few": "",
-        "tera_byte_many": "",
-        "tera_byte_other": ""
+        "byte": "{{count}} Байт",
+        "byte_one": "{{count}} Байт",
+        "byte_other": "{{count}} Байтов",
+        "giga_byte": "{{count}} ГБ",
+        "kilo_byte": "{{count}} КБ",
+        "mega_byte": "{{count}} МБ",
+        "tera_byte": "{{count}} ТБ"
       },
       "table_columns": {
         "dimensions": "Габариты",
@@ -293,13 +287,14 @@
       },
       "title": "Скачать"
     },
+    "error": "Ошибка загрузки информации о медиа: {{message}}",
     "location": {
-      "title": ""
+      "title": "Расположение"
     },
     "media": {
-      "album_path": "",
+      "album_path": "Путь к альбому",
       "exif": {
-        "description": "",
+        "description": "Описание",
         "exposure_program": {
           "action_program": "Действие программа",
           "aperture_priority": "Приоритет диафрагмы",
@@ -327,7 +322,7 @@
         "name": {
           "aperture": "Диафрагма",
           "camera": "Камера",
-          "coordinates": "",
+          "coordinates": "Координаты",
           "date_shot": "Дата снимка",
           "exposure": "Экспозиция",
           "exposure_program": "Программа",
@@ -341,19 +336,20 @@
     },
     "people": {
       "action_label": {
-        "detach_image": "",
-        "merge_face": "",
-        "move_face": ""
+        "detach_image": "Открепить фото",
+        "merge_face": "Объединить лицо",
+        "move_face": "Переместить лицо"
       },
-      "confirm_image_detach": "",
-      "title": ""
+      "confirm_image_detach": "Подтвердите открепление фото",
+      "title": "Люди"
     },
     "sharing": {
       "add_share": "Поделится",
       "copy_link": "Скопировать ссылку",
-      "delete": "",
-      "more": "",
-      "no_shares_found": "Нет доступа",
+      "delete": "Удалить",
+      "expiration_date": "Действительно до",
+      "more": "Больше",
+      "no_shares_found": "Нет общедоступных ссылок",
       "public_link": "Общедоступная ссылка",
       "title": "Настройки доступа"
     }
@@ -367,14 +363,15 @@
   },
   "timeline_filter": {
     "date": {
-      "dropdown_all": "",
-      "dropdown_year": "",
-      "label": ""
+      "dropdown_all": "От сегодня",
+      "dropdown_year": "{{year}} и раньше",
+      "label": "Дата"
     }
   },
   "title": {
     "loading_album": "Загрузка альбома",
     "login": "Имя пользователя",
+    "not_found": "Не найдено",
     "people": "Люди",
     "settings": "Настройки"
   }
