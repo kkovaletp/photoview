@@ -12,7 +12,7 @@ const getProtectedUrl = (url?: string) => {
 
   const imgUrl = new URL(url, location.origin)
 
-  const tokenRegex = new RegExp(/^\/share\/([\d\w]+)(\/?.*)$/).exec(location.pathname)
+  const tokenRegex = /^\/share\/(\w+)/.exec(location.pathname)
   if (tokenRegex) {
     const token = tokenRegex[1]
     imgUrl.searchParams.set('token', token)
