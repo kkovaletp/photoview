@@ -141,7 +141,6 @@ jobs:
           docker run --name test photoview/ui npm run test:ci
           docker cp test:/app/ui/coverage ./ui/
           docker cp test:/app/ui/junit-report.xml ./ui/
-          docker run --name translations photoview/ui ../scripts/ui_test_are_translations_in_sync.sh
 
       - name: Upload coverage
         uses: codecov/codecov-action@v5

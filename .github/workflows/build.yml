@@ -211,6 +211,8 @@ jobs:
           git fetch --all --unshallow
           npm install --global npm
           npm ci --no-audit --no-fund
+          echo "Check that the generated translations are in sync with the committed ones..."
+          ../scripts/ui_test_are_translations_in_sync.sh
           export REACT_APP_BUILD_DATE="$(date -u +'%Y-%m-%dT%H:%M:%S+00:00(UTC)')"
           export REACT_APP_BUILD_COMMIT_SHA="$(git rev-parse --short HEAD)"
           npm run build -- --base="/"
