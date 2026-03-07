@@ -42,6 +42,8 @@ RUN export REACT_APP_BUILD_DATE="$(date -u +'%Y-%m-%dT%H:%M:%S+00:00(UTC)')"; \
     export REACT_APP_API_ENDPOINT="${REACT_APP_API_ENDPOINT}"; \
     npm run build"$( [ "$NODE_ENV" != "production" ] && echo :dev )" -- --base="${UI_PUBLIC_URL}"
 
+COPY scripts/ui_* /app/scripts/
+
 ### Build API ###
 FROM --platform=${BUILDPLATFORM:-linux/amd64} golang:1.26-trixie AS api
 ARG TARGETPLATFORM
