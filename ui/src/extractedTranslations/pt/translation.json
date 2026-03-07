@@ -1,13 +1,12 @@
 {
   "album_filter": {
     "only_favorites": "Mostrar apenas os favoritos",
-    "sort": "Ordenar",
-    "sort_by": "Ordenado por",
-    "sort_direction": "Sentido da ordenação",
     "order_direction": {
       "ascending": "Ascendente",
       "descending": "Decrescente"
     },
+    "sort": "Ordenar",
+    "sort_direction": "Sentido da ordenação",
     "sorting_options": {
       "date_imported": "Data de importação",
       "date_shot": "Data da foto",
@@ -31,7 +30,8 @@
         "media": "A carregar mais mídia"
       },
       "shares": "A carregar partilhas..."
-    }
+    },
+    "notFound": ""
   },
   "header": {
     "search": {
@@ -48,7 +48,8 @@
     "field": {
       "password": "Palavra-passe",
       "submit": "Entrar",
-      "username": "Nome de utilizador"
+      "username": "Nome de utilizador",
+      "username_error": ""
     },
     "initial_setup": {
       "field": {
@@ -135,11 +136,13 @@
   "settings": {
     "concurrent_workers": {
       "description": "Quantidade máxima de processos de procura que podem ser executados de uma vez só",
+      "error": "",
       "title": "Processos simultâneos para procura"
     },
     "logout": "Sair",
     "periodic_scanner": {
       "checkbox_label": "Ativar procura automática",
+      "error": "",
       "field": {
         "description": "Com que frequência a procura deve ser executada de forma automática para todos os utilizadores",
         "label": "Intervalo periódico para procura automática"
@@ -183,6 +186,7 @@
     },
     "users": {
       "add_user": {
+        "error": "",
         "submit": "Adicionar utilizador"
       },
       "confirm_delete_user": {
@@ -192,6 +196,7 @@
       },
       "password_reset": {
         "description": "Mudar palavra-passe para <1>{{username}}</1>",
+        "error": "",
         "form": {
           "label": "Nova palavra-passe",
           "placeholder": "palavra-passe",
@@ -260,25 +265,19 @@
       },
       "reset_cover": "",
       "set_cover": "",
+      "title": "",
       "title_placeholder": "Título do Álbum"
     },
     "download": {
+      "error": "",
       "filesize": {
+        "byte": "",
         "byte_one": "",
-        "byte_many": "",
         "byte_other": "",
-        "giga_byte_one": "",
-        "giga_byte_many": "",
-        "giga_byte_other": "",
-        "kilo_byte_one": "",
-        "kilo_byte_many": "",
-        "kilo_byte_other": "",
-        "mega_byte_one": "",
-        "mega_byte_many": "",
-        "mega_byte_other": "",
-        "tera_byte_one": "",
-        "tera_byte_many": "",
-        "tera_byte_other": ""
+        "giga_byte": "",
+        "kilo_byte": "",
+        "mega_byte": "",
+        "tera_byte": ""
       },
       "table_columns": {
         "dimensions": "Dimensões",
@@ -288,6 +287,7 @@
       },
       "title": "Descarregar"
     },
+    "error": "",
     "location": {
       "title": ""
     },
@@ -347,6 +347,7 @@
       "add_share": "Adicionar partilha",
       "copy_link": "Copiar link",
       "delete": "Eliminar",
+      "expiration_date": "",
       "more": "Mais",
       "no_shares_found": "Não foram encontradas partilhas",
       "public_link": "Link público",
@@ -370,6 +371,7 @@
   "title": {
     "loading_album": "Carregar Álbum",
     "login": "Login",
+    "not_found": "",
     "people": "Pessoas",
     "settings": "Configurações"
   }

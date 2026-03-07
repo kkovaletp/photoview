@@ -1,13 +1,12 @@
 {
   "album_filter": {
     "only_favorites": "Показати тільки улюблені",
-    "sort": "Сортування",
-    "sort_by": "Сортувати за",
-    "sort_direction": "Напрям сортування",
     "order_direction": {
       "ascending": "За зростанням",
       "descending": "За спаданням"
     },
+    "sort": "Сортування",
+    "sort_direction": "Напрям сортування",
     "sorting_options": {
       "date_imported": "Дата імпортування",
       "date_shot": "Дата фотографування",
@@ -31,7 +30,8 @@
         "media": "Завантаження ще медіафайлів"
       },
       "shares": "Завантаження спільних ресурсів..."
-    }
+    },
+    "notFound": "Не знайдено"
   },
   "header": {
     "search": {
@@ -48,13 +48,14 @@
     "field": {
       "password": "Пароль",
       "submit": "Увійти",
-      "username": "Імʼя користувача"
+      "username": "Імʼя користувача",
+      "username_error": "Введіть імʼя користувача"
     },
     "initial_setup": {
       "field": {
         "photo_path": {
           "label": "Шлях до медіафайлів",
-          "placeholder": "/шлях/до/медіафайлів"
+          "placeholder": "/path/to/photos"
         },
         "submit": "Налаштувати Photoview"
       },
@@ -69,6 +70,7 @@
     "action_label": {
       "change_label": "Змінити мітку",
       "detach_images": "Від’єднати обличчя",
+      "merge_face": "Обʼєднати обличчя",
       "merge_people": "Обʼєднати обличчя",
       "move_faces": "Перемістити обличчя"
     },
@@ -79,7 +81,8 @@
     },
     "modal": {
       "action": {
-        "merge": "Обʼєднати"
+        "merge": "Обʼєднати",
+        "next": "Наступне"
       },
       "detach_image_faces": {
         "action": {
@@ -90,9 +93,13 @@
         "title": "Від’єднати світлини з обличчями"
       },
       "merge_face_groups": {
-        "description": "Усі світлини цієї групи обличь будуть обʼєднані з обраною групою.",
+        "destination_description": "Оберіть групу, яка отримає додаткові обличчя з вихідних груп.",
         "destination_table": {
-          "title": "Оберіть обличчя призначення"
+          "title": "Оберіть групу призначення"
+        },
+        "sources_description": "Оберіть усі групи, обличчя з яких будуть переміщені до кінцевої групи.",
+        "sources_table": {
+          "title": "Оберіть 1 чи кілька груп для переміщення"
         },
         "title": "Об’єднати групи обличь"
       },
@@ -129,11 +136,13 @@
   "settings": {
     "concurrent_workers": {
       "description": "Максимальна кількість завдань сканування, які можна запускати одночасно",
+      "error": "Помилка при оновленні кількості одночасних оброблювачів завдань",
       "title": "Кількість одночасних оброблювачів завдань"
     },
     "logout": "Завершити сесію користувача",
     "periodic_scanner": {
       "checkbox_label": "Увімкнути періодичне сканування",
+      "error": "Помилка при оновленні стану періодичного сканування",
       "field": {
         "description": "Як часто сканер повинен виконувати автоматичне сканування для всіх користувачів",
         "label": "Періодичний інтервал сканування"
@@ -177,6 +186,7 @@
     },
     "users": {
       "add_user": {
+        "error": "Помилка додавання користувача",
         "submit": "Додати користувача"
       },
       "confirm_delete_user": {
@@ -186,6 +196,7 @@
       },
       "password_reset": {
         "description": "Зміна пароля для <1>{{username}}</1>",
+        "error": "Помилка зміни пароля",
         "form": {
           "label": "Новий пароль",
           "placeholder": "пароль",
@@ -254,20 +265,19 @@
       },
       "reset_cover": "Скинути обкладинку",
       "set_cover": "Встановити як обкладинку альбому",
+      "title": "Налаштування альбому",
       "title_placeholder": "Назва альбому"
     },
     "download": {
+      "error": "Помилка завантаження налаштувань скачування",
       "filesize": {
+        "byte": "{{count}} Байт",
         "byte_one": "{{count}} Байт",
         "byte_other": "{{count}} Байтів",
-        "giga_byte_one": "{{count}} ГБ",
-        "giga_byte_other": "{{count}} ГБ",
-        "kilo_byte_one": "{{count}} КБ",
-        "kilo_byte_other": "{{count}} КБ",
-        "mega_byte_one": "{{count}} МБ",
-        "mega_byte_other": "{{count}} МБ",
-        "tera_byte_one": "{{count}} ТБ",
-        "tera_byte_other": "{{count}} ТБ"
+        "giga_byte": "{{count}} ГБ",
+        "kilo_byte": "{{count}} КБ",
+        "mega_byte": "{{count}} МБ",
+        "tera_byte": "{{count}} ТБ"
       },
       "table_columns": {
         "dimensions": "Габарити",
@@ -277,12 +287,14 @@
       },
       "title": "Завантажити"
     },
+    "error": "Помилка завантаження інформації про медіа: {{message}}",
     "location": {
       "title": "Місцезнаходження"
     },
     "media": {
       "album_path": "Шлях до альбому",
       "exif": {
+        "description": "Опис",
         "exposure_program": {
           "action_program": "Програма дії",
           "aperture_priority": "Пріоритет діафрагми",
@@ -335,6 +347,7 @@
       "add_share": "Додати спільний доступ",
       "copy_link": "Копіювати посилання",
       "delete": "Видалити",
+      "expiration_date": "Дійсне до",
       "more": "Більше",
       "no_shares_found": "Спільних доступів не знайдено",
       "public_link": "Публічне посилання",
@@ -358,6 +371,7 @@
   "title": {
     "loading_album": "Завантаження альбому",
     "login": "Логін",
+    "not_found": "Не знайдено",
     "people": "Люди",
     "settings": "Налаштування"
   }

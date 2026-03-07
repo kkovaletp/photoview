@@ -1,13 +1,12 @@
 {
   "album_filter": {
     "only_favorites": "Visa endast favoriter",
-    "sort": "Sortering",
-    "sort_by": "Sortera efter",
-    "sort_direction": "Sorteringsriktning",
     "order_direction": {
       "ascending": "Stigande",
       "descending": "Fallande"
     },
+    "sort": "Sortering",
+    "sort_direction": "Sorteringsriktning",
     "sorting_options": {
       "date_imported": "Datum för import",
       "date_shot": "Datum",
@@ -31,7 +30,8 @@
         "media": "Laddar fler media"
       },
       "shares": "Loading delningar..."
-    }
+    },
+    "notFound": ""
   },
   "header": {
     "search": {
@@ -48,7 +48,8 @@
     "field": {
       "password": "Lösenord",
       "submit": "Logga in",
-      "username": "Användarnamn"
+      "username": "Användarnamn",
+      "username_error": ""
     },
     "initial_setup": {
       "field": {
@@ -135,11 +136,13 @@
   "settings": {
     "concurrent_workers": {
       "description": "Max antal skannerjobb som får köras sammtidigt",
+      "error": "",
       "title": "Samtidiga skannerarbetare"
     },
     "logout": "Logga ut",
     "periodic_scanner": {
       "checkbox_label": "Aktivera periodisk skanner",
+      "error": "",
       "field": {
         "description": "Hur ofta ska skannern utföra automatiska skanningar av alla användare",
         "label": "Periodiskt skanningsintervall"
@@ -183,6 +186,7 @@
     },
     "users": {
       "add_user": {
+        "error": "",
         "submit": "Lägg till användare"
       },
       "confirm_delete_user": {
@@ -192,6 +196,7 @@
       },
       "password_reset": {
         "description": "Ändra lösenord för <1>{{username}}</1>",
+        "error": "",
         "form": {
           "label": "Nytt lösenord",
           "placeholder": "lösenord",
@@ -260,20 +265,19 @@
       },
       "reset_cover": "",
       "set_cover": "",
+      "title": "",
       "title_placeholder": ""
     },
     "download": {
+      "error": "",
       "filesize": {
+        "byte": "",
         "byte_one": "",
         "byte_other": "",
-        "giga_byte_one": "",
-        "giga_byte_other": "",
-        "kilo_byte_one": "",
-        "kilo_byte_other": "",
-        "mega_byte_one": "",
-        "mega_byte_other": "",
-        "tera_byte_one": "",
-        "tera_byte_other": ""
+        "giga_byte": "",
+        "kilo_byte": "",
+        "mega_byte": "",
+        "tera_byte": ""
       },
       "table_columns": {
         "dimensions": "Mått",
@@ -283,6 +287,7 @@
       },
       "title": "Ladda ner"
     },
+    "error": "",
     "location": {
       "title": ""
     },
@@ -342,6 +347,7 @@
       "add_share": "Dela",
       "copy_link": "Kopiera länk",
       "delete": "",
+      "expiration_date": "",
       "more": "",
       "no_shares_found": "Inga delningar hittades",
       "public_link": "Publika länkar",
@@ -365,6 +371,7 @@
   "title": {
     "loading_album": "Laddar album",
     "login": "",
+    "not_found": "",
     "people": "Personer",
     "settings": "Inställningar"
   }

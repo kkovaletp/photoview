@@ -1,13 +1,12 @@
 {
   "album_filter": {
     "only_favorites": "Solo mostrar favoritos",
-    "sort": "Clasificación",
-    "sort_by": "Ordenar por",
-    "sort_direction": "Dirección de ordenación",
     "order_direction": {
       "ascending": "Ascendente",
       "descending": "Descendente"
     },
+    "sort": "Clasificación",
+    "sort_direction": "Dirección de ordenación",
     "sorting_options": {
       "date_imported": "Fecha de importado",
       "date_shot": "Fecha de la foto",
@@ -31,7 +30,8 @@
         "media": "Cargando más archivos"
       },
       "shares": "Cargando compartidos..."
-    }
+    },
+    "notFound": ""
   },
   "header": {
     "search": {
@@ -48,7 +48,8 @@
     "field": {
       "password": "Contraseña",
       "submit": "Iniciar sesión",
-      "username": "Usuario"
+      "username": "Usuario",
+      "username_error": ""
     },
     "initial_setup": {
       "field": {
@@ -135,11 +136,13 @@
   "settings": {
     "concurrent_workers": {
       "description": "La cantidad máxima de tareas de escaneo que pueden ejecutarse al mismo tiempo",
+      "error": "",
       "title": "Tareas de escaneo concurrentes"
     },
     "logout": "Cerrar sesión",
     "periodic_scanner": {
       "checkbox_label": "Activar el escaneo periódico",
+      "error": "",
       "field": {
         "description": "Con qué frecuencia debe ejecutarse un escaneo automático de todos los usuarios",
         "label": "Intervalo del escaneo periódico"
@@ -183,6 +186,7 @@
     },
     "users": {
       "add_user": {
+        "error": "",
         "submit": "Añadir usuario"
       },
       "confirm_delete_user": {
@@ -192,6 +196,7 @@
       },
       "password_reset": {
         "description": "Cambiar contraseña a <1>{{username}}</1>",
+        "error": "",
         "form": {
           "label": "Nueva contraseña",
           "placeholder": "contraseña",
@@ -260,25 +265,19 @@
       },
       "reset_cover": "",
       "set_cover": "",
+      "title": "",
       "title_placeholder": ""
     },
     "download": {
+      "error": "",
       "filesize": {
+        "byte": "",
         "byte_one": "",
-        "byte_many": "",
         "byte_other": "",
-        "giga_byte_one": "",
-        "giga_byte_many": "",
-        "giga_byte_other": "",
-        "kilo_byte_one": "",
-        "kilo_byte_many": "",
-        "kilo_byte_other": "",
-        "mega_byte_one": "",
-        "mega_byte_many": "",
-        "mega_byte_other": "",
-        "tera_byte_one": "",
-        "tera_byte_many": "",
-        "tera_byte_other": ""
+        "giga_byte": "",
+        "kilo_byte": "",
+        "mega_byte": "",
+        "tera_byte": ""
       },
       "table_columns": {
         "dimensions": "Dimensiones",
@@ -288,6 +287,7 @@
       },
       "title": "Descargar"
     },
+    "error": "",
     "location": {
       "title": ""
     },
@@ -347,6 +347,7 @@
       "add_share": "Añadir compartido",
       "copy_link": "Copiar enlace",
       "delete": "",
+      "expiration_date": "",
       "more": "",
       "no_shares_found": "No se encontraron compartidos",
       "public_link": "Enlace público",
@@ -370,6 +371,7 @@
   "title": {
     "loading_album": "Cargando álbum",
     "login": "",
+    "not_found": "",
     "people": "Personas",
     "settings": "Opciones"
   }
