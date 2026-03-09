@@ -57,7 +57,7 @@ jobs:
         run: git fetch --unshallow
 
       - name: Build test image
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           pull: true
           push: false
@@ -122,7 +122,7 @@ jobs:
         run: git fetch --unshallow
 
       - name: Build test image
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           pull: true
           push: false
