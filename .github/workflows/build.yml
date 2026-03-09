@@ -128,7 +128,7 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_DOCKER }}
 
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
+        uses: docker/setup-qemu-action@v4
         with:
           platforms: ${{ env.QEMU_PLATFORMS }}
 
