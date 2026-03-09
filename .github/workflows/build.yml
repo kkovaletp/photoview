@@ -145,7 +145,7 @@ jobs:
 
       - name: "Docker meta - ${{ matrix.entry.image }}:${{ matrix.entry.tag }}"
         id: docker_meta
-        uses: docker/metadata-action@v5
+        uses: docker/metadata-action@v6
         with:
           context: "git"
           images: ${{ env.DOCKER_REGISTRY }}${{ matrix.entry.image }}
