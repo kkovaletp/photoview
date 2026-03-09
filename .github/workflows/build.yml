@@ -164,7 +164,7 @@ jobs:
 
       - name: "Build and Push - ${{ matrix.entry.image }}:${{ matrix.entry.tag }}"
         id: docker_buildx
-        uses: docker/build-push-action@v6
+        uses: docker/build-push-action@v7
         with:
           context: .
           target: ${{ matrix.entry.build_target }}
