@@ -337,7 +337,7 @@
           "aperture_priority": "Пріоритет діафрагми",
           "bulb": "Лампочка",
           "creative_program": "Творча програма",
-          "landscape_mode": "Альбомний режим",
+          "landscape_mode": "Пейзажний режим",
           "manual": "Ручний",
           "normal_program": "Нормальна програма",
           "not_defined": "Не визначений",
@@ -370,7 +370,7 @@
           "maker": "Виробник"
         }
       },
-      "unknown_type": "Невідомий тип медіа: {{type}}"
+      "unknown_type": "ПОМИЛКА: Невідомий тип медіа: {{type}}"
     },
     "people": {
       "action_label": {
