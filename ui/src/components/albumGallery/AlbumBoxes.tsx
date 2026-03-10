@@ -1,4 +1,4 @@
-import React from 'react'
+import { useTranslation } from 'react-i18next'
 import { albumQuery_album_subAlbums } from '../../Pages/AlbumPage/__generated__/albumQuery'
 import { AlbumBox } from './AlbumBox'
 
@@ -9,11 +9,16 @@ type AlbumBoxesProps = {
 }
 
 const AlbumBoxes = ({ error, albums, getCustomLink }: AlbumBoxesProps) => {
-  if (error) return <div>Error {error.message}</div>
+  const { t } = useTranslation()
+  if (error) return <div>{t('general.error.generic', 'Error: {{message}}', { message: error.message })}</div>
 
   let albumElements = []
 
-  if (albums !== undefined) {
+  if (albums === undefined) {
+    for (let i = 0; i < 4; i++) {
+      albumElements.push(<AlbumBox key={i} />)
+    }
+  } else {
     albumElements = albums.map(album => (
       <AlbumBox
         key={album.id}
@@ -21,10 +26,6 @@ const AlbumBoxes = ({ error, albums, getCustomLink }: AlbumBoxesProps) => {
         customLink={getCustomLink ? getCustomLink(album.id) : undefined}
       />
     ))
-  } else {
-    for (let i = 0; i < 4; i++) {
-      albumElements.push(<AlbumBox key={i} />)
-    }
   }
 
   return <div className="-mx-3 my-6">{albumElements}</div>

@@ -1,4 +1,7 @@
 {
+  "album": {
+    "breadcrumb_aria_label": "Шлях до альбому"
+  },
   "album_filter": {
     "only_favorites": "Показати тільки улюблені",
     "order_direction": {
@@ -14,12 +17,19 @@
       "type": "Тип"
     }
   },
+  "album_page": {
+    "load_error": "Помилка завантаження альбому: {{message}}"
+  },
   "general": {
     "action": {
       "add": "Додати",
       "cancel": "Відмінити",
       "remove": "Видалити",
-      "save": "Зберегти"
+      "save": "Зберегти",
+      "submit": "Підтвердити"
+    },
+    "error": {
+      "generic": "Помилка: {{message}}"
     },
     "loading": {
       "album": "Завантаження альбому",
@@ -34,6 +44,7 @@
     "notFound": "Не знайдено"
   },
   "header": {
+    "logo_alt": "Логотип Photoview",
     "search": {
       "loading": "Завантаження результатів...",
       "no_results": "Результатів не знайдено",
@@ -61,9 +72,11 @@
       },
       "title": "Початкове налаштування"
     },
+    "logo_alt": "Логотип Photoview",
     "welcome": "Ласкаво просимо до Photoview"
   },
   "meta": {
+    "app_name": "Photoview",
     "description": "Проста та зручна фотогалерея для персональних серверів"
   },
   "people_page": {
@@ -128,6 +141,13 @@
     "title": "Хронологія"
   },
   "places_page": {
+    "mapbox_token_error": {
+      "create_at": "Токен для Mapbox може бути створений безкоштовно на",
+      "description": "Щоб використовувати функції карти, потрібен токен Mapbox.",
+      "env_var": "Переконайтесь, що змінна оточення MAPBOX_TOKEN містить токен доступу.",
+      "mapbox_link_label": "mapbox.com",
+      "title": "Токен для Mapbox не знайдено"
+    },
     "title": "Місця"
   },
   "routes": {
@@ -240,9 +260,13 @@
     },
     "share_not_found": "Спільну медіатеку не знайдено",
     "share_not_found_description": "Можливо, спільний доступ закінчився або його було видалено.",
-    "wrong_password": "Неправильний пароль, спробуйте ще раз."
+    "wrong_password": "Невірний пароль, спробуйте ще раз."
   },
   "sidebar": {
+    "action": {
+      "close": "Закрити панель",
+      "pin": "Прикріпити панель"
+    },
     "album": {
       "album_cover": "Обкладинка альбому",
       "download": {
@@ -271,13 +295,26 @@
     "download": {
       "error": "Помилка завантаження налаштувань скачування",
       "filesize": {
-        "byte": "{{count}} Байт",
         "byte_one": "{{count}} Байт",
+        "byte_few": "{{count}} Байти",
+        "byte_many": "{{count}} Байтів",
         "byte_other": "{{count}} Байтів",
-        "giga_byte": "{{count}} ГБ",
-        "kilo_byte": "{{count}} КБ",
-        "mega_byte": "{{count}} МБ",
-        "tera_byte": "{{count}} ТБ"
+        "giga_byte_one": "{{count}} ГБ",
+        "giga_byte_few": "{{count}} ГБ",
+        "giga_byte_many": "{{count}} ГБ",
+        "giga_byte_other": "{{count}} ГБ",
+        "kilo_byte_one": "{{count}} КБ",
+        "kilo_byte_few": "{{count}} КБ",
+        "kilo_byte_many": "{{count}} КБ",
+        "kilo_byte_other": "{{count}} КБ",
+        "mega_byte_one": "{{count}} МБ",
+        "mega_byte_few": "{{count}} МБ",
+        "mega_byte_many": "{{count}} МБ",
+        "mega_byte_other": "{{count}} МБ",
+        "tera_byte_one": "{{count}} ТБ",
+        "tera_byte_few": "{{count}} ТБ",
+        "tera_byte_many": "{{count}} ТБ",
+        "tera_byte_other": "{{count}} ТБ"
       },
       "table_columns": {
         "dimensions": "Габарити",
@@ -300,7 +337,7 @@
           "aperture_priority": "Пріоритет діафрагми",
           "bulb": "Лампочка",
           "creative_program": "Творча програма",
-          "landscape_mode": "Альбомний режим",
+          "landscape_mode": "Пейзажний режим",
           "manual": "Ручний",
           "normal_program": "Нормальна програма",
           "not_defined": "Не визначений",
@@ -332,7 +369,8 @@
           "lens": "Об'єктив",
           "maker": "Виробник"
         }
-      }
+      },
+      "unknown_type": "ПОМИЛКА: Невідомий тип медіа: {{type}}"
     },
     "people": {
       "action_label": {
@@ -347,6 +385,7 @@
       "add_share": "Додати спільний доступ",
       "copy_link": "Копіювати посилання",
       "delete": "Видалити",
+      "error": "Помилка: {{message}}",
       "expiration_date": "Дійсне до",
       "more": "Більше",
       "no_shares_found": "Спільних доступів не знайдено",

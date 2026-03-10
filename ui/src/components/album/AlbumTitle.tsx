@@ -1,4 +1,5 @@
-import React, { useEffect, useContext } from 'react'
+import { useEffect, useContext } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 import styled from 'styled-components'
 import { SidebarContext } from '../sidebar/Sidebar'
@@ -49,6 +50,7 @@ type AlbumTitleProps = {
 const AlbumTitle = ({ album, disableLink = false }: AlbumTitleProps) => {
   const [fetchPath, { data: pathData }] =
     useLazyQuery<albumPathQuery>(ALBUM_PATH_QUERY)
+  const { t } = useTranslation()
   const { updateSidebar } = useContext(SidebarContext)
 
   useEffect(() => {
@@ -97,15 +99,15 @@ const AlbumTitle = ({ album, disableLink = false }: AlbumTitleProps) => {
   return (
     <div className="flex mb-6 items-end h-14">
       <div className="min-w-0">
-        <nav aria-label="Album breadcrumb">
+        <nav aria-label={t('album.breadcrumb_aria_label', 'Album breadcrumb')}>
           <BreadcrumbList>{breadcrumbSections}</BreadcrumbList>
         </nav>
         <h1 className="text-2xl truncate min-w-0">{title}</h1>
       </div>
       {authToken() && (
         <button
-          title="Album options"
-          aria-label="Album options"
+          title={t('sidebar.album.title', 'Album options')}
+          aria-label={t('sidebar.album.title', 'Album options')}
           className={tailwindClassNames(buttonStyles({}), 'px-2 py-2 ml-2')}
           onClick={() => {
             updateSidebar(<AlbumSidebar albumId={album.id} />)

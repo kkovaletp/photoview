@@ -467,7 +467,7 @@ export const SidebarAlbumShare = ({ id }: SidebarShareAlbumProps) => {
   const loading = queryLoading || mutationLoading
 
   if (sharesError) {
-    return <div>Error: {sharesError.message}</div>
+    return <div>{t('sidebar.sharing.error', 'Error: {{message}}', { message: sharesError.message })}</div>
   }
 
   if (loading) {
@@ -519,7 +519,7 @@ export const SidebarPhotoShare = ({ id }: SidebarSharePhotoProps) => {
   const loading = queryLoading || mutationLoading
 
   if (sharesError) {
-    return <div>Error: {sharesError.message}</div>
+    return <div>{t('sidebar.sharing.error', 'Error: {{message}}', { message: sharesError.message })}</div>
   }
 
   if (loading) {

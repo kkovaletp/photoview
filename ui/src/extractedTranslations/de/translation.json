@@ -1,4 +1,7 @@
 {
+  "album": {
+    "breadcrumb_aria_label": ""
+  },
   "album_filter": {
     "only_favorites": "Nur Favoriten anzeigen",
     "order_direction": {
@@ -14,12 +17,19 @@
       "type": "Typ"
     }
   },
+  "album_page": {
+    "load_error": ""
+  },
   "general": {
     "action": {
       "add": "Hinzufügen",
       "cancel": "Abbrechen",
       "remove": "Entfernen",
-      "save": "Speichern"
+      "save": "Speichern",
+      "submit": ""
+    },
+    "error": {
+      "generic": ""
     },
     "loading": {
       "album": "Lade Album",
@@ -34,6 +44,7 @@
     "notFound": ""
   },
   "header": {
+    "logo_alt": "",
     "search": {
       "loading": "Lade Ergebnisse...",
       "no_results": "Keine Ergebnisse gefunden",
@@ -61,9 +72,11 @@
       },
       "title": "Einrichtung"
     },
+    "logo_alt": "",
     "welcome": "Willkommen zu Photoview"
   },
   "meta": {
+    "app_name": "",
     "description": "Einfache und nutzerfreundliche Fotogallerie für Homeserver"
   },
   "people_page": {
@@ -128,6 +141,13 @@
     "title": "Fotos"
   },
   "places_page": {
+    "mapbox_token_error": {
+      "create_at": "",
+      "description": "",
+      "env_var": "",
+      "mapbox_link_label": "",
+      "title": ""
+    },
     "title": "Orte"
   },
   "routes": {
@@ -243,6 +263,10 @@
     "wrong_password": "Falsches Passwort, bitte erneut probieren."
   },
   "sidebar": {
+    "action": {
+      "close": "",
+      "pin": ""
+    },
     "album": {
       "album_cover": "Album Titelbild",
       "download": {
@@ -271,13 +295,16 @@
     "download": {
       "error": "",
       "filesize": {
-        "byte": "",
         "byte_one": "",
         "byte_other": "",
-        "giga_byte": "",
-        "kilo_byte": "",
-        "mega_byte": "",
-        "tera_byte": ""
+        "giga_byte_one": "",
+        "giga_byte_other": "",
+        "kilo_byte_one": "",
+        "kilo_byte_other": "",
+        "mega_byte_one": "",
+        "mega_byte_other": "",
+        "tera_byte_one": "",
+        "tera_byte_other": ""
       },
       "table_columns": {
         "dimensions": "Auflösung",
@@ -332,7 +359,8 @@
           "lens": "Objektiv",
           "maker": "Hersteller"
         }
-      }
+      },
+      "unknown_type": ""
     },
     "people": {
       "action_label": {
@@ -347,6 +375,7 @@
       "add_share": "Freigabe hinzufügen",
       "copy_link": "Link kopieren",
       "delete": "Freigabe löschen",
+      "error": "",
       "expiration_date": "",
       "more": "mehr infos",
       "no_shares_found": "Keine Freigaben gefunden",

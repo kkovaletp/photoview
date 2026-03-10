@@ -50,7 +50,7 @@ function AlbumPage() {
   const urlParams = useURLParameters()
   const orderParams = useOrderingParams(urlParams)
 
-  const onlyFavorites = urlParams.getParam('favorites') == '1' ? true : false
+  const onlyFavorites = urlParams.getParam('favorites') == '1'
   const setOnlyFavorites = useCallback((favorites: boolean) =>
     urlParams.setParam('favorites', favorites ? '1' : '0'),
     [urlParams]
@@ -98,19 +98,19 @@ function AlbumPage() {
     }, [setOnlyFavorites, refetch, albumId]
   )
 
-  if (error) return <div>Error</div>
+  if (error) return <div>{t('album_page.load_error', 'Error loading album: {{message}}', { message: error.message })}</div>
 
   return (
     <Layout
       title={
-        !data ? t('title.loading_album', 'Loading album') :
-          !data.album ? t('title.not_found', 'Not found') :
-            data.album.title
+        data ? data.album ? data.album.title :
+          t('title.not_found', 'Not found') :
+          t('title.loading_album', 'Loading album')
       }
     >
       <AlbumGallery
         ref={containerElem}
-        album={data && data.album}
+        album={data?.album}
         loading={loading}
         setOnlyFavorites={toggleFavorites}
         onlyFavorites={onlyFavorites}
