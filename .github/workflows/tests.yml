@@ -249,3 +249,35 @@ jobs:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_UI }}
         with:
           projectBaseDir: ui/
+
+  bundle:
+    name: Test UI bundle
+    if: github.repository == 'kkovaletp/photoview'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "20"
+          check-latest: true
+
+      - name: Test code sync and Build UI bundle
+        working-directory: ./ui
+        shell: bash
+        env:
+          REACT_APP_BUILD_VERSION: "UI-bundle-${{ github.ref_name }}"
+          REACT_APP_API_ENDPOINT: "/api"
+          CODECOV_TKN: "${{ secrets.CODECOV_TKN }}"
+        run: |
+          git fetch --all --unshallow
+          npm install --global npm
+          npm ci --no-audit --no-fund
+          echo "Check that the generated translations are in sync with the committed ones..."
+          npm run extractTranslations:ci
+          echo "Build the UI bundle with build info for Codecov..."
+          export REACT_APP_BUILD_DATE="$(date -u +'%Y-%m-%dT%H:%M:%S+00:00(UTC)')"
+          export REACT_APP_BUILD_COMMIT_SHA="$(git rev-parse --short HEAD)"
+          npm run build -- --base="/"

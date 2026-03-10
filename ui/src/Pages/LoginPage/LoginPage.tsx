@@ -30,7 +30,7 @@ const LogoHeader = () => {
       <img
         className="h-24"
         src={import.meta.env.BASE_URL + 'photoview-logo.svg'}
-        alt="photoview logo"
+        alt={t('login_page.logo_alt', 'Photoview logo')}
       />
       <h1 className="text-3xl text-center mt-4">
         {t('login_page.welcome', 'Welcome to Photoview')}
@@ -148,7 +148,7 @@ const LoginPage = () => {
     <>
       <HelmetProvider>
         <Helmet>
-          <title>{t('title.login', 'Login')} - Photoview</title>
+          <title>{t('title.login', 'Login')} - {t('meta.app_name', 'Photoview')}</title>
         </Helmet>
       </HelmetProvider>
       <div>

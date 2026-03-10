@@ -1,4 +1,7 @@
 {
+  "album": {
+    "breadcrumb_aria_label": ""
+  },
   "album_filter": {
     "only_favorites": "Visa endast favoriter",
     "order_direction": {
@@ -14,12 +17,19 @@
       "type": "Typ"
     }
   },
+  "album_page": {
+    "load_error": ""
+  },
   "general": {
     "action": {
       "add": "Lägg till",
       "cancel": "Avbryt",
       "remove": "Ta bort",
-      "save": "Spara"
+      "save": "Spara",
+      "submit": ""
+    },
+    "error": {
+      "generic": ""
     },
     "loading": {
       "album": "Laddar album",
@@ -34,6 +44,7 @@
     "notFound": ""
   },
   "header": {
+    "logo_alt": "",
     "search": {
       "loading": "Laddar resultat...",
       "no_results": "Inga resultat hittades",
@@ -61,9 +72,11 @@
       },
       "title": "Första Uppstart"
     },
+    "logo_alt": "",
     "welcome": "Välkommen till Photoview"
   },
   "meta": {
+    "app_name": "",
     "description": "Enkelt och Användarvänligt fotogalleri för personliga servrar"
   },
   "people_page": {
@@ -128,6 +141,13 @@
     "title": "Bilder"
   },
   "places_page": {
+    "mapbox_token_error": {
+      "create_at": "",
+      "description": "",
+      "env_var": "",
+      "mapbox_link_label": "",
+      "title": ""
+    },
     "title": ""
   },
   "routes": {
@@ -243,6 +263,10 @@
     "wrong_password": "Fel lösenord, försök igen."
   },
   "sidebar": {
+    "action": {
+      "close": "",
+      "pin": ""
+    },
     "album": {
       "album_cover": "",
       "download": {
@@ -335,7 +359,8 @@
           "lens": "Objektiv",
           "maker": "Märke"
         }
-      }
+      },
+      "unknown_type": ""
     },
     "people": {
       "action_label": {
@@ -350,6 +375,7 @@
       "add_share": "Dela",
       "copy_link": "Kopiera länk",
       "delete": "",
+      "error": "",
       "expiration_date": "",
       "more": "",
       "no_shares_found": "Inga delningar hittades",

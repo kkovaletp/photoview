@@ -1,4 +1,5 @@
 import React, { useContext } from 'react'
+import { useTranslation } from 'react-i18next'
 import SearchBar from './Searchbar'
 
 import { authToken } from '../../helpers/authentication'
@@ -7,6 +8,7 @@ import { clsx } from 'clsx'
 
 const Header = () => {
   const { pinned } = useContext(SidebarContext)
+  const { t } = useTranslation()
 
   return (
     <div
@@ -19,10 +21,10 @@ const Header = () => {
         <img
           className="h-12 lg:h-10"
           src={import.meta.env.BASE_URL + 'photoview-logo.svg'}
-          alt="logo"
+          alt={t('header.logo_alt', 'Photoview logo')}
         />
         <span className="hidden lg:block ml-2 text-2xl font-light">
-          Photoview
+          {t('meta.app_name', 'Photoview')}
         </span>
       </h1>
       {authToken() ? <SearchBar /> : null}

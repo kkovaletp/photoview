@@ -2,7 +2,7 @@ import { gql, useQuery } from '@apollo/client'
 import type mapboxgl from 'mapbox-gl'
 import React, { useReducer } from 'react'
 import { Helmet, HelmetProvider } from '@dr.pogodin/react-helmet'
-import { useTranslation } from 'react-i18next'
+import { useTranslation, Trans } from 'react-i18next'
 import styled from 'styled-components'
 import Layout from '../../components/layout/Layout'
 import { registerMediaMarkers } from '../../components/mapbox/mapboxHelperFunctions'
@@ -63,22 +63,24 @@ const MapPage = () => {
   if (mapboxData && mapboxToken == null) {
     return (
       <Layout title={t('places_page.title', 'Places')}>
-        <h1>Mapbox token is not set</h1>
+        <h1>{t('places_page.mapbox_token_error.title', 'Mapbox token is not set')}</h1>
         <p>
-          To use map related features a mapbox token is needed.
-          <br /> A mapbox token can be created for free at{' '}
-          <a href="https://account.mapbox.com/access-tokens/">mapbox.com</a>.
+          {t('places_page.mapbox_token_error.description', 'To use map related features a mapbox token is needed.')}
+          <br />{' '}
+          {t('places_page.mapbox_token_error.create_at', 'A mapbox token can be created for free at')}{' '}
+          <a href="https://account.mapbox.com/access-tokens/">
+            {t('places_page.mapbox_token_error.mapbox_link_label', 'mapbox.com')}
+          </a>.
         </p>
         <p>
-          Make sure the access token is added as the MAPBOX_TOKEN environment
-          variable.
+          {t('places_page.mapbox_token_error.env_var', 'Make sure the access token is added as the MAPBOX_TOKEN environment variable.')}
         </p>
       </Layout>
     )
   }
 
   return (
-    <Layout title="Places">
+    <Layout title={t('places_page.title', 'Places')}>
       <HelmetProvider>
         <Helmet>
           {/* <link rel="stylesheet" href="/mapbox-gl.css" /> */}
@@ -103,40 +105,40 @@ const configureMapbox =
     mapboxData?: mediaGeoJson
     dispatchMarkerMedia: React.Dispatch<PlacesAction>
   }) =>
-  (map: mapboxgl.Map, mapboxLibrary: typeof mapboxgl) => {
-    // Add map navigation control
-    map.addControl(new mapboxLibrary.NavigationControl())
+    (map: mapboxgl.Map, mapboxLibrary: typeof mapboxgl) => {
+      // Add map navigation control
+      map.addControl(new mapboxLibrary.NavigationControl())
 
-    map.on('load', () => {
-      if (map == null) {
-        console.error('ERROR: map is null')
-        return
-      }
+      map.on('load', () => {
+        if (map == null) {
+          console.error('ERROR: map is null')
+          return
+        }
 
-      map.addSource('media', {
-        type: 'geojson',
-        data: mapboxData?.myMediaGeoJson as never,
-        cluster: true,
-        clusterRadius: 50,
-        clusterProperties: {
-          thumbnail: ['coalesce', ['get', 'thumbnail'], false],
-        },
+        map.addSource('media', {
+          type: 'geojson',
+          data: mapboxData?.myMediaGeoJson as never,
+          cluster: true,
+          clusterRadius: 50,
+          clusterProperties: {
+            thumbnail: ['coalesce', ['get', 'thumbnail'], false],
+          },
+        })
+
+        // Add dummy layer for features to be queryable
+        map.addLayer({
+          id: 'media-points',
+          type: 'circle',
+          source: 'media',
+          filter: ['!', true],
+        })
+
+        registerMediaMarkers({
+          map: map,
+          mapboxLibrary,
+          dispatchMarkerMedia,
+        })
       })
-
-      // Add dummy layer for features to be queryable
-      map.addLayer({
-        id: 'media-points',
-        type: 'circle',
-        source: 'media',
-        filter: ['!', true],
-      })
-
-      registerMediaMarkers({
-        map: map,
-        mapboxLibrary,
-        dispatchMarkerMedia,
-      })
-    })
-  }
+    }
 
 export default MapPage
