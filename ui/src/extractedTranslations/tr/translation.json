@@ -1,13 +1,12 @@
 {
   "album_filter": {
     "only_favorites": "Sadece favorileri göster",
-    "sort": "Sırala",
-    "sort_by": "Sırala:",
-    "sort_direction": "Sıralama yönü",
     "order_direction": {
       "ascending": "Artan",
       "descending": "Azalan"
     },
+    "sort": "Sırala",
+    "sort_direction": "Sıralama yönü",
     "sorting_options": {
       "date_imported": "Alındığı tarih",
       "date_shot": "Çekildiği tarih",
@@ -31,7 +30,8 @@
         "media": "Daha fazla medya yükleniyor"
       },
       "shares": "Paylaşımlar yükleniyor..."
-    }
+    },
+    "notFound": ""
   },
   "header": {
     "search": {
@@ -48,7 +48,8 @@
     "field": {
       "password": "Parola",
       "submit": "Oturum aç",
-      "username": "Kullanıcı adı"
+      "username": "Kullanıcı adı",
+      "username_error": ""
     },
     "initial_setup": {
       "field": {
@@ -69,6 +70,7 @@
     "action_label": {
       "change_label": "Etiketi değiştir",
       "detach_images": "Yüzü ayır",
+      "merge_face": "",
       "merge_people": "Yüzü birleştir",
       "move_faces": "Yüzleri taşı"
     },
@@ -79,7 +81,8 @@
     },
     "modal": {
       "action": {
-        "merge": "Birleştir"
+        "merge": "Birleştir",
+        "next": ""
       },
       "detach_image_faces": {
         "action": {
@@ -90,9 +93,13 @@
         "title": "Resimdeki Yüzleri Ayır"
       },
       "merge_face_groups": {
-        "description": "Bu yüz grubundaki tüm resimler seçilen yüz grubunda birleştirilecektir.",
+        "destination_description": "",
         "destination_table": {
           "title": "Hedef yüzü seçin"
+        },
+        "sources_description": "",
+        "sources_table": {
+          "title": ""
         },
         "title": "Yüz Gruplarını Birleştir"
       },
@@ -129,11 +136,13 @@
   "settings": {
     "concurrent_workers": {
       "description": "Aynı anda çalışmasına izin verilen tarayıcı işi miktarı",
+      "error": "",
       "title": "Eş zamanlı tarayıcı işlemleri"
     },
     "logout": "Oturumu kapat",
     "periodic_scanner": {
       "checkbox_label": "Düzenli tarayıcıyı etkinleştir",
+      "error": "",
       "field": {
         "description": "Tarayıcının tüm kullanıcılar için otomatik taramaları ne sıklıkla gerçekleştirmesi gerekir",
         "label": "Düzenli tarama aralığı"
@@ -177,6 +186,7 @@
     },
     "users": {
       "add_user": {
+        "error": "",
         "submit": "Kullanıcı ekle"
       },
       "confirm_delete_user": {
@@ -186,6 +196,7 @@
       },
       "password_reset": {
         "description": "<1>{{username}}</1> için parola değiştir",
+        "error": "",
         "form": {
           "label": "Yeni parola",
           "placeholder": "parola",
@@ -254,9 +265,11 @@
       },
       "reset_cover": "Kapak fotoğrafını sıfırla",
       "set_cover": "Albüm kapak fotoğrafı olarak ayarla",
+      "title": "",
       "title_placeholder": "Albüm başlığı"
     },
     "download": {
+      "error": "",
       "filesize": {
         "byte_one": "{{count}} Bayt",
         "byte_other": "{{count}} Bayt",
@@ -277,12 +290,14 @@
       },
       "title": "İndir"
     },
+    "error": "",
     "location": {
       "title": "Konum"
     },
     "media": {
       "album_path": "Albüm yolu",
       "exif": {
+        "description": "",
         "exposure_program": {
           "action_program": "Action program",
           "aperture_priority": "Diyafram önceliği",
@@ -335,6 +350,7 @@
       "add_share": "Paylaşımlara ekle",
       "copy_link": "Bağlantıyı Kopyala",
       "delete": "Sil",
+      "expiration_date": "",
       "more": "Diğer",
       "no_shares_found": "Paylaşım bulunamadı",
       "public_link": "Genel bağlantı",
@@ -358,6 +374,7 @@
   "title": {
     "loading_album": "Albüm yükleniyor",
     "login": "Oturum Aç",
+    "not_found": "",
     "people": "Kişiler",
     "settings": "Ayarlar"
   }

@@ -271,13 +271,16 @@
     "download": {
       "error": "Failed to load download options",
       "filesize": {
-        "byte": "{{count}} Byte",
         "byte_one": "{{count}} Byte",
         "byte_other": "{{count}} Bytes",
-        "giga_byte": "{{count}} GB",
-        "kilo_byte": "{{count}} KB",
-        "mega_byte": "{{count}} MB",
-        "tera_byte": "{{count}} TB"
+        "giga_byte_one": "{{count}} GB",
+        "giga_byte_other": "{{count}} GB",
+        "kilo_byte_one": "{{count}} KB",
+        "kilo_byte_other": "{{count}} KB",
+        "mega_byte_one": "{{count}} MB",
+        "mega_byte_other": "{{count}} MB",
+        "tera_byte_one": "{{count}} TB",
+        "tera_byte_other": "{{count}} TB"
       },
       "table_columns": {
         "dimensions": "Dimensions",

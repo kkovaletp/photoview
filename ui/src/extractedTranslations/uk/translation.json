@@ -271,13 +271,26 @@
     "download": {
       "error": "Помилка завантаження налаштувань скачування",
       "filesize": {
-        "byte": "{{count}} Байт",
         "byte_one": "{{count}} Байт",
+        "byte_few": "{{count}} Байти",
+        "byte_many": "{{count}} Байтів",
         "byte_other": "{{count}} Байтів",
-        "giga_byte": "{{count}} ГБ",
-        "kilo_byte": "{{count}} КБ",
-        "mega_byte": "{{count}} МБ",
-        "tera_byte": "{{count}} ТБ"
+        "giga_byte_one": "{{count}} ГБ",
+        "giga_byte_few": "{{count}} ГБ",
+        "giga_byte_many": "{{count}} ГБ",
+        "giga_byte_other": "{{count}} ГБ",
+        "kilo_byte_one": "{{count}} КБ",
+        "kilo_byte_few": "{{count}} КБ",
+        "kilo_byte_many": "{{count}} КБ",
+        "kilo_byte_other": "{{count}} КБ",
+        "mega_byte_one": "{{count}} МБ",
+        "mega_byte_few": "{{count}} МБ",
+        "mega_byte_many": "{{count}} МБ",
+        "mega_byte_other": "{{count}} МБ",
+        "tera_byte_one": "{{count}} ТБ",
+        "tera_byte_few": "{{count}} ТБ",
+        "tera_byte_many": "{{count}} ТБ",
+        "tera_byte_other": "{{count}} ТБ"
       },
       "table_columns": {
         "dimensions": "Габарити",

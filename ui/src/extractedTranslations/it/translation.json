@@ -271,13 +271,21 @@
     "download": {
       "error": "",
       "filesize": {
-        "byte": "",
         "byte_one": "",
+        "byte_many": "",
         "byte_other": "",
-        "giga_byte": "",
-        "kilo_byte": "",
-        "mega_byte": "",
-        "tera_byte": ""
+        "giga_byte_one": "",
+        "giga_byte_many": "",
+        "giga_byte_other": "",
+        "kilo_byte_one": "",
+        "kilo_byte_many": "",
+        "kilo_byte_other": "",
+        "mega_byte_one": "",
+        "mega_byte_many": "",
+        "mega_byte_other": "",
+        "tera_byte_one": "",
+        "tera_byte_many": "",
+        "tera_byte_other": ""
       },
       "table_columns": {
         "dimensions": "Dimensioni",

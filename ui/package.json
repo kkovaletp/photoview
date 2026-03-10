@@ -20,7 +20,9 @@
     "test": "vitest",
     "test:ci": "CI=true vitest --run --coverage",
     "genSchemaTypes": "apollo client:codegen --target=typescript --globalTypesFile=src/__generated__/globalTypes.ts --passthroughCustomScalars && prettier --write */**/__generated__/*.ts",
-    "extractTranslations": "i18next-cli extract"
+    "extractTranslations": "i18next-cli extract; i18next-cli types",
+    "extractTranslations:ci": "i18next-cli extract --ci --quiet",
+    "lintTranslations": "i18next-cli lint"
   },
   "engines": {
     "node": ">=20.0.0"

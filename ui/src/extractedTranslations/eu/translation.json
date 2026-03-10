@@ -1,13 +1,12 @@
 {
   "album_filter": {
     "only_favorites": "Erakutsi gogokoak bakarrik",
-    "sort": "Sailkatu",
-    "sort_by": "Sailkatu honen arabera",
-    "sort_direction": "Sailkatze norabidea",
     "order_direction": {
       "ascending": "Goranzkoa",
       "descending": "Beheranzkoa"
     },
+    "sort": "Sailkatu",
+    "sort_direction": "Sailkatze norabidea",
     "sorting_options": {
       "date_imported": "Gehitutako data",
       "date_shot": "Egindako data",
@@ -31,7 +30,8 @@
         "media": "Eduki gehiago kargatzen"
       },
       "shares": "Partekatutakoak kargatzen…"
-    }
+    },
+    "notFound": ""
   },
   "header": {
     "search": {
@@ -48,7 +48,8 @@
     "field": {
       "password": "Pasahitza",
       "submit": "Hasi saioa",
-      "username": "Erabiltzailea"
+      "username": "Erabiltzailea",
+      "username_error": ""
     },
     "initial_setup": {
       "field": {
@@ -69,6 +70,7 @@
     "action_label": {
       "change_label": "Aldatu etiketa",
       "detach_images": "Kendu aurpegia",
+      "merge_face": "",
       "merge_people": "Bateratu aurpegiak",
       "move_faces": "Mugitu aurpegiak"
     },
@@ -79,7 +81,8 @@
     },
     "modal": {
       "action": {
-        "merge": "Bateratu"
+        "merge": "Bateratu",
+        "next": ""
       },
       "detach_image_faces": {
         "action": {
@@ -90,9 +93,13 @@
         "title": "Kendu irudiko aurpegiak"
       },
       "merge_face_groups": {
-        "description": "Aurpegi-multzo honetako irudi guztiak aukeratutako aurpegi-multzoarekin bateratuko dira.",
+        "destination_description": "",
         "destination_table": {
           "title": "Aukeratu zein aurpegira mugituko d(ir)en"
+        },
+        "sources_description": "",
+        "sources_table": {
+          "title": ""
         },
         "title": "Bateratu aurpegi-multzoak"
       },
@@ -129,11 +136,13 @@
   "settings": {
     "concurrent_workers": {
       "description": "Aldi berean jardun dezaketen baimendutako azterketa-lan kopuru maximoa",
+      "error": "",
       "title": "Aldibereko azterketa-lanak"
     },
     "logout": "Amaitu saioa",
     "periodic_scanner": {
       "checkbox_label": "Aktibatu aldizkako azterketa",
+      "error": "",
       "field": {
         "description": "Zenbatero aztertu beharko lirateken automatikoki erabiltzaile guztiak",
         "label": "Aldizkako azterketaren maiztasuna"
@@ -177,6 +186,7 @@
     },
     "users": {
       "add_user": {
+        "error": "",
         "submit": "Gehitu erabiltzailea"
       },
       "confirm_delete_user": {
@@ -186,6 +196,7 @@
       },
       "password_reset": {
         "description": "Aldatu <1>{{username}}</1>(r)en pasahitza",
+        "error": "",
         "form": {
           "label": "Pasahitz berria",
           "placeholder": "pasahitza",
@@ -254,9 +265,11 @@
       },
       "reset_cover": "Berrezarri azalaren argazkia",
       "set_cover": "Ezarri albumaren azal bezala",
+      "title": "",
       "title_placeholder": "Albumaren titulua"
     },
     "download": {
+      "error": "",
       "filesize": {
         "byte_one": "Byte {{count}}",
         "byte_other": "{{count}} Byte",
@@ -277,12 +290,14 @@
       },
       "title": "Deskargatu"
     },
+    "error": "",
     "location": {
       "title": "Kokapena"
     },
     "media": {
       "album_path": "Albumaren bidea",
       "exif": {
+        "description": "",
         "exposure_program": {
           "action_program": "Kirola",
           "aperture_priority": "Irekidurari lehentasuna",
@@ -335,6 +350,7 @@
       "add_share": "Gehitu partekatzeak",
       "copy_link": "Kopiatu esteka",
       "delete": "Ezabatu",
+      "expiration_date": "",
       "more": "Gehiago",
       "no_shares_found": "Ez da partekatutakorik aurkitu",
       "public_link": "Esteka publikoa",
@@ -358,6 +374,7 @@
   "title": {
     "loading_album": "Albuma kargatzen",
     "login": "Saioa",
+    "not_found": "",
     "people": "Jendea",
     "settings": "Ezarpenak"
   }
