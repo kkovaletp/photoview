@@ -8,7 +8,7 @@ import useURLParameters from '../../hooks/useURLParameters'
 import useScrollPagination from '../../hooks/useScrollPagination'
 import PaginateLoader from '../../components/PaginateLoader'
 import { useTranslation } from 'react-i18next'
-import { albumQuery, albumQueryVariables } from './__generated__/albumQuery'
+import { AlbumQueryQuery, AlbumQueryQueryVariables } from './__generated__/AlbumPage'
 import useOrderingParams from '../../hooks/useOrderingParams'
 import { useParams } from 'react-router-dom'
 import { isNil } from '../../helpers/utils'
@@ -50,15 +50,15 @@ function AlbumPage() {
   const urlParams = useURLParameters()
   const orderParams = useOrderingParams(urlParams)
 
-  const onlyFavorites = urlParams.getParam('favorites') == '1' ? true : false
+  const onlyFavorites = urlParams.getParam('favorites') == '1'
   const setOnlyFavorites = useCallback((favorites: boolean) =>
     urlParams.setParam('favorites', favorites ? '1' : '0'),
     [urlParams]
   )
 
   const { loading, error, data, refetch, fetchMore } = useQuery<
-    albumQuery,
-    albumQueryVariables
+    AlbumQueryQuery,
+    AlbumQueryQueryVariables
   >(ALBUM_QUERY, {
     variables: {
       id: albumId,
@@ -71,7 +71,7 @@ function AlbumPage() {
   })
 
   const { containerElem, finished: finishedLoadingMore } =
-    useScrollPagination<albumQuery>({
+    useScrollPagination<AlbumQueryQuery>({
       loading,
       fetchMore,
       data,
@@ -103,14 +103,14 @@ function AlbumPage() {
   return (
     <Layout
       title={
-        !data ? t('title.loading_album', 'Loading album') :
-          !data.album ? t('title.not_found', 'Not found') :
-            data.album.title
+        data ? data.album ? data.album.title :
+          t('title.not_found', 'Not found') :
+          t('title.loading_album', 'Loading album')
       }
     >
       <AlbumGallery
         ref={containerElem}
-        album={data && data.album}
+        album={data?.album}
         loading={loading}
         setOnlyFavorites={toggleFavorites}
         onlyFavorites={onlyFavorites}

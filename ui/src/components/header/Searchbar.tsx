@@ -5,11 +5,7 @@ import { debounce, DebouncedFn } from '../../helpers/utils'
 import { ProtectedImage } from '../photoGallery/ProtectedMedia'
 import { NavLink, useNavigate, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import {
-  searchQuery,
-  searchQuery_search_albums,
-  searchQuery_search_media,
-} from './__generated__/searchQuery'
+import { SearchQueryQuery } from './__generated__/Searchbar'
 import { clsx } from 'clsx'
 
 const SEARCH_QUERY = gql`
@@ -45,7 +41,7 @@ const SearchWrapper = styled.div.attrs({
 
 const SearchBar = () => {
   const { t } = useTranslation()
-  const [fetchSearches, fetchResult] = useLazyQuery<searchQuery>(SEARCH_QUERY)
+  const [fetchSearches, fetchResult] = useLazyQuery<SearchQueryQuery>(SEARCH_QUERY)
   const [query, setQuery] = useState('')
   const [fetched, setFetched] = useState(false)
   const [expanded, setExpanded] = useState(false)
@@ -95,9 +91,9 @@ const SearchBar = () => {
   media = media.slice(0, 5)
 
   const selectedItemId =
-    selectedItem !== null
-      ? [...albums.map(x => x.id), ...media.map(x => x.id)][selectedItem]
-      : null
+    selectedItem === null
+      ? null
+      : [...albums.map(x => x.id), ...media.map(x => x.id)][selectedItem]
 
   useEffect(() => {
     const elem = inputEl.current
@@ -193,8 +189,8 @@ const ResultTitle = styled.h1.attrs({
 })``
 
 type SearchResultsProps = {
-  albums: searchQuery_search_albums[]
-  media: searchQuery_search_media[]
+  albums: SearchQueryQuery['search']['albums']
+  media: SearchQueryQuery['search']['media']
   loading: boolean
   selectedItem: number | null
   setSelectedItem: React.Dispatch<React.SetStateAction<number | null>>
@@ -335,7 +331,7 @@ const SearchRow = ({
 
 type PhotoRowArgs = {
   query: string
-  media: searchQuery_search_media
+  media: SearchQueryQuery['search']['media'][0]
   selected: boolean
   setSelected(): void
 }
@@ -366,7 +362,7 @@ const PhotoRow = (props: PhotoRowArgs) => {
 
 type AlbumRowArgs = {
   query: string
-  album: searchQuery_search_albums
+  album: SearchQueryQuery['search']['albums'][0]
   selected: boolean
   setSelected(): void
 }

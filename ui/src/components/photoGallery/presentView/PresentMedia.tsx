@@ -1,9 +1,8 @@
-import React from 'react'
 import styled from 'styled-components'
 import { MediaType } from '../../../__generated__/globalTypes'
 import { exhaustiveCheck } from '../../../helpers/utils'
 import { ProtectedImage, ProtectedVideo } from '../ProtectedMedia'
-import { MediaGalleryFields } from '../__generated__/MediaGalleryFields'
+import { MediaGalleryFieldsFragment } from '../__generated__/MediaGallery'
 
 const StyledPhoto = styled(ProtectedImage)`
   position: absolute;
@@ -24,7 +23,7 @@ const StyledVideo = styled(ProtectedVideo)`
 `
 
 type PresentMediaProps = {
-  media: MediaGalleryFields
+  media: MediaGalleryFieldsFragment
   imageLoaded?(): void
 }
 
@@ -50,12 +49,13 @@ const PresentMedia = ({
             onLoad={e => {
               const elem = e.target as HTMLImageElement
               elem.style.display = 'initial'
-              imageLoaded && imageLoaded()
+              imageLoaded?.()
             }}
           />
         </div>
       )
     case MediaType.Video:
+      //TODO: fix the type mismatch: Type '"Media" | undefined' is not assignable to type '"Media"'
       return <StyledVideo media={media} data-testid="present-video" />
   }
 

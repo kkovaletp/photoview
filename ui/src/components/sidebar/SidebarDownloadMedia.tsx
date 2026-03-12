@@ -10,10 +10,9 @@ import React, { useEffect } from 'react'
 import { SidebarSection, SidebarSectionTitle } from './SidebarComponents'
 import SidebarTable from './SidebarTable'
 import {
-  sidebarDownloadQuery,
-  sidebarDownloadQueryVariables,
-  sidebarDownloadQuery_media_downloads,
-} from './__generated__/sidebarDownloadQuery'
+  SidebarDownloadQueryQuery,
+  SidebarDownloadQueryQueryVariables,
+} from './__generated__/SidebarDownloadMedia'
 
 const DOWNLOAD_COMPLETE_NOTIFICATION_DURATION = 2000
 
@@ -64,13 +63,13 @@ const downloadMedia = (
   removeKey: (key: string) => void
 ) => async (url: string) => {
   const imgUrl = new URL(
-    `${import.meta.env.BASE_URL}${url}`.replace(/\/\//g, '/'),
+    `${import.meta.env.BASE_URL}${url}`.replaceAll('//', '/'),
     location.origin
   )
 
   if (authToken() == null) {
     // Get share token if not authorized
-    const token = location.pathname.match(/^\/share\/([\d\w]+)(\/?.*)$/)
+    const token = /^\/share\/(\w)/.exec(location.pathname)
     if (token) {
       imgUrl.searchParams.set('token', token[1])
     }
@@ -91,7 +90,7 @@ const downloadMedia = (
     return
   }
 
-  const filenameMatch = url.match(/[^/]*$/)
+  const filenameMatch = /[^/]*$/.exec(url)
 
   if (filenameMatch == null) {
     console.error('Could not extract filename', url)
@@ -228,7 +227,7 @@ const downloadMediaShowProgress =
   }
 
 const downloadBlob = (blob: Blob, filename: string) => {
-  const objectUrl = window.URL.createObjectURL(blob)
+  const objectUrl = globalThis.URL.createObjectURL(blob)
 
   const anchor = document.createElement('a')
   document.body.appendChild(anchor)
@@ -239,7 +238,7 @@ const downloadBlob = (blob: Blob, filename: string) => {
 
   anchor.remove()
 
-  window.URL.revokeObjectURL(objectUrl)
+  globalThis.URL.revokeObjectURL(objectUrl)
 }
 
 type SidebarDownloadTableRow = {
@@ -309,8 +308,8 @@ const SidebarMediaDownload = ({ media }: SidebarMediaDownladProps) => {
   const { add, removeKey } = useMessageState()
 
   const [loadPhotoDownloads, { called, loading, data, error }] = useLazyQuery<
-    sidebarDownloadQuery,
-    sidebarDownloadQueryVariables
+    SidebarDownloadQueryQuery,
+    SidebarDownloadQueryQueryVariables
   >(SIDEBAR_DOWNLOAD_QUERY, {})
 
   useEffect(() => {
@@ -321,7 +320,7 @@ const SidebarMediaDownload = ({ media }: SidebarMediaDownladProps) => {
     }
   }, [media?.id, media?.downloads, called, loadPhotoDownloads])
 
-  if (!media || !media.id) return null
+  if (!media?.id) return null
 
   if (error) {
     console.error('Failed to load download options: ', error)
@@ -337,11 +336,12 @@ const SidebarMediaDownload = ({ media }: SidebarMediaDownladProps) => {
     )
   }
 
-  let downloads: sidebarDownloadQuery_media_downloads[] = []
+  let downloads: SidebarDownloadQueryQuery['media']['downloads'] = []
 
   if (called && !loading) {
-    downloads = (data && data.media.downloads) || []
+    downloads = (data?.media?.downloads) || []
   } else if (media.downloads) {
+    //TODO: how to fix the "Type 'MediaDownload[]' is not assignable to type 'undefined'" error?
     downloads = media.downloads
   }
 

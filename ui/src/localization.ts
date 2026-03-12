@@ -1,5 +1,5 @@
 import { useEffect } from 'react'
-import { siteTranslation } from './__generated__/siteTranslation'
+import { SiteTranslationQuery } from './__generated__/localization'
 import { gql, useLazyQuery } from '@apollo/client'
 import i18n from 'i18next'
 import { initReactI18next } from 'react-i18next'
@@ -43,7 +43,7 @@ const SITE_TRANSLATION = gql`
 let map_language: LanguageTranslation | null
 
 export const loadTranslations = () => {
-  const [loadLang, { data }] = useLazyQuery<siteTranslation>(SITE_TRANSLATION)
+  const [loadLang, { data }] = useLazyQuery<SiteTranslationQuery>(SITE_TRANSLATION)
 
   useEffect(() => {
     if (authToken()) {
@@ -121,7 +121,7 @@ export const loadTranslations = () => {
           i18n.changeLanguage('ru')
         })
         return
-      case LanguageTranslation.TraditionalChineseTW:
+      case LanguageTranslation.TraditionalChineseTw:
         import('./extractedTranslations/zh-TW/translation.json').then(
           language => {
             i18n.addResourceBundle('zh-TW', 'translation', language)
@@ -129,7 +129,7 @@ export const loadTranslations = () => {
           }
         )
         return
-      case LanguageTranslation.TraditionalChineseHK:
+      case LanguageTranslation.TraditionalChineseHk:
         import('./extractedTranslations/zh-HK/translation.json').then(
           language => {
             i18n.addResourceBundle('zh-HK', 'translation', language)
@@ -217,8 +217,8 @@ export const SetMapLanguages = (map: mapboxgl.Map) => {
     case LanguageTranslation.Russian:
       map.addControl(new MapboxLanguage({ defaultLanguage: 'ru' }))
       return
-    case LanguageTranslation.TraditionalChineseTW:
-    case LanguageTranslation.TraditionalChineseHK:
+    case LanguageTranslation.TraditionalChineseTw:
+    case LanguageTranslation.TraditionalChineseHk:
       map.addControl(new MapboxLanguage({ defaultLanguage: 'zh-Hant' }))
       return
     case LanguageTranslation.SimplifiedChinese:

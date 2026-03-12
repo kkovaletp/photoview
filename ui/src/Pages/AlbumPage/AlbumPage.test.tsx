@@ -36,7 +36,7 @@ test('AlbumPage renders', async () => {
         id: "1",
         onlyFavorites: false,
         mediaOrderBy: "date_shot",
-        orderDirection: OrderDirection.ASC,
+        orderDirection: OrderDirection.Asc,
         offset: 0,
         limit: 200
       }
@@ -75,7 +75,7 @@ test('AlbumPage shows loading state', async () => {
         id: "1",
         onlyFavorites: false,
         mediaOrderBy: "date_shot",
-        orderDirection: OrderDirection.ASC,
+        orderDirection: OrderDirection.Asc,
         offset: 0,
         limit: 200
       }
@@ -105,7 +105,7 @@ test('AlbumPage shows not found state', async () => {
         id: "1",
         onlyFavorites: false,
         mediaOrderBy: "date_shot",
-        orderDirection: OrderDirection.ASC,
+        orderDirection: OrderDirection.Asc,
         offset: 0,
         limit: 200
       }

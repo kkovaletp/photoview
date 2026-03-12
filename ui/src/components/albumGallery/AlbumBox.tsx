@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ProtectedImage } from '../photoGallery/ProtectedMedia'
-import { albumQuery_album_subAlbums } from '../../Pages/AlbumPage/__generated__/albumQuery'
+import { AlbumQueryQuery } from '../../Pages/AlbumPage/__generated__/AlbumPage'
 
 interface AlbumBoxImageProps {
   src?: string
@@ -30,7 +30,7 @@ const AlbumBoxImage = ({ src, ...props }: AlbumBoxImageProps) => {
   }
 
   return (
-    <div className="xs:w-[220px] xs:h-[220px] relative rounded-lg">
+    <div className="xs:w-55 xs:h-55 relative rounded-lg">
       {image}
       {placeholder}
     </div>
@@ -38,7 +38,7 @@ const AlbumBoxImage = ({ src, ...props }: AlbumBoxImageProps) => {
 }
 
 type AlbumBoxProps = {
-  album?: albumQuery_album_subAlbums
+  album?: AlbumQueryQuery['album']['subAlbums'][0]
   customLink?: string
 }
 

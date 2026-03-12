@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom'
 import styled from 'styled-components'
 import { MediaType } from '../../__generated__/globalTypes'
 import { MediaSidebarMedia } from '../sidebar/MediaSidebar/MediaSidebar'
-import { sidebarMediaQuery_media_faces } from '../sidebar/MediaSidebar/__generated__/sidebarMediaQuery'
+import { SidebarMediaQueryQuery } from '../sidebar/MediaSidebar/__generated__/MediaSidebar'
 
 interface FaceBoxStyleProps {
   $minY: number
@@ -23,7 +23,7 @@ const FaceBoxStyle = styled(Link) <FaceBoxStyleProps>`
 `
 
 type FaceBoxProps = {
-  face: sidebarMediaQuery_media_faces
+  face: SidebarMediaQueryQuery['media']['faces'][0]
 }
 
 const FaceBox = ({ face /*media*/ }: FaceBoxProps) => {

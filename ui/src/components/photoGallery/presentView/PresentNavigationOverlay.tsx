@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, ReactNode, Dispatch } from 'react'
 import styled from 'styled-components'
 import { debounce, DebouncedFn } from '../../../helpers/utils'
 import { closePresentModeAction, GalleryAction } from '../mediaGalleryReducer'
@@ -52,7 +52,7 @@ const ExitButton = styled(OverlayButton)`
   top: 28px;
 `
 
-const NavigationButton = styled(OverlayButton)<{ align: 'left' | 'right' }>`
+const NavigationButton = styled(OverlayButton) <{ align: 'left' | 'right' }>`
   height: 80%;
   width: 20%;
   top: 10%;
@@ -68,8 +68,8 @@ const NavigationButton = styled(OverlayButton)<{ align: 'left' | 'right' }>`
 `
 
 type PresentNavigationOverlayProps = {
-  children?: React.ReactChild
-  dispatchMedia: React.Dispatch<GalleryAction>
+  children?: ReactNode
+  dispatchMedia: Dispatch<GalleryAction>
   disableSaveCloseInHistory?: boolean
 }
 
@@ -106,41 +106,41 @@ const PresentNavigationOverlay = ({
     <StyledOverlayContainer
       data-testid="present-overlay"
       onMouseMove={() => {
-        onMouseMove.current && onMouseMove.current()
+        onMouseMove.current?.()
       }}
     >
-    <div {...handlers}>
-      {children}
-      <NavigationButton
-        aria-label="Previous image"
-        className={hide ? 'hide' : undefined}
-        align="left"
-        onClick={() => dispatchMedia({ type: 'previousImage' })}
-      >
-        <PrevIcon />
-      </NavigationButton>
-      <NavigationButton
-        aria-label="Next image"
-        className={hide ? 'hide' : undefined}
-        align="right"
-        onClick={() => dispatchMedia({ type: 'nextImage' })}
-      >
-        <NextIcon />
-      </NavigationButton>
-      <ExitButton
-        aria-label="Exit presentation mode"
-        className={hide ? 'hide' : undefined}
-        onClick={() => {
-          if (disableSaveCloseInHistory === true) {
-            dispatchMedia({ type: 'closePresentMode' })
-          } else {
-            closePresentModeAction({ dispatchMedia })
-          }
-        }}
-      >
-        <ExitIcon />
-      </ExitButton>
-    </div>
+      <div {...handlers}>
+        {children}
+        <NavigationButton
+          aria-label="Previous image"
+          className={hide ? 'hide' : undefined}
+          align="left"
+          onClick={() => dispatchMedia({ type: 'previousImage' })}
+        >
+          <PrevIcon />
+        </NavigationButton>
+        <NavigationButton
+          aria-label="Next image"
+          className={hide ? 'hide' : undefined}
+          align="right"
+          onClick={() => dispatchMedia({ type: 'nextImage' })}
+        >
+          <NextIcon />
+        </NavigationButton>
+        <ExitButton
+          aria-label="Exit presentation mode"
+          className={hide ? 'hide' : undefined}
+          onClick={() => {
+            if (disableSaveCloseInHistory === true) {
+              dispatchMedia({ type: 'closePresentMode' })
+            } else {
+              closePresentModeAction({ dispatchMedia })
+            }
+          }}
+        >
+          <ExitIcon />
+        </ExitButton>
+      </div>
     </StyledOverlayContainer>
   )
 }

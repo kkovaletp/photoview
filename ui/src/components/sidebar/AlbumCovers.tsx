@@ -5,13 +5,13 @@ import { useTranslation } from 'react-i18next'
 import { SidebarSection, SidebarSectionTitle } from './SidebarComponents'
 
 import {
-  setAlbumCover,
-  setAlbumCoverVariables,
-} from './__generated__/setAlbumCover'
+  SetAlbumCoverMutation,
+  SetAlbumCoverMutationVariables,
+} from './__generated__/AlbumCovers'
 import {
-  resetAlbumCover,
-  resetAlbumCoverVariables,
-} from './__generated__/resetAlbumCover'
+  ResetAlbumCoverMutation,
+  ResetAlbumCoverMutationVariables,
+} from './__generated__/AlbumCovers'
 import { authToken } from '../../helpers/authentication'
 
 const RESET_ALBUM_COVER_MUTATION = gql`
@@ -48,7 +48,7 @@ type SidebarPhotoCoverProps = {
 export const SidebarPhotoCover = ({ cover_id }: SidebarPhotoCoverProps) => {
   const { t } = useTranslation()
 
-  const [setAlbumCover] = useMutation<setAlbumCover, setAlbumCoverVariables>(
+  const [setAlbumCover] = useMutation<SetAlbumCoverMutation, SetAlbumCoverMutationVariables>(
     SET_ALBUM_COVER_MUTATION,
     {
       variables: {
@@ -111,8 +111,8 @@ export const SidebarAlbumCover = ({ id }: SidebarAlbumCoverProps) => {
   const { t } = useTranslation()
 
   const [resetAlbumCover] = useMutation<
-    resetAlbumCover,
-    resetAlbumCoverVariables
+    ResetAlbumCoverMutation,
+    ResetAlbumCoverMutationVariables
   >(RESET_ALBUM_COVER_MUTATION, {
     variables: {
       albumID: id,

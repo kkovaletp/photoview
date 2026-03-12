@@ -1,7 +1,8 @@
 import { useLazyQuery } from '@apollo/client'
-import React, { useEffect } from 'react'
+import { useEffect, JSX, ReactNode } from 'react'
 import { Navigate } from 'react-router-dom'
 import { authToken } from '../../helpers/authentication'
+//TODO: how to correctly replace the old "adminQuery" type with the new one from the "globalTypes"?
 import { adminQuery } from '../../__generated__/adminQuery'
 import { ADMIN_QUERY } from '../layout/Layout'
 
@@ -29,7 +30,7 @@ export const Authorized = ({ children }: { children: JSX.Element }) => {
 }
 
 interface AuthorizedRouteProps {
-  children: React.ReactNode
+  children: ReactNode
 }
 
 const AuthorizedRoute = ({ children }: AuthorizedRouteProps) => {

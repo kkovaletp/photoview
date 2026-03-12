@@ -163,7 +163,7 @@ const FallbackLazyloadedImage = ({
   }
 }
 
-export interface ProtectedVideoProps_Media {
+export interface ProtectedVideoPropsMedia {
   __typename: 'Media'
   id: string
   thumbnail?: null | {
@@ -177,7 +177,7 @@ export interface ProtectedVideoProps_Media {
 }
 
 export interface ProtectedVideoProps {
-  media: ProtectedVideoProps_Media
+  media: ProtectedVideoPropsMedia
 }
 
 export const ProtectedVideo = ({ media, ...props }: ProtectedVideoProps) => {

@@ -5,7 +5,7 @@ import { SidebarContext } from '../sidebar/Sidebar'
 import AlbumSidebar from '../sidebar/AlbumSidebar'
 import { useLazyQuery, gql } from '@apollo/client'
 import { authToken } from '../../helpers/authentication'
-import { albumPathQuery } from './__generated__/albumPathQuery'
+import { AlbumPathQueryQuery } from './__generated__/AlbumTitle'
 import useDelay from '../../hooks/useDelay'
 
 import GearIcon from './icons/gear.svg?react'
@@ -48,13 +48,13 @@ type AlbumTitleProps = {
 
 const AlbumTitle = ({ album, disableLink = false }: AlbumTitleProps) => {
   const [fetchPath, { data: pathData }] =
-    useLazyQuery<albumPathQuery>(ALBUM_PATH_QUERY)
+    useLazyQuery<AlbumPathQueryQuery>(ALBUM_PATH_QUERY)
   const { updateSidebar } = useContext(SidebarContext)
 
   useEffect(() => {
     if (!album) return
 
-    if (authToken() && disableLink == true) {
+    if (authToken() && disableLink) {
       fetchPath({
         variables: {
           id: album.id,

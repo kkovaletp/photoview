@@ -1,5 +1,5 @@
-import React from 'react'
-import { myTimeline_myTimeline } from './__generated__/myTimeline'
+import { Dispatch } from 'react'
+import { MyTimelineQuery } from './__generated__/TimelineGallery'
 import { TimelineGroup, TimelineGroupAlbum } from './TimelineGallery'
 import { GalleryAction } from '../photoGallery/mediaGalleryReducer'
 import { isNil } from '../../helpers/utils'
@@ -18,7 +18,7 @@ export interface TimelineGalleryState {
 
 export type TimelineGalleryAction =
   | GalleryAction
-  | { type: 'replaceTimelineGroups'; timeline: myTimeline_myTimeline[] }
+  | { type: 'replaceTimelineGroups'; timeline: MyTimelineQuery['myTimeline'] }
   | { type: 'selectImage'; index: TimelineMediaIndex }
   | { type: 'openPresentMode'; activeIndex: TimelineMediaIndex }
 
@@ -126,14 +126,14 @@ export function timelineGalleryReducer(
 
       if (activeIndex.date > 0) {
         const albumGroups = state.timelineGroups[activeIndex.date - 1].albums
-        const albumMedia = albumGroups[albumGroups.length - 1].media
+        const albumMedia = albumGroups?.at(-1)?.media
 
         return {
           ...state,
           activeIndex: {
             date: activeIndex.date - 1,
             album: albumGroups.length - 1,
-            media: albumMedia.length - 1,
+            media: albumMedia?.length ? albumMedia.length - 1 : 0,
           },
         }
       }
@@ -168,7 +168,7 @@ export const getTimelineImage = ({
 }: {
   mediaState: TimelineGalleryState
   index: TimelineMediaIndex
-}): myTimeline_myTimeline => {
+}): MyTimelineQuery['myTimeline'][0] => {
   const { date, album, media } = index
   return mediaState.timelineGroups[date].albums[album].media[media]
 }
@@ -191,7 +191,7 @@ export const getActiveTimelineImage = ({
 }
 
 function convertMediaToTimelineGroups(
-  timelineMedia: myTimeline_myTimeline[]
+  timelineMedia: MyTimelineQuery['myTimeline']
 ): TimelineGroup[] {
   const timelineGroups: TimelineGroup[] = []
   let albums: TimelineGroupAlbum[] = []
@@ -262,7 +262,7 @@ export const openTimelinePresentMode = ({
   dispatchMedia,
   activeIndex,
 }: {
-  dispatchMedia: React.Dispatch<TimelineGalleryAction>
+  dispatchMedia: Dispatch<TimelineGalleryAction>
   activeIndex: TimelineMediaIndex
 }) => {
   dispatchMedia({

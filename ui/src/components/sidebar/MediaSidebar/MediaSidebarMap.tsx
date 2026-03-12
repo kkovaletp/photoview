@@ -1,16 +1,19 @@
-import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { isNil } from '../../../helpers/utils'
 import useMapboxMap from '../../mapbox/MapboxMap'
 import { SidebarSection, SidebarSectionTitle } from '../SidebarComponents'
-import { sidebarMediaQuery_media_exif_coordinates } from './__generated__/sidebarMediaQuery'
+import { SidebarMediaQueryQuery } from './__generated__/MediaSidebar'
 
 type MediaSidebarMapProps = {
-  coordinates: sidebarMediaQuery_media_exif_coordinates
+  coordinates: NonNullable<SidebarMediaQueryQuery['media']['exif']>['coordinates']
 }
 
 const MediaSidebarMap = ({ coordinates }: MediaSidebarMapProps) => {
   const { t } = useTranslation()
+
+  if (isNil(coordinates)) {
+    return null
+  }
 
   const { mapContainer, mapboxToken } = useMapboxMap({
     mapboxOptions: {

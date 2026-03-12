@@ -7,10 +7,9 @@ import useScrollPagination from '../../hooks/useScrollPagination'
 import PaginateLoader from '../PaginateLoader'
 import { useTranslation } from 'react-i18next'
 import {
-  myTimeline,
-  myTimelineVariables,
-  myTimeline_myTimeline,
-} from './__generated__/myTimeline'
+  MyTimelineQuery,
+  MyTimelineQueryVariables,
+} from './__generated__/TimelineGallery'
 import {
   getActiveTimelineImage as getActiveTimelineMedia,
   timelineGalleryReducer,
@@ -67,7 +66,7 @@ export type TimelineGroup = {
 export type TimelineGroupAlbum = {
   id: string
   title: string
-  media: myTimeline_myTimeline[]
+  media: MyTimelineQuery['myTimeline']
 }
 
 const TimelineGallery = () => {
@@ -75,7 +74,7 @@ const TimelineGallery = () => {
 
   const { getParam, setParam } = useURLParameters()
 
-  const onlyFavorites = getParam('favorites') == '1' ? true : false
+  const onlyFavorites = getParam('favorites') == '1'
   const setOnlyFavorites = (favorites: boolean) =>
     setParam('favorites', favorites ? '1' : null)
 
@@ -93,13 +92,13 @@ const TimelineGallery = () => {
   })
 
   const { data, error, loading, refetch, fetchMore } = useQuery<
-    myTimeline,
-    myTimelineVariables
+    MyTimelineQuery,
+    MyTimelineQueryVariables
   >(MY_TIMELINE_QUERY, {
     variables: {
       onlyFavorites,
       fromDate: filterDate
-        ? `${parseInt(filterDate) + 1}-01-01T00:00:00Z`
+        ? `${Number.parseInt(filterDate) + 1}-01-01T00:00:00Z`
         : undefined,
       offset: 0,
       limit: 200,
@@ -107,7 +106,7 @@ const TimelineGallery = () => {
   })
 
   const { containerElem, finished: finishedLoadingMore } =
-    useScrollPagination<myTimeline>({
+    useScrollPagination<MyTimelineQuery>({
       loading,
       fetchMore,
       data,
@@ -131,7 +130,7 @@ const TimelineGallery = () => {
       await refetch({
         onlyFavorites,
         fromDate: filterDate
-          ? `${parseInt(filterDate) + 1}-01-01T00:00:00Z`
+          ? `${Number.parseInt(filterDate) + 1}-01-01T00:00:00Z`
           : undefined,
         offset: 0,
         limit: 200,

@@ -1,4 +1,4 @@
-import { notificationSubscription } from './__generated__/notificationSubscription'
+import { NotificationSubscriptionSubscription } from './__generated__/SubscriptionsHook'
 import React, { useEffect } from 'react'
 import { useSubscription, gql } from '@apollo/client'
 import { authToken } from '../../helpers/authentication'
@@ -49,7 +49,7 @@ export const SubscriptionsHook = ({
     return null
   }
 
-  const { data, error } = useSubscription<notificationSubscription>(
+  const { data, error } = useSubscription<NotificationSubscriptionSubscription>(
     NOTIFICATION_SUBSCRIPTION
   )
 

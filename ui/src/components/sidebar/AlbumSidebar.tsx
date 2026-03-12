@@ -1,12 +1,11 @@
-import React from 'react'
 import { useQuery, gql } from '@apollo/client'
 import { SidebarAlbumShare } from './Sharing'
 import { useTranslation } from 'react-i18next'
 import SidebarHeader from './SidebarHeader'
 import {
-  getAlbumSidebar,
-  getAlbumSidebarVariables,
-} from './__generated__/getAlbumSidebar'
+  GetAlbumSidebarQuery,
+  GetAlbumSidebarQueryVariables,
+} from './__generated__/AlbumSidebar'
 import { SidebarAlbumCover } from './AlbumCovers'
 import SidebarAlbumDownload from './SidebarDownloadAlbum'
 
@@ -26,8 +25,8 @@ type AlbumSidebarProps = {
 const AlbumSidebar = ({ albumId }: AlbumSidebarProps) => {
   const { t } = useTranslation()
   const { loading, error, data } = useQuery<
-    getAlbumSidebar,
-    getAlbumSidebarVariables
+    GetAlbumSidebarQuery,
+    GetAlbumSidebarQueryVariables
   >(albumQuery, {
     variables: { id: albumId },
   })

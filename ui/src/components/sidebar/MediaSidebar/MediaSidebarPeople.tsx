@@ -1,10 +1,10 @@
-import React, { useState } from 'react'
+import { Dispatch, SetStateAction, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useNavigate } from 'react-router-dom'
 import FaceCircleImage from '../../../Pages/PeoplePage/FaceCircleImage'
 import { SidebarSection, SidebarSectionTitle } from '../SidebarComponents'
 import { MediaSidebarMedia, SIDEBAR_MEDIA_QUERY } from './MediaSidebar'
-import { sidebarMediaQuery_media_faces } from './__generated__/sidebarMediaQuery'
+import { SidebarMediaQueryQuery } from './__generated__/MediaSidebar'
 
 import PeopleDotsIcon from './icons/peopleDotsIcon.svg?react'
 import { MenuItem, MenuItems, MenuButton, Menu } from '@headlessui/react'
@@ -48,8 +48,8 @@ const PersonMoreMenuItem = ({
 }
 
 type PersonMoreMenuProps = {
-  face: sidebarMediaQuery_media_faces
-  setChangeLabel: React.Dispatch<React.SetStateAction<boolean>>
+  face: SidebarMediaQueryQuery['media']['faces'][0]
+  setChangeLabel: Dispatch<SetStateAction<boolean>>
   className?: string
   menuFlipped: boolean
 }
@@ -84,6 +84,7 @@ const PersonMoreMenu = ({
   const modals = (
     <>
       <MergeFaceGroupsModal
+        //TODO: how to fix the "Type '"FaceGroup" | undefined' is not assignable to type '"FaceGroup"'" error?
         preselectedDestinationFaceGroup={face.faceGroup}
         state={mergeModalState}
         setState={setMergeModalState}
@@ -158,7 +159,7 @@ const PersonMoreMenu = ({
 }
 
 type MediaSidebarFaceProps = {
-  face: sidebarMediaQuery_media_faces
+  face: SidebarMediaQueryQuery['media']['faces'][0]
   menuFlipped: boolean
 }
 
@@ -168,12 +169,14 @@ const MediaSidebarPerson = ({ face, menuFlipped }: MediaSidebarFaceProps) => {
   return (
     <li className="flex flex-col items-center">
       <Link to={`/people/${face.faceGroup.id}`}>
+        //TODO: how to fix the "Type '"ImageFace" | undefined' is not assignable to type '"ImageFace"'" error?
         <FaceCircleImage imageFace={face} selectable={true} size="92px" />
       </Link>
       <div className="mt-1 whitespace-nowrap">
         <FaceDetails
           className="text-sm max-w-[80px] align-middle"
           textFieldClassName="w-[100px]"
+          //TODO: how to fix the "Type '"FaceGroup" | undefined' is not assignable to type '"FaceGroup"'" error?
           group={face.faceGroup}
           editLabel={changeLabel}
           setEditLabel={setChangeLabel}
@@ -199,6 +202,7 @@ const MediaSidebarPeople = ({ media }: MediaSidebarFacesProps) => {
   const { t } = useTranslation()
 
   const faceElms = (media.faces ?? []).map((face, i) => (
+    //TODO: how to fix the "Property 'id' does not exist on type '{ __typename?: "ImageFace" | undefined; id: string;..." and the "Type '{ __typename?: "ImageFace" | undefined; id: string;... ' is missing the following properties from type '{ __typename?: "ImageFace" | undefined; id: string;..." errors?
     <MediaSidebarPerson key={face.id} face={face} menuFlipped={i % 3 == 0} />
   ))
 

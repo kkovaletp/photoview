@@ -1,10 +1,10 @@
 import React from 'react'
-import { albumQuery_album_subAlbums } from '../../Pages/AlbumPage/__generated__/albumQuery'
+import { AlbumQueryQuery } from '../../Pages/AlbumPage/__generated__/AlbumPage'
 import { AlbumBox } from './AlbumBox'
 
 type AlbumBoxesProps = {
   error?: Error
-  albums?: albumQuery_album_subAlbums[]
+  albums?: AlbumQueryQuery['album']['subAlbums']
   getCustomLink?(albumID: string): string
 }
 
@@ -13,7 +13,11 @@ const AlbumBoxes = ({ error, albums, getCustomLink }: AlbumBoxesProps) => {
 
   let albumElements = []
 
-  if (albums !== undefined) {
+  if (albums === undefined) {
+    for (let i = 0; i < 4; i++) {
+      albumElements.push(<AlbumBox key={i} />)
+    }
+  } else {
     albumElements = albums.map(album => (
       <AlbumBox
         key={album.id}
@@ -21,10 +25,6 @@ const AlbumBoxes = ({ error, albums, getCustomLink }: AlbumBoxesProps) => {
         customLink={getCustomLink ? getCustomLink(album.id) : undefined}
       />
     ))
-  } else {
-    for (let i = 0; i < 4; i++) {
-      albumElements.push(<AlbumBox key={i} />)
-    }
   }
 
   return <div className="-mx-3 my-6">{albumElements}</div>

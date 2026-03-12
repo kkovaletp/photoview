@@ -3,7 +3,7 @@ import styled from 'styled-components'
 import { ProtectedImage } from './ProtectedMedia'
 import { MediaType } from '../../__generated__/globalTypes'
 import VideoThumbnailIconSVG from './icons/videoThumbnailIcon.svg?react'
-import { MediaGalleryFields } from './__generated__/MediaGalleryFields'
+import { MediaGalleryFieldsFragment } from './__generated__/MediaGallery'
 
 const MediaContainer = styled.div`
   grow: 1;
@@ -26,7 +26,7 @@ const StyledPhoto = styled(ProtectedImage)`
 
 type LazyPhotoProps = {
   src?: string
-  blurhash: string | null
+  blurhash: string | null | undefined
 }
 
 const LazyPhoto = (photoProps: LazyPhotoProps) => {
@@ -137,7 +137,7 @@ const VideoThumbnailIcon = styled(VideoThumbnailIconSVG)`
 `
 
 type MediaThumbnailProps = {
-  media: MediaGalleryFields
+  media: MediaGalleryFieldsFragment
   active: boolean
   selectImage(): void
   clickPresent(): void

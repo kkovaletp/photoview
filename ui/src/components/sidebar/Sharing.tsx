@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import {
   useMutation,
   useQuery,
@@ -10,27 +10,19 @@ import copy from 'copy-to-clipboard'
 import { useTranslation } from 'react-i18next'
 import { Popover, PopoverButton, PopoverPanel } from '@headlessui/react'
 import {
-  sidebareDeleteShare,
-  sidebareDeleteShareVariables,
-} from './__generated__/sidebareDeleteShare'
-import {
-  sidebarPhotoAddShare,
-  sidebarPhotoAddShareVariables,
-} from './__generated__/sidebarPhotoAddShare'
-import {
-  sidebarAlbumAddShare,
-  sidebarAlbumAddShareVariables,
-} from './__generated__/sidebarAlbumAddShare'
-import {
-  sidebarGetPhotoShares,
-  sidebarGetPhotoSharesVariables,
-  sidebarGetPhotoShares_media_shares,
-} from './__generated__/sidebarGetPhotoShares'
-import {
-  sidebarGetAlbumShares,
-  sidebarGetAlbumSharesVariables,
-  sidebarGetAlbumShares_album_shares,
-} from './__generated__/sidebarGetAlbumShares'
+  SidebareDeleteShareMutation,
+  SidebareDeleteShareMutationVariables,
+  SidebarPhotoAddShareMutation,
+  SidebarPhotoAddShareMutationVariables,
+  SidebarAlbumAddShareMutation,
+  SidebarAlbumAddShareMutationVariables,
+  SidebarGetPhotoSharesQuery,
+  SidebarGetPhotoSharesQueryVariables,
+  SidebarGetAlbumSharesQuery,
+  SidebarGetAlbumSharesQueryVariables,
+  SidebarProtectShareMutation,
+  SidebarProtectShareMutationVariables,
+} from './__generated__/Sharing'
 import { authToken } from '../../helpers/authentication'
 import { SidebarSection, SidebarSectionTitle } from './SidebarComponents'
 
@@ -42,10 +34,6 @@ import AddIcon from './icons/shareAddIcon.svg?react'
 import Checkbox from '../../primitives/form/Checkbox'
 import { TextField } from '../../primitives/form/Input'
 import styled from 'styled-components'
-import {
-  sidebarProtectShare,
-  sidebarProtectShareVariables,
-} from './__generated__/sidebarProtectShare'
 import { useMessageState } from '../messages/MessageState'
 import { NotificationType } from '../../__generated__/globalTypes'
 import DatePicker from "react-datepicker";
@@ -157,7 +145,7 @@ export const ArrowPopoverPanel = styled.div.attrs({
 `
 
 type MorePopoverSectionPasswordProps = {
-  share: sidebarGetAlbumShares_album_shares
+  share: SidebarGetAlbumSharesQuery['album']['shares'][0]
   query: DocumentNode
   id: string
 }
@@ -177,8 +165,8 @@ const MorePopoverSectionPassword = ({
   const [passwordHidden, setPasswordHidden] = useState(share.hasPassword)
 
   const [setPassword, { loading: setPasswordLoading }] = useMutation<
-    sidebarProtectShare,
-    sidebarProtectShareVariables
+    SidebarProtectShareMutation,
+    SidebarProtectShareMutationVariables
   >(PROTECT_SHARE_MUTATION, {
     refetchQueries: [{ query: query, variables: { id } }],
     awaitRefetchQueries: true,
@@ -290,7 +278,7 @@ const MorePopoverSectionPassword = ({
 }
 
 type MorePopoverSectionExpirationProps = {
-  share: sidebarGetAlbumShares_album_shares
+  share: SidebarGetAlbumSharesQuery['album']['shares'][0]
   id: string
   query: DocumentNode
 }
@@ -415,7 +403,7 @@ const MorePopoverSectionExpiration = ({
 type MorePopoverProps = {
   id: string
   query: DocumentNode
-  share: sidebarGetAlbumShares_album_shares
+  share: SidebarGetAlbumSharesQuery['album']['shares'][0]
 }
 
 const MorePopover = ({ id, share, query }: MorePopoverProps) => {
@@ -451,14 +439,14 @@ export const SidebarAlbumShare = ({ id }: SidebarShareAlbumProps) => {
     loading: queryLoading,
     error: sharesError,
     data: sharesData,
-  } = useQuery<sidebarGetAlbumShares, sidebarGetAlbumSharesVariables>(
+  } = useQuery<SidebarGetAlbumSharesQuery, SidebarGetAlbumSharesQueryVariables>(
     SHARE_ALBUM_QUERY,
     { variables: { id } }
   )
 
   const [shareAlbum, { loading: mutationLoading }] = useMutation<
-    sidebarAlbumAddShare,
-    sidebarAlbumAddShareVariables
+    SidebarAlbumAddShareMutation,
+    SidebarAlbumAddShareMutationVariables
   >(ADD_ALBUM_SHARE_MUTATION, {
     refetchQueries: [{ query: SHARE_ALBUM_QUERY, variables: { id } }],
     awaitRefetchQueries: true,
@@ -494,13 +482,13 @@ export const SidebarPhotoShare = ({ id }: SidebarSharePhotoProps) => {
   const [
     loadShares,
     { loading: queryLoading, error: sharesError, data: sharesData },
-  ] = useLazyQuery<sidebarGetPhotoShares, sidebarGetPhotoSharesVariables>(
+  ] = useLazyQuery<SidebarGetPhotoSharesQuery, SidebarGetPhotoSharesQueryVariables>(
     SHARE_PHOTO_QUERY
   )
 
   const [sharePhoto, { loading: mutationLoading }] = useMutation<
-    sidebarPhotoAddShare,
-    sidebarPhotoAddShareVariables
+    SidebarPhotoAddShareMutation,
+    SidebarPhotoAddShareMutationVariables
   >(ADD_MEDIA_SHARE_MUTATION, {
     refetchQueries: [{ query: SHARE_PHOTO_QUERY, variables: { id } }],
     awaitRefetchQueries: true,
@@ -541,7 +529,7 @@ type SidebarShareProps = {
   id: string
   isPhoto: boolean
   loading: boolean
-  shares?: sidebarGetPhotoShares_media_shares[]
+  shares?: SidebarGetPhotoSharesQuery['media']['shares']
   shareItem: (item: { variables: { id: string } }) => Promise<unknown>
 }
 
@@ -557,8 +545,8 @@ const SidebarShare = ({
   const query = isPhoto ? SHARE_PHOTO_QUERY : SHARE_ALBUM_QUERY
 
   const [deleteShare] = useMutation<
-    sidebareDeleteShare,
-    sidebareDeleteShareVariables
+    SidebareDeleteShareMutation,
+    SidebareDeleteShareMutationVariables
   >(DELETE_SHARE_MUTATION, {
     refetchQueries: [{ query: query, variables: { id } }],
     awaitRefetchQueries: true,

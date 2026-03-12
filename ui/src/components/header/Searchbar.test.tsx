@@ -5,7 +5,7 @@ import { MemoryRouter } from 'react-router-dom'
 import * as Apollo from '@apollo/client'
 import SearchBar, { AlbumRow, PhotoRow, searchHighlighted } from './Searchbar'
 import * as utils from '../../helpers/utils'
-import { searchQuery_search_albums, searchQuery_search_media } from './__generated__/searchQuery'
+import { SearchQueryQuery } from './__generated__/Searchbar'
 
 // Mock the debounce function with a direct implementation
 vi.mock('../../helpers/utils', () => ({
@@ -41,7 +41,7 @@ const sampleAlbums = [
                 url: '/api/thumbnail/album1'
             }
         }
-    } as unknown as searchQuery_search_albums,
+    } as unknown as SearchQueryQuery['search']['albums'][0],
     {
         __typename: "Album" as const,
         id: 'album2',
@@ -51,7 +51,7 @@ const sampleAlbums = [
                 url: '/api/thumbnail/album2'
             }
         }
-    } as unknown as searchQuery_search_albums
+    } as unknown as SearchQueryQuery['search']['albums'][0]
 ];
 const sampleMedia = [
     {
@@ -64,7 +64,7 @@ const sampleMedia = [
         album: {
             id: 'album1'
         }
-    } as unknown as searchQuery_search_media,
+    } as unknown as SearchQueryQuery['search']['media'][0],
     {
         __typename: 'Media' as const,
         id: 'media2',
@@ -75,7 +75,7 @@ const sampleMedia = [
         album: {
             id: 'album2'
         }
-    } as unknown as searchQuery_search_media
+    } as unknown as SearchQueryQuery['search']['media'][0]
 ];
 
 describe('SearchBar Component', () => {
@@ -236,7 +236,7 @@ describe('AlbumRow Component', () => {
             <MemoryRouter>
                 <AlbumRow
                     query="test"
-                    album={null as unknown as searchQuery_search_albums}
+                    album={null as unknown as SearchQueryQuery['search']['albums'][0]}
                     selected={false}
                     setSelected={() => { }}
                 />
@@ -299,7 +299,7 @@ describe('PhotoRow Component', () => {
             <MemoryRouter>
                 <PhotoRow
                     query="test"
-                    media={null as unknown as searchQuery_search_media}
+                    media={null as unknown as SearchQueryQuery['search']['media'][0]}
                     selected={false}
                     setSelected={() => { }}
                 />

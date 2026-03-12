@@ -4,7 +4,7 @@ import type mapboxgl from 'mapbox-gl'
 import styled from 'styled-components'
 
 import 'mapbox-gl/dist/mapbox-gl.css'
-import { mapboxToken } from './__generated__/mapboxToken'
+import { MapboxTokenQuery } from './__generated__/MapboxMap'
 import { isDarkMode } from '../../theme'
 import { SetMapLanguages } from '../../localization'
 
@@ -37,7 +37,7 @@ const useMapboxMap = ({
   const mapContainer = useRef<HTMLDivElement | null>(null)
   const map = useRef<mapboxgl.Map | null>(null)
 
-  const { data: mapboxData } = useQuery<mapboxToken>(MAPBOX_TOKEN_QUERY, {
+  const { data: mapboxData } = useQuery<MapboxTokenQuery>(MAPBOX_TOKEN_QUERY, {
     fetchPolicy: 'cache-first',
   })
 

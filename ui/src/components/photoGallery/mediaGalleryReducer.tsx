@@ -1,10 +1,10 @@
 import React, { useEffect } from 'react'
-import { MediaGalleryFields } from './__generated__/MediaGalleryFields'
+import { MediaGalleryFieldsFragment } from './__generated__/MediaGallery'
 
 export interface MediaGalleryState {
   presenting: boolean
   activeIndex: number
-  media: MediaGalleryFields[]
+  media: MediaGalleryFieldsFragment[]
 }
 
 export type GalleryAction =
@@ -16,7 +16,7 @@ export type PhotoGalleryAction =
   | GalleryAction
   | { type: 'openPresentMode'; activeIndex: number }
   | { type: 'selectImage'; index: number }
-  | { type: 'replaceMedia'; media: MediaGalleryFields[] }
+  | { type: 'replaceMedia'; media: MediaGalleryFieldsFragment[] }
 
 export function mediaGalleryReducer(
   state: MediaGalleryState,
@@ -89,12 +89,12 @@ export const urlPresentModeSetupHook = ({
       }
     }
 
-    window.addEventListener('popstate', urlChangeListener)
+    globalThis.addEventListener('popstate', urlChangeListener)
 
     history.replaceState({ presenting: false }, '')
 
     return () => {
-      window.removeEventListener('popstate', urlChangeListener)
+      globalThis.removeEventListener('popstate', urlChangeListener)
     }
   }, [])
 }

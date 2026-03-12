@@ -52,9 +52,9 @@ const SortingOptions = ({
     if (setOrdering && ordering) {
       setOrdering({
         orderDirection:
-          ordering.orderDirection === OrderDirection.ASC
-            ? OrderDirection.DESC
-            : OrderDirection.ASC,
+          ordering.orderDirection === OrderDirection.Asc
+            ? OrderDirection.Desc
+            : OrderDirection.Asc,
       })
     }
   }
@@ -108,17 +108,17 @@ const SortingOptions = ({
         <button
           title={t('album_filter.sort_direction', 'Sort direction')}
           aria-label={t('album_filter.sort_direction', 'Sort direction')}
-          aria-pressed={ordering?.orderDirection === OrderDirection.DESC}
+          aria-pressed={ordering?.orderDirection === OrderDirection.Desc}
           className={clsx(
             'bg-gray-50 h-[30px] align-top px-2 py-1 rounded ml-2 border border-gray-200 focus:outline-none focus:border-blue-300 text-[#8b8b8b] hover:bg-gray-100 hover:text-[#777]',
             'dark:bg-dark-input-bg dark:border-dark-input-border dark:text-dark-input-text dark:focus:border-blue-300',
-            { 'flip-y': ordering?.orderDirection === OrderDirection.ASC }
+            { 'flip-y': ordering?.orderDirection === OrderDirection.Asc }
           )}
           onClick={changeOrderDirection}
         >
           <DirectionIcon />
           <span className="sr-only">
-            {ordering?.orderDirection === OrderDirection.ASC
+            {ordering?.orderDirection === OrderDirection.Asc
               ? t('album_filter.order_direction.ascending', 'Ascending')
               : t('album_filter.order_direction.descending', 'Descending')}
           </span>

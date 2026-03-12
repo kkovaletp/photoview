@@ -11,7 +11,7 @@ import {
 } from '../photoGallery/mediaGalleryReducer'
 import { MediaOrdering, SetOrderingFn } from '../../hooks/useOrderingParams'
 import { gql } from '@apollo/client'
-import { AlbumGalleryFields } from './__generated__/AlbumGalleryFields'
+import { AlbumGalleryFieldsFragment } from './__generated__/AlbumGallery'
 
 export const ALBUM_GALLERY_FRAGMENT = gql`
   ${MEDIA_GALLERY_FRAGMENT}
@@ -40,7 +40,7 @@ export const ALBUM_GALLERY_FRAGMENT = gql`
 `
 
 type AlbumGalleryProps = {
-  album?: AlbumGalleryFields
+  album?: AlbumGalleryFieldsFragment
   loading?: boolean
   customAlbumLink?(albumID: string): string
   showFilter?: boolean
