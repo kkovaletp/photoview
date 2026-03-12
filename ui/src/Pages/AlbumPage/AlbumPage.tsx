@@ -98,7 +98,7 @@ function AlbumPage() {
     }, [setOnlyFavorites, refetch, albumId]
   )
 
-  if (error) return <div>Error</div>
+  if (error) return <div>{t('album_page.load_error', 'Error loading album: {{message}}', { message: error.message })}</div>
 
   return (
     <Layout

@@ -1,13 +1,15 @@
 {
+  "album": {
+    "breadcrumb_aria_label": ""
+  },
   "album_filter": {
     "only_favorites": "Erakutsi gogokoak bakarrik",
-    "sort": "Sailkatu",
-    "sort_by": "Sailkatu honen arabera",
-    "sort_direction": "Sailkatze norabidea",
     "order_direction": {
       "ascending": "Goranzkoa",
       "descending": "Beheranzkoa"
     },
+    "sort": "Sailkatu",
+    "sort_direction": "Sailkatze norabidea",
     "sorting_options": {
       "date_imported": "Gehitutako data",
       "date_shot": "Egindako data",
@@ -15,12 +17,19 @@
       "type": "Mota"
     }
   },
+  "album_page": {
+    "load_error": ""
+  },
   "general": {
     "action": {
       "add": "Gehitu",
       "cancel": "Utzi",
       "remove": "Kendu",
-      "save": "Gorde"
+      "save": "Gorde",
+      "submit": ""
+    },
+    "error": {
+      "generic": ""
     },
     "loading": {
       "album": "Albuma kargatzen",
@@ -31,9 +40,11 @@
         "media": "Eduki gehiago kargatzen"
       },
       "shares": "Partekatutakoak kargatzen…"
-    }
+    },
+    "notFound": ""
   },
   "header": {
+    "logo_alt": "",
     "search": {
       "loading": "Emaitzak kargatzen…",
       "no_results": "Ez da emaitzarik aurkitu",
@@ -48,7 +59,8 @@
     "field": {
       "password": "Pasahitza",
       "submit": "Hasi saioa",
-      "username": "Erabiltzailea"
+      "username": "Erabiltzailea",
+      "username_error": ""
     },
     "initial_setup": {
       "field": {
@@ -60,15 +72,18 @@
       },
       "title": "Aurreneko konfigurazioa"
     },
+    "logo_alt": "",
     "welcome": "Ongi etorri Photoview-ra"
   },
   "meta": {
+    "app_name": "",
     "description": "Zerbitzari pertsonaletarako argazki-galeria samur eta erabilterreza"
   },
   "people_page": {
     "action_label": {
       "change_label": "Aldatu etiketa",
       "detach_images": "Kendu aurpegia",
+      "merge_face": "",
       "merge_people": "Bateratu aurpegiak",
       "move_faces": "Mugitu aurpegiak"
     },
@@ -79,7 +94,8 @@
     },
     "modal": {
       "action": {
-        "merge": "Bateratu"
+        "merge": "Bateratu",
+        "next": ""
       },
       "detach_image_faces": {
         "action": {
@@ -90,9 +106,13 @@
         "title": "Kendu irudiko aurpegiak"
       },
       "merge_face_groups": {
-        "description": "Aurpegi-multzo honetako irudi guztiak aukeratutako aurpegi-multzoarekin bateratuko dira.",
+        "destination_description": "",
         "destination_table": {
           "title": "Aukeratu zein aurpegira mugituko d(ir)en"
+        },
+        "sources_description": "",
+        "sources_table": {
+          "title": ""
         },
         "title": "Bateratu aurpegi-multzoak"
       },
@@ -121,6 +141,13 @@
     "title": "Denbora-lerroa"
   },
   "places_page": {
+    "mapbox_token_error": {
+      "create_at": "",
+      "description": "",
+      "env_var": "",
+      "mapbox_link_label": "",
+      "title": ""
+    },
     "title": "Tokiak"
   },
   "routes": {
@@ -129,11 +156,13 @@
   "settings": {
     "concurrent_workers": {
       "description": "Aldi berean jardun dezaketen baimendutako azterketa-lan kopuru maximoa",
+      "error": "",
       "title": "Aldibereko azterketa-lanak"
     },
     "logout": "Amaitu saioa",
     "periodic_scanner": {
       "checkbox_label": "Aktibatu aldizkako azterketa",
+      "error": "",
       "field": {
         "description": "Zenbatero aztertu beharko lirateken automatikoki erabiltzaile guztiak",
         "label": "Aldizkako azterketaren maiztasuna"
@@ -177,6 +206,7 @@
     },
     "users": {
       "add_user": {
+        "error": "",
         "submit": "Gehitu erabiltzailea"
       },
       "confirm_delete_user": {
@@ -186,6 +216,7 @@
       },
       "password_reset": {
         "description": "Aldatu <1>{{username}}</1>(r)en pasahitza",
+        "error": "",
         "form": {
           "label": "Pasahitz berria",
           "placeholder": "pasahitza",
@@ -232,6 +263,10 @@
     "wrong_password": "Pasahitz okerra. Mesedez, saia zaitez berriro."
   },
   "sidebar": {
+    "action": {
+      "close": "",
+      "pin": ""
+    },
     "album": {
       "album_cover": "Albumaren azala",
       "download": {
@@ -254,9 +289,11 @@
       },
       "reset_cover": "Berrezarri azalaren argazkia",
       "set_cover": "Ezarri albumaren azal bezala",
+      "title": "",
       "title_placeholder": "Albumaren titulua"
     },
     "download": {
+      "error": "",
       "filesize": {
         "byte_one": "Byte {{count}}",
         "byte_other": "{{count}} Byte",
@@ -277,12 +314,14 @@
       },
       "title": "Deskargatu"
     },
+    "error": "",
     "location": {
       "title": "Kokapena"
     },
     "media": {
       "album_path": "Albumaren bidea",
       "exif": {
+        "description": "",
         "exposure_program": {
           "action_program": "Kirola",
           "aperture_priority": "Irekidurari lehentasuna",
@@ -320,7 +359,8 @@
           "lens": "Objektiboa",
           "maker": "Fabrikatzailea"
         }
-      }
+      },
+      "unknown_type": ""
     },
     "people": {
       "action_label": {
@@ -335,6 +375,8 @@
       "add_share": "Gehitu partekatzeak",
       "copy_link": "Kopiatu esteka",
       "delete": "Ezabatu",
+      "error": "",
+      "expiration_date": "",
       "more": "Gehiago",
       "no_shares_found": "Ez da partekatutakorik aurkitu",
       "public_link": "Esteka publikoa",
@@ -358,6 +400,7 @@
   "title": {
     "loading_album": "Albuma kargatzen",
     "login": "Saioa",
+    "not_found": "",
     "people": "Jendea",
     "settings": "Ezarpenak"
   }

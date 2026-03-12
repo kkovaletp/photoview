@@ -141,6 +141,7 @@ type PreviewMediaProps = {
 }
 
 const PreviewMedia = ({ media, previewImage }: PreviewMediaProps) => {
+  const { t } = useTranslation()
   if (media.type === MediaType.Photo) {
     return <PreviewImage src={previewImage?.url} />
   }
@@ -149,7 +150,7 @@ const PreviewMedia = ({ media, previewImage }: PreviewMediaProps) => {
     return <PreviewVideo media={media} />
   }
 
-  return <div>ERROR: Unknown media type: {media.type}</div>
+  return <div>{t('sidebar.media.unknown_type', 'ERROR: Unknown media type: {{type}}', { type: media.type })}</div>
 }
 
 type SidebarContentProps = {

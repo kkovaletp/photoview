@@ -1,4 +1,4 @@
-import React from 'react'
+import { useTranslation } from 'react-i18next'
 import { AlbumQueryQuery } from '../../Pages/AlbumPage/__generated__/AlbumPage'
 import { AlbumBox } from './AlbumBox'
 
@@ -9,7 +9,8 @@ type AlbumBoxesProps = {
 }
 
 const AlbumBoxes = ({ error, albums, getCustomLink }: AlbumBoxesProps) => {
-  if (error) return <div>Error {error.message}</div>
+  const { t } = useTranslation()
+  if (error) return <div>{t('general.error.generic', 'Error: {{message}}', { message: error.message })}</div>
 
   let albumElements = []
 

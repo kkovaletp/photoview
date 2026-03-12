@@ -1,4 +1,5 @@
 import React, { forwardRef } from 'react'
+import { useTranslation } from 'react-i18next'
 import { clsx, type ClassValue } from 'clsx'
 import ActionArrowIcon from './icons/textboxActionArrow.svg?react'
 import LoadingSpinnerIcon from './icons/textboxLoadingSpinner.svg?react'
@@ -33,6 +34,7 @@ export const TextField = forwardRef(
   ) => {
     const disabled = !!inputProps.disabled
     sizeVariant = sizeVariant ?? 'default'
+    const { t } = useTranslation()
 
     let variant = 'bg-white border-gray-200 focus:border-blue-400'
     if (error)
@@ -89,7 +91,7 @@ export const TextField = forwardRef(
           {input}
           <button
             disabled={disabled}
-            aria-label="Submit"
+            aria-label={t('general.action.submit', 'Submit')}
             className={clsx(
               'absolute top-1/2 right-0 -translate-y-1/2 p-2 text-gray-600 disabled:text-gray-400 disabled:cursor-default'
             )}
