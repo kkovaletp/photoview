@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import { ProtectedImage } from '../photoGallery/ProtectedMedia'
 import { AlbumQueryQuery } from '../../Pages/AlbumPage/__generated__/AlbumPage'

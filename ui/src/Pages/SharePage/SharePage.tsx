@@ -11,13 +11,11 @@ import { useTranslation } from 'react-i18next'
 import PasswordProtectedShare from './PasswordProtectedShare'
 import { isNil } from '../../helpers/utils'
 import {
-  SharePageToken,
-  SharePageTokenVariables,
-} from './__generated__/SharePageToken'
-import {
-  ShareTokenValidatePassword,
-  ShareTokenValidatePasswordVariables,
-} from './__generated__/ShareTokenValidatePassword'
+  SharePageTokenQuery,
+  SharePageTokenQueryVariables,
+  ShareTokenValidatePasswordQuery,
+  ShareTokenValidatePasswordQueryVariables,
+} from './__generated__/SharePage'
 
 export const SHARE_TOKEN_QUERY = gql`
   query SharePageToken($token: String!, $password: String) {
@@ -98,8 +96,8 @@ const AuthorizedTokenRoute = () => {
   const password = getSharePassword(token)
 
   const { loading, error, data } = useQuery<
-    SharePageToken,
-    SharePageTokenVariables
+    SharePageTokenQuery,
+    SharePageTokenQueryVariables
   >(SHARE_TOKEN_QUERY, {
     variables: {
       token,
@@ -111,17 +109,20 @@ const AuthorizedTokenRoute = () => {
   if (loading) return <div>{t('general.loading.default', 'Loading...')}</div>
 
   if (data?.shareToken?.album) {
+    //TODO: how to refactor this code to satisfy the "Move this component definition out of the parent component and pass data as props." warning?
     const SharedSubAlbumPage = () => {
       const { subAlbum } = useParams()
       if (isNil(subAlbum))
         throw new Error('Expected `subAlbum` param to be defined')
 
       return (
+        //TODO: how to fix the "Type 'undefined' is not assignable to type 'string | null'" error?
         <AlbumSharePage albumID={subAlbum} token={token} password={password} />
       )
     }
 
     return (
+      //TODO: how to fix the "Type 'undefined' is not assignable to type 'string | null'" error?
       <Routes>
         <Route path=":subAlbum" element={<SharedSubAlbumPage />} />
         <Route
@@ -155,8 +156,8 @@ export const TokenRoute = () => {
   const token = useTokenFromParams()
 
   const { loading, error, data, refetch } = useQuery<
-    ShareTokenValidatePassword,
-    ShareTokenValidatePasswordVariables
+    ShareTokenValidatePasswordQuery,
+    ShareTokenValidatePasswordQueryVariables
   >(VALIDATE_TOKEN_PASSWORD_QUERY, {
     notifyOnNetworkStatusChange: true,
     variables: {
@@ -183,7 +184,7 @@ export const TokenRoute = () => {
     return <div>{error.message}</div>
   }
 
-  if (data && data.shareTokenValidatePassword == false) {
+  if (!data?.shareTokenValidatePassword) {
     return (
       <PasswordProtectedShare
         refetchWithPassword={password => {

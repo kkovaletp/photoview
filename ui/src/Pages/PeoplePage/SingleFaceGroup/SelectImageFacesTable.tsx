@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import { Dispatch, SetStateAction, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import styled from 'styled-components'
 import { ProtectedImage } from '../../../components/photoGallery/ProtectedMedia'
@@ -12,8 +12,8 @@ import {
   TableHeaderCell,
   TableRow,
 } from '../../../primitives/Table'
-import { myFaces_myFaceGroups_imageFaces } from '../__generated__/myFaces'
-import { singleFaceGroup_faceGroup_imageFaces } from './__generated__/singleFaceGroup'
+import { MyFacesQuery } from '../__generated__/PeoplePage'
+import { SingleFaceGroupQuery } from './__generated__/SingleFaceGroup'
 
 const SelectImagePreview = styled(ProtectedImage)`
   max-width: 120px;
@@ -22,8 +22,8 @@ const SelectImagePreview = styled(ProtectedImage)`
 
 type ImageFaceRowProps = {
   imageFace:
-  | myFaces_myFaceGroups_imageFaces
-  | singleFaceGroup_faceGroup_imageFaces
+  | MyFacesQuery['myFaceGroups'][0]['imageFaces'][0]
+  | SingleFaceGroupQuery['faceGroup']['imageFaces'][0]
   faceSelected: boolean
   setFaceSelected(): void
 }
@@ -54,16 +54,16 @@ const ImageFaceRow = ({
 
 type SelectImageFacesTable = {
   imageFaces: (
-    | myFaces_myFaceGroups_imageFaces
-    | singleFaceGroup_faceGroup_imageFaces
+    | MyFacesQuery['myFaceGroups'][0]['imageFaces'][0]
+    | SingleFaceGroupQuery['faceGroup']['imageFaces'][0]
   )[]
   selectedImageFaces: (
-    | myFaces_myFaceGroups_imageFaces
-    | singleFaceGroup_faceGroup_imageFaces
+    | MyFacesQuery['myFaceGroups'][0]['imageFaces'][0]
+    | SingleFaceGroupQuery['faceGroup']['imageFaces'][0]
   )[]
-  setSelectedImageFaces: React.Dispatch<
-    React.SetStateAction<
-      (myFaces_myFaceGroups_imageFaces | singleFaceGroup_faceGroup_imageFaces)[]
+  setSelectedImageFaces: Dispatch<
+    SetStateAction<
+      (MyFacesQuery['myFaceGroups'][0]['imageFaces'][0] | SingleFaceGroupQuery['faceGroup']['imageFaces'][0])[]
     >
   >
   title: string
@@ -135,7 +135,7 @@ const SelectImageFacesTable = ({
           </TableRow>
         </TableHeader>
       </Table>
-      <div className="overflow-auto max-h-[500px] mt-2">
+      <div className="overflow-auto max-h-125 mt-2">
         <Table>
           <TableBody>{rows}</TableBody>
         </Table>

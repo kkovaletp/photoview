@@ -1,13 +1,12 @@
-import { gql } from '@apollo/client'
-import React, { useEffect, useRef, useState } from 'react'
-import { useMutation, useQuery } from '@apollo/client'
+import { useEffect, useRef, useState } from 'react'
+import { gql, useMutation, useQuery } from '@apollo/client'
 import { InputLabelDescription, InputLabelTitle } from './SettingsPage'
 import { useTranslation } from 'react-i18next'
-import { scanIntervalQuery } from './__generated__/scanIntervalQuery'
 import {
-  changeScanIntervalMutation,
-  changeScanIntervalMutationVariables,
-} from './__generated__/changeScanIntervalMutation'
+  ScanIntervalQueryQuery,
+  ChangeScanIntervalMutationMutation,
+  ChangeScanIntervalMutationMutationVariables,
+} from './__generated__/PeriodicScanner'
 import Checkbox from '../../primitives/form/Checkbox'
 import { TextField } from '../../primitives/form/Input'
 import Dropdown, { DropdownItem } from '../../primitives/form/Dropdown'
@@ -106,7 +105,7 @@ const PeriodicScanner = () => {
 
   const scanIntervalServerValue = useRef<number | null>(null)
   const hasInitialized = useRef(false)
-  const { data, loading, error } = useQuery<scanIntervalQuery>(SCAN_INTERVAL_QUERY)
+  const { data, loading, error } = useQuery<ScanIntervalQueryQuery>(SCAN_INTERVAL_QUERY)
 
   useEffect(() => {
     if (error) {
@@ -139,8 +138,8 @@ const PeriodicScanner = () => {
 
   const [setScanIntervalMutation, { loading: scanIntervalMutationLoading }] =
     useMutation<
-      changeScanIntervalMutation,
-      changeScanIntervalMutationVariables
+      ChangeScanIntervalMutationMutation,
+      ChangeScanIntervalMutationMutationVariables
     >(SCAN_INTERVAL_MUTATION)
 
   const onScanIntervalCheckboxChange = (checked: boolean) => {

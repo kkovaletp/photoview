@@ -1,11 +1,10 @@
-import React from 'react'
-import { forwardRef } from 'react'
+import { ForwardedRef, forwardRef, ReactNode } from 'react'
 import DismissIcon from './icons/dismissIcon.svg?react'
 
 export type MessageProps = {
   header: string
   content?: string
-  children?: React.ReactNode
+  children?: ReactNode
   onDismiss?(): void
   negative?: boolean
   positive?: boolean
@@ -14,7 +13,7 @@ export type MessageProps = {
 const Message = forwardRef(
   (
     { onDismiss, header, children, content, negative, positive }: MessageProps,
-    ref: React.ForwardedRef<HTMLDivElement>
+    ref: ForwardedRef<HTMLDivElement>
   ) => {
     const backgroundColorClass = negative
       ? 'bg-red-100 dark:bg-red-900'
@@ -28,7 +27,7 @@ const Message = forwardRef(
         className={`${backgroundColorClass} shadow-md border rounded p-2 relative`}
       >
         <button type="button" onClick={onDismiss} className="absolute top-3 right-2">
-          <DismissIcon className="w-[10px] h-[10px] text-gray-700 dark:text-gray-200" />
+          <DismissIcon className="w-2.5 h-2.5 text-gray-700 dark:text-gray-200" />
         </button>
         <h1 className="font-semibold text-sm">{header}</h1>
         <div

@@ -1,8 +1,8 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest'
 import SelectFaceGroupTable from './SelectFaceGroupTable'
-import { myFaces_myFaceGroups } from '../__generated__/myFaces'
-import { singleFaceGroup_faceGroup } from './__generated__/singleFaceGroup'
+import { MyFacesQuery } from '../__generated__/PeoplePage'
+import { SingleFaceGroupQuery } from './__generated__/SingleFaceGroup'
 
 // Mock react-i18next
 vi.mock('react-i18next', () => ({
@@ -28,7 +28,7 @@ vi.mock('../../../primitives/form/Input', () => ({
 }))
 
 // Test data setup
-const mockFaceGroups: myFaces_myFaceGroups[] = [
+const mockFaceGroups: MyFacesQuery['myFaceGroups'] = [
     {
         __typename: 'FaceGroup',
         id: 'face-group-1',
@@ -123,7 +123,7 @@ const mockFaceGroups: myFaces_myFaceGroups[] = [
 
 const defaultProps = {
     faceGroups: mockFaceGroups,
-    selectedFaceGroups: new Set<singleFaceGroup_faceGroup | myFaces_myFaceGroups | null>(),
+    selectedFaceGroups: new Set<SingleFaceGroupQuery['faceGroup'] | MyFacesQuery['myFaceGroups'][0] | null>(),
     toggleSelectedFaceGroup: vi.fn(),
     title: 'Face Groups',
     frozen: false,
@@ -144,7 +144,7 @@ describe('SelectFaceGroupTable', () => {
 
             // Table structure
             expect(screen.getAllByRole('table')).toHaveLength(2) // Header and body tables
-            expect(document.querySelector('.overflow-auto.max-h-\\[500px\\]')).toBeInTheDocument()
+            expect(document.querySelector(String.raw`.overflow-auto.max-h-\[500px\]`)).toBeInTheDocument()
 
             // Header and search
             expect(screen.getByText('Face Groups')).toBeInTheDocument()
@@ -182,7 +182,7 @@ describe('SelectFaceGroupTable', () => {
             expect(screen.queryByText('John Doe')).not.toBeInTheDocument()
 
             // Face groups with empty imageFaces
-            const faceGroupWithoutImages: myFaces_myFaceGroups = {
+            const faceGroupWithoutImages: MyFacesQuery['myFaceGroups'][0] = {
                 __typename: 'FaceGroup',
                 id: 'empty-faces',
                 label: 'No Images',
@@ -315,7 +315,7 @@ describe('SelectFaceGroupTable', () => {
 
     describe('Performance and Edge Cases', () => {
         it('should handle special data scenarios gracefully', () => {
-            const specialFaceGroups: myFaces_myFaceGroups[] = [
+            const specialFaceGroups: MyFacesQuery['myFaceGroups'] = [
                 {
                     __typename: 'FaceGroup',
                     id: 'special-chars',
@@ -386,7 +386,7 @@ describe('SelectFaceGroupTable', () => {
         })
 
         it('should handle large datasets efficiently and missing image data', () => {
-            const largeFaceGroupList: myFaces_myFaceGroups[] = Array.from({ length: 100 }, (_, i) => ({
+            const largeFaceGroupList: MyFacesQuery['myFaceGroups'] = Array.from({ length: 100 }, (_, i) => ({
                 __typename: 'FaceGroup',
                 id: `face-group-${i}`,
                 label: `Person ${i}`,
@@ -431,7 +431,7 @@ describe('SelectFaceGroupTable', () => {
         })
 
         it('should integrate with FaceCircleImage and handle missing image data gracefully', () => {
-            const faceGroupWithoutFirstImage: myFaces_myFaceGroups = {
+            const faceGroupWithoutFirstImage: MyFacesQuery['myFaceGroups'][0] = {
                 __typename: 'FaceGroup',
                 id: 'no-first-image',
                 label: 'No First Image',

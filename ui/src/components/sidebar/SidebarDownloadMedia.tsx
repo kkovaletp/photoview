@@ -6,7 +6,7 @@ import { TranslationFn } from '../../localization'
 import { useMessageState } from '../messages/MessageState'
 import { Message } from '../messages/SubscriptionsHook'
 import { MediaSidebarMedia } from './MediaSidebar/MediaSidebar'
-import React, { useEffect } from 'react'
+import { useEffect } from 'react'
 import { SidebarSection, SidebarSectionTitle } from './SidebarComponents'
 import SidebarTable from './SidebarTable'
 import {

@@ -1,5 +1,5 @@
 import { clsx } from 'clsx'
-import React from 'react'
+import { SelectHTMLAttributes, ChangeEvent } from 'react'
 import styled from 'styled-components'
 
 const DropdownStyledSelect = styled.select`
@@ -15,7 +15,7 @@ export type DropdownItem = {
   label: string
 }
 
-type DropdownProps = React.SelectHTMLAttributes<HTMLSelectElement> & {
+type DropdownProps = SelectHTMLAttributes<HTMLSelectElement> & {
   items: DropdownItem[]
   selected?: string
   setSelected(value: string): void
@@ -29,7 +29,7 @@ const Dropdown = ({
   className,
   ...otherProps
 }: DropdownProps) => {
-  const onChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+  const onChange = (e: ChangeEvent<HTMLSelectElement>) => {
     setSelected(e.target.value)
     otherProps.onChange?.(e)
   }

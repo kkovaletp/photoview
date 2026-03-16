@@ -1,17 +1,14 @@
-import React, { useState } from 'react'
+import { useState, ChangeEvent } from 'react'
 import { gql, useMutation } from '@apollo/client'
 import { USERS_QUERY } from './UsersTable'
 import { useTranslation } from 'react-i18next'
 import { USER_ADD_ROOT_PATH_MUTATION } from './AddUserRow'
 import {
-  userRemoveAlbumPathMutation,
-  userRemoveAlbumPathMutationVariables,
-} from './__generated__/userRemoveAlbumPathMutation'
-import {
-  settingsUsersQuery_user,
-  settingsUsersQuery_user_rootAlbums,
-} from './__generated__/settingsUsersQuery'
-import { userAddRootPath } from './__generated__/userAddRootPath'
+  UserRemoveAlbumPathMutationMutation,
+  UserRemoveAlbumPathMutationMutationVariables,
+} from './__generated__/EditUserRowRootPaths'
+import { SettingsUsersQueryQuery } from './__generated__/UsersTable'
+import { UserAddRootPathMutation } from './__generated__/AddUserRow'
 import { Button, TextField } from '../../../primitives/form/Input'
 
 const USER_REMOVE_ALBUM_PATH_MUTATION = gql`
@@ -23,15 +20,15 @@ const USER_REMOVE_ALBUM_PATH_MUTATION = gql`
 `
 
 type EditRootPathProps = {
-  album: settingsUsersQuery_user_rootAlbums
-  user: settingsUsersQuery_user
+  album: SettingsUsersQueryQuery['user'][0]['rootAlbums'][0]
+  user: SettingsUsersQueryQuery['user']
 }
 
 const EditRootPath = ({ album, user }: EditRootPathProps) => {
   const { t } = useTranslation()
   const [removeAlbumPath, { loading }] = useMutation<
-    userRemoveAlbumPathMutation,
-    userRemoveAlbumPathMutationVariables
+    UserRemoveAlbumPathMutationMutation,
+    UserRemoveAlbumPathMutationMutationVariables
   >(USER_REMOVE_ALBUM_PATH_MUTATION, {
     refetchQueries: [
       {
@@ -41,6 +38,7 @@ const EditRootPath = ({ album, user }: EditRootPathProps) => {
   })
 
   return (
+    //TODO: how to fix the "Property 'id' does not exist on type '{ __typename?: "User" | undefined; id: string;" error?
     <li className="flex justify-between">
       <span>{album.filePath}</span>
       <Button
@@ -68,7 +66,7 @@ type EditNewRootPathProps = {
 const EditNewRootPath = ({ userID }: EditNewRootPathProps) => {
   const { t } = useTranslation()
   const [value, setValue] = useState('')
-  const [addRootPath, { loading }] = useMutation<userAddRootPath>(
+  const [addRootPath, { loading }] = useMutation<UserAddRootPathMutation>(
     USER_ADD_ROOT_PATH_MUTATION,
     {
       refetchQueries: [
@@ -83,7 +81,7 @@ const EditNewRootPath = ({ userID }: EditNewRootPathProps) => {
     <li className="flex gap-1 mt-2">
       <TextField
         value={value}
-        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+        onChange={(e: ChangeEvent<HTMLInputElement>) =>
           setValue(e.target.value)
         }
         disabled={loading}
@@ -108,11 +106,12 @@ const EditNewRootPath = ({ userID }: EditNewRootPathProps) => {
 }
 
 type EditRootPathsProps = {
-  user: settingsUsersQuery_user
+  user: SettingsUsersQueryQuery['user'][0]
 }
 
 export const EditRootPaths = ({ user }: EditRootPathsProps) => {
   const editRows = user.rootAlbums.map(album => (
+    //TODO: how to fix the "Type '{ __typename?: "User" | undefined; id: string; username: string; admin: boolean; rootAlbums: { __typename?: "Album" | undefined; id: string; filePath: string; }[]; }' is missing the following properties from type '{ __typename?: "User" | undefined; id: string; username: string; admin: boolean; rootAlbums: { __typename?: "Album" | undefined; id: string; filePath: string; }[]; }[]': length, pop, push, concat, and 35 more" error?
     <EditRootPath key={album.id} album={album} user={user} />
   ))
 

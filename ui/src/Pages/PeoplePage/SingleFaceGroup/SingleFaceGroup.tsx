@@ -7,10 +7,10 @@ import { mediaGalleryReducer } from '../../../components/photoGallery/mediaGalle
 import useScrollPagination from '../../../hooks/useScrollPagination'
 import FaceGroupTitle from './FaceGroupTitle'
 import {
-  singleFaceGroup,
-  singleFaceGroupVariables,
-} from './__generated__/singleFaceGroup'
-import { MediaGalleryFields } from '../../../components/photoGallery/__generated__/MediaGalleryFields'
+  SingleFaceGroupQuery,
+  SingleFaceGroupQueryVariables,
+} from './__generated__/SingleFaceGroup'
+import { MediaGalleryFieldsFragment } from '../../../components/photoGallery/__generated__/MediaGallery'
 
 export const SINGLE_FACE_GROUP = gql`
   query singleFaceGroup($id: ID!, $limit: Int!, $offset: Int!) {
@@ -53,8 +53,8 @@ const SingleFaceGroup = ({ faceGroupID }: SingleFaceGroupProps) => {
   const { t } = useTranslation()
 
   const { data, error, loading, fetchMore } = useQuery<
-    singleFaceGroup,
-    singleFaceGroupVariables
+    SingleFaceGroupQuery,
+    SingleFaceGroupQueryVariables
   >(SINGLE_FACE_GROUP, {
     variables: {
       limit: 200,
@@ -70,7 +70,7 @@ const SingleFaceGroup = ({ faceGroupID }: SingleFaceGroupProps) => {
   })
 
   const { containerElem, finished: finishedLoadingMore } =
-    useScrollPagination<singleFaceGroup>({
+    useScrollPagination<SingleFaceGroupQuery>({
       loading,
       fetchMore,
       data,
@@ -81,7 +81,7 @@ const SingleFaceGroup = ({ faceGroupID }: SingleFaceGroupProps) => {
     const media = (data?.faceGroup?.imageFaces?.map(x => ({
       ...x.media,
       videoWeb: null
-    })) || []) as MediaGalleryFields[]
+    })) || []) as MediaGalleryFieldsFragment[]
     dispatchMedia({ type: 'replaceMedia', media })
   }, [data])
 

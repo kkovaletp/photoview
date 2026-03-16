@@ -1,4 +1,10 @@
-import React, { forwardRef } from 'react'
+import {
+  forwardRef,
+  InputHTMLAttributes,
+  ForwardedRef,
+  KeyboardEvent,
+  ButtonHTMLAttributes
+} from 'react'
 import { useTranslation } from 'react-i18next'
 import { clsx, type ClassValue } from 'clsx'
 import ActionArrowIcon from './icons/textboxActionArrow.svg?react'
@@ -15,7 +21,7 @@ type TextFieldProps = {
   fullWidth?: boolean
   action?: () => void
   loading?: boolean
-} & Omit<React.InputHTMLAttributes<HTMLInputElement>, 'className'>
+} & Omit<InputHTMLAttributes<HTMLInputElement>, 'className'>
 
 export const TextField = forwardRef(
   (
@@ -30,7 +36,7 @@ export const TextField = forwardRef(
       loading,
       ...inputProps
     }: TextFieldProps,
-    ref: React.ForwardedRef<HTMLInputElement>
+    ref: ForwardedRef<HTMLInputElement>
   ) => {
     const disabled = !!inputProps.disabled
     sizeVariant = sizeVariant ?? 'default'
@@ -45,7 +51,7 @@ export const TextField = forwardRef(
 
     let keyUpEvent = undefined
     if (action) {
-      keyUpEvent = (event: React.KeyboardEvent<HTMLInputElement>) => {
+      keyUpEvent = (event: KeyboardEvent<HTMLInputElement>) => {
         if (inputProps.onKeyUp) inputProps.onKeyUp(event)
 
         if (event.key == 'Enter') {
@@ -77,7 +83,7 @@ export const TextField = forwardRef(
           {input}
           <LoadingSpinnerIcon
             aria-label="Loading"
-            className="absolute right-[8px] top-[7px] animate-spin"
+            className="absolute right-2 top-1.75 animate-spin"
           />
         </div>
       )
@@ -169,7 +175,7 @@ export const Submit = ({
   background,
   children,
   ...props
-}: SubmitProps & React.ButtonHTMLAttributes<HTMLInputElement>) => (
+}: SubmitProps & ButtonHTMLAttributes<HTMLInputElement>) => (
   <input
     className={tailwindClassNames(
       buttonStyles({ variant, background }),
@@ -187,7 +193,7 @@ export const Button = ({
   background,
   className,
   ...props
-}: ButtonProps & React.ButtonHTMLAttributes<HTMLButtonElement>) => (
+}: ButtonProps & ButtonHTMLAttributes<HTMLButtonElement>) => (
   <button
     className={tailwindClassNames(
       buttonStyles({ variant, background }),

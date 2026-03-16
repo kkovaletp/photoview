@@ -127,6 +127,9 @@ describe('MediaSidebarPeople', () => {
         faces: hasFaces
             ? [
                 {
+                    //TODO: consistently fix the following error: "Type '({ __typename: string; id: string; rectangle: { __typename: string; minX: number; maxX: number; minY: number; maxY: number; }; faceGroup: { __typename: string; id: string; label: string; imageFaceCount: number; }; media: { ...; }; } | { ...; })[]' is not assignable to type '{ __typename?: "ImageFace" | undefined; id: string; rectangle: { __typename?: "FaceRectangle" | undefined; minX: number; maxX: number; minY: number; maxY: number; }; faceGroup: { __typename?: "FaceGroup" | undefined; id: string; label?: string | ... 1 more ... | undefined; imageFaceCount: number; }; media: { ...; };...'.
+                    //Type '{ __typename: string; id: string; rectangle: { __typename: string; minX: number; maxX: number; minY: number; maxY: number; }; faceGroup: { __typename: string; id: string; label: string; imageFaceCount: number; }; media: { ...; }; } | { ...; }' is not assignable to type '{ __typename?: "ImageFace" | undefined; id: string; rectangle: { __typename?: "FaceRectangle" | undefined; minX: number; maxX: number; minY: number; maxY: number; }; faceGroup: { __typename?: "FaceGroup" | undefined; id: string; label?: string | ... 1 more ... | undefined; imageFaceCount: number; }; media: { ...; };...'.
+                    //Object literal may only specify known properties, and '__typename' does not exist in type '{ __typename?: "ImageFace" | undefined; id: string; rectangle: { __typename?: "FaceRectangle" | undefined; minX: number; maxX: number; minY: number; maxY: number; }; faceGroup: { __typename?: "FaceGroup" | undefined; id: string; label?: string | ... 1 more ... | undefined; imageFaceCount: number; }; media: { ...; };...'."
                     __typename: 'ImageFace',
                     id: 'face-1',
                     rectangle: {
@@ -344,7 +347,7 @@ describe('MediaSidebarPeople', () => {
         const user = userEvent.setup()
 
         // Mock window.confirm
-        const confirmSpy = vi.spyOn(window, 'confirm')
+        const confirmSpy = vi.spyOn(globalThis, 'confirm')
         confirmSpy.mockReturnValue(true)
 
         const mocks: MockedResponse[] = [
@@ -400,7 +403,7 @@ describe('MediaSidebarPeople', () => {
         const user = userEvent.setup()
 
         // Mock window.confirm to return false
-        const confirmSpy = vi.spyOn(window, 'confirm')
+        const confirmSpy = vi.spyOn(globalThis, 'confirm')
         confirmSpy.mockReturnValue(false)
 
         renderWithProviders(<MediaSidebarPeople media={media} />)

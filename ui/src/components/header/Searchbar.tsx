@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, ReactNode, ChangeEvent, Dispatch, SetStateAction } from 'react'
 import styled from 'styled-components'
 import { useLazyQuery, gql } from '@apollo/client'
 import { debounce, DebouncedFn } from '../../helpers/utils'
@@ -64,7 +64,7 @@ const SearchBar = () => {
     }
   }, [])
 
-  const fetchEvent = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const fetchEvent = (e: ChangeEvent<HTMLInputElement>) => {
     e.persist()
 
     setQuery(e.target.value)
@@ -162,6 +162,7 @@ const SearchBar = () => {
 
   return (
     <SearchWrapper>
+      //TODO: Is it a safe fix to add the `role="combobox"` to this input element to fix the "`aria-expanded` is not supported by the current role" error?
       <input
         ref={inputEl}
         autoComplete="off"
@@ -193,7 +194,7 @@ type SearchResultsProps = {
   media: SearchQueryQuery['search']['media']
   loading: boolean
   selectedItem: number | null
-  setSelectedItem: React.Dispatch<React.SetStateAction<number | null>>
+  setSelectedItem: Dispatch<SetStateAction<number | null>>
   query: string
   expanded: boolean
 }
@@ -237,12 +238,13 @@ const SearchResults = ({
   if (message) message = <div className="mt-8 text-center">{message}</div>
 
   return (
+    //TODO: how to consistently fix the following warning: "Use <select size=...>, <select multiple=...>, or <datalist> instead of the "listbox" role to ensure accessibility across all devices"?
     <div
       id="search-results"
       role="listbox"
       className={clsx(
-        'absolute bg-white dark:bg-dark-bg left-0 right-0 top-[72px] overflow-y-auto h-[calc(100vh-152px)] border dark:border-dark-border px-4 z-0',
-        'lg:top-[40px] lg:shadow-md lg:rounded-b lg:max-h-[560px]',
+        'absolute bg-white dark:bg-dark-bg left-0 right-0 top-18 overflow-y-auto h-[calc(100vh-152px)] border dark:border-dark-border px-4 z-0',
+        'lg:top-10 lg:shadow-md lg:rounded-b lg:max-h-140',
         { hidden: !expanded }
       )}
       tabIndex={-1}
@@ -275,8 +277,8 @@ const SearchResults = ({
 type SearchRowProps = {
   id: string
   link: string
-  preview: React.ReactNode
-  label: React.ReactNode
+  preview: ReactNode
+  label: ReactNode
   selected: boolean
   setSelected(): void
 }
@@ -311,6 +313,7 @@ const SearchRow = ({
   }
 
   return (
+    //TODO: how to consistently fix the following warnings: "Use <option> instead of the "option" role to ensure accessibility across all devices", "Non-interactive elements should not be assigned interactive roles", and "onMouseOver must be accompanied by onFocus for accessibility"?
     <li
       id={`search-item-${id}`}
       ref={rowEl}

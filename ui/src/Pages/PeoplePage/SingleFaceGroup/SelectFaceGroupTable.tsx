@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import { Dispatch, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import styled from 'styled-components'
 import { TextField } from '../../../primitives/form/Input'
@@ -11,8 +11,8 @@ import {
   TableRow,
 } from '../../../primitives/Table'
 import FaceCircleImage from '../FaceCircleImage'
-import { myFaces_myFaceGroups } from '../__generated__/myFaces'
-import { singleFaceGroup_faceGroup } from './__generated__/singleFaceGroup'
+import { MyFacesQuery } from '../__generated__/PeoplePage'
+import { SingleFaceGroupQuery } from './__generated__/SingleFaceGroup'
 
 const FaceCircleWrapper = styled.div<{ $selected: boolean }>`
   display: inline-block;
@@ -33,7 +33,7 @@ export const RowLabel = styled.span<{ $selected: boolean }>`
 `
 
 type FaceGroupRowProps = {
-  faceGroup: myFaces_myFaceGroups
+  faceGroup: MyFacesQuery['myFaceGroups'][0]
   faceSelected: boolean
   selectable: boolean
   toggleFaceSelected(): void
@@ -51,6 +51,7 @@ const FaceGroupRow = ({
       <FlexCell className={faceSelected ? 'brightness-110' : ''}>
         <FaceCircleWrapper $selected={faceSelected}>
           <FaceCircleImage
+            //TODO: consistently fix the "Type '"ImageFace" | undefined' is not assignable to type '"ImageFace"'" type mismatch.
             imageFace={faceGroup.imageFaces[0]}
             size="50px"
             selectable={false}
@@ -69,12 +70,12 @@ const FaceGroupRow = ({
 }
 
 type SelectFaceGroupTableProps = {
-  faceGroups: myFaces_myFaceGroups[]
+  faceGroups: MyFacesQuery['myFaceGroups']
   selectedFaceGroups: Set<
-    singleFaceGroup_faceGroup | myFaces_myFaceGroups | null
+    SingleFaceGroupQuery['faceGroup'] | MyFacesQuery['myFaceGroups'][0] | null
   >
-  toggleSelectedFaceGroup: React.Dispatch<
-    singleFaceGroup_faceGroup | myFaces_myFaceGroups | null
+  toggleSelectedFaceGroup: Dispatch<
+    SingleFaceGroupQuery['faceGroup'] | MyFacesQuery['myFaceGroups'][0] | null
   >
   title: string,
   frozen: boolean
@@ -95,7 +96,7 @@ const SelectFaceGroupTable = ({
     .filter(
       x =>
         searchValue == '' ||
-        (x.label && x.label.toLowerCase().includes(searchValue.toLowerCase()))
+        (x.label?.toLowerCase().includes(searchValue.toLowerCase()))
     )
     .map(face => (
       <FaceGroupRow
@@ -129,7 +130,7 @@ const SelectFaceGroupTable = ({
           </TableRow>
         </TableHeader>
       </Table>
-      <div className="overflow-auto max-h-[500px] mt-2">
+      <div className="overflow-auto max-h-125 mt-2">
         <Table className="w-full">
           <TableBody>{rows}</TableBody>
         </Table>

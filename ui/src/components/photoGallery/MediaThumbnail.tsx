@@ -1,4 +1,4 @@
-import React from 'react'
+import { MouseEvent } from 'react'
 import styled from 'styled-components'
 import { ProtectedImage } from './ProtectedMedia'
 import { MediaType } from '../../__generated__/globalTypes'
@@ -74,11 +74,22 @@ const HoverIcon = styled.button`
 
 type FavoriteIconProps = {
   favorite: boolean
-  onClick(e: React.MouseEvent<HTMLButtonElement, MouseEvent>): void
+  onClick(e: MouseEvent<HTMLButtonElement, MouseEvent>): void
 }
 
 const FavoriteIcon = ({ favorite, onClick }: FavoriteIconProps) => {
   return (
+    //TODO: consistently fix the following error: "No overload matches this call.
+    //Overload 1 of 2, '(props: Omit<FastOmit<Substitute<FastOmit<DetailedHTMLProps<ButtonHTMLAttributes<HTMLButtonElement>, HTMLButtonElement>, never>, FastOmit<...>>, keyof ExecutionProps> & FastOmit<...> & { ...; }, "style"> & { ...; }): Element', gave the following error.
+    //  Type '(e: MouseEvent<HTMLButtonElement, MouseEvent<Element, MouseEvent>>) => void' is not assignable to type 'MouseEventHandler<HTMLButtonElement>'.
+    //  Types of parameters 'e' and 'event' are incompatible.
+    //Type 'MouseEvent<HTMLButtonElement, MouseEvent>' is not assignable to type 'MouseEvent<HTMLButtonElement, MouseEvent<Element, MouseEvent>>'.
+    //  Type 'MouseEvent' is missing the following properties from type 'MouseEvent<Element, MouseEvent>': nativeEvent, isDefaultPrevented, isPropagationStopped, persist
+    //Overload 2 of 2, '(props: FastOmit<DetailedHTMLProps<ButtonHTMLAttributes<HTMLButtonElement>, HTMLButtonElement>, never>): ReactNode', gave the following error.
+    //Type '(e: MouseEvent<HTMLButtonElement, MouseEvent<Element, MouseEvent>>) => void' is not assignable to type 'MouseEventHandler<HTMLButtonElement>'.
+    //  Types of parameters 'e' and 'event' are incompatible.
+    //Type 'MouseEvent<HTMLButtonElement, MouseEvent>' is not assignable to type 'MouseEvent<HTMLButtonElement, MouseEvent<Element, MouseEvent>>'.
+    //  Type 'MouseEvent' is missing the following properties from type 'MouseEvent<Element, MouseEvent>': nativeEvent, isDefaultPrevented, isPropagationStopped, persist"
     <HoverIcon
       onClick={onClick}
       style={{ opacity: favorite ? '0.75' : undefined }}
@@ -102,10 +113,21 @@ const FavoriteIcon = ({ favorite, onClick }: FavoriteIconProps) => {
 }
 
 type SidebarIconProps = {
-  onClick(e: React.MouseEvent<HTMLButtonElement, MouseEvent>): void
+  onClick(e: MouseEvent<HTMLButtonElement, MouseEvent>): void
 }
 
 const SidebarIcon = ({ onClick }: SidebarIconProps) => (
+  //TODO: consistently fix the following error: "No overload matches this call.
+  // Overload 1 of 2, '(props: Omit<FastOmit<Substitute<FastOmit<FastOmit<DetailedHTMLProps<ButtonHTMLAttributes<HTMLButtonElement>, HTMLButtonElement>, never>, never>, FastOmit<...>>, keyof ExecutionProps> & FastOmit<...> & { ...; }, "style"> & { ...; }): Element', gave the following error.
+  //   Type '(e: MouseEvent<HTMLButtonElement, MouseEvent<Element, MouseEvent>>) => void' is not assignable to type 'MouseEventHandler<HTMLButtonElement>'.
+  //     Types of parameters 'e' and 'event' are incompatible.
+  // Type 'MouseEvent<HTMLButtonElement, MouseEvent>' is not assignable to type 'MouseEvent<HTMLButtonElement, MouseEvent<Element, MouseEvent>>'.
+  //   Type 'MouseEvent' is missing the following properties from type 'MouseEvent<Element, MouseEvent>': nativeEvent, isDefaultPrevented, isPropagationStopped, persist
+  // Overload 2 of 2, '(props: FastOmit<FastOmit<DetailedHTMLProps<ButtonHTMLAttributes<HTMLButtonElement>, HTMLButtonElement>, never>, never>): ReactNode', gave the following error.
+  // Type '(e: MouseEvent<HTMLButtonElement, MouseEvent<Element, MouseEvent>>) => void' is not assignable to type 'MouseEventHandler<HTMLButtonElement>'.
+  //     Types of parameters 'e' and 'event' are incompatible.
+  // Type 'MouseEvent<HTMLButtonElement, MouseEvent>' is not assignable to type 'MouseEvent<HTMLButtonElement, MouseEvent<Element, MouseEvent>>'.
+  //   Type 'MouseEvent' is missing the following properties from type 'MouseEvent<Element, MouseEvent>': nativeEvent, isDefaultPrevented, isPropagationStopped, persist"
   <SidebarIconWrapper onClick={onClick}>
     <svg
       width="20px"

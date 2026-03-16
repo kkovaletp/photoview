@@ -1,5 +1,5 @@
 import { render, screen, fireEvent, renderHook } from '@testing-library/react'
-import React, { useState } from 'react'
+import { Dispatch, SetStateAction, useState } from 'react'
 import { NotificationType } from '../../__generated__/globalTypes'
 import { MessageProvider } from './MessageState'
 import MessagePlain from './Message'
@@ -8,7 +8,7 @@ import { Message } from './SubscriptionsHook'
 
 interface MockSubscriptionsHookProps {
   messages: Message[]
-  setMessages: React.Dispatch<React.SetStateAction<Message[]>>
+  setMessages: Dispatch<SetStateAction<Message[]>>
 }
 
 // Define the mock for SubscriptionsHook before using it
@@ -149,7 +149,7 @@ describe('Messages Component', () => {
   })
 
   test('subscriptions hook triggers messages correctly', () => {
-    const { result } = renderHook(() => useState<Message[]>([]))
+    const { result } = renderHook(() => useState<Message[]>([])) //TODO: Suggest a similar to the `ui/src/hooks/useDelay.ts` fix for the "useState call is not destructured into value + setter pair" error.
     const [, setMessages] = result.current
 
     render(

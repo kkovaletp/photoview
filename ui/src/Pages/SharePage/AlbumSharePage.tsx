@@ -1,4 +1,3 @@
-import React from 'react'
 import Layout from '../../components/layout/Layout'
 import AlbumGallery from '../../components/albumGallery/AlbumGallery'
 import styled from 'styled-components'
@@ -6,7 +5,7 @@ import { gql, useQuery } from '@apollo/client'
 import { useTranslation } from 'react-i18next'
 import useURLParameters from '../../hooks/useURLParameters'
 import useOrderingParams from '../../hooks/useOrderingParams'
-import { shareAlbumQuery } from './__generated__/shareAlbumQuery'
+import { ShareAlbumQueryQuery } from './__generated__/AlbumSharePage'
 import useScrollPagination from '../../hooks/useScrollPagination'
 import PaginateLoader from '../../components/PaginateLoader'
 
@@ -105,7 +104,7 @@ const AlbumSharePage = ({ albumID, token, password }: AlbumSharePageProps) => {
   const urlParams = useURLParameters()
   const orderParams = useOrderingParams(urlParams)
 
-  const { data, error, loading, fetchMore } = useQuery<shareAlbumQuery>(
+  const { data, error, loading, fetchMore } = useQuery<ShareAlbumQueryQuery>(
     SHARE_ALBUM_QUERY,
     {
       variables: {
@@ -121,7 +120,7 @@ const AlbumSharePage = ({ albumID, token, password }: AlbumSharePageProps) => {
   )
 
   const { containerElem, finished: finishedLoadingMore } =
-    useScrollPagination<shareAlbumQuery>({
+    useScrollPagination<ShareAlbumQueryQuery>({
       loading,
       fetchMore,
       data,
@@ -135,6 +134,11 @@ const AlbumSharePage = ({ albumID, token, password }: AlbumSharePageProps) => {
   const album = data?.album
 
   return (
+    //TODO: how to fix the following type mismatch: "Type '{ __typename?: "Album" | undefined; id: string; title: string; subAlbums: { __typename?: "Album" | undefined; id: string; title: string; thumbnail?: { __typename?: "Media" | undefined; id: string; thumbnail?: { ...; } | ... 1 more ... | undefined; } | null | undefined; }[]; media: { ...; }[]; } | undefined' is not assignable to type 'AlbumGalleryFieldsFragment | undefined'.
+    // Type '{ __typename?: "Album" | undefined; id: string; title: string; subAlbums: { __typename?: "Album" | undefined; id: string; title: string; thumbnail?: { __typename?: "Media" | undefined; id: string; thumbnail?: { ...; } | ... 1 more ... | undefined; } | null | undefined; }[]; media: { ...; }[]; }' is not assignable to type 'AlbumGalleryFieldsFragment'.
+    // Types of property 'media' are incompatible.
+    // Type '{ __typename?: "Media" | undefined; id: string; title: string; type: MediaType; blurhash?: string | null | undefined; thumbnail?: { __typename?: "MediaURL" | undefined; url: string; width: number; height: number; } | null | undefined; downloads: { ...; }[]; highRes?: { ...; } | ... 1 more ... | undefined; videoWeb?:...' is not assignable to type '{ __typename?: "Media" | undefined; id: string; type: MediaType; blurhash?: string | null | undefined; favorite: boolean; thumbnail?: { __typename?: "MediaURL" | undefined; url: string; width: number; height: number; } | null | undefined; highRes?: { ...; } | ... 1 more ... | undefined; videoWeb?: { ...; } | ... 1 m...'.
+    //   Property 'favorite' is missing in type '{ __typename?: "Media" | undefined; id: string; title: string; type: MediaType; blurhash?: string | null | undefined; thumbnail?: { __typename?: "MediaURL" | undefined; url: string; width: number; height: number; } | null | undefined; downloads: { ...; }[]; highRes?: { ...; } | ... 1 more ... | undefined; videoWeb?:...' but required in type '{ __typename?: "Media" | undefined; id: string; type: MediaType; blurhash?: string | null | undefined; favorite: boolean; thumbnail?: { __typename?: "MediaURL" | undefined; url: string; width: number; height: number; } | null | undefined; highRes?: { ...; } | ... 1 more ... | undefined; videoWeb?: { ...; } | ... 1 m...'."
     <AlbumSharePageWrapper data-testid="AlbumSharePage">
       <Layout
         title={

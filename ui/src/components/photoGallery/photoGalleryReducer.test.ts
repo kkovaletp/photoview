@@ -6,6 +6,7 @@ describe('photo gallery reducer', () => {
     presenting: false,
     activeIndex: 0,
     media: [
+    //TODO: consistently fix the type mismatch: "Property 'favorite' is missing in type '{ __typename: "Media"; id: string; highRes: null; thumbnail: null; blurhash: null; type: MediaType.Photo; }' but required in type 'MediaGalleryFieldsFragment'" 3 times in this definition.
       {
         __typename: 'Media',
         id: '1',

@@ -1,10 +1,9 @@
-import React from 'react'
 import { useMutation, gql } from '@apollo/client'
 import PeriodicScanner from './PeriodicScanner'
 import { ScannerConcurrentWorkers } from './ScannerConcurrentWorkers'
 import { SectionTitle, InputLabelDescription } from './SettingsPage'
 import { useTranslation } from 'react-i18next'
-import { scanAllMutation } from './__generated__/scanAllMutation'
+import { ScanAllMutationMutation } from './__generated__/ScannerSection'
 import { Button } from '../../primitives/form/Input'
 
 const SCAN_MUTATION = gql`
@@ -18,7 +17,7 @@ const SCAN_MUTATION = gql`
 
 const ScannerSection = () => {
   const { t } = useTranslation()
-  const [startScanner, { called }] = useMutation<scanAllMutation>(SCAN_MUTATION)
+  const [startScanner, { called }] = useMutation<ScanAllMutationMutation>(SCAN_MUTATION)
 
   return (
     <div>

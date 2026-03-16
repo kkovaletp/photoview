@@ -1,10 +1,9 @@
-import React from 'react'
+import { ChangeEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import { EditRootPaths } from './EditUserRowRootPaths'
 import { UserRowChildProps } from './UserRow'
 import { TableRow, TableCell } from '../../../primitives/Table'
-import { TextField } from '../../../primitives/form/Input'
-import { Button, ButtonGroup } from '../../../primitives/form/Input'
+import { TextField, Button, ButtonGroup } from '../../../primitives/form/Input'
 import Checkbox from '../../../primitives/form/Checkbox'
 
 const EditUserRow = ({
@@ -17,7 +16,7 @@ const EditUserRow = ({
   const { t } = useTranslation()
 
   function updateInput(
-    event: React.ChangeEvent<HTMLInputElement>,
+    event: ChangeEvent<HTMLInputElement>,
     key: string
   ) {
     setState(state => ({
@@ -27,6 +26,7 @@ const EditUserRow = ({
   }
 
   return (
+    //TODO: how to consistently fix the "Property 'username' does not exist on type 'UserRowState'." and the "Property 'admin' does not exist on type 'UserRowState'." errors?
     <TableRow>
       <TableCell>
         <TextField

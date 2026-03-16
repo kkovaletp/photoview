@@ -1,13 +1,12 @@
-import { gql } from '@apollo/client'
-import React, { useEffect } from 'react'
-import { useLazyQuery } from '@apollo/client'
+import { gql, useLazyQuery } from '@apollo/client'
+import { Dispatch, useEffect } from 'react'
 import PresentView from '../../components/photoGallery/presentView/PresentView'
 import type mapboxgl from 'mapbox-gl'
 import { PresentMarker } from './PlacesPage'
 import {
-  placePageQueryMedia,
-  placePageQueryMediaVariables,
-} from './__generated__/placePageQueryMedia'
+  PlacePageQueryMediaQuery,
+  PlacePageQueryMediaQueryVariables,
+} from './__generated__/MapPresentMarker'
 import { PlacesAction, PlacesState } from './placesReducer'
 
 const QUERY_MEDIA = gql`
@@ -58,7 +57,7 @@ const getMediaFromMarker = (map: mapboxgl.Map, presentMarker: PresentMarker) =>
         ?.properties as MediaMarker | undefined
 
       if (media === undefined) {
-        reject('ERROR: media is undefined')
+        reject(new Error('ERROR: media is undefined'))
         return
       }
 
@@ -78,7 +77,7 @@ export interface MediaMarker {
 type MapPresetMarkerProps = {
   map: mapboxgl.Map | null
   markerMediaState: PlacesState
-  dispatchMarkerMedia: React.Dispatch<PlacesAction>
+  dispatchMarkerMedia: Dispatch<PlacesAction>
 }
 
 /**
@@ -90,8 +89,8 @@ const MapPresentMarker = ({
   dispatchMarkerMedia,
 }: MapPresetMarkerProps) => {
   const [loadMedia, { data: loadedMedia }] = useLazyQuery<
-    placePageQueryMedia,
-    placePageQueryMediaVariables
+    PlacePageQueryMediaQuery,
+    PlacePageQueryMediaQueryVariables
   >(QUERY_MEDIA)
 
   useEffect(() => {
@@ -116,7 +115,7 @@ const MapPresentMarker = ({
     const mediaList = loadedMedia?.mediaList || []
     dispatchMarkerMedia({
       type: 'replaceMedia',
-      media: mediaList,
+      media: mediaList, //TODO: how to fix the "Property 'favorite' is missing in type '{ __typename?: "Media" | undefined; id: string;..." error?
     })
     if (mediaList.length > 0) {
       dispatchMarkerMedia({

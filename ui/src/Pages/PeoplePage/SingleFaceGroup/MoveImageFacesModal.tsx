@@ -1,24 +1,19 @@
 import { gql, useLazyQuery, useMutation } from '@apollo/client'
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState, Dispatch, SetStateAction } from 'react'
 import { useNavigate } from 'react-router-dom'
 import SelectFaceGroupTable from './SelectFaceGroupTable'
 import SelectImageFacesTable from './SelectImageFacesTable'
 import { MY_FACES_QUERY } from '../PeoplePage'
+import { SingleFaceGroupQuery } from './__generated__/SingleFaceGroup'
 import {
-  singleFaceGroup_faceGroup,
-  singleFaceGroup_faceGroup_imageFaces,
-} from './__generated__/singleFaceGroup'
-import {
-  myFaces,
-  myFacesVariables,
-  myFaces_myFaceGroups,
-  myFaces_myFaceGroups_imageFaces,
-} from '../__generated__/myFaces'
+  MyFacesQuery,
+  MyFacesQueryVariables
+} from '../__generated__/PeoplePage'
 import { isNil } from '../../../helpers/utils'
 import {
-  moveImageFaces,
-  moveImageFacesVariables,
-} from './__generated__/moveImageFaces'
+  MoveImageFacesMutation,
+  MoveImageFacesMutationVariables,
+} from './__generated__/MoveImageFacesModal'
 import { useTranslation } from 'react-i18next'
 import Modal, { ModalAction } from '../../../primitives/Modal'
 
@@ -38,11 +33,11 @@ const MOVE_IMAGE_FACES_MUTATION = gql`
 
 type MoveImageFacesModalProps = {
   open: boolean
-  setOpen: React.Dispatch<React.SetStateAction<boolean>>
-  faceGroup: singleFaceGroup_faceGroup
+  setOpen: Dispatch<SetStateAction<boolean>>
+  faceGroup: SingleFaceGroupQuery['faceGroup']
   preselectedImageFaces?: (
-    | singleFaceGroup_faceGroup_imageFaces
-    | myFaces_myFaceGroups_imageFaces
+    | SingleFaceGroupQuery['faceGroup']['imageFaces'][0]
+    | MyFacesQuery['myFaceGroups'][0]['imageFaces'][0]
   )[]
 }
 
@@ -55,17 +50,17 @@ const MoveImageFacesModal = ({
   const { t } = useTranslation()
 
   const [selectedImageFaces, setSelectedImageFaces] = useState<
-    (singleFaceGroup_faceGroup_imageFaces | myFaces_myFaceGroups_imageFaces)[]
+    (SingleFaceGroupQuery['faceGroup']['imageFaces'][0] | MyFacesQuery['myFaceGroups'][0]['imageFaces'][0])[]
   >([])
   const [selectedFaceGroup, setSelectedFaceGroup] = useState<
-    myFaces_myFaceGroups | singleFaceGroup_faceGroup | null
+    MyFacesQuery['myFaceGroups'][0] | SingleFaceGroupQuery['faceGroup'] | null
   >(null)
   const [imagesSelected, setImagesSelected] = useState(false)
   const navigate = useNavigate()
 
   const [moveImageFacesMutation] = useMutation<
-    moveImageFaces,
-    moveImageFacesVariables
+    MoveImageFacesMutation,
+    MoveImageFacesMutationVariables
   >(MOVE_IMAGE_FACES_MUTATION, {
     refetchQueries: [
       {
@@ -75,8 +70,8 @@ const MoveImageFacesModal = ({
   })
 
   const [loadFaceGroups, { data: faceGroupsData }] = useLazyQuery<
-    myFaces,
-    myFacesVariables
+    MyFacesQuery,
+    MyFacesQueryVariables
   >(MY_FACES_QUERY)
 
   useEffect(() => {
@@ -99,7 +94,7 @@ const MoveImageFacesModal = ({
     }
   }, [open])
 
-  if (open == false) return null
+  if (!open) return null
 
   const moveImageFaces = () => {
     const faceIDs = selectedImageFaces.map(face => face.id)
@@ -122,19 +117,7 @@ const MoveImageFacesModal = ({
   const imageFaces = faceGroup.imageFaces
 
   let table = null
-  if (!imagesSelected) {
-    table = (
-      <SelectImageFacesTable
-        imageFaces={imageFaces}
-        selectedImageFaces={selectedImageFaces}
-        setSelectedImageFaces={setSelectedImageFaces}
-        title={t(
-          'people_page.modal.move_image_faces.image_select_table.title',
-          'Select images to move'
-        )}
-      />
-    )
-  } else {
+  if (imagesSelected) {
     if (faceGroupsData && faceGroup) {
       const filteredFaceGroups = faceGroupsData.myFaceGroups.filter(
         x => x.id != faceGroup.id
@@ -146,6 +129,7 @@ const MoveImageFacesModal = ({
             'Select destination face group'
           )}
           faceGroups={filteredFaceGroups}
+          //TODO: consistently fix the "Property 'selectedFaceGroup' does not exist on type 'IntrinsicAttributes & SelectFaceGroupTableProps'" error
           selectedFaceGroup={selectedFaceGroup}
           setSelectedFaceGroup={setSelectedFaceGroup}
         />
@@ -153,20 +137,22 @@ const MoveImageFacesModal = ({
     } else {
       table = <div>{t('general.loading.default', 'Loading...')}</div>
     }
+  } else {
+    table = (
+      <SelectImageFacesTable
+        imageFaces={imageFaces}
+        selectedImageFaces={selectedImageFaces}
+        setSelectedImageFaces={setSelectedImageFaces}
+        title={t(
+          'people_page.modal.move_image_faces.image_select_table.title',
+          'Select images to move'
+        )}
+      />
+    )
   }
 
   let positiveButton: ModalAction
-  if (!imagesSelected) {
-    positiveButton = {
-      key: 'next',
-      label: t(
-        'people_page.modal.move_image_faces.image_select_table.next_action',
-        'Next'
-      ),
-      onClick: () => setImagesSelected(true),
-      variant: 'positive',
-    }
-  } else {
+  if (imagesSelected) {
     positiveButton = {
       key: 'move',
       label: t(
@@ -174,6 +160,16 @@ const MoveImageFacesModal = ({
         'Move image faces'
       ),
       onClick: () => moveImageFaces(),
+      variant: 'positive',
+    }
+  } else {
+    positiveButton = {
+      key: 'next',
+      label: t(
+        'people_page.modal.move_image_faces.image_select_table.next_action',
+        'Next'
+      ),
+      onClick: () => setImagesSelected(true),
       variant: 'positive',
     }
   }

@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import { useState, Dispatch, SetStateAction } from 'react'
 import {
   FetchResult,
   gql,
@@ -7,10 +7,12 @@ import {
 } from '@apollo/client'
 import EditUserRow from './EditUserRow'
 import ViewUserRow from './ViewUserRow'
-import { settingsUsersQuery_user } from './__generated__/settingsUsersQuery'
-import { scanUser, scanUserVariables } from './__generated__/scanUser'
-import { updateUser, updateUserVariables } from './__generated__/updateUser'
-import { deleteUser, deleteUserVariables } from './__generated__/deleteUser'
+import { SettingsUsersQueryQuery } from './__generated__/UsersTable'
+import {
+  ScanUserMutation, ScanUserMutationVariables,
+  UpdateUserMutation, UpdateUserMutationVariables,
+  DeleteUserMutation, DeleteUserMutationVariables,
+} from './__generated__/UserRow'
 import { useMessageState } from '../../../components/messages/MessageState'
 import { NotificationType } from '../../../__generated__/globalTypes'
 
@@ -41,7 +43,8 @@ const scanUserMutation = gql`
   }
 `
 
-interface UserRowState extends settingsUsersQuery_user {
+//TODO: how to fix the "An interface can only extend an identifier/qualified-name with optional type arguments" error?
+interface UserRowState extends SettingsUsersQueryQuery['user'][0] {
   editing: boolean
   newRootPath: string
   oldState?: Omit<UserRowState, 'oldState'>
@@ -53,22 +56,22 @@ type ApolloMutationFn<MutationType, VariablesType> = (
 ) => Promise<FetchResult<MutationType, any, any>>
 
 export type UserRowChildProps = {
-  user: settingsUsersQuery_user
+  user: SettingsUsersQueryQuery['user'][0]
   state: UserRowState
-  setState: React.Dispatch<React.SetStateAction<UserRowState>>
-  scanUser: ApolloMutationFn<scanUser, scanUserVariables>
-  updateUser: ApolloMutationFn<updateUser, updateUserVariables>
+  setState: Dispatch<SetStateAction<UserRowState>>
+  scanUser: ApolloMutationFn<ScanUserMutation, ScanUserMutationVariables>
+  updateUser: ApolloMutationFn<UpdateUserMutation, UpdateUserMutationVariables>
   updateUserLoading: boolean
-  deleteUser: ApolloMutationFn<deleteUser, deleteUserVariables>
-  setChangePassword: React.Dispatch<React.SetStateAction<boolean>>
-  setConfirmDelete: React.Dispatch<React.SetStateAction<boolean>>
+  deleteUser: ApolloMutationFn<DeleteUserMutation, DeleteUserMutationVariables>
+  setChangePassword: Dispatch<SetStateAction<boolean>>
+  setConfirmDelete: Dispatch<SetStateAction<boolean>>
   scanUserCalled: boolean
   showChangePassword: boolean
   showConfirmDelete: boolean
 }
 
 export type UserRowProps = {
-  user: settingsUsersQuery_user
+  user: SettingsUsersQueryQuery['user'][0]
   refetchUsers: () => void
 }
 
@@ -99,18 +102,18 @@ const UserRow = ({ user, refetchUsers }: UserRowProps) => {
   const [showConfirmDelete, setConfirmDelete] = useState(false)
   const [showChangePassword, setChangePassword] = useState(false)
   const [updateUserMutationFn, { loading: updateUserLoading }] = useMutation<
-    updateUser,
-    updateUserVariables
+    UpdateUserMutation,
+    UpdateUserMutationVariables
   >(updateUserMutation)
 
-  const [deleteUserMutationFn] = useMutation<deleteUser, deleteUserVariables>(deleteUserMutation)
+  const [deleteUserMutationFn] = useMutation<DeleteUserMutation, DeleteUserMutationVariables>(deleteUserMutation)
 
   const [scanUserMutationFn, { called: scanUserCalled }] = useMutation<
-    scanUser,
-    scanUserVariables
+    ScanUserMutation,
+    ScanUserMutationVariables
   >(scanUserMutation)
 
-  const updateUser: ApolloMutationFn<updateUser, updateUserVariables> = async (
+  const updateUser: ApolloMutationFn<UpdateUserMutation, UpdateUserMutationVariables> = async (
     options
   ) => {
     try {
@@ -128,11 +131,11 @@ const UserRow = ({ user, refetchUsers }: UserRowProps) => {
     } catch (error) {
       console.error('Failed to update user: ', error)
       notifyMutationError(add, 'Failed to update user', error)
-      return {} as FetchResult<updateUser>
+      return {} as FetchResult<UpdateUserMutation>
     }
   }
 
-  const deleteUser: ApolloMutationFn<deleteUser, deleteUserVariables> = async (
+  const deleteUser: ApolloMutationFn<DeleteUserMutation, DeleteUserMutationVariables> = async (
     options
   ) => {
     try {
@@ -145,11 +148,11 @@ const UserRow = ({ user, refetchUsers }: UserRowProps) => {
     } catch (error) {
       console.error('Failed to delete user: ', error)
       notifyMutationError(add, 'Failed to delete user', error)
-      return {} as FetchResult<deleteUser>
+      return {} as FetchResult<DeleteUserMutation>
     }
   }
 
-  const scanUser: ApolloMutationFn<scanUser, scanUserVariables> = async (
+  const scanUser: ApolloMutationFn<ScanUserMutation, ScanUserMutationVariables> = async (
     options
   ) => {
     try {
@@ -162,7 +165,7 @@ const UserRow = ({ user, refetchUsers }: UserRowProps) => {
     } catch (error) {
       console.error('Failed to scan user: ', error)
       notifyMutationError(add, 'Failed to scan user', error)
-      return {} as FetchResult<scanUser>
+      return {} as FetchResult<ScanUserMutation>
     }
   }
 

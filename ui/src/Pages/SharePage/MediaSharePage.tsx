@@ -8,7 +8,7 @@ import {
 import { SidebarContext } from '../../components/sidebar/Sidebar'
 import MediaSidebar from '../../components/sidebar/MediaSidebar/MediaSidebar'
 import { useTranslation } from 'react-i18next'
-import { SharePageToken_shareToken_media } from './__generated__/SharePageToken'
+import { SharePageTokenQuery } from './__generated__/SharePage'
 import { MediaType } from '../../__generated__/globalTypes'
 import { exhaustiveCheck } from '../../helpers/utils'
 
@@ -24,7 +24,7 @@ const DisplayVideo = styled(ProtectedVideo)`
 `
 
 type MediaViewProps = {
-  media: SharePageToken_shareToken_media
+  media: SharePageTokenQuery['shareToken']['media']
 }
 
 const MediaView = ({ media }: MediaViewProps) => {
@@ -32,28 +32,34 @@ const MediaView = ({ media }: MediaViewProps) => {
 
   useEffect(() => {
     if (typeof updateSidebar === 'function') {
+      //TODO: how to fix the "Type 'undefined' is not assignable to type 'MediaSidebarMedia'" error?
       updateSidebar(<MediaSidebar media={media} hidePreview />)
     }
   }, [media, updateSidebar])
 
+  //TODO: how to fix the "'media' is possibly 'null' or 'undefined'" error?
   switch (media.type) {
     case MediaType.Photo:
+      //TODO: how to fix the "'media' is possibly 'null' or 'undefined'" error?
       return <DisplayPhoto src={media.highRes?.url} />
     case MediaType.Video:
+      //TODO: how to fix the "Type 'undefined' is not assignable to type 'ProtectedVideoPropsMedia'" error?
       return <DisplayVideo media={media} />
     default:
+      //TODO: how to fix the "'media' is possibly 'null' or 'undefined'" error?
       return exhaustiveCheck(media.type)
   }
 }
 
 type MediaSharePageType = {
-  media: SharePageToken_shareToken_media
+  media: SharePageTokenQuery['shareToken']['media']
 }
 
 const MediaSharePage = ({ media }: MediaSharePageType) => {
   const { t } = useTranslation()
 
   return (
+    //TODO: how to fix the "'media' is possibly 'null' or 'undefined'" error?
     <Layout title={t('share_page.media.title', 'Shared media')}>
       <div data-testid="MediaSharePage">
         <h1 className="font-semibold text-xl mb-4">{media.title}</h1>

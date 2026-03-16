@@ -1,10 +1,10 @@
-import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react'
+import { createContext, useContext, useState, ReactNode, useEffect, useMemo, Dispatch, SetStateAction } from 'react'
 import { Message } from './SubscriptionsHook'
 import { globalMessageHandler } from './globalMessageHandler'
 
 type MessageContextType = {
   messages: Message[]
-  setMessages: React.Dispatch<React.SetStateAction<Message[]>>
+  setMessages: Dispatch<SetStateAction<Message[]>>
   add: (message: Message) => void
   removeKey: (key: string) => void
 }
@@ -55,8 +55,13 @@ export const MessageProvider = ({ children }: MessageProviderProps) => {
     return () => clearInterval(cleanupInterval);
   }, []);
 
+  const contextValue = useMemo(
+    () => ({ messages, setMessages, add, removeKey }),
+    [messages, setMessages, add, removeKey]
+  );
+
   return (
-    <MessageContext.Provider value={{ messages, setMessages, add, removeKey }}>
+    <MessageContext.Provider value={contextValue}>
       {children}
     </MessageContext.Provider>
   )

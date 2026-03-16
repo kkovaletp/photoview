@@ -1,4 +1,4 @@
-import React, { useContext } from 'react'
+import { Dispatch, useContext } from 'react'
 import { Link } from 'react-router-dom'
 import { MediaThumbnail } from '../photoGallery/MediaThumbnail'
 import { PhotoFiller } from '../photoGallery/MediaGallery'
@@ -19,7 +19,7 @@ type TimelineGroupAlbumProps = {
   dateIndex: number
   albumIndex: number
   mediaState: TimelineGalleryState
-  dispatchMedia: React.Dispatch<TimelineGalleryAction>
+  dispatchMedia: Dispatch<TimelineGalleryAction>
 }
 
 const TimelineGroupAlbum = ({
@@ -51,6 +51,7 @@ const TimelineGroupAlbum = ({
             media: index,
           },
         })
+        //TODO: how to fix the "Type '"Media" | undefined' is not assignable to type '"Media"'" error?
         updateSidebar(<MediaSidebar media={media} />)
       }}
       clickPresent={() => {

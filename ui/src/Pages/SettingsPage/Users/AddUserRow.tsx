@@ -1,14 +1,15 @@
 import { gql, useMutation } from '@apollo/client'
-import React, { useState } from 'react'
+import { useState, ChangeEvent, Dispatch, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
 import Checkbox from '../../../primitives/form/Checkbox'
 import { TextField, Button, ButtonGroup } from '../../../primitives/form/Input'
 import { TableRow, TableCell } from '../../../primitives/Table'
-import { createUser, createUserVariables } from './__generated__/createUser'
 import {
-  userAddRootPath,
-  userAddRootPathVariables,
-} from './__generated__/userAddRootPath'
+  CreateUserMutation,
+  CreateUserMutationVariables,
+  UserAddRootPathMutation,
+  UserAddRootPathMutationVariables,
+} from './__generated__/AddUserRow'
 import MessageBox from '../../../primitives/form/MessageBox'
 
 export const CREATE_USER_MUTATION = gql`
@@ -38,7 +39,7 @@ const initialState = {
 }
 
 type AddUserRowProps = {
-  setShow: React.Dispatch<React.SetStateAction<boolean>>
+  setShow: Dispatch<SetStateAction<boolean>>
   show: boolean
   onUserAdded(): void
 }
@@ -55,13 +56,13 @@ const AddUserRow = ({ setShow, show, onUserAdded }: AddUserRowProps) => {
   }
 
   const [addRootPath, { loading: addRootPathLoading }] = useMutation<
-    userAddRootPath,
-    userAddRootPathVariables
+    UserAddRootPathMutation,
+    UserAddRootPathMutationVariables
   >(USER_ADD_ROOT_PATH_MUTATION)
 
   const [createUser, { loading: createUserLoading }] = useMutation<
-    createUser,
-    createUserVariables
+    CreateUserMutation,
+    CreateUserMutationVariables
   >(CREATE_USER_MUTATION)
 
   const loading = addRootPathLoading || createUserLoading
@@ -97,7 +98,7 @@ const AddUserRow = ({ setShow, show, onUserAdded }: AddUserRowProps) => {
   }
 
   function updateInput(
-    event: React.ChangeEvent<HTMLInputElement>,
+    event: ChangeEvent<HTMLInputElement>,
     key: string
   ) {
     setState({

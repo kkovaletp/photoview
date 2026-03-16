@@ -1,6 +1,6 @@
 import { useMutation, useQuery } from '@apollo/client'
 import gql from 'graphql-tag'
-import React, { useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import styled from 'styled-components'
 import { LanguageTranslation } from '../../__generated__/globalTypes'
@@ -12,10 +12,10 @@ import {
   SectionTitle,
 } from './SettingsPage'
 import {
-  changeUserPreferences,
-  changeUserPreferencesVariables,
-} from './__generated__/changeUserPreferences'
-import { myUserPreferences } from './__generated__/myUserPreferences'
+  MyUserPreferencesQuery,
+  ChangeUserPreferencesMutation,
+  ChangeUserPreferencesMutationVariables,
+} from './__generated__/UserPreferences'
 import { TranslationFn } from '../../localization'
 import { changeTheme, getTheme } from '../../theme'
 
@@ -29,8 +29,8 @@ const languagePreferences = [
   { key: 7, label: 'Italiano', value: LanguageTranslation.Italian },
   { key: 8, label: 'Deutsch', value: LanguageTranslation.German },
   { key: 9, label: 'Русский', value: LanguageTranslation.Russian },
-  { key: 10, label: '繁體中文 (香港)', value: LanguageTranslation.TraditionalChineseHK },
-  { key: 16, label: '繁體中文 (台灣)', value: LanguageTranslation.TraditionalChineseTW },
+  { key: 10, label: '繁體中文 (香港)', value: LanguageTranslation.TraditionalChineseHk },
+  { key: 16, label: '繁體中文 (台灣)', value: LanguageTranslation.TraditionalChineseTw },
   { key: 11, label: '简体中文', value: LanguageTranslation.SimplifiedChinese },
   { key: 12, label: 'Português', value: LanguageTranslation.Portuguese },
   { key: 13, label: 'Euskara', value: LanguageTranslation.Basque },
@@ -103,11 +103,11 @@ const UserPreferences = () => {
     setTheme(value)
   }
 
-  const { data } = useQuery<myUserPreferences>(MY_USER_PREFERENCES)
+  const { data } = useQuery<MyUserPreferencesQuery>(MY_USER_PREFERENCES)
 
   const [changePrefs, { loading: loadingPrefs, error }] = useMutation<
-    changeUserPreferences,
-    changeUserPreferencesVariables
+    ChangeUserPreferencesMutation,
+    ChangeUserPreferencesMutationVariables
   >(CHANGE_USER_PREFERENCES)
 
   const sortedLanguagePrefs = useMemo(
@@ -120,6 +120,7 @@ const UserPreferences = () => {
   }
 
   return (
+    //TODO: how to fix the "Property 'placeholder' does not exist on type 'IntrinsicAttributes & SelectHTMLAttributes<HTMLSelectElement> & { items: DropdownItem[]; selected?: string | undefined; setSelected(value: string): void; className?: string | undefined; }" error?
     <UserPreferencesWrapper>
       <SectionTitle nospace>
         {t('settings.user_preferences.title', 'User preferences')}

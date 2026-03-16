@@ -1,5 +1,5 @@
 import { NotificationSubscriptionSubscription } from './__generated__/SubscriptionsHook'
-import React, { useEffect } from 'react'
+import { Dispatch, SetStateAction, useEffect } from 'react'
 import { useSubscription, gql } from '@apollo/client'
 import { authToken } from '../../helpers/authentication'
 import { NotificationType } from '../../__generated__/globalTypes'
@@ -38,21 +38,24 @@ export interface Message {
 
 type SubscriptionHookProps = {
   messages: Message[]
-  setMessages: React.Dispatch<React.SetStateAction<Message[]>>
+  setMessages: Dispatch<SetStateAction<Message[]>>
 }
 
 export const SubscriptionsHook = ({
   messages,
   setMessages,
+  //TODO: Suggest a consistent fix for the "Refactor this function to not always return the same value" warning.
 }: SubscriptionHookProps) => {
   if (!authToken()) {
     return null
   }
 
+  //TODO: Suggest a consistent fix for the "React Hook "useSubscription" is called conditionally. React Hooks must be called in the exact same order in every component render. Did you accidentally call a React Hook after an early return?" warning.
   const { data, error } = useSubscription<NotificationSubscriptionSubscription>(
     NOTIFICATION_SUBSCRIPTION
   )
 
+  //TODO: Suggest a consistent fix for the "React Hook "useSubscription" is called conditionally. React Hooks must be called in the exact same order in every component render. Did you accidentally call a React Hook after an early return?" warning.
   useEffect(() => {
     if (error) {
       setMessages(state => [
@@ -110,10 +113,10 @@ export const SubscriptionsHook = ({
     const notifyIndex = newMessages.findIndex(
       msg => msg.key == newNotification.key
     )
-    if (notifyIndex != -1) {
-      newMessages[notifyIndex] = newNotification
-    } else {
+    if (notifyIndex === -1) {
       newMessages.push(newNotification)
+    } else {
+      newMessages[notifyIndex] = newNotification
     }
 
     setMessages(newMessages)

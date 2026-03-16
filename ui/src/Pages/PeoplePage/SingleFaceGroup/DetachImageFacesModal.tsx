@@ -1,23 +1,17 @@
 import { BaseMutationOptions, gql, useMutation } from '@apollo/client'
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
 import { isNil } from '../../../helpers/utils'
 import Modal from '../../../primitives/Modal'
 import { MY_FACES_QUERY } from '../PeoplePage'
-import {
-  myFaces_myFaceGroups,
-  myFaces_myFaceGroups_imageFaces,
-} from '../__generated__/myFaces'
+import { MyFacesQuery } from '../__generated__/PeoplePage'
 import SelectImageFacesTable from './SelectImageFacesTable'
 import {
-  detachImageFaces,
-  detachImageFacesVariables,
-} from './__generated__/detachImageFaces'
-import {
-  singleFaceGroup_faceGroup,
-  singleFaceGroup_faceGroup_imageFaces,
-} from './__generated__/singleFaceGroup'
+  DetachImageFacesMutation,
+  DetachImageFacesMutationVariables,
+} from './__generated__/DetachImageFacesModal'
+import { SingleFaceGroupQuery } from './__generated__/SingleFaceGroup'
 
 const DETACH_IMAGE_FACES_MUTATION = gql`
   mutation detachImageFaces($faceIDs: [ID!]!) {
@@ -30,21 +24,22 @@ const DETACH_IMAGE_FACES_MUTATION = gql`
 
 export const useDetachImageFaces = (
   mutationOptions: BaseMutationOptions<
-    detachImageFaces,
-    detachImageFacesVariables
+    DetachImageFacesMutation,
+    DetachImageFacesMutationVariables
   >
 ) => {
   const [detachImageFacesMutation] = useMutation<
-    detachImageFaces,
-    detachImageFacesVariables
+    DetachImageFacesMutation,
+    DetachImageFacesMutationVariables
   >(DETACH_IMAGE_FACES_MUTATION, mutationOptions)
 
   return async (
     selectedImageFaces: (
-      | myFaces_myFaceGroups_imageFaces
-      | singleFaceGroup_faceGroup_imageFaces
+      | MyFacesQuery['myFaceGroups'][0]['imageFaces']
+      | SingleFaceGroupQuery['faceGroup']['imageFaces']
     )[]
   ) => {
+    //TODO: how to fix the "Property 'id' does not exist on type '{ __typename?: "ImageFace" | undefined; id: string;" error?
     const faceIDs = selectedImageFaces.map(face => face.id)
 
     const result = await detachImageFacesMutation({
@@ -60,10 +55,10 @@ export const useDetachImageFaces = (
 type DetachImageFacesModalProps = {
   open: boolean
   setOpen(open: boolean): void
-  faceGroup: myFaces_myFaceGroups | singleFaceGroup_faceGroup
+  faceGroup: MyFacesQuery['myFaceGroups'][0] | SingleFaceGroupQuery['faceGroup']
   selectedImageFaces?: (
-    | myFaces_myFaceGroups_imageFaces
-    | singleFaceGroup_faceGroup_imageFaces
+    | MyFacesQuery['myFaceGroups'][0]['imageFaces']
+    | SingleFaceGroupQuery['faceGroup']['imageFaces']
   )[]
 }
 
@@ -76,7 +71,7 @@ const DetachImageFacesModal = ({
   const { t } = useTranslation()
 
   const [selectedImageFaces, setSelectedImageFaces] = useState<
-    (myFaces_myFaceGroups_imageFaces | singleFaceGroup_faceGroup_imageFaces)[]
+    (MyFacesQuery['myFaceGroups'][0]['imageFaces'] | SingleFaceGroupQuery['faceGroup']['imageFaces'])[]
   >([])
   const navigate = useNavigate()
 
@@ -107,7 +102,7 @@ const DetachImageFacesModal = ({
     }
   }, [open])
 
-  if (open == false) return null
+  if (!open) return null
 
   const imageFaces = faceGroup?.imageFaces ?? []
 

@@ -41,7 +41,7 @@ const SITE_TRANSLATION = gql`
   }
 `
 let map_language: LanguageTranslation | null
-
+//TODO: should I rename this function to the "LoadTranslations" or "useLoadTranslations" to satisfy the "React Hook "useLazyQuery" is called in function "loadTranslations" that is neither a React function component nor a custom React Hook function. React component names must start with an uppercase letter. React Hook names must start with the word "use"" warning?
 export const loadTranslations = () => {
   const [loadLang, { data }] = useLazyQuery<SiteTranslationQuery>(SITE_TRANSLATION)
 
@@ -228,7 +228,7 @@ export const SetMapLanguages = (map: mapboxgl.Map) => {
       map.addControl(new MapboxLanguage({ defaultLanguage: 'pt' }))
       return
     case LanguageTranslation.Basque:
-      map.addControl(new MapboxLanguage({ defaultLanguage: 'en' }))
+      map.addControl(new MapboxLanguage({ defaultLanguage: 'eu' }))
       return
     case LanguageTranslation.Turkish:
       map.addControl(new MapboxLanguage({ defaultLanguage: 'tr' }))

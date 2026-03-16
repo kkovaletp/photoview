@@ -1,5 +1,5 @@
 import { useMutation } from '@apollo/client'
-import React, {
+import {
   useState,
   useEffect,
   createRef,
@@ -10,18 +10,18 @@ import { isNil } from '../../../helpers/utils'
 import { Button, TextField } from '../../../primitives/form/Input'
 import { MY_FACES_QUERY, SET_GROUP_LABEL_MUTATION } from '../PeoplePage'
 import {
-  setGroupLabel,
-  setGroupLabelVariables,
-} from '../__generated__/setGroupLabel'
+  SetGroupLabelMutation,
+  SetGroupLabelMutationVariables,
+} from '../__generated__/PeoplePage'
 import DetachImageFacesModal from './DetachImageFacesModal'
 import MergeFaceGroupsModal, {
   MergeFaceGroupsModalState,
 } from './MergeFaceGroupsModal'
 import MoveImageFacesModal from './MoveImageFacesModal'
-import { singleFaceGroup_faceGroup } from './__generated__/singleFaceGroup'
+import { SingleFaceGroupQuery } from './__generated__/SingleFaceGroup'
 
 type FaceGroupTitleProps = {
-  faceGroup?: singleFaceGroup_faceGroup
+  faceGroup?: SingleFaceGroupQuery['faceGroup']
 }
 
 const FaceGroupTitle = ({ faceGroup }: FaceGroupTitleProps) => {
@@ -37,8 +37,8 @@ const FaceGroupTitle = ({ faceGroup }: FaceGroupTitleProps) => {
   const [detachModalOpen, setDetachModalOpen] = useState(false)
 
   const [setGroupLabel, { loading: setLabelLoading }] = useMutation<
-    setGroupLabel,
-    setGroupLabelVariables
+    SetGroupLabelMutation,
+    SetGroupLabelMutationVariables
   >(SET_GROUP_LABEL_MUTATION)
 
   const resetLabel = () => {
@@ -61,55 +61,51 @@ const FaceGroupTitle = ({ faceGroup }: FaceGroupTitleProps) => {
   const onKeyDown: KeyboardEventHandler<HTMLInputElement> = e => {
     if (e.key == 'Escape') {
       resetLabel()
-      return
     }
   }
 
   let title
-  if (!editLabel) {
+  if (editLabel) {
     title = (
-      <>
-        <h1
-          className={`text-2xl font-semibold ${faceGroup?.label ? '' : 'text-gray-600 dark:text-gray-400'
-            }`}
-        >
-          {faceGroup?.label ??
-            t('people_page.face_group.unlabeled_person', 'Unlabeled person')}
-        </h1>
-      </>
+      <TextField
+        loading={setLabelLoading}
+        ref={inputRef}
+        placeholder={t('people_page.face_group.label_placeholder', 'Label')}
+        action={() => {
+          if (isNil(faceGroup))
+            throw new Error('Expected faceGroup to be defined')
+
+          setGroupLabel({
+            variables: {
+              groupID: faceGroup.id,
+              label: inputValue || null,
+            },
+          })
+        }}
+        value={inputValue}
+        onKeyDown={onKeyDown}
+        onChange={e => setInputValue(e.target.value)}
+        onBlur={() => {
+          resetLabel()
+        }}
+      />
     )
   } else {
     title = (
-      <>
-        <TextField
-          loading={setLabelLoading}
-          ref={inputRef}
-          placeholder={t('people_page.face_group.label_placeholder', 'Label')}
-          action={() => {
-            if (isNil(faceGroup))
-              throw new Error('Expected faceGroup to be defined')
-
-            setGroupLabel({
-              variables: {
-                groupID: faceGroup.id,
-                label: inputValue ? inputValue : null,
-              },
-            })
-          }}
-          value={inputValue}
-          onKeyDown={onKeyDown}
-          onChange={e => setInputValue(e.target.value)}
-          onBlur={() => {
-            resetLabel()
-          }}
-        />
-      </>
+      <h1
+        className={`text-2xl font-semibold ${faceGroup?.label ? '' : 'text-gray-600 dark:text-gray-400'
+          }`}
+      >
+        {faceGroup?.label ??
+          t('people_page.face_group.unlabeled_person', 'Unlabeled person')}
+      </h1>
     )
   }
 
   let modals = null
   if (faceGroup) {
     modals = (
+      //TODO: consistently fix the "Type '"FaceGroup" | undefined' is not assignable to type '"FaceGroup"'" error
       <>
         <MergeFaceGroupsModal
           state={mergeModalState}

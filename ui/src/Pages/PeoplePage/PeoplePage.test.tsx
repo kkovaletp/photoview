@@ -6,7 +6,7 @@ import {
   MY_FACES_QUERY,
   SET_GROUP_LABEL_MUTATION,
 } from './PeoplePage'
-import { myFaces_myFaceGroups } from './__generated__/myFaces'
+import { MyFacesQuery } from './__generated__/PeoplePage'
 import { renderWithProviders } from '../../helpers/testUtils'
 
 vi.mock('../../hooks/useScrollPagination')
@@ -133,7 +133,7 @@ describe('PeoplePage component', () => {
 })
 
 describe('FaceDetails component', () => {
-  const faceGroup: myFaces_myFaceGroups = {
+  const faceGroup: MyFacesQuery['myFaceGroups'][0] = {
     id: '3',
     label: null,
     imageFaceCount: 2,
@@ -165,7 +165,7 @@ describe('FaceDetails component', () => {
   }
 
   test('unlabeled, no images', () => {
-    const emptyFaceGroup: myFaces_myFaceGroups = {
+    const emptyFaceGroup: MyFacesQuery['myFaceGroups'][0] = {
       ...faceGroup,
       imageFaces: [],
     }
@@ -174,6 +174,7 @@ describe('FaceDetails component', () => {
       <FaceDetails
         editLabel={false}
         setEditLabel={vi.fn()}
+        //TODO: consistently fix the "Type '"FaceGroup" | undefined' is not assignable to type '"FaceGroup"'" type mismatch.
         group={emptyFaceGroup}
       />,
       { mocks: [] }
@@ -183,7 +184,7 @@ describe('FaceDetails component', () => {
   })
 
   test('labeled, with thumbnail', () => {
-    const labeledFaceGroup: myFaces_myFaceGroups = {
+    const labeledFaceGroup: MyFacesQuery['myFaceGroups'][0] = {
       ...faceGroup,
       label: 'Some label',
     }
@@ -192,6 +193,7 @@ describe('FaceDetails component', () => {
       <FaceDetails
         editLabel={false}
         setEditLabel={vi.fn()}
+        //TODO: consistently fix the "Type '"FaceGroup" | undefined' is not assignable to type '"FaceGroup"'" type mismatch.
         group={labeledFaceGroup}
       />,
       { mocks: [] }
@@ -225,6 +227,7 @@ describe('FaceDetails component', () => {
     renderWithProviders(<FaceGroup group={faceGroup} />, {
       mocks: graphqlMocks,
       apolloOptions: {
+        //TODO: how to consistently fix the "'addTypename' does not exist in type '{ defaultOptions?: any; }'" error?
         addTypename: false
       }
     })
@@ -251,6 +254,7 @@ describe('FaceDetails component', () => {
     renderWithProviders(<FaceGroup group={faceGroup} />, {
       mocks: [],
       apolloOptions: {
+        //TODO: how to consistently fix the "'addTypename' does not exist in type '{ defaultOptions?: any; }'" error?
         addTypename: false
       }
     })

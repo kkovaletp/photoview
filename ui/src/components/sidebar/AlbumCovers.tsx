@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { useMutation, gql } from '@apollo/client'
 import { useTranslation } from 'react-i18next'
 
@@ -7,8 +7,6 @@ import { SidebarSection, SidebarSectionTitle } from './SidebarComponents'
 import {
   SetAlbumCoverMutation,
   SetAlbumCoverMutationVariables,
-} from './__generated__/AlbumCovers'
-import {
   ResetAlbumCoverMutation,
   ResetAlbumCoverMutationVariables,
 } from './__generated__/AlbumCovers'
@@ -69,6 +67,7 @@ export const SidebarPhotoCover = ({ cover_id }: SidebarPhotoCoverProps) => {
   }
 
   return (
+    //TODO: consistently fix the following warning: "Expected an assignment or function call and instead saw an expression"
     <SidebarSection>
       <SidebarSectionTitle>
         {t('sidebar.album.album_cover', 'Album cover')}
@@ -126,6 +125,7 @@ export const SidebarAlbumCover = ({ id }: SidebarAlbumCoverProps) => {
   }, [id])
 
   return (
+    //TODO: consistently fix the following warning: "Expected an assignment or function call and instead saw an expression"
     <SidebarSection>
       <SidebarSectionTitle>
         {t('sidebar.album.album_cover', 'Album cover')}

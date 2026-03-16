@@ -1,9 +1,8 @@
 import { vi } from 'vitest'
 import { render, fireEvent, waitFor } from '@testing-library/react'
-import MergeFaceGroupsModal, { MergeFaceGroupsModalState } from './MergeFaceGroupsModal'
+import MergeFaceGroupsModal, { MergeFaceGroupsModalState, COMBINE_FACES_MUTATION } from './MergeFaceGroupsModal'
 import { MockedProvider } from '@apollo/client/testing'
 import { MY_FACES_QUERY } from '../PeoplePage'
-import { COMBINE_FACES_MUTATION } from './MergeFaceGroupsModal'
 
 // Mock Modal component to prevent import issues
 vi.mock('../../../primitives/Modal', () => ({
@@ -41,7 +40,7 @@ vi.mock('react-router-dom', async () => {
 
 // Mock IntersectionObserver for tests
 beforeAll(() => {
-    global.IntersectionObserver = class {
+    globalThis.IntersectionObserver = class {
         constructor() { }
         observe() { }
         unobserve() { }

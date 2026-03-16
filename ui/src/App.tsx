@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import { useEffect } from 'react'
 import { HelmetProvider, Helmet } from '@dr.pogodin/react-helmet'
 import Routes from './components/routes/Routes'
 import Messages from './components/messages/Messages'

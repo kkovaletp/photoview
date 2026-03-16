@@ -1,4 +1,4 @@
-import React, { forwardRef } from 'react'
+import { ForwardedRef, forwardRef } from 'react'
 import MessagePlain, { MessageProps } from './Message'
 
 type MessageProgressProps = MessageProps & {
@@ -8,7 +8,7 @@ type MessageProgressProps = MessageProps & {
 const MessageProgress = forwardRef(
   (
     { header, content, percent = 0, ...props }: MessageProgressProps,
-    ref: React.ForwardedRef<HTMLDivElement>
+    ref: ForwardedRef<HTMLDivElement>
   ) => {
     const PROGRESS_LEVELS = {
       LOW: { threshold: 0, color: '#dc2625', state: 'low progress' },
@@ -32,8 +32,9 @@ const MessageProgress = forwardRef(
     }
 
     return (
+      //TODO: how to consistently fix the "Use <progress> instead of the "progressbar" role to ensure accessibility across all devices" warning?
       <MessagePlain header={header} content={content} {...props} ref={ref}>
-        <div className="absolute bottom-0 left-0 right-0 h-[3px] rounded-b overflow-hidden">
+        <div className="absolute bottom-0 left-0 right-0 h-0.75 rounded-b overflow-hidden">
           <div
             role="progressbar"
             aria-valuenow={percent}

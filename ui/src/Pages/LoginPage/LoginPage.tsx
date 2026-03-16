@@ -9,8 +9,8 @@ import { Helmet, HelmetProvider } from '@dr.pogodin/react-helmet'
 import { useNavigate } from 'react-router'
 import { TextField } from '../../primitives/form/Input'
 import MessageBox from '../../primitives/form/MessageBox'
-import { CheckInitialSetup } from './__generated__/CheckInitialSetup'
-import { Authorize, AuthorizeVariables } from './__generated__/Authorize'
+import { CheckInitialSetupQuery } from './__generated__/loginUtilities'
+import { AuthorizeMutation, AuthorizeMutationVariables } from './__generated__/LoginPage'
 
 const authorizeMutation = gql`
   mutation Authorize($username: String!, $password: String!) {
@@ -49,7 +49,7 @@ const LoginForm = () => {
 
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
-  const [authorize, { loading }] = useMutation<Authorize, AuthorizeVariables>(authorizeMutation)
+  const [authorize, { loading }] = useMutation<AuthorizeMutation, AuthorizeMutationVariables>(authorizeMutation)
 
   const onSubmit = handleSubmit(async (data) => {
     try {
@@ -76,7 +76,7 @@ const LoginForm = () => {
 
   return (
     <form
-      className="mx-auto max-w-[500px] px-4"
+      className="mx-auto max-w-125 px-4"
       onSubmit={onSubmit}
     // loading={loading || (data && data.authorizeUser.success)}
     >
@@ -127,7 +127,7 @@ const LoginPage = () => {
   const navigate = useNavigate()
   const token = authToken()
 
-  const { data: initialSetupData } = useQuery<CheckInitialSetup>(
+  const { data: initialSetupData } = useQuery<CheckInitialSetupQuery>(
     INITIAL_SETUP_QUERY,
     { variables: {} }
   )

@@ -1,4 +1,4 @@
-import React, { useContext } from 'react'
+import { Dispatch, useContext } from 'react'
 import styled from 'styled-components'
 import { MediaThumbnail, MediaPlaceholder } from './MediaThumbnail'
 import PresentView from './presentView/PresentView'
@@ -57,7 +57,7 @@ export const MEDIA_GALLERY_FRAGMENT = gql`
 type MediaGalleryProps = {
   loading: boolean
   mediaState: MediaGalleryState
-  dispatchMedia: React.Dispatch<PhotoGalleryAction>
+  dispatchMedia: Dispatch<PhotoGalleryAction>
 }
 
 const MediaGallery = ({ mediaState, dispatchMedia }: MediaGalleryProps) => {
@@ -82,6 +82,7 @@ const MediaGallery = ({ mediaState, dispatchMedia }: MediaGalleryProps) => {
               type: 'selectImage',
               index,
             })
+            //TODO: fix the type mismatch: Type '"Media" | undefined' is not assignable to type '"Media"'
             updateSidebar(<MediaSidebar media={mediaState.media[index]} />)
           }}
           clickFavorite={() => {

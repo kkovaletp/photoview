@@ -1,5 +1,3 @@
-import React from 'react'
-
 type MessageBoxProps = {
   message?: string | null
   show?: boolean

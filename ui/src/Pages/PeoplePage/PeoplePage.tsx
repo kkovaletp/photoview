@@ -1,4 +1,14 @@
-import React, { JSX, createRef, useEffect, useState } from 'react'
+import {
+  createRef,
+  DetailedHTMLProps,
+  Dispatch,
+  HTMLAttributes,
+  JSX,
+  SetStateAction,
+  useEffect,
+  useState,
+  KeyboardEvent,
+} from 'react'
 import { gql, useMutation, useQuery } from '@apollo/client'
 import Layout from '../../components/layout/Layout'
 import styled from 'styled-components'
@@ -10,15 +20,12 @@ import useScrollPagination from '../../hooks/useScrollPagination'
 import PaginateLoader from '../../components/PaginateLoader'
 import { useTranslation } from 'react-i18next'
 import {
-  setGroupLabel,
-  setGroupLabelVariables,
-} from './__generated__/setGroupLabel'
-import {
-  myFaces,
-  myFacesVariables,
-  myFaces_myFaceGroups,
-} from './__generated__/myFaces'
-import { recognizeUnlabeledFaces } from './__generated__/recognizeUnlabeledFaces'
+  SetGroupLabelMutation,
+  SetGroupLabelMutationVariables,
+  MyFacesQuery,
+  MyFacesQueryVariables,
+  RecognizeUnlabeledFacesMutation
+} from './__generated__/PeoplePage'
 import { isNil, tailwindClassNames } from '../../helpers/utils'
 import { clsx } from 'clsx'
 import MergeFaceGroupsModal, {
@@ -73,8 +80,8 @@ const RECOGNIZE_UNLABELED_FACES_MUTATION = gql`
 type FaceDetailsWrapperProps = {
   labeled: boolean
   className?: string
-} & React.DetailedHTMLProps<
-  React.HTMLAttributes<HTMLSpanElement>,
+} & DetailedHTMLProps<
+  HTMLAttributes<HTMLSpanElement>,
   HTMLSpanElement
 >
 
@@ -112,7 +119,7 @@ type FaceDetailsProps = {
   className?: string
   textFieldClassName?: string
   editLabel: boolean
-  setEditLabel: React.Dispatch<React.SetStateAction<boolean>>
+  setEditLabel: Dispatch<SetStateAction<boolean>>
 }
 
 export const FaceDetails = ({
@@ -127,8 +134,8 @@ export const FaceDetails = ({
   const inputRef = createRef<HTMLInputElement>()
 
   const [setGroupLabel, { loading }] = useMutation<
-    setGroupLabel,
-    setGroupLabelVariables
+    SetGroupLabelMutation,
+    SetGroupLabelMutationVariables
   >(SET_GROUP_LABEL_MUTATION, {
     variables: {
       groupID: group.id,
@@ -150,32 +157,14 @@ export const FaceDetails = ({
     }
   }, [loading])
 
-  const onKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  const onKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key == 'Escape') {
       resetLabel()
-      return
     }
   }
 
   let label
-  if (!editLabel) {
-    label = (
-      <FaceDetailsWrapper
-        className={tailwindClassNames(
-          className,
-          'whitespace-nowrap inline-block overflow-hidden text-clip'
-        )}
-        labeled={!!group.label}
-        onClick={() => setEditLabel(true)}
-      >
-        <FaceImagesCount>{group.imageFaceCount}</FaceImagesCount>
-        <button className="">
-          {group.label ?? t('people_page.face_group.unlabeled', 'Unlabeled')}
-        </button>
-        {/* <EditIcon name="pencil" /> */}
-      </FaceDetailsWrapper>
-    )
-  } else {
+  if (editLabel) {
     label = (
       <FaceDetailsWrapper className={className} labeled={!!group.label}>
         <TextField
@@ -202,6 +191,23 @@ export const FaceDetails = ({
         />
       </FaceDetailsWrapper>
     )
+  } else {
+    label = (
+      <FaceDetailsWrapper
+        className={tailwindClassNames(
+          className,
+          'whitespace-nowrap inline-block overflow-hidden text-clip'
+        )}
+        labeled={!!group.label}
+        onClick={() => setEditLabel(true)}
+      >
+        <FaceImagesCount>{group.imageFaceCount}</FaceImagesCount>
+        <button className="">
+          {group.label ?? t('people_page.face_group.unlabeled', 'Unlabeled')}
+        </button>
+        {/* <EditIcon name="pencil" /> */}
+      </FaceDetailsWrapper>
+    )
   }
 
   return label
@@ -213,7 +219,7 @@ const FaceImagesCount = styled.span.attrs({
 })``
 
 type FaceGroupProps = {
-  group: myFaces_myFaceGroups
+  group: MyFacesQuery['myFaceGroups'][0]
 }
 
 export const FaceGroup = ({ group }: FaceGroupProps) => {
@@ -221,6 +227,7 @@ export const FaceGroup = ({ group }: FaceGroupProps) => {
   const [editLabel, setEditLabel] = useState(false)
 
   return (
+    //TODO: how to fix the "Type '"ImageFace" | undefined' is not assignable to type '"ImageFace"'" and the "Type '"FaceGroup" | undefined' is not assignable to type '"FaceGroup"'" type mismatches?
     <div className="m-3">
       <Link to={`/people/${group.id}`}>
         <FaceCircleImage imageFace={previewFace} selectable />
@@ -248,8 +255,8 @@ const FaceGroupsWrapper = styled.div`
 export const PeoplePage = () => {
   const { t } = useTranslation()
   const { data, error, loading, fetchMore } = useQuery<
-    myFaces,
-    myFacesVariables
+    MyFacesQuery,
+    MyFacesQueryVariables
   >(MY_FACES_QUERY, {
     variables: {
       limit: 50,
@@ -262,10 +269,10 @@ export const PeoplePage = () => {
   )
 
   const [recognizeUnlabeled, { loading: recognizeUnlabeledLoading }] =
-    useMutation<recognizeUnlabeledFaces>(RECOGNIZE_UNLABELED_FACES_MUTATION)
+    useMutation<RecognizeUnlabeledFacesMutation>(RECOGNIZE_UNLABELED_FACES_MUTATION)
 
   const { containerElem, finished: finishedLoadingMore } =
-    useScrollPagination<myFaces>({
+    useScrollPagination<MyFacesQuery>({
       loading,
       fetchMore,
       data,

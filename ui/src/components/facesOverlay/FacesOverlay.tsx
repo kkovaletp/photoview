@@ -1,4 +1,3 @@
-import React from 'react'
 import { Link } from 'react-router-dom'
 import styled from 'styled-components'
 import { MediaType } from '../../__generated__/globalTypes'
@@ -63,6 +62,7 @@ export const SidebarFacesOverlay = ({ media }: SidebarFaceOverlayProps) => {
   if (media.thumbnail == null) return null
 
   const faceBoxes = media.faces?.map(face => (
+    //TODO: how to fix the "Property 'id' does not exist on type '{ __typename?: "ImageFace" | undefined;..." error?
     <FaceBox key={face.id} face={face} />
   ))
 

@@ -1,19 +1,14 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { gql, useQuery, useMutation } from '@apollo/client'
 import { useNavigate } from 'react-router-dom'
-import { Container } from './loginUtilities'
-
-import { INITIAL_SETUP_QUERY, login } from './loginUtilities'
+import { Container, INITIAL_SETUP_QUERY, login } from './loginUtilities'
 import { authToken } from '../../helpers/authentication'
 import { useTranslation } from 'react-i18next'
-import { CheckInitialSetup } from './__generated__/CheckInitialSetup'
+import { CheckInitialSetupQuery } from './__generated__/loginUtilities'
+import { InitialSetupMutation, InitialSetupMutationVariables } from './__generated__/InitialSetupPage'
 import { useForm } from 'react-hook-form'
 import { Submit, TextField } from '../../primitives/form/Input'
 import MessageBox from '../../primitives/form/MessageBox'
-import {
-  InitialSetup,
-  InitialSetupVariables,
-} from './__generated__/InitialSetup'
 
 const initialSetupMutation = gql`
   mutation InitialSetup(
@@ -54,7 +49,7 @@ const InitialSetupPage = () => {
   }, [])
 
   const { data: initialSetupData } =
-    useQuery<CheckInitialSetup>(INITIAL_SETUP_QUERY)
+    useQuery<CheckInitialSetupQuery>(INITIAL_SETUP_QUERY)
 
   const notInitialSetup = initialSetupData?.siteInfo?.initialSetup === false
 
@@ -65,7 +60,7 @@ const InitialSetupPage = () => {
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
   const [authorize, { loading: authorizeLoading }] =
-    useMutation<InitialSetup, InitialSetupVariables>(initialSetupMutation)
+    useMutation<InitialSetupMutation, InitialSetupMutationVariables>(initialSetupMutation)
 
   const signIn = handleSubmit(async (data) => {
     try {
@@ -101,7 +96,7 @@ const InitialSetupPage = () => {
         <h1 className="text-center text-xl">
           {t('login_page.initial_setup.title', 'Initial Setup')}
         </h1>
-        <form onSubmit={signIn} className="max-w-[500px] mx-auto">
+        <form onSubmit={signIn} className="max-w-125 mx-auto">
           <TextField
             wrapperClassName="my-4"
             fullWidth

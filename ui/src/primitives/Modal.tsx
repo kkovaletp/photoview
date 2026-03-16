@@ -1,4 +1,4 @@
-import React from 'react'
+import { MouseEvent, ReactNode } from 'react'
 import { Dialog, DialogPanel, DialogTitle, Description } from '@headlessui/react'
 import { Button } from './form/Input'
 
@@ -6,13 +6,13 @@ export type ModalAction = {
   key: string
   label: string
   variant?: 'negative' | 'positive' | 'default'
-  onClick(event: React.MouseEvent<HTMLButtonElement>): void
+  onClick(event: MouseEvent<HTMLButtonElement>): void
 }
 
 export type ModalProps = {
   title: string
-  description: React.ReactNode
-  children?: React.ReactNode
+  description: ReactNode
+  children?: ReactNode
   actions: ModalAction[]
   open: boolean
   onClose(): void

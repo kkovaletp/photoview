@@ -1,10 +1,9 @@
-import React from 'react'
 import { render, screen } from '@testing-library/react'
 import FaceCircleImage from './FaceCircleImage'
-import { myFaces_myFaceGroups_imageFaces } from './__generated__/myFaces'
+import { MyFacesQuery } from './__generated__/PeoplePage'
 
 test('face circle image', () => {
-  const imageFace: myFaces_myFaceGroups_imageFaces = {
+  const imageFace: MyFacesQuery['myFaceGroups'][0]['imageFaces'][0] = {
     __typename: 'ImageFace',
     id: '3',
     media: {
@@ -27,6 +26,7 @@ test('face circle image', () => {
     },
   }
 
+  //TODO: consistently fix the "Type '"ImageFace" | undefined' is not assignable to type '"ImageFace"'" type mismatch.
   render(<FaceCircleImage imageFace={imageFace} selectable={true} />)
 
   expect(screen.getByRole('img')).toBeInTheDocument()

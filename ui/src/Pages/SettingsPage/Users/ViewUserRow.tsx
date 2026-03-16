@@ -1,4 +1,3 @@
-import React from 'react'
 import { Trans, useTranslation } from 'react-i18next'
 import Checkbox from '../../../primitives/form/Checkbox'
 import { Button } from '../../../primitives/form/Input'
