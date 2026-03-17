@@ -162,8 +162,8 @@ const SearchBar = () => {
 
   return (
     <SearchWrapper>
-      //TODO: Is it a safe fix to add the `role="combobox"` to this input element to fix the "`aria-expanded` is not supported by the current role" error?
       <input
+        role="combobox"
         ref={inputEl}
         autoComplete="off"
         aria-controls="search-results"
@@ -242,6 +242,7 @@ const SearchResults = ({
     <div
       id="search-results"
       role="listbox"
+      aria-label={t('header.search.results_label', 'Search results')}
       className={clsx(
         'absolute bg-white dark:bg-dark-bg left-0 right-0 top-18 overflow-y-auto h-[calc(100vh-152px)] border dark:border-dark-border px-4 z-0',
         'lg:top-10 lg:shadow-md lg:rounded-b lg:max-h-140',
@@ -313,13 +314,15 @@ const SearchRow = ({
   }
 
   return (
-    //TODO: how to consistently fix the following warnings: "Use <option> instead of the "option" role to ensure accessibility across all devices", "Non-interactive elements should not be assigned interactive roles", and "onMouseOver must be accompanied by onFocus for accessibility"?
+    //TODO: how to consistently fix the following warnings: "Use <option> instead of the "option" role to ensure accessibility across all devices", "Non-interactive elements should not be assigned interactive roles"?
     <li
       id={`search-item-${id}`}
       ref={rowEl}
       role="option"
       aria-selected={selected}
       onMouseOver={() => setSelected()}
+      onFocus={() => setSelected()}
+      tabIndex={0}
       className={clsx('rounded p-1 mt-1', {
         'bg-gray-100 dark:bg-dark-bg2': selected,
       })}

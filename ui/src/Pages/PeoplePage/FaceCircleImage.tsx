@@ -71,14 +71,14 @@ const CircleImageWrapper = styled.div<{ $size: string }>`
 `
 
 type FaceCircleImageFace = {
-  __typename: 'ImageFace'
+  __typename?: 'ImageFace'
   id: string
   rectangle: MyFacesQuery['myFaceGroups'][0]['imageFaces'][0]['rectangle']
   media: MyFacesQuery['myFaceGroups'][0]['imageFaces'][0]['media']
 }
 
 type FaceCircleImageProps = {
-  imageFace: FaceCircleImageFace
+  imageFace?: FaceCircleImageFace
   selectable: boolean
   size?: string
 }

@@ -44,19 +44,16 @@ type SubscriptionHookProps = {
 export const SubscriptionsHook = ({
   messages,
   setMessages,
-  //TODO: Suggest a consistent fix for the "Refactor this function to not always return the same value" warning.
 }: SubscriptionHookProps) => {
-  if (!authToken()) {
-    return null
-  }
+  const isAuthenticated = !!authToken()
 
-  //TODO: Suggest a consistent fix for the "React Hook "useSubscription" is called conditionally. React Hooks must be called in the exact same order in every component render. Did you accidentally call a React Hook after an early return?" warning.
   const { data, error } = useSubscription<NotificationSubscriptionSubscription>(
-    NOTIFICATION_SUBSCRIPTION
+    NOTIFICATION_SUBSCRIPTION,
+    { skip: !isAuthenticated }
   )
 
-  //TODO: Suggest a consistent fix for the "React Hook "useSubscription" is called conditionally. React Hooks must be called in the exact same order in every component render. Did you accidentally call a React Hook after an early return?" warning.
   useEffect(() => {
+    if (!isAuthenticated) return
     if (error) {
       setMessages(state => [
         ...state,
@@ -120,7 +117,7 @@ export const SubscriptionsHook = ({
     }
 
     setMessages(newMessages)
-  }, [data, error])
+  }, [data, error, isAuthenticated])
 
   return null
 }

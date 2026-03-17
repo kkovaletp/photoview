@@ -26,7 +26,6 @@ test('face circle image', () => {
     },
   }
 
-  //TODO: consistently fix the "Type '"ImageFace" | undefined' is not assignable to type '"ImageFace"'" type mismatch.
   render(<FaceCircleImage imageFace={imageFace} selectable={true} />)
 
   expect(screen.getByRole('img')).toBeInTheDocument()

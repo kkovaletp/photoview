@@ -152,10 +152,9 @@ const TimelineGallery = () => {
     return <div>{error.message}</div>
   }
 
-  const timelineGroups = mediaState.timelineGroups.map((_, i) => (
-    //TODO: suggest a consistent and reliable replacement for hte `i` to fix the "Do not use Array index in keys" warning
+  const timelineGroups = mediaState.timelineGroups.map((group, i) => (
     <TimelineGroupDate
-      key={i}
+      key={`${group.date}-${i}`}
       groupIndex={i}
       mediaState={mediaState}
       dispatchMedia={dispatchMedia}

@@ -3,14 +3,14 @@ import { HelmetProvider, Helmet } from '@dr.pogodin/react-helmet'
 import Routes from './components/routes/Routes'
 import Messages from './components/messages/Messages'
 import { useTranslation } from 'react-i18next'
-import { loadTranslations } from './localization'
+import { useLoadTranslations } from './localization'
 import { useLocation } from 'react-router'
 
 const App = () => {
   const { t } = useTranslation()
   const { pathname } = useLocation()
 
-  loadTranslations()
+  useLoadTranslations()
 
   useEffect(() => {
     window.scrollTo(0, 0)

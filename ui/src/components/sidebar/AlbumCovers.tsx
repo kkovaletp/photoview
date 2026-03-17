@@ -67,7 +67,7 @@ export const SidebarPhotoCover = ({ cover_id }: SidebarPhotoCoverProps) => {
   }
 
   return (
-    //TODO: consistently fix the following warning: "Expected an assignment or function call and instead saw an expression"
+    //TODO: how to fix the "Add a valid header row or column to this "<table>"." warning without breaking/changing the layout?
     <SidebarSection>
       <SidebarSectionTitle>
         {t('sidebar.album.album_cover', 'Album cover')}
@@ -81,12 +81,12 @@ export const SidebarPhotoCover = ({ cover_id }: SidebarPhotoCoverProps) => {
                   className="disabled:opacity-50 text-green-500 font-bold uppercase text-xs"
                   disabled={buttonDisabled}
                   onClick={() => {
-                    setButtonDisabled(true),
-                      setAlbumCover({
-                        variables: {
-                          coverID: cover_id,
-                        },
-                      })
+                    setButtonDisabled(true)
+                    setAlbumCover({
+                      variables: {
+                        coverID: cover_id,
+                      },
+                    })
                   }}
                 >
                   <span>
@@ -125,7 +125,7 @@ export const SidebarAlbumCover = ({ id }: SidebarAlbumCoverProps) => {
   }, [id])
 
   return (
-    //TODO: consistently fix the following warning: "Expected an assignment or function call and instead saw an expression"
+    //TODO: how to fix the "Add a valid header row or column to this "<table>"." warning without breaking/changing the layout?
     <SidebarSection>
       <SidebarSectionTitle>
         {t('sidebar.album.album_cover', 'Album cover')}
@@ -139,12 +139,12 @@ export const SidebarAlbumCover = ({ id }: SidebarAlbumCoverProps) => {
                   className="disabled:opacity-50 text-red-500 font-bold uppercase text-xs"
                   disabled={buttonDisabled}
                   onClick={() => {
-                    setButtonDisabled(true),
-                      resetAlbumCover({
-                        variables: {
-                          albumID: id,
-                        },
-                      })
+                    setButtonDisabled(true)
+                    resetAlbumCover({
+                      variables: {
+                        albumID: id,
+                      },
+                    })
                   }}
                 >
                   <span>

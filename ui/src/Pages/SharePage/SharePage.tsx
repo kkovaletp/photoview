@@ -89,11 +89,18 @@ const useTokenFromParams = () => {
   return token
 }
 
+type SharedSubAlbumPageProps = { token: string; password: string | null }
+const SharedSubAlbumPage = ({ token, password }: SharedSubAlbumPageProps) => {
+  const { subAlbum } = useParams()
+  if (isNil(subAlbum)) throw new Error('Expected `subAlbum` param to be defined')
+  return <AlbumSharePage albumID={subAlbum} token={token} password={password} />
+}
+
 const AuthorizedTokenRoute = () => {
   const { t } = useTranslation()
 
   const token = useTokenFromParams()
-  const password = getSharePassword(token)
+  const password = getSharePassword(token) ?? null
 
   const { loading, error, data } = useQuery<
     SharePageTokenQuery,
@@ -109,22 +116,9 @@ const AuthorizedTokenRoute = () => {
   if (loading) return <div>{t('general.loading.default', 'Loading...')}</div>
 
   if (data?.shareToken?.album) {
-    //TODO: how to refactor this code to satisfy the "Move this component definition out of the parent component and pass data as props." warning?
-    const SharedSubAlbumPage = () => {
-      const { subAlbum } = useParams()
-      if (isNil(subAlbum))
-        throw new Error('Expected `subAlbum` param to be defined')
-
-      return (
-        //TODO: how to fix the "Type 'undefined' is not assignable to type 'string | null'" error?
-        <AlbumSharePage albumID={subAlbum} token={token} password={password} />
-      )
-    }
-
     return (
-      //TODO: how to fix the "Type 'undefined' is not assignable to type 'string | null'" error?
       <Routes>
-        <Route path=":subAlbum" element={<SharedSubAlbumPage />} />
+        <Route path=":subAlbum" element={<SharedSubAlbumPage token={token} password={password} />} />
         <Route
           index
           element={

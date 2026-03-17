@@ -55,6 +55,7 @@ export const MEDIA_GALLERY_FRAGMENT = gql`
 `
 
 type MediaGalleryProps = {
+  //TODO: carefully analyze  the codebase to figure out how to consistently and reliably handle the "'loading' PropType is defined but prop is never used" warning. Why is it unused? Is it forgotten to be called, or unneeded? Is it handled indirectly, so the static cannot detect it?
   loading: boolean
   mediaState: MediaGalleryState
   dispatchMedia: Dispatch<PhotoGalleryAction>
@@ -82,7 +83,6 @@ const MediaGallery = ({ mediaState, dispatchMedia }: MediaGalleryProps) => {
               type: 'selectImage',
               index,
             })
-            //TODO: fix the type mismatch: Type '"Media" | undefined' is not assignable to type '"Media"'
             updateSidebar(<MediaSidebar media={mediaState.media[index]} />)
           }}
           clickFavorite={() => {

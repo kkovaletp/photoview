@@ -103,6 +103,7 @@ function AlbumPage() {
   return (
     <Layout
       title={
+        //TODO: suggest a consistent and reliable refactoring to handle the "Extract this nested ternary operation into an independent statement." warning
         data ? data.album ? data.album.title :
           t('title.not_found', 'Not found') :
           t('title.loading_album', 'Loading album')

@@ -149,8 +149,11 @@ describe('Messages Component', () => {
   })
 
   test('subscriptions hook triggers messages correctly', () => {
-    const { result } = renderHook(() => useState<Message[]>([])) //TODO: Suggest a similar to the `ui/src/hooks/useDelay.ts` fix for the "useState call is not destructured into value + setter pair" error.
-    const [, setMessages] = result.current
+    const { result } = renderHook(() => {
+      const [messages, setMessages] = useState<Message[]>([])
+      return { messages, setMessages }
+    })
+    const { setMessages } = result.current
 
     render(
       <MessageProvider>
@@ -159,6 +162,6 @@ describe('Messages Component', () => {
     )
 
     fireEvent.click(screen.getByTestId('trigger-messages'))
-    expect(result.current[0]).toEqual(expect.arrayContaining(messages))
+    expect(result.current.messages).toEqual(expect.arrayContaining(messages))
   })
 })

@@ -48,6 +48,7 @@ type AlbumGalleryProps = {
   setOrdering?: SetOrderingFn
   ordering?: MediaOrdering
   onlyFavorites?: boolean
+  //TODO: There is the "'onFavorite' PropType is defined but prop is never used" warning. Please carefully analyze the code and let me know why is it never used: is it forgotten to be called consistently, unneeded, or is it used in a way that the static analysis cannot detect?
   onFavorite?(): void
 }
 

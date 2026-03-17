@@ -15,6 +15,7 @@ const Message = forwardRef(
     { onDismiss, header, children, content, negative, positive }: MessageProps,
     ref: ForwardedRef<HTMLDivElement>
   ) => {
+    //TODO: Suggest a consistent and reliable refactoring to handle the following warning: "Extract this nested ternary operation into an independent statement"
     const backgroundColorClass = negative
       ? 'bg-red-100 dark:bg-red-900'
       : positive

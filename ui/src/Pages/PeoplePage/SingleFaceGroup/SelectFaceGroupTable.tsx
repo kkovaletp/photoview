@@ -51,7 +51,6 @@ const FaceGroupRow = ({
       <FlexCell className={faceSelected ? 'brightness-110' : ''}>
         <FaceCircleWrapper $selected={faceSelected}>
           <FaceCircleImage
-            //TODO: consistently fix the "Type '"ImageFace" | undefined' is not assignable to type '"ImageFace"'" type mismatch.
             imageFace={faceGroup.imageFaces[0]}
             size="50px"
             selectable={false}
@@ -71,13 +70,16 @@ const FaceGroupRow = ({
 
 type SelectFaceGroupTableProps = {
   faceGroups: MyFacesQuery['myFaceGroups']
-  selectedFaceGroups: Set<
+  //TODO: How to fix the "'selectedFaceGroup' PropType is defined but prop is never used" and the "'setSelectedFaceGroup' PropType is defined but prop is never used" warnings?
+  selectedFaceGroup?: MyFacesQuery['myFaceGroups'][0] | SingleFaceGroupQuery['faceGroup'] | null
+  setSelectedFaceGroup?: Dispatch<(MyFacesQuery['myFaceGroups'][0] | SingleFaceGroupQuery['faceGroup'] | null)>
+  selectedFaceGroups?: Set<
     SingleFaceGroupQuery['faceGroup'] | MyFacesQuery['myFaceGroups'][0] | null
   >
-  toggleSelectedFaceGroup: Dispatch<
+  toggleSelectedFaceGroup?: Dispatch<
     SingleFaceGroupQuery['faceGroup'] | MyFacesQuery['myFaceGroups'][0] | null
   >
-  title: string,
+  title: string
   frozen: boolean
 }
 
@@ -102,9 +104,15 @@ const SelectFaceGroupTable = ({
       <FaceGroupRow
         key={face.id}
         faceGroup={face}
-        faceSelected={[...selectedFaceGroups].some(val => val?.id === face.id)}
+        //TODO: how to fix the "Cannot find name 'selectedFaceGroup'. Did you mean 'selectedFaceGroups'?" error?
+        faceSelected={selectedFaceGroup ? selectedFaceGroup.id === face.id
+          : selectedFaceGroups ? [...selectedFaceGroups].some(val => val?.id === face.id) : false}
         selectable={!frozen}
-        toggleFaceSelected={() => !frozen && toggleSelectedFaceGroup(face)}
+        toggleFaceSelected={() => {
+          if (frozen) return
+          if (setSelectedFaceGroup) setSelectedFaceGroup(face)
+          else toggleSelectedFaceGroup?.(face)
+        }}
       />
     ))
 

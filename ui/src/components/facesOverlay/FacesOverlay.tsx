@@ -61,8 +61,8 @@ export const SidebarFacesOverlay = ({ media }: SidebarFaceOverlayProps) => {
   if (media.type != MediaType.Photo) return null
   if (media.thumbnail == null) return null
 
-  const faceBoxes = media.faces?.map(face => (
-    //TODO: how to fix the "Property 'id' does not exist on type '{ __typename?: "ImageFace" | undefined;..." error?
+  const faceBoxes = (media.faces ?? []).map(face => (
+    //TODO: how to fix the following errors: "Property 'id' does not exist on type '{ __typename?: "ImageFace" | undefined; id: string; rectangle: { __typename?: "FaceRectangle" | undefined; minX: number; maxX: number; minY: number; maxY: number; }; faceGroup: { __typename?: "FaceGroup" | undefined; id: string; label?: string | ... 1 more ... | undefined; imageFaceCount: number; }; media: { ...; };...'." and "Type '{ __typename?: "ImageFace" | undefined; id: string; rectangle: { __typename?: "FaceRectangle" | undefined; minX: number; maxX: number; minY: number; maxY: number; }; faceGroup: { __typename?: "FaceGroup" | undefined; id: string; label?: string | ... 1 more ... | undefined; imageFaceCount: number; }; media: { ...; };...' is missing the following properties from type '{ __typename?: "ImageFace" | undefined; id: string; rectangle: { __typename?: "FaceRectangle" | undefined; minX: number; maxX: number; minY: number; maxY: number; }; faceGroup: { __typename?: "FaceGroup" | undefined; id: string; label?: string | ... 1 more ... | undefined; imageFaceCount: number; }; media: { ...; }; }': id, rectangle, faceGroup, media"?
     <FaceBox key={face.id} face={face} />
   ))
 

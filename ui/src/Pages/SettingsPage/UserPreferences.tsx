@@ -120,7 +120,6 @@ const UserPreferences = () => {
   }
 
   return (
-    //TODO: how to fix the "Property 'placeholder' does not exist on type 'IntrinsicAttributes & SelectHTMLAttributes<HTMLSelectElement> & { items: DropdownItem[]; selected?: string | undefined; setSelected(value: string): void; className?: string | undefined; }" error?
     <UserPreferencesWrapper>
       <SectionTitle nospace>
         {t('settings.user_preferences.title', 'User preferences')}

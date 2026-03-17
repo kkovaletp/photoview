@@ -43,8 +43,8 @@ const scanUserMutation = gql`
   }
 `
 
-//TODO: how to fix the "An interface can only extend an identifier/qualified-name with optional type arguments" error?
-interface UserRowState extends SettingsUsersQueryQuery['user'][0] {
+type UserBase = SettingsUsersQueryQuery['user'][0]
+interface UserRowState extends UserBase {
   editing: boolean
   newRootPath: string
   oldState?: Omit<UserRowState, 'oldState'>
@@ -99,6 +99,7 @@ const UserRow = ({ user, refetchUsers }: UserRowProps) => {
     newRootPath: '',
   })
 
+  //TODO: how to consistently handle the "useState call is not destructured into value + setter pair" warning for the next 2 lines?
   const [showConfirmDelete, setConfirmDelete] = useState(false)
   const [showChangePassword, setChangePassword] = useState(false)
   const [updateUserMutationFn, { loading: updateUserLoading }] = useMutation<

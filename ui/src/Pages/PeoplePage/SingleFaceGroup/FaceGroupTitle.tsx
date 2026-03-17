@@ -105,7 +105,6 @@ const FaceGroupTitle = ({ faceGroup }: FaceGroupTitleProps) => {
   let modals = null
   if (faceGroup) {
     modals = (
-      //TODO: consistently fix the "Type '"FaceGroup" | undefined' is not assignable to type '"FaceGroup"'" error
       <>
         <MergeFaceGroupsModal
           state={mergeModalState}

@@ -110,12 +110,7 @@ const FaceDetailsWrapper = styled(FaceDetailsWrapperInner)`
 `
 
 type FaceDetailsProps = {
-  group: {
-    __typename: 'FaceGroup'
-    id: string
-    label: string | null
-    imageFaceCount: number
-  }
+  group: MyFacesQuery['myFaceGroups'][0]
   className?: string
   textFieldClassName?: string
   editLabel: boolean
@@ -227,7 +222,6 @@ export const FaceGroup = ({ group }: FaceGroupProps) => {
   const [editLabel, setEditLabel] = useState(false)
 
   return (
-    //TODO: how to fix the "Type '"ImageFace" | undefined' is not assignable to type '"ImageFace"'" and the "Type '"FaceGroup" | undefined' is not assignable to type '"FaceGroup"'" type mismatches?
     <div className="m-3">
       <Link to={`/people/${group.id}`}>
         <FaceCircleImage imageFace={previewFace} selectable />

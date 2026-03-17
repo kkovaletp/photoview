@@ -84,7 +84,6 @@ const PersonMoreMenu = ({
   const modals = (
     <>
       <MergeFaceGroupsModal
-        //TODO: how to fix the "Type '"FaceGroup" | undefined' is not assignable to type '"FaceGroup"'" error?
         preselectedDestinationFaceGroup={face.faceGroup}
         state={mergeModalState}
         setState={setMergeModalState}
@@ -109,6 +108,7 @@ const PersonMoreMenu = ({
       )
     )
       return
+    //TODO: how to fix the "Type '{ __typename?: "ImageFace" | undefined; id: string; rectangle: { __typename?: "FaceRectangle" | undefined; minX: number; maxX: number; minY: number; maxY: number; }; faceGroup: { __typename?: "FaceGroup" | undefined; id: string; label?: string | ... 1 more ... | undefined; imageFaceCount: number; }; media: { ...; }; }' is not assignable to type '{ __typename?: "ImageFace" | undefined; id: string; rectangle: { __typename?: "FaceRectangle" | undefined; minX: number; maxX: number; minY: number; maxY: number; }; media: { __typename?: "Media" | undefined; id: string; title: string; thumbnail?: { ...; } | ... 1 more ... | undefined; }; }[] | { ...; }[]'." error?
     detachImageFaceMutation([face]).then(({ data }) => {
       if (isNil(data)) throw new Error('Expected data not to be null')
       navigate(`/people/${data.detachImageFaces.id}`)
@@ -169,14 +169,13 @@ const MediaSidebarPerson = ({ face, menuFlipped }: MediaSidebarFaceProps) => {
   return (
     <li className="flex flex-col items-center">
       <Link to={`/people/${face.faceGroup.id}`}>
-        //TODO: how to fix the "Type '"ImageFace" | undefined' is not assignable to type '"ImageFace"'" error?
         <FaceCircleImage imageFace={face} selectable={true} size="92px" />
       </Link>
       <div className="mt-1 whitespace-nowrap">
         <FaceDetails
-          className="text-sm max-w-[80px] align-middle"
+          className="text-sm max-w-20 align-middle"
           textFieldClassName="w-[100px]"
-          //TODO: how to fix the "Type '"FaceGroup" | undefined' is not assignable to type '"FaceGroup"'" error?
+          //TODO: how to fix the "Property 'imageFaces' is missing in type '{ __typename?: "FaceGroup" | undefined; id: string; label?: string | null | undefined; imageFaceCount: number; }' but required in type '{ __typename?: "FaceGroup" | undefined; id: string; label?: string | null | undefined; imageFaceCount: number; imageFaces: { __typename?: "ImageFace" | undefined; id: string; rectangle: { ...; }; media: { ...; }; }[]; }'." error?
           group={face.faceGroup}
           editLabel={changeLabel}
           setEditLabel={setChangeLabel}
@@ -202,7 +201,7 @@ const MediaSidebarPeople = ({ media }: MediaSidebarFacesProps) => {
   const { t } = useTranslation()
 
   const faceElms = (media.faces ?? []).map((face, i) => (
-    //TODO: how to fix the "Property 'id' does not exist on type '{ __typename?: "ImageFace" | undefined; id: string;..." and the "Type '{ __typename?: "ImageFace" | undefined; id: string;... ' is missing the following properties from type '{ __typename?: "ImageFace" | undefined; id: string;..." errors?
+    //TODO: how to fix the "Property 'id' does not exist on type '{ __typename?: "ImageFace" | undefined; id: string; rectangle: { __typename?: "FaceRectangle" | undefined; minX: number; maxX: number; minY: number; maxY: number; }; faceGroup: { __typename?: "FaceGroup" | undefined; id: string; label?: string | ... 1 more ... | undefined; imageFaceCount: number; }; media: { ...; };...'." and the "Type '{ __typename?: "ImageFace" | undefined; id: string; rectangle: { __typename?: "FaceRectangle" | undefined; minX: number; maxX: number; minY: number; maxY: number; }; faceGroup: { __typename?: "FaceGroup" | undefined; id: string; label?: string | ... 1 more ... | undefined; imageFaceCount: number; }; media: { ...; };...' is missing the following properties from type '{ __typename?: "ImageFace" | undefined; id: string; rectangle: { __typename?: "FaceRectangle" | undefined; minX: number; maxX: number; minY: number; maxY: number; }; faceGroup: { __typename?: "FaceGroup" | undefined; id: string; label?: string | ... 1 more ... | undefined; imageFaceCount: number; }; media: { ...; }; }': id, rectangle, faceGroup, media" errors?
     <MediaSidebarPerson key={face.id} face={face} menuFlipped={i % 3 == 0} />
   ))
 

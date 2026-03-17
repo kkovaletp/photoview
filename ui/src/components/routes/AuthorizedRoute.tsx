@@ -2,13 +2,12 @@ import { useLazyQuery } from '@apollo/client'
 import { useEffect, JSX, ReactNode } from 'react'
 import { Navigate } from 'react-router-dom'
 import { authToken } from '../../helpers/authentication'
-//TODO: how to correctly replace the old "adminQuery" type with the new one from the "globalTypes"?
-import { adminQuery } from '../../__generated__/adminQuery'
+import { AdminQueryQuery } from '../layout/__generated__/Layout'
 import { ADMIN_QUERY } from '../layout/Layout'
 
 export const useIsAdmin = () => {
   const [fetchAdminQuery, { data, called }] =
-    useLazyQuery<adminQuery>(ADMIN_QUERY)
+    useLazyQuery<AdminQueryQuery>(ADMIN_QUERY)
 
   useEffect(() => {
     if (authToken() && !called) {

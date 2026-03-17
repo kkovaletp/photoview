@@ -36,27 +36,27 @@ describe('PeoplePage component', () => {
         data: {
           myFaceGroups: [
             {
-              __typename: 'FaceGroup',
+              __typename: 'FaceGroup' as const,
               id: '3',
               label: 'Person A',
               imageFaceCount: 2,
               imageFaces: [
                 {
-                  __typename: 'ImageFace',
+                  __typename: 'ImageFace' as const,
                   id: '3',
                   rectangle: {
-                    __typename: 'FaceRectangle',
+                    __typename: 'FaceRectangle' as const,
                     minX: 0.2705079913139343,
                     maxX: 0.3408200144767761,
                     minY: 0.7691109776496887,
                     maxY: 0.881434977054596,
                   },
                   media: {
-                    __typename: 'Media',
+                    __typename: 'Media' as const,
                     id: '63',
                     title: 'image.jpg',
                     thumbnail: {
-                      __typename: 'MediaURL',
+                      __typename: 'MediaURL' as const,
                       url: '/photo/thumbnail_image_jpg_p9x8dLWr.jpg',
                       width: 1024,
                       height: 641,
@@ -66,7 +66,7 @@ describe('PeoplePage component', () => {
               ],
             },
             {
-              __typename: 'FaceGroup',
+              __typename: 'FaceGroup' as const,
               id: '1',
               label: 'Person B',
               imageFaceCount: 1,
@@ -85,14 +85,14 @@ describe('PeoplePage component', () => {
         data: {
           myFaceGroups: [
             {
-              __typename: 'FaceGroup',
+              __typename: 'FaceGroup' as const,
               id: '3',
               label: 'Person A',
               imageFaceCount: 2,
               imageFaces: [],
             },
             {
-              __typename: 'FaceGroup',
+              __typename: 'FaceGroup' as const,
               id: '1',
               label: 'Person B',
               imageFaceCount: 1,
@@ -145,7 +145,7 @@ describe('FaceDetails component', () => {
           maxX: 0.3408200144767761,
           minY: 0.7691109776496887,
           maxY: 0.881434977054596,
-          __typename: 'FaceRectangle',
+          __typename: 'FaceRectangle' as const,
         },
         media: {
           id: '63',
@@ -154,14 +154,14 @@ describe('FaceDetails component', () => {
             url: '/photo/thumbnail_image_jpg_p9x8dLWr.jpg',
             width: 1024,
             height: 641,
-            __typename: 'MediaURL',
+            __typename: 'MediaURL' as const,
           },
-          __typename: 'Media',
+          __typename: 'Media' as const,
         },
-        __typename: 'ImageFace',
+        __typename: 'ImageFace' as const,
       },
     ],
-    __typename: 'FaceGroup',
+    __typename: 'FaceGroup' as const,
   }
 
   test('unlabeled, no images', () => {
@@ -174,7 +174,6 @@ describe('FaceDetails component', () => {
       <FaceDetails
         editLabel={false}
         setEditLabel={vi.fn()}
-        //TODO: consistently fix the "Type '"FaceGroup" | undefined' is not assignable to type '"FaceGroup"'" type mismatch.
         group={emptyFaceGroup}
       />,
       { mocks: [] }
@@ -193,7 +192,6 @@ describe('FaceDetails component', () => {
       <FaceDetails
         editLabel={false}
         setEditLabel={vi.fn()}
-        //TODO: consistently fix the "Type '"FaceGroup" | undefined' is not assignable to type '"FaceGroup"'" type mismatch.
         group={labeledFaceGroup}
       />,
       { mocks: [] }
@@ -216,7 +214,7 @@ describe('FaceDetails component', () => {
         newData: vi.fn(() => ({
           data: {
             setFaceGroupLabel: {
-              __typename: 'FaceGroup',
+              __typename: 'FaceGroup' as const,
               id: '3',
               label: 'John Doe',
             },
@@ -225,11 +223,7 @@ describe('FaceDetails component', () => {
       },
     ]
     renderWithProviders(<FaceGroup group={faceGroup} />, {
-      mocks: graphqlMocks,
-      apolloOptions: {
-        //TODO: how to consistently fix the "'addTypename' does not exist in type '{ defaultOptions?: any; }'" error?
-        addTypename: false
-      }
+      mocks: graphqlMocks
     })
 
     const btn = screen.getByRole('button')
@@ -252,11 +246,7 @@ describe('FaceDetails component', () => {
 
   test('cancel add label to face group', () => {
     renderWithProviders(<FaceGroup group={faceGroup} />, {
-      mocks: [],
-      apolloOptions: {
-        //TODO: how to consistently fix the "'addTypename' does not exist in type '{ defaultOptions?: any; }'" error?
-        addTypename: false
-      }
+      mocks: []
     })
 
     const btn = screen.getByRole('button')

@@ -37,7 +37,7 @@ type MergeFaceGroupsModalProps = {
   state: MergeFaceGroupsModalState
   setState(state: MergeFaceGroupsModalState): void
   preselectedDestinationFaceGroup?: {
-    __typename: 'FaceGroup'
+    __typename?: 'FaceGroup'
     id: string
   }
   refetchQueries: PureQueryOptions[]

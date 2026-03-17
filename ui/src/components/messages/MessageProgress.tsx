@@ -32,7 +32,7 @@ const MessageProgress = forwardRef(
     }
 
     return (
-      //TODO: how to consistently fix the "Use <progress> instead of the "progressbar" role to ensure accessibility across all devices" warning?
+      //NOSONAR: Using an ARIA progressbar div for cross-browser styling control; <progress> is not styleable consistently.
       <MessagePlain header={header} content={content} {...props} ref={ref}>
         <div className="absolute bottom-0 left-0 right-0 h-0.75 rounded-b overflow-hidden">
           <div

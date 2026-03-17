@@ -341,7 +341,6 @@ const SidebarMediaDownload = ({ media }: SidebarMediaDownladProps) => {
   if (called && !loading) {
     downloads = (data?.media?.downloads) || []
   } else if (media.downloads) {
-    //TODO: how to fix the "Type 'MediaDownload[]' is not assignable to type 'undefined'" error?
     downloads = media.downloads
   }
 

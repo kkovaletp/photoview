@@ -55,7 +55,6 @@ const PresentMedia = ({
         </div>
       )
     case MediaType.Video:
-      //TODO: fix the type mismatch: Type '"Media" | undefined' is not assignable to type '"Media"'
       return <StyledVideo media={media} data-testid="present-video" />
   }
 

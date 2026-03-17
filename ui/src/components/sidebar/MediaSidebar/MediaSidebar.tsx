@@ -215,7 +215,6 @@ const SidebarContent = ({ media, hidePreview }: SidebarContentProps) => {
           >
             <PreviewMedia
               previewImage={previewImage || undefined}
-              //TODO: how to fix the "Type '"MediaURL" | undefined' is not assignable to type '"MediaURL"'" error?
               media={media}
             />
             <SidebarFacesOverlay media={media} />
@@ -236,19 +235,19 @@ const SidebarContent = ({ media, hidePreview }: SidebarContentProps) => {
 }
 
 export interface MediaSidebarMedia {
-  __typename: 'Media'
+  __typename?: 'Media'
   id: string
   title?: string
   type: MediaType
   highRes?: null | {
-    __typename: 'MediaURL'
+    __typename?: 'MediaURL'
     url: string
     width?: number
     height?: number
   }
   thumbnail?: SidebarMediaQueryQuery['media']['thumbnail'] | null
   videoWeb?: null | {
-    __typename: 'MediaURL'
+    __typename?: 'MediaURL'
     url: string
     width?: number
     height?: number
@@ -256,7 +255,7 @@ export interface MediaSidebarMedia {
   videoMetadata?: SidebarMediaQueryQuery['media']['videoMetadata'] | null
   exif?: SidebarMediaQueryQuery['media']['exif'] | null
   faces?: SidebarMediaQueryQuery['media']['faces'][]
-  downloads?: SidebarDownloadQueryQuery['media']['downloads'][]
+  downloads?: SidebarDownloadQueryQuery['media']['downloads']
   album?: {
     __typename: 'Album'
     id: string
@@ -303,7 +302,10 @@ const MediaSidebar = ({ media, hidePreview }: MediaSidebarType) => {
     return <SidebarContent media={media} hidePreview={hidePreview} />
   }
 
-  //TODO: how to fix the "Type '"Media" | undefined' is not assignable to type '"Media"'" error?
+  //TODO: how to fix the "Type '{ __typename?: "Media" | undefined; id: string; title: string; type: MediaType; highRes?: { __typename?: "MediaURL" | undefined; url: string; width: number; height: number; } | null | undefined; ... 5 more ...; faces: { ...; }[]; }' is not assignable to type 'MediaSidebarMedia'.
+  // Types of property 'faces' are incompatible.
+  //   Type '{ __typename?: "ImageFace" | undefined; id: string; rectangle: { __typename?: "FaceRectangle" | undefined; minX: number; maxX: number; minY: number; maxY: number; }; faceGroup: { __typename?: "FaceGroup" | undefined; id: string; label?: string | ... 1 more ... | undefined; imageFaceCount: number; }; media: { ...; };...' is not assignable to type '{ __typename?: "ImageFace" | undefined; id: string; rectangle: { __typename?: "FaceRectangle" | undefined; minX: number; maxX: number; minY: number; maxY: number; }; faceGroup: { __typename?: "FaceGroup" | undefined; id: string; label?: string | ... 1 more ... | undefined; imageFaceCount: number; }; media: { ...; };...'.Two different types with this name exist, but they are unrelated.
+  //     Type '{ __typename?: "ImageFace" | undefined; id: string; rectangle: { __typename?: "FaceRectangle" | undefined; minX: number; maxX: number; minY: number; maxY: number; }; faceGroup: { __typename?: "FaceGroup" | undefined; id: string; label?: string | ... 1 more ... | undefined; imageFaceCount: number; }; media: { ...; }; }' is missing the following properties from type '{ __typename?: "ImageFace" | undefined; id: string; rectangle: { __typename?: "FaceRectangle" | undefined; minX: number; maxX: number; minY: number; maxY: number; }; faceGroup: { __typename?: "FaceGroup" | undefined; id: string; label?: string | ... 1 more ... | undefined; imageFaceCount: number; }; media: { ...; };...': length, pop, push, concat, and 35 more." error?
   return <SidebarContent media={data.media} hidePreview={hidePreview} />
 }
 

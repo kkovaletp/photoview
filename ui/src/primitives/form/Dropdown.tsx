@@ -20,6 +20,7 @@ type DropdownProps = SelectHTMLAttributes<HTMLSelectElement> & {
   selected?: string
   setSelected(value: string): void
   className?: string
+  placeholder?: string
 }
 
 const Dropdown = ({
@@ -27,6 +28,7 @@ const Dropdown = ({
   selected,
   setSelected,
   className,
+  placeholder,
   ...otherProps
 }: DropdownProps) => {
   const onChange = (e: ChangeEvent<HTMLSelectElement>) => {
@@ -51,6 +53,11 @@ const Dropdown = ({
       onChange={onChange}
       {...otherProps}
     >
+      {placeholder && !selected && (
+        <option value="" disabled hidden>
+          {placeholder}
+        </option>
+      )}
       {options}
     </DropdownStyledSelect>
   )

@@ -25,6 +25,7 @@ vi.mock('../../Pages/SharePage/MediaSharePage', () => {
   }
   return {
     __esModule: true,
+    //TODO: how to consistently fix the "Expected a non-Promise value to be spread in an object." warning?
     ...originalModule,
     MediaView: MockMediaView,
     default: MockMediaSharePage,

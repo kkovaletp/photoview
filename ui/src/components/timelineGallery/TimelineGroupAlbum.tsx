@@ -51,7 +51,10 @@ const TimelineGroupAlbum = ({
             media: index,
           },
         })
-        //TODO: how to fix the "Type '"Media" | undefined' is not assignable to type '"Media"'" error?
+        //TODO: how to fix the "Type '{ __typename?: "Media" | undefined; id: string; title: string; type: MediaType; blurhash?: string | null | undefined; favorite: boolean; date: any; thumbnail?: { __typename?: "MediaURL" | undefined; url: string; width: number; height: number; } | null | undefined; highRes?: { ...; } | ... 1 more ... | undefined; vid...' is not assignable to type 'MediaSidebarMedia'.
+        // The types of 'album.__typename' are incompatible between these types.
+        //   Type '"Album" | undefined' is not assignable to type '"Album"'.
+        //     Type 'undefined' is not assignable to type '"Album"'." error?
         updateSidebar(<MediaSidebar media={media} />)
       }}
       clickPresent={() => {

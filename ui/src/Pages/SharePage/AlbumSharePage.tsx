@@ -43,6 +43,7 @@ export const SHARE_ALBUM_QUERY = gql`
         title
         type
         blurhash
+        favorite
         thumbnail {
           url
           width

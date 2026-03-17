@@ -26,7 +26,6 @@ const EditUserRow = ({
   }
 
   return (
-    //TODO: how to consistently fix the "Property 'username' does not exist on type 'UserRowState'." and the "Property 'admin' does not exist on type 'UserRowState'." errors?
     <TableRow>
       <TableCell>
         <TextField

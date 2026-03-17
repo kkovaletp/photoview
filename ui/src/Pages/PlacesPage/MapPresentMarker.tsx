@@ -15,6 +15,7 @@ const QUERY_MEDIA = gql`
       id
       title
       blurhash
+      favorite
       thumbnail {
         url
         width
@@ -115,7 +116,9 @@ const MapPresentMarker = ({
     const mediaList = loadedMedia?.mediaList || []
     dispatchMarkerMedia({
       type: 'replaceMedia',
-      media: mediaList, //TODO: how to fix the "Property 'favorite' is missing in type '{ __typename?: "Media" | undefined; id: string;..." error?
+      //TODO: how to fix the following type mismatch: "Type '{ __typename?: "Media" | undefined; id: string; title: string; blurhash?: string | null | undefined; type: MediaType; thumbnail?: { __typename?: "MediaURL" | undefined; url: string; width: number; height: number; } | null | undefined; highRes?: { ...; } | ... 1 more ... | undefined; videoWeb?: { ...; } | ... 1 more ...' is not assignable to type 'MediaGalleryFieldsFragment[]'.
+      // Property 'favorite' is missing in type '{ __typename?: "Media" | undefined; id: string; title: string; blurhash?: string | null | undefined; type: MediaType; thumbnail?: { __typename?: "MediaURL" | undefined; url: string; width: number; height: number; } | null | undefined; highRes?: { ...; } | ... 1 more ... | undefined; videoWeb?: { ...; } | ... 1 more ...' but required in type 'MediaGalleryFieldsFragment'."?
+      media: mediaList,
     })
     if (mediaList.length > 0) {
       dispatchMarkerMedia({

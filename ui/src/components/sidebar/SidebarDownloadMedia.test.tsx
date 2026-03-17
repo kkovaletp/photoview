@@ -92,7 +92,6 @@ describe('SidebarMediaDownload', () => {
         it('should not trigger query when media has downloads prop', () => {
             const mediaWithDownloads: MediaSidebarMedia = {
                 ...mockMedia,
-                //TODO: how to fix the "Type 'MediaDownload[]' is not assignable to type 'undefined'" error?
                 downloads: mockDownloads,
             }
 
@@ -221,7 +220,6 @@ describe('SidebarMediaDownload', () => {
         it('should render table headers correctly', () => {
             const mediaWithDownloads: MediaSidebarMedia = {
                 ...mockMedia,
-                //TODO: how to fix the "Type 'MediaDownload[]' is not assignable to type 'undefined'" error?
                 downloads: mockDownloads,
             }
 
@@ -262,7 +260,6 @@ describe('SidebarMediaDownload', () => {
 
             const mediaWithDownloads: MediaSidebarMedia = {
                 ...mockMedia,
-                //TODO: how to fix the "Type 'MediaDownload[]' is not assignable to type 'undefined'" error?
                 downloads: [mockDownloads[0]],
             }
 
@@ -296,7 +293,6 @@ describe('SidebarMediaDownload', () => {
 
             const mediaWithDownloads: MediaSidebarMedia = {
                 ...mockMedia,
-                //TODO: how to fix the "Type 'MediaDownload[]' is not assignable to type 'undefined'" error?
                 downloads: [mockDownloads[0]],
             }
 
@@ -328,7 +324,6 @@ describe('SidebarMediaDownload', () => {
                 ...mockMedia,
                 downloads: [
                     {
-                        //TODO: how to fix the "Object literal may only specify known properties, and '__typename' does not exist in type '{ __typename?: "MediaDownload" | undefined;" error?
                         __typename: 'MediaDownload',
                         title: 'Test',
                         mediaUrl: {

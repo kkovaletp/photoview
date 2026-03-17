@@ -21,7 +21,7 @@ const USER_REMOVE_ALBUM_PATH_MUTATION = gql`
 
 type EditRootPathProps = {
   album: SettingsUsersQueryQuery['user'][0]['rootAlbums'][0]
-  user: SettingsUsersQueryQuery['user']
+  user: SettingsUsersQueryQuery['user'][0]
 }
 
 const EditRootPath = ({ album, user }: EditRootPathProps) => {
@@ -38,7 +38,6 @@ const EditRootPath = ({ album, user }: EditRootPathProps) => {
   })
 
   return (
-    //TODO: how to fix the "Property 'id' does not exist on type '{ __typename?: "User" | undefined; id: string;" error?
     <li className="flex justify-between">
       <span>{album.filePath}</span>
       <Button
@@ -111,7 +110,6 @@ type EditRootPathsProps = {
 
 export const EditRootPaths = ({ user }: EditRootPathsProps) => {
   const editRows = user.rootAlbums.map(album => (
-    //TODO: how to fix the "Type '{ __typename?: "User" | undefined; id: string; username: string; admin: boolean; rootAlbums: { __typename?: "Album" | undefined; id: string; filePath: string; }[]; }' is missing the following properties from type '{ __typename?: "User" | undefined; id: string; username: string; admin: boolean; rootAlbums: { __typename?: "Album" | undefined; id: string; filePath: string; }[]; }[]': length, pop, push, concat, and 35 more" error?
     <EditRootPath key={album.id} album={album} user={user} />
   ))
 

@@ -1,4 +1,3 @@
-import { FunctionComponent } from 'react'
 import styled from 'styled-components'
 import { authToken } from '../../helpers/authentication'
 import MessageProgress from './MessageProgress'
@@ -20,51 +19,44 @@ const Container = styled.div`
   }
 `
 
+type MessageItemProps = {
+  message: Message
+  onDismiss: (message: Message) => void
+}
+
+const MessageItem = ({ message, onDismiss }: MessageItemProps) => {
+  switch (message.type) {
+    case NotificationType.Message:
+      return (
+        <MessagePlain
+          onDismiss={() => onDismiss(message)}
+          {...message.props}
+        />
+      )
+    case NotificationType.Progress:
+      return (
+        <MessageProgress
+          onDismiss={() => onDismiss(message)}
+          {...message.props}
+        />
+      )
+    default:
+      throw new Error(`Invalid message type: ${message.type}`)
+  }
+}
+
 const Messages = () => {
   const { messages, setMessages } = useMessageState()
 
-  const getMessageElement = (message: Message): FunctionComponent => {
-    const dismissMessage = (message: Message) => {
-      message.onDismiss?.()
-      setMessages(prevMessages => prevMessages.filter(msg => msg.key != message.key))
-    }
-
-    switch (message.type) {
-      case NotificationType.Message:
-        //TODO: how to consistently fix the "Move this component definition out of the parent component and pass data as props" warning?
-        return props => (
-          <MessagePlain
-            onDismiss={() => {
-              dismissMessage(message)
-            }}
-            {...message.props}
-            {...props}
-          />
-        )
-      case NotificationType.Progress:
-        //TODO: how to consistently fix the "Move this component definition out of the parent component and pass data as props" warning?
-        return props => (
-          <MessageProgress
-            onDismiss={() => {
-              dismissMessage(message)
-            }}
-            {...message.props}
-            {...props}
-          />
-        )
-      default:
-        throw new Error(`Invalid message type: ${message.type}`)
-    }
+  const dismissMessage = (message: Message) => {
+    message.onDismiss?.()
+    setMessages(prevMessages => prevMessages.filter(msg => msg.key != message.key))
   }
-
-  const messageElems = messages.map(msg => {
-    const Elem = getMessageElement(msg)
-    return (
-      <div key={msg.key}>
-        <Elem />
-      </div>
-    )
-  })
+  const messageElems = messages.map(msg => (
+    <div key={msg.key}>
+      <MessageItem message={msg} onDismiss={dismissMessage} />
+    </div>
+  ))
 
   return (
     <Container>
