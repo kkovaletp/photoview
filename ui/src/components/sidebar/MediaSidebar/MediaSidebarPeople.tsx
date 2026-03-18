@@ -84,6 +84,10 @@ const PersonMoreMenu = ({
   const modals = (
     <>
       <MergeFaceGroupsModal
+        //TODO: how to fix the "Type '{ __typename?: "FaceGroup" | undefined; id: string; label?: string | null | undefined; imageFaceCount: number; }' is not assignable to type '{ __typename: "FaceGroup"; id: string; }'.
+        //   Types of property '__typename' are incompatible.
+        // Type '"FaceGroup" | undefined' is not assignable to type '"FaceGroup"'.
+        // Type 'undefined' is not assignable to type '"FaceGroup"'." error?
         preselectedDestinationFaceGroup={face.faceGroup}
         state={mergeModalState}
         setState={setMergeModalState}
@@ -108,7 +112,6 @@ const PersonMoreMenu = ({
       )
     )
       return
-    //TODO: how to fix the "Type '{ __typename?: "ImageFace" | undefined; id: string; rectangle: { __typename?: "FaceRectangle" | undefined; minX: number; maxX: number; minY: number; maxY: number; }; faceGroup: { __typename?: "FaceGroup" | undefined; id: string; label?: string | ... 1 more ... | undefined; imageFaceCount: number; }; media: { ...; }; }' is not assignable to type '{ __typename?: "ImageFace" | undefined; id: string; rectangle: { __typename?: "FaceRectangle" | undefined; minX: number; maxX: number; minY: number; maxY: number; }; media: { __typename?: "Media" | undefined; id: string; title: string; thumbnail?: { ...; } | ... 1 more ... | undefined; }; }[] | { ...; }[]'." error?
     detachImageFaceMutation([face]).then(({ data }) => {
       if (isNil(data)) throw new Error('Expected data not to be null')
       navigate(`/people/${data.detachImageFaces.id}`)
@@ -175,7 +178,6 @@ const MediaSidebarPerson = ({ face, menuFlipped }: MediaSidebarFaceProps) => {
         <FaceDetails
           className="text-sm max-w-20 align-middle"
           textFieldClassName="w-[100px]"
-          //TODO: how to fix the "Property 'imageFaces' is missing in type '{ __typename?: "FaceGroup" | undefined; id: string; label?: string | null | undefined; imageFaceCount: number; }' but required in type '{ __typename?: "FaceGroup" | undefined; id: string; label?: string | null | undefined; imageFaceCount: number; imageFaces: { __typename?: "ImageFace" | undefined; id: string; rectangle: { ...; }; media: { ...; }; }[]; }'." error?
           group={face.faceGroup}
           editLabel={changeLabel}
           setEditLabel={setChangeLabel}
@@ -201,7 +203,6 @@ const MediaSidebarPeople = ({ media }: MediaSidebarFacesProps) => {
   const { t } = useTranslation()
 
   const faceElms = (media.faces ?? []).map((face, i) => (
-    //TODO: how to fix the "Property 'id' does not exist on type '{ __typename?: "ImageFace" | undefined; id: string; rectangle: { __typename?: "FaceRectangle" | undefined; minX: number; maxX: number; minY: number; maxY: number; }; faceGroup: { __typename?: "FaceGroup" | undefined; id: string; label?: string | ... 1 more ... | undefined; imageFaceCount: number; }; media: { ...; };...'." and the "Type '{ __typename?: "ImageFace" | undefined; id: string; rectangle: { __typename?: "FaceRectangle" | undefined; minX: number; maxX: number; minY: number; maxY: number; }; faceGroup: { __typename?: "FaceGroup" | undefined; id: string; label?: string | ... 1 more ... | undefined; imageFaceCount: number; }; media: { ...; };...' is missing the following properties from type '{ __typename?: "ImageFace" | undefined; id: string; rectangle: { __typename?: "FaceRectangle" | undefined; minX: number; maxX: number; minY: number; maxY: number; }; faceGroup: { __typename?: "FaceGroup" | undefined; id: string; label?: string | ... 1 more ... | undefined; imageFaceCount: number; }; media: { ...; }; }': id, rectangle, faceGroup, media" errors?
     <MediaSidebarPerson key={face.id} face={face} menuFlipped={i % 3 == 0} />
   ))
 

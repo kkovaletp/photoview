@@ -237,8 +237,8 @@ const SearchResults = ({
 
   if (message) message = <div className="mt-8 text-center">{message}</div>
 
+  //NOSONAR: Custom ARIA combobox/listbox pattern is required here; native <select>/<datalist> cannot replicate the UX
   return (
-    //TODO: how to consistently fix the following warning: "Use <select size=...>, <select multiple=...>, or <datalist> instead of the "listbox" role to ensure accessibility across all devices"?
     <div
       id="search-results"
       role="listbox"
@@ -313,8 +313,8 @@ const SearchRow = ({
     })
   }
 
+  //NOSONAR: Using role="option" within custom listbox; interactions provided via mouseover/focus
   return (
-    //TODO: how to consistently fix the following warnings: "Use <option> instead of the "option" role to ensure accessibility across all devices", "Non-interactive elements should not be assigned interactive roles"?
     <li
       id={`search-item-${id}`}
       ref={rowEl}

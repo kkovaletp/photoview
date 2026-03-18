@@ -123,7 +123,6 @@ const MoveImageFacesModal = ({
         x => x.id != faceGroup.id
       )
       table = (
-        //TODO: how to fix the "Property 'frozen' is missing in type '{ title: "Select destination face group"; faceGroups: { __typename?: "FaceGroup" | undefined; id: string; label?: string | null | undefined; imageFaceCount: number; imageFaces: { __typename?: "ImageFace" | undefined; id: string; rectangle: { ...; }; media: { ...; }; }[]; }[]; selectedFaceGroup: { ...; } | ... 1 more...' but required in type 'SelectFaceGroupTableProps'." error?
         <SelectFaceGroupTable
           title={t(
             'people_page.modal.move_image_faces.destination_face_group_table.title',

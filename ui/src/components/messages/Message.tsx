@@ -15,12 +15,12 @@ const Message = forwardRef(
     { onDismiss, header, children, content, negative, positive }: MessageProps,
     ref: ForwardedRef<HTMLDivElement>
   ) => {
-    //TODO: Suggest a consistent and reliable refactoring to handle the following warning: "Extract this nested ternary operation into an independent statement"
-    const backgroundColorClass = negative
-      ? 'bg-red-100 dark:bg-red-900'
-      : positive
-        ? 'bg-green-100 dark:bg-green-900'
-        : 'bg-white dark:bg-dark-bg2'
+    let backgroundColorClass = 'bg-white dark:bg-dark-bg2'
+    if (negative) {
+      backgroundColorClass = 'bg-red-100 dark:bg-red-900'
+    } else if (positive) {
+      backgroundColorClass = 'bg-green-100 dark:bg-green-900'
+    }
 
     return (
       <div

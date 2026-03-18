@@ -53,8 +53,7 @@ describe('LoginPage', () => {
     test('redirects to root when auth token exists', async () => {
       authToken.mockImplementation(() => 'mock-token')
 
-      //TODO: how to consistently fix the "Unexpected `await` of a non-Promise (non-"Thenable") value." warning, making sure that the test still works reliably and in a robust way?
-      await renderWithProviders(<LoginPage />, {
+      renderWithProviders(<LoginPage />, {
         mocks: [mockInitialSetupGraphql(false)],
         initialEntries: ['/login'],
       })
@@ -65,8 +64,7 @@ describe('LoginPage', () => {
     })
 
     test('redirects to initial setup when initialSetup is true', async () => {
-      //TODO: how to consistently fix the "Unexpected `await` of a non-Promise (non-"Thenable") value." warning, making sure that the test still works reliably and in a robust way?
-      await renderWithProviders(<LoginPage />, {
+      renderWithProviders(<LoginPage />, {
         mocks: [mockInitialSetupGraphql(true)],
         initialEntries: ['/login'],
       })
@@ -79,8 +77,7 @@ describe('LoginPage', () => {
 
   describe('Form Rendering', () => {
     test('renders login form', async () => {
-      //TODO: how to consistently fix the "Unexpected `await` of a non-Promise (non-"Thenable") value." warning, making sure that the test still works reliably and in a robust way?
-      await renderWithProviders(<LoginPage />, {
+      renderWithProviders(<LoginPage />, {
         mocks: [mockInitialSetupGraphql(false)],
         initialEntries: ['/login'],
       })
@@ -118,8 +115,7 @@ describe('LoginPage', () => {
         },
       }
 
-      //TODO: how to consistently fix the "Unexpected `await` of a non-Promise (non-"Thenable") value." warning, making sure that the test still works reliably and in a robust way?
-      await renderWithProviders(<LoginPage />, {
+      renderWithProviders(<LoginPage />, {
         mocks: [mockInitialSetupGraphql(false), authMock],
         initialEntries: ['/login'],
       })
@@ -160,8 +156,7 @@ describe('LoginPage', () => {
         },
       }
 
-      //TODO: how to consistently fix the "Unexpected `await` of a non-Promise (non-"Thenable") value." warning, making sure that the test still works reliably and in a robust way?
-      await renderWithProviders(<LoginPage />, {
+      renderWithProviders(<LoginPage />, {
         mocks: [mockInitialSetupGraphql(false), authMock],
         initialEntries: ['/login'],
       })
@@ -200,8 +195,7 @@ describe('LoginPage', () => {
         .spyOn(console, 'error')
         .mockImplementation(() => { })
 
-      //TODO: how to consistently fix the "Unexpected `await` of a non-Promise (non-"Thenable") value." warning, making sure that the test still works reliably and in a robust way?
-      await renderWithProviders(<LoginPage />, {
+      renderWithProviders(<LoginPage />, {
         mocks: [mockInitialSetupGraphql(false), authMock],
         initialEntries: ['/login'],
       })
@@ -254,8 +248,7 @@ describe('LoginPage', () => {
         delay: 100, // Add delay to observe loading state
       }
 
-      //TODO: how to consistently fix the "Unexpected `await` of a non-Promise (non-"Thenable") value." warning, making sure that the test still works reliably and in a robust way?
-      await renderWithProviders(<LoginPage />, {
+      renderWithProviders(<LoginPage />, {
         mocks: [mockInitialSetupGraphql(false), authMock],
         initialEntries: ['/login'],
       })
@@ -283,8 +276,7 @@ describe('LoginPage', () => {
     })
 
     test('form validation - required username field', async () => {
-      //TODO: how to consistently fix the "Unexpected `await` of a non-Promise (non-"Thenable") value." warning, making sure that the test still works reliably and in a robust way?
-      await renderWithProviders(<LoginPage />, {
+      renderWithProviders(<LoginPage />, {
         mocks: [mockInitialSetupGraphql(false)],
         initialEntries: ['/login'],
       })
@@ -342,8 +334,7 @@ describe('LoginPage', () => {
         },
       }
 
-      await renderWithProviders(<LoginPage />, {
-        //TODO: how to consistently fix the "Unexpected `await` of a non-Promise (non-"Thenable") value." warning, making sure that the test still works reliably and in a robust way?
+      renderWithProviders(<LoginPage />, {
         mocks: [mockInitialSetupGraphql(false), failedAuthMock, successAuthMock],
         initialEntries: ['/login'],
       })
@@ -377,8 +368,7 @@ describe('LoginPage', () => {
     })
 
     test('message box is hidden when no error exists', async () => {
-      //TODO: how to consistently fix the "Unexpected `await` of a non-Promise (non-"Thenable") value." warning, making sure that the test still works reliably and in a robust way?
-      await renderWithProviders(<LoginPage />, {
+      renderWithProviders(<LoginPage />, {
         mocks: [mockInitialSetupGraphql(false)],
         initialEntries: ['/login'],
       })

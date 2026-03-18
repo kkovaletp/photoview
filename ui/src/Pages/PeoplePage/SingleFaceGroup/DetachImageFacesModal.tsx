@@ -34,13 +34,11 @@ export const useDetachImageFaces = (
   >(DETACH_IMAGE_FACES_MUTATION, mutationOptions)
 
   return async (
-    selectedImageFaces: (
-      | MyFacesQuery['myFaceGroups'][0]['imageFaces']
-      | SingleFaceGroupQuery['faceGroup']['imageFaces']
-    )[]
+    selectedImageFaces: Array<
+      MyFacesQuery['myFaceGroups'][0]['imageFaces'][0] |
+      SingleFaceGroupQuery['faceGroup']['imageFaces'][0]
+    >
   ) => {
-    //TODO: how to fix the "Property 'id' does not exist on type '{ __typename?: "ImageFace" | undefined; id: string; rectangle: { __typename?: "FaceRectangle" | undefined; minX: number; maxX: number; minY: number; maxY: number; }; media: { __typename?: "Media" | undefined; id: string; title: string; thumbnail?: { ...; } | ... 1 more ... | undefined; }; }[] | { ...; }[]'.
-    // Property 'id' does not exist on type '{ __typename?: "ImageFace" | undefined; id: string; rectangle: { __typename?: "FaceRectangle" | undefined; minX: number; maxX: number; minY: number; maxY: number; }; media: { __typename?: "Media" | undefined; id: string; title: string; thumbnail?: { ...; } | ... 1 more ... | undefined; }; }[]'." error?
     const faceIDs = selectedImageFaces.map(face => face.id)
 
     const result = await detachImageFacesMutation({
@@ -57,10 +55,10 @@ type DetachImageFacesModalProps = {
   open: boolean
   setOpen(open: boolean): void
   faceGroup: MyFacesQuery['myFaceGroups'][0] | SingleFaceGroupQuery['faceGroup']
-  selectedImageFaces?: (
-    | MyFacesQuery['myFaceGroups'][0]['imageFaces']
-    | SingleFaceGroupQuery['faceGroup']['imageFaces']
-  )[]
+  selectedImageFaces?: Array<
+    MyFacesQuery['myFaceGroups'][0]['imageFaces'][0] |
+    SingleFaceGroupQuery['faceGroup']['imageFaces'][0]
+  >
 }
 
 const DetachImageFacesModal = ({
@@ -72,7 +70,10 @@ const DetachImageFacesModal = ({
   const { t } = useTranslation()
 
   const [selectedImageFaces, setSelectedImageFaces] = useState<
-    (MyFacesQuery['myFaceGroups'][0]['imageFaces'] | SingleFaceGroupQuery['faceGroup']['imageFaces'])[]
+    Array<
+      MyFacesQuery['myFaceGroups'][0]['imageFaces'][0] |
+      SingleFaceGroupQuery['faceGroup']['imageFaces'][0]
+    >
   >([])
   const navigate = useNavigate()
 
@@ -138,16 +139,7 @@ const DetachImageFacesModal = ({
     >
       <SelectImageFacesTable
         imageFaces={imageFaces}
-        //TODO: how to fix the "Type '({ __typename?: "ImageFace" | undefined; id: string; rectangle: { __typename?: "FaceRectangle" | undefined; minX: number; maxX: number; minY: number; maxY: number; }; media: { __typename?: "Media" | undefined; id: string; title: string; thumbnail?: { ...; } | ... 1 more ... | undefined; }; }[] | { ...; }[])[]' is not assignable to type '({ __typename?: "ImageFace" | undefined; id: string; rectangle: { __typename?: "FaceRectangle" | undefined; minX: number; maxX: number; minY: number; maxY: number; }; media: { __typename?: "Media" | undefined; id: string; title: string; thumbnail?: { ...; } | ... 1 more ... | undefined; }; } | { ...; })[]'.
-        //   Type '{ __typename?: "ImageFace" | undefined; id: string; rectangle: { __typename?: "FaceRectangle" | undefined; minX: number; maxX: number; minY: number; maxY: number; }; media: { __typename?: "Media" | undefined; id: string; title: string; thumbnail?: { ...; } | ... 1 more ... | undefined; }; }[] | { ...; }[]' is not assignable to type '{__typename ?: "ImageFace" | undefined; id: string; rectangle: {__typename ?: "FaceRectangle" | undefined; minX: number; maxX: number; minY: number; maxY: number; }; media: {__typename ?: "Media" | undefined; id: string; title: string; thumbnail?: {...; } | ... 1 more ... | undefined; }; } | {...; }'.
-        // Type '{__typename ?: "ImageFace" | undefined; id: string; rectangle: {__typename ?: "FaceRectangle" | undefined; minX: number; maxX: number; minY: number; maxY: number; }; media: {__typename ?: "Media" | undefined; id: string; title: string; thumbnail?: {...; } | ... 1 more ... | undefined; }; }[]' is not assignable to type '{__typename ?: "ImageFace" | undefined; id: string; rectangle: {__typename ?: "FaceRectangle" | undefined; minX: number; maxX: number; minY: number; maxY: number; }; media: {__typename ?: "Media" | undefined; id: string; title: string; thumbnail?: {...; } | ... 1 more ... | undefined; }; } | {...; }'." error?
         selectedImageFaces={selectedImageFaces}
-        //TODO: how to fix the "Type 'Dispatch<SetStateAction<({ __typename?: "ImageFace" | undefined; id: string; rectangle: { __typename?: "FaceRectangle" | undefined; minX: number; maxX: number; minY: number; maxY: number; }; media: { __typename?: "Media" | undefined; id: string; title: string; thumbnail?: { ...; } | ... 1 more ... | undefined; }; }[...' is not assignable to type 'Dispatch<SetStateAction<({ __typename?: "ImageFace" | undefined; id: string; rectangle: { __typename?: "FaceRectangle" | undefined; minX: number; maxX: number; minY: number; maxY: number; }; media: { __typename?: "Media" | undefined; id: string; title: string; thumbnail?: { ...; } | ... 1 more ... | undefined; }; } ...'.
-        //   Type 'SetStateAction<({ __typename?: "ImageFace" | undefined; id: string; rectangle: { __typename?: "FaceRectangle" | undefined; minX: number; maxX: number; minY: number; maxY: number; }; media: { __typename?: "Media" | undefined; id: string; title: string; thumbnail?: { ...; } | ... 1 more ... | undefined; }; } | { ...; ...' is not assignable to type 'SetStateAction<({__typename ?: "ImageFace" | undefined; id: string; rectangle: {__typename ?: "FaceRectangle" | undefined; minX: number; maxX: number; minY: number; maxY: number; }; media: {__typename ?: "Media" | undefined; id: string; title: string; thumbnail?: {...; } | ... 1 more ... | undefined; }; }[] | {......'.
-        // Type '({__typename ?: "ImageFace" | undefined; id: string; rectangle: {__typename ?: "FaceRectangle" | undefined; minX: number; maxX: number; minY: number; maxY: number; }; media: {__typename ?: "Media" | undefined; id: string; title: string; thumbnail?: {...; } | ... 1 more ... | undefined; }; } | {...; })[]' is not assignable to type 'SetStateAction<({__typename ?: "ImageFace" | undefined; id: string; rectangle: {__typename ?: "FaceRectangle" | undefined; minX: number; maxX: number; minY: number; maxY: number; }; media: {__typename ?: "Media" | undefined; id: string; title: string; thumbnail?: {...; } | ... 1 more ... | undefined; }; }[] | {......'.
-        // Type '({__typename ?: "ImageFace" | undefined; id: string; rectangle: {__typename ?: "FaceRectangle" | undefined; minX: number; maxX: number; minY: number; maxY: number; }; media: {__typename ?: "Media" | undefined; id: string; title: string; thumbnail?: {...; } | ... 1 more ... | undefined; }; } | {...; })[]' is not assignable to type '({__typename ?: "ImageFace" | undefined; id: string; rectangle: {__typename ?: "FaceRectangle" | undefined; minX: number; maxX: number; minY: number; maxY: number; }; media: {__typename ?: "Media" | undefined; id: string; title: string; thumbnail?: {...; } | ... 1 more ... | undefined; }; }[] | {...; }[])[]'.
-        // Type '{__typename ?: "ImageFace" | undefined; id: string; rectangle: {__typename ?: "FaceRectangle" | undefined; minX: number; maxX: number; minY: number; maxY: number; }; media: {__typename ?: "Media" | undefined; id: string; title: string; thumbnail?: {...; } | ... 1 more ... | undefined; }; } | {...; }' is not assignable to type '{__typename ?: "ImageFace" | undefined; id: string; rectangle: {__typename ?: "FaceRectangle" | undefined; minX: number; maxX: number; minY: number; maxY: number; }; media: {__typename ?: "Media" | undefined; id: string; title: string; thumbnail?: {...; } | ... 1 more ... | undefined; }; }[] | {...; }[]'.
-        // Type '{__typename ?: "ImageFace" | undefined; id: string; rectangle: {__typename ?: "FaceRectangle" | undefined; minX: number; maxX: number; minY: number; maxY: number; }; media: {__typename ?: "Media" | undefined; id: string; title: string; thumbnail?: {...; } | ... 1 more ... | undefined; }; }' is not assignable to type '{__typename ?: "ImageFace" | undefined; id: string; rectangle: {__typename ?: "FaceRectangle" | undefined; minX: number; maxX: number; minY: number; maxY: number; }; media: {__typename ?: "Media" | undefined; id: string; title: string; thumbnail?: {...; } | ... 1 more ... | undefined; }; }[] | {...; }[]'." error?
         setSelectedImageFaces={setSelectedImageFaces}
         title={t(
           'people_page.modal.detach_image_faces.action.select_images',

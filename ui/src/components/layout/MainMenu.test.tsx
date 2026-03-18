@@ -55,8 +55,7 @@ test('Layout sidebar component', async () => {
   ]
 
   render(
-    //TODO: how to consistently handle the following deprecation warning: "'addTypename' is deprecated."? Sonar suggests "It is recommended to add __typename to your mock objects if it is not already defined. This ensures the cache more closely resembles the production environment", but I'm not sure that this is the consistent solution with the project code.
-    <MockedProvider mocks={mockedGraphql} addTypename={false}>
+    <MockedProvider mocks={mockedGraphql}>
       <MemoryRouter>
         <MainMenu />
       </MemoryRouter>
@@ -89,8 +88,7 @@ test('Layout sidebar with disabled features', async () => {
   ]
 
   render(
-    //TODO: how to consistently handle the following deprecation warning: "'addTypename' is deprecated."? Sonar suggests "It is recommended to add __typename to your mock objects if it is not already defined. This ensures the cache more closely resembles the production environment", but I'm not sure that this is the consistent solution with the project code.
-    <MockedProvider mocks={disabledFeaturesMocks} addTypename={false}>
+    <MockedProvider mocks={disabledFeaturesMocks}>
       <MemoryRouter>
         <MainMenu />
       </MemoryRouter>
@@ -111,8 +109,7 @@ test('Layout sidebar when unauthenticated', () => {
   authTokenMock.mockImplementation(() => '')
 
   render(
-    //TODO: how to consistently handle the following deprecation warning: "'addTypename' is deprecated."? Sonar suggests "It is recommended to add __typename to your mock objects if it is not already defined. This ensures the cache more closely resembles the production environment", but I'm not sure that this is the consistent solution with the project code.
-    <MockedProvider mocks={[]} addTypename={false}>
+    <MockedProvider mocks={[]}>
       <MemoryRouter>
         <MainMenu />
       </MemoryRouter>
@@ -144,8 +141,7 @@ test('Layout sidebar handles GraphQL errors gracefully', () => {
   ]
 
   render(
-    //TODO: how to consistently handle the following deprecation warning: "'addTypename' is deprecated."? Sonar suggests "It is recommended to add __typename to your mock objects if it is not already defined. This ensures the cache more closely resembles the production environment", but I'm not sure that this is the consistent solution with the project code.
-    <MockedProvider mocks={errorMocks} addTypename={false}>
+    <MockedProvider mocks={errorMocks}>
       <MemoryRouter>
         <MainMenu />
       </MemoryRouter>

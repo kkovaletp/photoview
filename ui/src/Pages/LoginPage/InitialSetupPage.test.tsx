@@ -76,8 +76,7 @@ describe('InitialSetupPage - Form Submission', () => {
       },
     }
 
-    //TODO: how to consistently fix the "Unexpected `await` of a non-Promise (non-"Thenable") value." warning, making sure that the test still works reliably and in a robust way?
-    await renderWithProviders(<InitialSetupPage />, {
+    renderWithProviders(<InitialSetupPage />, {
       mocks: [mockInitialSetupGraphql(true), setupMock],
       initialEntries: ['/initialSetup'],
     })
@@ -119,8 +118,7 @@ describe('InitialSetupPage - Form Submission', () => {
       },
     }
 
-    //TODO: how to consistently fix the "Unexpected `await` of a non-Promise (non-"Thenable") value." warning, making sure that the test still works reliably and in a robust way?
-    await renderWithProviders(<InitialSetupPage />, {
+    renderWithProviders(<InitialSetupPage />, {
       mocks: [mockInitialSetupGraphql(true), setupMock],
       initialEntries: ['/initialSetup'],
     })
@@ -152,8 +150,7 @@ describe('InitialSetupPage - Form Submission', () => {
       error: new Error('Network error'),
     }
 
-    //TODO: how to consistently fix the "Unexpected `await` of a non-Promise (non-"Thenable") value." warning, making sure that the test still works reliably and in a robust way?
-    await renderWithProviders(<InitialSetupPage />, {
+    renderWithProviders(<InitialSetupPage />, {
       mocks: [mockInitialSetupGraphql(true), setupMock],
       initialEntries: ['/initialSetup'],
     })
@@ -193,8 +190,7 @@ describe('InitialSetupPage - Form Submission', () => {
       delay: 100, // Simulate network delay
     }
 
-    //TODO: how to consistently fix the "Unexpected `await` of a non-Promise (non-"Thenable") value." warning, making sure that the test still works reliably and in a robust way?
-    await renderWithProviders(<InitialSetupPage />, {
+    renderWithProviders(<InitialSetupPage />, {
       mocks: [mockInitialSetupGraphql(true), setupMock],
       initialEntries: ['/initialSetup'],
     })
@@ -258,8 +254,7 @@ describe('InitialSetupPage - Form Submission', () => {
       },
     }
 
-    //TODO: how to consistently fix the "Unexpected `await` of a non-Promise (non-"Thenable") value." warning, making sure that the test still works reliably and in a robust way?
-    await renderWithProviders(<InitialSetupPage />, {
+    renderWithProviders(<InitialSetupPage />, {
       mocks: [mockInitialSetupGraphql(true), failedSetupMock, successSetupMock],
       initialEntries: ['/initialSetup'],
     })
@@ -288,8 +283,7 @@ describe('InitialSetupPage - Form Submission', () => {
   })
 
   test('form validation - required fields', async () => {
-    //TODO: how to consistently fix the "Unexpected `await` of a non-Promise (non-"Thenable") value." warning, making sure that the test still works reliably and in a robust way?
-    await renderWithProviders(<InitialSetupPage />, {
+    renderWithProviders(<InitialSetupPage />, {
       mocks: [mockInitialSetupGraphql(true)],
       initialEntries: ['/initialSetup'],
     })
@@ -309,8 +303,7 @@ describe('InitialSetupPage - Form Submission', () => {
   })
 
   test('message box is hidden when no error', async () => {
-    //TODO: how to consistently fix the "Unexpected `await` of a non-Promise (non-"Thenable") value." warning, making sure that the test still works reliably and in a robust way?
-    await renderWithProviders(<InitialSetupPage />, {
+    renderWithProviders(<InitialSetupPage />, {
       mocks: [mockInitialSetupGraphql(true)],
       initialEntries: ['/initialSetup'],
     })

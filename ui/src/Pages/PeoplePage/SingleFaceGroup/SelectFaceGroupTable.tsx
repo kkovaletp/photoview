@@ -70,7 +70,6 @@ const FaceGroupRow = ({
 
 type SelectFaceGroupTableProps = {
   faceGroups: MyFacesQuery['myFaceGroups']
-  //TODO: How to fix the "'selectedFaceGroup' PropType is defined but prop is never used" and the "'setSelectedFaceGroup' PropType is defined but prop is never used" warnings?
   selectedFaceGroup?: MyFacesQuery['myFaceGroups'][0] | SingleFaceGroupQuery['faceGroup'] | null
   setSelectedFaceGroup?: Dispatch<(MyFacesQuery['myFaceGroups'][0] | SingleFaceGroupQuery['faceGroup'] | null)>
   selectedFaceGroups?: Set<
@@ -80,15 +79,17 @@ type SelectFaceGroupTableProps = {
     SingleFaceGroupQuery['faceGroup'] | MyFacesQuery['myFaceGroups'][0] | null
   >
   title: string
-  frozen: boolean
+  frozen?: boolean
 }
 
 const SelectFaceGroupTable = ({
   faceGroups,
+  selectedFaceGroup,
+  setSelectedFaceGroup,
   selectedFaceGroups,
   toggleSelectedFaceGroup,
   title,
-  frozen
+  frozen = false
 }: SelectFaceGroupTableProps) => {
   const { t } = useTranslation()
 
@@ -104,7 +105,7 @@ const SelectFaceGroupTable = ({
       <FaceGroupRow
         key={face.id}
         faceGroup={face}
-        //TODO: how to fix the "Cannot find name 'selectedFaceGroup'. Did you mean 'selectedFaceGroups'?" error?
+        //TODO: suggest a consistent and reliable refactoring to fix the "Extract this nested ternary operation into an independent statement." warning.
         faceSelected={selectedFaceGroup ? selectedFaceGroup.id === face.id
           : selectedFaceGroups ? [...selectedFaceGroups].some(val => val?.id === face.id) : false}
         selectable={!frozen}

@@ -504,9 +504,7 @@ describe('AddUserRow', () => {
 
       renderComponent(mocks)
 
-      const usernameInput = screen.getByPlaceholderText(
-        'Username'
-      ) as HTMLInputElement
+      const usernameInput = screen.getByPlaceholderText('Username') as HTMLInputElement
 
       await user.type(usernameInput, 'newuser')
 
@@ -519,9 +517,7 @@ describe('AddUserRow', () => {
 
       renderComponent(mocks)
 
-      const pathInput = screen.getByPlaceholderText(
-        '/path/to/photos'
-      ) as HTMLInputElement
+      const pathInput = screen.getByPlaceholderText('/path/to/photos') as HTMLInputElement
 
       await user.type(pathInput, '/home/photos')
 

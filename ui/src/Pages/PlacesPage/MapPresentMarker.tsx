@@ -7,33 +7,16 @@ import {
   PlacePageQueryMediaQuery,
   PlacePageQueryMediaQueryVariables,
 } from './__generated__/MapPresentMarker'
+import { MEDIA_GALLERY_FRAGMENT } from '../../components/photoGallery/MediaGallery'
 import { PlacesAction, PlacesState } from './placesReducer'
 
 const QUERY_MEDIA = gql`
   query placePageQueryMedia($mediaIDs: [ID!]!) {
     mediaList(ids: $mediaIDs) {
-      id
-      title
-      blurhash
-      favorite
-      thumbnail {
-        url
-        width
-        height
-      }
-      highRes {
-        url
-        width
-        height
-      }
-      videoWeb {
-        url
-        width
-        height
-      }
-      type
+      ...MediaGalleryFields
     }
   }
+  ${MEDIA_GALLERY_FRAGMENT}
 `
 
 const getMediaFromMarker = (map: mapboxgl.Map, presentMarker: PresentMarker) =>

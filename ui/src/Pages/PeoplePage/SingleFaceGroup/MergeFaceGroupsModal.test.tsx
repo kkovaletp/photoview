@@ -112,8 +112,7 @@ async function testMerge(destinationID: string, sourceIDs: string[]) {
 
     // Render modal in SelectDestination state
     const { getByText, getByTestId, getByRole, rerender } = render(
-        //TODO: how to consistently handle the "'addTypename' is deprecated." warning? Sonar suggests "It is recommended to add __typename to your mock objects if it is not already defined. This ensures the cache more closely resembles the production environment", but I'm not sure that this is the most efficient and consistent solution for the project.
-        <MockedProvider mocks={[myFacesMock, combineFacesMock]} addTypename={false}>
+        <MockedProvider mocks={[myFacesMock, combineFacesMock]}>
             <MergeFaceGroupsModal
                 state={MergeFaceGroupsModalState.SelectDestination}
                 setState={setState}
@@ -132,8 +131,7 @@ async function testMerge(destinationID: string, sourceIDs: string[]) {
 
     // Rerender in SelectSources state
     rerender(
-        //TODO: how to consistently handle the "'addTypename' is deprecated." warning? Sonar suggests "It is recommended to add __typename to your mock objects if it is not already defined. This ensures the cache more closely resembles the production environment", but I'm not sure that this is the most efficient and consistent solution for the project.
-        <MockedProvider mocks={[myFacesMock, combineFacesMock]} addTypename={false}>
+        <MockedProvider mocks={[myFacesMock, combineFacesMock]}>
             <MergeFaceGroupsModal
                 state={MergeFaceGroupsModalState.SelectSources}
                 setState={setState}

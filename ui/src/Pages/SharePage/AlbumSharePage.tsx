@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next'
 import useURLParameters from '../../hooks/useURLParameters'
 import useOrderingParams from '../../hooks/useOrderingParams'
 import { ShareAlbumQueryQuery } from './__generated__/AlbumSharePage'
+import { MEDIA_GALLERY_FRAGMENT } from '../../components/photoGallery/MediaGallery'
 import useScrollPagination from '../../hooks/useScrollPagination'
 import PaginateLoader from '../../components/PaginateLoader'
 
@@ -29,6 +30,8 @@ export const SHARE_ALBUM_QUERY = gql`
           id
           thumbnail {
             url
+            width
+            height
           }
         }
       }
@@ -39,54 +42,11 @@ export const SHARE_ALBUM_QUERY = gql`
           order_direction: $mediaOrderDirection
         }
       ) {
-        id
-        title
-        type
-        blurhash
-        favorite
-        thumbnail {
-          url
-          width
-          height
-        }
-        downloads {
-          title
-          mediaUrl {
-            url
-            width
-            height
-            fileSize
-          }
-        }
-        highRes {
-          url
-          width
-          height
-        }
-        videoWeb {
-          url
-        }
-        exif {
-          id
-          description
-          camera
-          maker
-          lens
-          dateShot
-          exposure
-          aperture
-          iso
-          focalLength
-          flash
-          exposureProgram
-          coordinates {
-            latitude
-            longitude
-          }
-        }
+        ...MediaGalleryFields
       }
     }
   }
+  ${MEDIA_GALLERY_FRAGMENT}
 `
 
 const AlbumSharePageWrapper = styled.div`

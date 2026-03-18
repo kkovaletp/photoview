@@ -127,9 +127,6 @@ describe('MediaSidebarPeople', () => {
         faces: hasFaces
             ? [
                 {
-                    //TODO: how to fix the "Type '({ __typename: "ImageFace"; id: string; rectangle: { __typename: "FaceRectangle"; minX: number; maxX: number; minY: number; maxY: number; }; faceGroup: { __typename: "FaceGroup"; id: string; label: string; imageFaceCount: number; }; media: { ...; }; } | { ...; })[]' is not assignable to type '{ __typename?: "ImageFace" | undefined; id: string; rectangle: { __typename?: "FaceRectangle" | undefined; minX: number; maxX: number; minY: number; maxY: number; }; faceGroup: { __typename?: "FaceGroup" | undefined; id: string; label?: string | ... 1 more ... | undefined; imageFaceCount: number; }; media: { ...; };...'.
-                    // Type '{ __typename: "ImageFace"; id: string; rectangle: { __typename: "FaceRectangle"; minX: number; maxX: number; minY: number; maxY: number; }; faceGroup: { __typename: "FaceGroup"; id: string; label: string; imageFaceCount: number; }; media: { ...; }; } | { ...; }' is not assignable to type '{ __typename?: "ImageFace" | undefined; id: string; rectangle: { __typename?: "FaceRectangle" | undefined; minX: number; maxX: number; minY: number; maxY: number; }; faceGroup: { __typename?: "FaceGroup" | undefined; id: string; label?: string | ... 1 more ... | undefined; imageFaceCount: number; }; media: { ...; };...'.
-                    // Object literal may only specify known properties, and '__typename' does not exist in type '{ __typename?: "ImageFace" | undefined; id: string; rectangle: { __typename?: "FaceRectangle" | undefined; minX: number; maxX: number; minY: number; maxY: number; }; faceGroup: { __typename?: "FaceGroup" | undefined; id: string; label?: string | ... 1 more ... | undefined; imageFaceCount: number; }; media: { ...; };...'." error?
                     __typename: 'ImageFace',
                     id: 'face-1',
                     rectangle: {

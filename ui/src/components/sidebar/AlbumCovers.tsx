@@ -67,13 +67,19 @@ export const SidebarPhotoCover = ({ cover_id }: SidebarPhotoCoverProps) => {
   }
 
   return (
-    //TODO: how to fix the "Add a valid header row or column to this "<table>"." warning without breaking/changing the layout?
     <SidebarSection>
       <SidebarSectionTitle>
         {t('sidebar.album.album_cover', 'Album cover')}
       </SidebarSectionTitle>
       <div>
         <table className="border-collapse w-full">
+          <thead className="sr-only">
+            <tr>
+              <th colSpan={2}>
+                {t('sidebar.album.album_cover', 'Album cover')}
+              </th>
+            </tr>
+          </thead>
           <tfoot>
             <tr className="text-left border-gray-100 dark:border-dark-border2 border-b border-t">
               <td colSpan={2} className="pl-4 py-2">
@@ -125,13 +131,19 @@ export const SidebarAlbumCover = ({ id }: SidebarAlbumCoverProps) => {
   }, [id])
 
   return (
-    //TODO: how to fix the "Add a valid header row or column to this "<table>"." warning without breaking/changing the layout?
     <SidebarSection>
       <SidebarSectionTitle>
         {t('sidebar.album.album_cover', 'Album cover')}
       </SidebarSectionTitle>
       <div>
         <table className="border-collapse w-full">
+          <thead className="sr-only">
+            <tr>
+              <th colSpan={2}>
+                {t('sidebar.album.album_cover', 'Album cover')}
+              </th>
+            </tr>
+          </thead>
           <tfoot>
             <tr className="text-left border-gray-100 dark:border-dark-border2 border-b border-t">
               <td colSpan={2} className="pl-4 py-2">

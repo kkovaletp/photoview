@@ -109,8 +109,12 @@ const FaceDetailsWrapper = styled(FaceDetailsWrapperInner)`
   }
 `
 
+type FaceDetailsGroup = Pick<MyFacesQuery['myFaceGroups'][0], 'id' | 'label' | 'imageFaceCount'> & {
+  imageFaces?: MyFacesQuery['myFaceGroups'][0]['imageFaces']
+}
+
 type FaceDetailsProps = {
-  group: MyFacesQuery['myFaceGroups'][0]
+  group: FaceDetailsGroup
   className?: string
   textFieldClassName?: string
   editLabel: boolean

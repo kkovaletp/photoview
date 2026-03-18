@@ -109,6 +109,10 @@ const FaceGroupTitle = ({ faceGroup }: FaceGroupTitleProps) => {
         <MergeFaceGroupsModal
           state={mergeModalState}
           setState={setMergeModalState}
+          //TODO: how to fix the "Type '{ __typename?: "FaceGroup" | undefined; id: string; label?: string | null | undefined; imageFaces: { __typename?: "ImageFace" | undefined; id: string; rectangle: { __typename?: "FaceRectangle" | undefined; minX: number; maxX: number; minY: number; maxY: number; }; media: { ...; }; }[]; }' is not assignable to type '{ __typename: "FaceGroup"; id: string; }'.
+          // Types of property '__typename' are incompatible.
+          // Type '"FaceGroup" | undefined' is not assignable to type '"FaceGroup"'.
+          // Type 'undefined' is not assignable to type '"FaceGroup"'." error?
           preselectedDestinationFaceGroup={faceGroup}
           refetchQueries={[
             {

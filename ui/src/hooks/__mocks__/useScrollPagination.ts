@@ -1,5 +1,6 @@
-//TODO: how to consistently handle the "The arrow function should be named." warning (including callers of this export)?
-export default () => ({
+const mockUseScrollPagination = () => ({
   finished: true,
   containerElem: vi.fn(),
 })
+
+export default mockUseScrollPagination
