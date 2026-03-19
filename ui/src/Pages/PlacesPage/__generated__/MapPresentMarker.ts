@@ -9,26 +9,16 @@ export type PlacePageQueryMediaQuery = {
   mediaList: Array<{
     __typename?: 'Media'
     id: string
-    title: string
-    blurhash?: string | null
     type: Types.MediaType
+    blurhash?: string | null
+    favorite: boolean
     thumbnail?: {
       __typename?: 'MediaURL'
       url: string
       width: number
       height: number
     } | null
-    highRes?: {
-      __typename?: 'MediaURL'
-      url: string
-      width: number
-      height: number
-    } | null
-    videoWeb?: {
-      __typename?: 'MediaURL'
-      url: string
-      width: number
-      height: number
-    } | null
+    highRes?: { __typename?: 'MediaURL'; url: string } | null
+    videoWeb?: { __typename?: 'MediaURL'; url: string } | null
   }>
 }

@@ -23,59 +23,28 @@ export type ShareAlbumQueryQuery = {
       thumbnail?: {
         __typename?: 'Media'
         id: string
-        thumbnail?: { __typename?: 'MediaURL'; url: string } | null
+        thumbnail?: {
+          __typename?: 'MediaURL'
+          url: string
+          width: number
+          height: number
+        } | null
       } | null
     }>
     media: Array<{
       __typename?: 'Media'
       id: string
-      title: string
       type: Types.MediaType
       blurhash?: string | null
+      favorite: boolean
       thumbnail?: {
         __typename?: 'MediaURL'
         url: string
         width: number
         height: number
       } | null
-      downloads: Array<{
-        __typename?: 'MediaDownload'
-        title: string
-        mediaUrl: {
-          __typename?: 'MediaURL'
-          url: string
-          width: number
-          height: number
-          fileSize: number
-        }
-      }>
-      highRes?: {
-        __typename?: 'MediaURL'
-        url: string
-        width: number
-        height: number
-      } | null
+      highRes?: { __typename?: 'MediaURL'; url: string } | null
       videoWeb?: { __typename?: 'MediaURL'; url: string } | null
-      exif?: {
-        __typename?: 'MediaEXIF'
-        id: string
-        description?: string | null
-        camera?: string | null
-        maker?: string | null
-        lens?: string | null
-        dateShot?: string | null
-        exposure?: number | null
-        aperture?: number | null
-        iso?: number | null
-        focalLength?: number | null
-        flash?: number | null
-        exposureProgram?: number | null
-        coordinates?: {
-          __typename?: 'Coordinates'
-          latitude: number
-          longitude: number
-        } | null
-      } | null
     }>
   }
 }
