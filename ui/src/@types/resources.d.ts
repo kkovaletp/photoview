@@ -20,7 +20,9 @@ interface Resources {
       }
     },
     "album_page": {
-      "load_error": "Error loading album: {{message}}"
+      "load_error": "Error loading album: {{message}}",
+      "loading": "Loading album...",
+      "not_found": "Album not found"
     },
     "general": {
       "action": {
@@ -401,9 +403,7 @@ interface Resources {
       }
     },
     "title": {
-      "loading_album": "Loading album",
       "login": "Login",
-      "not_found": "Not found",
       "people": "People",
       "settings": "Settings"
     }

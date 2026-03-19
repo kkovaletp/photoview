@@ -18,7 +18,9 @@
     }
   },
   "album_page": {
-    "load_error": "Ошибка загрузки альбома: {{message}}"
+    "load_error": "Ошибка загрузки альбома: {{message}}",
+    "loading": "Загрузка альбома...",
+    "not_found": "Альбом не найден"
   },
   "general": {
     "action": {
@@ -409,9 +411,7 @@
     }
   },
   "title": {
-    "loading_album": "Загрузка альбома",
     "login": "Вход",
-    "not_found": "Не найдено",
     "people": "Люди",
     "settings": "Настройки"
   }

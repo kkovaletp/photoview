@@ -29,7 +29,7 @@ export const SidebarContext = createContext<SidebarContextType>({
 SidebarContext.displayName = 'SidebarContext'
 
 type SidebarProviderProps = {
-  children: ReactNode | ReactNode[]
+  children: ReactNode
 }
 
 export const SidebarProvider = ({ children }: SidebarProviderProps) => {
@@ -42,10 +42,10 @@ export const SidebarProvider = ({ children }: SidebarProviderProps) => {
   })
 
   const updateSidebar = useCallback((content: ReactNode | null) => {
-    if (content) {
-      setState(state => ({ ...state, content }))
-    } else {
+    if (content === null) {
       setState(state => ({ ...state, content: null, pinned: false }))
+    } else {
+      setState(state => ({ ...state, content }))
     }
   }, [])
 

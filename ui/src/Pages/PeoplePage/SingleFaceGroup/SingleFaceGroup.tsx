@@ -78,6 +78,7 @@ const SingleFaceGroup = ({ faceGroupID }: SingleFaceGroupProps) => {
     })
 
   useEffect(() => {
+    //TODO: This forced cast tells the type checker to trust the gallery shape without proving it. If the shared gallery fragment changes later, this page can quietly drift out of sync and still compile. Prefer reusing the shared fragment in this query, or mapping through a small typed helper, instead of a blind cast.
     const media = (data?.faceGroup?.imageFaces?.map(x => ({
       ...x.media,
       videoWeb: null

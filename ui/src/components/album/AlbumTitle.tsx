@@ -53,18 +53,19 @@ const AlbumTitle = ({ album, disableLink = false }: AlbumTitleProps) => {
   const { t } = useTranslation()
   const { updateSidebar } = useContext(SidebarContext)
   const token = authToken()
+  const albumId = album?.id
 
   useEffect(() => {
-    if (!album) return
+    if (!albumId) return
     if (!token || !disableLink) return
 
     fetchPath({
       variables: {
-        id: album.id,
+        id: albumId,
       },
     })
 
-  }, [album, token, disableLink, fetchPath])
+  }, [albumId, token, disableLink, fetchPath])
 
   const delay = useDelay(200, [album])
 

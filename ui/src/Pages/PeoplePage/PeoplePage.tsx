@@ -134,7 +134,7 @@ export const FaceDetails = ({
   const inputRef = useRef<HTMLInputElement>(null)
   const wasLoading = useRef(false)
 
-  const [setGroupLabel, { loading }] = useMutation<
+  const [setGroupLabel, { loading, data: mutationData, error: mutationError }] = useMutation<
     SetGroupLabelMutation,
     SetGroupLabelMutationVariables
   >(SET_GROUP_LABEL_MUTATION, {
@@ -149,15 +149,17 @@ export const FaceDetails = ({
   }, [group.label, setEditLabel])
 
   useEffect(() => {
-    inputRef.current?.focus()
-  }, [inputRef])
+    if (editLabel) {
+      inputRef.current?.focus()
+    }
+  }, [editLabel])
 
   useEffect(() => {
-    if (wasLoading.current && !loading) {
+    if (wasLoading.current && !loading && !mutationError && mutationData) {
       resetLabel()
     }
     wasLoading.current = loading
-  }, [loading, resetLabel])
+  }, [loading, resetLabel, mutationData, mutationError])
 
   const onKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key == 'Escape') {

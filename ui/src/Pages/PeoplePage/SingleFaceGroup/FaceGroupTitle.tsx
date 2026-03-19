@@ -37,7 +37,7 @@ const FaceGroupTitle = ({ faceGroup }: FaceGroupTitleProps) => {
   const [moveModalOpen, setMoveModalOpen] = useState(false)
   const [detachModalOpen, setDetachModalOpen] = useState(false)
 
-  const [setGroupLabel, { loading: setLabelLoading }] = useMutation<
+  const [setGroupLabel, { loading: setLabelLoading, error: labelSaveError }] = useMutation<
     SetGroupLabelMutation,
     SetGroupLabelMutationVariables
   >(SET_GROUP_LABEL_MUTATION)
@@ -48,19 +48,19 @@ const FaceGroupTitle = ({ faceGroup }: FaceGroupTitleProps) => {
   }, [faceGroup?.label])
 
   useEffect(() => {
-    if (inputRef.current) {
-      inputRef.current.focus()
+    if (editLabel) {
+      inputRef.current?.focus()
     }
-  }, [inputRef])
+  }, [editLabel])
 
   const wasLoading = useRef(false)
 
   useEffect(() => {
-    if (wasLoading.current && !setLabelLoading) {
+    if (wasLoading.current && !setLabelLoading && !labelSaveError) {
       resetLabel()
     }
     wasLoading.current = setLabelLoading
-  }, [setLabelLoading, resetLabel])
+  }, [setLabelLoading, resetLabel, labelSaveError])
 
   const onKeyDown: KeyboardEventHandler<HTMLInputElement> = e => {
     if (e.key == 'Escape') {

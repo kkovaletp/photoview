@@ -18,7 +18,9 @@
     }
   },
   "album_page": {
-    "load_error": ""
+    "load_error": "",
+    "loading": "",
+    "not_found": ""
   },
   "general": {
     "action": {
@@ -395,9 +397,7 @@
     }
   },
   "title": {
-    "loading_album": "アルバムを読み込み中",
     "login": "ログイン",
-    "not_found": "",
     "people": "人物",
     "settings": "設定"
   }

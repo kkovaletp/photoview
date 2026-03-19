@@ -14,7 +14,6 @@ vi.mock('react-i18next', () => ({
 // Mock styled-components ProtectedImage
 vi.mock('../../../components/photoGallery/ProtectedMedia', () => ({
     ProtectedImage: ({ src, onClick, ...props }: any) => (
-        //TODO: how to consistently fix the following warnings: "Non-interactive elements should not be assigned mouse or keyboard event listeners.", "Visible, non-interactive elements with click handlers must have at least one keyboard listener.", and "img elements must have an alt prop, either with meaningful text, or an empty string for decorative images."?
         <img
             src={src || 'data:image/gif;base64,R0lGODlhAQABAPAAAAAAAAAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw=='}
             onClick={onClick}

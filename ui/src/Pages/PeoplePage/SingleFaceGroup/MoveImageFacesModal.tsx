@@ -158,7 +158,10 @@ const MoveImageFacesModal = ({
         'people_page.modal.move_image_faces.destination_face_group_table.move_action',
         'Move image faces'
       ),
-      onClick: () => moveImageFaces(),
+      onClick: () => {
+        if (isNil(selectedFaceGroup)) return
+        moveImageFaces()
+      },
       variant: 'positive',
     }
   } else {
@@ -168,7 +171,10 @@ const MoveImageFacesModal = ({
         'people_page.modal.move_image_faces.image_select_table.next_action',
         'Next'
       ),
-      onClick: () => setImagesSelected(true),
+      onClick: () => {
+        if (selectedImageFaces.length == 0) return
+        setImagesSelected(true)
+      },
       variant: 'positive',
     }
   }

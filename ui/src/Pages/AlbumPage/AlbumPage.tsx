@@ -100,12 +100,12 @@ function AlbumPage() {
 
   if (error) return <div>{t('album_page.load_error', 'Error loading album: {{message}}', { message: error.message })}</div>
 
-  //TODO: suggest a consistent and reliable refactoring to handle the "Extract this nested ternary operation into an independent statement." warning
-  const pageTitle = data?.album?.title
-    ? data.album.title
-    : data
-      ? t('title.not_found', 'Not found')
-      : t('title.loading_album', 'Loading album')
+  let pageTitle = t('album_page.loading', 'Loading album...') as string
+  if (data) {
+    pageTitle = data.album?.title
+      ? data.album.title
+      : t('album_page.not_found', 'Album not found')
+  }
 
   return (
     <Layout
@@ -117,6 +117,8 @@ function AlbumPage() {
         loading={loading}
         setOnlyFavorites={toggleFavorites}
         onlyFavorites={onlyFavorites}
+        //TODO: After removing the "onFavorite" prop from the AlbumGallery component, the following error appears "Type '{ ref: (node: Element | null) => void; album: { __typename?: "Album" | undefined; id: string; title: string; subAlbums: { __typename?: "Album" | undefined; id: string; title: string; thumbnail?: { ...; } | ... 1 more ... | undefined; }[]; media: { ...; }[]; } | undefined; ... 6 more ...; ordering: { ...; }; }' is not assignable to type 'IntrinsicAttributes & AlbumGalleryProps & RefAttributes<HTMLDivElement>'.
+        // Property 'onFavorite' does not exist on type 'IntrinsicAttributes & AlbumGalleryProps & RefAttributes<HTMLDivElement>'. Did you mean 'onlyFavorites'?". Is it safe to remove the "onFavorite" logic here as well, or should we reimplement it based on the favorite toggling in MediaThumbnail’s action?
         onFavorite={() => (refetchNeededAll = refetchNeededFavorites = true)}
         showFilter
         setOrdering={orderParams.setOrdering}

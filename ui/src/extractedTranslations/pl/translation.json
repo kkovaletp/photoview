@@ -18,7 +18,9 @@
     }
   },
   "album_page": {
-    "load_error": ""
+    "load_error": "",
+    "loading": "",
+    "not_found": ""
   },
   "general": {
     "action": {
@@ -409,9 +411,7 @@
     }
   },
   "title": {
-    "loading_album": "Ładowanie albumu",
     "login": "Logowanie",
-    "not_found": "",
     "people": "Ludzie",
     "settings": "Ustawienia"
   }

@@ -46,9 +46,12 @@ export const useLoadTranslations = () => {
   const token = authToken()
 
   useEffect(() => {
-    if (token) {
-      loadLang()
+    if (!token) {
+      map_language = null
+      void i18n.changeLanguage('en')
+      return
     }
+    loadLang()
   }, [token, loadLang])
 
   useEffect(() => {

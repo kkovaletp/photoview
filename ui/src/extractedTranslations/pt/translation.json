@@ -18,7 +18,9 @@
     }
   },
   "album_page": {
-    "load_error": ""
+    "load_error": "",
+    "loading": "",
+    "not_found": ""
   },
   "general": {
     "action": {
@@ -404,9 +406,7 @@
     }
   },
   "title": {
-    "loading_album": "Carregar Álbum",
     "login": "Login",
-    "not_found": "",
     "people": "Pessoas",
     "settings": "Configurações"
   }

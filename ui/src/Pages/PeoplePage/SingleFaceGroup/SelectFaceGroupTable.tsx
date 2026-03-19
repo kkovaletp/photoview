@@ -1,4 +1,4 @@
-import { Dispatch, useState } from 'react'
+import { Dispatch, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import styled from 'styled-components'
 import { TextField } from '../../../primitives/form/Input'
@@ -92,30 +92,35 @@ const SelectFaceGroupTable = ({
   frozen = false
 }: SelectFaceGroupTableProps) => {
   const { t } = useTranslation()
+  const selectedIds = useMemo(() => {
+    if (selectedFaceGroup) return new Set<string>([selectedFaceGroup.id])
+    if (selectedFaceGroups && selectedFaceGroups.size > 0) {
+      return new Set<string>([...selectedFaceGroups].filter(Boolean).map(x => (x as any).id))
+    }
+    return new Set<string>()
+  }, [selectedFaceGroup, selectedFaceGroups])
 
   const [searchValue, setSearchValue] = useState('')
 
   const rows = faceGroups
-    .filter(
-      x =>
-        searchValue == '' ||
-        (x.label?.toLowerCase().includes(searchValue.toLowerCase()))
-    )
-    .map(face => (
-      <FaceGroupRow
-        key={face.id}
-        faceGroup={face}
-        //TODO: suggest a consistent and reliable refactoring to fix the "Extract this nested ternary operation into an independent statement." warning.
-        faceSelected={selectedFaceGroup ? selectedFaceGroup.id === face.id
-          : selectedFaceGroups ? [...selectedFaceGroups].some(val => val?.id === face.id) : false}
-        selectable={!frozen}
-        toggleFaceSelected={() => {
-          if (frozen) return
-          if (setSelectedFaceGroup) setSelectedFaceGroup(face)
-          else toggleSelectedFaceGroup?.(face)
-        }}
-      />
-    ))
+    .filter(x => x.label?.toLowerCase().includes(searchValue.toLowerCase()))
+    .map(face => {
+      const isSelected = selectedIds.has(face.id)
+      const onToggle = () => {
+        if (frozen) return
+        if (setSelectedFaceGroup) setSelectedFaceGroup(face)
+        else toggleSelectedFaceGroup?.(face)
+      }
+      return (
+        <FaceGroupRow
+          key={face.id}
+          faceGroup={face}
+          faceSelected={isSelected}
+          selectable={!frozen}
+          toggleFaceSelected={onToggle}
+        />
+      )
+    })
 
   return (
     <>

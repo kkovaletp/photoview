@@ -18,7 +18,9 @@
     }
   },
   "album_page": {
-    "load_error": ""
+    "load_error": "",
+    "loading": "",
+    "not_found": ""
   },
   "general": {
     "action": {
@@ -399,9 +401,7 @@
     }
   },
   "title": {
-    "loading_album": "Loader album",
     "login": "Log ind",
-    "not_found": "",
     "people": "Personer",
     "settings": "Indstillinger"
   }
