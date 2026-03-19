@@ -11,20 +11,18 @@ type MediaSidebarMapProps = {
 const MediaSidebarMap = ({ coordinates }: MediaSidebarMapProps) => {
   const { t } = useTranslation()
 
-  if (isNil(coordinates)) {
-    return null
-  }
+  const hasCoordinates = !isNil(coordinates)
+  const latitude = hasCoordinates ? coordinates.latitude : 0
+  const longitude = hasCoordinates ? coordinates.longitude : 0
 
   const { mapContainer, mapboxToken } = useMapboxMap({
     mapboxOptions: {
       interactive: false,
       zoom: 12,
-      center: {
-        lat: coordinates.latitude,
-        lng: coordinates.longitude,
-      },
+      center: { lat: latitude, lng: longitude },
     },
     configureMapbox: (map, mapboxLibrary) => {
+      if (!hasCoordinates) return
       map.addControl(
         new mapboxLibrary.NavigationControl({ showCompass: false })
       )
@@ -34,14 +32,14 @@ const MediaSidebarMap = ({ coordinates }: MediaSidebarMapProps) => {
         scale: 0.8,
       })
       centerMarker.setLngLat({
-        lat: coordinates.latitude,
-        lng: coordinates.longitude,
+        lat: latitude,
+        lng: longitude,
       })
       centerMarker.addTo(map)
     },
   })
 
-  if (isNil(mapboxToken)) {
+  if (!hasCoordinates || isNil(mapboxToken)) {
     return null
   }
 

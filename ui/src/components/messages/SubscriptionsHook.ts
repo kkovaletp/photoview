@@ -1,7 +1,6 @@
 import { NotificationSubscriptionSubscription } from './__generated__/SubscriptionsHook'
 import { Dispatch, SetStateAction, useEffect } from 'react'
 import { useSubscription, gql } from '@apollo/client'
-import { authToken } from '../../helpers/authentication'
 import { NotificationType } from '../../__generated__/globalTypes'
 
 const NOTIFICATION_SUBSCRIPTION = gql`
@@ -45,15 +44,11 @@ export const SubscriptionsHook = ({
   messages,
   setMessages,
 }: SubscriptionHookProps) => {
-  const isAuthenticated = !!authToken()
-
   const { data, error } = useSubscription<NotificationSubscriptionSubscription>(
-    NOTIFICATION_SUBSCRIPTION,
-    { skip: !isAuthenticated }
+    NOTIFICATION_SUBSCRIPTION
   )
 
   useEffect(() => {
-    if (!isAuthenticated) return
     if (error) {
       setMessages(state => [
         ...state,
@@ -117,7 +112,7 @@ export const SubscriptionsHook = ({
     }
 
     setMessages(newMessages)
-  }, [data, error, isAuthenticated])
+  }, [data, error])
 
   return null
 }

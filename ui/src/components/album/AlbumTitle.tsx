@@ -52,18 +52,19 @@ const AlbumTitle = ({ album, disableLink = false }: AlbumTitleProps) => {
     useLazyQuery<AlbumPathQueryQuery>(ALBUM_PATH_QUERY)
   const { t } = useTranslation()
   const { updateSidebar } = useContext(SidebarContext)
+  const token = authToken()
 
   useEffect(() => {
     if (!album) return
+    if (!token || !disableLink) return
 
-    if (authToken() && disableLink) {
-      fetchPath({
-        variables: {
-          id: album.id,
-        },
-      })
-    }
-  }, [album])
+    fetchPath({
+      variables: {
+        id: album.id,
+      },
+    })
+
+  }, [album, token, disableLink, fetchPath])
 
   const delay = useDelay(200, [album])
 

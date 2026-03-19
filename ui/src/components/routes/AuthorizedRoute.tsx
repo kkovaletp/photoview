@@ -8,14 +8,15 @@ import { ADMIN_QUERY } from '../layout/Layout'
 export const useIsAdmin = () => {
   const [fetchAdminQuery, { data, called }] =
     useLazyQuery<AdminQueryQuery>(ADMIN_QUERY)
+  const token = authToken()
 
   useEffect(() => {
-    if (authToken() && !called) {
+    if (token && !called) {
       fetchAdminQuery()
     }
-  }, [authToken()])
+  }, [token, called, fetchAdminQuery])
 
-  if (!authToken()) {
+  if (!token) {
     return false
   }
 

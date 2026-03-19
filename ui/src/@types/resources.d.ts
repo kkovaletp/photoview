@@ -54,7 +54,8 @@ interface Resources {
         "result_type": {
           "albums": "Albums",
           "media": "Media"
-        }
+        },
+        "results_label": "Search results"
       }
     },
     "login_page": {
@@ -86,7 +87,7 @@ interface Resources {
         "change_label": "Change label",
         "detach_images": "Detach face",
         "merge_face": "Merge face",
-        "merge_people": "Merge face",
+        "merge_people": "Merge people",
         "move_faces": "Move faces"
       },
       "face_group": {
@@ -362,7 +363,7 @@ interface Resources {
             "maker": "Maker"
           }
         },
-        "unknown_type": "Unknown media type: {{type}}"
+        "unknown_type": "ERROR: Unknown media type: {{type}}"
       },
       "people": {
         "action_label": {

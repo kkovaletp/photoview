@@ -36,7 +36,7 @@ const useScrollPagination: <D>(
 
     // configure new observer
     observer.current = new IntersectionObserver(entities => {
-      if (entities.some(x => !x.isIntersecting)) {
+      if (entities.some(x => x.isIntersecting)) {
         const itemCount = data === undefined ? 0 : getItems(data).length
         fetchMore({
           variables: {

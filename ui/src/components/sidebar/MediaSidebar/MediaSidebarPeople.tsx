@@ -84,10 +84,6 @@ const PersonMoreMenu = ({
   const modals = (
     <>
       <MergeFaceGroupsModal
-        //TODO: how to fix the "Type '{ __typename?: "FaceGroup" | undefined; id: string; label?: string | null | undefined; imageFaceCount: number; }' is not assignable to type '{ __typename: "FaceGroup"; id: string; }'.
-        //   Types of property '__typename' are incompatible.
-        // Type '"FaceGroup" | undefined' is not assignable to type '"FaceGroup"'.
-        // Type 'undefined' is not assignable to type '"FaceGroup"'." error?
         preselectedDestinationFaceGroup={face.faceGroup}
         state={mergeModalState}
         setState={setMergeModalState}

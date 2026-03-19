@@ -69,7 +69,7 @@ const downloadMedia = (
 
   if (authToken() == null) {
     // Get share token if not authorized
-    const token = /^\/share\/(\w)/.exec(location.pathname)
+    const token = /^\/share\/(\w+)/.exec(location.pathname)
     if (token) {
       imgUrl.searchParams.set('token', token[1])
     }

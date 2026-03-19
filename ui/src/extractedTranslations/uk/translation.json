@@ -52,7 +52,8 @@
       "result_type": {
         "albums": "Альбоми",
         "media": "Медіафайли"
-      }
+      },
+      "results_label": "Результати пошуку"
     }
   },
   "login_page": {

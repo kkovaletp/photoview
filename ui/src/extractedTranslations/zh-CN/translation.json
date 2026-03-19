@@ -52,7 +52,8 @@
       "result_type": {
         "albums": "相册",
         "media": "媒体"
-      }
+      },
+      "results_label": ""
     }
   },
   "login_page": {

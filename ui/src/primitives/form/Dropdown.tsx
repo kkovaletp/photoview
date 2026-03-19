@@ -49,11 +49,11 @@ const Dropdown = ({
         'dark:bg-dark-input-bg dark:border-dark-input-border dark:text-dark-input-text dark:focus:border-blue-300',
         className
       )}
-      value={selected}
+      value={selected ?? ''}
       onChange={onChange}
       {...otherProps}
     >
-      {placeholder && !selected && (
+      {placeholder && (
         <option value="" disabled hidden>
           {placeholder}
         </option>

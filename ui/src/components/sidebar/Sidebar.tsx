@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState, ReactNode, useMemo } from 'react'
+import { createContext, useContext, useEffect, useState, ReactNode, useMemo, useCallback } from 'react'
 
 export type UpdateSidebarFn = (content: ReactNode) => void
 export type SidebarPinnedFn = (pin: boolean) => void
@@ -41,17 +41,17 @@ export const SidebarProvider = ({ children }: SidebarProviderProps) => {
     pinned: false,
   })
 
-  const updateSidebar = (content: ReactNode | null) => {
+  const updateSidebar = useCallback((content: ReactNode | null) => {
     if (content) {
       setState(state => ({ ...state, content }))
     } else {
       setState(state => ({ ...state, content: null, pinned: false }))
     }
-  }
+  }, [])
 
-  const setPinned = (pinned: boolean) => {
+  const setPinned = useCallback((pinned: boolean) => {
     setState(state => ({ ...state, pinned }))
-  }
+  }, [])
 
   const contextValue = useMemo(
     () => ({
@@ -85,7 +85,7 @@ export const Sidebar = () => {
     return () => {
       body.classList.remove('overflow-y-hidden', 'lg:overflow-y-auto')
     }
-  })
+  }, [content])
 
   return (
     <div

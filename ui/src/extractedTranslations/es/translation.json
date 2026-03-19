@@ -52,7 +52,8 @@
       "result_type": {
         "albums": "Álbumes",
         "media": ""
-      }
+      },
+      "results_label": ""
     }
   },
   "login_page": {

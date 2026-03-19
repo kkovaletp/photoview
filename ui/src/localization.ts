@@ -43,12 +43,13 @@ const SITE_TRANSLATION = gql`
 let map_language: LanguageTranslation | null
 export const useLoadTranslations = () => {
   const [loadLang, { data }] = useLazyQuery<SiteTranslationQuery>(SITE_TRANSLATION)
+  const token = authToken()
 
   useEffect(() => {
-    if (authToken()) {
+    if (token) {
       loadLang()
     }
-  }, [authToken()])
+  }, [token, loadLang])
 
   useEffect(() => {
     const language = data?.myUserPreferences.language

@@ -2,8 +2,9 @@ import { useMutation } from '@apollo/client'
 import {
   useState,
   useEffect,
-  createRef,
   KeyboardEventHandler,
+  useRef,
+  useCallback,
 } from 'react'
 import { useTranslation } from 'react-i18next'
 import { isNil } from '../../../helpers/utils'
@@ -29,7 +30,7 @@ const FaceGroupTitle = ({ faceGroup }: FaceGroupTitleProps) => {
 
   const [editLabel, setEditLabel] = useState(false)
   const [inputValue, setInputValue] = useState(faceGroup?.label ?? '')
-  const inputRef = createRef<HTMLInputElement>()
+  const inputRef = useRef<HTMLInputElement>(null)
   const [mergeModalState, setMergeModalState] = useState(
     MergeFaceGroupsModalState.Closed
   )
@@ -41,10 +42,10 @@ const FaceGroupTitle = ({ faceGroup }: FaceGroupTitleProps) => {
     SetGroupLabelMutationVariables
   >(SET_GROUP_LABEL_MUTATION)
 
-  const resetLabel = () => {
+  const resetLabel = useCallback(() => {
     setInputValue(faceGroup?.label ?? '')
     setEditLabel(false)
-  }
+  }, [faceGroup?.label])
 
   useEffect(() => {
     if (inputRef.current) {
@@ -52,11 +53,14 @@ const FaceGroupTitle = ({ faceGroup }: FaceGroupTitleProps) => {
     }
   }, [inputRef])
 
+  const wasLoading = useRef(false)
+
   useEffect(() => {
-    if (!setLabelLoading) {
+    if (wasLoading.current && !setLabelLoading) {
       resetLabel()
     }
-  }, [setLabelLoading])
+    wasLoading.current = setLabelLoading
+  }, [setLabelLoading, resetLabel])
 
   const onKeyDown: KeyboardEventHandler<HTMLInputElement> = e => {
     if (e.key == 'Escape') {
@@ -109,10 +113,6 @@ const FaceGroupTitle = ({ faceGroup }: FaceGroupTitleProps) => {
         <MergeFaceGroupsModal
           state={mergeModalState}
           setState={setMergeModalState}
-          //TODO: how to fix the "Type '{ __typename?: "FaceGroup" | undefined; id: string; label?: string | null | undefined; imageFaces: { __typename?: "ImageFace" | undefined; id: string; rectangle: { __typename?: "FaceRectangle" | undefined; minX: number; maxX: number; minY: number; maxY: number; }; media: { ...; }; }[]; }' is not assignable to type '{ __typename: "FaceGroup"; id: string; }'.
-          // Types of property '__typename' are incompatible.
-          // Type '"FaceGroup" | undefined' is not assignable to type '"FaceGroup"'.
-          // Type 'undefined' is not assignable to type '"FaceGroup"'." error?
           preselectedDestinationFaceGroup={faceGroup}
           refetchQueries={[
             {

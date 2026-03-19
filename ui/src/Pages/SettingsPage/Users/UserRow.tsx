@@ -99,9 +99,8 @@ const UserRow = ({ user, refetchUsers }: UserRowProps) => {
     newRootPath: '',
   })
 
-  //TODO: how to consistently handle the "useState call is not destructured into value + setter pair" warning for the next 2 lines?
-  const [showConfirmDelete, setConfirmDelete] = useState(false)
-  const [showChangePassword, setChangePassword] = useState(false)
+  const [showConfirmDelete, setShowConfirmDelete] = useState(false)
+  const [showChangePassword, setShowChangePassword] = useState(false)
   const [updateUserMutationFn, { loading: updateUserLoading }] = useMutation<
     UpdateUserMutation,
     UpdateUserMutationVariables
@@ -132,7 +131,7 @@ const UserRow = ({ user, refetchUsers }: UserRowProps) => {
     } catch (error) {
       console.error('Failed to update user: ', error)
       notifyMutationError(add, 'Failed to update user', error)
-      return {} as FetchResult<UpdateUserMutation>
+      return { data: undefined, errors: undefined } as FetchResult<UpdateUserMutation>
     }
   }
 
@@ -149,7 +148,7 @@ const UserRow = ({ user, refetchUsers }: UserRowProps) => {
     } catch (error) {
       console.error('Failed to delete user: ', error)
       notifyMutationError(add, 'Failed to delete user', error)
-      return {} as FetchResult<DeleteUserMutation>
+      return { data: undefined, errors: undefined } as FetchResult<DeleteUserMutation>
     }
   }
 
@@ -166,7 +165,7 @@ const UserRow = ({ user, refetchUsers }: UserRowProps) => {
     } catch (error) {
       console.error('Failed to scan user: ', error)
       notifyMutationError(add, 'Failed to scan user', error)
-      return {} as FetchResult<ScanUserMutation>
+      return { data: undefined, errors: undefined } as FetchResult<ScanUserMutation>
     }
   }
 
@@ -178,8 +177,8 @@ const UserRow = ({ user, refetchUsers }: UserRowProps) => {
     updateUser,
     updateUserLoading,
     deleteUser,
-    setChangePassword,
-    setConfirmDelete,
+    setChangePassword: setShowChangePassword,
+    setConfirmDelete: setShowConfirmDelete,
     scanUserCalled,
     showChangePassword,
     showConfirmDelete,

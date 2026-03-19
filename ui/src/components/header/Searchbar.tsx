@@ -65,8 +65,6 @@ const SearchBar = () => {
   }, [])
 
   const fetchEvent = (e: ChangeEvent<HTMLInputElement>) => {
-    e.persist()
-
     setQuery(e.target.value)
     if (e.target.value.trim() != '' && debouncedFetch.current) {
       debouncedFetch.current(e.target.value.trim())
@@ -297,7 +295,7 @@ const SearchRow = ({
 
   useEffect(() => {
     const keydownEvent = (event: KeyboardEvent) => {
-      if (event.key == 'Enter') navigate(link)
+      if (event.key == 'Enter' && selected) navigate(link)
     }
 
     document.addEventListener('keydown', keydownEvent)
@@ -305,7 +303,7 @@ const SearchRow = ({
     return () => {
       document.removeEventListener('keydown', keydownEvent)
     }
-  })
+  }, [selected, link, navigate])
 
   if (selected) {
     rowEl.current?.scrollIntoView({

@@ -1,5 +1,4 @@
 import {
-  createRef,
   DetailedHTMLProps,
   Dispatch,
   HTMLAttributes,
@@ -8,6 +7,8 @@ import {
   useEffect,
   useState,
   KeyboardEvent,
+  useCallback,
+  useRef,
 } from 'react'
 import { gql, useMutation, useQuery } from '@apollo/client'
 import Layout from '../../components/layout/Layout'
@@ -130,7 +131,8 @@ export const FaceDetails = ({
 }: FaceDetailsProps) => {
   const { t } = useTranslation()
   const [inputValue, setInputValue] = useState(group.label ?? '')
-  const inputRef = createRef<HTMLInputElement>()
+  const inputRef = useRef<HTMLInputElement>(null)
+  const wasLoading = useRef(false)
 
   const [setGroupLabel, { loading }] = useMutation<
     SetGroupLabelMutation,
@@ -141,20 +143,21 @@ export const FaceDetails = ({
     },
   })
 
-  const resetLabel = () => {
+  const resetLabel = useCallback(() => {
     setInputValue(group.label ?? '')
     setEditLabel(false)
-  }
+  }, [group.label, setEditLabel])
 
   useEffect(() => {
     inputRef.current?.focus()
   }, [inputRef])
 
   useEffect(() => {
-    if (!loading) {
+    if (wasLoading.current && !loading) {
       resetLabel()
     }
-  }, [loading])
+    wasLoading.current = loading
+  }, [loading, resetLabel])
 
   const onKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key == 'Escape') {

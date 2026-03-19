@@ -1,8 +1,8 @@
 import { vi } from 'vitest'
 
 vi.mock('../../hooks/useScrollPagination')
-vi.mock('../../Pages/SharePage/MediaSharePage', () => {
-  const originalModule = vi.importActual('../../Pages/SharePage/MediaSharePage')
+vi.mock('../../Pages/SharePage/MediaSharePage', async () => {
+  const originalModule = await vi.importActual('../../Pages/SharePage/MediaSharePage')
   // Define interface for the props
   interface MediaViewProps {
     media?: {
@@ -25,7 +25,6 @@ vi.mock('../../Pages/SharePage/MediaSharePage', () => {
   }
   return {
     __esModule: true,
-    //TODO: how to consistently fix the "Expected a non-Promise value to be spread in an object." warning?
     ...originalModule,
     MediaView: MockMediaView,
     default: MockMediaSharePage,

@@ -52,7 +52,8 @@
       "result_type": {
         "albums": "Albumak",
         "media": "Edukia"
-      }
+      },
+      "results_label": ""
     }
   },
   "login_page": {

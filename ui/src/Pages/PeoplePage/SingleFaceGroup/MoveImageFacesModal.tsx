@@ -84,7 +84,7 @@ const MoveImageFacesModal = ({
     if (imagesSelected) {
       loadFaceGroups()
     }
-  }, [imagesSelected])
+  }, [imagesSelected, loadFaceGroups])
 
   useEffect(() => {
     if (!open) {

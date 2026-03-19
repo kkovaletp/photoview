@@ -52,7 +52,7 @@ export const ProtectedImage = ({
 
   if (!lazyLoading) {
     return (
-      <img {...props} src={url} loading="eager" crossOrigin="use-credentials" alt='' />
+      <img {...props} src={url} loading="eager" crossOrigin="use-credentials" alt={props.alt ?? ''} />
     )
   }
 
@@ -68,7 +68,7 @@ export const ProtectedImage = ({
         src={url}
         loading="lazy"
         crossOrigin="use-credentials"
-        alt=''
+        alt={props.alt ?? ''}
         onLoad={didLoad}
       />
       {blurhash && !loaded && (
@@ -141,7 +141,7 @@ const FallbackLazyloadedImage = ({
           src={src}
           onLoad={didLoad}
           crossOrigin="use-credentials"
-          alt=''
+          alt={props.alt ?? ''}
         />
         {blurhash && !loaded && (
           <BlurhashCanvas

@@ -100,14 +100,16 @@ function AlbumPage() {
 
   if (error) return <div>{t('album_page.load_error', 'Error loading album: {{message}}', { message: error.message })}</div>
 
+  //TODO: suggest a consistent and reliable refactoring to handle the "Extract this nested ternary operation into an independent statement." warning
+  const pageTitle = data?.album?.title
+    ? data.album.title
+    : data
+      ? t('title.not_found', 'Not found')
+      : t('title.loading_album', 'Loading album')
+
   return (
     <Layout
-      title={
-        //TODO: suggest a consistent and reliable refactoring to handle the "Extract this nested ternary operation into an independent statement." warning
-        data ? data.album ? data.album.title :
-          t('title.not_found', 'Not found') :
-          t('title.loading_album', 'Loading album')
-      }
+      title={pageTitle}
     >
       <AlbumGallery
         ref={containerElem}

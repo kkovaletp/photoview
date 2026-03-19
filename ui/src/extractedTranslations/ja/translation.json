@@ -52,7 +52,8 @@
       "result_type": {
         "albums": "アルバム",
         "media": "メディア"
-      }
+      },
+      "results_label": ""
     }
   },
   "login_page": {

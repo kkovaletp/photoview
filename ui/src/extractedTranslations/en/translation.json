@@ -52,7 +52,8 @@
       "result_type": {
         "albums": "Albums",
         "media": "Media"
-      }
+      },
+      "results_label": "Search results"
     }
   },
   "login_page": {

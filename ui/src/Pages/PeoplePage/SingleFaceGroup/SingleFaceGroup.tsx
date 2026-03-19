@@ -74,7 +74,7 @@ const SingleFaceGroup = ({ faceGroupID }: SingleFaceGroupProps) => {
       loading,
       fetchMore,
       data,
-      getItems: data => data.faceGroup.imageFaces,
+      getItems: data => data.faceGroup?.imageFaces ?? [],
     })
 
   useEffect(() => {

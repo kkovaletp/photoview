@@ -144,8 +144,12 @@ export const ArrowPopoverPanel = styled.div.attrs({
   }
 `
 
+type ShareItem =
+  | SidebarGetAlbumSharesQuery['album']['shares'][0]
+  | SidebarGetPhotoSharesQuery['media']['shares'][0]
+
 type MorePopoverSectionPasswordProps = {
-  share: SidebarGetAlbumSharesQuery['album']['shares'][0]
+  share: ShareItem
   query: DocumentNode
   id: string
 }
@@ -278,7 +282,7 @@ const MorePopoverSectionPassword = ({
 }
 
 type MorePopoverSectionExpirationProps = {
-  share: SidebarGetAlbumSharesQuery['album']['shares'][0]
+  share: ShareItem
   id: string
   query: DocumentNode
 }
@@ -403,7 +407,7 @@ const MorePopoverSectionExpiration = ({
 type MorePopoverProps = {
   id: string
   query: DocumentNode
-  share: SidebarGetAlbumSharesQuery['album']['shares'][0]
+  share: ShareItem
 }
 
 const MorePopover = ({ id, share, query }: MorePopoverProps) => {
@@ -529,7 +533,7 @@ type SidebarShareProps = {
   id: string
   isPhoto: boolean
   loading: boolean
-  shares?: SidebarGetPhotoSharesQuery['media']['shares']
+  shares?: ShareItem[]
   shareItem: (item: { variables: { id: string } }) => Promise<unknown>
 }
 
