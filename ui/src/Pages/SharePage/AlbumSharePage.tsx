@@ -20,7 +20,8 @@ export const SHARE_ALBUM_QUERY = gql`
     $limit: Int!
     $offset: Int!
     $mediaOrderBy: String!
-    $mediaOrderDirection: OrderDirection!
+    $orderDirection: OrderDirection!
+    $onlyFavorites: Boolean
   ) {
     album(id: $id, tokenCredentials: { token: $token, password: $password }) {
       ...AlbumGalleryFields
@@ -54,7 +55,8 @@ const AlbumSharePage = ({ albumID, token, password }: AlbumSharePageProps) => {
         limit: 200,
         offset: 0,
         mediaOrderBy: orderParams.orderBy,
-        mediaOrderDirection: orderParams.orderDirection,
+        orderDirection: orderParams.orderDirection,
+        onlyFavorites: false,
       },
     }
   )

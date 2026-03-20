@@ -74,6 +74,7 @@ const FaceGroupTitle = ({ faceGroup }: FaceGroupTitleProps) => {
       <TextField
         loading={setLabelLoading}
         ref={inputRef}
+        error={labelSaveError?.message}
         placeholder={t('people_page.face_group.label_placeholder', 'Label')}
         action={() => {
           if (isNil(faceGroup))

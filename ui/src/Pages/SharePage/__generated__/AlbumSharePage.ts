@@ -4,10 +4,11 @@ export type ShareAlbumQueryQueryVariables = Types.Exact<{
   id: Types.Scalars['ID']['input']
   token: Types.Scalars['String']['input']
   password?: Types.InputMaybe<Types.Scalars['String']['input']>
-  mediaOrderBy?: Types.InputMaybe<Types.Scalars['String']['input']>
-  mediaOrderDirection?: Types.InputMaybe<Types.OrderDirection>
-  limit?: Types.InputMaybe<Types.Scalars['Int']['input']>
-  offset?: Types.InputMaybe<Types.Scalars['Int']['input']>
+  limit: Types.Scalars['Int']['input']
+  offset: Types.Scalars['Int']['input']
+  mediaOrderBy: Types.Scalars['String']['input']
+  orderDirection: Types.OrderDirection
+  onlyFavorites?: Types.InputMaybe<Types.Scalars['Boolean']['input']>
 }>
 
 export type ShareAlbumQueryQuery = {
@@ -23,12 +24,7 @@ export type ShareAlbumQueryQuery = {
       thumbnail?: {
         __typename?: 'Media'
         id: string
-        thumbnail?: {
-          __typename?: 'MediaURL'
-          url: string
-          width: number
-          height: number
-        } | null
+        thumbnail?: { __typename?: 'MediaURL'; url: string } | null
       } | null
     }>
     media: Array<{

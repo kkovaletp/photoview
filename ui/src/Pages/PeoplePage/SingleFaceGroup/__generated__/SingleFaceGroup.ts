@@ -24,9 +24,9 @@ export type SingleFaceGroupQuery = {
       }
       media: {
         __typename?: 'Media'
+        title: string
         id: string
         type: Types.MediaType
-        title: string
         blurhash?: string | null
         favorite: boolean
         thumbnail?: {
@@ -36,6 +36,7 @@ export type SingleFaceGroupQuery = {
           height: number
         } | null
         highRes?: { __typename?: 'MediaURL'; url: string } | null
+        videoWeb?: { __typename?: 'MediaURL'; url: string } | null
       }
     }>
   }

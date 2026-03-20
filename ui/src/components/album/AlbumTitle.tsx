@@ -106,7 +106,7 @@ const AlbumTitle = ({ album, disableLink = false }: AlbumTitleProps) => {
         </nav>
         <h1 className="text-2xl truncate min-w-0">{title}</h1>
       </div>
-      {authToken() && (
+      {token && (
         <button
           title={t('sidebar.album.title', 'Album options')}
           aria-label={t('sidebar.album.title', 'Album options')}

@@ -13,18 +13,6 @@ import { MediaOrdering, SetOrderingFn } from '../../hooks/useOrderingParams'
 import { gql } from '@apollo/client'
 import { AlbumGalleryFieldsFragment } from './__generated__/AlbumGallery'
 
-//TODO: When I tried to run the "npm run genSchemaTypes" for this project, I got the following errors:
-//     ✖ GraphQL Document Validation failed with 3 errors;
-//         Error 0: Variable "$orderDirection" is not defined by operation "shareAlbumQuery".
-//            at photoview / ui / src / components / albumGallery / AlbumGallery.tsx: 7: 60
-//            at photoview / ui / src / components / albumGallery / AlbumGallery.tsx: 4: 3
-//         Error 1: Variable "$orderDirection" is not defined by operation "shareAlbumQuery".
-//            at photoview / ui / src / components / albumGallery / AlbumGallery.tsx: 19: 58
-//            at photoview / ui / src / components / albumGallery / AlbumGallery.tsx: 4: 3
-//         Error 2: Variable "$onlyFavorites" is not defined by operation "shareAlbumQuery".
-//            at photoview / ui / src / components / albumGallery / AlbumGallery.tsx: 20: 22
-//            at photoview / ui / src / components / albumGallery / AlbumGallery.tsx: 4: 3
-// Please give me a consistent and reliable fix for them.
 export const ALBUM_GALLERY_FRAGMENT = gql`
   ${MEDIA_GALLERY_FRAGMENT}
 

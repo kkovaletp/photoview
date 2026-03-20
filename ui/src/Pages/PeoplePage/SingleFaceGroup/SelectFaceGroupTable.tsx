@@ -95,7 +95,11 @@ const SelectFaceGroupTable = ({
   const selectedIds = useMemo(() => {
     if (selectedFaceGroup) return new Set<string>([selectedFaceGroup.id])
     if (selectedFaceGroups && selectedFaceGroups.size > 0) {
-      return new Set<string>([...selectedFaceGroups].filter(Boolean).map(x => (x as any).id))
+      return new Set<string>(
+        [...selectedFaceGroups]
+          .filter((x): x is NonNullable<typeof x> => x !== null)
+          .map(x => x.id)
+      )
     }
     return new Set<string>()
   }, [selectedFaceGroup, selectedFaceGroups])
@@ -103,7 +107,7 @@ const SelectFaceGroupTable = ({
   const [searchValue, setSearchValue] = useState('')
 
   const rows = faceGroups
-    .filter(x => x.label?.toLowerCase().includes(searchValue.toLowerCase()))
+    .filter(x => (x.label ?? '').toLowerCase().includes(searchValue.toLowerCase()))
     .map(face => {
       const isSelected = selectedIds.has(face.id)
       const onToggle = () => {
