@@ -48,6 +48,12 @@ const FaceGroupTitle = ({ faceGroup }: FaceGroupTitleProps) => {
   }, [faceGroup?.label])
 
   useEffect(() => {
+    if (!editLabel) {
+      setInputValue(faceGroup?.label ?? '')
+    }
+  }, [faceGroup?.id, faceGroup?.label, editLabel])
+
+  useEffect(() => {
     if (editLabel) {
       inputRef.current?.focus()
     }
@@ -146,26 +152,34 @@ const FaceGroupTitle = ({ faceGroup }: FaceGroupTitleProps) => {
         <div className="mb-2">{title}</div>
         <ul className="flex gap-2 flex-wrap mb-6">
           <li>
-            <Button disabled={!faceGroup} onClick={() => setEditLabel(true)}>
+            <Button disabled={!faceGroup} onClick={() => {
+              if (!faceGroup) return
+              setEditLabel(true)
+            }}>
               {t('people_page.action_label.change_label', 'Change label')}
             </Button>
           </li>
           <li>
-            <Button
-              onClick={() =>
-                setMergeModalState(MergeFaceGroupsModalState.SelectDestination)
-              }
-            >
+            <Button disabled={!faceGroup} onClick={() => {
+              if (!faceGroup) return
+              setMergeModalState(MergeFaceGroupsModalState.SelectDestination)
+            }}>
               {t('people_page.action_label.merge_face', 'Merge face')}
             </Button>
           </li>
           <li>
-            <Button onClick={() => setDetachModalOpen(true)}>
+            <Button disabled={!faceGroup} onClick={() => {
+              if (!faceGroup) return
+              setDetachModalOpen(true)
+            }}>
               {t('people_page.action_label.detach_images', 'Detach images')}
             </Button>
           </li>
           <li>
-            <Button onClick={() => setMoveModalOpen(true)}>
+            <Button disabled={!faceGroup} onClick={() => {
+              if (!faceGroup) return
+              setMoveModalOpen(true)
+            }}>
               {t('people_page.action_label.move_faces', 'Move faces')}
             </Button>
           </li>

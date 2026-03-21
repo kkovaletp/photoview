@@ -90,7 +90,7 @@ test('shows loading state', async () => {
 
   // During loading, the favorites checkbox exists but no images yet
   expect(screen.getByLabelText('Show only favorites')).toBeInTheDocument();
-  expect(screen.queryAllByRole('img')).toHaveLength(0);
+  expect(screen.queryAllByRole('presentation')).toHaveLength(0);
 
   // After loading completes, images should appear
   expect(await screen.findAllByRole('presentation')).toHaveLength(5);
@@ -163,7 +163,7 @@ test('filter by favorites', async () => {
 
   // Longer timeout for image loading
   await waitFor(() => {
-    const images = screen.getAllByRole('img');
+    const images = screen.getAllByRole('presentation');
     expect(images.length).toBe(favoriteTimelineData.length);
   }, { timeout: 3000 });
 })

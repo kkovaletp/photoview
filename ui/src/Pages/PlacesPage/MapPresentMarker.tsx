@@ -92,6 +92,10 @@ const MapPresentMarker = ({
           mediaIDs: mediaMarkers.map(x => x.media_id),
         },
       })
+    }).catch(() => {
+      dispatchMarkerMedia({
+        type: 'closePresentMode',
+      })
     })
   }, [markerMediaState.presentMarker, map, loadMedia, dispatchMarkerMedia])
 
