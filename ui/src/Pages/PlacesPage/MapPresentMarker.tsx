@@ -87,7 +87,7 @@ const MapPresentMarker = ({
     }
 
     getMediaFromMarker(map, presentMarker).then(mediaMarkers => {
-      loadMedia({
+      return loadMedia({
         variables: {
           mediaIDs: mediaMarkers.map(x => x.media_id),
         },

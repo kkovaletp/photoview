@@ -132,15 +132,15 @@ export const FaceDetails = ({
   const { t } = useTranslation()
   const [inputValue, setInputValue] = useState(group.label ?? '')
   const inputRef = useRef<HTMLInputElement>(null)
-  const wasLoading = useRef(false)
 
-  const [setGroupLabel, { loading, data: mutationData, error: mutationError }] = useMutation<
+  const [setGroupLabel, { loading, error: mutationError }] = useMutation<
     SetGroupLabelMutation,
     SetGroupLabelMutationVariables
   >(SET_GROUP_LABEL_MUTATION, {
     variables: {
       groupID: group.id,
     },
+    onCompleted: () => setEditLabel(false),
   })
 
   const resetLabel = useCallback(() => {
@@ -153,13 +153,6 @@ export const FaceDetails = ({
       inputRef.current?.focus()
     }
   }, [editLabel])
-
-  useEffect(() => {
-    if (wasLoading.current && !loading && !mutationError && mutationData) {
-      resetLabel()
-    }
-    wasLoading.current = loading
-  }, [loading, resetLabel, mutationData, mutationError])
 
   const onKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Escape') {
@@ -174,6 +167,7 @@ export const FaceDetails = ({
         <TextField
           className={textFieldClassName}
           loading={loading}
+          error={mutationError?.message}
           ref={inputRef}
           // size="mini"
           placeholder={t('people_page.face_group.label_placeholder', 'Label')}
@@ -203,7 +197,10 @@ export const FaceDetails = ({
           'whitespace-nowrap inline-block overflow-hidden text-clip'
         )}
         labeled={!!group.label}
-        onClick={() => setEditLabel(true)}
+        onClick={() => {
+          setInputValue(group.label ?? '')
+          setEditLabel(true)
+        }}
       >
         <FaceImagesCount>{group.imageFaceCount}</FaceImagesCount>
         <button className="">

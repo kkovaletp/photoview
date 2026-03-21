@@ -90,14 +90,12 @@ const downloadMedia = (
     return
   }
 
-  const filenameMatch = /[^/]*$/.exec(url)
-
-  if (filenameMatch == null) {
+  const lastSlashIndex = url.lastIndexOf('/')
+  const filename = url.slice(lastSlashIndex + 1)
+  if (!filename) {
     console.error('Could not extract filename', url)
     return
   }
-
-  const filename = filenameMatch[0]
   downloadBlob(blob, filename)
 }
 
@@ -307,23 +305,22 @@ const SidebarMediaDownload = ({ media }: SidebarMediaDownladProps) => {
   const { t } = useTranslation()
   const { add, removeKey } = useMessageState()
 
-  //TODO: how to fix the following issue: "Once one item's downloads have been fetched, Lines 339-343 reuse that payload for whatever media prop is rendered next. If the sidebar switches from media A to media B and B does not already include downloads, the table can show A's files instead of B's. Only trust the lazy-query result when it matches the current media.id, and trigger a fresh load when that id changes"?
-  const [loadPhotoDownloads, { called, loading, data, error }] = useLazyQuery<
+  const [loadPhotoDownloads, { loading, data, error }] = useLazyQuery<
     SidebarDownloadQueryQuery,
     SidebarDownloadQueryQueryVariables
   >(SIDEBAR_DOWNLOAD_QUERY, {})
 
   useEffect(() => {
-    if (media?.id && !media.downloads && !called) {
+    if (media?.id && !media.downloads && !loading && data?.media?.id !== media.id) {
       loadPhotoDownloads({
         variables: { mediaId: media.id }
       })
     }
-  }, [media?.id, media?.downloads, called, loadPhotoDownloads])
+  }, [media?.id, media?.downloads, loading, data?.media?.id, loadPhotoDownloads])
 
   if (!media?.id) return null
 
-  if (error) {
+  if (error && !loading) {
     console.error('Failed to load download options: ', error)
     return (
       <SidebarSection>
@@ -338,9 +335,10 @@ const SidebarMediaDownload = ({ media }: SidebarMediaDownladProps) => {
   }
 
   let downloads: SidebarDownloadQueryQuery['media']['downloads'] = []
+  const queryMatchesCurrentMedia = data?.media?.id === media?.id
 
-  if (called && !loading) {
-    downloads = (data?.media?.downloads) || []
+  if (queryMatchesCurrentMedia && !loading) {
+    downloads = data?.media?.downloads || []
   } else if (media.downloads) {
     downloads = media.downloads
   }

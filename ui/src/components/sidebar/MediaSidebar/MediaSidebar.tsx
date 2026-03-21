@@ -285,7 +285,7 @@ const MediaSidebar = ({ media, hidePreview }: MediaSidebarType) => {
         },
       })
     }
-  }, [media?.id, token, loadMedia])
+  }, [media, media?.id, token, loadMedia])
 
   if (!media) return null
 

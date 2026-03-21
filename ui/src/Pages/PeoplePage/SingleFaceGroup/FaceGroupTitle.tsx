@@ -40,7 +40,9 @@ const FaceGroupTitle = ({ faceGroup }: FaceGroupTitleProps) => {
   const [setGroupLabel, { loading: setLabelLoading, error: labelSaveError }] = useMutation<
     SetGroupLabelMutation,
     SetGroupLabelMutationVariables
-  >(SET_GROUP_LABEL_MUTATION)
+  >(SET_GROUP_LABEL_MUTATION, {
+    onCompleted: () => setEditLabel(false),
+  })
 
   const resetLabel = useCallback(() => {
     setInputValue(faceGroup?.label ?? '')
@@ -48,25 +50,10 @@ const FaceGroupTitle = ({ faceGroup }: FaceGroupTitleProps) => {
   }, [faceGroup?.label])
 
   useEffect(() => {
-    if (!editLabel) {
-      setInputValue(faceGroup?.label ?? '')
-    }
-  }, [faceGroup?.id, faceGroup?.label, editLabel])
-
-  useEffect(() => {
     if (editLabel) {
       inputRef.current?.focus()
     }
   }, [editLabel])
-
-  const wasLoading = useRef(false)
-
-  useEffect(() => {
-    if (wasLoading.current && !setLabelLoading && !labelSaveError) {
-      resetLabel()
-    }
-    wasLoading.current = setLabelLoading
-  }, [setLabelLoading, resetLabel, labelSaveError])
 
   const onKeyDown: KeyboardEventHandler<HTMLInputElement> = e => {
     if (e.key === 'Escape') {
@@ -154,6 +141,7 @@ const FaceGroupTitle = ({ faceGroup }: FaceGroupTitleProps) => {
           <li>
             <Button disabled={!faceGroup} onClick={() => {
               if (!faceGroup) return
+              setInputValue(faceGroup.label ?? '')
               setEditLabel(true)
             }}>
               {t('people_page.action_label.change_label', 'Change label')}

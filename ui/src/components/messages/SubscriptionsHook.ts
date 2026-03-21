@@ -36,12 +36,10 @@ export interface Message {
 }
 
 type SubscriptionHookProps = {
-  messages: Message[]
   setMessages: Dispatch<SetStateAction<Message[]>>
 }
 
 export const SubscriptionsHook = ({
-  messages,
   setMessages,
 }: SubscriptionHookProps) => {
   const { data, error } = useSubscription<NotificationSubscriptionSubscription>(

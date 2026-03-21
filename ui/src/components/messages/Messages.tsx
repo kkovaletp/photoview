@@ -62,7 +62,7 @@ const Messages = () => {
     <Container>
       {messageElems}
       {authToken() && (
-        <SubscriptionsHook messages={messages} setMessages={setMessages} />
+        <SubscriptionsHook setMessages={setMessages} />
       )}
     </Container>
   )
