@@ -132,7 +132,7 @@ export function timelineGalleryReducer(
           ...state,
           activeIndex: {
             date: activeIndex.date - 1,
-            album: albumGroups.length - 1,
+            album: albumGroups?.length ? albumGroups.length - 1 : 0,
             media: albumMedia?.length ? albumMedia.length - 1 : 0,
           },
         }

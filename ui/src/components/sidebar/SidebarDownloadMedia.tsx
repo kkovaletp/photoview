@@ -307,6 +307,7 @@ const SidebarMediaDownload = ({ media }: SidebarMediaDownladProps) => {
   const { t } = useTranslation()
   const { add, removeKey } = useMessageState()
 
+  //TODO: how to fix the following issue: "Once one item's downloads have been fetched, Lines 339-343 reuse that payload for whatever media prop is rendered next. If the sidebar switches from media A to media B and B does not already include downloads, the table can show A's files instead of B's. Only trust the lazy-query result when it matches the current media.id, and trigger a fresh load when that id changes"?
   const [loadPhotoDownloads, { called, loading, data, error }] = useLazyQuery<
     SidebarDownloadQueryQuery,
     SidebarDownloadQueryQueryVariables

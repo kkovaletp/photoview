@@ -107,7 +107,7 @@ const MapPresentMarker = ({
         activeIndex: 0,
       })
     }
-  }, [loadedMedia])
+  }, [loadedMedia, dispatchMarkerMedia])
 
   if (markerMediaState.presenting) {
     return (

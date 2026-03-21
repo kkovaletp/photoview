@@ -125,7 +125,7 @@ test('AlbumPage shows not found state', async () => {
   })
 
   await waitFor(() => {
-    expect(document.title).toContain('Not found')
+    expect(document.title).toContain('Album not found')
     const layout = screen.getByTestId('Layout');
     expect(layout).toBeInTheDocument();
   })

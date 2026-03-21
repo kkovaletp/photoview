@@ -58,7 +58,7 @@ test('timeline with media', async () => {
 
   expect(screen.getByLabelText('Show only favorites')).toBeInTheDocument()
   expect(await screen.findAllByRole('link')).toHaveLength(4)
-  expect(await screen.findAllByRole('img')).toHaveLength(5)
+  expect(await screen.findAllByRole('presentation')).toHaveLength(5)
 })
 
 test('shows loading state', async () => {
@@ -93,7 +93,7 @@ test('shows loading state', async () => {
   expect(screen.queryAllByRole('img')).toHaveLength(0);
 
   // After loading completes, images should appear
-  expect(await screen.findAllByRole('img')).toHaveLength(5);
+  expect(await screen.findAllByRole('presentation')).toHaveLength(5);
 })
 
 test('filter by favorites', async () => {
@@ -148,7 +148,7 @@ test('filter by favorites', async () => {
 
   // Wait for initial data to load
   await waitFor(() => {
-    expect(screen.queryAllByRole('img').length).toBeGreaterThan(0);
+    expect(screen.queryAllByRole('presentation').length).toBeGreaterThan(0);
   }, { timeout: 2000 });
 
   // Toggle favorites filter

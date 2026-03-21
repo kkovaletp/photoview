@@ -1,8 +1,8 @@
 import { vi } from 'vitest'
 
 vi.mock('../../hooks/useScrollPagination')
-vi.mock('../../Pages/SharePage/MediaSharePage', async () => {
-  const originalModule = await vi.importActual('../../Pages/SharePage/MediaSharePage')
+vi.mock('../../Pages/SharePage/MediaSharePage', () => {
+  const originalModule = vi.importActual('../../Pages/SharePage/MediaSharePage')
   // Define interface for the props
   interface MediaViewProps {
     media?: {
@@ -52,6 +52,7 @@ import {
 
 import { SIDEBAR_DOWNLOAD_QUERY } from '../../components/sidebar/SidebarDownloadMedia'
 import { SHARE_ALBUM_QUERY } from './AlbumSharePage'
+import { OrderDirection } from '../../__generated__/globalTypes';
 
 afterEach(() => {
   vi.restoreAllMocks();
@@ -148,9 +149,9 @@ describe('load correct share page, based on graphql query', () => {
       }
     })
 
-    expect(screen.getByText('Loading...')).toBeInTheDocument()
+    expect(screen.getByLabelText('Loading')).toBeInTheDocument()
 
-    await waitForElementToBeRemoved(() => screen.queryByText('Loading...'))
+    await waitForElementToBeRemoved(() => screen.queryByLabelText('Loading'))
 
     expect(screen.getByTestId('Layout')).toBeInTheDocument()
     expect(screen.getByTestId('MediaSharePage')).toBeInTheDocument()
@@ -190,7 +191,7 @@ describe('load correct share page, based on graphql query', () => {
             limit: 200,
             offset: 0,
             mediaOrderBy: 'date_shot',
-            mediaOrderDirection: 'ASC',
+            orderDirection: OrderDirection.Asc,
           },
         },
         result: {
@@ -224,8 +225,8 @@ describe('load correct share page, based on graphql query', () => {
       }
     })
 
-    expect(screen.getByText('Loading...')).toBeInTheDocument()
-    await waitForElementToBeRemoved(() => screen.getByText('Loading...'))
+    expect(screen.getByLabelText('Loading')).toBeInTheDocument()
+    await waitForElementToBeRemoved(() => screen.getByLabelText('Loading'))
 
     expect(screen.getByTestId('Layout')).toBeInTheDocument()
     expect(screen.getByTestId('AlbumSharePage')).toBeInTheDocument()
@@ -268,7 +269,7 @@ describe('load correct share page, based on graphql query', () => {
             limit: 200,
             offset: 0,
             mediaOrderBy: 'date_shot',
-            mediaOrderDirection: 'ASC',
+            orderDirection: OrderDirection.Asc,
           },
         },
         result: {
@@ -306,8 +307,8 @@ describe('load correct share page, based on graphql query', () => {
       </MockedProvider>
     )
 
-    expect(screen.getByText('Loading...')).toBeInTheDocument()
-    await waitForElementToBeRemoved(() => screen.getByText('Loading...'))
+    expect(screen.getByLabelText('Loading')).toBeInTheDocument()
+    await waitForElementToBeRemoved(() => screen.getByLabelText('Loading'))
 
     expect(screen.getByTestId('Layout')).toBeInTheDocument()
     expect(screen.getByTestId('AlbumSharePage')).toBeInTheDocument()
@@ -388,8 +389,8 @@ describe('load correct share page, based on graphql query', () => {
       route: <TokenRoute />,
     })
 
-    expect(screen.getByText('Loading...')).toBeInTheDocument()
-    await waitForElementToBeRemoved(() => screen.queryByText('Loading...'))
+    expect(screen.getByLabelText('Loading')).toBeInTheDocument()
+    await waitForElementToBeRemoved(() => screen.queryByLabelText('Loading'))
 
     // Should show "Share not found" when shareToken is null
     expect(screen.getByText('Share not found')).toBeInTheDocument()
@@ -446,9 +447,9 @@ describe('load correct share page, based on graphql query', () => {
       route: <TokenRoute />,
     })
 
-    expect(screen.getByText('Loading...')).toBeInTheDocument()
+    expect(screen.getByLabelText('Loading')).toBeInTheDocument()
 
-    await waitForElementToBeRemoved(() => screen.queryByText('Loading...'))
+    await waitForElementToBeRemoved(() => screen.queryByLabelText('Loading'))
 
     expect(screen.getByText(/share expired/i)).toBeInTheDocument()
   })

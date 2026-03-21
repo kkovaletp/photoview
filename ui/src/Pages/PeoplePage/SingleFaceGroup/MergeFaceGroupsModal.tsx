@@ -157,7 +157,7 @@ const MergeFaceGroupsModal = ({
 
     const sourceGroupIDs: string[] = [...selectedFaceGroups].filter(fc => fc !== null).map(fc => fc.id)
 
-    if (sourceGroupIDs.length < 1)
+    if (sourceGroupIDs.length === 0)
       throw new Error('No selected source face groups')
 
     combineFacesMutation({
@@ -253,7 +253,7 @@ const MergeFaceGroupsModal = ({
         frozen={state === MergeFaceGroupsModalState.SelectDestination && preselectedDestinationFaceGroup !== undefined}
         faceGroups={filteredFaceGroups}
         selectedFaceGroups={selectedFaceGroups}
-        toggleSelectedFaceGroup={(face) => { if (face === null) { return }; handleFaceGroupToggled(face) }}
+        toggleSelectedFaceGroup={(face) => { if (face !== null) handleFaceGroupToggled(face) }}
       />
     </Modal>
   )

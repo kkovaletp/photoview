@@ -77,9 +77,7 @@ const FaceGroupTitle = ({ faceGroup }: FaceGroupTitleProps) => {
         error={labelSaveError?.message}
         placeholder={t('people_page.face_group.label_placeholder', 'Label')}
         action={() => {
-          if (isNil(faceGroup))
-            throw new Error('Expected faceGroup to be defined')
-
+          if (isNil(faceGroup)) return
           setGroupLabel({
             variables: {
               groupID: faceGroup.id,
@@ -90,7 +88,14 @@ const FaceGroupTitle = ({ faceGroup }: FaceGroupTitleProps) => {
         value={inputValue}
         onKeyDown={onKeyDown}
         onChange={e => setInputValue(e.target.value)}
-        onBlur={() => {
+        onBlur={event => {
+          if (
+            event.currentTarget.parentElement?.contains(
+              event.relatedTarget as Node | null
+            )
+          ) {
+            return
+          }
           resetLabel()
         }}
       />
@@ -141,7 +146,7 @@ const FaceGroupTitle = ({ faceGroup }: FaceGroupTitleProps) => {
         <div className="mb-2">{title}</div>
         <ul className="flex gap-2 flex-wrap mb-6">
           <li>
-            <Button onClick={() => setEditLabel(true)}>
+            <Button disabled={!faceGroup} onClick={() => setEditLabel(true)}>
               {t('people_page.action_label.change_label', 'Change label')}
             </Button>
           </li>
