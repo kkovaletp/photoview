@@ -63,11 +63,11 @@ type TimeValue = {
 }
 
 const convertToSeconds = ({ value, unit }: TimeValue) => {
-  return value * (timeUnits.find(x => x.value == unit)?.multiplier as number)
+  return value * (timeUnits.find(x => x.value === unit)?.multiplier as number)
 }
 
 const convertToAppropriateUnit = ({ value, unit }: TimeValue): TimeValue => {
-  if (value == 0) {
+  if (value === 0) {
     return {
       unit: TimeUnit.Second,
       value: 0,
@@ -80,7 +80,7 @@ const convertToAppropriateUnit = ({ value, unit }: TimeValue): TimeValue => {
   for (const unit of timeUnits) {
     if (
       seconds / unit.multiplier >= 1 &&
-      (seconds / unit.multiplier) % 1 == 0
+      (seconds / unit.multiplier) % 1 === 0
     ) {
       resultingUnit = unit
     } else {
@@ -153,7 +153,7 @@ const PeriodicScanner = () => {
   const onScanIntervalUpdate = (scanInterval: TimeValue) => {
     const seconds = convertToSeconds(scanInterval)
 
-    if (scanIntervalServerValue.current != seconds) {
+    if (scanIntervalServerValue.current !== seconds) {
       setScanIntervalMutation({
         variables: {
           interval: seconds,

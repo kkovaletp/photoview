@@ -4,7 +4,7 @@ import { renderWithProviders } from '../../helpers/testUtils'
 import { gql } from '@apollo/client'
 import { OrderDirection } from '../../__generated__/globalTypes'
 import { ALBUM_GALLERY_FRAGMENT } from '../../components/albumGallery/AlbumGallery'
-import { MEDIA_GALLERY_FRAGMENT } from '../../components/photoGallery/MediaGallery'
+import { MEDIA_GALLERY_FRAGMENT } from '../../components/photoGallery/fragments'
 
 vi.mock('../../hooks/useScrollPagination', () => {
   return {

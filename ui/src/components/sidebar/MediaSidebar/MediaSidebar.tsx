@@ -271,24 +271,25 @@ type MediaSidebarType = {
 
 const MediaSidebar = ({ media, hidePreview }: MediaSidebarType) => {
   const { t } = useTranslation()
+  const token = authToken()
   const [loadMedia, { loading, error, data }] = useLazyQuery<
     SidebarMediaQueryQuery,
     SidebarMediaQueryQueryVariables
   >(SIDEBAR_MEDIA_QUERY)
 
   useEffect(() => {
-    if (media != null && authToken()) {
+    if (media != null && token) {
       loadMedia({
         variables: {
           id: media.id,
         },
       })
     }
-  }, [media, loadMedia])
+  }, [media?.id, token, loadMedia])
 
   if (!media) return null
 
-  if (!authToken()) {
+  if (!token) {
     return <SidebarContent media={media} hidePreview={hidePreview} />
   }
 

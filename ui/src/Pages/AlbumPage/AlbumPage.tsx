@@ -50,7 +50,7 @@ function AlbumPage() {
   const urlParams = useURLParameters()
   const orderParams = useOrderingParams(urlParams)
 
-  const onlyFavorites = urlParams.getParam('favorites') == '1'
+  const onlyFavorites = urlParams.getParam('favorites') === '1'
   const setOnlyFavorites = useCallback((favorites: boolean) =>
     urlParams.setParam('favorites', favorites ? '1' : '0'),
     [urlParams]
@@ -100,11 +100,11 @@ function AlbumPage() {
 
   if (error) return <div>{t('album_page.load_error', 'Error loading album: {{message}}', { message: error.message })}</div>
 
-  let pageTitle = t('album_page.loading', 'Loading album...') as string
+  let pageTitle: string
   if (data) {
-    pageTitle = data.album?.title
-      ? data.album.title
-      : t('album_page.not_found', 'Album not found')
+    pageTitle = data.album?.title ?? t('album_page.not_found', 'Album not found')
+  } else {
+    pageTitle = t('album_page.loading', 'Loading album...')
   }
 
   return (

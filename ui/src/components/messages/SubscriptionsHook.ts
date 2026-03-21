@@ -50,8 +50,8 @@ export const SubscriptionsHook = ({
 
   useEffect(() => {
     if (error) {
-      setMessages(state => [
-        ...state,
+      setMessages(prev => [
+        ...prev,
         {
           key: `download-${Date.now()}-${Math.random().toString(36).slice(2, 11)}`,
           type: NotificationType.Message,
@@ -63,56 +63,40 @@ export const SubscriptionsHook = ({
         },
       ])
     }
-
     if (!data) return
-
-    const newMessages = [...messages]
-
     const msg = data.notification
-
-    if (msg.type == 'Close') {
-      setMessages(messages => messages.filter(m => m.key != msg.key))
-      return
-    }
-
-    const newNotification: Message = {
-      key: msg.key,
-      type: msg.type,
-      timeout: msg.timeout || undefined,
-      props: {
-        header: msg.header,
-        content: msg.content,
-        negative: msg.negative,
-        positive: msg.positive,
-        percent: msg.progress || undefined,
-      },
-    }
-
+    // Handle timeouts independent of outer "messages"
     if (msg.timeout) {
-      // Clear old timeout, to replace it with the new one
-      if (messageTimeoutHandles.get(msg.key)) {
-        const timeoutHandle = messageTimeoutHandles.get(msg.key)
-        clearTimeout(timeoutHandle)
-      }
-
+      const existing = messageTimeoutHandles.get(msg.key)
+      if (existing) clearTimeout(existing)
       const timeoutHandle = setTimeout(() => {
-        setMessages(messages => messages.filter(m => m.key != msg.key))
+        setMessages(prev => prev.filter(m => m.key !== msg.key))
       }, msg.timeout) as unknown as number
-
       messageTimeoutHandles.set(msg.key, timeoutHandle)
     }
-
-    const notifyIndex = newMessages.findIndex(
-      msg => msg.key == newNotification.key
-    )
-    if (notifyIndex === -1) {
-      newMessages.push(newNotification)
-    } else {
-      newMessages[notifyIndex] = newNotification
-    }
-
-    setMessages(newMessages)
-  }, [data, error])
+    setMessages(prev => {
+      if (msg.type === 'Close') {
+        return prev.filter(m => m.key != msg.key)
+      }
+      const newNotification: Message = {
+        key: msg.key,
+        type: msg.type,
+        timeout: msg.timeout || undefined,
+        props: {
+          header: msg.header,
+          content: msg.content,
+          negative: msg.negative,
+          positive: msg.positive,
+          percent: msg.progress || undefined,
+        },
+      }
+      const next = [...prev]
+      const i = next.findIndex(m => m.key === newNotification.key)
+      if (i === -1) next.push(newNotification)
+      else next[i] = newNotification
+      return next
+    })
+  }, [data, error, setMessages])
 
   return null
 }

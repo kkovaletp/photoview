@@ -63,7 +63,7 @@ const FaceGroupTitle = ({ faceGroup }: FaceGroupTitleProps) => {
   }, [setLabelLoading, resetLabel, labelSaveError])
 
   const onKeyDown: KeyboardEventHandler<HTMLInputElement> = e => {
-    if (e.key == 'Escape') {
+    if (e.key === 'Escape') {
       resetLabel()
     }
   }

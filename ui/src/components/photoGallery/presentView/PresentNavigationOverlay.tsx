@@ -57,8 +57,8 @@ const NavigationButton = styled(OverlayButton) <{ align: 'left' | 'right' }>`
   width: 20%;
   top: 10%;
 
-  ${({ align: float }) => (float == 'left' ? 'left: 0;' : null)}
-  ${({ align: float }) => (float == 'right' ? 'right: 0;' : null)}
+  ${({ align: float }) => (float === 'left' ? 'left: 0;' : null)}
+  ${({ align: float }) => (float === 'right' ? 'right: 0;' : null)}
 
   & svg {
     margin: auto;

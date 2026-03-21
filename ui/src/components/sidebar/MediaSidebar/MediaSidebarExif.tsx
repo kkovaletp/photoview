@@ -27,7 +27,7 @@ const ExifDetails = ({ media }: ExifDetailsProps) => {
     }
 
     const exifKeys = Object.keys(exifName).filter(
-      x => mediaExif[x] !== null && x != '__typename'
+      x => mediaExif[x] !== null && x !== '__typename'
     )
 
     const exif = exifKeys.reduce((prev, curr) => {

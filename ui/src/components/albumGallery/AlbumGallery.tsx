@@ -1,8 +1,7 @@
 import { ForwardedRef, forwardRef, useEffect, useReducer } from 'react'
 import AlbumTitle from '../album/AlbumTitle'
-import MediaGallery, {
-  MEDIA_GALLERY_FRAGMENT,
-} from '../photoGallery/MediaGallery'
+import MediaGallery from '../photoGallery/MediaGallery'
+import { MEDIA_GALLERY_FRAGMENT } from '../photoGallery/fragments'
 import AlbumBoxes from './AlbumBoxes'
 import AlbumFilter from '../album/AlbumFilter'
 import {

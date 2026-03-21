@@ -6,7 +6,7 @@ import useURLParameters from '../../hooks/useURLParameters'
 import useOrderingParams from '../../hooks/useOrderingParams'
 import { ShareAlbumQueryQuery } from './__generated__/AlbumSharePage'
 import AlbumGallery, { ALBUM_GALLERY_FRAGMENT } from '../../components/albumGallery/AlbumGallery'
-import { MEDIA_GALLERY_FRAGMENT } from '../../components/photoGallery/MediaGallery'
+import { MEDIA_GALLERY_FRAGMENT } from '../../components/photoGallery/fragments'
 import useScrollPagination from '../../hooks/useScrollPagination'
 import PaginateLoader from '../../components/PaginateLoader'
 

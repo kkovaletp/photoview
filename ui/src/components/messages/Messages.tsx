@@ -50,7 +50,7 @@ const Messages = () => {
 
   const dismissMessage = (message: Message) => {
     message.onDismiss?.()
-    setMessages(prevMessages => prevMessages.filter(msg => msg.key != message.key))
+    setMessages(prevMessages => prevMessages.filter(msg => msg.key !== message.key))
   }
   const messageElems = messages.map(msg => (
     <div key={msg.key}>

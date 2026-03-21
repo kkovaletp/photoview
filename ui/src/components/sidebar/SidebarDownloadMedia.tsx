@@ -34,7 +34,7 @@ export const SIDEBAR_DOWNLOAD_QUERY = gql`
 `
 
 const formatBytes = (t: TranslationFn) => (bytes: number) => {
-  if (bytes == 0)
+  if (bytes === 0)
     return t('sidebar.download.filesize.byte', '{{count}} Byte', { count: 0 })
 
   const i = Math.floor(Math.log(bytes) / Math.log(1024))

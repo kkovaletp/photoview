@@ -37,6 +37,7 @@ type InitialSetupFormData = {
 const InitialSetupPage = () => {
   const { t } = useTranslation()
   const navigate = useNavigate()
+  const token = authToken()
 
   const {
     register,
@@ -45,8 +46,8 @@ const InitialSetupPage = () => {
   } = useForm<InitialSetupFormData>()
 
   useEffect(() => {
-    if (authToken()) navigate('/')
-  }, [])
+    if (token) navigate('/')
+  }, [token, navigate])
 
   const { data: initialSetupData } =
     useQuery<CheckInitialSetupQuery>(INITIAL_SETUP_QUERY)
@@ -86,7 +87,7 @@ const InitialSetupPage = () => {
     }
   })
 
-  if (authToken() || notInitialSetup) {
+  if (token || notInitialSetup) {
     return null
   }
 
@@ -103,7 +104,7 @@ const InitialSetupPage = () => {
             {...register('username', { required: true })}
             label={t('login_page.field.username', 'Username')}
             error={
-              formErrors.username?.type == 'required'
+              formErrors.username?.type === 'required'
                 ? 'Please enter a username'
                 : undefined
             }
@@ -114,7 +115,7 @@ const InitialSetupPage = () => {
             {...register('password', { required: true })}
             label={t('login_page.field.password', 'Password')}
             error={
-              formErrors.password?.type == 'required'
+              formErrors.password?.type === 'required'
                 ? 'Please enter a password'
                 : undefined
             }

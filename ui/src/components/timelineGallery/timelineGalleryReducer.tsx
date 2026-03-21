@@ -44,9 +44,9 @@ export function timelineGalleryReducer(
       const { activeIndex, timelineGroups } = state
 
       if (
-        activeIndex.album == -1 &&
-        activeIndex.date == -1 &&
-        activeIndex.media == -1
+        activeIndex.album === -1 &&
+        activeIndex.date === -1 &&
+        activeIndex.media === -1
       ) {
         return state
       }
@@ -93,9 +93,9 @@ export function timelineGalleryReducer(
       const { activeIndex } = state
 
       if (
-        activeIndex.album == -1 &&
-        activeIndex.date == -1 &&
-        activeIndex.media == -1
+        activeIndex.album === -1 &&
+        activeIndex.date === -1 &&
+        activeIndex.media === -1
       ) {
         return state
       }
@@ -232,7 +232,7 @@ function convertMediaToTimelineGroups(
     }
 
     // if album changes
-    if (nextAlbum.id != media.album.id) {
+    if (nextAlbum.id !== media.album.id) {
       albums.push(nextAlbum)
       nextAlbum = {
         id: media.album.id,

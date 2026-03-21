@@ -165,7 +165,7 @@ export const MediaThumbnail = ({
   }
 
   let videoIcon = null
-  if (media.type == MediaType.Video) {
+  if (media.type === MediaType.Video) {
     videoIcon = <VideoThumbnailIcon />
   }
 

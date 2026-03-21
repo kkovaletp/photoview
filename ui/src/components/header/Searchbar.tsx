@@ -62,11 +62,11 @@ const SearchBar = () => {
     return () => {
       debouncedFetch.current?.cancel()
     }
-  }, [])
+  }, [fetchSearches])
 
   const fetchEvent = (e: ChangeEvent<HTMLInputElement>) => {
     setQuery(e.target.value)
-    if (e.target.value.trim() != '' && debouncedFetch.current) {
+    if (e.target.value.trim() !== '' && debouncedFetch.current) {
       debouncedFetch.current(e.target.value.trim())
     } else {
       setFetched(false)
@@ -124,13 +124,13 @@ const SearchBar = () => {
     const keydownEvent = (event: KeyboardEvent) => {
       if (!expanded) return
 
-      if (event.key == 'ArrowDown') {
+      if (event.key === 'ArrowDown') {
         event.preventDefault()
         setSelectedItem(i => (i === null ? 0 : Math.min(totalItems - 1, i + 1)))
-      } else if (event.key == 'ArrowUp') {
+      } else if (event.key === 'ArrowUp') {
         event.preventDefault()
         setSelectedItem(i => (i === null ? 0 : Math.max(0, i - 1)))
-      } else if (event.key == 'Escape') {
+      } else if (event.key === 'Escape') {
         // setExpanded(false)
         inputEl.current?.blur()
       }
@@ -141,7 +141,7 @@ const SearchBar = () => {
     return () => {
       document.removeEventListener('keydown', keydownEvent)
     }
-  }, [searchData])
+  }, [searchData, expanded, albums.length, media.length])
 
   let results = null
   if (query.trim().length > 0 && fetched) {
@@ -213,7 +213,7 @@ const SearchResults = ({
       key={album.id}
       query={query}
       album={album}
-      selected={selectedItem == i}
+      selected={selectedItem === i}
       setSelected={() => setSelectedItem(i)}
     />
   ))
@@ -223,14 +223,14 @@ const SearchResults = ({
       key={media.id}
       query={query}
       media={media}
-      selected={selectedItem == i + albumElements.length}
+      selected={selectedItem === i + albumElements.length}
       setSelected={() => setSelectedItem(i + albumElements.length)}
     />
   ))
 
   let message = null
   if (loading) message = t('header.search.loading', 'Loading results...')
-  else if (media.length == 0 && albums.length == 0)
+  else if (media.length === 0 && albums.length === 0)
     message = t('header.search.no_results', 'No results found')
 
   if (message) message = <div className="mt-8 text-center">{message}</div>
@@ -295,7 +295,7 @@ const SearchRow = ({
 
   useEffect(() => {
     const keydownEvent = (event: KeyboardEvent) => {
-      if (event.key == 'Enter' && selected) navigate(link)
+      if (event.key === 'Enter' && selected) navigate(link)
     }
 
     document.addEventListener('keydown', keydownEvent)
@@ -398,7 +398,7 @@ const AlbumRow = (props: AlbumRowArgs) => {
 const searchHighlighted = (query: string, text: string) => {
   const i = text.toLowerCase().indexOf(query.toLowerCase())
 
-  if (i == -1) {
+  if (i === -1) {
     return text
   }
 

@@ -58,7 +58,7 @@ type SidebarFaceOverlayProps = {
 }
 
 export const SidebarFacesOverlay = ({ media }: SidebarFaceOverlayProps) => {
-  if (media.type != MediaType.Photo) return null
+  if (media.type !== MediaType.Photo) return null
   if (media.thumbnail == null) return null
 
   const faceBoxes = (media.faces ?? []).map(face => (

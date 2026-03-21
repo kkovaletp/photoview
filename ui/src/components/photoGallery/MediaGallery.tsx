@@ -13,7 +13,6 @@ import {
 } from './photoGalleryMutations'
 import MediaSidebar from '../sidebar/MediaSidebar/MediaSidebar'
 import { SidebarContext } from '../sidebar/Sidebar'
-import { gql } from '@apollo/client'
 
 const Gallery = styled.div`
   display: flex;
@@ -34,26 +33,6 @@ export const PhotoFiller = styled.div`
   grow: 999999;
 `
 
-export const MEDIA_GALLERY_FRAGMENT = gql`
-  fragment MediaGalleryFields on Media {
-    id
-    type
-    blurhash
-    thumbnail {
-      url
-      width
-      height
-    }
-    highRes {
-      url
-    }
-    videoWeb {
-      url
-    }
-    favorite
-  }
-`
-
 type MediaGalleryProps = {
   loading: boolean
   mediaState: MediaGalleryState
@@ -70,7 +49,7 @@ const MediaGallery = ({ loading, mediaState, dispatchMedia }: MediaGalleryProps)
   let mediaElements = []
   if (media && !loading) {
     mediaElements = media.map((media, index) => {
-      const active = activeIndex == index
+      const active = activeIndex === index
 
       return (
         <MediaThumbnail

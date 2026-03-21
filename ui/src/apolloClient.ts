@@ -204,7 +204,7 @@ const linkError = onError(({ graphQLErrors, networkError }) => {
       )
     )
 
-    if (graphQLErrors.length == 1) {
+    if (graphQLErrors.length === 1) {
       errorMessages.push({
         header: 'Something went wrong',
         content: `Server error: ${graphQLErrors[0].message} at (${formatPath(
@@ -218,7 +218,7 @@ const linkError = onError(({ graphQLErrors, networkError }) => {
       })
     }
 
-    if (graphQLErrors.some(x => x.message == 'unauthorized')) {
+    if (graphQLErrors.some(x => x.message === 'unauthorized')) {
       console.error('Unauthorized, clearing token cookie')
       clearTokenCookie()
       // location.reload()
@@ -230,7 +230,7 @@ const linkError = onError(({ graphQLErrors, networkError }) => {
     clearTokenCookie()
 
     const errors = getServerErrorMessages(networkError);
-    if (errors.length == 1) {
+    if (errors.length === 1) {
       errorMessages.push({
         header: 'Server error',
         content: `You are being logged out in an attempt to recover.\n${errors[0].message}`,

@@ -39,17 +39,17 @@ const PresentView = ({
 }: PresentViewProps) => {
   useEffect(() => {
     const keyDownEvent = (e: KeyboardEvent) => {
-      if (e.key == 'ArrowRight') {
+      if (e.key === 'ArrowRight') {
         e.stopPropagation()
         dispatchMedia({ type: 'nextImage' })
       }
 
-      if (e.key == 'ArrowLeft') {
+      if (e.key === 'ArrowLeft') {
         e.stopPropagation()
         dispatchMedia({ type: 'previousImage' })
       }
 
-      if (e.key == 'Escape') {
+      if (e.key === 'Escape') {
         e.stopPropagation()
 
         if (disableSaveCloseInHistory === true) {
@@ -65,7 +65,7 @@ const PresentView = ({
     return function cleanup() {
       document.removeEventListener('keydown', keyDownEvent)
     }
-  })
+  }, [dispatchMedia, disableSaveCloseInHistory])
 
   return (
     <StyledContainer className={className}>

@@ -7,7 +7,7 @@ import {
   PlacePageQueryMediaQuery,
   PlacePageQueryMediaQueryVariables,
 } from './__generated__/MapPresentMarker'
-import { MEDIA_GALLERY_FRAGMENT } from '../../components/photoGallery/MediaGallery'
+import { MEDIA_GALLERY_FRAGMENT } from '../../components/photoGallery/fragments'
 import { PlacesAction, PlacesState } from './placesReducer'
 
 const QUERY_MEDIA = gql`
@@ -93,7 +93,7 @@ const MapPresentMarker = ({
         },
       })
     })
-  }, [markerMediaState.presentMarker])
+  }, [markerMediaState.presentMarker, map, loadMedia, dispatchMarkerMedia])
 
   useEffect(() => {
     const mediaList = loadedMedia?.mediaList ?? []

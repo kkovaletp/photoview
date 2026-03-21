@@ -53,6 +53,7 @@ export default defineConfig(async ({ command, mode }) => {
       globals: true,
       environment: 'jsdom',
       setupFiles: './testing/setupTests.ts',
+      exclude: ['**/node_modules/**', '**/dist/**', '**/__generated__/**'],
       reporters: ['verbose', 'junit'],
       outputFile: {
         junit: './junit-report.xml',

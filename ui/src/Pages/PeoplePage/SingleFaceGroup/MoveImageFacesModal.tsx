@@ -120,7 +120,7 @@ const MoveImageFacesModal = ({
   if (imagesSelected) {
     if (faceGroupsData && faceGroup) {
       const filteredFaceGroups = faceGroupsData.myFaceGroups.filter(
-        x => x.id != faceGroup.id
+        x => x.id !== faceGroup.id
       )
       table = (
         <SelectFaceGroupTable
@@ -172,7 +172,7 @@ const MoveImageFacesModal = ({
         'Next'
       ),
       onClick: () => {
-        if (selectedImageFaces.length == 0) return
+        if (selectedImageFaces.length === 0) return
         setImagesSelected(true)
       },
       variant: 'positive',

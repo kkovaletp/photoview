@@ -2,9 +2,8 @@ import { gql, useQuery } from '@apollo/client'
 import { useEffect, useReducer } from 'react'
 import { useTranslation } from 'react-i18next'
 import PaginateLoader from '../../../components/PaginateLoader'
-import MediaGallery, {
-  MEDIA_GALLERY_FRAGMENT,
-} from '../../../components/photoGallery/MediaGallery'
+import MediaGallery from '../../../components/photoGallery/MediaGallery'
+import { MEDIA_GALLERY_FRAGMENT } from '../../../components/photoGallery/fragments'
 import { mediaGalleryReducer } from '../../../components/photoGallery/mediaGalleryReducer'
 import useScrollPagination from '../../../hooks/useScrollPagination'
 import FaceGroupTitle from './FaceGroupTitle'

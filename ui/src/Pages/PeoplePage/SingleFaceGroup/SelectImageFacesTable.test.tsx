@@ -194,7 +194,7 @@ describe('SelectImageFacesTable', () => {
 
             // CSS classes for layout
             expect(screen.getByTestId('table-body').closest('div'))
-                .toHaveClass('overflow-auto', 'max-h-[500px]', 'mt-2')
+                .toHaveClass('overflow-auto', 'max-h-125', 'mt-2')
         })
 
         it('handles empty state and missing data gracefully', () => {

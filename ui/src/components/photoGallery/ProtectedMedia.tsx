@@ -130,7 +130,7 @@ const FallbackLazyloadedImage = ({
     return () => {
       observer.disconnect()
     }
-  }, [imgRef])
+  }, [imgRef, inView])
 
   if (inView) {
     return (

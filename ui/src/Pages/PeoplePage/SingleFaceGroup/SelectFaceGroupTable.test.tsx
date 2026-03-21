@@ -144,7 +144,7 @@ describe('SelectFaceGroupTable', () => {
 
             // Table structure
             expect(screen.getAllByRole('table')).toHaveLength(2) // Header and body tables
-            expect(document.querySelector(String.raw`.overflow-auto.max-h-\[500px\]`)).toBeInTheDocument()
+            expect(document.querySelector(String.raw`.overflow-auto.max-h-125`)).toBeInTheDocument()
 
             // Header and search
             expect(screen.getByText('Face Groups')).toBeInTheDocument()
@@ -161,7 +161,7 @@ describe('SelectFaceGroupTable', () => {
             expect(screen.getByText('Unlabeled')).toHaveClass('text-gray-600', 'italic')
 
             // Images
-            expect(screen.getAllByRole('img')).toHaveLength(3)
+            expect(screen.getAllByRole('presentation')).toHaveLength(3)
 
             // Table styling
             screen.getAllByRole('table').forEach(table => {
@@ -453,7 +453,7 @@ describe('SelectFaceGroupTable', () => {
 
             // Verify FaceCircleImage integration with normal data
             render(<SelectFaceGroupTable {...defaultProps} />)
-            expect(screen.getAllByRole('img')).toHaveLength(3)
+            expect(screen.getAllByRole('presentation')).toHaveLength(3)
         })
     })
 })

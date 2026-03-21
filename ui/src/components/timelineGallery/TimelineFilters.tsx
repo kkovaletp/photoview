@@ -37,7 +37,7 @@ const DateSelector = ({ filterDate, setFilterDate }: DateSelectorProps) => {
   ]
 
   if (data) {
-    if (data.myMedia.length != 0) {
+    if (data.myMedia.length !== 0) {
       const dateStr = data.myMedia[0].date
       const date = new Date(dateStr)
       const now = new Date()
@@ -73,7 +73,7 @@ const DateSelector = ({ filterDate, setFilterDate }: DateSelectorProps) => {
         <Dropdown
           aria-labelledby="filter_group_date-label"
           setSelected={date =>
-            date == 'all' ? setFilterDate(null) : setFilterDate(date)
+            date === 'all' ? setFilterDate(null) : setFilterDate(date)
           }
           value={filterDate || 'all'}
           items={items}

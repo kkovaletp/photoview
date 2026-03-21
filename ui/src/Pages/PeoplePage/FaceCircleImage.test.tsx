@@ -28,8 +28,8 @@ test('face circle image', () => {
 
   render(<FaceCircleImage imageFace={imageFace} selectable={true} />)
 
-  expect(screen.getByRole('img')).toBeInTheDocument()
-  expect(screen.getByRole('img')).toHaveAttribute(
+  expect(screen.getByRole('presentation')).toBeInTheDocument()
+  expect(screen.getByRole('presentation')).toHaveAttribute(
     'src',
     'http://localhost:3000/photo/thumbnail_my_image_jpg_p9x8dLWr.jpg'
   )

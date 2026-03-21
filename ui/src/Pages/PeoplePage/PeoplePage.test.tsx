@@ -121,13 +121,13 @@ describe('PeoplePage component', () => {
     expect(
       screen
         .getAllByRole('link')
-        .some(x => x.getAttribute('href') == '/people/1')
+        .some(x => x.getAttribute('href') === '/people/1')
     ).toBeTruthy()
 
     expect(
       screen
         .getAllByRole('link')
-        .some(x => x.getAttribute('href') == '/people/3')
+        .some(x => x.getAttribute('href') === '/people/3')
     ).toBeTruthy()
   })
 })

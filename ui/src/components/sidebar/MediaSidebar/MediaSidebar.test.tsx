@@ -154,7 +154,7 @@ describe('MediaSidebar', () => {
     })
 
     expect(screen.getByText('122A6069.jpg')).toBeInTheDocument()
-    expect(screen.getByRole('img')).toHaveAttribute(
+    expect(screen.getByRole('presentation')).toHaveAttribute(
       'src',
       'http://localhost:3000/photo/highres.jpg'
     )

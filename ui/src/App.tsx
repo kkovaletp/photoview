@@ -14,7 +14,7 @@ const App = () => {
 
   useEffect(() => {
     window.scrollTo(0, 0)
-    if (document.activeElement != document.body)
+    if (document.activeElement !== document.body)
       (document.activeElement as HTMLInputElement).blur()
   }, [pathname])
 

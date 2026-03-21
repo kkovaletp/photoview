@@ -74,7 +74,7 @@ const TimelineGallery = () => {
 
   const { getParam, setParam } = useURLParameters()
 
-  const onlyFavorites = getParam('favorites') == '1'
+  const onlyFavorites = getParam('favorites') === '1'
   const setOnlyFavorites = (favorites: boolean) =>
     setParam('favorites', favorites ? '1' : null)
 

@@ -162,7 +162,7 @@ export const FaceDetails = ({
   }, [loading, resetLabel, mutationData, mutationError])
 
   const onKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
-    if (e.key == 'Escape') {
+    if (e.key === 'Escape') {
       resetLabel()
     }
   }
@@ -183,7 +183,7 @@ export const FaceDetails = ({
             setGroupLabel({
               variables: {
                 groupID: group.id,
-                label: inputValue == '' ? null : inputValue,
+                label: inputValue === '' ? null : inputValue,
               },
             })
           }

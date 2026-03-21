@@ -22,7 +22,7 @@ const useScrollPagination: <D>(
   const observerElem = useRef<Element | null>(null)
   const [finished, setFinished] = useState(false)
 
-  const reconfigureIntersectionObserver = () => {
+  const reconfigureIntersectionObserver = useCallback(() => {
     const options = {
       root: null,
       rootMargin: '-100% 0px 0px 0px',
@@ -44,7 +44,7 @@ const useScrollPagination: <D>(
           },
         }).then(result => {
           const newItemCount = getItems(result.data).length
-          if (newItemCount == 0) {
+          if (newItemCount === 0) {
             setFinished(true)
           }
         })
@@ -55,7 +55,7 @@ const useScrollPagination: <D>(
     if (observerElem.current && !loading) {
       observer.current.observe(observerElem.current)
     }
-  }
+  }, [loading, fetchMore, data, getItems, finished])
 
   const containerElem = useCallback((node: null | Element): void => {
     observerElem.current = node
@@ -68,7 +68,7 @@ const useScrollPagination: <D>(
     if (node != null) {
       reconfigureIntersectionObserver()
     }
-  }, [])
+  }, [reconfigureIntersectionObserver])
 
   // only observe when not loading
   useEffect(() => {
@@ -84,7 +84,7 @@ const useScrollPagination: <D>(
   // reconfigure observer if fetchMore function changes
   useEffect(() => {
     reconfigureIntersectionObserver()
-  }, [fetchMore, data, finished])
+  }, [fetchMore, data, finished, reconfigureIntersectionObserver])
 
   useEffect(() => {
     setFinished(false)

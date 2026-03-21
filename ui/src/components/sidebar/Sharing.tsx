@@ -262,9 +262,9 @@ const MorePopoverSectionPassword = ({
             event.altKey ||
             event.ctrlKey ||
             event.metaKey ||
-            event.key == 'Enter' ||
-            event.key == 'Tab' ||
-            event.key == 'Escape'
+            event.key === 'Enter' ||
+            event.key === 'Tab' ||
+            event.key === 'Escape'
           ) {
             return
           }
@@ -482,6 +482,7 @@ type SidebarSharePhotoProps = {
 
 export const SidebarPhotoShare = ({ id }: SidebarSharePhotoProps) => {
   const { t } = useTranslation()
+  const token = authToken()
 
   const [
     loadShares,
@@ -499,14 +500,14 @@ export const SidebarPhotoShare = ({ id }: SidebarSharePhotoProps) => {
   })
 
   useEffect(() => {
-    if (authToken()) {
+    if (token) {
       loadShares({
         variables: {
           id,
         },
       })
     }
-  }, [loadShares, id])
+  }, [loadShares, id, token])
 
   const loading = queryLoading || mutationLoading
 
@@ -600,7 +601,7 @@ const SidebarShare = ({
     </tr>
   ))
 
-  if (optionsRows.length == 0) {
+  if (optionsRows.length === 0) {
     optionsRows.push(
       <tr
         key="no-shares"

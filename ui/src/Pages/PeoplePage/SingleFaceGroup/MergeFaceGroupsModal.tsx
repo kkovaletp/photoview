@@ -111,15 +111,15 @@ const MergeFaceGroupsModal = ({
   // Go straight to the sources page if a destination face group is preselected, using the preselection as the destination
   useEffect(() => {
     if (isNil(preselectedDestinationFaceGroup)) return
-    if (state != MergeFaceGroupsModalState.SelectDestination) return
+    if (state !== MergeFaceGroupsModalState.SelectDestination) return
 
     const destinationFaceGroup = data?.myFaceGroups.find(
-      x => x.id == preselectedDestinationFaceGroup?.id
+      x => x.id === preselectedDestinationFaceGroup?.id
     )
     if (isNil(destinationFaceGroup)) return
 
     setDestinationFaceGroup(destinationFaceGroup)
-  }, [state, preselectedDestinationFaceGroup])
+  }, [state, preselectedDestinationFaceGroup, data?.myFaceGroups])
 
   function handleFaceGroupToggled(newValue: MyFacesQuery['myFaceGroups'][0] | SingleFaceGroupQuery['faceGroup']) {
     switch (state) {
@@ -140,7 +140,7 @@ const MergeFaceGroupsModal = ({
     data?.myFaceGroups.filter(
       x =>
         state === MergeFaceGroupsModalState.SelectDestination ||
-        x.id != selectedDestinationFaceGroup?.id
+        x.id !== selectedDestinationFaceGroup?.id
     ) ?? []
 
   const goNext = () => {
