@@ -92,7 +92,7 @@
     "eslint-plugin-react-hooks": "^7.0.1",
     "globals": "^17.4.0",
     "i18next-cli": "^1.50.2",
-    "jsdom": "^26.1.0",
+    "jsdom": "^29.0.1",
     "lint-staged": "^15.5.2",
     "nodemon": "^3.1.14",
     "ts-node": "^10.9.2",
