@@ -54,9 +54,7 @@ const Messages = () => {
     setMessages(prevMessages => prevMessages.filter(msg => msg.key !== message.key))
   }
   const messageElems = messages.map(msg => (
-    <div key={msg.key}>
-      <MessageItem message={msg} onDismiss={dismissMessage} />
-    </div>
+    <MessageItem key={msg.key} message={msg} onDismiss={dismissMessage} />
   ))
 
   return (

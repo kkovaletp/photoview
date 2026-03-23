@@ -42,6 +42,8 @@ const InitialSetupPage = () => {
 
   const {
     register,
+    clearErrors,
+    setError,
     handleSubmit,
     formState: { errors: formErrors },
   } = useForm<InitialSetupFormData>()
@@ -67,12 +69,29 @@ const InitialSetupPage = () => {
   const signIn = handleSubmit(async (data) => {
     try {
       setErrorMessage(null)
+      clearErrors(['username', 'rootPath'])
+
+      const username = normalizeUsername(data.username)
+      const rootPath = normalizePath(data.rootPath)
+      let hasError = false
+
+      if (username === '') {
+        setError('username', { type: 'required' })
+        hasError = true
+      }
+
+      if (rootPath === '') {
+        setError('rootPath', { type: 'required' })
+        hasError = true
+      }
+
+      if (hasError) return
 
       const result = await authorize({
         variables: {
-          username: normalizeUsername(data.username),
+          username,
           password: data.password,
-          rootPath: normalizePath(data.rootPath),
+          rootPath,
         },
       })
 
@@ -134,7 +153,7 @@ const InitialSetupPage = () => {
               '/path/to/photos'
             )}
             error={
-              formErrors.password?.type == 'required'
+              formErrors.rootPath?.type === 'required'
                 ? 'Please enter a photo path'
                 : undefined
             }
