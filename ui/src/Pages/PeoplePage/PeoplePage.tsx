@@ -28,6 +28,7 @@ import {
   RecognizeUnlabeledFacesMutation
 } from './__generated__/PeoplePage'
 import { isNil, tailwindClassNames } from '../../helpers/utils'
+import { normalizeLabel } from '../../helpers/normalize'
 import { clsx } from 'clsx'
 import MergeFaceGroupsModal, {
   MergeFaceGroupsModalState,
@@ -177,7 +178,7 @@ export const FaceDetails = ({
             setGroupLabel({
               variables: {
                 groupID: group.id,
-                label: inputValue === '' ? null : inputValue,
+                label: normalizeLabel(inputValue),
               },
             })
           }

@@ -311,12 +311,12 @@ const SidebarMediaDownload = ({ media }: SidebarMediaDownladProps) => {
   >(SIDEBAR_DOWNLOAD_QUERY, {})
 
   useEffect(() => {
-    if (media?.id && !media.downloads && !loading && data?.media?.id !== media.id) {
+    if (media?.id && !media.downloads && !loading && !error && data?.media?.id !== media.id) {
       loadPhotoDownloads({
         variables: { mediaId: media.id }
       })
     }
-  }, [media?.id, media?.downloads, loading, data?.media?.id, loadPhotoDownloads])
+  }, [media?.id, media?.downloads, loading, error, data?.media?.id, loadPhotoDownloads])
 
   if (!media?.id) return null
 

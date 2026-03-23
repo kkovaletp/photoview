@@ -3,7 +3,7 @@ import { useQuery, gql, useMutation } from '@apollo/client'
 import { useForm } from 'react-hook-form'
 import { INITIAL_SETUP_QUERY, login } from './loginUtilities'
 import { authToken } from '../../helpers/authentication'
-
+import { normalizeUsername } from '../../helpers/normalize'
 import { useTranslation } from 'react-i18next'
 import { Helmet, HelmetProvider } from '@dr.pogodin/react-helmet'
 import { useNavigate } from 'react-router'
@@ -57,7 +57,7 @@ const LoginForm = () => {
 
       const result = await authorize({
         variables: {
-          username: data.username,
+          username: normalizeUsername(data.username),
           password: data.password,
         },
       })

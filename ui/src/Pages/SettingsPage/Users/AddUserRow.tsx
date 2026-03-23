@@ -3,14 +3,15 @@ import { useState, ChangeEvent, Dispatch, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
 import Checkbox from '../../../primitives/form/Checkbox'
 import { TextField, Button, ButtonGroup } from '../../../primitives/form/Input'
+import MessageBox from '../../../primitives/form/MessageBox'
 import { TableRow, TableCell } from '../../../primitives/Table'
+import { normalizePath, normalizeUsername } from '../../../helpers/normalize'
 import {
   CreateUserMutation,
   CreateUserMutationVariables,
   UserAddRootPathMutation,
   UserAddRootPathMutationVariables,
 } from './__generated__/AddUserRow'
-import MessageBox from '../../../primitives/form/MessageBox'
 
 export const CREATE_USER_MUTATION = gql`
   mutation createUser($username: String!, $admin: Boolean!) {
@@ -70,18 +71,27 @@ const AddUserRow = ({ setShow, show, onUserAdded }: AddUserRowProps) => {
   const handleAddUser = async () => {
     setErrorMessage(null)
     try {
+      const username = normalizeUsername(state.username)
+      if (username === '') {
+        setErrorMessage(
+          t('login_page.field.username_error', 'Please enter a username')
+        )
+        return
+      }
+
       const result = await createUser({
         variables: {
-          username: state.username,
+          username,
           admin: state.admin,
         },
       })
 
-      if (result.data?.createUser?.id && state.rootPath) {
+      const rootPath = normalizePath(state.rootPath)
+      if (result.data?.createUser?.id && rootPath) {
         await addRootPath({
           variables: {
             id: result.data.createUser.id,
-            rootPath: state.rootPath,
+            rootPath,
           },
         })
       }

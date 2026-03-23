@@ -5,6 +5,7 @@ import { UserRowChildProps } from './UserRow'
 import { TableRow, TableCell } from '../../../primitives/Table'
 import { TextField, Button, ButtonGroup } from '../../../primitives/form/Input'
 import Checkbox from '../../../primitives/form/Checkbox'
+import { normalizeUsername } from '../../../helpers/normalize'
 
 const EditUserRow = ({
   user,
@@ -66,15 +67,17 @@ const EditUserRow = ({
           <Button
             disabled={updateUserLoading}
             variant="positive"
-            onClick={() =>
+            onClick={() => {
+              const username =
+                normalizeUsername(state.username)
               updateUser({
                 variables: {
                   id: user.id,
-                  username: state.username,
+                  username,
                   admin: state.admin,
                 },
               })
-            }
+            }}
           >
             {t('general.action.save', 'Save')}
           </Button>

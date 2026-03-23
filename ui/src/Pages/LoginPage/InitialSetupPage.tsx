@@ -3,6 +3,7 @@ import { gql, useQuery, useMutation } from '@apollo/client'
 import { useNavigate } from 'react-router-dom'
 import { Container, INITIAL_SETUP_QUERY, login } from './loginUtilities'
 import { authToken } from '../../helpers/authentication'
+import { normalizePath, normalizeUsername } from '../../helpers/normalize'
 import { useTranslation } from 'react-i18next'
 import { CheckInitialSetupQuery } from './__generated__/loginUtilities'
 import { InitialSetupMutation, InitialSetupMutationVariables } from './__generated__/InitialSetupPage'
@@ -69,9 +70,9 @@ const InitialSetupPage = () => {
 
       const result = await authorize({
         variables: {
-          username: data.username,
+          username: normalizeUsername(data.username),
           password: data.password,
-          rootPath: data.rootPath,
+          rootPath: normalizePath(data.rootPath),
         },
       })
 

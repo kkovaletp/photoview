@@ -41,7 +41,8 @@ const MessageItem = ({ message, onDismiss }: MessageItemProps) => {
         />
       )
     default:
-      throw new Error(`Invalid message type: ${message.type}`)
+      console.error(`Unknown message type encountered: ${message.type}`)
+      return null
   }
 }
 

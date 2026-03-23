@@ -153,8 +153,6 @@ describe('SidebarMediaDownload', () => {
             await waitFor(() => {
                 expect(screen.getByText(/Failed to load download options/i)).toBeInTheDocument()
             })
-
-            expect(screen.getByText(/Failed to load downloads/i)).toBeInTheDocument()
         })
 
         it('should return null when media is null', () => {

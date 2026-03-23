@@ -8,6 +8,7 @@ import {
 } from 'react'
 import { useTranslation } from 'react-i18next'
 import { isNil } from '../../../helpers/utils'
+import { normalizeLabel } from '../../../helpers/normalize'
 import { Button, TextField } from '../../../primitives/form/Input'
 import { MY_FACES_QUERY, SET_GROUP_LABEL_MUTATION } from '../PeoplePage'
 import {
@@ -37,17 +38,24 @@ const FaceGroupTitle = ({ faceGroup }: FaceGroupTitleProps) => {
   const [moveModalOpen, setMoveModalOpen] = useState(false)
   const [detachModalOpen, setDetachModalOpen] = useState(false)
 
-  const [setGroupLabel, { loading: setLabelLoading, error: labelSaveError }] = useMutation<
-    SetGroupLabelMutation,
-    SetGroupLabelMutationVariables
-  >(SET_GROUP_LABEL_MUTATION, {
-    onCompleted: () => setEditLabel(false),
-  })
+  const [
+    setGroupLabel,
+    {
+      loading: setLabelLoading,
+      error: labelSaveError,
+      reset: resetSetGroupLabel,
+    }] = useMutation<
+      SetGroupLabelMutation,
+      SetGroupLabelMutationVariables
+    >(SET_GROUP_LABEL_MUTATION, {
+      onCompleted: () => setEditLabel(false),
+    })
 
   const resetLabel = useCallback(() => {
+    resetSetGroupLabel()
     setInputValue(faceGroup?.label ?? '')
     setEditLabel(false)
-  }, [faceGroup?.label])
+  }, [faceGroup?.label, resetSetGroupLabel])
 
   useEffect(() => {
     if (editLabel) {
@@ -74,7 +82,7 @@ const FaceGroupTitle = ({ faceGroup }: FaceGroupTitleProps) => {
           setGroupLabel({
             variables: {
               groupID: faceGroup.id,
-              label: inputValue || null,
+              label: normalizeLabel(inputValue),
             },
           })
         }}
@@ -141,6 +149,7 @@ const FaceGroupTitle = ({ faceGroup }: FaceGroupTitleProps) => {
           <li>
             <Button disabled={!faceGroup} onClick={() => {
               if (!faceGroup) return
+              resetSetGroupLabel()
               setInputValue(faceGroup.label ?? '')
               setEditLabel(true)
             }}>

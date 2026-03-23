@@ -10,6 +10,7 @@ import {
 import { SettingsUsersQueryQuery } from './__generated__/UsersTable'
 import { UserAddRootPathMutation } from './__generated__/AddUserRow'
 import { Button, TextField } from '../../../primitives/form/Input'
+import { normalizePath } from '../../../helpers/normalize'
 
 const USER_REMOVE_ALBUM_PATH_MUTATION = gql`
   mutation userRemoveAlbumPathMutation($userId: ID!, $albumId: ID!) {
@@ -89,11 +90,13 @@ const EditNewRootPath = ({ userID }: EditNewRootPathProps) => {
         variant="positive"
         disabled={loading}
         onClick={() => {
+          const rootPath = normalizePath(value)
+          if (rootPath === '') return
           setValue('')
           addRootPath({
             variables: {
               id: userID,
-              rootPath: value,
+              rootPath,
             },
           })
         }}
