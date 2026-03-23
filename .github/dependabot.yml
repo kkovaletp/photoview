@@ -36,6 +36,9 @@ updates:
           - "react-dom"
           - "@types/react-dom"
           - "react-test-renderer"
+      tailwindcss:
+        patterns:
+          - "*tailwindcss*"
 
   # Maintain dependencies for Dockerfiles
   - package-ecosystem: "docker"
