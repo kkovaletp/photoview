@@ -192,6 +192,7 @@ describe('load correct share page, based on graphql query', () => {
             offset: 0,
             mediaOrderBy: 'date_shot',
             orderDirection: OrderDirection.Asc,
+            onlyFavorites: false,
           },
         },
         result: {
@@ -270,6 +271,7 @@ describe('load correct share page, based on graphql query', () => {
             offset: 0,
             mediaOrderBy: 'date_shot',
             orderDirection: OrderDirection.Asc,
+            onlyFavorites: false,
           },
         },
         result: {
