@@ -48,6 +48,7 @@ const FaceGroupTitle = ({ faceGroup }: FaceGroupTitleProps) => {
       SetGroupLabelMutation,
       SetGroupLabelMutationVariables
     >(SET_GROUP_LABEL_MUTATION, {
+      errorPolicy: 'all',
       onCompleted: () => setEditLabel(false),
     })
 
