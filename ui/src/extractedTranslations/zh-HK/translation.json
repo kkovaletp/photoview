@@ -125,6 +125,9 @@
           "move_action": "移動相片的面孔",
           "title": "選擇目標臉孔群組"
         },
+        "error": {
+          "network": ""
+        },
         "image_select_table": {
           "next_action": "下一步",
           "title": "選擇想移動的相片"

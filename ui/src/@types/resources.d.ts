@@ -127,6 +127,9 @@ interface Resources {
             "move_action": "Move image faces",
             "title": "Select destination face group"
           },
+          "error": {
+            "network": "Network error while moving faces"
+          },
           "image_select_table": {
             "next_action": "Next",
             "title": "Select images to move"

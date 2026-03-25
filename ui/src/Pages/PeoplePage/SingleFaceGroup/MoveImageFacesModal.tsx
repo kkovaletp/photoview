@@ -41,6 +41,8 @@ type MoveImageFacesModalProps = {
   )[]
 }
 
+let errMessage: string
+
 const MoveImageFacesModal = ({
   open,
   setOpen,
@@ -58,18 +60,15 @@ const MoveImageFacesModal = ({
   const [imagesSelected, setImagesSelected] = useState(false)
   const navigate = useNavigate()
 
-  const [moveImageFacesMutation] = useMutation<
+  const [moveImageFacesMutation, { error: moveError }] = useMutation<
     MoveImageFacesMutation,
     MoveImageFacesMutationVariables
   >(MOVE_IMAGE_FACES_MUTATION, {
-    refetchQueries: [
-      {
-        query: MY_FACES_QUERY,
-      },
-    ],
+    errorPolicy: 'all',
+    refetchQueries: [{ query: MY_FACES_QUERY }],
   })
 
-  const [loadFaceGroups, { data: faceGroupsData }] = useLazyQuery<
+  const [loadFaceGroups, { data: faceGroupsData, error: loadError }] = useLazyQuery<
     MyFacesQuery,
     MyFacesQueryVariables
   >(MY_FACES_QUERY)
@@ -108,9 +107,17 @@ const MoveImageFacesModal = ({
         faceIDs,
         destFaceGroupID: selectedFaceGroup.id,
       },
-    }).then(() => {
+    }).then(({ data }) => {
+      // GraphQL errors with errorPolicy:'all' will not reject; they appear in moveError.
+      // Only proceed if we got data back and no mutation-level errors.
+      if (!data) return
       setOpen(false)
       navigate(`/people/${selectedFaceGroup.id}`)
+    }).catch((e) => {
+      // Network errors always reject; report to the user via a global negative toast.
+      errMessage =
+        e?.message ??
+        t('people_page.modal.move_image_faces.error.network', 'Network error while moving faces')
     })
   }
 
@@ -149,6 +156,12 @@ const MoveImageFacesModal = ({
       />
     )
   }
+
+  const inlineError =
+    errMessage ??
+    moveError?.message ??
+    loadError?.message ??
+    undefined
 
   let positiveButton: ModalAction
   if (imagesSelected) {
@@ -197,6 +210,11 @@ const MoveImageFacesModal = ({
         positiveButton,
       ]}
     >
+      {inlineError && (
+        <div role="alert" className="mb-2 rounded border border-red-300 bg-red-50 dark:bg-dark-900/50 px-3 py-2 text-sm text-red-800 dark:text-red-300">
+          {inlineError}
+        </div>
+      )}
       {table}
     </Modal>
   )

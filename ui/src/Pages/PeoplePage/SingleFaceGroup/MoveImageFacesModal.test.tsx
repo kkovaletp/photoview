@@ -290,6 +290,36 @@ describe('MoveImageFacesModal', () => {
                 expect(screen.getByTestId(`image-face-row-${face.id}`)).toBeInTheDocument()
             }
         })
+
+        test('modal stays open and does not navigate on mutation error', async () => {
+            const faceId = sourceFaceGroup.imageFaces[0].id
+            const errorMock = {
+                request: {
+                    query: MOVE_IMAGE_FACES_MUTATION,
+                    variables: { faceIDs: [faceId], destFaceGroupID: destGroup1.id },
+                },
+                error: new Error('Network error'),
+            }
+
+            renderModal({}, [makeMyFacesMock(), errorMock])
+
+            fireEvent.click(screen.getByTestId(`image-face-row-${faceId}`))
+            fireEvent.click(screen.getByRole('button', { name: /Next/i }))
+
+            await waitFor(() =>
+                expect(screen.getByTestId('select-face-group-table')).toBeInTheDocument()
+            )
+
+            fireEvent.click(screen.getByTestId(`face-group-row-${destGroup1.id}`))
+            fireEvent.click(screen.getByRole('button', { name: /Move image faces/i }))
+
+            // Allow time for mutation to attempt and fail
+            await waitFor(() => {
+                expect(defaultSetOpen).not.toHaveBeenCalled()
+                expect(mockNavigate).not.toHaveBeenCalled()
+                expect(screen.getByRole('alert')).toHaveTextContent(/Network error/i)
+            })
+        })
     })
 
     // ── Step 1: image selection ────────────────────────────────────────────────

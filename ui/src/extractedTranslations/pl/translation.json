@@ -125,6 +125,9 @@
           "move_action": "Przenieś twarze z obrazu",
           "title": "Wybierz docelową grupę twarzy"
         },
+        "error": {
+          "network": ""
+        },
         "image_select_table": {
           "next_action": "Dalej",
           "title": "Wybierz obrazy do przeniesienia"

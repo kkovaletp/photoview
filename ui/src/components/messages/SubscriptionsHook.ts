@@ -85,7 +85,7 @@ export const SubscriptionsHook = ({
           content: msg.content,
           negative: msg.negative,
           positive: msg.positive,
-          percent: msg.progress || undefined,
+          percent: msg.progress ?? undefined,
         },
       }
       const next = [...prev]

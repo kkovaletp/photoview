@@ -125,6 +125,9 @@
           "move_action": "Flyt ansigter",
           "title": "Vælg destinationsgruppe"
         },
+        "error": {
+          "network": ""
+        },
         "image_select_table": {
           "next_action": "Næste",
           "title": "Vælg billeder som skal flyttes"

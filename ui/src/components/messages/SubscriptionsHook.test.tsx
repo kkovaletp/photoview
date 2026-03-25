@@ -240,6 +240,22 @@ describe('SubscriptionsHook', () => {
             })
         })
 
+        it('preserves 0 progress instead of treating it as missing', () => {
+            const key = uniqueKey()
+            const notification = makeNotification(key, { progress: 0 })
+            mockUseSubscription.mockReturnValue({
+                data: { notification },
+                error: undefined,
+                loading: false,
+            })
+
+            render(<SubscriptionsHook setMessages={setMessages} />)
+
+            const last = setMessages.mock.calls.length - 1
+            const result = applyUpdater(setMessages, last, [])
+            expect(result[0].props.percent).toBe(0)
+        })
+
         it('sets percent to undefined when progress is null', () => {
             const key = uniqueKey()
             const notification = makeNotification(key, { progress: null })

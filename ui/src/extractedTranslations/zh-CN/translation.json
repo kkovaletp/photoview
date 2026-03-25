@@ -125,6 +125,9 @@
           "move_action": "移动照片",
           "title": "选择目标面孔"
         },
+        "error": {
+          "network": ""
+        },
         "image_select_table": {
           "next_action": "下一步",
           "title": "选择想移动的照片"

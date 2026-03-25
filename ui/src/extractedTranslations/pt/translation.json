@@ -125,6 +125,9 @@
           "move_action": "Mover caras de imagens",
           "title": "Selecione o grupo de caras destino"
         },
+        "error": {
+          "network": ""
+        },
         "image_select_table": {
           "next_action": "Próxima",
           "title": "Selecionar imagens para mover"

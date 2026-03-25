@@ -125,6 +125,9 @@
           "move_action": "写真の顔グループを移動",
           "title": "対象の顔グループを選択"
         },
+        "error": {
+          "network": ""
+        },
         "image_select_table": {
           "next_action": "次へ",
           "title": "移動する写真を選択"

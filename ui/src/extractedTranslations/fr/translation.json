@@ -125,6 +125,9 @@
           "move_action": "Déplacer les visages de l'image",
           "title": "Sélectionner le groupe de visages de destination"
         },
+        "error": {
+          "network": ""
+        },
         "image_select_table": {
           "next_action": "Suivant",
           "title": "Sélectionner les images à déplacer"

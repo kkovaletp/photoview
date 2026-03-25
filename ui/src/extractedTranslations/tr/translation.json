@@ -125,6 +125,9 @@
           "move_action": "Resimdeki yüzleri taşı",
           "title": "Hedef yüz grubunu seçin"
         },
+        "error": {
+          "network": ""
+        },
         "image_select_table": {
           "next_action": "Sonraki",
           "title": "Taşınacak resimleri seçin"

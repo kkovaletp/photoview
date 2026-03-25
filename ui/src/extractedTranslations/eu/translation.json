@@ -125,6 +125,9 @@
           "move_action": "Mugitu irudiko aurpegiak",
           "title": "Aukeratu zein aurpegi-multzora mugituko d(ir)en"
         },
+        "error": {
+          "network": ""
+        },
         "image_select_table": {
           "next_action": "Hurrengoa",
           "title": "Aukeratu mugitzeko irudiak"
