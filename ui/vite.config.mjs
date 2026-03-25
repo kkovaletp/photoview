@@ -60,6 +60,7 @@ export default defineConfig(async ({ command, mode }) => {
       },
       coverage: {
         reporter: ['text', 'lcov', 'json', 'html'],
+        exclude: ['**/node_modules/**', '**/dist/**', '**/__generated__/**'],
         reportOnFailure: true,
       },
     },

@@ -49,7 +49,8 @@ const applyUpdater = (
     prev: Message[]
 ): Message[] => {
     const updater = mockFn.mock.calls[callIndex][0]
-    return typeof updater === 'function' ? updater(prev) : updater
+    expect(updater).toEqual(expect.any(Function))
+    return (updater as (messages: Message[]) => Message[])(prev)
 }
 
 // ── Tests ────────────────────────────────────────────────────────────────────
@@ -132,14 +133,39 @@ describe('SubscriptionsHook', () => {
         })
 
         it('processes data as well when both error and data arrive together', () => {
+            const key = uniqueKey()
             const error = new ApolloError({ errorMessage: 'Partial failure' })
-            const notification = makeNotification(uniqueKey())
+            const notification = makeNotification(key, { header: 'Data Header' })
             mockUseSubscription.mockReturnValue({ data: { notification }, error, loading: false })
 
             render(<SubscriptionsHook setMessages={setMessages} />)
 
-            // Effect processes error first, then the notification (two setMessages calls minimum)
+            // Error is processed first (call 0), then the notification data (the last call)
             expect(setMessages.mock.calls.length).toBeGreaterThanOrEqual(2)
+
+            // Call 0 must produce the negative network-error message
+            const afterError = applyUpdater(setMessages, 0, [])
+            expect(afterError).toHaveLength(1)
+            expect(afterError[0]).toMatchObject({
+                type: NotificationType.Message,
+                props: { header: 'Network error', content: 'Partial failure', negative: true },
+            })
+
+            // The last call must upsert the notification alongside the error message
+            const lastIndex = setMessages.mock.calls.length - 1
+            const afterBoth = applyUpdater(setMessages, lastIndex, afterError)
+            expect(afterBoth).toHaveLength(2)
+            expect(afterBoth).toEqual(
+                expect.arrayContaining([
+                    expect.objectContaining({
+                        props: expect.objectContaining({ header: 'Network error', negative: true }),
+                    }),
+                    expect.objectContaining({
+                        key,
+                        props: expect.objectContaining({ header: 'Data Header' }),
+                    }),
+                ])
+            )
         })
     })
 
@@ -242,7 +268,8 @@ describe('SubscriptionsHook', () => {
             const key1 = uniqueKey()
             const key2 = uniqueKey()
 
-            const notification1 = makeNotification(key1)
+            // Render with the first notification
+            const notification1 = makeNotification(key1, { header: 'First' })
             mockUseSubscription.mockReturnValue({
                 data: { notification: notification1 },
                 error: undefined,
@@ -250,8 +277,13 @@ describe('SubscriptionsHook', () => {
             })
             const { rerender } = render(<SubscriptionsHook setMessages={setMessages} />)
 
+            // Capture the state produced by the first notification's updater
             const callCountAfterFirst = setMessages.mock.calls.length
+            const stateAfterFirst = applyUpdater(setMessages, callCountAfterFirst - 1, [])
+            expect(stateAfterFirst).toHaveLength(1)
+            expect(stateAfterFirst[0].key).toBe(key1)
 
+            // Rerender with a second, distinct notification
             const notification2 = makeNotification(key2, { header: 'Second' })
             mockUseSubscription.mockReturnValue({
                 data: { notification: notification2 },
@@ -261,10 +293,24 @@ describe('SubscriptionsHook', () => {
             rerender(<SubscriptionsHook setMessages={setMessages} />)
 
             expect(setMessages.mock.calls.length).toBeGreaterThan(callCountAfterFirst)
-            const last = setMessages.mock.calls.length - 1
-            const result = applyUpdater(setMessages, last, [])
-            expect(result[0].key).toBe(key2)
-            expect(result[0].props.header).toBe('Second')
+
+            // Apply the second updater against the state that already contains notification1 —
+            // this proves notification1 is preserved alongside notification2
+            const lastIndex = setMessages.mock.calls.length - 1
+            const stateAfterSecond = applyUpdater(setMessages, lastIndex, stateAfterFirst)
+            expect(stateAfterSecond).toHaveLength(2)
+            expect(stateAfterSecond).toEqual(
+                expect.arrayContaining([
+                    expect.objectContaining({
+                        key: key1,
+                        props: expect.objectContaining({ header: 'First' }),
+                    }),
+                    expect.objectContaining({
+                        key: key2,
+                        props: expect.objectContaining({ header: 'Second' }),
+                    }),
+                ])
+            )
         })
     })
 
@@ -393,27 +439,30 @@ describe('SubscriptionsHook', () => {
 
         it('clears the previous timer handle when the same key receives a new timeout', () => {
             const clearTimeoutSpy = vi.spyOn(globalThis, 'clearTimeout')
-            const key = uniqueKey()
+            try {
+                const key = uniqueKey()
 
-            const notification1 = makeNotification(key, { timeout: 3000 })
-            mockUseSubscription.mockReturnValue({
-                data: { notification: notification1 },
-                error: undefined,
-                loading: false,
-            })
-            const { rerender } = render(<SubscriptionsHook setMessages={setMessages} />)
+                const notification1 = makeNotification(key, { timeout: 3000 })
+                mockUseSubscription.mockReturnValue({
+                    data: { notification: notification1 },
+                    error: undefined,
+                    loading: false,
+                })
+                const { rerender } = render(<SubscriptionsHook setMessages={setMessages} />)
 
-            // Deliver a second message with the same key and a new timeout
-            const notification2 = makeNotification(key, { timeout: 10_000, content: 'Updated' })
-            mockUseSubscription.mockReturnValue({
-                data: { notification: notification2 },
-                error: undefined,
-                loading: false,
-            })
-            rerender(<SubscriptionsHook setMessages={setMessages} />)
+                // Deliver a second message with the same key and a new timeout
+                const notification2 = makeNotification(key, { timeout: 10_000, content: 'Updated' })
+                mockUseSubscription.mockReturnValue({
+                    data: { notification: notification2 },
+                    error: undefined,
+                    loading: false,
+                })
+                rerender(<SubscriptionsHook setMessages={setMessages} />)
 
-            expect(clearTimeoutSpy).toHaveBeenCalled()
-            clearTimeoutSpy.mockRestore()
+                expect(clearTimeoutSpy).toHaveBeenCalled()
+            } finally {
+                clearTimeoutSpy.mockRestore()
+            }
         })
 
         it('only fires the latest timer after replacing the handle for the same key', () => {
