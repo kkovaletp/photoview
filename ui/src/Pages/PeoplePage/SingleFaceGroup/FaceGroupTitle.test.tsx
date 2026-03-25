@@ -304,7 +304,7 @@ describe('FaceGroupTitle', () => {
             expect(screen.getByTestId('move-modal')).toBeInTheDocument()
         })
 
-        test('modals remain closed when buttons are clicked while faceGroup is undefined (disabled buttons)', () => {
+        test('modals remain closed when faceGroup is undefined (buttons disabled)', () => {
             renderComponent()
 
             // Buttons are disabled; no modals should appear regardless
