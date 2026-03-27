@@ -41,8 +41,6 @@ type MoveImageFacesModalProps = {
   )[]
 }
 
-let errMessage: string
-
 const MoveImageFacesModal = ({
   open,
   setOpen,
@@ -50,6 +48,8 @@ const MoveImageFacesModal = ({
   preselectedImageFaces,
 }: MoveImageFacesModalProps) => {
   const { t } = useTranslation()
+
+  const [errMessage, setErrMessage] = useState<string | null>(null)
 
   const [selectedImageFaces, setSelectedImageFaces] = useState<
     (SingleFaceGroupQuery['faceGroup']['imageFaces'][0] | MyFacesQuery['myFaceGroups'][0]['imageFaces'][0])[]
@@ -90,6 +90,7 @@ const MoveImageFacesModal = ({
       setImagesSelected(false)
       setSelectedImageFaces([])
       setSelectedFaceGroup(null)
+      setErrMessage(null)
     }
   }, [open])
 
@@ -115,9 +116,10 @@ const MoveImageFacesModal = ({
       navigate(`/people/${selectedFaceGroup.id}`)
     }).catch((e) => {
       // Network errors always reject; report to the user via a global negative toast.
-      errMessage =
+      setErrMessage(
         e?.message ??
         t('people_page.modal.move_image_faces.error.network', 'Network error while moving faces')
+      )
     })
   }
 

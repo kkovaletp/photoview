@@ -64,10 +64,15 @@ export const SubscriptionsHook = ({
     if (!data) return
     const msg = data.notification
     // Handle timeouts independent of outer "messages"
-    if (msg.timeout) {
-      const existing = messageTimeoutHandles.get(msg.key)
-      if (existing) clearTimeout(existing)
+    const existing = messageTimeoutHandles.get(msg.key)
+    if (existing) {
+      clearTimeout(existing)
+      messageTimeoutHandles.delete(msg.key)
+    }
+
+    if (msg.timeout != null) {
       const timeoutHandle = setTimeout(() => {
+        messageTimeoutHandles.delete(msg.key)
         setMessages(prev => prev.filter(m => m.key !== msg.key))
       }, msg.timeout) as unknown as number
       messageTimeoutHandles.set(msg.key, timeoutHandle)

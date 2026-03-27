@@ -60,11 +60,12 @@ const MergeFaceGroupsModal = ({
 
   const navigate = useNavigate()
   const { data } = useQuery<MyFacesQuery, MyFacesQueryVariables>(MY_FACES_QUERY)
-  const [combineFacesMutation] = useMutation<
+  const [combineFacesMutation, { error: combineError }] = useMutation<
     CombineFacesMutation,
     CombineFacesMutationVariables
   >(COMBINE_FACES_MUTATION, {
     refetchQueries: refetchQueries,
+    errorPolicy: 'all',
   })
 
   // The destination face group
@@ -75,6 +76,8 @@ const MergeFaceGroupsModal = ({
   const [selectedFaceGroups, setSelectedFaceGroups] = useState<
     Set<MyFaceGroupsOrSingleFaceGroupOrNull>
   >(new Set())
+
+  const [inlineError, setInlineError] = useState<string | undefined>(undefined)
 
   const addSelectedFaceGroup = (
     faceGroup: MyFaceGroupsOrSingleFaceGroupOrNull
@@ -165,9 +168,16 @@ const MergeFaceGroupsModal = ({
         srcIDs: sourceGroupIDs,
         destID: selectedDestinationFaceGroup.id,
       },
-    }).then(() => {
+    }).then(({ data }) => {
+      if (!data) return
+      setInlineError(undefined)
       setState(MergeFaceGroupsModalState.Closed)
       navigate(`/people/${selectedDestinationFaceGroup.id}`)
+    }).catch((e: unknown) => {
+      const message =
+        (e as Error)?.message ??
+        t('people_page.modal.merge_face_groups.error.network', 'Network error while merging faces')
+      setInlineError(message)
     })
   }
 
@@ -248,6 +258,11 @@ const MergeFaceGroupsModal = ({
 
   return (
     <Modal {...modalContent.props}>
+      {(inlineError || combineError?.message) && (
+        <div role="alert" className="mb-2 rounded border border-red-300 bg-red-50 dark:bg-dark-900/50 px-3 py-2 text-sm text-red-800 dark:text-red-300">
+          {inlineError ?? combineError?.message}
+        </div>
+      )}
       <SelectFaceGroupTable
         title={modalContent.searchTitle}
         frozen={state === MergeFaceGroupsModalState.SelectDestination && preselectedDestinationFaceGroup !== undefined}

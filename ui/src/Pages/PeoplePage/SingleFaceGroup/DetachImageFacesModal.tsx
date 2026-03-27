@@ -1,4 +1,4 @@
-import { BaseMutationOptions, gql, useMutation } from '@apollo/client'
+import { gql, useMutation } from '@apollo/client'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
@@ -22,18 +22,16 @@ const DETACH_IMAGE_FACES_MUTATION = gql`
   }
 `
 
-export const useDetachImageFaces = (
-  mutationOptions: BaseMutationOptions<
+export const useDetachImageFaces = () => {
+  const [detachImageFacesMutation, { error: detachError }] = useMutation<
     DetachImageFacesMutation,
     DetachImageFacesMutationVariables
-  >
-) => {
-  const [detachImageFacesMutation] = useMutation<
-    DetachImageFacesMutation,
-    DetachImageFacesMutationVariables
-  >(DETACH_IMAGE_FACES_MUTATION, mutationOptions)
+  >(DETACH_IMAGE_FACES_MUTATION, {
+    refetchQueries: [{ query: MY_FACES_QUERY }],
+    errorPolicy: 'all',
+  })
 
-  return async (
+  const detachImageFaces = async (
     selectedImageFaces: Array<
       MyFacesQuery['myFaceGroups'][0]['imageFaces'][0] |
       SingleFaceGroupQuery['faceGroup']['imageFaces'][0]
@@ -49,6 +47,8 @@ export const useDetachImageFaces = (
 
     return result
   }
+
+  return { detachImageFaces, error: detachError }
 }
 
 type DetachImageFacesModalProps = {
@@ -68,6 +68,7 @@ const DetachImageFacesModal = ({
   selectedImageFaces: selectedImageFacesProp,
 }: DetachImageFacesModalProps) => {
   const { t } = useTranslation()
+  const [inlineError, setInlineError] = useState<string | undefined>(undefined)
 
   const [selectedImageFaces, setSelectedImageFaces] = useState<
     Array<
@@ -77,19 +78,19 @@ const DetachImageFacesModal = ({
   >([])
   const navigate = useNavigate()
 
-  const detachImageFacesMutation = useDetachImageFaces({
-    refetchQueries: [
-      {
-        query: MY_FACES_QUERY,
-      },
-    ],
-  })
+  const { detachImageFaces, error: detachError } = useDetachImageFaces()
 
-  const detachImageFaces = () => {
-    detachImageFacesMutation(selectedImageFaces).then(({ data }) => {
-      if (isNil(data)) throw new Error('Expected data not to be null')
+  const detachImageFacesAction = () => {
+    detachImageFaces(selectedImageFaces).then(({ data }) => {
+      if (!data) throw new Error('Expected data not to be null')
+      setInlineError(undefined)
       setOpen(false)
       navigate(`/people/${data.detachImageFaces.id}`)
+    }).catch((e: unknown) => {
+      const message =
+        (e as Error)?.message ??
+        t('people_page.modal.detach_image_faces.error.network', 'Network error while detaching images')
+      setInlineError(message)
     })
   }
 
@@ -131,12 +132,17 @@ const DetachImageFacesModal = ({
             'Detach image faces'
           ),
           variant: 'positive',
-          onClick: () => detachImageFaces(),
+          onClick: () => detachImageFacesAction(),
         },
       ]}
       onClose={() => setOpen(false)}
       open={open}
     >
+      {(inlineError || detachError?.message) && (
+        <div role="alert" className="mb-2 rounded border border-red-300 bg-red-50 dark:bg-dark-900/50 px-3 py-2 text-sm text-red-800 dark:text-red-300">
+          {inlineError ?? detachError?.message}
+        </div>
+      )}
       <SelectImageFacesTable
         imageFaces={imageFaces}
         selectedImageFaces={selectedImageFaces}
