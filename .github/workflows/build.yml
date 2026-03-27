@@ -220,8 +220,8 @@ jobs:
           report-name: dockle-results-${{ matrix.entry.tag }}
           report-format: sarif
           failure-threshold: fatal
-          exit-code: 1
-          timeout: 5m
+          exit-code:         1
+          timeout:           5m
 
       - name: Upload SARIF file
         if: ${{ steps.dockle.conclusion == 'success' || steps.dockle.conclusion == 'failure' }}
