@@ -87,6 +87,8 @@ services:
       ## Read more about these options in the `.env` file. Uncomment if used.
       # UI_COOKIE_SECURE: ${UI_COOKIE_SECURE}
       # UI_COOKIE_DOMAIN: ${UI_COOKIE_DOMAIN}
+      ## Uncomment the next variable if set in the `.env` file to override the default 5s media probe timeout
+      # PHOTOVIEW_MEDIA_PROBE_TIMEOUT: ${PHOTOVIEW_MEDIA_PROBE_TIMEOUT}
     ## Share hardware devices with FFmpeg (optional):
     # gpus: all
     # devices:

@@ -6,7 +6,6 @@ import (
 	"os"
 	"path"
 	"strings"
-	"time"
 
 	"github.com/kkovaletp/photoview/api/graphql/models"
 	"github.com/kkovaletp/photoview/api/log"
@@ -205,7 +204,7 @@ func (t ProcessVideoTask) ProcessMedia(ctx scanner_task.TaskContext, mediaData *
 }
 
 func ReadVideoMetadata(videoPath string) (*ffprobe.ProbeData, error) {
-	ctx, cancelFn := context.WithTimeout(context.Background(), 5*time.Second)
+	ctx, cancelFn := context.WithTimeout(context.Background(), utils.MediaProbeTimeout())
 	defer cancelFn()
 
 	data, err := ffprobe.ProbeURL(ctx, videoPath)
