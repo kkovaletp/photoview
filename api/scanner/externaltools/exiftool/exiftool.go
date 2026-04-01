@@ -161,7 +161,9 @@ func (e *Exiftool) rawGetTags(v any, args ...string) (err error) {
 	}
 	defer func() {
 		_, _ = io.Copy(io.Discard, e.stdout)
-		err = e.rawReadStderr()
+		if stderrErr := e.rawReadStderr(); err == nil {
+			err = stderrErr
+		}
 	}()
 
 	if err = json.NewDecoder(e.stdout).Decode(v); err != nil {
@@ -177,7 +179,9 @@ func (e *Exiftool) rawSaveEmbedFile(outputPath string, args ...string) (hasEmbed
 	}
 	defer func() {
 		_, _ = io.Copy(io.Discard, e.stdout)
-		err = e.rawReadStderr()
+		if stderrErr := e.rawReadStderr(); err == nil {
+			err = stderrErr
+		}
 	}()
 
 	var output []byte
@@ -209,7 +213,9 @@ func (e *Exiftool) rawUpdateFile(args ...string) (err error) {
 	}
 	defer func() {
 		_, _ = io.Copy(io.Discard, e.stdout)
-		err = e.rawReadStderr()
+		if stderrErr := e.rawReadStderr(); err == nil {
+			err = stderrErr
+		}
 	}()
 
 	var output []byte

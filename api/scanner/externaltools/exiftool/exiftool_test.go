@@ -10,7 +10,7 @@ import (
 	"testing"
 	"time"
 
-	_ "github.com/photoview/photoview/api/test_utils/flags"
+	_ "github.com/kkovaletp/photoview/api/test_utils/flags"
 )
 
 func TestExiftool(t *testing.T) {
@@ -27,7 +27,7 @@ func TestExiftool(t *testing.T) {
 	}
 
 	if instance.Version() == "" {
-		t.Errorf("want exiftool version, but got an emtpy string")
+		t.Errorf("want exiftool version, but got an empty string")
 	}
 
 	if err := instance.Close(); err != nil {
