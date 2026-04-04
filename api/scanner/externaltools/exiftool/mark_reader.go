@@ -28,6 +28,9 @@ type MarkReader struct {
 
 // NewMarkReader creates a reader that stops at each marker and requires Reset to continue.
 func NewMarkReader(upstream io.Reader, bufferSize int, mark string) (*MarkReader, error) {
+	if upstream == nil {
+		return nil, errors.New("nil upstream")
+	}
 	if len(mark) == 0 {
 		return nil, errors.New("empty mark")
 	}
