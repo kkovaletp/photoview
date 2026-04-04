@@ -106,12 +106,18 @@
           "select_images": "Selecione imagens para desanexar"
         },
         "description": "Desanexe as imagens selecionadas deste grupo de caras e mova-as para um novo grupo",
+        "error": {
+          "network": ""
+        },
         "title": "Desanexar caras de imagens"
       },
       "merge_face_groups": {
         "destination_description": "",
         "destination_table": {
           "title": "Selecione a cara de destino"
+        },
+        "error": {
+          "network": ""
         },
         "sources_description": "",
         "sources_table": {

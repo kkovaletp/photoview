@@ -106,12 +106,18 @@
           "select_images": ""
         },
         "description": "",
+        "error": {
+          "network": ""
+        },
         "title": ""
       },
       "merge_face_groups": {
         "destination_description": "",
         "destination_table": {
           "title": ""
+        },
+        "error": {
+          "network": ""
         },
         "sources_description": "",
         "sources_table": {

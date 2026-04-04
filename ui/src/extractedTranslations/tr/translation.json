@@ -106,12 +106,18 @@
           "select_images": "Ayırılacak resimleri seçin"
         },
         "description": "Bu yüz grubunun seçili resimlerini ayırın ve bunları yeni bir yüz grubuna taşıyın",
+        "error": {
+          "network": ""
+        },
         "title": "Resimdeki Yüzleri Ayır"
       },
       "merge_face_groups": {
         "destination_description": "",
         "destination_table": {
           "title": "Hedef yüzü seçin"
+        },
+        "error": {
+          "network": ""
         },
         "sources_description": "",
         "sources_table": {

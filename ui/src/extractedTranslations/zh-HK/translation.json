@@ -106,12 +106,18 @@
           "select_images": "選擇分離相片"
         },
         "description": "分離已選擇相片中的臉孔群組及移動到新臉孔群組",
+        "error": {
+          "network": ""
+        },
         "title": "分離相片中的臉孔"
       },
       "merge_face_groups": {
         "destination_description": "",
         "destination_table": {
           "title": "選擇目標臉孔群組"
+        },
+        "error": {
+          "network": ""
         },
         "sources_description": "",
         "sources_table": {

@@ -106,12 +106,18 @@
           "select_images": "Aukeratu aurpegiak kentzeko irudiak"
         },
         "description": "Kendu aukeratutako irudiak aurpegi-multzo honetatik eta mugitu beste aurpegi-multzo batera",
+        "error": {
+          "network": ""
+        },
         "title": "Kendu irudiko aurpegiak"
       },
       "merge_face_groups": {
         "destination_description": "",
         "destination_table": {
           "title": "Aukeratu zein aurpegira mugituko d(ir)en"
+        },
+        "error": {
+          "network": ""
         },
         "sources_description": "",
         "sources_table": {

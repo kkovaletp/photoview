@@ -106,12 +106,18 @@
           "select_images": "选择要解除标记的照片"
         },
         "description": "将该组面孔选中的照片取消标记，并移动至新的面孔",
+        "error": {
+          "network": ""
+        },
         "title": "解除面孔标记"
       },
       "merge_face_groups": {
         "destination_description": "",
         "destination_table": {
           "title": "选择目标面孔"
+        },
+        "error": {
+          "network": ""
         },
         "sources_description": "",
         "sources_table": {

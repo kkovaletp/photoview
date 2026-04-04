@@ -106,12 +106,18 @@
           "select_images": "選擇要移除的相片"
         },
         "description": "將選取的相片從此人臉群組中移除，並移至新的人臉群組",
+        "error": {
+          "network": ""
+        },
         "title": "移除相片中的人臉"
       },
       "merge_face_groups": {
         "destination_description": "",
         "destination_table": {
           "title": "選擇目標人臉"
+        },
+        "error": {
+          "network": ""
         },
         "sources_description": "",
         "sources_table": {

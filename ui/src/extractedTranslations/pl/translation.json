@@ -106,12 +106,18 @@
           "select_images": "Zaznacz zdjęcia do odłączenia"
         },
         "description": "Odłącz wybrane zdjęcia w tej grupie twarzy i przenieś je do nowej grupy twarzy",
+        "error": {
+          "network": ""
+        },
         "title": "Odłącz zdjęcia twarzy"
       },
       "merge_face_groups": {
         "destination_description": "",
         "destination_table": {
           "title": "Wybierz twarz"
+        },
+        "error": {
+          "network": ""
         },
         "sources_description": "",
         "sources_table": {

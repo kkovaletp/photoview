@@ -106,12 +106,18 @@
           "select_images": "Select images to detach"
         },
         "description": "Detach selected images of this face group and move them to a new face groups",
+        "error": {
+          "network": "Network error while detaching images"
+        },
         "title": "Detach Image Faces"
       },
       "merge_face_groups": {
         "destination_description": "Select the face group that other groups should be merged into.",
         "destination_table": {
           "title": "Select the destination face"
+        },
+        "error": {
+          "network": "Network error while merging faces"
         },
         "sources_description": "Select all face groups that will be merged into the destination group.",
         "sources_table": {

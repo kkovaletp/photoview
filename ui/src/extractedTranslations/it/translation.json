@@ -106,12 +106,18 @@
           "select_images": "Seleziona le immagini da separare"
         },
         "description": "Separa le immagini selezionate di questo volto e muovile in nuovo volto",
+        "error": {
+          "network": ""
+        },
         "title": "Separa immagini volto"
       },
       "merge_face_groups": {
         "destination_description": "",
         "destination_table": {
           "title": "Seleziona il volto di destinazione"
+        },
+        "error": {
+          "network": ""
         },
         "sources_description": "",
         "sources_table": {

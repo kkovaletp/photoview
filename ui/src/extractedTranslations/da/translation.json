@@ -106,12 +106,18 @@
           "select_images": "Vælg billeder som skal løsrives"
         },
         "description": "Løsriv valgte billeder fra denne gruppe og flyt dem til sin egen gruppe",
+        "error": {
+          "network": ""
+        },
         "title": "Løsriv Billeder"
       },
       "merge_face_groups": {
         "destination_description": "",
         "destination_table": {
           "title": "Vælg destinationsgruppe"
+        },
+        "error": {
+          "network": ""
         },
         "sources_description": "",
         "sources_table": {

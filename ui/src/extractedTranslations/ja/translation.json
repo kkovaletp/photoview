@@ -106,12 +106,18 @@
           "select_images": "写真を選択"
         },
         "description": "選択した写真をこの顔グループから削除し、新しい顔グループに移動します",
+        "error": {
+          "network": ""
+        },
         "title": "写真の顔グループを分割"
       },
       "merge_face_groups": {
         "destination_description": "統合先の顔グループを選択してください。",
         "destination_table": {
           "title": "統合先の顔グループを選択"
+        },
+        "error": {
+          "network": ""
         },
         "sources_description": "統合する対象の顔グループをすべて選択してください。",
         "sources_table": {

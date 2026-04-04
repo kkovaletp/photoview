@@ -106,12 +106,18 @@
           "select_images": ""
         },
         "description": "",
+        "error": {
+          "network": ""
+        },
         "title": ""
       },
       "merge_face_groups": {
         "destination_description": "Välj målansiktsgruppen som andra ansikten ska slås samman med.",
         "destination_table": {
           "title": "Välj målansiktet"
+        },
+        "error": {
+          "network": ""
         },
         "sources_description": "Välj en eller flera ansiktsgrupper att slå samman med målgruppen",
         "sources_table": {

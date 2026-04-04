@@ -106,12 +106,18 @@
           "select_images": "Sélectionner les images de visages à détacher"
         },
         "description": "Détachez les images sélectionnées de ce groupe de visages et déplacez-les vers un nouveau groupe de visages",
+        "error": {
+          "network": ""
+        },
         "title": "Détacher les visages des images"
       },
       "merge_face_groups": {
         "destination_description": "Sélectionnez le groupe de visages dans lequel les autres groupes seront fusionnés.",
         "destination_table": {
           "title": "Sélectionner le visage de destination"
+        },
+        "error": {
+          "network": ""
         },
         "sources_description": "Sélectionnez tous les groupes de visages qui seront fusionnés dans le groupe de destination.",
         "sources_table": {

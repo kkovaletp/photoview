@@ -106,12 +106,18 @@
           "select_images": "Bilder auswählen"
         },
         "description": "Ausgewählte Bilder werden von dieser Person abgelöst.",
+        "error": {
+          "network": ""
+        },
         "title": "Bilder von Person ablösen"
       },
       "merge_face_groups": {
         "destination_description": "",
         "destination_table": {
           "title": "Personen zusammenführen"
+        },
+        "error": {
+          "network": ""
         },
         "sources_description": "",
         "sources_table": {
