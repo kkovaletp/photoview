@@ -6,6 +6,7 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/kkovaletp/photoview/api/log"
 )
@@ -20,6 +21,7 @@ const (
 	EnvUIPath                    EnvironmentVariable = "PHOTOVIEW_UI_PATH"
 	EnvMediaCachePath            EnvironmentVariable = "PHOTOVIEW_MEDIA_CACHE"
 	EnvFaceRecognitionModelsPath EnvironmentVariable = "PHOTOVIEW_FACE_RECOGNITION_MODELS_PATH"
+	EnvMediaProbeTimeout         EnvironmentVariable = "PHOTOVIEW_MEDIA_PROBE_TIMEOUT"
 )
 
 // Logging
@@ -102,6 +104,19 @@ func ShouldServeUI() bool {
 // and should thus print debug informations and enable other features related to developing.
 func DevelopmentMode() bool {
 	return EnvDevelopmentMode.GetBool()
+}
+
+// MediaProbeTimeout returns the media probing timeout duration.
+// Defaults to 5 seconds if PHOTOVIEW_MEDIA_PROBE_TIMEOUT is not set or invalid.
+// The value is interpreted as seconds.
+func MediaProbeTimeout() time.Duration {
+	if val := EnvMediaProbeTimeout.GetValue(); val != "" {
+		if seconds, err := strconv.Atoi(val); err == nil && seconds > 0 {
+			return time.Duration(seconds) * time.Second
+		}
+		log.Warn(nil, "Invalid PHOTOVIEW_MEDIA_PROBE_TIMEOUT value, using default 5s", "value", val)
+	}
+	return 5 * time.Second
 }
 
 // UIPath returns the value from where the static UI files are located if SERVE_UI=1
