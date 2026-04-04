@@ -64,15 +64,17 @@ func (r *MarkReader) Read(p []byte) (int, error) {
 		r.pending -= r.start
 		r.start = 0
 
-		// fill buffer
-		n, err := io.ReadAtLeast(r.upstream, r.buf[r.end:], len(r.mark))
-		r.end += n
-		if err == io.EOF || err == io.ErrUnexpectedEOF {
-			r.upstreamEOF = true
-			err = nil
-		}
-		if err != nil {
-			return 0, err
+		if !r.hasMark {
+			// fill buffer
+			n, err := io.ReadAtLeast(r.upstream, r.buf[r.end:], len(r.mark))
+			r.end += n
+			if err == io.EOF || err == io.ErrUnexpectedEOF {
+				r.upstreamEOF = true
+				err = nil
+			}
+			if err != nil {
+				return 0, err
+			}
 		}
 
 		r.checkMarkInPending()
