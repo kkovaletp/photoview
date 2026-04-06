@@ -183,6 +183,7 @@ const MergeFaceGroupsModal = ({
 
   const closeModal = () => {
     setState(MergeFaceGroupsModalState.Closed)
+    setInlineError(undefined)
   }
 
   const isOpen: boolean = state !== MergeFaceGroupsModalState.Closed
@@ -190,7 +191,7 @@ const MergeFaceGroupsModal = ({
   const cancelAction: ModalAction = {
     key: 'cancel',
     label: t('general.action.cancel', 'Cancel'),
-    onClick: () => setState(MergeFaceGroupsModalState.Closed),
+    onClick: closeModal,
   }
 
   const nextAction: ModalAction = {

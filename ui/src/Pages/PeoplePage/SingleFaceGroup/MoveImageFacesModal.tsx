@@ -74,10 +74,10 @@ const MoveImageFacesModal = ({
   >(MY_FACES_QUERY)
 
   useEffect(() => {
-    if (isNil(preselectedImageFaces)) return
+    if (!open || isNil(preselectedImageFaces) || preselectedImageFaces.length === 0) return
     setSelectedImageFaces(preselectedImageFaces)
     setImagesSelected(true)
-  }, [preselectedImageFaces])
+  }, [open, preselectedImageFaces])
 
   useEffect(() => {
     if (imagesSelected) {

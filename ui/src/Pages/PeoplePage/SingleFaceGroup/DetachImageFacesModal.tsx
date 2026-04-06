@@ -109,6 +109,11 @@ const DetachImageFacesModal = ({
 
   const imageFaces = faceGroup?.imageFaces ?? []
 
+  const closeModal = () => {
+    setOpen(false)
+    setInlineError(undefined)
+  }
+
   return (
     <Modal
       title={t(
@@ -123,7 +128,7 @@ const DetachImageFacesModal = ({
         {
           key: 'cancel',
           label: t('general.action.cancel', 'Cancel'),
-          onClick: () => setOpen(false),
+          onClick: closeModal,
         },
         {
           key: 'detach',
@@ -135,7 +140,7 @@ const DetachImageFacesModal = ({
           onClick: () => detachImageFacesAction(),
         },
       ]}
-      onClose={() => setOpen(false)}
+      onClose={closeModal}
       open={open}
     >
       {(inlineError || detachError?.message) && (
