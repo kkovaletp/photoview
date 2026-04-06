@@ -184,6 +184,8 @@ const MergeFaceGroupsModal = ({
   const closeModal = () => {
     setState(MergeFaceGroupsModalState.Closed)
     setInlineError(undefined)
+    setSelectedDestinationFaceGroup(null)
+    setSelectedFaceGroups(new Set())
   }
 
   const isOpen: boolean = state !== MergeFaceGroupsModalState.Closed

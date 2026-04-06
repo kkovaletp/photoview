@@ -82,7 +82,7 @@ const DetachImageFacesModal = ({
 
   const detachImageFacesAction = () => {
     detachImageFaces(selectedImageFaces).then(({ data }) => {
-      if (!data) throw new Error('Expected data not to be null')
+      if (!data) return
       setInlineError(undefined)
       setOpen(false)
       navigate(`/people/${data.detachImageFaces.id}`)
@@ -102,6 +102,7 @@ const DetachImageFacesModal = ({
   useEffect(() => {
     if (!open) {
       setSelectedImageFaces([])
+      setInlineError(undefined)
     }
   }, [open])
 
