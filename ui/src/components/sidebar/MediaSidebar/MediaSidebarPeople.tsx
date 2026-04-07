@@ -66,6 +66,7 @@ const PersonMoreMenu = ({
     MergeFaceGroupsModalState.Closed
   )
   const [moveModalOpen, setMoveModalOpen] = useState(false)
+  const [inlineError, setInlineError] = useState<string | null>(null)
 
   const refetchQueries = [
     {
@@ -77,7 +78,7 @@ const PersonMoreMenu = ({
   ]
 
   const navigate = useNavigate()
-  const { detachImageFaces } = useDetachImageFaces()
+  const { detachImageFaces, error: detachError } = useDetachImageFaces()
 
   const modals = (
     <>
@@ -106,14 +107,24 @@ const PersonMoreMenu = ({
       )
     )
       return
+    setInlineError(null)
     detachImageFaces([face]).then(({ data }) => {
       if (!data) return
       navigate(`/people/${data.detachImageFaces.id}`)
     }).catch((e: unknown) => {
       console.error('Failed to detach image face', e)
-      throw new Error('Failed to detach image face', e as Error)
+      setInlineError(
+        e instanceof Error
+          ? e.message
+          : t(
+            'people_page.modal.detach_image_faces.error.network',
+            'Network error while detaching images'
+          )
+      )
     })
   }
+
+  const displayedError = inlineError ?? detachError?.message ?? null
 
   return (
     <>
@@ -153,6 +164,14 @@ const PersonMoreMenu = ({
           </ArrowPopoverPanel>
         </MenuItems>
       </Menu>
+      {displayedError && (
+        <div
+          role="alert"
+          className="text-red-500 text-xs mt-1 max-w-30 whitespace-normal wrap-break-word"
+        >
+          {displayedError}
+        </div>
+      )}
       {modals}
     </>
   )
