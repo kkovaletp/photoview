@@ -1,5 +1,5 @@
 import { Dispatch, useEffect } from 'react'
-import { MediaGalleryFieldsFragment } from './__generated__/MediaGallery'
+import { MediaGalleryFieldsFragment } from './__generated__/fragments'
 
 export interface MediaGalleryState {
   presenting: boolean

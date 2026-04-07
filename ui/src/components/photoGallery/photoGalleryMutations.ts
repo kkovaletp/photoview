@@ -1,4 +1,4 @@
-import { MediaGalleryFieldsFragment } from './__generated__/MediaGallery'
+import { MediaGalleryFieldsFragment } from './__generated__/fragments'
 import { gql, MutationFunction, useMutation } from '@apollo/client'
 import {
   MarkMediaFavoriteMutation,

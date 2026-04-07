@@ -3,7 +3,7 @@ import styled, { createGlobalStyle } from 'styled-components'
 import PresentNavigationOverlay from './PresentNavigationOverlay'
 import PresentMedia from './PresentMedia'
 import { closePresentModeAction, GalleryAction } from '../mediaGalleryReducer'
-import { MediaGalleryFieldsFragment } from '../__generated__/MediaGallery'
+import { MediaGalleryFieldsFragment } from '../__generated__/fragments'
 
 const StyledContainer = styled.div`
   position: fixed;

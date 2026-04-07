@@ -77,6 +77,10 @@ const PersonMoreMenu = ({
   ]
 
   const navigate = useNavigate()
+  //TODO: how to consistently fix the following contract mismatch:
+  // ui/src/Pages/PeoplePage/SingleFaceGroup/DetachImageFacesModal.tsx: Line 25 and Line 51 change useDetachImageFaces from “callable return + options arg” to “object return + no args”.
+  // But ui/src/components/sidebar/MediaSidebar/MediaSidebarPeople.tsx (Line 80-82 and Line 101-115 in provided context) still uses the old contract, and ui/src/components/sidebar/MediaSidebar/MediaSidebarPeople.test.tsx (Line 87-94) mocks the old shape. This creates a blocker for the sidebar detach flow.
+  // Please migrate those consumers in the same PR to the new { detachImageFaces, error } API.
   const detachImageFaceMutation = useDetachImageFaces({
     refetchQueries,
   })
@@ -108,6 +112,10 @@ const PersonMoreMenu = ({
       )
     )
       return
+    //TODO: how to consistently fix the following contract mismatch:
+    // ui/src/Pages/PeoplePage/SingleFaceGroup/DetachImageFacesModal.tsx: Line 25 and Line 51 change useDetachImageFaces from “callable return + options arg” to “object return + no args”.
+    // But ui/src/components/sidebar/MediaSidebar/MediaSidebarPeople.tsx (Line 80-82 and Line 101-115 in provided context) still uses the old contract, and ui/src/components/sidebar/MediaSidebar/MediaSidebarPeople.test.tsx (Line 87-94) mocks the old shape. This creates a blocker for the sidebar detach flow.
+    // Please migrate those consumers in the same PR to the new { detachImageFaces, error } API.
     detachImageFaceMutation([face]).then(({ data }) => {
       if (isNil(data)) throw new Error('Expected data not to be null')
       navigate(`/people/${data.detachImageFaces.id}`)

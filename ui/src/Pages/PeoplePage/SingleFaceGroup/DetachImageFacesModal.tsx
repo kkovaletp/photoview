@@ -81,6 +81,7 @@ const DetachImageFacesModal = ({
   const { detachImageFaces, error: detachError } = useDetachImageFaces()
 
   const detachImageFacesAction = () => {
+    setInlineError(undefined)
     detachImageFaces(selectedImageFaces).then(({ data }) => {
       if (!data) return
       setInlineError(undefined)

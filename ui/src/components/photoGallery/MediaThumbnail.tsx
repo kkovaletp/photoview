@@ -3,7 +3,7 @@ import styled from 'styled-components'
 import { ProtectedImage } from './ProtectedMedia'
 import { MediaType } from '../../__generated__/globalTypes'
 import VideoThumbnailIconSVG from './icons/videoThumbnailIcon.svg?react'
-import { MediaGalleryFieldsFragment } from './__generated__/MediaGallery'
+import { MediaGalleryFieldsFragment } from './__generated__/fragments'
 
 const MediaContainer = styled.div`
   grow: 1;

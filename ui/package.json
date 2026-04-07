@@ -19,7 +19,7 @@
     "format:check": "prettier --check .",
     "test": "vitest",
     "test:ci": "CI=true vitest --run --coverage",
-    "genSchemaTypes": "graphql-codegen --config codegen.ts && prettier --write \"src/**/__generated__/*.ts\"",
+    "genSchemaTypes": "find src -type f -path '*/__generated__/*.ts' -delete && graphql-codegen --config codegen.ts && prettier --write \"src/**/__generated__/*.ts\"",
     "extractTranslations": "i18next-cli extract; i18next-cli types",
     "extractTranslations:ci": "i18next-cli extract --ci --quiet",
     "lintTranslations": "i18next-cli lint"

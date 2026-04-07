@@ -2,7 +2,7 @@ import styled from 'styled-components'
 import { MediaType } from '../../../__generated__/globalTypes'
 import { exhaustiveCheck } from '../../../helpers/utils'
 import { ProtectedImage, ProtectedVideo } from '../ProtectedMedia'
-import { MediaGalleryFieldsFragment } from '../__generated__/MediaGallery'
+import { MediaGalleryFieldsFragment } from '../__generated__/fragments'
 
 const StyledPhoto = styled(ProtectedImage)`
   position: absolute;

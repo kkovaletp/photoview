@@ -1,7 +1,7 @@
 import { render, screen } from '@testing-library/react'
 
 import { MediaType } from '../../../__generated__/globalTypes'
-import { MediaGalleryFieldsFragment } from '../__generated__/MediaGallery'
+import { MediaGalleryFieldsFragment } from '../__generated__/fragments'
 import PresentMedia from './PresentMedia'
 
 test('render present image', () => {
