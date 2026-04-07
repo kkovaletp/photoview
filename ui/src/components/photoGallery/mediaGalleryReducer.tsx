@@ -1,4 +1,4 @@
-import { Dispatch, useEffect } from 'react'
+import { Dispatch, useEffect, useRef } from 'react'
 import { MediaGalleryFieldsFragment } from './__generated__/fragments'
 
 export interface MediaGalleryState {
@@ -80,10 +80,16 @@ export const useUrlPresentModeSetup = ({
   dispatchMedia: Dispatch<GalleryAction>
   openPresentMode: (event: MediaGalleryPopStateEvent) => void
 }) => {
+  const openPresentModeRef = useRef(openPresentMode)
+
+  useEffect(() => {
+    openPresentModeRef.current = openPresentMode
+  }, [openPresentMode])
+
   useEffect(() => {
     const urlChangeListener = (event: MediaGalleryPopStateEvent) => {
       if (event.state.presenting === true) {
-        openPresentMode(event)
+        openPresentModeRef.current(event)
       } else {
         dispatchMedia({ type: 'closePresentMode' })
       }
@@ -96,7 +102,7 @@ export const useUrlPresentModeSetup = ({
     return () => {
       globalThis.removeEventListener('popstate', urlChangeListener)
     }
-  }, [dispatchMedia, openPresentMode])
+  }, [dispatchMedia])
 }
 
 export const openPresentModeAction = ({

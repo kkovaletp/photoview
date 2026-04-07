@@ -84,7 +84,6 @@ const DetachImageFacesModal = ({
     setInlineError(undefined)
     detachImageFaces(selectedImageFaces).then(({ data }) => {
       if (!data) return
-      setInlineError(undefined)
       setOpen(false)
       navigate(`/people/${data.detachImageFaces.id}`)
     }).catch((e: unknown) => {
