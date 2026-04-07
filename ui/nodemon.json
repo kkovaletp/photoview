@@ -1,9 +1,13 @@
 {
-  "watch": ["./**"],
+  "watch": [
+    "./**"
+  ],
   "exec": "npm start",
   "ext": "ts,json,tsx,js,html,css",
-  "ignore": ["./dist/"],
+  "ignore": [
+    "./dist/"
+  ],
   "execMap": {
-    "ts": "ts-node-esm"
+    "ts": "tsx"
   }
 }
