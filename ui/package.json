@@ -95,8 +95,8 @@
     "jsdom": "^26.1.0",
     "lint-staged": "^15.5.2",
     "nodemon": "^3.1.14",
-    "ts-node": "^10.9.2",
-    "typescript": "^5.9.3",
+    "tsx": "^4.21.0",
+    "typescript": "^6.0.2",
     "vitest": "^3.2.4"
   },
   "overrides": {
