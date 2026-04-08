@@ -19,9 +19,8 @@ export function placesReducer(
 ): PlacesState {
   if (action.type === 'replacePresentMarker') {
     if (
-      state.presentMarker &&
-      state.presentMarker.cluster === action.marker?.cluster &&
-      state.presentMarker.id === action.marker.id
+      state.presentMarker?.cluster === action.marker?.cluster &&
+      state.presentMarker?.id === action.marker?.id
     ) {
       return {
         ...state,
