@@ -179,6 +179,11 @@ function makeDetachNetworkErrorMock(faceIDs: string[]) {
     }
 }
 
+const myFacesRefetchMock = {
+    request: { query: MY_FACES_QUERY },
+    result: { data: { myFaceGroups: [] } },
+}
+
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 const defaultSetOpen = vi.fn()
@@ -300,7 +305,7 @@ describe('DetachImageFacesModal', () => {
 
     test('shows GraphQL error from hook (errorPolicy: all) and stays open', async () => {
         const [f1] = faceGroup.imageFaces
-        const mocks = [makeDetachGraphQLErrorMock([f1.id], 'Save failed')]
+        const mocks = [myFacesRefetchMock, makeDetachGraphQLErrorMock([f1.id], 'Save failed')]
         renderModal({}, mocks)
 
         fireEvent.click(screen.getByTestId(`image-face-row-${f1.id}`))

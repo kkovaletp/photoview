@@ -60,7 +60,7 @@ const MergeFaceGroupsModal = ({
 
   const navigate = useNavigate()
   const { data } = useQuery<MyFacesQuery, MyFacesQueryVariables>(MY_FACES_QUERY)
-  const [combineFacesMutation, { error: combineError }] = useMutation<
+  const [combineFacesMutation, { error: combineError, reset: resetCombine }] = useMutation<
     CombineFacesMutation,
     CombineFacesMutationVariables
   >(COMBINE_FACES_MUTATION, {
@@ -184,6 +184,7 @@ const MergeFaceGroupsModal = ({
   const closeModal = () => {
     setState(MergeFaceGroupsModalState.Closed)
     setInlineError(undefined)
+    resetCombine?.()
     setSelectedDestinationFaceGroup(null)
     setSelectedFaceGroups(new Set())
   }
