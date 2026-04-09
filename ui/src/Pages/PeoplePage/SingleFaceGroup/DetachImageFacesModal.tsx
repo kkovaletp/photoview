@@ -23,7 +23,7 @@ const DETACH_IMAGE_FACES_MUTATION = gql`
 `
 
 export const useDetachImageFaces = () => {
-  const [detachImageFacesMutation, { error: detachError }] = useMutation<
+  const [detachImageFacesMutation, { error: detachError, reset: resetDetach }] = useMutation<
     DetachImageFacesMutation,
     DetachImageFacesMutationVariables
   >(DETACH_IMAGE_FACES_MUTATION, {
@@ -48,7 +48,7 @@ export const useDetachImageFaces = () => {
     return result
   }
 
-  return { detachImageFaces, error: detachError }
+  return { detachImageFaces, error: detachError, reset: resetDetach }
 }
 
 type DetachImageFacesModalProps = {
@@ -78,7 +78,7 @@ const DetachImageFacesModal = ({
   >([])
   const navigate = useNavigate()
 
-  const { detachImageFaces, error: detachError } = useDetachImageFaces()
+  const { detachImageFaces, error: detachError, reset: resetDetach } = useDetachImageFaces()
 
   const detachImageFacesAction = () => {
     setInlineError(undefined)
@@ -103,8 +103,9 @@ const DetachImageFacesModal = ({
     if (!open) {
       setSelectedImageFaces([])
       setInlineError(undefined)
+      resetDetach?.()
     }
-  }, [open])
+  }, [open, resetDetach])
 
   if (!open) return null
 
@@ -113,6 +114,7 @@ const DetachImageFacesModal = ({
   const closeModal = () => {
     setOpen(false)
     setInlineError(undefined)
+    resetDetach?.()
   }
 
   return (
