@@ -59,12 +59,15 @@ const MergeFaceGroupsModal = ({
   const { t } = useTranslation()
 
   const navigate = useNavigate()
-  const { data } = useQuery<MyFacesQuery, MyFacesQueryVariables>(MY_FACES_QUERY)
+  const { data } = useQuery<MyFacesQuery, MyFacesQueryVariables>(MY_FACES_QUERY, {
+    skip: state === MergeFaceGroupsModalState.Closed,
+  })
   const [combineFacesMutation, { error: combineError, reset: resetCombine }] = useMutation<
     CombineFacesMutation,
     CombineFacesMutationVariables
   >(COMBINE_FACES_MUTATION, {
-    refetchQueries: refetchQueries,
+    refetchQueries: ({ data }) =>
+      data?.combineFaceGroups ? refetchQueries : [],
     errorPolicy: 'all',
   })
 
@@ -161,6 +164,9 @@ const MergeFaceGroupsModal = ({
     const sourceGroupIDs: string[] = [...selectedFaceGroups].filter(fc => fc !== null).map(fc => fc.id)
 
     if (sourceGroupIDs.length === 0) return
+
+    setInlineError(undefined)
+    resetCombine?.()
 
     combineFacesMutation({
       variables: {
