@@ -160,8 +160,7 @@ const MergeFaceGroupsModal = ({
 
     const sourceGroupIDs: string[] = [...selectedFaceGroups].filter(fc => fc !== null).map(fc => fc.id)
 
-    if (sourceGroupIDs.length === 0)
-      throw new Error('No selected source face groups')
+    if (sourceGroupIDs.length === 0) return
 
     combineFacesMutation({
       variables: {
@@ -209,6 +208,7 @@ const MergeFaceGroupsModal = ({
     label: t('people_page.modal.action.merge', 'Merge'),
     onClick: () => mergeFaceGroups(),
     variant: 'positive',
+    disabled: selectedFaceGroups.size === 0,
   }
 
   const modalTitle: string = t(

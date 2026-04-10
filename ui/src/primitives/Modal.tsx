@@ -7,6 +7,7 @@ export type ModalAction = {
   label: string
   variant?: 'negative' | 'positive' | 'default'
   onClick(event: MouseEvent<HTMLButtonElement>): void
+  disabled?: boolean
 }
 
 export type ModalProps = {
@@ -32,6 +33,7 @@ const Modal = ({
       onClick={e => x.onClick(e)}
       variant={x.variant}
       background="white"
+      disabled={x.disabled}
     >
       {x.label}
     </Button>
