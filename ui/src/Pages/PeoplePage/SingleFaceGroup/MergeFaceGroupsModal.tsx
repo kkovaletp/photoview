@@ -183,8 +183,9 @@ const MergeFaceGroupsModal = ({
       navigate(`/people/${selectedDestinationFaceGroup.id}`)
     }).catch((e: unknown) => {
       const message =
-        (e as Error)?.message ??
-        t('people_page.modal.merge_face_groups.error.network', 'Network error while merging faces')
+        e instanceof Error && e.message.trim().length > 0
+          ? e.message
+          : t('people_page.modal.merge_face_groups.error.network', 'Network error while merging faces')
       setInlineError(message)
     }).finally(() => {
       setIsMerging(false)
@@ -283,10 +284,14 @@ const MergeFaceGroupsModal = ({
       )}
       <SelectFaceGroupTable
         title={modalContent.searchTitle}
-        frozen={state === MergeFaceGroupsModalState.SelectDestination && preselectedDestinationFaceGroup !== undefined}
+        frozen={
+          isMerging ||
+          (state === MergeFaceGroupsModalState.SelectDestination &&
+            preselectedDestinationFaceGroup !== undefined)
+        }
         faceGroups={filteredFaceGroups}
         selectedFaceGroups={selectedFaceGroups}
-        toggleSelectedFaceGroup={(face) => { if (face !== null) handleFaceGroupToggled(face) }}
+        toggleSelectedFaceGroup={(face) => { if (!isMerging && face !== null) handleFaceGroupToggled(face) }}
       />
     </Modal>
   )

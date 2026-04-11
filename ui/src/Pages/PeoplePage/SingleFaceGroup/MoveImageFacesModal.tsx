@@ -61,7 +61,7 @@ const MoveImageFacesModal = ({
   const [imagesSelected, setImagesSelected] = useState(false)
   const navigate = useNavigate()
 
-  const [moveImageFacesMutation, { error: moveError }] = useMutation<
+  const [moveImageFacesMutation, { error: moveError, reset: resetMoveImageFaces }] = useMutation<
     MoveImageFacesMutation,
     MoveImageFacesMutationVariables
   >(MOVE_IMAGE_FACES_MUTATION, {
@@ -81,10 +81,10 @@ const MoveImageFacesModal = ({
   }, [open, preselectedImageFaces])
 
   useEffect(() => {
-    if (imagesSelected) {
+    if (open && imagesSelected) {
       loadFaceGroups()
     }
-  }, [imagesSelected, loadFaceGroups])
+  }, [open, imagesSelected, loadFaceGroups])
 
   useEffect(() => {
     if (!open) {
@@ -93,8 +93,9 @@ const MoveImageFacesModal = ({
       setSelectedFaceGroup(null)
       setErrMessage(null)
       setIsMoving(false)
+      resetMoveImageFaces()
     }
-  }, [open])
+  }, [open, resetMoveImageFaces])
 
   if (!open) return null
 
@@ -105,6 +106,7 @@ const MoveImageFacesModal = ({
       throw new Error('Expected selectedFaceGroup not to be null')
     }
     if (isMoving) return
+    setErrMessage(null)
     setIsMoving(true)
 
     moveImageFacesMutation({
