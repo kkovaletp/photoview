@@ -179,6 +179,25 @@ function makeDetachNetworkErrorMock(faceIDs: string[]) {
     }
 }
 
+function makeDetachDataAndErrorsMock(faceIDs: string[], newGroupId: string, message = 'Save failed') {
+    return {
+        request: {
+            query: DETACH_IMAGE_FACES_MUTATION,
+            variables: { faceIDs },
+        },
+        result: {
+            data: {
+                detachImageFaces: {
+                    __typename: 'FaceGroup',
+                    id: newGroupId,
+                    label: null,
+                },
+            },
+            errors: [{ message }],
+        },
+    }
+}
+
 const myFacesRefetchMock = {
     request: { query: MY_FACES_QUERY },
     result: { data: { myFaceGroups: [] } },
@@ -310,6 +329,24 @@ describe('DetachImageFacesModal', () => {
     test('shows GraphQL error from hook (errorPolicy: all) and stays open', async () => {
         const [f1] = faceGroup.imageFaces
         const mocks = [myFacesRefetchMock, makeDetachGraphQLErrorMock([f1.id], 'Save failed')]
+        renderModal({}, mocks)
+
+        fireEvent.click(screen.getByTestId(`image-face-row-${f1.id}`))
+        const detachBtn = screen.getByRole('button', { name: /Detach image faces/i })
+        expect(detachBtn).not.toBeDisabled()
+        fireEvent.click(detachBtn)
+
+        await waitFor(() => {
+            expect(defaultSetOpen).not.toHaveBeenCalled()
+            expect(mockNavigate).not.toHaveBeenCalled()
+            expect(screen.getByRole('alert')).toHaveTextContent(/Save failed/i)
+        })
+    })
+
+    test('stays open when detach resolves with data AND GraphQL errors', async () => {
+        const [f1] = faceGroup.imageFaces
+        // Include a MY_FACES_QUERY mock to satisfy refetchQueries even when GraphQL errors exist
+        const mocks = [myFacesRefetchMock, makeDetachDataAndErrorsMock([f1.id], 'new-group-3', 'Save failed')]
         renderModal({}, mocks)
 
         fireEvent.click(screen.getByTestId(`image-face-row-${f1.id}`))

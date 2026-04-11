@@ -176,8 +176,8 @@ const MergeFaceGroupsModal = ({
         srcIDs: sourceGroupIDs,
         destID: selectedDestinationFaceGroup.id,
       },
-    }).then(({ data }) => {
-      if (!data) return
+    }).then(({ data, errors }) => {
+      if (!data?.combineFaceGroups || (errors?.length ?? 0) > 0) return
       setInlineError(undefined)
       setState(MergeFaceGroupsModalState.Closed)
       navigate(`/people/${selectedDestinationFaceGroup.id}`)

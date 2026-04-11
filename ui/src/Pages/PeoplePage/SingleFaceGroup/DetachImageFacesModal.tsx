@@ -85,14 +85,15 @@ const DetachImageFacesModal = ({
     if (isDetaching) return
     setIsDetaching(true)
     setInlineError(undefined)
-    detachImageFaces(selectedImageFaces).then(({ data }) => {
-      if (!data) return
+    detachImageFaces(selectedImageFaces).then(({ data, errors }) => {
+      if (!data?.detachImageFaces || (errors?.length ?? 0) > 0) return
       setOpen(false)
       navigate(`/people/${data.detachImageFaces.id}`)
     }).catch((e: unknown) => {
       const message =
-        (e as Error)?.message ??
-        t('people_page.modal.detach_image_faces.error.network', 'Network error while detaching images')
+        e instanceof Error && e.message.trim().length > 0
+          ? e.message
+          : t('people_page.modal.detach_image_faces.error.network', 'Network error while detaching images')
       setInlineError(message)
     }).finally(() => {
       setIsDetaching(false)

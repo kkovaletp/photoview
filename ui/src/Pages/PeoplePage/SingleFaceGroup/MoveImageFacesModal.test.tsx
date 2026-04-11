@@ -496,6 +496,43 @@ describe('MoveImageFacesModal', () => {
                 expect(mockNavigate).toHaveBeenCalledWith(`/people/${destGroup2.id}`)
             })
         })
+
+        test('stays open when mutation resolves with data AND GraphQL errors', async () => {
+            const faceId = sourceFaceGroup.imageFaces[0].id
+            const dataAndErrorsMock = {
+                request: {
+                    query: MOVE_IMAGE_FACES_MUTATION,
+                    variables: { faceIDs: [faceId], destFaceGroupID: destGroup1.id },
+                },
+                result: {
+                    data: {
+                        moveImageFaces: {
+                            __typename: 'FaceGroup',
+                            id: destGroup1.id,
+                            imageFaces: [{ __typename: 'ImageFace', id: faceId }],
+                        },
+                    },
+                    errors: [new GraphQLError('GraphQL error')],
+                },
+            }
+
+            renderModal({}, [makeMyFacesMock(), dataAndErrorsMock])
+
+            // Step 1 → select image and Next
+            fireEvent.click(screen.getByTestId(`image-face-row-${faceId}`))
+            fireEvent.click(screen.getByRole('button', { name: /Next/i }))
+            await waitFor(() => expect(screen.getByTestId('select-face-group-table')).toBeInTheDocument())
+
+            // Step 2 → select destination and Move
+            fireEvent.click(screen.getByTestId(`face-group-row-${destGroup1.id}`))
+            fireEvent.click(screen.getByRole('button', { name: /Move image faces/i }))
+
+            await waitFor(() => {
+                expect(defaultSetOpen).not.toHaveBeenCalled()
+                expect(mockNavigate).not.toHaveBeenCalled()
+                expect(screen.getByRole('alert')).toHaveTextContent(/GraphQL error/i)
+            })
+        })
     })
 
     // ── preselectedImageFaces ──────────────────────────────────────────────────

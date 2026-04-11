@@ -137,6 +137,25 @@ function getCombineGraphQLErrorMock(
     }
 }
 
+function getCombineDataAndErrorsMock(
+    destinationID: string,
+    sourceIDs: string[],
+    message = 'Merge not allowed'
+) {
+    return {
+        request: {
+            query: COMBINE_FACES_MUTATION,
+            variables: { destID: destinationID, srcIDs: sourceIDs },
+        },
+        result: {
+            data: {
+                combineFaceGroups: { __typename: 'FaceGroup' as const, id: destinationID },
+            },
+            errors: [{ message }],
+        },
+    }
+}
+
 // ─── Helpers (top-level to avoid nested-function warnings) ────────────────────
 
 const defaultSetState = vi.fn()
@@ -438,6 +457,18 @@ describe('MergeFaceGroupsModal', () => {
             const { setState } = await setupAndTriggerMerge('0', ['1'], mocks)
             await waitFor(() => {
                 expect(screen.getByRole('alert')).toBeInTheDocument()
+                expect(setState).not.toHaveBeenCalledWith(MergeFaceGroupsModalState.Closed)
+                expect(mockNavigate).not.toHaveBeenCalled()
+            })
+        })
+
+        test('keeps modal open when mutation resolves with data AND GraphQL errors', async () => {
+            const mocks = [myFacesMock, getCombineDataAndErrorsMock('0', ['1'], 'Merge not allowed')]
+            const { setState } = await setupAndTriggerMerge('0', ['1'], mocks)
+
+            await waitFor(() => {
+                expect(screen.getByRole('alert')).toBeInTheDocument()
+                expect(screen.getByRole('alert')).toHaveTextContent(/Merge not allowed/i)
                 expect(setState).not.toHaveBeenCalledWith(MergeFaceGroupsModalState.Closed)
                 expect(mockNavigate).not.toHaveBeenCalled()
             })

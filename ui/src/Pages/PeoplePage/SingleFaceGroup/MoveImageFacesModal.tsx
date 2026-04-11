@@ -114,17 +114,15 @@ const MoveImageFacesModal = ({
         faceIDs,
         destFaceGroupID: selectedFaceGroup.id,
       },
-    }).then(({ data }) => {
-      // GraphQL errors with errorPolicy:'all' will not reject; they appear in moveError.
-      // Only proceed if we got data back and no mutation-level errors.
-      if (!data) return
+    }).then(({ data, errors }) => {
+      if (!data?.moveImageFaces || (errors?.length ?? 0) > 0) return
       setOpen(false)
       navigate(`/people/${selectedFaceGroup.id}`)
     }).catch((e) => {
-      // Network errors always reject; report to the user via a global negative toast.
       setErrMessage(
-        e?.message ??
-        t('people_page.modal.move_image_faces.error.network', 'Network error while moving faces')
+        e instanceof Error && e.message.trim().length > 0
+          ? e.message
+          : t('people_page.modal.move_image_faces.error.network', 'Network error while moving faces')
       )
     }).finally(() => {
       setIsMoving(false)
