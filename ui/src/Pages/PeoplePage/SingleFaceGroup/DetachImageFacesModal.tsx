@@ -69,6 +69,7 @@ const DetachImageFacesModal = ({
 }: DetachImageFacesModalProps) => {
   const { t } = useTranslation()
   const [inlineError, setInlineError] = useState<string | undefined>(undefined)
+  const [isDetaching, setIsDetaching] = useState(false)
 
   const [selectedImageFaces, setSelectedImageFaces] = useState<
     Array<
@@ -81,6 +82,8 @@ const DetachImageFacesModal = ({
   const { detachImageFaces, error: detachError, reset: resetDetach } = useDetachImageFaces()
 
   const detachImageFacesAction = () => {
+    if (isDetaching) return
+    setIsDetaching(true)
     setInlineError(undefined)
     detachImageFaces(selectedImageFaces).then(({ data }) => {
       if (!data) return
@@ -91,13 +94,19 @@ const DetachImageFacesModal = ({
         (e as Error)?.message ??
         t('people_page.modal.detach_image_faces.error.network', 'Network error while detaching images')
       setInlineError(message)
+    }).finally(() => {
+      setIsDetaching(false)
     })
   }
 
   useEffect(() => {
-    if (isNil(selectedImageFacesProp)) return
+    if (!open) return
+    if (isNil(selectedImageFacesProp)) {
+      setSelectedImageFaces([])
+      return
+    }
     setSelectedImageFaces(selectedImageFacesProp)
-  }, [selectedImageFacesProp])
+  }, [open, selectedImageFacesProp])
 
   useEffect(() => {
     if (!open) {
@@ -112,6 +121,7 @@ const DetachImageFacesModal = ({
   const imageFaces = faceGroup?.imageFaces ?? []
 
   const closeModal = () => {
+    if (isDetaching) return
     setOpen(false)
     setInlineError(undefined)
     resetDetach?.()
@@ -132,6 +142,7 @@ const DetachImageFacesModal = ({
           key: 'cancel',
           label: t('general.action.cancel', 'Cancel'),
           onClick: closeModal,
+          disabled: isDetaching,
         },
         {
           key: 'detach',
@@ -140,8 +151,8 @@ const DetachImageFacesModal = ({
             'Detach image faces'
           ),
           variant: 'positive',
-          onClick: () => detachImageFacesAction(),
-          disabled: selectedImageFaces.length === 0,
+          onClick: detachImageFacesAction,
+          disabled: selectedImageFaces.length === 0 || isDetaching,
         },
       ]}
       onClose={closeModal}

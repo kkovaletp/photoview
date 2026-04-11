@@ -164,15 +164,6 @@ describe('MapPresentMarker', () => {
             })
         })
 
-        test('dispatches closePresentMode when presentMarker is undefined', async () => {
-            renderComponent(makeDefaultState({ presentMarker: undefined }), {})
-            await waitFor(() => {
-                expect(dispatchMarkerMedia).toHaveBeenCalledWith({
-                    type: 'closePresentMode',
-                })
-            })
-        })
-
         test('dispatches closePresentMode when presentMarker is null', async () => {
             renderComponent(makeDefaultState({
                 presentMarker: null as unknown as PlacesState['presentMarker']

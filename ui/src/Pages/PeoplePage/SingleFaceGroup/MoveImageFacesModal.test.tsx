@@ -2,6 +2,7 @@ import { vi, describe, test, beforeAll, beforeEach, expect } from 'vitest'
 import { render, fireEvent, screen, waitFor } from '@testing-library/react'
 import { MockedProvider } from '@apollo/client/testing'
 import { gql } from '@apollo/client'
+import { GraphQLError } from 'graphql'
 import MoveImageFacesModal from './MoveImageFacesModal'
 import { MY_FACES_QUERY } from '../PeoplePage'
 import { SingleFaceGroupQuery } from './__generated__/SingleFaceGroup'
@@ -37,7 +38,10 @@ vi.mock('react-i18next', () => ({
     }),
 }))
 
-const mockNavigate = vi.fn()
+const { mockNavigate } = vi.hoisted(() => ({
+    mockNavigate: vi.fn(),
+}))
+
 vi.mock('react-router-dom', async () => {
     const actual: object = await vi.importActual('react-router-dom')
     return { ...actual, useNavigate: () => mockNavigate }
@@ -322,6 +326,37 @@ describe('MoveImageFacesModal', () => {
                 expect(screen.getByRole('alert')).toHaveTextContent(/Network error/i)
             })
         })
+
+        test('modal stays open and shows GraphQL errors returned by the mutation', async () => {
+            const faceId = sourceFaceGroup.imageFaces[0].id
+            const errorMock = {
+                request: {
+                    query: MOVE_IMAGE_FACES_MUTATION,
+                    variables: { faceIDs: [faceId], destFaceGroupID: destGroup1.id },
+                },
+                result: {
+                    errors: [new GraphQLError('GraphQL error')],
+                },
+            }
+
+            renderModal({}, [makeMyFacesMock(), errorMock])
+
+            fireEvent.click(screen.getByTestId(`image-face-row-${faceId}`))
+            fireEvent.click(screen.getByRole('button', { name: /Next/i }))
+
+            await waitFor(() =>
+                expect(screen.getByTestId('select-face-group-table')).toBeInTheDocument()
+            )
+
+            fireEvent.click(screen.getByTestId(`face-group-row-${destGroup1.id}`))
+            fireEvent.click(screen.getByRole('button', { name: /Move image faces/i }))
+
+            await waitFor(() => {
+                expect(defaultSetOpen).not.toHaveBeenCalled()
+                expect(mockNavigate).not.toHaveBeenCalled()
+                expect(screen.getByRole('alert')).toHaveTextContent(/GraphQL error/i)
+            })
+        })
     })
 
     // ── Step 1: image selection ────────────────────────────────────────────────
@@ -380,7 +415,7 @@ describe('MoveImageFacesModal', () => {
         })
 
         test('shows a loading indicator while face group query is in flight', async () => {
-            renderModal({}, [makeMyFacesMock()])
+            renderModal({}, [{ ...makeMyFacesMock(), delay: 30 }])
             fireEvent.click(
                 screen.getByTestId(`image-face-row-${sourceFaceGroup.imageFaces[0].id}`)
             )
