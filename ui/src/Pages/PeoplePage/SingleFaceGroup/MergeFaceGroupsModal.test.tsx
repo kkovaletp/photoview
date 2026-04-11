@@ -255,9 +255,11 @@ describe('MergeFaceGroupsModal', () => {
             )
         })
 
-        test('shows Next and Cancel actions but not Merge', () => {
+        test('shows Next (disabled) and Cancel actions but not Merge', () => {
             renderModal()
-            expect(screen.getByRole('button', { name: /Next/i })).toBeInTheDocument()
+            const nextBtn = screen.getByRole('button', { name: /Next/i })
+            expect(nextBtn).toBeInTheDocument()
+            expect(nextBtn).toBeDisabled()
             expect(screen.getByRole('button', { name: /Cancel/i })).toBeInTheDocument()
             expect(screen.queryByRole('button', { name: /Merge/i })).not.toBeInTheDocument()
         })
@@ -297,8 +299,11 @@ describe('MergeFaceGroupsModal', () => {
         test('clicking Next after selecting a destination calls setState(SelectSources)', async () => {
             renderModal({}, [myFacesMock])
             await waitFor(() => screen.getByTestId('facegroup-0'))
+            const nextBtn = screen.getByRole('button', { name: /Next/i })
+            expect(nextBtn).toBeDisabled()
             fireEvent.click(screen.getByTestId('facegroup-0'))
-            fireEvent.click(screen.getByRole('button', { name: /Next/i }))
+            expect(nextBtn).not.toBeDisabled()
+            fireEvent.click(nextBtn)
             expect(defaultSetState).toHaveBeenCalledWith(MergeFaceGroupsModalState.SelectSources)
         })
     })
@@ -484,7 +489,9 @@ describe('MergeFaceGroupsModal', () => {
             await waitFor(() =>
                 expect(screen.getByTestId('facegroup-0')).toHaveAttribute('aria-pressed', 'true')
             )
-            fireEvent.click(screen.getByRole('button', { name: /Next/i }))
+            const nextBtn = screen.getByRole('button', { name: /Next/i })
+            expect(nextBtn).not.toBeDisabled()
+            fireEvent.click(nextBtn)
             expect(setState).toHaveBeenCalledWith(MergeFaceGroupsModalState.SelectSources)
         })
 

@@ -248,16 +248,13 @@ describe('DetachImageFacesModal', () => {
         expect(row).toHaveAttribute('aria-pressed', 'true')
     })
 
-    test('executes mutation (no selection → empty list), then closes and navigates on success', async () => {
-        const mocks = [makeDetachSuccessMock([], 'new-group-0'), makeMyFacesMock()]
-        renderModal({}, mocks)
-
-        fireEvent.click(screen.getByRole('button', { name: /Detach image faces/i }))
-
-        await waitFor(() => {
-            expect(defaultSetOpen).toHaveBeenCalledWith(false)
-            expect(mockNavigate).toHaveBeenCalledWith('/people/new-group-0')
-        })
+    test('disables detach action when no images are selected', () => {
+        renderModal()
+        const detachBtn = screen.getByRole('button', { name: /Detach image faces/i })
+        expect(detachBtn).toBeDisabled()
+        fireEvent.click(detachBtn) // should be ignored
+        expect(defaultSetOpen).not.toHaveBeenCalled()
+        expect(mockNavigate).not.toHaveBeenCalled()
     })
 
     test('executes mutation with selected face IDs, then closes and navigates', async () => {
@@ -265,8 +262,11 @@ describe('DetachImageFacesModal', () => {
         const mocks = [makeDetachSuccessMock([f1.id], 'new-group-1'), makeMyFacesMock()]
         renderModal({}, mocks)
 
+        const detachBtn = screen.getByRole('button', { name: /Detach image faces/i })
+        expect(detachBtn).toBeDisabled()
         fireEvent.click(screen.getByTestId(`image-face-row-${f1.id}`))
-        fireEvent.click(screen.getByRole('button', { name: /Detach image faces/i }))
+        expect(detachBtn).not.toBeDisabled()
+        fireEvent.click(detachBtn)
 
         await waitFor(() => {
             expect(defaultSetOpen).toHaveBeenCalledWith(false)
@@ -279,8 +279,10 @@ describe('DetachImageFacesModal', () => {
         const mocks = [makeDetachSuccessMock([preselected[0].id], 'new-group-2'), makeMyFacesMock()]
         renderModal({ selectedImageFaces: preselected }, mocks)
 
-        // Step table is visible but we can run detach immediately because faces are preselected
-        fireEvent.click(screen.getByRole('button', { name: /Detach image faces/i }))
+        // Button should already be enabled with preselected faces
+        const detachBtn = screen.getByRole('button', { name: /Detach image faces/i })
+        expect(detachBtn).not.toBeDisabled()
+        fireEvent.click(detachBtn)
 
         await waitFor(() => {
             expect(defaultSetOpen).toHaveBeenCalledWith(false)
@@ -294,7 +296,9 @@ describe('DetachImageFacesModal', () => {
         renderModal({}, mocks)
 
         fireEvent.click(screen.getByTestId(`image-face-row-${f1.id}`))
-        fireEvent.click(screen.getByRole('button', { name: /Detach image faces/i }))
+        const detachBtn = screen.getByRole('button', { name: /Detach image faces/i })
+        expect(detachBtn).not.toBeDisabled()
+        fireEvent.click(detachBtn)
 
         await waitFor(() => {
             expect(defaultSetOpen).not.toHaveBeenCalled()
@@ -309,7 +313,9 @@ describe('DetachImageFacesModal', () => {
         renderModal({}, mocks)
 
         fireEvent.click(screen.getByTestId(`image-face-row-${f1.id}`))
-        fireEvent.click(screen.getByRole('button', { name: /Detach image faces/i }))
+        const detachBtn = screen.getByRole('button', { name: /Detach image faces/i })
+        expect(detachBtn).not.toBeDisabled()
+        fireEvent.click(detachBtn)
 
         await waitFor(() => {
             expect(defaultSetOpen).not.toHaveBeenCalled()

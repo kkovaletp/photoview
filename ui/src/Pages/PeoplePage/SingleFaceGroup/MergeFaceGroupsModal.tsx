@@ -207,6 +207,7 @@ const MergeFaceGroupsModal = ({
     label: t('people_page.modal.action.next', 'Next'),
     onClick: () => goNext(),
     variant: 'positive',
+    disabled: isNil(selectedDestinationFaceGroup),
   }
 
   const mergeAction: ModalAction = {

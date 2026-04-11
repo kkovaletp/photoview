@@ -141,6 +141,7 @@ const DetachImageFacesModal = ({
           ),
           variant: 'positive',
           onClick: () => detachImageFacesAction(),
+          disabled: selectedImageFaces.length === 0,
         },
       ]}
       onClose={closeModal}

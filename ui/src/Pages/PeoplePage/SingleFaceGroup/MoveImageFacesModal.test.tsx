@@ -275,9 +275,11 @@ describe('MoveImageFacesModal', () => {
             )
         })
 
-        test('shows "Next" action button and "Cancel" action button in step 1', () => {
+        test('sshows "Next" action button (disabled) and "Cancel" action button in step 1', () => {
             renderModal()
-            expect(screen.getByRole('button', { name: /Next/i })).toBeInTheDocument()
+            const nextBtn = screen.getByRole('button', { name: /Next/i })
+            expect(nextBtn).toBeInTheDocument()
+            expect(nextBtn).toBeDisabled()
             expect(screen.getByRole('button', { name: /Cancel/i })).toBeInTheDocument()
             expect(
                 screen.queryByRole('button', { name: /Move image faces/i })
@@ -325,9 +327,11 @@ describe('MoveImageFacesModal', () => {
     // ── Step 1: image selection ────────────────────────────────────────────────
 
     describe('step 1 - image face selection', () => {
-        test('Next does nothing when no images are selected', () => {
+        test('Next is disabled when no images are selected', () => {
             renderModal()
-            fireEvent.click(screen.getByRole('button', { name: /Next/i }))
+            const nextBtn = screen.getByRole('button', { name: /Next/i })
+            expect(nextBtn).toBeDisabled()
+            fireEvent.click(nextBtn)
             // Still on step 1
             expect(screen.getByTestId('select-image-faces-table')).toBeInTheDocument()
             expect(screen.queryByTestId('select-face-group-table')).not.toBeInTheDocument()
@@ -357,11 +361,11 @@ describe('MoveImageFacesModal', () => {
             )
         })
 
-        test('shows "Move image faces" button and "Cancel" button in step 2', async () => {
+        test('shows "Move image faces" button (disabled) and "Cancel" button in step 2', async () => {
             await goToStep2()
-            expect(
-                screen.getByRole('button', { name: /Move image faces/i })
-            ).toBeInTheDocument()
+            const moveBtn = screen.getByRole('button', { name: /Move image faces/i })
+            expect(moveBtn).toBeInTheDocument()
+            expect(moveBtn).toBeDisabled()
             expect(screen.getByRole('button', { name: /Cancel/i })).toBeInTheDocument()
             expect(screen.queryByRole('button', { name: /Next/i })).not.toBeInTheDocument()
         })
@@ -390,9 +394,11 @@ describe('MoveImageFacesModal', () => {
             )
         })
 
-        test('Move does nothing when no destination face group is selected', async () => {
+        test('Move is disabled when no destination face group is selected', async () => {
             await goToStep2()
-            fireEvent.click(screen.getByRole('button', { name: /Move image faces/i }))
+            const moveBtn = screen.getByRole('button', { name: /Move image faces/i })
+            expect(moveBtn).toBeDisabled()
+            fireEvent.click(moveBtn)
             // Modal still open, no mutation/navigation
             expect(mockNavigate).not.toHaveBeenCalled()
             expect(defaultSetOpen).not.toHaveBeenCalled()

@@ -178,6 +178,7 @@ const MoveImageFacesModal = ({
         moveImageFaces()
       },
       variant: 'positive',
+      disabled: isNil(selectedFaceGroup),
     }
   } else {
     positiveButton = {
@@ -191,6 +192,7 @@ const MoveImageFacesModal = ({
         setImagesSelected(true)
       },
       variant: 'positive',
+      disabled: selectedImageFaces.length === 0,
     }
   }
 

@@ -164,8 +164,19 @@ describe('MapPresentMarker', () => {
             })
         })
 
-        test('dispatches closePresentMode when presentMarker is null', async () => {
+        test('dispatches closePresentMode when presentMarker is undefined', async () => {
             renderComponent(makeDefaultState({ presentMarker: undefined }), {})
+            await waitFor(() => {
+                expect(dispatchMarkerMedia).toHaveBeenCalledWith({
+                    type: 'closePresentMode',
+                })
+            })
+        })
+
+        test('dispatches closePresentMode when presentMarker is null', async () => {
+            renderComponent(makeDefaultState({
+                presentMarker: null as unknown as PlacesState['presentMarker']
+            }), {})
             await waitFor(() => {
                 expect(dispatchMarkerMedia).toHaveBeenCalledWith({
                     type: 'closePresentMode',
@@ -220,10 +231,9 @@ describe('MapPresentMarker', () => {
             })
         })
 
-        test('supports string cluster IDs by coercing to number', async () => {
+        test('loads media for a cluster marker using the numeric cluster ID', async () => {
             const clusterFeatures = [{ properties: { media_id: 'media-x' } }]
             const { map, getClusterLeaves } = makeClusterMap({ clusterFeatures })
-            // id coerced to number via `id as number` in the component
             const state = makeDefaultState({ presentMarker: { id: 7, cluster: true } })
 
             renderComponent(state, map)
@@ -395,7 +405,7 @@ describe('MapPresentMarker', () => {
     // ── Prop updates (re-render) ───────────────────────────────────────────────
 
     describe('prop updates', () => {
-        test('re-runs first effect when presentMarker changes to null, dispatching closePresentMode again', async () => {
+        test('re-runs first effect when presentMarker changes to undefined, dispatching closePresentMode again', async () => {
             const map = makeSingleMap([{ properties: { media_id: 'media-1' } }])
             const initialState = makeDefaultState({
                 presentMarker: { id: 'media-1', cluster: false },
@@ -408,6 +418,37 @@ describe('MapPresentMarker', () => {
             })
 
             const updatedState = makeDefaultState({ presentMarker: undefined })
+            rerender(
+                <MapPresentMarker
+                    map={map as any}
+                    markerMediaState={updatedState}
+                    dispatchMarkerMedia={dispatchMarkerMedia}
+                />
+            )
+
+            await waitFor(() => {
+                const calls = (dispatchMarkerMedia.mock.calls as Array<[{ type: string }]>).map(
+                    ([a]) => a.type
+                )
+                expect(calls).toContain('closePresentMode')
+            })
+        })
+
+        test('re-runs first effect when presentMarker changes to null, dispatching closePresentMode again', async () => {
+            const map = makeSingleMap([{ properties: { media_id: 'media-1' } }])
+            const initialState = makeDefaultState({
+                presentMarker: { id: 'media-1', cluster: false },
+            })
+
+            const { rerender } = renderComponent(initialState, map)
+
+            await waitFor(() => {
+                expect(mockApollo.loadMedia).toHaveBeenCalledTimes(1)
+            })
+
+            const updatedState = makeDefaultState({
+                presentMarker: null as unknown as PlacesState['presentMarker']
+            })
             rerender(
                 <MapPresentMarker
                     map={map as any}
