@@ -28,6 +28,7 @@ const ChangePasswordModal = ({
   const { t } = useTranslation()
   const [passwordInput, setPasswordInput] = useState('')
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  const [isChanging, setIsChanging] = useState(false)
   const [changePassword] = useMutation(changeUserPasswordMutation)
 
   return (
@@ -45,6 +46,7 @@ const ChangePasswordModal = ({
           key: 'cancel',
           label: t('general.action.cancel', 'Cancel'),
           onClick: () => onClose?.(),
+          disabled: isChanging,
         },
         {
           key: 'change_password',
@@ -53,7 +55,10 @@ const ChangePasswordModal = ({
             'Change password'
           ),
           variant: 'positive',
+          disabled: isChanging,
           onClick: () => void (async () => {
+            if (isChanging) return
+            setIsChanging(true)
             try {
               setErrorMessage(null)
               await changePassword({
@@ -67,6 +72,8 @@ const ChangePasswordModal = ({
             } catch (error) {
               console.error('Failed to change password: ', error)
               setErrorMessage(t('settings.users.password_reset.error', 'Failed to change password'))
+            } finally {
+              setIsChanging(false)
             }
           })()
         },

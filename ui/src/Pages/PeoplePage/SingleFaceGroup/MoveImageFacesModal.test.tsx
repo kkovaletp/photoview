@@ -1,4 +1,4 @@
-import { vi, describe, test, beforeAll, beforeEach, expect } from 'vitest'
+import { vi, describe, test, beforeAll, afterAll, beforeEach, expect } from 'vitest'
 import { render, fireEvent, screen, waitFor } from '@testing-library/react'
 import { MockedProvider } from '@apollo/client/testing'
 import { gql } from '@apollo/client'
@@ -93,6 +93,8 @@ vi.mock('./SelectImageFacesTable', () => ({
     ),
 }))
 
+const originalIntersectionObserver = globalThis.IntersectionObserver
+
 beforeAll(() => {
     globalThis.IntersectionObserver = class {
         constructor() { }
@@ -100,6 +102,10 @@ beforeAll(() => {
         unobserve() { }
         disconnect() { }
     } as any
+})
+
+afterAll(() => {
+    globalThis.IntersectionObserver = originalIntersectionObserver
 })
 
 // ─── GraphQL documents ────────────────────────────────────────────────────────
@@ -279,7 +285,7 @@ describe('MoveImageFacesModal', () => {
             )
         })
 
-        test('sshows "Next" action button (disabled) and "Cancel" action button in step 1', () => {
+        test('shows "Next" action button (disabled) and "Cancel" action button in step 1', () => {
             renderModal()
             const nextBtn = screen.getByRole('button', { name: /Next/i })
             expect(nextBtn).toBeInTheDocument()

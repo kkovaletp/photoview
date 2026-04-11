@@ -50,6 +50,7 @@ const MoveImageFacesModal = ({
   const { t } = useTranslation()
 
   const [errMessage, setErrMessage] = useState<string | null>(null)
+  const [isMoving, setIsMoving] = useState(false)
 
   const [selectedImageFaces, setSelectedImageFaces] = useState<
     (SingleFaceGroupQuery['faceGroup']['imageFaces'][0] | MyFacesQuery['myFaceGroups'][0]['imageFaces'][0])[]
@@ -91,6 +92,7 @@ const MoveImageFacesModal = ({
       setSelectedImageFaces([])
       setSelectedFaceGroup(null)
       setErrMessage(null)
+      setIsMoving(false)
     }
   }, [open])
 
@@ -102,6 +104,8 @@ const MoveImageFacesModal = ({
     if (isNil(selectedFaceGroup)) {
       throw new Error('Expected selectedFaceGroup not to be null')
     }
+    if (isMoving) return
+    setIsMoving(true)
 
     moveImageFacesMutation({
       variables: {
@@ -120,6 +124,8 @@ const MoveImageFacesModal = ({
         e?.message ??
         t('people_page.modal.move_image_faces.error.network', 'Network error while moving faces')
       )
+    }).finally(() => {
+      setIsMoving(false)
     })
   }
 
@@ -165,6 +171,8 @@ const MoveImageFacesModal = ({
     loadError?.message ??
     undefined
 
+  const handleClose = () => { if (!isMoving) setOpen(false) }
+
   let positiveButton: ModalAction
   if (imagesSelected) {
     positiveButton = {
@@ -178,7 +186,7 @@ const MoveImageFacesModal = ({
         moveImageFaces()
       },
       variant: 'positive',
-      disabled: isNil(selectedFaceGroup),
+      disabled: isNil(selectedFaceGroup) || isMoving,
     }
   } else {
     positiveButton = {
@@ -203,13 +211,14 @@ const MoveImageFacesModal = ({
         'people_page.modal.move_image_faces.description',
         'Move selected images of this face group to another face group'
       )}
-      onClose={() => setOpen(false)}
+      onClose={handleClose}
       open={open}
       actions={[
         {
           key: 'cancel',
           label: t('general.action.cancel', 'Cancel'),
-          onClick: () => setOpen(false),
+          onClick: handleClose,
+          disabled: isMoving,
         },
         positiveButton,
       ]}

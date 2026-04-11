@@ -81,6 +81,7 @@ const MergeFaceGroupsModal = ({
   >(new Set())
 
   const [inlineError, setInlineError] = useState<string | undefined>(undefined)
+  const [isMerging, setIsMerging] = useState(false)
 
   const addSelectedFaceGroup = (
     faceGroup: MyFaceGroupsOrSingleFaceGroupOrNull
@@ -164,6 +165,8 @@ const MergeFaceGroupsModal = ({
     const sourceGroupIDs: string[] = [...selectedFaceGroups].filter(fc => fc !== null).map(fc => fc.id)
 
     if (sourceGroupIDs.length === 0) return
+    if (isMerging) return
+    setIsMerging(true)
 
     setInlineError(undefined)
     resetCombine?.()
@@ -183,10 +186,13 @@ const MergeFaceGroupsModal = ({
         (e as Error)?.message ??
         t('people_page.modal.merge_face_groups.error.network', 'Network error while merging faces')
       setInlineError(message)
+    }).finally(() => {
+      setIsMerging(false)
     })
   }
 
   const closeModal = () => {
+    if (isMerging) return
     setState(MergeFaceGroupsModalState.Closed)
     setInlineError(undefined)
     resetCombine?.()
@@ -200,6 +206,7 @@ const MergeFaceGroupsModal = ({
     key: 'cancel',
     label: t('general.action.cancel', 'Cancel'),
     onClick: closeModal,
+    disabled: isMerging,
   }
 
   const nextAction: ModalAction = {
@@ -215,7 +222,7 @@ const MergeFaceGroupsModal = ({
     label: t('people_page.modal.action.merge', 'Merge'),
     onClick: () => mergeFaceGroups(),
     variant: 'positive',
-    disabled: selectedFaceGroups.size === 0,
+    disabled: selectedFaceGroups.size === 0 || isMerging,
   }
 
   const modalTitle: string = t(
