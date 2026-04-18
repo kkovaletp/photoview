@@ -435,6 +435,31 @@ describe('MoveImageFacesModal', () => {
             )
         })
 
+        test('shows an inline error and retries when destination face groups fail to load', async () => {
+            const faceId = sourceFaceGroup.imageFaces[0].id
+            const loadErrorMock = {
+                request: { query: MY_FACES_QUERY },
+                error: new Error('Failed to load face groups'),
+            }
+
+            renderModal({}, [loadErrorMock, makeMyFacesMock()])
+
+            fireEvent.click(screen.getByTestId(`image-face-row-${faceId}`))
+            fireEvent.click(screen.getByRole('button', { name: /Next/i }))
+
+            await waitFor(() => {
+                expect(screen.getByRole('alert')).toHaveTextContent(
+                    /Failed to load face groups/i
+                )
+            })
+
+            fireEvent.click(screen.getByRole('button', { name: /Retry/i }))
+
+            await waitFor(() =>
+                expect(screen.getByTestId('select-face-group-table')).toBeInTheDocument()
+            )
+        })
+
         test('Move is disabled when no destination face group is selected', async () => {
             await goToStep2()
             const moveBtn = screen.getByRole('button', { name: /Move image faces/i })

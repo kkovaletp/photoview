@@ -1,4 +1,4 @@
-import { vi, describe, test, beforeAll, beforeEach, expect } from 'vitest'
+import { vi, describe, test, beforeAll, afterAll, beforeEach, expect } from 'vitest'
 import { render, fireEvent, screen, waitFor } from '@testing-library/react'
 import { MockedProvider } from '@apollo/client/testing'
 import MergeFaceGroupsModal, {
@@ -42,7 +42,9 @@ vi.mock('react-i18next', () => ({
     }),
 }))
 
-const mockNavigate = vi.fn()
+const { mockNavigate } = vi.hoisted(() => ({
+    mockNavigate: vi.fn(),
+}))
 vi.mock('react-router-dom', async () => {
     const actual: object = await vi.importActual('react-router-dom')
     return { ...actual, useNavigate: () => mockNavigate }
@@ -426,14 +428,17 @@ describe('MergeFaceGroupsModal', () => {
         })
 
         test('does not close or navigate when mutation returns no data', async () => {
+            const onNoDataResult = vi.fn()
             const noDataMock = {
                 request: { query: COMBINE_FACES_MUTATION, variables: { destID: '0', srcIDs: ['1'] } },
-                result: { data: null },
+                result: () => {
+                    onNoDataResult()
+                    return { data: null }
+                },
             }
             const setState = await doMerge('0', ['1'], [myFacesMock, noDataMock])
-            await waitFor(() => {
-                expect(mockNavigate).not.toHaveBeenCalled()
-            })
+            await waitFor(() => expect(onNoDataResult).toHaveBeenCalled())
+            expect(mockNavigate).not.toHaveBeenCalled()
             expect(setState).not.toHaveBeenCalledWith(MergeFaceGroupsModalState.Closed)
         })
     })
@@ -441,6 +446,22 @@ describe('MergeFaceGroupsModal', () => {
     // ── Error handling ────────────────────────────────────────────────────────
 
     describe('error handling', () => {
+        test('shows load error and retries loading face groups', async () => {
+            const loadErrorMock = {
+                request: { query: MY_FACES_QUERY },
+                error: new Error('Failed to load face groups'),
+            }
+            renderModal({}, [loadErrorMock, myFacesMock])
+
+            //TODO: @coderabbitai, this test fails on this line with inability to find the alert element. Why there is no alert rendered when the error is thrown? Please carefully analyze this case and suggest a consistent, reliable, and maintainable fix.
+            await waitFor(() => expect(screen.getByRole('alert')).toBeInTheDocument())
+            fireEvent.click(screen.getByRole('button', { name: /Retry/i }))
+
+            await waitFor(() =>
+                expect(screen.getByTestId('facegroup-0')).toBeInTheDocument()
+            )
+        })
+
         test('shows inline alert and keeps modal open on network error', async () => {
             const mocks = [myFacesMock, getCombineNetworkErrorMock('0', ['1'])]
             const { setState } = await setupAndTriggerMerge('0', ['1'], mocks)
