@@ -288,19 +288,21 @@ const MergeFaceGroupsModal = ({
   } else if (faceGroupsError) {
     faceGroupContent = (
       <div className="space-y-2 text-sm">
-        <div className="text-red-600 dark:text-red-400">
+        <div role="alert" className="mb-2 rounded border border-red-300 bg-red-50 dark:bg-dark-900/50 px-3 py-2 text-sm text-red-800 dark:text-red-300">
           {t(
             'people_page.modal.merge_face_groups.face_groups_load_error',
             'Failed to load face groups'
           )}
+          <div className="mt-2">
+            <button
+              type="button"
+              className="underline"
+              onClick={() => refetchFaceGroups()}
+            >
+              {t('general.action.retry', 'Retry')}
+            </button>
+          </div>
         </div>
-        <button
-          type="button"
-          className="underline"
-          onClick={() => refetchFaceGroups()}
-        >
-          {t('general.action.retry', 'Retry')}
-        </button>
       </div>
     )
   } else {

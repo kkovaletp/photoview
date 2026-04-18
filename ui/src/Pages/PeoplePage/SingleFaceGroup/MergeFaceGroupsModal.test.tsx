@@ -453,7 +453,6 @@ describe('MergeFaceGroupsModal', () => {
             }
             renderModal({}, [loadErrorMock, myFacesMock])
 
-            //TODO: @coderabbitai, this test fails on this line with inability to find the alert element. Why there is no alert rendered when the error is thrown? Please carefully analyze this case and suggest a consistent, reliable, and maintainable fix.
             await waitFor(() => expect(screen.getByRole('alert')).toBeInTheDocument())
             fireEvent.click(screen.getByRole('button', { name: /Retry/i }))
 
