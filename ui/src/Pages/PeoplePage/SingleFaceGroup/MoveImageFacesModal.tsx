@@ -106,18 +106,19 @@ const MoveImageFacesModal = ({
       throw new Error('Expected selectedFaceGroup not to be null')
     }
     if (isMoving) return
+    const destinationFaceGroupId = selectedFaceGroup.id
     setErrMessage(null)
     setIsMoving(true)
 
     moveImageFacesMutation({
       variables: {
         faceIDs,
-        destFaceGroupID: selectedFaceGroup.id,
+        destFaceGroupID: destinationFaceGroupId,
       },
     }).then(({ data, errors }) => {
       if (!data?.moveImageFaces || (errors?.length ?? 0) > 0) return
       setOpen(false)
-      navigate(`/people/${selectedFaceGroup.id}`)
+      navigate(`/people/${destinationFaceGroupId}`)
     }).catch((e) => {
       setErrMessage(
         e instanceof Error && e.message.trim().length > 0
@@ -147,6 +148,24 @@ const MoveImageFacesModal = ({
           selectedFaceGroup={selectedFaceGroup}
           setSelectedFaceGroup={setSelectedFaceGroup}
         />
+      )
+    } else if (loadError) {
+      table = (
+        <div className="space-y-2 text-sm">
+          <div className="text-red-600 dark:text-red-400">
+            {t(
+              'people_page.modal.move_image_faces.destination_face_group_table.load_error',
+              'Failed to load face groups'
+            )}
+          </div>
+          <button
+            type="button"
+            className="underline"
+            onClick={() => loadFaceGroups()}
+          >
+            {t('general.action.retry', 'Retry')}
+          </button>
+        </div>
       )
     } else {
       table = <div>{t('general.loading.default', 'Loading...')}</div>

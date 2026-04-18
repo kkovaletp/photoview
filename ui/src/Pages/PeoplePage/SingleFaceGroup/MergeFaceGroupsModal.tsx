@@ -59,7 +59,12 @@ const MergeFaceGroupsModal = ({
   const { t } = useTranslation()
 
   const navigate = useNavigate()
-  const { data } = useQuery<MyFacesQuery, MyFacesQueryVariables>(MY_FACES_QUERY, {
+  const {
+    data,
+    loading: faceGroupsLoading,
+    error: faceGroupsError,
+    refetch: refetchFaceGroups,
+  } = useQuery<MyFacesQuery, MyFacesQueryVariables>(MY_FACES_QUERY, {
     skip: state === MergeFaceGroupsModalState.Closed,
   })
   const [combineFacesMutation, { error: combineError, reset: resetCombine }] = useMutation<
@@ -275,13 +280,31 @@ const MergeFaceGroupsModal = ({
       ? selectDestinationProps
       : selectSourcesProps
 
-  return (
-    <Modal {...modalContent.props}>
-      {(inlineError || combineError?.message) && (
-        <div role="alert" className="mb-2 rounded border border-red-300 bg-red-50 dark:bg-dark-900/50 px-3 py-2 text-sm text-red-800 dark:text-red-300">
-          {inlineError ?? combineError?.message}
+  let faceGroupContent = null
+  if (faceGroupsLoading) {
+    faceGroupContent = (
+      <div>{t('general.loading.default', 'Loading...')}</div>
+    )
+  } else if (faceGroupsError) {
+    faceGroupContent = (
+      <div className="space-y-2 text-sm">
+        <div className="text-red-600 dark:text-red-400">
+          {t(
+            'people_page.modal.merge_face_groups.face_groups_load_error',
+            'Failed to load face groups'
+          )}
         </div>
-      )}
+        <button
+          type="button"
+          className="underline"
+          onClick={() => refetchFaceGroups()}
+        >
+          {t('general.action.retry', 'Retry')}
+        </button>
+      </div>
+    )
+  } else {
+    faceGroupContent = (
       <SelectFaceGroupTable
         title={modalContent.searchTitle}
         frozen={
@@ -291,8 +314,21 @@ const MergeFaceGroupsModal = ({
         }
         faceGroups={filteredFaceGroups}
         selectedFaceGroups={selectedFaceGroups}
-        toggleSelectedFaceGroup={(face) => { if (!isMerging && face !== null) handleFaceGroupToggled(face) }}
+        toggleSelectedFaceGroup={(face) => {
+          if (!isMerging && face !== null) handleFaceGroupToggled(face)
+        }}
       />
+    )
+  }
+
+  return (
+    <Modal {...modalContent.props}>
+      {(inlineError || combineError?.message) && (
+        <div role="alert" className="mb-2 rounded border border-red-300 bg-red-50 dark:bg-dark-900/50 px-3 py-2 text-sm text-red-800 dark:text-red-300">
+          {inlineError ?? combineError?.message}
+        </div>
+      )}
+      {faceGroupContent}
     </Modal>
   )
 }

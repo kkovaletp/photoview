@@ -27,6 +27,7 @@
       "add": "Ekle",
       "cancel": "İptal",
       "remove": "Kaldır",
+      "retry": "",
       "save": "Kaydet",
       "submit": ""
     },
@@ -119,6 +120,7 @@
         "error": {
           "network": ""
         },
+        "face_groups_load_error": "",
         "sources_description": "",
         "sources_table": {
           "title": ""
@@ -128,6 +130,7 @@
       "move_image_faces": {
         "description": "Bu yüz grubunun seçili resimlerini başka bir yüz grubuna taşı",
         "destination_face_group_table": {
+          "load_error": "",
           "move_action": "Resimdeki yüzleri taşı",
           "title": "Hedef yüz grubunu seçin"
         },

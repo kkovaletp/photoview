@@ -76,13 +76,20 @@ vi.mock('./SelectFaceGroupTable', () => ({
     ),
 }))
 
+let originalIntersectionObserver: typeof globalThis.IntersectionObserver | undefined
+
 beforeAll(() => {
+    originalIntersectionObserver = globalThis.IntersectionObserver
     globalThis.IntersectionObserver = class {
         constructor() { }
         observe() { }
         unobserve() { }
         disconnect() { }
     } as any
+})
+
+afterAll(() => {
+    globalThis.IntersectionObserver = originalIntersectionObserver as any
 })
 
 // ─── Fixtures ──────────────────────────────────────────────────────────────────

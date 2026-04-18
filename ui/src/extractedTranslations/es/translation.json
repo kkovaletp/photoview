@@ -27,6 +27,7 @@
       "add": "Añadir",
       "cancel": "Cancelar",
       "remove": "Borrar",
+      "retry": "",
       "save": "Guardar",
       "submit": ""
     },
@@ -119,6 +120,7 @@
         "error": {
           "network": ""
         },
+        "face_groups_load_error": "",
         "sources_description": "",
         "sources_table": {
           "title": ""
@@ -128,6 +130,7 @@
       "move_image_faces": {
         "description": "",
         "destination_face_group_table": {
+          "load_error": "",
           "move_action": "",
           "title": ""
         },

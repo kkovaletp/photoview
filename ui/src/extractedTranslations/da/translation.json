@@ -27,6 +27,7 @@
       "add": "Tilføj",
       "cancel": "Annuller",
       "remove": "Fjern",
+      "retry": "",
       "save": "Gem",
       "submit": ""
     },
@@ -119,6 +120,7 @@
         "error": {
           "network": ""
         },
+        "face_groups_load_error": "",
         "sources_description": "",
         "sources_table": {
           "title": ""
@@ -128,6 +130,7 @@
       "move_image_faces": {
         "description": "Flyt valgte billeder fra denne gruppe til en anden gruppe",
         "destination_face_group_table": {
+          "load_error": "",
           "move_action": "Flyt ansigter",
           "title": "Vælg destinationsgruppe"
         },

@@ -345,7 +345,7 @@ describe('MoveImageFacesModal', () => {
                 },
             }
 
-            renderModal({}, [makeMyFacesMock(), errorMock])
+            renderModal({}, [makeMyFacesMock(), errorMock, makeMyFacesMock()])
 
             fireEvent.click(screen.getByTestId(`image-face-row-${faceId}`))
             fireEvent.click(screen.getByRole('button', { name: /Next/i }))
@@ -516,7 +516,7 @@ describe('MoveImageFacesModal', () => {
                 },
             }
 
-            renderModal({}, [makeMyFacesMock(), dataAndErrorsMock])
+            renderModal({}, [makeMyFacesMock(), dataAndErrorsMock, makeMyFacesMock()])
 
             // Step 1 → select image and Next
             fireEvent.click(screen.getByTestId(`image-face-row-${faceId}`))

@@ -194,7 +194,7 @@ jobs:
           overwrite: true
 
       - name: Publish ESlint report in PR comment
-        uses: actions/github-script@v8
+        uses: actions/github-script@v9
         if: github.event_name == 'pull_request'
         with:
           github-token: ${{ secrets.COMMENT_TOKEN }}

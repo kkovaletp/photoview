@@ -27,6 +27,7 @@
       "add": "追加",
       "cancel": "キャンセル",
       "remove": "削除",
+      "retry": "",
       "save": "保存",
       "submit": ""
     },
@@ -119,6 +120,7 @@
         "error": {
           "network": ""
         },
+        "face_groups_load_error": "",
         "sources_description": "統合する対象の顔グループをすべて選択してください。",
         "sources_table": {
           "title": "統合する対象の顔グループを1つ以上選択:"
@@ -128,6 +130,7 @@
       "move_image_faces": {
         "description": "この顔グループの選択した写真を別の顔グループに移動します",
         "destination_face_group_table": {
+          "load_error": "",
           "move_action": "写真の顔グループを移動",
           "title": "対象の顔グループを選択"
         },

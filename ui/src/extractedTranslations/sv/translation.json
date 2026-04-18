@@ -27,6 +27,7 @@
       "add": "Lägg till",
       "cancel": "Avbryt",
       "remove": "Ta bort",
+      "retry": "",
       "save": "Spara",
       "submit": ""
     },
@@ -119,6 +120,7 @@
         "error": {
           "network": ""
         },
+        "face_groups_load_error": "",
         "sources_description": "Välj en eller flera ansiktsgrupper att slå samman med målgruppen",
         "sources_table": {
           "title": "Välj minst ett ansikte att slå ihop med:"
@@ -128,6 +130,7 @@
       "move_image_faces": {
         "description": "",
         "destination_face_group_table": {
+          "load_error": "",
           "move_action": "",
           "title": ""
         },

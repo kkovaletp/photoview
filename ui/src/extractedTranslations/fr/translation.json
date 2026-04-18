@@ -27,6 +27,7 @@
       "add": "Ajouter",
       "cancel": "Annuler",
       "remove": "Supprimer",
+      "retry": "",
       "save": "Sauvegarder",
       "submit": ""
     },
@@ -119,6 +120,7 @@
         "error": {
           "network": ""
         },
+        "face_groups_load_error": "",
         "sources_description": "Sélectionnez tous les groupes de visages qui seront fusionnés dans le groupe de destination.",
         "sources_table": {
           "title": "Sélectionnez un ou plusieurs groupes sources à fusionner :"
@@ -128,6 +130,7 @@
       "move_image_faces": {
         "description": "Déplacer les images sélectionnées de ce groupe de visages vers un autre groupe de visages",
         "destination_face_group_table": {
+          "load_error": "",
           "move_action": "Déplacer les visages de l'image",
           "title": "Sélectionner le groupe de visages de destination"
         },

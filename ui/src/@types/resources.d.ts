@@ -29,6 +29,7 @@ interface Resources {
         "add": "Add",
         "cancel": "Cancel",
         "remove": "Remove",
+        "retry": "Retry",
         "save": "Save",
         "submit": "Submit"
       },
@@ -121,6 +122,7 @@ interface Resources {
           "error": {
             "network": "Network error while merging faces"
           },
+          "face_groups_load_error": "Failed to load face groups",
           "sources_description": "Select all face groups that will be merged into the destination group.",
           "sources_table": {
             "title": "Select one or more source faces to merge into:"
@@ -130,6 +132,7 @@ interface Resources {
         "move_image_faces": {
           "description": "Move selected images of this face group to another face group",
           "destination_face_group_table": {
+            "load_error": "Failed to load face groups",
             "move_action": "Move image faces",
             "title": "Select destination face group"
           },

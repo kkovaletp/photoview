@@ -27,6 +27,7 @@
       "add": "Gehitu",
       "cancel": "Utzi",
       "remove": "Kendu",
+      "retry": "",
       "save": "Gorde",
       "submit": ""
     },
@@ -119,6 +120,7 @@
         "error": {
           "network": ""
         },
+        "face_groups_load_error": "",
         "sources_description": "",
         "sources_table": {
           "title": ""
@@ -128,6 +130,7 @@
       "move_image_faces": {
         "description": "Mugitu aurpegi-multzo honetan aukeratutako irudiak beste aurpegi-multzo batera",
         "destination_face_group_table": {
+          "load_error": "",
           "move_action": "Mugitu irudiko aurpegiak",
           "title": "Aukeratu zein aurpegi-multzora mugituko d(ir)en"
         },

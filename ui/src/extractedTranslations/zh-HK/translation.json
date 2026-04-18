@@ -27,6 +27,7 @@
       "add": "加入",
       "cancel": "取消",
       "remove": "刪除",
+      "retry": "",
       "save": "儲存",
       "submit": ""
     },
@@ -119,6 +120,7 @@
         "error": {
           "network": ""
         },
+        "face_groups_load_error": "",
         "sources_description": "",
         "sources_table": {
           "title": ""
@@ -128,6 +130,7 @@
       "move_image_faces": {
         "description": "移動已選擇的臉孔群組到另一個面孔群組",
         "destination_face_group_table": {
+          "load_error": "",
           "move_action": "移動相片的面孔",
           "title": "選擇目標臉孔群組"
         },

@@ -27,6 +27,7 @@
       "add": "Dodaj",
       "cancel": "Anuluj",
       "remove": "Usuń",
+      "retry": "",
       "save": "Zapisz",
       "submit": ""
     },
@@ -119,6 +120,7 @@
         "error": {
           "network": ""
         },
+        "face_groups_load_error": "",
         "sources_description": "",
         "sources_table": {
           "title": ""
@@ -128,6 +130,7 @@
       "move_image_faces": {
         "description": "Przenieś wybrane obrazy tej grupy twarzy do innej grupy twarzy",
         "destination_face_group_table": {
+          "load_error": "",
           "move_action": "Przenieś twarze z obrazu",
           "title": "Wybierz docelową grupę twarzy"
         },
