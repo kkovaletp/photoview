@@ -71,8 +71,10 @@ const MergeFaceGroupsModal = ({
     CombineFacesMutation,
     CombineFacesMutationVariables
   >(COMBINE_FACES_MUTATION, {
-    refetchQueries: ({ data }) =>
-      data?.combineFaceGroups ? refetchQueries : [],
+    refetchQueries: ({ data, errors }) =>
+      data?.combineFaceGroups && (errors?.length ?? 0) === 0
+        ? refetchQueries
+        : [],
     errorPolicy: 'all',
   })
 
@@ -297,7 +299,7 @@ const MergeFaceGroupsModal = ({
             <button
               type="button"
               className="underline"
-              onClick={() => refetchFaceGroups()}
+              onClick={() => refetchFaceGroups().catch(() => undefined)}
             >
               {t('general.action.retry', 'Retry')}
             </button>
