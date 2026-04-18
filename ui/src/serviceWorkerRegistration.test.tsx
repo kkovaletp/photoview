@@ -2,22 +2,25 @@ import { describe, test, expect, vi, beforeEach, afterEach } from 'vitest'
 
 /** Capture a single 'load' handler and expose a triggerLoad() to invoke it. */
 function mockWindowLoadOnce() {
-    let handler: ((e: Event) => void) | null = null
+    let handler: EventListenerOrEventListenerObject | null = null
     const addSpy = vi
         .spyOn(globalThis as unknown as Window, 'addEventListener')
         .mockImplementation(((type: string, cb: EventListenerOrEventListenerObject) => {
             if (type === 'load') {
-                handler = cb as EventListener
+                handler = cb
             }
-            // Do not attach to the real event target to avoid cross-test leakage.
-            return undefined as unknown as void
-        }) as any)
+        }))
 
     return {
         addSpy,
         triggerLoad: () => {
             if (!handler) throw new Error('load handler not registered')
-            handler(new Event('load'))
+            const event = new Event('load')
+            if (typeof handler === 'function') {
+                handler(event)
+            } else {
+                handler.handleEvent(event)
+            }
         },
     }
 }
@@ -63,6 +66,15 @@ function makeRegistrationMock() {
 
 const originalFetch = globalThis.fetch
 const originalLocation = Object.getOwnPropertyDescriptor(globalThis, 'location')
+const originalServiceWorker = Object.getOwnPropertyDescriptor(navigator, 'serviceWorker')
+
+function restoreNavigatorSW() {
+    if (originalServiceWorker) {
+        Object.defineProperty(navigator, 'serviceWorker', originalServiceWorker)
+    } else {
+        Reflect.deleteProperty(navigator, 'serviceWorker')
+    }
+}
 
 describe('serviceWorkerRegistration', () => {
     beforeEach(() => {
@@ -76,6 +88,7 @@ describe('serviceWorkerRegistration', () => {
         vi.unstubAllEnvs()
         vi.restoreAllMocks()
         globalThis.fetch = originalFetch
+        restoreNavigatorSW()
     })
 
     // ── isLocalhost detection ──────────────────────────────────────────────────
