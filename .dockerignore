@@ -22,10 +22,15 @@ systemd/
 storage/
 photoview.db*
 
+# testing
 ui/node_modules/
 ui/build/
 ui/.cache/
 ui/.nvmrc
+ui/coverage*
+api/coverage*
+api/*.cov
+api/test-*-report.xml
 
 **/.sonarlint/
 **/sonar-project.properties
