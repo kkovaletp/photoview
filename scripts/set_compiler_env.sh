@@ -30,7 +30,7 @@ GOOS="${TARGETOS}"
 GOARCH="${TARGETARCH}"
 GOARM=""
 # best efforts
-if [ "${TARGETARCH}" = "arm" ] && [ ! -z "${TARGETVARIANT}" ]; then
+if [[ "${TARGETARCH}" == "arm" && -n "${TARGETVARIANT}" ]]; then
   GOARM="7"
   case "${TARGETVARIANT}" in
   "v5")

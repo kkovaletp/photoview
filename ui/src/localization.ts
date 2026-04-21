@@ -197,6 +197,7 @@ export const SetMapLanguages = (map: mapboxgl.Map) => {
       map.addControl(new MapboxLanguage({ defaultLanguage: 'da' }))
       return
     case LanguageTranslation.English:
+    case LanguageTranslation.Basque:
       map.addControl(new MapboxLanguage({ defaultLanguage: 'en' }))
       return
     case LanguageTranslation.French:
@@ -233,14 +234,14 @@ export const SetMapLanguages = (map: mapboxgl.Map) => {
     case LanguageTranslation.Portuguese:
       map.addControl(new MapboxLanguage({ defaultLanguage: 'pt' }))
       return
-    case LanguageTranslation.Basque:
-      map.addControl(new MapboxLanguage({ defaultLanguage: 'en' }))
-      return
     case LanguageTranslation.Turkish:
       map.addControl(new MapboxLanguage({ defaultLanguage: 'tr' }))
       return
     case LanguageTranslation.Japanese:
       map.addControl(new MapboxLanguage({ defaultLanguage: 'ja' }))
+      return
+    case LanguageTranslation.Dutch:
+      map.addControl(new MapboxLanguage({ defaultLanguage: 'nl' }))
       return
     default:
       map.addControl(new MapboxLanguage({ defaultLanguage: 'en' }))

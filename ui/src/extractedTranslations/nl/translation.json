@@ -1,13 +1,15 @@
 {
+  "album": {
+    "breadcrumb_aria_label": ""
+  },
   "album_filter": {
     "only_favorites": "Toon favorieten",
-    "sort": "Sorteren",
-    "sort_by": "Sorteren op",
-    "sort_direction": "Sorteerrichting",
     "order_direction": {
       "ascending": "Oplopend",
       "descending": "Aflopend"
     },
+    "sort": "Sorteren",
+    "sort_direction": "Sorteerrichting",
     "sorting_options": {
       "date_imported": "Importdatum",
       "date_shot": "Opnamedatum",
@@ -15,12 +17,19 @@
       "type": "Type"
     }
   },
+  "album_page": {
+    "load_error": ""
+  },
   "general": {
     "action": {
       "add": "Toevoegen",
       "cancel": "Annuleren",
       "remove": "Verwijderen",
-      "save": "Opslaan"
+      "save": "Opslaan",
+      "submit": ""
+    },
+    "error": {
+      "generic": ""
     },
     "loading": {
       "album": "Album laden",
@@ -31,9 +40,11 @@
         "media": "Meer media laden"
       },
       "shares": "Laden gedeelde albums..."
-    }
+    },
+    "notFound": ""
   },
   "header": {
+    "logo_alt": "",
     "search": {
       "loading": "Resultaten laden...",
       "no_results": "Geen resultaten gevonden",
@@ -48,7 +59,8 @@
     "field": {
       "password": "Wachtwoord",
       "submit": "Inloggen",
-      "username": "Gebruikersnaam"
+      "username": "Gebruikersnaam",
+      "username_error": ""
     },
     "initial_setup": {
       "field": {
@@ -60,9 +72,11 @@
       },
       "title": "Initiële configuratie"
     },
+    "logo_alt": "",
     "welcome": "Welkom bij Photoview"
   },
   "meta": {
+    "app_name": "",
     "description": "Eenvoudige en gebruiksvriendelijke fotogalerij voor zelf hosting"
   },
   "people_page": {
@@ -127,6 +141,13 @@
     "title": "Tijdlijn"
   },
   "places_page": {
+    "mapbox_token_error": {
+      "create_at": "",
+      "description": "",
+      "env_var": "",
+      "mapbox_link_label": "",
+      "title": ""
+    },
     "title": "Locaties"
   },
   "routes": {
@@ -135,11 +156,13 @@
   "settings": {
     "concurrent_workers": {
       "description": "Het maximale aantal scanprocessen dat tegelijk mag draaien",
+      "error": "",
       "title": "Aantal gelijktijdige scans"
     },
     "logout": "Uitloggen",
     "periodic_scanner": {
       "checkbox_label": "Periodieke scan inschakelen",
+      "error": "",
       "field": {
         "description": "Hoe vaak automatisch alle gebruikers gescand worden",
         "label": "Scaninterval"
@@ -183,6 +206,7 @@
     },
     "users": {
       "add_user": {
+        "error": "",
         "submit": "Gebruiker toevoegen"
       },
       "confirm_delete_user": {
@@ -192,6 +216,7 @@
       },
       "password_reset": {
         "description": "Wijzig wachtwoord voor <1>{{username}}</1>",
+        "error": "",
         "form": {
           "label": "Nieuw wachtwoord",
           "placeholder": "wachtwoord",
@@ -238,6 +263,10 @@
     "wrong_password": "Onjuist wachtwoord, probeer opnieuw."
   },
   "sidebar": {
+    "action": {
+      "close": "",
+      "pin": ""
+    },
     "album": {
       "album_cover": "Albumhoes",
       "download": {
@@ -246,7 +275,7 @@
           "title": "Hoge resolutie"
         },
         "originals": {
-          "description": "De originele foto's and video's",
+          "description": "De originele foto's en video's",
           "title": "Originelen"
         },
         "thumbnails": {
@@ -260,9 +289,11 @@
       },
       "reset_cover": "Omslagfoto resetten",
       "set_cover": "Instellen als omslagfoto",
+      "title": "",
       "title_placeholder": "Albumtitel"
     },
     "download": {
+      "error": "",
       "filesize": {
         "byte_one": "{{count}} Byte",
         "byte_other": "{{count}} Bytes",
@@ -283,6 +314,7 @@
       },
       "title": "Downloaden"
     },
+    "error": "",
     "location": {
       "title": "Locatie"
     },
@@ -298,7 +330,7 @@
           "landscape_mode": "Landschap mode",
           "manual": "Handmatig",
           "normal_program": "Normale programma",
-          "not_defined": "Not gedefinieerd",
+          "not_defined": "Niet gedefinieerd",
           "portrait_mode": "Portret mode",
           "shutter_priority": "Sluitertijd prioriteit"
         },
@@ -327,7 +359,8 @@
           "lens": "Lens",
           "maker": "Fabrikant"
         }
-      }
+      },
+      "unknown_type": ""
     },
     "people": {
       "action_label": {
@@ -342,6 +375,8 @@
       "add_share": "Share toevoegen",
       "copy_link": "Link kopiëren",
       "delete": "Verwijderen",
+      "error": "",
+      "expiration_date": "",
       "more": "Meer",
       "no_shares_found": "Geen albums gevonden",
       "public_link": "Publieke link",
@@ -365,6 +400,7 @@
   "title": {
     "loading_album": "Album laden",
     "login": "Inloggen",
+    "not_found": "",
     "people": "Personen",
     "settings": "Instellingen"
   }
