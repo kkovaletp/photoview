@@ -182,7 +182,7 @@ describe('Messages', () => {
       injectMessages([makeMessage({ key: 'bad', type: 'UNKNOWN_TYPE' as NotificationType })])
 
       expect(consoleSpy).toHaveBeenCalledOnce()
-      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('UNKNOWN_TYPE'))
+      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('bad'))
       // No heading should be rendered for the bad message
       expect(screen.queryByText('Test Header')).not.toBeInTheDocument()
       consoleSpy.mockRestore()

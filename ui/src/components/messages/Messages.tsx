@@ -41,7 +41,7 @@ const MessageItem = ({ message, onDismiss }: MessageItemProps) => {
         />
       )
     default:
-      console.error(`Unknown message type encountered: ${message.type}`)
+      console.error('Unknown message type encountered for message key: ' + message.key)
       return null
   }
 }

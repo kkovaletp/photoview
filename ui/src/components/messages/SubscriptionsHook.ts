@@ -18,6 +18,11 @@ const NOTIFICATION_SUBSCRIPTION = gql`
   }
 `
 
+const KNOWN_NOTIFICATION_TYPES = new Set<string>([
+  ...Object.values(NotificationType),
+  'Close', // handled separately in the filter path
+])
+
 const messageTimeoutHandles = new Map<string, number>()
 
 export interface Message {
@@ -63,6 +68,10 @@ export const SubscriptionsHook = ({
     }
     if (!data) return
     const msg = data.notification
+    if (!KNOWN_NOTIFICATION_TYPES.has(msg.type)) {
+      // Silently discard notifications with unknown types from the server
+      return
+    }
     // Handle timeouts independent of outer "messages"
     const existing = messageTimeoutHandles.get(msg.key)
     if (existing) {
