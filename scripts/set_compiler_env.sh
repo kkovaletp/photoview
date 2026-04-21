@@ -31,13 +31,19 @@ GOARCH="${TARGETARCH}"
 GOARM=""
 # best efforts
 if [[ "${TARGETARCH}" == "arm" && -n "${TARGETVARIANT}" ]]; then
-  GOARM="7"
   case "${TARGETVARIANT}" in
   "v5")
     GOARM="5"
     ;;
   "v6")
     GOARM="6"
+    ;;
+  "v7")
+    GOARM="7"
+    ;;
+  *)
+    GOARM="7"
+    echo "Warning: unexpected ARM variant ${TARGETVARIANT}; defaulting GOARM to 7."
     ;;
   esac
 fi
