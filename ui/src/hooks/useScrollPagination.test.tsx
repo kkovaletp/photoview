@@ -1,5 +1,5 @@
 import { vi, describe, test, expect, beforeEach, afterEach, beforeAll, afterAll } from 'vitest'
-import { renderHook, act } from '@testing-library/react'
+import { renderHook, act, waitFor } from '@testing-library/react'
 import { ApolloQueryResult } from '@apollo/client'
 import useScrollPagination from './useScrollPagination'
 
@@ -57,8 +57,8 @@ const makeResult = (items: string[]): ApolloQueryResult<SimpleData> => ({
 })
 
 /**
- * Fire the IntersectionObserver callback with the supplied entries inside
- * act() so any resulting state updates are flushed synchronously.
+ * Fire the IntersectionObserver callback with the supplied entries.
+ * Callers wrap it in act and wait for async state updates when needed.
  */
 const triggerIntersection = (entries: { isIntersecting: boolean }[]) => {
     capturedCallback?.(
@@ -379,7 +379,7 @@ describe('useScrollPagination', () => {
             await act(async () => {
                 triggerIntersection([{ isIntersecting: true }])
             })
-            expect(result.current.finished).toBe(true)
+            await waitFor(() => expect(result.current.finished).toBe(true))
 
             act(() => {
                 rerender({ data: { items: ['a', 'b'] } })

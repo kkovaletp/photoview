@@ -90,10 +90,12 @@ export const SubscriptionsHook = ({
       if (msg.type === 'Close') {
         return prev.filter(m => m.key != msg.key)
       }
+      const timestamp = Date.now()
       const newNotification: Message = {
         key: msg.key,
         type: msg.type,
         timeout: msg.timeout || undefined,
+        timestamp,
         props: {
           header: msg.header,
           content: msg.content,
@@ -105,7 +107,10 @@ export const SubscriptionsHook = ({
       const next = [...prev]
       const i = next.findIndex(m => m.key === newNotification.key)
       if (i === -1) next.push(newNotification)
-      else next[i] = newNotification
+      else next[i] = {
+        ...newNotification,
+        timestamp: next[i].timestamp ?? timestamp,
+      }
       return next
     })
   }, [data, error, setMessages])
