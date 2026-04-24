@@ -18,16 +18,16 @@
     }
   },
   "album_page": {
-    "load_error": "",
-    "loading": "",
-    "not_found": ""
+    "load_error": "Kan album niet laden",
+    "loading": "Album laden...",
+    "not_found": "Album niet gevonden"
   },
   "general": {
     "action": {
       "add": "Toevoegen",
       "cancel": "Annuleren",
       "remove": "Verwijderen",
-      "retry": "",
+      "retry": "Opnieuw proberen",
       "save": "Opslaan",
       "submit": ""
     },
@@ -56,7 +56,7 @@
         "albums": "Albums",
         "media": "Media"
       },
-      "results_label": ""
+      "results_label": "Zoekresultaten"
     }
   },
   "login_page": {
@@ -108,7 +108,7 @@
         },
         "description": "Koppel geselecteerde afbeeldingen los van deze gezichtsgroep en verplaats ze naar een nieuwe groep",
         "error": {
-          "network": ""
+          "network": "Netwerkfout. Controleer je verbinding en probeer opnieuw."
         },
         "title": "Gezichten loskoppelen"
       },
@@ -118,9 +118,9 @@
           "title": "Selecteer doelgezicht"
         },
         "error": {
-          "network": ""
+          "network": "Netwerkfout. Controleer je verbinding en probeer opnieuw."
         },
-        "face_groups_load_error": "",
+        "face_groups_load_error": "Kan gezichtsgroepen niet laden",
         "sources_description": "Selecteer alle gezichtsgroepen die samengevoegd worden met de doelgroep.",
         "sources_table": {
           "title": "Selecteer één of meer brongezichten:"
@@ -130,12 +130,12 @@
       "move_image_faces": {
         "description": "Verplaats geselecteerde afbeeldingen naar een andere gezichtsgroep",
         "destination_face_group_table": {
-          "load_error": "",
+          "load_error": "Kan gezichtsgroepen niet laden",
           "move_action": "Gezichten verplaatsen",
           "title": "Selecteer doelgezichtsgroep"
         },
         "error": {
-          "network": ""
+          "network": "Netwerkfout. Controleer je verbinding en probeer opnieuw."
         },
         "image_select_table": {
           "next_action": "Volgende",

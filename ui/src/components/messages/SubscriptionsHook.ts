@@ -18,10 +18,9 @@ const NOTIFICATION_SUBSCRIPTION = gql`
   }
 `
 
-const KNOWN_NOTIFICATION_TYPES = new Set<string>([
-  ...Object.values(NotificationType),
-  'Close', // handled separately in the filter path
-])
+const KNOWN_NOTIFICATION_TYPES = new Set<string>(
+  Object.values(NotificationType)
+)
 
 const messageTimeoutHandles = new Map<string, number>()
 
@@ -87,8 +86,8 @@ export const SubscriptionsHook = ({
       messageTimeoutHandles.set(msg.key, timeoutHandle)
     }
     setMessages(prev => {
-      if (msg.type === 'Close') {
-        return prev.filter(m => m.key != msg.key)
+      if (msg.type === NotificationType.Close) {
+        return prev.filter(m => m.key !== msg.key)
       }
       const timestamp = Date.now()
       const newNotification: Message = {

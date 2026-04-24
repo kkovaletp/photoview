@@ -305,6 +305,7 @@ describe('useScrollPagination', () => {
                 triggerIntersection([{ isIntersecting: true }])
             })
 
+            await waitFor(() => expect(fetchMore).toHaveBeenCalled())
             expect(result.current.finished).toBe(false)
         })
     })
