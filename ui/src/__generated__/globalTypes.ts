@@ -120,6 +120,7 @@ export type ImageFace = {
 export enum LanguageTranslation {
   Basque = 'Basque',
   Danish = 'Danish',
+  Dutch = 'Dutch',
   English = 'English',
   French = 'French',
   German = 'German',

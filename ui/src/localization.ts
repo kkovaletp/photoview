@@ -70,6 +70,12 @@ export const useLoadTranslations = () => {
           i18n.changeLanguage('da')
         })
         return
+      case LanguageTranslation.Dutch:
+        import('./extractedTranslations/nl/translation.json').then(language => {
+          i18n.addResourceBundle('nl', 'translation', language)
+          i18n.changeLanguage('nl')
+        })
+        return
       case LanguageTranslation.English:
         import('./extractedTranslations/en/translation.json').then(language => {
           i18n.addResourceBundle('en', 'translation', language)
@@ -194,6 +200,7 @@ export const SetMapLanguages = (map: mapboxgl.Map) => {
       map.addControl(new MapboxLanguage({ defaultLanguage: 'da' }))
       return
     case LanguageTranslation.English:
+    case LanguageTranslation.Basque:
       map.addControl(new MapboxLanguage({ defaultLanguage: 'en' }))
       return
     case LanguageTranslation.French:
@@ -230,14 +237,14 @@ export const SetMapLanguages = (map: mapboxgl.Map) => {
     case LanguageTranslation.Portuguese:
       map.addControl(new MapboxLanguage({ defaultLanguage: 'pt' }))
       return
-    case LanguageTranslation.Basque:
-      map.addControl(new MapboxLanguage({ defaultLanguage: 'eu' }))
-      return
     case LanguageTranslation.Turkish:
       map.addControl(new MapboxLanguage({ defaultLanguage: 'tr' }))
       return
     case LanguageTranslation.Japanese:
       map.addControl(new MapboxLanguage({ defaultLanguage: 'ja' }))
+      return
+    case LanguageTranslation.Dutch:
+      map.addControl(new MapboxLanguage({ defaultLanguage: 'nl' }))
       return
     default:
       map.addControl(new MapboxLanguage({ defaultLanguage: 'en' }))
