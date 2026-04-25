@@ -3,7 +3,7 @@ import { useQuery, gql, useMutation } from '@apollo/client'
 import { useForm } from 'react-hook-form'
 import { INITIAL_SETUP_QUERY, login } from './loginUtilities'
 import { authToken } from '../../helpers/authentication'
-
+import TermsOfUseModal, { useTermsAccepted } from '../../components/termsOfUse/TermsOfUseModal'
 import { useTranslation } from 'react-i18next'
 import { Helmet, HelmetProvider } from '@dr.pogodin/react-helmet'
 import { useNavigate } from 'react-router'
@@ -124,6 +124,7 @@ type LoginInputs = {
 
 const LoginPage = () => {
   const { t } = useTranslation()
+  const { accepted, accept } = useTermsAccepted()
   const navigate = useNavigate()
   const token = authToken()
 
@@ -151,6 +152,7 @@ const LoginPage = () => {
           <title>{t('title.login', 'Login')} - {t('meta.app_name', 'Photoview')}</title>
         </Helmet>
       </HelmetProvider>
+      <TermsOfUseModal open={!accepted} onAccept={accept} />
       <div>
         <LogoHeader />
         <LoginForm />

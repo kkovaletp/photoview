@@ -1,7 +1,7 @@
-import React, { useContext } from 'react'
+import { useContext } from 'react'
 import { useTranslation } from 'react-i18next'
 import SearchBar from './Searchbar'
-
+import EthicalUseFlagBadge from '../termsOfUse/EthicalUseFlagBadge'
 import { authToken } from '../../helpers/authentication'
 import { SidebarContext } from '../sidebar/Sidebar'
 import { clsx } from 'clsx'
@@ -17,7 +17,7 @@ const Header = () => {
         { 'mr-[404px]': pinned }
       )}
     >
-      <h1 className="mr-4 lg:mr-8 shrink-0 flex items-center">
+      <h1 className="mr-4 lg:mr-8 shrink-0 flex items-center gap-2">
         <img
           className="h-12 lg:h-10"
           src={import.meta.env.BASE_URL + 'photoview-logo.svg'}
@@ -26,6 +26,7 @@ const Header = () => {
         <span className="hidden lg:block ml-2 text-2xl font-light">
           {t('meta.app_name', 'Photoview')}
         </span>
+        <EthicalUseFlagBadge />
       </h1>
       {authToken() ? <SearchBar /> : null}
     </div>

@@ -22,6 +22,7 @@ RUN npm install --global npm \
     fi
 
 COPY ui/ /app/ui
+COPY ETHICAL_USE_LICENSE.md /app/
 
 # Set environment variable REACT_APP_API_ENDPOINT from build args, uses "<web server>/api" as default
 ARG REACT_APP_API_ENDPOINT
@@ -179,7 +180,7 @@ HEALTHCHECK --interval=60s --timeout=10s --start-period=10s --retries=2 \
     || exit 1
 
 LABEL org.opencontainers.image.source=https://github.com/kkovaletp/photoview/
-LABEL org.opencontainers.image.licenses="AGPL-3.0 + Ethical Use License"
+LABEL org.opencontainers.image.licenses="AGPL-3.0-only AND LicenseRef-Photoview-Ethical-Use"
 USER photoview
 ENTRYPOINT ["/app/photoview"]
 
@@ -235,7 +236,7 @@ ENV HTTPS_PORT=8443
 EXPOSE 8080 ${HTTPS_PORT} ${HTTPS_PORT}/udp
 
 LABEL org.opencontainers.image.source=https://github.com/kkovaletp/photoview/
-LABEL org.opencontainers.image.licenses="AGPL-3.0 + Ethical Use License"
+LABEL org.opencontainers.image.licenses="AGPL-3.0-only AND LicenseRef-Photoview-Ethical-Use"
 
 HEALTHCHECK --interval=60s --timeout=5s --start-period=10s --retries=2 \
     CMD curl -kfsS "https://localhost:${HTTPS_PORT}/health-check" \
