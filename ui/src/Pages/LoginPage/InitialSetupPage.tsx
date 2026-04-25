@@ -1,9 +1,8 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { gql, useQuery, useMutation } from '@apollo/client'
 import { useNavigate } from 'react-router-dom'
-import { Container } from './loginUtilities'
-
-import { INITIAL_SETUP_QUERY, login } from './loginUtilities'
+import TermsOfUseModal, { useTermsAccepted } from '../../components/termsOfUse/TermsOfUseModal'
+import { Container, INITIAL_SETUP_QUERY, login } from './loginUtilities'
 import { authToken } from '../../helpers/authentication'
 import { useTranslation } from 'react-i18next'
 import { CheckInitialSetup } from './__generated__/CheckInitialSetup'
@@ -41,6 +40,8 @@ type InitialSetupFormData = {
 
 const InitialSetupPage = () => {
   const { t } = useTranslation()
+  const TERMS_URL = import.meta.env.BASE_URL + 'ethical-use-license.html'
+  const { accepted, accept, declined, decline } = useTermsAccepted()
   const navigate = useNavigate()
 
   const {
@@ -95,13 +96,30 @@ const InitialSetupPage = () => {
     return null
   }
 
+  if (declined) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen text-center p-8">
+        <h1 className="text-2xl font-bold mb-4">Access Denied</h1>
+        <p className="mb-4">
+          You have declined the{' '}
+          <a href={TERMS_URL} className="text-blue-600 underline">
+            Ethical Use License
+          </a>{/* */}
+          . You must not use this service.
+        </p>
+        <p className="text-sm text-gray-500">Please close this tab.</p>
+      </div>
+    )
+  }
+
   return (
     <div>
+      <TermsOfUseModal open={!accepted} onAccept={accept} onDecline={decline} />
       <Container>
         <h1 className="text-center text-xl">
           {t('login_page.initial_setup.title', 'Initial Setup')}
         </h1>
-        <form onSubmit={signIn} className="max-w-[500px] mx-auto">
+        <form onSubmit={signIn} className="max-w-125 mx-auto">
           <TextField
             wrapperClassName="my-4"
             fullWidth

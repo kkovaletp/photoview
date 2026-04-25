@@ -7,7 +7,7 @@ const OUTPUT_FILENAME = 'ethical-use-license.html'
 
 function buildHtml(mdFilePath: string): string {
     const md = readFileSync(mdFilePath, 'utf-8')
-    const body = marked(md) as string
+    const body = marked.parse(md, { async: false })
     return `<!DOCTYPE html>
 <html lang="en">
 <head>

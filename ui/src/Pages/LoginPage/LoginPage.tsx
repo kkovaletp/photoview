@@ -76,7 +76,7 @@ const LoginForm = () => {
 
   return (
     <form
-      className="mx-auto max-w-[500px] px-4"
+      className="mx-auto max-w-125 px-4"
       onSubmit={onSubmit}
     // loading={loading || (data && data.authorizeUser.success)}
     >
@@ -124,9 +124,10 @@ type LoginInputs = {
 
 const LoginPage = () => {
   const { t } = useTranslation()
-  const { accepted, accept } = useTermsAccepted()
+  const { accepted, declined, accept, decline } = useTermsAccepted()
   const navigate = useNavigate()
   const token = authToken()
+  const TERMS_URL = import.meta.env.BASE_URL + 'ethical-use-license.html'
 
   const { data: initialSetupData } = useQuery<CheckInitialSetup>(
     INITIAL_SETUP_QUERY,
@@ -145,6 +146,22 @@ const LoginPage = () => {
     return null
   }
 
+  if (declined) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen text-center p-8">
+        <h1 className="text-2xl font-bold mb-4">Access Denied</h1>
+        <p className="mb-4">
+          You have declined the{' '}
+          <a href={TERMS_URL} className="text-blue-600 underline">
+            Ethical Use License
+          </a>{/* */}
+          . You must not use this service.
+        </p>
+        <p className="text-sm text-gray-500">Please close this tab.</p>
+      </div>
+    )
+  }
+
   return (
     <>
       <HelmetProvider>
@@ -152,7 +169,7 @@ const LoginPage = () => {
           <title>{t('title.login', 'Login')} - {t('meta.app_name', 'Photoview')}</title>
         </Helmet>
       </HelmetProvider>
-      <TermsOfUseModal open={!accepted} onAccept={accept} />
+      <TermsOfUseModal open={!accepted} onAccept={accept} onDecline={decline} />
       <div>
         <LogoHeader />
         <LoginForm />

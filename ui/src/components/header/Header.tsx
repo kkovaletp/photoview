@@ -23,7 +23,7 @@ const Header = () => {
           src={import.meta.env.BASE_URL + 'photoview-logo.svg'}
           alt={t('header.logo_alt', 'Photoview logo')}
         />
-        <span className="hidden lg:block ml-2 text-2xl font-light">
+        <span className="hidden lg:block text-2xl font-light">
           {t('meta.app_name', 'Photoview')}
         </span>
         <EthicalUseFlagBadge />
