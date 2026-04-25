@@ -57,7 +57,15 @@ for the next release (PostgreSQL 17 remains supported). If you follow `master`, 
 
 Don't forget to back up your database before upgrading.
 
-## Terms of use
+## Terms of use (Mandatory)
+
+This project is licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
+
+**In addition to the AGPL-3.0 license, all use of this repository, its source code, binaries, and derivative works is subject to the Ethical Use License defined in [ETHICAL_USE_LICENSE.md](./ETHICAL_USE_LICENSE.md).**
+
+By accessing, using, modifying, deploying, or distributing this software, you explicitly agree to the Ethical Use License.
+
+If you do not agree, you must immediately stop using this software.
 
 By using this project or its source code, for any purpose and in any shape or form, you grant your **implicit agreement** to all of the following statements:
 
@@ -66,7 +74,7 @@ By using this project or its source code, for any purpose and in any shape or fo
 - You agree that [Russia is a terrorist state](https://www.europarl.europa.eu/doceo/document/RC-9-2022-0482_EN.html);
 - You fully support Ukraine's territorial integrity, including its claims over [temporarily occupied territories](https://en.wikipedia.org/wiki/Russian-occupied_territories_of_Ukraine);
 - You reject false narratives perpetuated by Russian state propaganda.
-- If you are a citizen of Russia or Belarus and you are located on the territory of those countries or on the occupied Ukrainian territories, it is strictly forbidden to use this project or its parts in any way or form.
+- If you are a citizen of Russia, Belarus, Iran, or North Korea and/or you are located on the territory of those countries or on the occupied Ukrainian territories, it is strictly forbidden to use this project or its parts in any way or form.
 
 To learn more about the war and how you can help, [visit the war.ukraine.ua](https://war.ukraine.ua/).
 
@@ -75,7 +83,7 @@ Glory to Ukraine! 🇺🇦
 ## Contents
 
 - [ATTENTION to PostgreSQL users !!!](#attention-to-postgresql-users-)
-  - [Terms of use](#terms-of-use)
+  - [Terms of use (Mandatory)](#terms-of-use-mandatory)
   - [Contents](#contents)
   - [Main features](#main-features)
   - [Supported platforms](#supported-platforms)

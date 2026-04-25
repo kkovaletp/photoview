@@ -179,6 +179,7 @@ HEALTHCHECK --interval=60s --timeout=10s --start-period=10s --retries=2 \
     || exit 1
 
 LABEL org.opencontainers.image.source=https://github.com/kkovaletp/photoview/
+LABEL org.opencontainers.image.licenses="AGPL-3.0 + Ethical Use License"
 USER photoview
 ENTRYPOINT ["/app/photoview"]
 
@@ -234,6 +235,7 @@ ENV HTTPS_PORT=8443
 EXPOSE 8080 ${HTTPS_PORT} ${HTTPS_PORT}/udp
 
 LABEL org.opencontainers.image.source=https://github.com/kkovaletp/photoview/
+LABEL org.opencontainers.image.licenses="AGPL-3.0 + Ethical Use License"
 
 HEALTHCHECK --interval=60s --timeout=5s --start-period=10s --retries=2 \
     CMD curl -kfsS "https://localhost:${HTTPS_PORT}/health-check" \
