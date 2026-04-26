@@ -4,6 +4,7 @@ import { useForm } from 'react-hook-form'
 import { INITIAL_SETUP_QUERY, login } from './loginUtilities'
 import { authToken } from '../../helpers/authentication'
 import TermsOfUseModal, { useTermsAccepted } from '../../components/termsOfUse/TermsOfUseModal'
+import AccessDeniedScreen from '../../components/termsOfUse/AccessDeniedScreen'
 import { useTranslation } from 'react-i18next'
 import { Helmet, HelmetProvider } from '@dr.pogodin/react-helmet'
 import { useNavigate } from 'react-router'
@@ -127,7 +128,6 @@ const LoginPage = () => {
   const { accepted, declined, accept, decline } = useTermsAccepted()
   const navigate = useNavigate()
   const token = authToken()
-  const TERMS_URL = import.meta.env.BASE_URL + 'ethical-use-license.html'
 
   const { data: initialSetupData } = useQuery<CheckInitialSetup>(
     INITIAL_SETUP_QUERY,
@@ -147,19 +147,7 @@ const LoginPage = () => {
   }
 
   if (declined) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-screen text-center p-8">
-        <h1 className="text-2xl font-bold mb-4">Access Denied</h1>
-        <p className="mb-4">
-          You have declined the{' '}
-          <a href={TERMS_URL} className="text-blue-600 underline">
-            Ethical Use License
-          </a>{/* */}
-          . You must not use this service.
-        </p>
-        <p className="text-sm text-gray-500">Please close this tab.</p>
-      </div>
-    )
+    return <AccessDeniedScreen />
   }
 
   return (
