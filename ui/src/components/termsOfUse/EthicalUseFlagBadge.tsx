@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
-import { useTranslation } from 'react-i18next'
+import { Trans, useTranslation } from 'react-i18next'
+import { TERMS_URL } from './AccessDeniedScreen'
 
-const TERMS_URL = import.meta.env.BASE_URL + 'ethical-use-license.html'
 const DIALOG_ID = 'ethical-use-dialog'
 
 const EthicalUseFlagBadge = () => {
@@ -9,15 +9,24 @@ const EthicalUseFlagBadge = () => {
     const [open, setOpen] = useState(false)
     const ref = useRef<HTMLDivElement>(null)
 
-    // Close on outside click
+    // Close on outside click or escape key
     useEffect(() => {
         const handler = (e: MouseEvent) => {
             if (ref.current && !ref.current.contains(e.target as Node)) {
                 setOpen(false)
             }
         }
-        if (open) document.addEventListener('mousedown', handler)
-        return () => document.removeEventListener('mousedown', handler)
+        const onKey = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') setOpen(false)
+        }
+        if (open) {
+            document.addEventListener('mousedown', handler)
+            document.addEventListener('keydown', onKey)
+        }
+        return () => {
+            document.removeEventListener('mousedown', handler)
+            document.removeEventListener('keydown', onKey)
+        }
     }, [open])
 
     return (
@@ -54,52 +63,63 @@ const EthicalUseFlagBadge = () => {
                         </button>
                     </div>
                     <p className="text-gray-600 dark:text-gray-300 mb-3">
-                        {t('terms_of_use.badge.agreement_intro',
-                            'By accessing or sharing this service, you agree to the')}{' '}
-                        <a
-                            href={TERMS_URL}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-blue-600 dark:text-blue-400 underline"
-                        >
-                            {t('terms_of_use.ethical_use_license_link', 'Ethical Use License')}
-                        </a>
-                        {'.'}
+                        <Trans
+                            i18nKey="terms_of_use.agreement_intro"
+                            defaults="By accessing, using, or interacting with this product/service you explicitly agree to the <licenseLink>Ethical Use License</licenseLink>."
+                            components={{
+                                licenseLink: (
+                                    <a
+                                        href={TERMS_URL}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="text-blue-600 dark:text-blue-400 underline"
+                                    >
+                                        Ethical Use License
+                                    </a>
+                                ),
+                            }}
+                        />
+                        {' '}
                         {t('terms_of_use.badge.key_conditions_suffix', 'Key conditions:')}
                     </p>
                     <ul className="list-disc list-inside text-xs text-gray-600 dark:text-gray-400 space-y-1">
                         <li>
-                            {t('terms_of_use.badge.conditions.condemn_aggression',
-                                "You condemn Russia's military aggression against Ukraine")}
+                            {t('terms_of_use.conditions.condemn_aggression',
+                                "You unequivocally condemn Russia's military aggression against Ukraine")}
                         </li>
                         <li>
-                            {t('terms_of_use.badge.conditions.recognize_sovereignty',
-                                'You recognize Ukraine as a sovereign, independent state')}
+                            {t('terms_of_use.conditions.recognize_invasion',
+                                'You recognize that Russia unlawfully invaded a sovereign state')}
                         </li>
                         <li>
-                            {t('terms_of_use.modal.conditions.terrorist_state_p1',
-                                'You agree that')}{' '}
-                            <a
-                                href="https://www.europarl.europa.eu/doceo/document/RC-9-2022-0482_EN.html"
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-blue-600 dark:text-blue-400 underline"
-                            >
-                                {t('terms_of_use.modal.conditions.terrorist_state_p2',
-                                    'Russia is a terrorist state')}
-                            </a>
+                            <Trans
+                                i18nKey="terms_of_use.conditions.terrorist_state"
+                                defaults="You agree that <doc>Russia is a terrorist state</doc>."
+                                components={{
+                                    doc: (
+                                        <a
+                                            href="https://www.europarl.europa.eu/doceo/document/RC-9-2022-0482_EN.html"
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="text-blue-600 dark:text-blue-400 underline"
+                                        >
+                                            Russia is a terrorist state
+                                        </a>
+                                    ),
+                                }}
+                            />
                         </li>
                         <li>
-                            {t('terms_of_use.badge.conditions.support_territorial_integrity',
-                                "You support Ukraine's full territorial integrity")}
+                            {t('terms_of_use.conditions.support_territorial_integrity',
+                                "You fully support Ukraine's territorial integrity")}
                         </li>
                         <li>
-                            {t('terms_of_use.badge.conditions.reject_propaganda',
-                                'You reject Russian state propaganda')}
+                            {t('terms_of_use.conditions.reject_propaganda',
+                                'You reject narratives perpetuated by Russian state propaganda')}
                         </li>
                         <li className="text-red-500 dark:text-red-400 font-medium">
-                            {t('terms_of_use.badge.conditions.forbidden_citizens',
-                                'Forbidden for citizens/residents of Russia, Belarus, Iran, or North Korea')}
+                            {t('terms_of_use.conditions.forbidden_citizens',
+                                'Citizens/residents of Russia, Belarus, Iran, and/or North Korea are strictly forbidden from using this product/service')}
                         </li>
                     </ul>
                 </div>

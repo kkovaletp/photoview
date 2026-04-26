@@ -1,10 +1,9 @@
 import { useState } from 'react'
-import { useTranslation } from 'react-i18next'
+import { Trans, useTranslation } from 'react-i18next'
 import Modal from '../../primitives/Modal'
+import { TERMS_URL } from './AccessDeniedScreen'
 
 const TERMS_ACCEPTED_KEY = 'ethical_use_terms_accepted'
-
-const TERMS_URL = import.meta.env.BASE_URL + 'ethical-use-license.html'
 
 const safeRead = (): boolean => {
     try {
@@ -50,17 +49,22 @@ const TermsOfUseModal = ({ open, onAccept, onDecline }: Props) => {
             title={t('terms_of_use.modal.title', 'Terms of Use (Mandatory)')}
             description={
                 <span>
-                    {t('terms_of_use.modal.description_intro',
-                        'By accessing, using, or interacting with this service you explicitly agree to the')}{' '}
-                    <a
-                        href={TERMS_URL}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-600 dark:text-blue-400 underline"
-                    >
-                        {t('terms_of_use.ethical_use_license_link', 'Ethical Use License')}
-                    </a>
-                    {'.'}
+                    <Trans
+                        i18nKey="terms_of_use.agreement_intro"
+                        defaults="By accessing, using, or interacting with this product/service you explicitly agree to the <licenseLink>Ethical Use License</licenseLink>."
+                        components={{
+                            licenseLink: (
+                                <a
+                                    href={TERMS_URL}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-blue-600 dark:text-blue-400 underline"
+                                >
+                                    Ethical Use License
+                                </a>
+                            ),
+                        }}
+                    />
                 </span>
             }
             actions={[
@@ -80,37 +84,42 @@ const TermsOfUseModal = ({ open, onAccept, onDecline }: Props) => {
         >
             <ul className="list-disc list-inside text-sm text-gray-700 dark:text-gray-300 space-y-1 mb-2">
                 <li>
-                    {t('terms_of_use.modal.conditions.condemn_aggression',
+                    {t('terms_of_use.conditions.condemn_aggression',
                         "You unequivocally condemn Russia's military aggression against Ukraine")}
                 </li>
                 <li>
-                    {t('terms_of_use.modal.conditions.recognize_invasion',
+                    {t('terms_of_use.conditions.recognize_invasion',
                         'You recognize that Russia unlawfully invaded a sovereign state')}
                 </li>
                 <li>
-                    {t('terms_of_use.modal.conditions.terrorist_state_p1',
-                        'You agree that')}{' '}
-                    <a
-                        href="https://www.europarl.europa.eu/doceo/document/RC-9-2022-0482_EN.html"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-blue-600 dark:text-blue-400 underline"
-                    >
-                        {t('terms_of_use.modal.conditions.terrorist_state_p2',
-                            'Russia is a terrorist state')}
-                    </a>
+                    <Trans
+                        i18nKey="terms_of_use.conditions.terrorist_state"
+                        defaults="You agree that <doc>Russia is a terrorist state</doc>."
+                        components={{
+                            doc: (
+                                <a
+                                    href="https://www.europarl.europa.eu/doceo/document/RC-9-2022-0482_EN.html"
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="text-blue-600 dark:text-blue-400 underline"
+                                >
+                                    Russia is a terrorist state
+                                </a>
+                            ),
+                        }}
+                    />
                 </li>
                 <li>
-                    {t('terms_of_use.modal.conditions.support_territorial_integrity',
+                    {t('terms_of_use.conditions.support_territorial_integrity',
                         "You fully support Ukraine's territorial integrity")}
                 </li>
                 <li>
-                    {t('terms_of_use.modal.conditions.reject_propaganda',
+                    {t('terms_of_use.conditions.reject_propaganda',
                         'You reject narratives perpetuated by Russian state propaganda')}
                 </li>
                 <li className="font-semibold text-red-600 dark:text-red-400">
-                    {t('terms_of_use.modal.conditions.forbidden_citizens',
-                        'Citizens/residents of Russia, Belarus, Iran, or North Korea are strictly forbidden from using this product/service')}
+                    {t('terms_of_use.conditions.forbidden_citizens',
+                        'Citizens/residents of Russia, Belarus, Iran, and/or North Korea are strictly forbidden from using this product/service')}
                 </li>
             </ul>
         </Modal>

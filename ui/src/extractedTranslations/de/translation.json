@@ -392,36 +392,31 @@
     "settings": "Einstellungen"
   },
   "terms_of_use": {
+    "agreement_intro": "",
     "badge": {
-      "agreement_intro": "",
       "button_aria_label": "",
       "button_title": "",
-      "conditions": {
-        "condemn_aggression": "",
-        "forbidden_citizens": "",
-        "recognize_sovereignty": "",
-        "reject_propaganda": "",
-        "support_territorial_integrity": ""
-      },
       "dialog_aria_label": "",
       "key_conditions_suffix": ""
     },
-    "ethical_use_license_link": "",
+    "conditions": {
+      "condemn_aggression": "",
+      "forbidden_citizens": "",
+      "recognize_invasion": "",
+      "reject_propaganda": "",
+      "support_territorial_integrity": "",
+      "terrorist_state": ""
+    },
+    "declined": {
+      "close_tab": "",
+      "message": "",
+      "title": ""
+    },
     "modal": {
       "action": {
         "accept": "",
         "decline": ""
       },
-      "conditions": {
-        "condemn_aggression": "",
-        "forbidden_citizens": "",
-        "recognize_invasion": "",
-        "reject_propaganda": "",
-        "support_territorial_integrity": "",
-        "terrorist_state_p1": "",
-        "terrorist_state_p2": ""
-      },
-      "description_intro": "",
       "title": ""
     }
   },

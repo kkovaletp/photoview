@@ -392,36 +392,31 @@
     "settings": "Settings"
   },
   "terms_of_use": {
+    "agreement_intro": "By accessing, using, or interacting with this product/service you explicitly agree to the <licenseLink>Ethical Use License</licenseLink>.",
     "badge": {
-      "agreement_intro": "By accessing or sharing this service, you agree to the",
       "button_aria_label": "View Terms of Use",
       "button_title": "Terms of Use (Mandatory)",
-      "conditions": {
-        "condemn_aggression": "You condemn Russia's military aggression against Ukraine",
-        "forbidden_citizens": "Forbidden for citizens/residents of Russia, Belarus, Iran, or North Korea",
-        "recognize_sovereignty": "You recognize Ukraine as a sovereign, independent state",
-        "reject_propaganda": "You reject Russian state propaganda",
-        "support_territorial_integrity": "You support Ukraine's full territorial integrity"
-      },
       "dialog_aria_label": "Terms of Use",
       "key_conditions_suffix": "Key conditions:"
     },
-    "ethical_use_license_link": "Ethical Use License",
+    "conditions": {
+      "condemn_aggression": "You unequivocally condemn Russia's military aggression against Ukraine",
+      "forbidden_citizens": "Citizens/residents of Russia, Belarus, Iran, and/or North Korea are strictly forbidden from using this product/service",
+      "recognize_invasion": "You recognize that Russia unlawfully invaded a sovereign state",
+      "reject_propaganda": "You reject narratives perpetuated by Russian state propaganda",
+      "support_territorial_integrity": "You fully support Ukraine's territorial integrity",
+      "terrorist_state": "You agree that <doc>Russia is a terrorist state</doc>."
+    },
+    "declined": {
+      "close_tab": "Please close this tab.",
+      "message": "You have declined the <licenseLink>Ethical Use License</licenseLink>. You must not use this service.",
+      "title": "Access Denied"
+    },
     "modal": {
       "action": {
         "accept": "I Agree",
         "decline": "I Do Not Agree"
       },
-      "conditions": {
-        "condemn_aggression": "You unequivocally condemn Russia's military aggression against Ukraine",
-        "forbidden_citizens": "Citizens/residents of Russia, Belarus, Iran, or North Korea are strictly forbidden from using this product/service",
-        "recognize_invasion": "You recognize that Russia unlawfully invaded a sovereign state",
-        "reject_propaganda": "You reject narratives perpetuated by Russian state propaganda",
-        "support_territorial_integrity": "You fully support Ukraine's territorial integrity",
-        "terrorist_state_p1": "You agree that",
-        "terrorist_state_p2": "Russia is a terrorist state"
-      },
-      "description_intro": "By accessing, using, or interacting with this service you explicitly agree to the",
       "title": "Terms of Use (Mandatory)"
     }
   },

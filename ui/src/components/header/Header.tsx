@@ -14,20 +14,22 @@ const Header = () => {
     <div
       className={clsx(
         'sticky top-0 z-10 bg-white dark:bg-dark-bg flex items-center justify-between py-3 px-4 lg:px-8 lg:pt-4 shadow-separator lg:shadow-none',
-        { 'mr-[404px]': pinned }
+        { 'mr-101': pinned }
       )}
     >
-      <h1 className="mr-4 lg:mr-8 shrink-0 flex items-center gap-2">
-        <img
-          className="h-12 lg:h-10"
-          src={import.meta.env.BASE_URL + 'photoview-logo.svg'}
-          alt={t('header.logo_alt', 'Photoview logo')}
-        />
-        <span className="hidden lg:block text-2xl font-light">
-          {t('meta.app_name', 'Photoview')}
-        </span>
+      <div className="mr-4 lg:mr-8 shrink-0 flex items-center gap-2">
+        <h1 className="flex items-center gap-2">
+          <img
+            className="h-12 lg:h-10"
+            src={import.meta.env.BASE_URL + 'photoview-logo.svg'}
+            alt={t('header.logo_alt', 'Photoview logo')}
+          />
+          <span className="hidden lg:block text-2xl font-light">
+            {t('meta.app_name', 'Photoview')}
+          </span>
+        </h1>
         <EthicalUseFlagBadge />
-      </h1>
+      </div>
       {authToken() ? <SearchBar /> : null}
     </div>
   )
