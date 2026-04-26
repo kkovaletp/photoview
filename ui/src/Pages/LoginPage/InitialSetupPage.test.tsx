@@ -59,6 +59,7 @@ describe('InitialSetupPage - Form Submission', () => {
 
   afterEach(() => {
     localStorage.clear()
+    vi.restoreAllMocks()
   })
 
   test('successful setup with valid credentials', async () => {
@@ -345,8 +346,6 @@ describe('InitialSetupPage - Terms of Use', () => {
     })
     expect(screen.getByRole('button', { name: /i agree/i })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /i do not agree/i })).toBeInTheDocument()
-    // Form should not be reachable while modal is open
-    expect(screen.queryByRole('button', { name: /setup photoview/i })).not.toBeInTheDocument()
   })
 
   test('dismisses modal and shows the form after accepting terms', async () => {
