@@ -33,7 +33,7 @@
     "@dr.pogodin/react-helmet": "^3.1.1",
     "@headlessui/react": "^2.2.10",
     "@mapbox/mapbox-gl-language": "^1.0.0",
-    "@tailwindcss/vite": "^4.2.2",
+    "@tailwindcss/vite": "^4.2.4",
     "@types/geojson": "^7946.0.16",
     "@types/js-cookie": "^3.0.6",
     "@types/luxon": "^3.7.1",
