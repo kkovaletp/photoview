@@ -61,7 +61,7 @@ Durch die Nutzung dieser Software erklären Sie ausdrücklich Folgendes:
 
 Diese Erklärung ist eine **wesentliche Bedingung der Lizenz**.
 
-* ---
+---
 
 ## 5. Persönliche Verantwortung
 

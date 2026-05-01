@@ -40,7 +40,7 @@ Aşağıdaki durumlarda bu yazılımı KULLANAMAZSINIZ:
 
   * Askeri operasyonlar
   * Propaganda veya dezenformasyon
-  * Devlet kontrolündeki altyapı Yasaklı Yetki Alanları
+  * Yasaklı Yetki Alanlarındaki devlet kontrolündeki altyapı
 
 ---
 

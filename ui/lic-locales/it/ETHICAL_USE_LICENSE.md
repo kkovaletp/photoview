@@ -40,7 +40,7 @@ NON è consentito utilizzare questo software se:
 
   * Operazioni militari
   * Propaganda o disinformazione
-  * Infrastrutture controllate dallo Stato di Entità Proibite Giurisdizioni
+  * Infrastrutture controllate dallo Stato di una Giurisdizione Proibita
 
 ---
 

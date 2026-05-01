@@ -40,7 +40,7 @@ Vous ne pouvez PAS utiliser ce logiciel si :
 
   * Des opérations militaires
   * De la propagande ou de la désinformation
-  * Une infrastructure étatique d’une Juridiction interdite Juridictions
+  * Une infrastructure étatique d’une Juridiction interdite
 
 ---
 

@@ -34,13 +34,13 @@ Jeśli nie zgadzasz się z niniejszymi warunkami, nie masz prawa korzystać z te
 
 NIE wolno używać tego oprogramowania, jeśli:
 
-* Znajdujesz się w Jurysdykcji Zakazanych
-* Działasz w imieniu lub pod kontrolą Podmiotu Zakazanych
+* Znajdujesz się w Zakazanej Jurysdykcji
+* Działasz w imieniu lub pod kontrolą Zakazanego Podmiotu
 * Używasz oprogramowania do celów wspierających:
 
   * Operacje wojskowe
   * Propagandę lub dezinformację
-  * Infrastrukturę kontrolowaną przez państwo Zabronione jurysdykcje
+  * Infrastrukturę państwową kontrolowaną przez Zakazane Jurysdykcje
 
 ---
 
@@ -85,7 +85,7 @@ Każde naruszenie niniejszej licencji:
 
 Niniejsza licencja nie modyfikuje wyłączenia gwarancji AGPL-3.0.
 
---
+---
 
 ## 8. Rozdzielność postanowień
 

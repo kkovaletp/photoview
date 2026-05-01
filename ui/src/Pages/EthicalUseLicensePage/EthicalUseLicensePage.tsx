@@ -1,5 +1,6 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect } from 'react'
 import { marked } from 'marked'
+import DOMPurify from 'dompurify'
 import { useNavigate } from 'react-router-dom'
 import i18n from 'i18next'
 
@@ -28,22 +29,34 @@ const LOCALE_LABELS: Record<string, string> = {
 
 type Manifest = { locales: string[] }
 
-async function fetchManifest(): Promise<Manifest> {
+async function fetchManifest(signal: AbortSignal): Promise<Manifest> {
     try {
-        const res = await fetch(`${BASE}lic-locales/manifest.json`)
+        const res = await fetch(`${BASE}lic-locales/manifest.json`, { signal })
         if (res.ok) return res.json() as Promise<Manifest>
-    } catch { /* fall through */ }
+    } catch (err) {
+        // Re-throw aborts so the caller can detect cancellation; swallow other errors.
+        if (err instanceof DOMException && err.name === 'AbortError') throw err
+        /* fall through – network/parse error → use default */
+    }
     return { locales: ['en'] }
 }
 
-async function fetchLicenseMd(lang: string): Promise<string> {
-    const primary = `${BASE}lic-locales/${lang}/${LICENSE_FILE}`
-    const res = await fetch(primary)
-    if (res.ok) return res.text()
+async function fetchLicenseMd(lang: string, signal: AbortSignal): Promise<string> {
+    const primaryRes = await fetch(
+        `${BASE}lic-locales/${lang}/${LICENSE_FILE}`,
+        { signal },
+    )
+    if (primaryRes.ok) return primaryRes.text()
 
-    // Fallback to English
-    const fallback = await fetch(`${BASE}lic-locales/en/${LICENSE_FILE}`)
-    if (fallback.ok) return fallback.text()
+    // Fallback to English when the requested locale file is absent,
+    // but skip the extra round-trip if English was already requested.
+    if (lang !== 'en') {
+        const fallbackRes = await fetch(
+            `${BASE}lic-locales/en/${LICENSE_FILE}`,
+            { signal },
+        )
+        if (fallbackRes.ok) return fallbackRes.text()
+    }
 
     throw new Error('License file unavailable')
 }
@@ -93,30 +106,38 @@ const EthicalUseLicensePage = () => {
 
     // Load manifest on mount, then resolve initial locale
     useEffect(() => {
-        fetchManifest().then(m => {
-            setAvailableLocales(m.locales)
-            setSelectedLang(resolveInitialLocale(m.locales))
-        })
+        const controller = new AbortController()
+        fetchManifest(controller.signal)
+            .then(m => {
+                setAvailableLocales(m.locales)
+                setSelectedLang(resolveInitialLocale(m.locales))
+            })
+            .catch(() => {
+                // AbortError (unmount) or unexpected failure – keep defaults.
+            })
+        return () => controller.abort()
     }, [])
 
     // Fetch MD whenever selected language changes
-    const loadMd = useCallback((lang: string) => {
+    // A new AbortController is created on every run; the cleanup function aborts
+    // the previous controller, so only the most-recent locale's fetch can update state.
+    // This covers both the auto-resolved locale (after the manifest loads) and manual dropdown switches.
+    useEffect(() => {
+        const controller = new AbortController()
         setLoading(true)
         setError(null)
-        fetchLicenseMd(lang)
+        fetchLicenseMd(selectedLang, controller.signal)
             .then(md => {
-                setHtml(marked.parse(md) as string)
+                setHtml(DOMPurify.sanitize(marked.parse(md) as string))
                 setLoading(false)
             })
-            .catch(() => {
+            .catch(err => {
+                if (err instanceof DOMException && err.name === 'AbortError') return
                 setError('Failed to load the license document. Please try again.')
                 setLoading(false)
             })
-    }, [])
-
-    useEffect(() => {
-        loadMd(selectedLang)
-    }, [selectedLang, loadMd])
+        return () => controller.abort()
+    }, [selectedLang])
 
     return (
         <>
