@@ -1,82 +1,99 @@
 import type { Plugin } from 'vite'
-import { readFileSync } from 'node:fs'
+import { readFileSync, readdirSync, existsSync } from 'node:fs'
 import { resolve } from 'node:path'
-import { marked } from 'marked'
 
-const OUTPUT_FILENAME = 'ethical-use-license.html'
+const LOCALES_DIR = 'ui/lic-locales'
+const LICENSE_FILE = 'ETHICAL_USE_LICENSE.md'
+const MANIFEST_PATH = `${LOCALES_DIR}/manifest.json`
 
-function buildHtml(mdFilePath: string): string {
-    const md = readFileSync(mdFilePath, 'utf-8')
-    const body = marked.parse(md, { async: false })
-    return `<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Ethical Use License (EUL) v1.0 — Photoview</title>
-    <style>
-        :root { color-scheme: light dark; }
-        body {
-            font-family: system-ui, -apple-system, sans-serif;
-            max-width: 800px;
-            margin: 2rem auto;
-            padding: 0 1.5rem 4rem;
-            line-height: 1.7;
-            color: light-dark(#1a1a1a, #e8e8e8);
-            background: light-dark(#ffffff, #1e2227);
-        }
-        h1 { font-size: 1.75rem; border-bottom: 2px solid light-dark(#e0e0e0, #444); padding-bottom: 0.5rem; }
-        h2 { font-size: 1.2rem; margin-top: 2rem; color: light-dark(#2a5ba8, #6fa3ef); }
-        hr { border: none; border-top: 1px solid light-dark(#e0e0e0, #444); margin: 1.5rem 0; }
-        ul { padding-left: 1.5rem; }
-        li { margin-bottom: 0.4rem; }
-        strong { color: light-dark(#b91c1c, #f87171); }
-        a { color: light-dark(#1d4ed8, #60a5fa); }
-        p:last-child { text-align: center; font-size: 1.5rem; }
-    </style>
-</head>
-<body>
-${body}
-</body>
-</html>`
+/** Returns locale codes that have a translated MD file under lic-locales/. */
+function getAvailableLocales(repoRoot: string): string[] {
+    const dir = resolve(repoRoot, LOCALES_DIR)
+    if (!existsSync(dir)) return ['en']
+    return readdirSync(dir, { withFileTypes: true })
+        .filter(e => e.isDirectory() || e.isSymbolicLink())
+        .map(e => e.name)
+        .filter(name => {
+            // Only include if the MD file actually exists (symlink or real file)
+            return existsSync(resolve(dir, name, LICENSE_FILE))
+        })
+        .sort((a, b) => a.localeCompare(b))
+}
+
+/** Reads a locale's MD, falling back to the repo-root EN copy. */
+function readLicenseMd(repoRoot: string, lang: string): string | null {
+    const localePath = resolve(repoRoot, LOCALES_DIR, lang, LICENSE_FILE)
+    if (existsSync(localePath)) {
+        try { return readFileSync(localePath, 'utf-8') } catch { /* fall through */ }
+    }
+    // Absolute fallback: the root English copy
+    const rootPath = resolve(repoRoot, LICENSE_FILE)
+    try { return readFileSync(rootPath, 'utf-8') } catch { /* fall through */ }
+    return null
 }
 
 export function ethicalLicensePlugin(): Plugin {
-    let mdFilePath: string
+    let repoRoot: string
 
     return {
-        name: 'ethical-license-html',
+        name: 'ethical-license-assets',
 
         configResolved(config) {
             // config.root is the absolute path to ui/
-            mdFilePath = resolve(config.root, '../ETHICAL_USE_LICENSE.md')
+            repoRoot = resolve(config.root, '..')
         },
 
-        // Dev server: serve the generated HTML on-the-fly
+        // Dev server: serve manifest + MD files on-the-fly
         configureServer(server) {
             server.middlewares.use((req, res, next) => {
-                if (req.url?.endsWith(`/${OUTPUT_FILENAME}`)) {
-                    try {
-                        const html = buildHtml(mdFilePath)
-                        res.setHeader('Content-Type', 'text/html; charset=utf-8')
-                        res.end(html)
-                    } catch (e) {
-                        next(e)
-                    }
-                } else {
-                    next()
+                const url = req.url ?? ''
+
+                // GET /lic-locales/manifest.json
+                if (url === `/${MANIFEST_PATH}`) {
+                    const locales = getAvailableLocales(repoRoot)
+                    res.setHeader('Content-Type', 'application/json; charset=utf-8')
+                    res.end(JSON.stringify({ locales }))
+                    return
                 }
+
+                // GET /lic-locales/<lang>/ETHICAL_USE_LICENSE.md
+                const mdMatch = new RegExp(/^\/lic-locales\/([a-zA-Z0-9_-]+)\/ETHICAL_USE_LICENSE\.md(\?.*)?$/).exec(url)
+                if (mdMatch) {
+                    const md = readLicenseMd(repoRoot, mdMatch[1])
+                    if (md === null) {
+                        res.statusCode = 404
+                        res.end('License file not found')
+                    } else {
+                        res.setHeader('Content-Type', 'text/markdown; charset=utf-8')
+                        res.end(md)
+                    }
+                    return
+                }
+
+                next()
             })
         },
 
-        // Build: emit the file directly into dist/
+        // Production build: emit manifest + all locale MD files as static assets
         generateBundle() {
-            const html = buildHtml(mdFilePath)
+            const locales = getAvailableLocales(repoRoot)
+
             this.emitFile({
                 type: 'asset',
-                fileName: OUTPUT_FILENAME,
-                source: html,
+                fileName: MANIFEST_PATH,
+                source: JSON.stringify({ locales }),
             })
+
+            for (const lang of locales) {
+                const md = readLicenseMd(repoRoot, lang)
+                if (md !== null) {
+                    this.emitFile({
+                        type: 'asset',
+                        fileName: `${LOCALES_DIR}/${lang}/${LICENSE_FILE}`,
+                        source: md,
+                    })
+                }
+            }
         },
     }
 }

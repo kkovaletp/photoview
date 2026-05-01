@@ -9,7 +9,8 @@ import {
 
 import Layout from '../layout/Layout'
 import { authToken, clearTokenCookie } from '../../helpers/authentication'
-import { TFunction, useTranslation } from 'react-i18next'
+import { useTranslation } from 'react-i18next'
+import type { TFunction } from 'i18next'
 import Loader from '../../primitives/Loader'
 import AuthorizedRoute from './AuthorizedRoute'
 
@@ -25,6 +26,10 @@ const PlacesPage = React.lazy(() => import('../../Pages/PlacesPage/PlacesPage'))
 const LoginPage = React.lazy(() => import('../../Pages/LoginPage/LoginPage'))
 const InitialSetupPage = React.lazy(
   () => import('../../Pages/LoginPage/InitialSetupPage')
+)
+
+const EthicalUseLicensePage = React.lazy(
+  () => import('../../Pages/EthicalUseLicensePage/EthicalUseLicensePage')
 )
 
 const SharePageTokenRoute = React.lazy(() =>
@@ -116,6 +121,10 @@ const Routes = () => {
       // for backwards-compatibility
       path: '/photos',
       element: <Navigate to="/timeline" />,
+    },
+    {
+      path: '/ethical-use-license',
+      element: <EthicalUseLicensePage />,
     },
     {
       path: '*',

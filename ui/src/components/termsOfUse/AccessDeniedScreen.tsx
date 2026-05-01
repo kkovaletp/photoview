@@ -1,6 +1,6 @@
 import { Trans, useTranslation } from 'react-i18next'
 
-export const TERMS_URL = import.meta.env.BASE_URL + 'ethical-use-license.html'
+export const TERMS_URL = import.meta.env.BASE_URL + 'ethical-use-license'
 
 const AccessDeniedScreen = () => {
   const { t } = useTranslation()

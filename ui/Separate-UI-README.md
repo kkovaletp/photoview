@@ -8,7 +8,7 @@
 
 This project is licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
 
-**In addition to the AGPL-3.0 license, all use of this repository, its source code, binaries, and derivative works is subject to the Ethical Use License defined in [ETHICAL_USE_LICENSE.md](../ETHICAL_USE_LICENSE.md).**
+**In addition to the AGPL-3.0 license, all use of this repository, its source code, binaries, and derivative works is subject to the Ethical Use License defined in the [ETHICAL_USE_LICENSE.md](../ETHICAL_USE_LICENSE.md) (En). Also translated to [UK](./lic-locales/uk/ETHICAL_USE_LICENSE.md), [DA](./lic-locales/da/ETHICAL_USE_LICENSE.md), [DE](./lic-locales/de/ETHICAL_USE_LICENSE.md), [ES](./lic-locales/es/ETHICAL_USE_LICENSE.md), [EU](./lic-locales/eu/ETHICAL_USE_LICENSE.md), [FR](./lic-locales/fr/ETHICAL_USE_LICENSE.md), [IT](./lic-locales/it/ETHICAL_USE_LICENSE.md), [JA](./lic-locales/ja/ETHICAL_USE_LICENSE.md), [NL](./lic-locales/nl/ETHICAL_USE_LICENSE.md), [PL](./lic-locales/pl/ETHICAL_USE_LICENSE.md), [PT](./lic-locales/pt/ETHICAL_USE_LICENSE.md), [RU](./lic-locales/ru/ETHICAL_USE_LICENSE.md), [SV](./lic-locales/sv/ETHICAL_USE_LICENSE.md), [TR](./lic-locales/tr/ETHICAL_USE_LICENSE.md), [Simplified Chinese](./lic-locales/zh-CN/ETHICAL_USE_LICENSE.md), and [Traditional Chinese](./lic-locales/zh-TW/ETHICAL_USE_LICENSE.md).**
 
 By accessing, using, modifying, deploying, or distributing this software, you explicitly agree to the Ethical Use License.
 
