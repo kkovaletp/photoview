@@ -82,9 +82,15 @@ const EthicalUseLicensePage = () => {
     const { t } = useTranslation()
     const [availableLocales, setAvailableLocales] = useState<string[]>(['en'])
     const [selectedLang, setSelectedLang] = useState('en')
-    const [html, setHtml] = useState('')
-    const [loading, setLoading] = useState(true)
-    const [error, setError] = useState<string | null>(null)
+
+    const [result, setResult] = useState<{
+        lang: string
+        html: string
+        error: string | null
+    } | null>(null)
+    const loading = result?.lang !== selectedLang
+    const error = loading ? null : (result?.error ?? null)
+    const html = loading ? '' : (result?.html ?? '')
 
     // Load manifest on mount, then resolve initial locale
     useEffect(() => {
@@ -107,19 +113,23 @@ const EthicalUseLicensePage = () => {
     // This covers both the auto-resolved locale (after the manifest loads) and manual dropdown switches.
     useEffect(() => {
         const controller = new AbortController()
-        setLoading(true)
-        setError(null)
         fetchLicenseMd(selectedLang, controller.signal)
             .then(md => {
                 if (controller.signal.aborted) return
-                setHtml(DOMPurify.sanitize(marked.parse(md, { async: false })))
-                setLoading(false)
+                setResult({
+                    lang: selectedLang,
+                    html: DOMPurify.sanitize(marked.parse(md, { async: false })),
+                    error: null,
+                })
             })
             .catch(err => {
                 if (err instanceof DOMException && err.name === 'AbortError') return
-                setError(t('ethical_use_license_page.load_error',
-                    'Failed to load the license document. Please try again.'))
-                setLoading(false)
+                setResult({
+                    lang: selectedLang,
+                    html: '',
+                    error: t('ethical_use_license_page.load_error',
+                        'Failed to load the license document. Please try again.'),
+                })
             })
         return () => controller.abort()
     }, [selectedLang, t])

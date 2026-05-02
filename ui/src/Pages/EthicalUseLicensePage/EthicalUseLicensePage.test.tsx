@@ -19,7 +19,7 @@ vi.mock('react-router-dom', async () => {
 // DOMPurify.sanitize is an identity pass-through; marked.parse returns a
 // fixed HTML string so assertions on rendered content are stable.
 vi.mock('marked', () => ({
-    marked: { parse: (_md: string) => '<p>Mock license content</p>' },
+    marked: { parse: (_: string) => '<p>Mock license content</p>' },
 }))
 vi.mock('dompurify', () => ({
     default: { sanitize: (html: string) => html },
@@ -63,7 +63,7 @@ describe('EthicalUseLicensePage', () => {
     afterEach(() => {
         vi.unstubAllGlobals()
         vi.restoreAllMocks() // resets i18n.language spies between tests
-        vi.clearAllMocks()
+        vi.resetAllMocks()
     })
 
     // -----------------------------------------------------------------------
@@ -189,6 +189,7 @@ describe('EthicalUseLicensePage', () => {
         })
 
         test('IS rendered when multiple locales are available', async () => {
+            vi.spyOn(i18n, 'language', 'get').mockReturnValue('en')
             mockFetch
                 .mockResolvedValueOnce(okJson({ locales: ['en', 'de', 'fr'] }))
                 .mockResolvedValueOnce(okText('# License'))
@@ -201,6 +202,7 @@ describe('EthicalUseLicensePage', () => {
         })
 
         test('lists all available locales as options', async () => {
+            vi.spyOn(i18n, 'language', 'get').mockReturnValue('en')
             mockFetch
                 .mockResolvedValueOnce(okJson({ locales: ['en', 'de', 'fr'] }))
                 .mockResolvedValueOnce(okText('# License'))
