@@ -21,16 +21,16 @@
     "load_error": "Помилка завантаження альбому: {{message}}"
   },
   "ethical_use_license_page": {
-    "load_error": "",
-    "loading": "",
-    "title": ""
+    "load_error": "Помилка завантаження документу ліцензії. Будь ласка, спробуйте ще раз.",
+    "loading": "Завантаження...",
+    "title": "🇺🇦 Ліцензія на этичне використання (EUL)"
   },
   "general": {
     "action": {
       "add": "Додати",
-      "back": "",
+      "back": "← Назад",
       "cancel": "Відмінити",
-      "close": "",
+      "close": "Закрити",
       "remove": "Видалити",
       "save": "Зберегти",
       "submit": "Підтвердити"
@@ -408,32 +408,32 @@
     "settings": "Налаштування"
   },
   "terms_of_use": {
-    "agreement_intro": "",
+    "agreement_intro": "Отримуючи доступ, використовуючи або взаємодіючи з цим продуктом/послугою, ви прямо погоджуєтеся з <licenseLink>Ліцензією на етичне використання</licenseLink>.",
     "badge": {
-      "button_aria_label": "",
-      "button_title": "",
-      "dialog_aria_label": "",
-      "key_conditions_suffix": ""
+      "button_aria_label": "Дивитися умови використання",
+      "button_title": "Умови використання (Обовʼязкові)",
+      "dialog_aria_label": "Умови використання",
+      "key_conditions_suffix": "Основні умови:"
     },
     "conditions": {
-      "condemn_aggression": "",
-      "forbidden_citizens": "",
-      "recognize_invasion": "",
-      "reject_propaganda": "",
-      "support_territorial_integrity": "",
-      "terrorist_state": ""
+      "condemn_aggression": "Ви однозначно засуджуєте військову агресію Росії проти України",
+      "forbidden_citizens": "Громадянам/резидентам Росії, Білорусі, Ірану та/або Північної Кореї суворо заборонено використовувати цей продукт/послугу",
+      "recognize_invasion": "Ви визнаєте, що Росія незаконно вторглася в суверенну державу",
+      "reject_propaganda": "Ви відкидаєте наративи, що поширюються російською державною пропагандою",
+      "support_territorial_integrity": "Ви повністю підтримуєте територіальну цілісність України",
+      "terrorist_state": "Ви погоджуєтеся, що <doc>Росія є терористичною державою</doc>."
     },
     "declined": {
-      "close_tab": "",
-      "message": "",
-      "title": ""
+      "close_tab": "Будь ласка, закрийте цю вкладку.",
+      "message": "Ви відхилили <licenseLink>Ліцензію на етичне використання</licenseLink>. Ви повинні не користуватися цим продуктом/послугою.",
+      "title": "Доступ заборонено"
     },
     "modal": {
       "action": {
-        "accept": "",
-        "decline": ""
+        "accept": "Я погоджуюсь",
+        "decline": "Я відхиляю"
       },
-      "title": ""
+      "title": "Умови використання (Обовʼязкові)"
     }
   },
   "timeline_filter": {
