@@ -40,7 +40,7 @@ By using this project or its source code, for any purpose and in any shape or fo
 - You reject false narratives perpetuated by Russian state propaganda.
 - If you are a citizen of Russia, Belarus, Iran, or North Korea and/or you are located on the territory of those countries or on the occupied Ukrainian territories, it is strictly forbidden to use this project or its parts in any way or form.
 
-To learn more about the war and how you can help, [visit the war.ukraine.ua](https://war.ukraine.ua/).
+To learn more about the war and how you can help, visit [war.ukraine.ua](https://war.ukraine.ua/).
 
 Glory to Ukraine! 🇺🇦
 
