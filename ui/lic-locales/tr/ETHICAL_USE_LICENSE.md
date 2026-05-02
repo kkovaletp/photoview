@@ -18,7 +18,7 @@ Bu şartları kabul etmiyorsanız, bu yazılımı kullanmanıza izin verilmez.
 * Belarus Cumhuriyeti
 * İran İslam Cumhuriyeti
 * Kore Demokratik Halk Cumhuriyeti (Kuzey Kore)
-* Ukrayna'nın geçici olarak işgal ettiği bölgeler
+* Ukrayna'nın geçici olarak işgal edilmiş bölgeleri
 
 **“Yasaklı Kuruluşlar”** şunları içerir:
 

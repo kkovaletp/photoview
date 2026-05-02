@@ -6,11 +6,23 @@ import { initReactI18next } from 'react-i18next'
 import type { TFunction } from 'i18next'
 import { LanguageTranslation } from './__generated__/globalTypes'
 import { authToken } from './helpers/authentication'
-import { exhaustiveCheck, isNil } from './helpers/utils'
+import { isNil } from './helpers/utils'
 import type mapboxgl from 'mapbox-gl'
 import MapboxLanguage from '@mapbox/mapbox-gl-language'
+import {
+  LANGUAGE_TRANSLATION_TO_LOCALE,
+  LANGUAGE_TRANSLATION_TO_MAPBOX_LOCALE,
+} from './helpers/localeDisplayNames'
 
 export type TranslationFn = TFunction<'translation'>
+
+/**
+ * Pre-built map of all translation JSON loaders, keyed by the import path.
+ * Vite analyses this glob at build time and creates lazy chunks for each locale.
+ */
+const translationModules = import.meta.glob<{ default: Record<string, unknown> }>(
+  './extractedTranslations/*/translation.json'
+)
 
 export function setupLocalization(): void {
   i18n
@@ -60,192 +72,20 @@ export const loadTranslations = () => {
 
     map_language = language
 
-    switch (language) {
-      case LanguageTranslation.Danish:
-        import('./extractedTranslations/da/translation.json').then(language => {
-          i18n.addResourceBundle('da', 'translation', language)
-          i18n.changeLanguage('da')
+    const locale = LANGUAGE_TRANSLATION_TO_LOCALE[language] ?? 'en'
+    const loader = translationModules[`./extractedTranslations/${locale}/translation.json`]
+      ; (loader ?? translationModules['./extractedTranslations/en/translation.json'])()
+        .then(mod => {
+          i18n.addResourceBundle(locale, 'translation', mod.default)
+          i18n.changeLanguage(locale)
         })
-        return
-      case LanguageTranslation.Dutch:
-        import('./extractedTranslations/nl/translation.json').then(language => {
-          i18n.addResourceBundle('nl', 'translation', language)
-          i18n.changeLanguage('nl')
-        })
-        return
-      case LanguageTranslation.English:
-        import('./extractedTranslations/en/translation.json').then(language => {
-          i18n.addResourceBundle('en', 'translation', language)
-          i18n.changeLanguage('en')
-        })
-        return
-      case LanguageTranslation.French:
-        import('./extractedTranslations/fr/translation.json').then(language => {
-          i18n.addResourceBundle('fr', 'translation', language)
-          i18n.changeLanguage('fr')
-        })
-        return
-      case LanguageTranslation.Swedish:
-        import('./extractedTranslations/sv/translation.json').then(language => {
-          i18n.addResourceBundle('sv', 'translation', language)
-          i18n.changeLanguage('sv')
-        })
-        return
-      case LanguageTranslation.Italian:
-        import('./extractedTranslations/it/translation.json').then(language => {
-          i18n.addResourceBundle('it', 'translation', language)
-          i18n.changeLanguage('it')
-        })
-        return
-      case LanguageTranslation.Spanish:
-        import('./extractedTranslations/es/translation.json').then(language => {
-          i18n.addResourceBundle('es', 'translation', language)
-          i18n.changeLanguage('es')
-        })
-        return
-      case LanguageTranslation.Polish:
-        import('./extractedTranslations/pl/translation.json').then(language => {
-          i18n.addResourceBundle('pl', 'translation', language)
-          i18n.changeLanguage('pl')
-        })
-        return
-      case LanguageTranslation.Ukrainian:
-        import('./extractedTranslations/uk/translation.json').then(language => {
-          i18n.addResourceBundle('uk', 'translation', language)
-          i18n.changeLanguage('uk')
-        })
-        return
-      case LanguageTranslation.German:
-        import('./extractedTranslations/de/translation.json').then(language => {
-          i18n.addResourceBundle('de', 'translation', language)
-          i18n.changeLanguage('de')
-        })
-        return
-      case LanguageTranslation.Russian:
-        import('./extractedTranslations/ru/translation.json').then(language => {
-          i18n.addResourceBundle('ru', 'translation', language)
-          i18n.changeLanguage('ru')
-        })
-        return
-      case LanguageTranslation.TraditionalChineseTW:
-        import('./extractedTranslations/zh-TW/translation.json').then(
-          language => {
-            i18n.addResourceBundle('zh-TW', 'translation', language)
-            i18n.changeLanguage('zh-TW')
-          }
-        )
-        return
-      case LanguageTranslation.TraditionalChineseHK:
-        import('./extractedTranslations/zh-HK/translation.json').then(
-          language => {
-            i18n.addResourceBundle('zh-HK', 'translation', language)
-            i18n.changeLanguage('zh-HK')
-          }
-        )
-        return
-      case LanguageTranslation.SimplifiedChinese:
-        import('./extractedTranslations/zh-CN/translation.json').then(
-          language => {
-            i18n.addResourceBundle('zh-CN', 'translation', language)
-            i18n.changeLanguage('zh-CN')
-          }
-        )
-        return
-      case LanguageTranslation.Portuguese:
-        import('./extractedTranslations/pt/translation.json').then(language => {
-          i18n.addResourceBundle('pt', 'translation', language)
-          i18n.changeLanguage('pt')
-        })
-        return
-      case LanguageTranslation.Basque:
-        import('./extractedTranslations/eu/translation.json').then(language => {
-          i18n.addResourceBundle('eu', 'translation', language)
-          i18n.changeLanguage('eu')
-        })
-        return
-      case LanguageTranslation.Turkish:
-        import('./extractedTranslations/tr/translation.json').then(language => {
-          i18n.addResourceBundle('tr', 'translation', language)
-          i18n.changeLanguage('tr')
-        })
-        return
-      case LanguageTranslation.Japanese:
-        import('./extractedTranslations/ja/translation.json').then(language => {
-          i18n.addResourceBundle('ja', 'translation', language)
-          i18n.changeLanguage('ja')
-        })
-        return
-      default:
-        import('./extractedTranslations/en/translation.json').then(language => {
-          i18n.addResourceBundle('en', 'translation', language)
-          i18n.changeLanguage('en')
-        })
-        // Throw the error if we have an unhandled language
-        exhaustiveCheck(language)
-    }
+        .catch(err => console.error('Failed to load translation bundle', locale, err))
   }, [data?.myUserPreferences.language])
 }
 
 export const SetMapLanguages = (map: mapboxgl.Map) => {
-  if (isNil(map_language)) {
-    map.addControl(new MapboxLanguage({ defaultLanguage: 'en' }))
-    return
-  }
-
-  switch (map_language) {
-    case LanguageTranslation.Danish:
-      map.addControl(new MapboxLanguage({ defaultLanguage: 'da' }))
-      return
-    case LanguageTranslation.English:
-    case LanguageTranslation.Basque:
-      map.addControl(new MapboxLanguage({ defaultLanguage: 'en' }))
-      return
-    case LanguageTranslation.French:
-      map.addControl(new MapboxLanguage({ defaultLanguage: 'fr' }))
-      return
-    case LanguageTranslation.Swedish:
-      map.addControl(new MapboxLanguage({ defaultLanguage: 'sv' }))
-      return
-    case LanguageTranslation.Italian:
-      map.addControl(new MapboxLanguage({ defaultLanguage: 'it' }))
-      return
-    case LanguageTranslation.Spanish:
-      map.addControl(new MapboxLanguage({ defaultLanguage: 'es' }))
-      return
-    case LanguageTranslation.Polish:
-      map.addControl(new MapboxLanguage({ defaultLanguage: 'pl' }))
-      return
-    case LanguageTranslation.Ukrainian:
-      map.addControl(new MapboxLanguage({ defaultLanguage: 'uk' }))
-      return
-    case LanguageTranslation.German:
-      map.addControl(new MapboxLanguage({ defaultLanguage: 'de' }))
-      return
-    case LanguageTranslation.Russian:
-      map.addControl(new MapboxLanguage({ defaultLanguage: 'ru' }))
-      return
-    case LanguageTranslation.TraditionalChineseTW:
-    case LanguageTranslation.TraditionalChineseHK:
-      map.addControl(new MapboxLanguage({ defaultLanguage: 'zh-Hant' }))
-      return
-    case LanguageTranslation.SimplifiedChinese:
-      map.addControl(new MapboxLanguage({ defaultLanguage: 'zh-Hans' }))
-      return
-    case LanguageTranslation.Portuguese:
-      map.addControl(new MapboxLanguage({ defaultLanguage: 'pt' }))
-      return
-    case LanguageTranslation.Turkish:
-      map.addControl(new MapboxLanguage({ defaultLanguage: 'tr' }))
-      return
-    case LanguageTranslation.Japanese:
-      map.addControl(new MapboxLanguage({ defaultLanguage: 'ja' }))
-      return
-    case LanguageTranslation.Dutch:
-      map.addControl(new MapboxLanguage({ defaultLanguage: 'nl' }))
-      return
-    default:
-      map.addControl(new MapboxLanguage({ defaultLanguage: 'en' }))
-      // Throw the error if we have an unhandled language
-      exhaustiveCheck(map_language)
-  }
+  const mapboxLocale = isNil(map_language)
+    ? 'en'
+    : (LANGUAGE_TRANSLATION_TO_MAPBOX_LOCALE[map_language] ?? 'en')
+  map.addControl(new MapboxLanguage({ defaultLanguage: mapboxLocale }))
 }

@@ -3,35 +3,15 @@ import { marked } from 'marked'
 import DOMPurify from 'dompurify'
 import { useNavigate } from 'react-router-dom'
 import i18n from 'i18next'
+import { LOCALE_DISPLAY_NAMES } from '../../helpers/localeDisplayNames'
 
 const BASE = import.meta.env.BASE_URL
-
-// Map locale codes → human-readable display labels for the dropdown
-const LOCALE_LABELS: Record<string, string> = {
-    en: 'English',
-    uk: 'Українська',
-    de: 'Deutsch',
-    fr: 'Français',
-    es: 'Español',
-    eu: 'Euskara',
-    it: 'Italiano',
-    pl: 'Polski',
-    pt: 'Português',
-    da: 'Dansk',
-    sv: 'Svenska',
-    nl: 'Nederlands',
-    ru: 'Русский',
-    ja: '日本語',
-    'zh-CN': '简体中文',
-    'zh-TW': '繁體中文',
-    tr: 'Türkçe',
-}
 
 type Manifest = { locales: string[] }
 
 async function fetchManifest(signal: AbortSignal): Promise<Manifest> {
     try {
-        const res = await fetch(`${BASE}lic-locales/manifest.json`, { signal })
+        const res = await fetch(`${BASE}assets/lic-locales/manifest.json`, { signal })
         if (res.ok) return res.json() as Promise<Manifest>
     } catch (err) {
         // Re-throw aborts so the caller can detect cancellation; swallow other errors.
@@ -43,7 +23,7 @@ async function fetchManifest(signal: AbortSignal): Promise<Manifest> {
 
 async function fetchLicenseMd(lang: string, signal: AbortSignal): Promise<string> {
     const primaryRes = await fetch(
-        `${BASE}lic-locales/${lang}/${LICENSE_FILE}`,
+        `${BASE}assets/lic-locales/${lang}/${LICENSE_FILE}`,
         { signal },
     )
     if (primaryRes.ok) return primaryRes.text()
@@ -52,7 +32,7 @@ async function fetchLicenseMd(lang: string, signal: AbortSignal): Promise<string
     // but skip the extra round-trip if English was already requested.
     if (lang !== 'en') {
         const fallbackRes = await fetch(
-            `${BASE}lic-locales/en/${LICENSE_FILE}`,
+            `${BASE}assets/lic-locales/en/${LICENSE_FILE}`,
             { signal },
         )
         if (fallbackRes.ok) return fallbackRes.text()
@@ -159,7 +139,7 @@ const EthicalUseLicensePage = () => {
                     </button>
 
                     <span className="flex-1 text-sm font-semibold truncate">
-                        🇺🇦 Ethical Use License (EUL) v1.0
+                        🇺🇦 Ethical Use License (EUL)
                     </span>
 
                     {/* Language switcher — hidden until >1 locale is available */}
@@ -174,7 +154,7 @@ const EthicalUseLicensePage = () => {
                         >
                             {availableLocales.map(code => (
                                 <option key={code} value={code}>
-                                    {LOCALE_LABELS[code] ?? code}
+                                    {LOCALE_DISPLAY_NAMES[code] ?? code}
                                 </option>
                             ))}
                         </select>

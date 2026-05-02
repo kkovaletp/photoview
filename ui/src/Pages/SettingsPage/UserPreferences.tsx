@@ -1,6 +1,6 @@
 import { useMutation, useQuery } from '@apollo/client'
 import gql from 'graphql-tag'
-import React, { useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import styled from 'styled-components'
 import { LanguageTranslation } from '../../__generated__/globalTypes'
@@ -12,6 +12,10 @@ import {
   SectionTitle,
 } from './SettingsPage'
 import {
+  LOCALE_DISPLAY_NAMES,
+  LANGUAGE_TRANSLATION_TO_LOCALE,
+} from '../../helpers/localeDisplayNames'
+import {
   changeUserPreferences,
   changeUserPreferencesVariables,
 } from './__generated__/changeUserPreferences'
@@ -19,26 +23,13 @@ import { myUserPreferences } from './__generated__/myUserPreferences'
 import { TranslationFn } from '../../localization'
 import { changeTheme, getTheme } from '../../theme'
 
-const languagePreferences = [
-  { key: 1, label: 'English', value: LanguageTranslation.English },
-  { key: 2, label: 'Français', value: LanguageTranslation.French },
-  { key: 3, label: 'Svenska', value: LanguageTranslation.Swedish },
-  { key: 4, label: 'Dansk', value: LanguageTranslation.Danish },
-  { key: 5, label: 'Español', value: LanguageTranslation.Spanish },
-  { key: 6, label: 'Polski', value: LanguageTranslation.Polish },
-  { key: 7, label: 'Italiano', value: LanguageTranslation.Italian },
-  { key: 8, label: 'Deutsch', value: LanguageTranslation.German },
-  { key: 9, label: 'Русский', value: LanguageTranslation.Russian },
-  { key: 10, label: '繁體中文 (香港)', value: LanguageTranslation.TraditionalChineseHK },
-  { key: 16, label: '繁體中文 (台灣)', value: LanguageTranslation.TraditionalChineseTW },
-  { key: 11, label: '简体中文', value: LanguageTranslation.SimplifiedChinese },
-  { key: 12, label: 'Português', value: LanguageTranslation.Portuguese },
-  { key: 13, label: 'Euskara', value: LanguageTranslation.Basque },
-  { key: 14, label: 'Türkçe', value: LanguageTranslation.Turkish },
-  { key: 15, label: 'Українська', value: LanguageTranslation.Ukrainian },
-  { key: 17, label: '日本語', value: LanguageTranslation.Japanese },
-  { key: 18, label: 'Nederlands', value: LanguageTranslation.Dutch },
-]
+const languagePreferences = (
+  Object.entries(LANGUAGE_TRANSLATION_TO_LOCALE) as [LanguageTranslation, string][]
+).map(([enumValue, localeCode], index) => ({
+  key: index + 1,
+  label: LOCALE_DISPLAY_NAMES[localeCode] ?? localeCode,
+  value: enumValue,
+}))
 
 const themePreferences = (t: TranslationFn) => [
   {
