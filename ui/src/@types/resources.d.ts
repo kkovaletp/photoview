@@ -22,6 +22,12 @@ export default interface Resources {
     "album_page": {
       "load_error": "Error loading album: {{message}}"
     },
+    "ethical_use_license_page": {
+      "back": "← Back",
+      "load_error": "Failed to load the license document. Please try again.",
+      "loading": "Loading…",
+      "title": "🇺🇦 Ethical Use License (EUL)"
+    },
     "general": {
       "action": {
         "add": "Add",

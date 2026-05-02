@@ -150,7 +150,7 @@ RUN find "${PHOTOVIEW_UI_PATH}/assets" -type f -name "SettingsPage.*.js" \
     # Archive static files for better performance
     && find /app/ui -type f \( \
         -name "*.js" -o -name "*.mjs" -o -name "*.json" \
-        -o -name "*.css" -o -name "*.html" -o -name "*.svg" \
+        -o -name "*.css" -o -name "*.html" -o -name "*.svg" -o -name "*.md" \
         -o -name "*.txt" -o -name "*.xml" -o -name "*.wasm" -o -name "*.map" \
         \) ! -name "*.gz" ! -name "*.br" ! -name "*.zst" \
     -exec sh -c 'for file; do \
@@ -218,7 +218,7 @@ RUN apk add --no-cache curl bash \
     # Archive static files for better performance
     && find /srv -type f \( \
         -name "*.js" -o -name "*.mjs" -o -name "*.json" \
-        -o -name "*.css" -o -name "*.html" -o -name "*.svg" \
+        -o -name "*.css" -o -name "*.html" -o -name "*.svg" -o -name "*.md" \
         -o -name "*.txt" -o -name "*.xml" -o -name "*.wasm" -o -name "*.map" \
         \) ! -name "*.gz" ! -name "*.br" ! -name "*.zst" \
     -exec sh -c 'for file; do \

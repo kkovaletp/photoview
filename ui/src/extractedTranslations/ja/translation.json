@@ -20,6 +20,12 @@
   "album_page": {
     "load_error": ""
   },
+  "ethical_use_license_page": {
+    "back": "",
+    "load_error": "",
+    "loading": "",
+    "title": ""
+  },
   "general": {
     "action": {
       "add": "追加",

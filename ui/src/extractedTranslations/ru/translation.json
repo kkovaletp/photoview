@@ -20,6 +20,12 @@
   "album_page": {
     "load_error": "Ошибка загрузки альбома: {{message}}"
   },
+  "ethical_use_license_page": {
+    "back": "",
+    "load_error": "",
+    "loading": "",
+    "title": ""
+  },
   "general": {
     "action": {
       "add": "Добавить",

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { marked } from 'marked'
 import DOMPurify from 'dompurify'
 import { useNavigate } from 'react-router-dom'
@@ -78,6 +79,7 @@ const CONTENT_CSS = `
 
 const EthicalUseLicensePage = () => {
     const navigate = useNavigate()
+    const { t } = useTranslation()
     const [availableLocales, setAvailableLocales] = useState<string[]>(['en'])
     const [selectedLang, setSelectedLang] = useState('en')
     const [html, setHtml] = useState('')
@@ -108,16 +110,17 @@ const EthicalUseLicensePage = () => {
         setError(null)
         fetchLicenseMd(selectedLang, controller.signal)
             .then(md => {
-                setHtml(DOMPurify.sanitize(marked.parse(md) as string))
+                setHtml(DOMPurify.sanitize(marked.parse(md, { async: false })))
                 setLoading(false)
             })
             .catch(err => {
                 if (err instanceof DOMException && err.name === 'AbortError') return
-                setError('Failed to load the license document. Please try again.')
+                setError(t('ethical_use_license_page.load_error',
+                    'Failed to load the license document. Please try again.'))
                 setLoading(false)
             })
         return () => controller.abort()
-    }, [selectedLang])
+    }, [selectedLang, t])
 
     return (
         <>
@@ -135,11 +138,11 @@ const EthicalUseLicensePage = () => {
                         hover:underline focus:outline-none
                         focus-visible:ring-2 focus-visible:ring-blue-500 rounded"
                     >
-                        ← Back
+                        {t('ethical_use_license_page.back', '← Back')}
                     </button>
 
                     <span className="flex-1 text-sm font-semibold truncate">
-                        🇺🇦 Ethical Use License (EUL)
+                        {t('ethical_use_license_page.title', '🇺🇦 Ethical Use License (EUL)')}
                     </span>
 
                     {/* Language switcher — hidden until >1 locale is available */}
@@ -147,7 +150,7 @@ const EthicalUseLicensePage = () => {
                         <select
                             value={selectedLang}
                             onChange={e => setSelectedLang(e.target.value)}
-                            aria-label="Select language"
+                            aria-label={t('settings.user_preferences.language_selector.placeholder', 'Select language')}
                             className="shrink-0 text-sm rounded border border-gray-300 dark:border-gray-600
                             bg-white dark:bg-[`#31363d`] px-2 py-1
                             focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
@@ -164,7 +167,9 @@ const EthicalUseLicensePage = () => {
                 {/* Document area */}
                 <div className="max-w-3xl mx-auto px-6 py-8 pb-20">
                     {loading && (
-                        <p className="text-gray-400 dark:text-gray-500 animate-pulse">Loading…</p>
+                        <p className="text-gray-400 dark:text-gray-500 animate-pulse">
+                            {t('ethical_use_license_page.loading', 'Loading…')}
+                        </p>
                     )}
                     {error && (
                         <p className="text-red-600 dark:text-red-400">{error}</p>

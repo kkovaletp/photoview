@@ -9,15 +9,19 @@ const LICENSE_FILE = 'ETHICAL_USE_LICENSE.md'
 /** Returns locale codes that have a translated MD file under lic-locales/. */
 function getAvailableLocales(repoRoot: string): string[] {
     const dir = resolve(repoRoot, SOURCE_LOCALES_DIR)
-    if (!existsSync(dir)) return ['en']
-    return readdirSync(dir, { withFileTypes: true })
-        .filter(e => e.isDirectory() || e.isSymbolicLink())
-        .map(e => e.name)
-        .filter(name => {
+    const locales = existsSync(dir)
+        ? readdirSync(dir, { withFileTypes: true })
+            .filter(e => e.isDirectory() || e.isSymbolicLink())
+            .map(e => e.name)
             // Only include if the MD file actually exists (symlink or real file)
-            return existsSync(resolve(dir, name, LICENSE_FILE))
-        })
-        .sort((a, b) => a.localeCompare(b))
+            .filter(name => existsSync(resolve(dir, name, LICENSE_FILE)))
+        : []
+
+    if (existsSync(resolve(repoRoot, LICENSE_FILE))) {
+        locales.push('en')
+    }
+
+    return [...new Set(locales)].sort((a, b) => a.localeCompare(b))
 }
 
 /** Reads a locale's MD, falling back to the repo-root EN copy. */
