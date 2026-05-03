@@ -1,8 +1,7 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { marked } from 'marked'
 import DOMPurify from 'dompurify'
-import { useNavigate } from 'react-router-dom'
 import i18n from 'i18next'
 import { LOCALE_DISPLAY_NAMES } from '../../helpers/localeDisplayNames'
 
@@ -71,17 +70,34 @@ const CONTENT_CSS = `
     .eul-content li { margin-bottom: .35rem; }
     .eul-content strong { color: #b91c1c; }
     .eul-content a { text-decoration: underline; }
-    .eul-content p:last-child { text-align: center; font-size: 1.4rem; }
+
+    /* Restore list markers stripped by Tailwind v4 preflight */
+    .eul-content ul { list-style-type: disc; }
+    .eul-content ol { list-style-type: decimal; }
+    .eul-content ul ul { list-style-type: circle; }
+    .eul-content ul ul ul { list-style-type: square; }
+
+    /* Scope the closing slogan rule to a DIRECT child of the container only */
+    .eul-content > p:last-child { text-align: center; font-size: 1.4rem; }
+
     .dark .eul-content h2 { color: #6fa3ef; }
     .dark .eul-content strong { color: #f87171; }
     .dark .eul-content a { color: #60a5fa; }
 `
 
 const EthicalUseLicensePage = () => {
-    const navigate = useNavigate()
     const { t } = useTranslation()
     const [availableLocales, setAvailableLocales] = useState<string[]>(['en'])
     const [selectedLang, setSelectedLang] = useState('en')
+
+    /** Set to true once the user manually picks a locale from the dropdown. */
+    const userHasPickedLocale = useRef(false)
+    /**
+     * Always-current mirror of `availableLocales`.
+     * Lets the `languageChanged` handler resolve the right locale
+     * without needing to re-subscribe every time locales are updated.
+     */
+    const availableLocalesRef = useRef<string[]>(['en'])
 
     const [result, setResult] = useState<{
         lang: string
@@ -92,19 +108,49 @@ const EthicalUseLicensePage = () => {
     const error = loading ? null : (result?.error ?? null)
     const html = loading ? '' : (result?.html ?? '')
 
+    // Keep the browser tab title in sync with the current UI language.
+    // A dedicated effect (dep: [t]) updates immediately on mount and on every
+    // language switch, without coupling to the async license-fetch lifecycle.
+    useEffect(() => {
+        document.title = `${t('ethical_use_license_page.title', '🇺🇦 Ethical Use License (EUL)')} - Photoview`
+        return () => {
+            document.title = 'Photoview'
+        }
+    }, [t])
+
     // Load manifest on mount, then resolve initial locale
     useEffect(() => {
         const controller = new AbortController()
         fetchManifest(controller.signal)
             .then(m => {
                 if (controller.signal.aborted) return
+                availableLocalesRef.current = m.locales
                 setAvailableLocales(m.locales)
-                setSelectedLang(resolveInitialLocale(m.locales))
+                // Only auto-resolve if the user hasn't already picked manually.
+                if (!userHasPickedLocale.current) {
+                    setSelectedLang(resolveInitialLocale(m.locales))
+                }
             })
             .catch(() => {
                 // AbortError (unmount) or unexpected failure – keep defaults.
             })
         return () => controller.abort()
+    }, [])
+
+    // Subscribe to i18n's languageChanged event so that if Apollo/loadTranslations
+    // switches the language *after* the manifest has already resolved, selectedLang
+    // is updated accordingly — unless the user has manually chosen a locale.
+    // Empty deps: only accesses refs (always current), no re-subscription needed.
+    useEffect(() => {
+        const handleLanguageChanged = () => {
+            if (!userHasPickedLocale.current) {
+                setSelectedLang(resolveInitialLocale(availableLocalesRef.current))
+            }
+        }
+        i18n.on('languageChanged', handleLanguageChanged)
+        return () => {
+            i18n.off('languageChanged', handleLanguageChanged)
+        }
     }, [])
 
     // Fetch MD whenever selected language changes.
@@ -144,15 +190,6 @@ const EthicalUseLicensePage = () => {
                 <div className="sticky top-0 z-10 flex items-center gap-3 px-4 py-3
                         border-b border-gray-200 dark:border-dark-border
                         bg-white/90 dark:bg-dark-bg/90 backdrop-blur">
-                    <button
-                        onClick={() => navigate(-1)}
-                        className="shrink-0 text-sm text-blue-600 dark:text-blue-400
-                        hover:underline focus:outline-none
-                        focus-visible:ring-2 focus-visible:ring-blue-500 rounded"
-                    >
-                        {t('general.action.back', '← Back')}
-                    </button>
-
                     <span className="flex-1 text-sm font-semibold truncate">
                         {t('ethical_use_license_page.title', '🇺🇦 Ethical Use License (EUL)')}
                     </span>
@@ -161,7 +198,11 @@ const EthicalUseLicensePage = () => {
                     {availableLocales.length > 1 && (
                         <select
                             value={selectedLang}
-                            onChange={e => setSelectedLang(e.target.value)}
+                            onChange={e => {
+                                userHasPickedLocale.current = true
+                                setSelectedLang(e.target.value)
+                                i18n.changeLanguage(e.target.value)
+                            }}
                             aria-label={t('settings.user_preferences.language_selector.placeholder', 'Select language')}
                             className="shrink-0 text-sm rounded border border-gray-300 dark:border-dark-input-border
                             bg-white dark:bg-dark-input-bg px-2 py-1

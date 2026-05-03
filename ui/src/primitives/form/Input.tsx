@@ -147,6 +147,7 @@ type ButtonProps = {
   className?: string
 }
 
+//TODO: how to fix the "5. 🐛 "I Agree" button text/border turns invisible on hover in light theme" bug here?
 export const buttonStyles = ({ variant, background }: ButtonProps) =>
   clsx(
     'px-6 py-0.5 rounded border border-gray-200 focus:outline-none focus:border-blue-300 text-[#222] hover:bg-gray-100 whitespace-nowrap',

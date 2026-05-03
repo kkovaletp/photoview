@@ -375,22 +375,6 @@ describe('EthicalUseLicensePage', () => {
     })
 
     // -----------------------------------------------------------------------
-    describe('back navigation', () => {
-        test('clicking the back button calls navigate(-1)', async () => {
-            const user = userEvent.setup()
-            mockFetch
-                .mockResolvedValueOnce(okJson({ locales: ['en'] }))
-                .mockResolvedValueOnce(okText('# License'))
-
-            renderPage()
-
-            await user.click(screen.getByRole('button', { name: /back/i }))
-
-            expect(mockNavigate).toHaveBeenCalledWith(-1)
-        })
-    })
-
-    // -----------------------------------------------------------------------
     describe('page branding', () => {
         test('renders the Photoview logo', () => {
             mockFetch.mockReturnValue(new Promise(() => { }))
