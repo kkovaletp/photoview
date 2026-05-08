@@ -51,7 +51,7 @@
     "js-cookie": "^3.0.5",
     "luxon": "^3.7.2",
     "mapbox-gl": "~3.23.1",
-    "prettier": "^2.8.8",
+    "prettier": "^3.8.3",
     "react": "19.2.5",
     "react-blurhash": "^0.3.0",
     "react-datepicker": "^9.0.0",
