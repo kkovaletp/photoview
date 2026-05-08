@@ -1,7 +1,7 @@
 import { gql, useLazyQuery } from '@apollo/client'
 import { useEffect, useContext } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router'
 import styled from 'styled-components'
 import { authToken } from '../../../helpers/authentication'
 import { isNil } from '../../../helpers/utils'

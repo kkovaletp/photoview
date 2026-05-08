@@ -16,8 +16,8 @@ vi.mock('react-i18next', () => ({
 
 // Mock useNavigate
 const mockNavigate = vi.fn()
-vi.mock('react-router-dom', async () => {
-    const actual = await vi.importActual('react-router-dom') as object
+vi.mock('react-router', async () => {
+    const actual = await vi.importActual('react-router') as object
     return {
         ...actual,
         useNavigate: () => mockNavigate,
@@ -344,7 +344,7 @@ describe('MediaSidebarPeople', () => {
         const user = userEvent.setup()
 
         // Mock window.confirm
-        const confirmSpy = vi.spyOn(window, 'confirm')
+        const confirmSpy = vi.spyOn(globalThis, 'confirm')
         confirmSpy.mockReturnValue(true)
 
         const mocks: MockedResponse[] = [
@@ -400,7 +400,7 @@ describe('MediaSidebarPeople', () => {
         const user = userEvent.setup()
 
         // Mock window.confirm to return false
-        const confirmSpy = vi.spyOn(window, 'confirm')
+        const confirmSpy = vi.spyOn(globalThis, 'confirm')
         confirmSpy.mockReturnValue(false)
 
         renderWithProviders(<MediaSidebarPeople media={media} />)

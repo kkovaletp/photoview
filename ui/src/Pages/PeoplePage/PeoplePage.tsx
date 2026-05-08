@@ -2,7 +2,7 @@ import React, { JSX, createRef, useEffect, useState } from 'react'
 import { gql, useMutation, useQuery } from '@apollo/client'
 import Layout from '../../components/layout/Layout'
 import styled from 'styled-components'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useParams } from 'react-router'
 import SingleFaceGroup from './SingleFaceGroup/SingleFaceGroup'
 import { Button, TextField } from '../../primitives/form/Input'
 import FaceCircleImage from './FaceCircleImage'
@@ -153,29 +153,11 @@ export const FaceDetails = ({
   const onKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key == 'Escape') {
       resetLabel()
-      return
     }
   }
 
   let label
-  if (!editLabel) {
-    label = (
-      <FaceDetailsWrapper
-        className={tailwindClassNames(
-          className,
-          'whitespace-nowrap inline-block overflow-hidden text-clip'
-        )}
-        labeled={!!group.label}
-        onClick={() => setEditLabel(true)}
-      >
-        <FaceImagesCount>{group.imageFaceCount}</FaceImagesCount>
-        <button className="">
-          {group.label ?? t('people_page.face_group.unlabeled', 'Unlabeled')}
-        </button>
-        {/* <EditIcon name="pencil" /> */}
-      </FaceDetailsWrapper>
-    )
-  } else {
+  if (editLabel) {
     label = (
       <FaceDetailsWrapper className={className} labeled={!!group.label}>
         <TextField
@@ -200,6 +182,23 @@ export const FaceDetails = ({
             resetLabel()
           }}
         />
+      </FaceDetailsWrapper>
+    )
+  } else {
+    label = (
+      <FaceDetailsWrapper
+        className={tailwindClassNames(
+          className,
+          'whitespace-nowrap inline-block overflow-hidden text-clip'
+        )}
+        labeled={!!group.label}
+        onClick={() => setEditLabel(true)}
+      >
+        <FaceImagesCount>{group.imageFaceCount}</FaceImagesCount>
+        <button className="">
+          {group.label ?? t('people_page.face_group.unlabeled', 'Unlabeled')}
+        </button>
+        {/* <EditIcon name="pencil" /> */}
       </FaceDetailsWrapper>
     )
   }

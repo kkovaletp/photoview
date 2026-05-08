@@ -1,6 +1,6 @@
 import { gql, useLazyQuery, useMutation } from '@apollo/client'
 import React, { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 import SelectFaceGroupTable from './SelectFaceGroupTable'
 import SelectImageFacesTable from './SelectImageFacesTable'
 import { MY_FACES_QUERY } from '../PeoplePage'
@@ -99,7 +99,7 @@ const MoveImageFacesModal = ({
     }
   }, [open])
 
-  if (open == false) return null
+  if (!open) return null
 
   const moveImageFaces = () => {
     const faceIDs = selectedImageFaces.map(face => face.id)
@@ -122,19 +122,7 @@ const MoveImageFacesModal = ({
   const imageFaces = faceGroup.imageFaces
 
   let table = null
-  if (!imagesSelected) {
-    table = (
-      <SelectImageFacesTable
-        imageFaces={imageFaces}
-        selectedImageFaces={selectedImageFaces}
-        setSelectedImageFaces={setSelectedImageFaces}
-        title={t(
-          'people_page.modal.move_image_faces.image_select_table.title',
-          'Select images to move'
-        )}
-      />
-    )
-  } else {
+  if (imagesSelected) {
     if (faceGroupsData && faceGroup) {
       const filteredFaceGroups = faceGroupsData.myFaceGroups.filter(
         x => x.id != faceGroup.id
@@ -153,20 +141,22 @@ const MoveImageFacesModal = ({
     } else {
       table = <div>{t('general.loading.default', 'Loading...')}</div>
     }
+  } else {
+    table = (
+      <SelectImageFacesTable
+        imageFaces={imageFaces}
+        selectedImageFaces={selectedImageFaces}
+        setSelectedImageFaces={setSelectedImageFaces}
+        title={t(
+          'people_page.modal.move_image_faces.image_select_table.title',
+          'Select images to move'
+        )}
+      />
+    )
   }
 
   let positiveButton: ModalAction
-  if (!imagesSelected) {
-    positiveButton = {
-      key: 'next',
-      label: t(
-        'people_page.modal.move_image_faces.image_select_table.next_action',
-        'Next'
-      ),
-      onClick: () => setImagesSelected(true),
-      variant: 'positive',
-    }
-  } else {
+  if (imagesSelected) {
     positiveButton = {
       key: 'move',
       label: t(
@@ -174,6 +164,16 @@ const MoveImageFacesModal = ({
         'Move image faces'
       ),
       onClick: () => moveImageFaces(),
+      variant: 'positive',
+    }
+  } else {
+    positiveButton = {
+      key: 'next',
+      label: t(
+        'people_page.modal.move_image_faces.image_select_table.next_action',
+        'Next'
+      ),
+      onClick: () => setImagesSelected(true),
       variant: 'positive',
     }
   }

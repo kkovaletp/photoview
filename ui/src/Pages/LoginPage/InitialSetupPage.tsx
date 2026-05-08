@@ -1,9 +1,7 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { gql, useQuery, useMutation } from '@apollo/client'
-import { useNavigate } from 'react-router-dom'
-import { Container } from './loginUtilities'
-
-import { INITIAL_SETUP_QUERY, login } from './loginUtilities'
+import { useNavigate } from 'react-router'
+import { INITIAL_SETUP_QUERY, login, Container } from './loginUtilities'
 import { authToken } from '../../helpers/authentication'
 import { useTranslation } from 'react-i18next'
 import { CheckInitialSetup } from './__generated__/CheckInitialSetup'
@@ -101,7 +99,7 @@ const InitialSetupPage = () => {
         <h1 className="text-center text-xl">
           {t('login_page.initial_setup.title', 'Initial Setup')}
         </h1>
-        <form onSubmit={signIn} className="max-w-[500px] mx-auto">
+        <form onSubmit={signIn} className="max-w-125 mx-auto">
           <TextField
             wrapperClassName="my-4"
             fullWidth
