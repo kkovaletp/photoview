@@ -1,5 +1,5 @@
 import React, { useContext } from 'react'
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router'
 import { MediaThumbnail } from '../photoGallery/MediaThumbnail'
 import { PhotoFiller } from '../photoGallery/MediaGallery'
 import {

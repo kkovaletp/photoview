@@ -31,7 +31,7 @@ vi.mock('../../Pages/SharePage/MediaSharePage', () => {
   }
 })
 
-import { MemoryRouter, Routes, Route } from 'react-router-dom'
+import { MemoryRouter, Routes, Route } from 'react-router'
 import { MockedProvider } from '@apollo/client/testing'
 import { renderWithProviders } from '../../helpers/testUtils'
 

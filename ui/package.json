@@ -39,7 +39,6 @@
     "@types/luxon": "^3.7.1",
     "@types/react": "19.2.14",
     "@types/react-dom": "19.2.3",
-    "@types/react-router-dom": "^5.3.3",
     "@vitejs/plugin-react": "^4.3.3",
     "blurhash": "^2.0.5",
     "clsx": "^2.1.1",

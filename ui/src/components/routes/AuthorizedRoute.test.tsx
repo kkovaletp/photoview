@@ -1,7 +1,6 @@
-import React from 'react'
 import AuthorizedRoute, { useIsAdmin } from './AuthorizedRoute'
 import { render, screen, waitFor } from '@testing-library/react'
-import { MemoryRouter, Route, Routes } from 'react-router-dom'
+import { MemoryRouter, Route, Routes } from 'react-router'
 
 import * as authentication from '../../helpers/authentication'
 import { MockedProvider } from '@apollo/client/testing'
@@ -15,7 +14,7 @@ describe('AuthorizedRoute component', () => {
   const AuthorizedComponent = () => <div>authorized content</div>
 
   test('not logged in', () => {
-    authToken.mockImplementation(() => null)
+    authToken.mockImplementation(() => undefined)
 
     render(
       <MemoryRouter initialEntries={['/authorized']}>
@@ -76,7 +75,7 @@ describe('useIsAdmin hook', () => {
   })
 
   test('not logged in', async () => {
-    authToken.mockImplementation(() => null)
+    authToken.mockImplementation(() => undefined)
 
     const TestComponent = () => {
       const isAdmin = useIsAdmin()

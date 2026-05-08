@@ -5,11 +5,12 @@ import {
   NavigateFunction,
   Outlet,
   useRoutes,
-} from 'react-router-dom'
+} from 'react-router'
 
 import Layout from '../layout/Layout'
 import { authToken, clearTokenCookie } from '../../helpers/authentication'
-import { TFunction, useTranslation } from 'react-i18next'
+import { useTranslation } from 'react-i18next'
+import type { TFunction } from 'i18next'
 import Loader from '../../primitives/Loader'
 import AuthorizedRoute from './AuthorizedRoute'
 

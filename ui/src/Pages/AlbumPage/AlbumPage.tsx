@@ -10,7 +10,7 @@ import PaginateLoader from '../../components/PaginateLoader'
 import { useTranslation } from 'react-i18next'
 import { albumQuery, albumQueryVariables } from './__generated__/albumQuery'
 import useOrderingParams from '../../hooks/useOrderingParams'
-import { useParams } from 'react-router-dom'
+import { useParams } from 'react-router'
 import { isNil } from '../../helpers/utils'
 
 const ALBUM_QUERY = gql`
