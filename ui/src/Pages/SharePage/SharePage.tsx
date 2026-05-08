@@ -183,6 +183,10 @@ export const TokenRoute = () => {
     return <div>{error.message}</div>
   }
 
+  if (loading && data === undefined) {
+    return <div>{t('general.loading.default', 'Loading...')}</div>
+  }
+
   if (!data?.shareTokenValidatePassword) {
     return (
       <PasswordProtectedShare
