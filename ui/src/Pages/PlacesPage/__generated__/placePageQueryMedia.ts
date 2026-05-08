@@ -78,6 +78,7 @@ export interface placePageQueryMedia_mediaList {
    */
   videoWeb: placePageQueryMedia_mediaList_videoWeb | null;
   type: MediaType;
+  favorite: boolean;
 }
 
 export interface placePageQueryMedia {

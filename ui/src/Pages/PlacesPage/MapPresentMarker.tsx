@@ -1,8 +1,7 @@
-import { gql } from '@apollo/client'
+import { gql, useLazyQuery } from '@apollo/client'
 import React, { useEffect } from 'react'
-import { useLazyQuery } from '@apollo/client'
 import PresentView from '../../components/photoGallery/presentView/PresentView'
-import type mapboxgl from 'mapbox-gl'
+import type * as mapboxgl from 'mapbox-gl'
 import { PresentMarker } from './PlacesPage'
 import {
   placePageQueryMedia,
@@ -32,6 +31,7 @@ const QUERY_MEDIA = gql`
         height
       }
       type
+      favorite
     }
   }
 `
@@ -48,6 +48,10 @@ const getMediaFromMarker = (map: mapboxgl.Map, presentMarker: PresentMarker) =>
           reject(error)
           return
         }
+        if (!features) {
+          resolve([])
+          return
+        }
 
         const media = features.map(feat => feat.properties) as MediaMarker[]
         resolve(media)
@@ -58,7 +62,7 @@ const getMediaFromMarker = (map: mapboxgl.Map, presentMarker: PresentMarker) =>
         ?.properties as MediaMarker | undefined
 
       if (media === undefined) {
-        reject('ERROR: media is undefined')
+        reject(new Error('media is undefined'))
         return
       }
 
