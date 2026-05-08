@@ -37,7 +37,6 @@
     "@types/geojson": "^7946.0.16",
     "@types/js-cookie": "^3.0.6",
     "@types/luxon": "^3.7.1",
-    "@types/mapbox-gl": "^3.5.0",
     "@types/react": "19.2.14",
     "@types/react-dom": "19.2.3",
     "@types/react-router-dom": "^5.3.3",
