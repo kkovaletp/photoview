@@ -15,8 +15,8 @@
     "build:dev": "NODE_ENV=development vite build --mode development --sourcemap --minify=false",
     "lint": "eslint ./src --max-warnings 0",
     "lint:ci": "eslint ./src --no-color --fix-dry-run | tee eslint-report.txt; eslint ./src --no-color --format json > eslint-report.json",
-    "lint:staged": "lint-staged",
     "format:check": "prettier --check .",
+    "format:fix": "prettier --write *.{ts,tsx,js,json,css,md,graphql}",
     "test": "vitest",
     "test:ci": "CI=true vitest --run --coverage",
     "genSchemaTypes": "apollo client:codegen --target=typescript --globalTypesFile=src/__generated__/globalTypes.ts --passthroughCustomScalars && prettier --write */**/__generated__/*.ts",
@@ -89,7 +89,6 @@
     "globals": "^17.6.0",
     "i18next-cli": "^1.56.11",
     "jsdom": "^26.1.0",
-    "lint-staged": "^17.0.3",
     "nodemon": "^3.1.14",
     "prettier": "^3.8.3",
     "tsx": "^4.21.0",
@@ -105,10 +104,6 @@
     "semi": false,
     "singleQuote": true,
     "arrowParens": "avoid"
-  },
-  "lint-staged": {
-    "*.{ts,tsx,js,json,css,md,graphql}": "prettier --write",
-    "*.{js,ts,tsx}": "eslint --cache --fix --max-warnings 0"
   },
   "browserslist": {
     "production": [
