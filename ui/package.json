@@ -25,11 +25,10 @@
     "lintTranslations": "i18next-cli lint"
   },
   "engines": {
-    "node": ">=20.0.0"
+    "node": ">=20.20.0"
   },
   "dependencies": {
     "@apollo/client": "~3.14.0",
-    "@babel/preset-typescript": "^7.28.5",
     "@dr.pogodin/react-helmet": "^3.1.1",
     "@headlessui/react": "^2.2.10",
     "@mapbox/mapbox-gl-language": "^1.0.0",
@@ -39,7 +38,7 @@
     "@types/luxon": "^3.7.1",
     "@types/react": "19.2.14",
     "@types/react-dom": "19.2.3",
-    "@vitejs/plugin-react": "^4.3.3",
+    "@vitejs/plugin-react": "^5.2.0",
     "blurhash": "^2.0.5",
     "clsx": "^2.1.1",
     "connect-history-api-fallback": "^2.0.0",
