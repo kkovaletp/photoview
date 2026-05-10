@@ -5,7 +5,7 @@ import {
   NavigateFunction,
   Outlet,
   useRoutes,
-} from 'react-router-dom'
+} from 'react-router'
 
 import Layout from '../layout/Layout'
 import { authToken, clearTokenCookie } from '../../helpers/authentication'

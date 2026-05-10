@@ -1,5 +1,5 @@
 import React from 'react'
-import { NavLink } from 'react-router-dom'
+import { NavLink } from 'react-router'
 import { useQuery, gql } from '@apollo/client'
 import { authToken } from '../../helpers/authentication'
 import { useTranslation } from 'react-i18next'
@@ -56,7 +56,7 @@ const MenuButton = ({
     >
       <li className="flex items-center">
         <div
-          className={`w-12 h-12 p-1.5 lg:w-8 lg:h-8 lg:p-1 w-full h-full rounded-lg`}
+          className={`w-12 h-12 p-1.5 lg:w-8 lg:h-8 lg:p-1 rounded-lg`}
           style={{ backgroundColor: background }}
         >
           {icon}
@@ -92,7 +92,7 @@ export const MainMenu = () => {
     !faceDetectionEnabledQuery?.error
 
   return (
-    <div className="fixed w-full bottom-0 lg:bottom-auto lg:top-[84px] z-30 bg-white dark:bg-dark-bg shadow-separator lg:shadow-none lg:w-[240px] lg:ml-8 lg:mr-5 shrink-0" data-testid="main-menu">
+    <div className="fixed w-full bottom-0 lg:bottom-auto lg:top-21 z-30 bg-white dark:bg-dark-bg shadow-separator lg:shadow-none lg:w-60 lg:ml-8 lg:mr-5 shrink-0" data-testid="main-menu">
       <ul className="flex justify-around py-2 px-2 max-w-lg mx-auto lg:flex-col lg:p-0" data-testid="menu-items">
         <MenuButton
           data-testid="menu-timeline"

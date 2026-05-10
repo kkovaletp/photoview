@@ -15,7 +15,7 @@ vi.mock('../../helpers/authentication', () => ({
 }))
 
 vi.mock('copy-to-clipboard', () => ({
-    default: vi.fn(() => true),
+    default: vi.fn(() => Promise.resolve(true)),
 }))
 
 // Import the mocked modules for assertions

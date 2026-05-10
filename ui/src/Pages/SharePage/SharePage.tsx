@@ -1,5 +1,5 @@
 import { useQuery, gql } from '@apollo/client'
-import { Route, Routes, useParams } from 'react-router-dom'
+import { Route, Routes, useParams } from 'react-router'
 import styled from 'styled-components'
 import {
   getSharePassword,
@@ -183,7 +183,11 @@ export const TokenRoute = () => {
     return <div>{error.message}</div>
   }
 
-  if (data && data.shareTokenValidatePassword == false) {
+  if (loading && data === undefined) {
+    return <div>{t('general.loading.default', 'Loading...')}</div>
+  }
+
+  if (!data?.shareTokenValidatePassword) {
     return (
       <PasswordProtectedShare
         refetchWithPassword={password => {

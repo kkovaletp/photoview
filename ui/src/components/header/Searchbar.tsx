@@ -3,7 +3,7 @@ import styled from 'styled-components'
 import { useLazyQuery, gql } from '@apollo/client'
 import { debounce, DebouncedFn } from '../../helpers/utils'
 import { ProtectedImage } from '../photoGallery/ProtectedMedia'
-import { NavLink, useNavigate, useLocation } from 'react-router-dom'
+import { NavLink, useNavigate, useLocation } from 'react-router'
 import { useTranslation } from 'react-i18next'
 import {
   searchQuery,
@@ -95,9 +95,9 @@ const SearchBar = () => {
   media = media.slice(0, 5)
 
   const selectedItemId =
-    selectedItem !== null
-      ? [...albums.map(x => x.id), ...media.map(x => x.id)][selectedItem]
-      : null
+    selectedItem === null
+      ? null
+      : [...albums.map(x => x.id), ...media.map(x => x.id)][selectedItem]
 
   useEffect(() => {
     const elem = inputEl.current
@@ -245,8 +245,8 @@ const SearchResults = ({
       id="search-results"
       role="listbox"
       className={clsx(
-        'absolute bg-white dark:bg-dark-bg left-0 right-0 top-[72px] overflow-y-auto h-[calc(100vh-152px)] border dark:border-dark-border px-4 z-0',
-        'lg:top-[40px] lg:shadow-md lg:rounded-b lg:max-h-[560px]',
+        'absolute bg-white dark:bg-dark-bg left-0 right-0 top-18 overflow-y-auto h-[calc(100vh-152px)] border dark:border-dark-border px-4 z-0',
+        'lg:top-10 lg:shadow-md lg:rounded-b lg:max-h-140',
         { hidden: !expanded }
       )}
       tabIndex={-1}

@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router'
 import FaceCircleImage from '../../../Pages/PeoplePage/FaceCircleImage'
 import { SidebarSection, SidebarSectionTitle } from '../SidebarComponents'
 import { MediaSidebarMedia, SIDEBAR_MEDIA_QUERY } from './MediaSidebar'
@@ -172,7 +172,7 @@ const MediaSidebarPerson = ({ face, menuFlipped }: MediaSidebarFaceProps) => {
       </Link>
       <div className="mt-1 whitespace-nowrap">
         <FaceDetails
-          className="text-sm max-w-[80px] align-middle"
+          className="text-sm max-w-20 align-middle"
           textFieldClassName="w-[100px]"
           group={face.faceGroup}
           editLabel={changeLabel}

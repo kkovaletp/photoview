@@ -1,5 +1,5 @@
-import React, { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { useState } from 'react'
+import { Link } from 'react-router'
 import { ProtectedImage } from '../photoGallery/ProtectedMedia'
 import { albumQuery_album_subAlbums } from '../../Pages/AlbumPage/__generated__/albumQuery'
 
@@ -30,7 +30,7 @@ const AlbumBoxImage = ({ src, ...props }: AlbumBoxImageProps) => {
   }
 
   return (
-    <div className="xs:w-[220px] xs:h-[220px] relative rounded-lg">
+    <div className="xs:w-55 xs:h-55 relative rounded-lg">
       {image}
       {placeholder}
     </div>

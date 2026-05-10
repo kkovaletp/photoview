@@ -3,7 +3,7 @@ import {
   render,
   screen,
 } from '@testing-library/react'
-import { MemoryRouter } from 'react-router-dom'
+import { MemoryRouter } from 'react-router'
 
 vi.mock('../../Pages/LoginPage/LoginPage.tsx', () => () => (
   <div>mocked login page</div>

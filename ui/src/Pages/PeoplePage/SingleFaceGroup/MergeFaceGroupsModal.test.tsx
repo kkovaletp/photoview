@@ -1,9 +1,8 @@
 import { vi } from 'vitest'
 import { render, fireEvent, waitFor } from '@testing-library/react'
-import MergeFaceGroupsModal, { MergeFaceGroupsModalState } from './MergeFaceGroupsModal'
+import MergeFaceGroupsModal, { MergeFaceGroupsModalState, COMBINE_FACES_MUTATION } from './MergeFaceGroupsModal'
 import { MockedProvider } from '@apollo/client/testing'
 import { MY_FACES_QUERY } from '../PeoplePage'
-import { COMBINE_FACES_MUTATION } from './MergeFaceGroupsModal'
 
 // Mock Modal component to prevent import issues
 vi.mock('../../../primitives/Modal', () => ({
@@ -34,8 +33,8 @@ vi.mock('react-i18next', () => ({
 
 // Mock useNavigate before any imports that use it
 const navigate = vi.fn()
-vi.mock('react-router-dom', async () => {
-    const actual: object = await vi.importActual('react-router-dom')
+vi.mock('react-router', async () => {
+    const actual: object = await vi.importActual('react-router')
     return { ...actual, useNavigate: () => navigate }
 })
 

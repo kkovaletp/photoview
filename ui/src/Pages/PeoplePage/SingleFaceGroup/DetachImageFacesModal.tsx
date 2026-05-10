@@ -1,7 +1,7 @@
 import { BaseMutationOptions, gql, useMutation } from '@apollo/client'
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 import { isNil } from '../../../helpers/utils'
 import Modal from '../../../primitives/Modal'
 import { MY_FACES_QUERY } from '../PeoplePage'
@@ -107,7 +107,7 @@ const DetachImageFacesModal = ({
     }
   }, [open])
 
-  if (open == false) return null
+  if (!open) return null
 
   const imageFaces = faceGroup?.imageFaces ?? []
 
