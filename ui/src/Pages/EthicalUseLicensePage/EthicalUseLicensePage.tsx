@@ -15,7 +15,7 @@ const LICENSE_FILE = 'ETHICAL_USE_LICENSE.md'
 
 type Manifest = { locales: string[] }
 
-// Load a locale bundle into i18n (no-op if already loaded) and return getFixedT for it.
+// Load a locale bundle into i18n without touching the global app language (no-op if already loaded).
 async function loadBundle(locale: string): Promise<void> {
     if (!i18n.hasResourceBundle(locale, 'translation')) {
         const loader = translationModules[`../../extractedTranslations/${locale}/translation.json`]

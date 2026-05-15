@@ -15,10 +15,14 @@ const EthicalUseFlagBadge = () => {
     const handleToggle = () => {
         if (!open && buttonRef.current) {
             const rect = buttonRef.current.getBoundingClientRect()
+            const margin = 16
+            const dialogWidth = 400
+            // Ensure right edge doesn't overflow, but never let left go below margin
+            const maxLeft = Math.max(margin, window.innerWidth - dialogWidth - margin)
             setDialogPos({
                 top: rect.bottom + 8,
                 // Clamp so the 400 px (w-100) dialog doesn't overflow the right viewport edge
-                left: Math.min(rect.left, window.innerWidth - 400 - 16),
+                left: Math.max(margin, Math.min(rect.left, maxLeft)),
             })
         }
         setOpen(prev => !prev)
