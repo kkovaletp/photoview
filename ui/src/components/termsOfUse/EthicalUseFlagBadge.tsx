@@ -68,7 +68,7 @@ const EthicalUseFlagBadge = () => {
                     aria-modal="false"
                     aria-label={t('terms_of_use.badge.dialog_aria_label', 'Terms of Use')}
                     style={{ top: dialogPos.top, left: dialogPos.left }}
-                    className="absolute top-full left-0 mt-2 w-100 max-w-[calc(100vw-2rem)] bg-white dark:bg-[#31363d]
+                    className="fixed w-100 max-w-[calc(100vw-2rem)] bg-white dark:bg-[#31363d]
                     border border-gray-200 dark:border-gray-600 rounded-xl shadow-xl p-4 text-sm z-50"
                 >
                     <div className="flex items-start justify-between mb-2">

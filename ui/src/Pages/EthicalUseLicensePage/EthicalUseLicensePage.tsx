@@ -1,14 +1,34 @@
 import { useState, useEffect, useRef } from 'react'
-import { useTranslation } from 'react-i18next'
 import { marked } from 'marked'
 import DOMPurify from 'dompurify'
 import i18n from 'i18next'
 import { LOCALE_DISPLAY_NAMES } from '../../helpers/localeDisplayNames'
 
+// Vite static glob — pattern must be a string literal at the call-site.
+const translationModules = import.meta.glob<{ default: Record<string, unknown> }>(
+    '../../extractedTranslations/*/translation.json'
+)
+
 const BASE = import.meta.env.BASE_URL
 const LICENSE_FILE = 'ETHICAL_USE_LICENSE.md'
 
 type Manifest = { locales: string[] }
+
+// Load a locale bundle into i18n (no-op if already loaded) and return getFixedT for it.
+async function loadBundleAndGetT(locale: string) {
+    if (!i18n.hasResourceBundle(locale, 'translation')) {
+        const loader = translationModules[`../../extractedTranslations/${locale}/translation.json`]
+        if (loader) {
+            try {
+                const mod = await loader()
+                i18n.addResourceBundle(locale, 'translation', mod.default, true, true)
+            } catch {
+                // Bundle load failed — getFixedT will fall back to 'en'
+            }
+        }
+    }
+    return i18n.getFixedT(locale)
+}
 
 async function fetchManifest(signal: AbortSignal): Promise<Manifest> {
     try {
@@ -86,9 +106,9 @@ const CONTENT_CSS = `
 `
 
 const EthicalUseLicensePage = () => {
-    const { t } = useTranslation()
     const [availableLocales, setAvailableLocales] = useState<string[]>(['en'])
     const [selectedLang, setSelectedLang] = useState('en')
+    const [pageT, setPageT] = useState(() => i18n.getFixedT('en'))
 
     /** Set to true once the user manually picks a locale from the dropdown. */
     const userHasPickedLocale = useRef(false)
@@ -108,15 +128,18 @@ const EthicalUseLicensePage = () => {
     const error = loading ? null : (result?.error ?? null)
     const html = loading ? '' : (result?.html ?? '')
 
-    // Keep the browser tab title in sync with the current UI language.
-    // A dedicated effect (dep: [t]) updates immediately on mount and on every
-    // language switch, without coupling to the async license-fetch lifecycle.
+    // Load translation bundle + update pageT whenever the selected license locale changes.
     useEffect(() => {
-        document.title = `${t('ethical_use_license_page.title', '🇺🇦 Ethical Use License (EUL)')} - Photoview`
+        loadBundleAndGetT(selectedLang).then(fixedT => setPageT(() => fixedT))
+    }, [selectedLang])
+
+    // Keep the browser tab title in sync with the current UI language.
+    useEffect(() => {
+        document.title = `${pageT('ethical_use_license_page.title', '🇺🇦 Ethical Use License (EUL)')} - Photoview`
         return () => {
             document.title = 'Photoview'
         }
-    }, [t])
+    }, [pageT])
 
     // Load manifest on mount, then resolve initial locale
     useEffect(() => {
@@ -173,12 +196,12 @@ const EthicalUseLicensePage = () => {
                 setResult({
                     lang: selectedLang,
                     html: '',
-                    error: t('ethical_use_license_page.load_error',
+                    error: pageT('ethical_use_license_page.load_error',
                         'Failed to load the license document. Please try again.'),
                 })
             })
         return () => controller.abort()
-    }, [selectedLang, t])
+    }, [selectedLang, pageT])
 
     return (
         <>
@@ -191,7 +214,7 @@ const EthicalUseLicensePage = () => {
                         border-b border-gray-200 dark:border-dark-border
                         bg-white/90 dark:bg-dark-bg/90 backdrop-blur">
                     <span className="flex-1 text-sm font-semibold truncate">
-                        {t('ethical_use_license_page.title', '🇺🇦 Ethical Use License (EUL)')}
+                        {pageT('ethical_use_license_page.title', '🇺🇦 Ethical Use License (EUL)')}
                     </span>
 
                     {/* Language switcher — hidden until >1 locale is available */}
@@ -201,9 +224,8 @@ const EthicalUseLicensePage = () => {
                             onChange={e => {
                                 userHasPickedLocale.current = true
                                 setSelectedLang(e.target.value)
-                                i18n.changeLanguage(e.target.value)
                             }}
-                            aria-label={t('settings.user_preferences.language_selector.placeholder', 'Select language')}
+                            aria-label={pageT('settings.user_preferences.language_selector.placeholder', 'Select language')}
                             className="shrink-0 text-sm rounded border border-gray-300 dark:border-dark-input-border
                             bg-white dark:bg-dark-input-bg px-2 py-1
                             focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
@@ -222,10 +244,10 @@ const EthicalUseLicensePage = () => {
                     <img
                         className="h-16 sm:h-20"
                         src={BASE + 'photoview-logo.svg'}
-                        alt={t('header.logo_alt', 'Photoview logo')}
+                        alt={pageT('header.logo_alt', 'Photoview logo')}
                     />
                     <h1 className="text-2xl sm:text-3xl font-light mt-3 text-center">
-                        {t('meta.app_name', 'Photoview')}
+                        {pageT('meta.app_name', 'Photoview')}
                     </h1>
                 </div>
 
@@ -233,7 +255,7 @@ const EthicalUseLicensePage = () => {
                 <div className="max-w-3xl mx-auto px-4 sm:px-6 py-4 pb-20">
                     {loading && (
                         <p className="text-gray-400 dark:text-gray-500 animate-pulse">
-                            {t('ethical_use_license_page.loading', 'Loading…')}
+                            {pageT('ethical_use_license_page.loading', 'Loading…')}
                         </p>
                     )}
                     {error && (

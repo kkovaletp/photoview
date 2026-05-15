@@ -58,6 +58,7 @@ describe('EthicalUseLicensePage', () => {
     beforeEach(() => {
         vi.stubGlobal('fetch', mockFetch)
         mockNavigate.mockClear()
+        vi.spyOn(i18n, 'changeLanguage').mockResolvedValue((() => '') as never)
     })
 
     afterEach(() => {

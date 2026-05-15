@@ -30,7 +30,6 @@ export default interface Resources {
     "general": {
       "action": {
         "add": "Add",
-        "back": "← Back",
         "cancel": "Cancel",
         "close": "Close",
         "remove": "Remove",
