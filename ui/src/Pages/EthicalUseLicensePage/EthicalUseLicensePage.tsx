@@ -5,6 +5,19 @@ import i18n from 'i18next'
 import { LOCALE_DISPLAY_NAMES } from '../../helpers/localeDisplayNames'
 import { useTranslation } from 'react-i18next'
 
+// Only the HTML elements that `marked` can actually produce for standard Markdown are allowed.
+export const DOMPURIFY_CONFIG: Parameters<typeof DOMPurify.sanitize>[1] = {
+    ALLOWED_TAGS: [
+        'h1', 'h2', 'h3', 'h4', 'h5', 'h6',
+        'p', 'br', 'hr',
+        'strong', 'em', 'b', 'i',
+        'ul', 'ol', 'li',
+        'a',
+        'blockquote', 'pre', 'code',
+    ],
+    ALLOWED_ATTR: ['href', 'target', 'rel', 'class'],
+}
+
 // Vite static glob — pattern must be a string literal at the call-site.
 const translationModules = import.meta.glob<{ default: Record<string, unknown> }>(
     '../../extractedTranslations/*/translation.json'
@@ -197,7 +210,7 @@ const EthicalUseLicensePage = () => {
                 if (controller.signal.aborted) return
                 setResult({
                     lang: selectedLang,
-                    html: DOMPurify.sanitize(marked.parse(md, { async: false })),
+                    html: DOMPurify.sanitize(marked.parse(md, { async: false }), DOMPURIFY_CONFIG),
                     hasError: false,
                 })
             })

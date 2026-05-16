@@ -3,7 +3,8 @@ import { act, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import i18n from 'i18next'
-import EthicalUseLicensePage from './EthicalUseLicensePage'
+import DOMPurify from 'dompurify'
+import EthicalUseLicensePage, { DOMPURIFY_CONFIG } from './EthicalUseLicensePage'
 
 // ---------------------------------------------------------------------------
 // Module-level mocks
@@ -544,5 +545,50 @@ describe('EthicalUseLicensePage', () => {
 
             expect(document.title).toBe('Photoview')
         })
+    })
+})
+
+// ---------------------------------------------------------------------------
+// Sanitizer configuration tests
+// These intentionally bypass the DOMPurify mock to verify real sanitization.
+// ---------------------------------------------------------------------------
+describe('DOMPURIFY_CONFIG – sanitizer behaviour', () => {
+    // The top-level vi.mock('dompurify') in this file stubs sanitize as identity for all tests.
+    // Use vi.importActual to load the real sanitizer, scoped to this describe block only.
+    let realSanitize: (dirty: string, config?: Parameters<typeof DOMPurify.sanitize>[1]) => string
+
+    beforeAll(async () => {
+        const mod = await vi.importActual<typeof import('dompurify')>('dompurify')
+        realSanitize = (dirty, config) => mod.default.sanitize(dirty, config)
+    })
+
+    test('strips <script> tags', () => {
+        const dirty = '<p>Hello</p><script>alert(1)</script>'
+        expect(realSanitize(dirty, DOMPURIFY_CONFIG)).not.toContain('<script>')
+    })
+
+    test('strips inline event handlers', () => {
+        const dirty = '<p onmouseover="alert(1)">text</p>'
+        expect(realSanitize(dirty, DOMPURIFY_CONFIG)).not.toContain('onmouseover')
+    })
+
+    test('strips javascript: hrefs', () => {
+        const dirty = '<a href="javascript:alert(1)">click</a>'
+        expect(realSanitize(dirty, DOMPURIFY_CONFIG)).not.toContain('javascript:')
+    })
+
+    test('strips disallowed tags like <iframe>', () => {
+        const dirty = '<iframe src="https://evil.example.com"></iframe>'
+        expect(realSanitize(dirty, DOMPURIFY_CONFIG)).not.toContain('<iframe')
+    })
+
+    test('preserves allowed Markdown-produced HTML', () => {
+        const clean =
+            '<h1>Title</h1><p>Text with <strong>bold</strong> and ' +
+            '<a href="https://example.com" rel="noopener noreferrer">a link</a>.</p>'
+        const result = realSanitize(clean, DOMPURIFY_CONFIG)
+        expect(result).toContain('<h1>Title</h1>')
+        expect(result).toContain('<strong>bold</strong>')
+        expect(result).toContain('href="https://example.com"')
     })
 })
