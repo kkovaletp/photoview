@@ -109,7 +109,8 @@ const EthicalUseLicensePage = () => {
     const { t } = useTranslation()
     const [availableLocales, setAvailableLocales] = useState<string[]>(['en'])
     const [selectedLang, setSelectedLang] = useState('en')
-    const [bundleReady, setBundleReady] = useState(false)
+    const [bundleReadyLocale, setBundleReadyLocale] = useState<string | null>(null)
+    const bundleReady = bundleReadyLocale === selectedLang
 
     /** Set to true once the user manually picks a locale from the dropdown. */
     const userHasPickedLocale = useRef(false)
@@ -131,8 +132,13 @@ const EthicalUseLicensePage = () => {
 
     // Load translation bundle when the selected locale changes.
     useEffect(() => {
-        setBundleReady(false)
-        loadBundle(selectedLang).then(() => setBundleReady(true))
+        let cancelled = false
+        loadBundle(selectedLang).then(() => {
+            if (!cancelled) setBundleReadyLocale(selectedLang)
+        })
+        return () => {
+            cancelled = true
+        }
     }, [selectedLang])
 
     // Keep the browser tab title in sync with both the app language and the selected license locale.
