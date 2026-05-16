@@ -3,7 +3,8 @@ import { useQuery, gql, useMutation } from '@apollo/client'
 import { useForm } from 'react-hook-form'
 import { INITIAL_SETUP_QUERY, login } from './loginUtilities'
 import { authToken } from '../../helpers/authentication'
-
+import TermsOfUseModal, { useTermsAccepted } from '../../components/termsOfUse/TermsOfUseModal'
+import AccessDeniedScreen from '../../components/termsOfUse/AccessDeniedScreen'
 import { useTranslation } from 'react-i18next'
 import { Helmet, HelmetProvider } from '@dr.pogodin/react-helmet'
 import { useNavigate } from 'react-router'
@@ -76,7 +77,7 @@ const LoginForm = () => {
 
   return (
     <form
-      className="mx-auto max-w-[500px] px-4"
+      className="mx-auto max-w-125 px-4"
       onSubmit={onSubmit}
     // loading={loading || (data && data.authorizeUser.success)}
     >
@@ -124,6 +125,7 @@ type LoginInputs = {
 
 const LoginPage = () => {
   const { t } = useTranslation()
+  const { accepted, declined, accept, decline } = useTermsAccepted()
   const navigate = useNavigate()
   const token = authToken()
 
@@ -144,6 +146,10 @@ const LoginPage = () => {
     return null
   }
 
+  if (declined) {
+    return <AccessDeniedScreen />
+  }
+
   return (
     <>
       <HelmetProvider>
@@ -151,6 +157,7 @@ const LoginPage = () => {
           <title>{t('title.login', 'Login')} - {t('meta.app_name', 'Photoview')}</title>
         </Helmet>
       </HelmetProvider>
+      <TermsOfUseModal open={!accepted} onAccept={accept} onDecline={decline} />
       <div>
         <LogoHeader />
         <LoginForm />

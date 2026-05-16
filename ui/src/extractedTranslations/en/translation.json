@@ -20,10 +20,16 @@
   "album_page": {
     "load_error": "Error loading album: {{message}}"
   },
+  "ethical_use_license_page": {
+    "load_error": "Failed to load the license document. Please try again.",
+    "loading": "Loading…",
+    "title": "🇺🇦 Ethical Use License (EUL)"
+  },
   "general": {
     "action": {
       "add": "Add",
       "cancel": "Cancel",
+      "close": "Close",
       "remove": "Remove",
       "save": "Save",
       "submit": "Submit"
@@ -389,6 +395,35 @@
     "photos": "Timeline",
     "places": "Places",
     "settings": "Settings"
+  },
+  "terms_of_use": {
+    "agreement_intro": "By accessing, using, or interacting with this product/service you explicitly agree to the <licenseLink>Ethical Use License</licenseLink>.",
+    "badge": {
+      "button_aria_label": "View Terms of Use",
+      "button_title": "Terms of Use (Mandatory)",
+      "dialog_aria_label": "Terms of Use",
+      "key_conditions_suffix": "Key conditions:"
+    },
+    "conditions": {
+      "condemn_aggression": "You unequivocally condemn Russia's military aggression against Ukraine",
+      "forbidden_citizens": "Citizens/residents of Russia, Belarus, Iran, and/or North Korea are strictly forbidden from using this product/service",
+      "recognize_invasion": "You recognize that Russia unlawfully invaded a sovereign state",
+      "reject_propaganda": "You reject narratives perpetuated by Russian state propaganda",
+      "support_territorial_integrity": "You fully support Ukraine's territorial integrity",
+      "terrorist_state": "You agree that <doc>Russia is a terrorist state</doc>."
+    },
+    "declined": {
+      "close_tab": "Please close this tab.",
+      "message": "You have declined the <licenseLink>Ethical Use License</licenseLink>. You must not use this service.",
+      "title": "Access Denied"
+    },
+    "modal": {
+      "action": {
+        "accept": "I Agree",
+        "decline": "I Do Not Agree"
+      },
+      "title": "Terms of Use (Mandatory)"
+    }
   },
   "timeline_filter": {
     "date": {

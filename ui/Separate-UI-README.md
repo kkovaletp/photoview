@@ -4,7 +4,15 @@
 [![Docker Pulls](https://img.shields.io/docker/pulls/kkoval/photoview-ui)](https://hub.docker.com/r/kkoval/photoview-ui)
 [![Docker builds](https://github.com/kkovaletp/photoview/actions/workflows/build.yml/badge.svg?branch=master)](https://github.com/kkovaletp/photoview/actions/workflows/build.yml)
 
-## Terms of use
+## Terms of use (Mandatory)
+
+This project is licensed under the GNU Affero General Public License v3.0 (AGPL-3.0).
+
+**In addition to the AGPL-3.0 license, all use of this repository, its source code, binaries, and derivative works is subject to the Ethical Use License defined in the [ETHICAL_USE_LICENSE.md](../ETHICAL_USE_LICENSE.md) (En). Also translated to [UK](./lic-locales/uk/ETHICAL_USE_LICENSE.md), [DA](./lic-locales/da/ETHICAL_USE_LICENSE.md), [DE](./lic-locales/de/ETHICAL_USE_LICENSE.md), [ES](./lic-locales/es/ETHICAL_USE_LICENSE.md), [EU](./lic-locales/eu/ETHICAL_USE_LICENSE.md), [FR](./lic-locales/fr/ETHICAL_USE_LICENSE.md), [IT](./lic-locales/it/ETHICAL_USE_LICENSE.md), [JA](./lic-locales/ja/ETHICAL_USE_LICENSE.md), [NL](./lic-locales/nl/ETHICAL_USE_LICENSE.md), [PL](./lic-locales/pl/ETHICAL_USE_LICENSE.md), [PT](./lic-locales/pt/ETHICAL_USE_LICENSE.md), [RU](./lic-locales/ru/ETHICAL_USE_LICENSE.md), [SV](./lic-locales/sv/ETHICAL_USE_LICENSE.md), [TR](./lic-locales/tr/ETHICAL_USE_LICENSE.md), [Simplified Chinese](./lic-locales/zh-CN/ETHICAL_USE_LICENSE.md), and [Traditional Chinese](./lic-locales/zh-TW/ETHICAL_USE_LICENSE.md).**
+
+By accessing, using, modifying, deploying, or distributing this software, you explicitly agree to the Ethical Use License.
+
+If you do not agree, you must immediately stop using this software.
 
 By using this project or its source code, for any purpose and in any shape or form, you grant your **implicit agreement** to all of the following statements:
 
@@ -13,16 +21,16 @@ By using this project or its source code, for any purpose and in any shape or fo
 - You agree that [Russia is a terrorist state](https://www.europarl.europa.eu/doceo/document/RC-9-2022-0482_EN.html);
 - You fully support Ukraine's territorial integrity, including its claims over [temporarily occupied territories](https://en.wikipedia.org/wiki/Russian-occupied_territories_of_Ukraine);
 - You reject false narratives perpetuated by Russian state propaganda.
-- If you are a citizen of Russia or Belarus and you are located on the territory of those countries or on the occupied Ukrainian territories, it is strictly forbidden to use this project or its parts in any way or form.
+- If you are a citizen of Russia, Belarus, Iran, or North Korea and/or you are located on the territory of those countries or on the occupied Ukrainian territories, it is strictly forbidden to use this project or its parts in any way or form.
 
-To learn more about the war and how you can help, [visit the war.ukraine.ua](https://war.ukraine.ua/).
+To learn more about the war and how you can help, visit [war.ukraine.ua](https://war.ukraine.ua/).
 
 Glory to Ukraine! 🇺🇦
 
 ## Contents
 
 - [Photoview Separate UI Container](#photoview-separate-ui-container)
-  - [Terms of use](#terms-of-use)
+  - [Terms of use (Mandatory)](#terms-of-use-mandatory)
   - [Contents](#contents)
   - [Overview](#overview)
   - [Why Use Separate Containers?](#why-use-separate-containers)

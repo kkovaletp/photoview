@@ -1,4 +1,4 @@
-import { describe, test, expect, vi, beforeEach } from 'vitest'
+import { describe, test, expect, vi, beforeEach, afterEach } from 'vitest'
 import { screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import InitialSetupPage from './InitialSetupPage'
@@ -51,8 +51,15 @@ const initialSetupMutation = gql`
 describe('InitialSetupPage - Form Submission', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    localStorage.clear()
+    localStorage.setItem('ethical_use_terms_accepted', 'true')
     authToken.mockImplementation(() => undefined)
     mockNavigate.mockClear()
+  })
+
+  afterEach(() => {
+    localStorage.clear()
+    vi.restoreAllMocks()
   })
 
   test('successful setup with valid credentials', async () => {
@@ -311,5 +318,104 @@ describe('InitialSetupPage - Form Submission', () => {
     // MessageBox should not be visible initially
     const messageBoxes = screen.queryAllByRole('alert')
     expect(messageBoxes).toHaveLength(0)
+  })
+})
+
+describe('InitialSetupPage - Terms of Use', () => {
+  beforeEach(() => {
+    vi.clearAllMocks()
+    localStorage.clear() // terms NOT accepted — modal will show
+    authToken.mockImplementation(() => undefined)
+    mockNavigate.mockClear()
+  })
+
+  afterEach(() => {
+    localStorage.clear()
+  })
+
+  test('shows the Terms of Use modal when terms have not been accepted', async () => {
+    await renderWithProviders(<InitialSetupPage />, {
+      mocks: [mockInitialSetupGraphql(true)],
+      initialEntries: ['/initialSetup'],
+    })
+
+    await waitFor(() => {
+      expect(
+        screen.getByRole('dialog', { name: /terms of use/i })
+      ).toBeInTheDocument()
+    })
+    expect(screen.getByRole('button', { name: /i agree/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /i do not agree/i })).toBeInTheDocument()
+  })
+
+  test('dismisses modal and shows the form after accepting terms', async () => {
+    await renderWithProviders(<InitialSetupPage />, {
+      mocks: [mockInitialSetupGraphql(true)],
+      initialEntries: ['/initialSetup'],
+    })
+
+    const user = userEvent.setup()
+
+    await waitFor(() => {
+      expect(
+        screen.getByRole('dialog', { name: /terms of use/i })
+      ).toBeInTheDocument()
+    })
+
+    await user.click(screen.getByRole('button', { name: /i agree/i }))
+
+    await waitFor(() => {
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    })
+
+    // Form is now accessible
+    expect(screen.getByLabelText('Username')).toBeInTheDocument()
+    expect(screen.getByLabelText('Password')).toBeInTheDocument()
+
+    // Acceptance is persisted in localStorage
+    expect(localStorage.getItem('ethical_use_terms_accepted')).toBe('true')
+  })
+
+  test('shows the Access Denied screen after declining terms', async () => {
+    vi.spyOn(globalThis, 'close').mockImplementation(() => { })
+
+    await renderWithProviders(<InitialSetupPage />, {
+      mocks: [mockInitialSetupGraphql(true)],
+      initialEntries: ['/initialSetup'],
+    })
+
+    const user = userEvent.setup()
+
+    await waitFor(() => {
+      expect(
+        screen.getByRole('dialog', { name: /terms of use/i })
+      ).toBeInTheDocument()
+    })
+
+    await user.click(screen.getByRole('button', { name: /i do not agree/i }))
+
+    await waitFor(() => {
+      expect(
+        screen.getByRole('heading', { name: /access denied/i })
+      ).toBeInTheDocument()
+    })
+
+    expect(
+      screen.getByRole('link', { name: /ethical use license/i })
+    ).toBeInTheDocument()
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    expect(screen.queryByLabelText('Username')).not.toBeInTheDocument()
+  })
+
+  test('skips modal when terms were previously accepted (localStorage pre-set)', async () => {
+    localStorage.setItem('ethical_use_terms_accepted', 'true')
+
+    await renderWithProviders(<InitialSetupPage />, {
+      mocks: [mockInitialSetupGraphql(true)],
+      initialEntries: ['/initialSetup'],
+    })
+
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    expect(screen.getByLabelText('Username')).toBeInTheDocument()
   })
 })

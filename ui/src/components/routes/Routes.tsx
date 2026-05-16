@@ -28,6 +28,10 @@ const InitialSetupPage = React.lazy(
   () => import('../../Pages/LoginPage/InitialSetupPage')
 )
 
+const EthicalUseLicensePage = React.lazy(
+  () => import('../../Pages/EthicalUseLicensePage/EthicalUseLicensePage')
+)
+
 const SharePageTokenRoute = React.lazy(() =>
   import('../../Pages/SharePage/SharePage').then(x => ({
     default: x.TokenRoute,
@@ -117,6 +121,10 @@ const Routes = () => {
       // for backwards-compatibility
       path: '/photos',
       element: <Navigate to="/timeline" />,
+    },
+    {
+      path: '/ethical-use-license',
+      element: <EthicalUseLicensePage />,
     },
     {
       path: '*',

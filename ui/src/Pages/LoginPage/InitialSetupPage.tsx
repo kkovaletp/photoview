@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import { gql, useQuery, useMutation } from '@apollo/client'
 import { useNavigate } from 'react-router'
+import TermsOfUseModal, { useTermsAccepted } from '../../components/termsOfUse/TermsOfUseModal'
+import AccessDeniedScreen from '../../components/termsOfUse/AccessDeniedScreen'
 import { INITIAL_SETUP_QUERY, login, Container } from './loginUtilities'
 import { authToken } from '../../helpers/authentication'
 import { useTranslation } from 'react-i18next'
@@ -39,6 +41,7 @@ type InitialSetupFormData = {
 
 const InitialSetupPage = () => {
   const { t } = useTranslation()
+  const { accepted, accept, declined, decline } = useTermsAccepted()
   const navigate = useNavigate()
 
   const {
@@ -93,8 +96,13 @@ const InitialSetupPage = () => {
     return null
   }
 
+  if (declined) {
+    return <AccessDeniedScreen />
+  }
+
   return (
     <div>
+      <TermsOfUseModal open={!accepted} onAccept={accept} onDecline={decline} />
       <Container>
         <h1 className="text-center text-xl">
           {t('login_page.initial_setup.title', 'Initial Setup')}
