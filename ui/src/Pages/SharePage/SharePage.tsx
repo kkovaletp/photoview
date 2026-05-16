@@ -113,7 +113,11 @@ const AuthorizedTokenRoute = () => {
   })
 
   if (!isNil(error)) return <div>{error.message || 'An unknown error occurred'}</div>
-  if (loading) return <div>{t('general.loading.default', 'Loading...')}</div>
+  if (loading) {
+    return <div aria-label={t('general.loading.default', 'Loading...')}>
+      {t('general.loading.default', 'Loading...')}
+    </div>
+  }
 
   if (data?.shareToken?.album) {
     return (
@@ -179,7 +183,9 @@ export const TokenRoute = () => {
   }
 
   if (loading && data === undefined) {
-    return <div>{t('general.loading.default', 'Loading...')}</div>
+    return <div aria-label={t('general.loading.default', 'Loading...')}>
+      {t('general.loading.default', 'Loading...')}
+    </div>
   }
 
   if (!data?.shareTokenValidatePassword) {
@@ -194,7 +200,11 @@ export const TokenRoute = () => {
     )
   }
 
-  if (loading) return <div>{t('general.loading.default', 'Loading...')}</div>
+  if (loading) {
+    return <div aria-label={t('general.loading.default', 'Loading...')}>
+      {t('general.loading.default', 'Loading...')}
+    </div>
+  }
 
   return <AuthorizedTokenRoute />
 }

@@ -12,7 +12,7 @@ const Loader = ({ active, message, className, style, size = 'default' }: LoaderP
   const dim = size === 'small' ? 24 : 40
   if (!active) return null
   return (
-    <div className={className} style={{ width: dim, height: dim, ...style }}>
+    <div className={className} style={{ width: dim, height: dim, ...style }} aria-label={message ?? 'Loading...'}>
       {message ?? 'Loading...'}
     </div>
   )

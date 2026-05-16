@@ -149,9 +149,8 @@ describe('load correct share page, based on graphql query', () => {
       }
     })
 
-    expect(screen.getByLabelText('Loading')).toBeInTheDocument()
-
-    await waitForElementToBeRemoved(() => screen.queryByLabelText('Loading'))
+    expect(screen.getByLabelText('Loading...')).toBeInTheDocument()
+    await waitForElementToBeRemoved(() => screen.queryByLabelText('Loading...'))
 
     expect(screen.getByTestId('Layout')).toBeInTheDocument()
     expect(screen.getByTestId('MediaSharePage')).toBeInTheDocument()
@@ -226,8 +225,8 @@ describe('load correct share page, based on graphql query', () => {
       }
     })
 
-    expect(screen.getByLabelText('Loading')).toBeInTheDocument()
-    await waitForElementToBeRemoved(() => screen.getByLabelText('Loading'))
+    expect(screen.getByLabelText('Loading...')).toBeInTheDocument()
+    await waitForElementToBeRemoved(() => screen.getByLabelText('Loading...'))
 
     expect(screen.getByTestId('Layout')).toBeInTheDocument()
     expect(screen.getByTestId('AlbumSharePage')).toBeInTheDocument()
@@ -309,8 +308,8 @@ describe('load correct share page, based on graphql query', () => {
       </MockedProvider>
     )
 
-    expect(screen.getByLabelText('Loading')).toBeInTheDocument()
-    await waitForElementToBeRemoved(() => screen.getByLabelText('Loading'))
+    expect(screen.getByLabelText('Loading...')).toBeInTheDocument()
+    await waitForElementToBeRemoved(() => screen.getByLabelText('Loading...'))
 
     expect(screen.getByTestId('Layout')).toBeInTheDocument()
     expect(screen.getByTestId('AlbumSharePage')).toBeInTheDocument()
@@ -391,8 +390,8 @@ describe('load correct share page, based on graphql query', () => {
       route: <TokenRoute />,
     })
 
-    expect(screen.getByLabelText('Loading')).toBeInTheDocument()
-    await waitForElementToBeRemoved(() => screen.queryByLabelText('Loading'))
+    expect(screen.getByLabelText('Loading...')).toBeInTheDocument()
+    await waitForElementToBeRemoved(() => screen.queryByLabelText('Loading...'))
 
     // Should show "Share not found" when shareToken is null
     expect(screen.getByText('Share not found')).toBeInTheDocument()
@@ -449,9 +448,8 @@ describe('load correct share page, based on graphql query', () => {
       route: <TokenRoute />,
     })
 
-    expect(screen.getByLabelText('Loading')).toBeInTheDocument()
-
-    await waitForElementToBeRemoved(() => screen.queryByLabelText('Loading'))
+    expect(screen.getByLabelText('Loading...')).toBeInTheDocument()
+    await waitForElementToBeRemoved(() => screen.queryByLabelText('Loading...'))
 
     expect(screen.getByText(/share expired/i)).toBeInTheDocument()
   })
