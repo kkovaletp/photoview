@@ -64,7 +64,7 @@ async function fetchLicenseMd(lang: string, signal: AbortSignal): Promise<string
 
     // Fallback to English when the requested locale file is absent,
     // but skip the extra round-trip if English was already requested.
-    if (lang !== 'en') {
+    if (lang !== 'en' && primaryRes.status === 404) {
         const fallbackRes = await fetch(
             `${BASE}assets/lic-locales/en/${LICENSE_FILE}`,
             { signal },
