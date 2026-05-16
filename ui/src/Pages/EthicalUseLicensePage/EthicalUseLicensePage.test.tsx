@@ -38,7 +38,7 @@ function okText(text: string) {
     return { ok: true, text: () => Promise.resolve(text), json: () => Promise.resolve({}) }
 }
 function notFound() {
-    return { ok: false, text: () => Promise.resolve('Not found'), json: () => Promise.resolve({}) }
+    return { ok: false, status: 404, text: () => Promise.resolve('Not found'), json: () => Promise.resolve({}) }
 }
 
 function renderPage() {
