@@ -1,7 +1,7 @@
 import { MockedProvider } from '@apollo/client/testing'
 import { render } from '@testing-library/react'
 import { MessageProvider } from '../components/messages/MessageState'
-import { MemoryRouter, Route, Routes, Location } from 'react-router-dom'
+import { MemoryRouter, Route, Routes, Location } from 'react-router'
 import { ReactElement, ReactNode } from 'react'
 
 /**

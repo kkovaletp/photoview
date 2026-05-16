@@ -26,14 +26,15 @@ vi.mock('react-i18next', () => ({
 }))
 
 const mockNavigate = vi.fn()
-vi.mock('react-router-dom', async () => {
-    const actual = await vi.importActual('react-router-dom') as object
+vi.mock('react-router', async () => {
+    const actual = await vi.importActual('react-router') as object
     return {
         ...actual,
         useNavigate: () => mockNavigate,
     }
 })
 
+// Mock FaceCircleImage to simplify rendering
 vi.mock('../../../Pages/PeoplePage/FaceCircleImage', () => ({
     __esModule: true,
     default: ({ imageFace, size }: any) => (
@@ -43,6 +44,7 @@ vi.mock('../../../Pages/PeoplePage/FaceCircleImage', () => ({
     ),
 }))
 
+// Mock FaceDetails component
 vi.mock('../../../Pages/PeoplePage/PeoplePage', () => ({
     FaceDetails: ({ group, editLabel, setEditLabel }: any) => (
         <div data-testid={`face-details-${group.id}`}>
@@ -59,6 +61,7 @@ vi.mock('../../../Pages/PeoplePage/PeoplePage', () => ({
     ),
 }))
 
+// Mock MergeFaceGroupsModal
 vi.mock('../../../Pages/PeoplePage/SingleFaceGroup/MergeFaceGroupsModal', () => ({
     __esModule: true,
     default: ({ state, setState, preselectedDestinationFaceGroup }: any) => (
@@ -78,6 +81,7 @@ vi.mock('../../../Pages/PeoplePage/SingleFaceGroup/MergeFaceGroupsModal', () => 
     },
 }))
 
+// Mock MoveImageFacesModal
 vi.mock('../../../Pages/PeoplePage/SingleFaceGroup/MoveImageFacesModal', () => ({
     __esModule: true,
     default: ({ open, setOpen, faceGroup }: any) => (
@@ -201,6 +205,7 @@ describe('MediaSidebarPeople', () => {
         const { container } = renderWithProviders(
             <MediaSidebarPeople media={media} />
         )
+
         expect(container.firstChild).toBeNull()
     })
 
@@ -229,6 +234,7 @@ describe('MediaSidebarPeople', () => {
         const user = userEvent.setup()
         renderWithProviders(<MediaSidebarPeople media={media} />)
 
+        // Find and click the first menu button
         const menuButtons = screen.getAllByRole('button')
         await user.click(menuButtons[0])
 
@@ -245,12 +251,14 @@ describe('MediaSidebarPeople', () => {
         const user = userEvent.setup()
         renderWithProviders(<MediaSidebarPeople media={media} />)
 
+        // Open menu
         const menuButtons = screen.getAllByRole('button')
         await user.click(menuButtons[0])
 
         await waitFor(() => expect(screen.getByText('Change label')).toBeInTheDocument())
         await user.click(screen.getByText('Change label'))
 
+        // Should show input field
         await waitFor(() => {
             expect(screen.getByTestId('label-input')).toBeInTheDocument()
         })
@@ -281,6 +289,7 @@ describe('MediaSidebarPeople', () => {
         await waitFor(() => expect(screen.getByText('Merge face')).toBeInTheDocument())
         await user.click(screen.getByText('Merge face'))
 
+        // Check modal state for the specific face group
         await waitFor(() => {
             expect(screen.getByTestId('merge-modal-group-1')).toHaveAttribute(
                 'data-state',
@@ -298,6 +307,7 @@ describe('MediaSidebarPeople', () => {
         await waitFor(() => expect(screen.getByText('Move face')).toBeInTheDocument())
         await user.click(screen.getByText('Move face'))
 
+        // Check modal is open for the specific face group
         await waitFor(() => {
             expect(screen.getByTestId('move-modal-group-1')).toHaveAttribute('data-open', 'true')
         })
@@ -398,6 +408,7 @@ describe('MediaSidebarPeople', () => {
         await waitFor(() => expect(screen.getByText('Detach image')).toBeInTheDocument())
         await user.click(screen.getByText('Detach image'))
 
+        // Click "Detach image"
         await waitFor(() => {
             const alert = screen.getByRole('alert')
             expect(alert).toBeInTheDocument()

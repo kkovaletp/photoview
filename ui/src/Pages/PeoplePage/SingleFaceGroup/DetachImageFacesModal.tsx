@@ -1,7 +1,7 @@
 import { gql, useMutation } from '@apollo/client'
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router'
 import { isNil } from '../../../helpers/utils'
 import Modal from '../../../primitives/Modal'
 import { MY_FACES_QUERY } from '../PeoplePage'

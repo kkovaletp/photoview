@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom'
+import { Link } from 'react-router'
 import styled from 'styled-components'
 import { MediaType } from '../../__generated__/globalTypes'
 import { MediaSidebarMedia } from '../sidebar/MediaSidebar/MediaSidebar'

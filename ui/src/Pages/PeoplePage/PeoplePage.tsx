@@ -13,7 +13,7 @@ import {
 import { gql, useMutation, useQuery } from '@apollo/client'
 import Layout from '../../components/layout/Layout'
 import styled from 'styled-components'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useParams } from 'react-router'
 import SingleFaceGroup from './SingleFaceGroup/SingleFaceGroup'
 import { Button, TextField } from '../../primitives/form/Input'
 import FaceCircleImage from './FaceCircleImage'

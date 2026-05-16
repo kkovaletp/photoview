@@ -42,8 +42,8 @@ const { mockNavigate } = vi.hoisted(() => ({
     mockNavigate: vi.fn(),
 }))
 
-vi.mock('react-router-dom', async () => {
-    const actual: object = await vi.importActual('react-router-dom')
+vi.mock('react-router', async () => {
+    const actual: object = await vi.importActual('react-router')
     return { ...actual, useNavigate: () => mockNavigate }
 })
 

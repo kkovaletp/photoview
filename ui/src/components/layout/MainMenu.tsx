@@ -1,5 +1,5 @@
 import { ReactNode } from 'react'
-import { NavLink } from 'react-router-dom'
+import { NavLink } from 'react-router'
 import { useQuery, gql } from '@apollo/client'
 import { authToken } from '../../helpers/authentication'
 import { useTranslation } from 'react-i18next'
@@ -55,7 +55,7 @@ const MenuButton = ({
     >
       <li className="flex items-center">
         <div
-          className={`p-1.5 lg:w-8 lg:h-8 lg:p-1 w-full h-full rounded-lg`}
+          className={`w-12 h-12 p-1.5 lg:w-8 lg:h-8 lg:p-1 rounded-lg`}
           style={{ backgroundColor: background }}
         >
           {icon}

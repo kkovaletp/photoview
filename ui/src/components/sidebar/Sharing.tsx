@@ -579,8 +579,8 @@ const SidebarShare = ({
         <button
           className="align-middle p-1 ml-2"
           title={t('sidebar.sharing.copy_link', 'Copy Link')}
-          onClick={() => {
-            copy(`${location.origin}/share/${share.token}`)
+          onClick={async () => {
+            await copy(`${location.origin}/share/${share.token}`)
           }}
         >
           <CopyIcon />

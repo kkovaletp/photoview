@@ -5,6 +5,7 @@ import svgr from 'vite-plugin-svgr'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
 import tailwindcss from '@tailwindcss/vite'
+import { ethicalLicensePlugin } from './vite-plugins/ethicalLicensePlugin'
 
 export default defineConfig(async ({ command, mode }) => {
   // Conditionally import codecov plugin only if it's installed
@@ -31,6 +32,7 @@ export default defineConfig(async ({ command, mode }) => {
           injectionPoint: undefined
         }
       }),
+      ethicalLicensePlugin(),
       // Only add codecov plugin if it's available
       codecovVitePlugin?.({
         enableBundleAnalysis: process.env.CODECOV_TKN !== undefined,

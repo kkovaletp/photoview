@@ -22,10 +22,16 @@
     "loading": "",
     "not_found": ""
   },
+  "ethical_use_license_page": {
+    "load_error": "",
+    "loading": "",
+    "title": ""
+  },
   "general": {
     "action": {
       "add": "Dodaj",
       "cancel": "Anuluj",
+      "close": "",
       "remove": "Usuń",
       "retry": "",
       "save": "Zapisz",
@@ -414,6 +420,35 @@
     "photos": "Zdjęcia",
     "places": "Miejsca",
     "settings": "Ustawienia"
+  },
+  "terms_of_use": {
+    "agreement_intro": "",
+    "badge": {
+      "button_aria_label": "",
+      "button_title": "",
+      "dialog_aria_label": "",
+      "key_conditions_suffix": ""
+    },
+    "conditions": {
+      "condemn_aggression": "",
+      "forbidden_citizens": "",
+      "recognize_invasion": "",
+      "reject_propaganda": "",
+      "support_territorial_integrity": "",
+      "terrorist_state": ""
+    },
+    "declined": {
+      "close_tab": "",
+      "message": "",
+      "title": ""
+    },
+    "modal": {
+      "action": {
+        "accept": "",
+        "decline": ""
+      },
+      "title": ""
+    }
   },
   "timeline_filter": {
     "date": {

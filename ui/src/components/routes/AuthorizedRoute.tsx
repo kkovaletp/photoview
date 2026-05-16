@@ -1,6 +1,6 @@
 import { useLazyQuery } from '@apollo/client'
 import { useEffect, JSX, ReactNode } from 'react'
-import { Navigate } from 'react-router-dom'
+import { Navigate } from 'react-router'
 import { authToken } from '../../helpers/authentication'
 import { AdminQueryQuery } from '../layout/__generated__/Layout'
 import { ADMIN_QUERY } from '../layout/Layout'

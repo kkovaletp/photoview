@@ -36,6 +36,7 @@ vi.mock('../../../primitives/Modal', () => ({
         ) : null,
 }))
 
+// Mock useTranslation to prevent i18n issues
 vi.mock('react-i18next', () => ({
     useTranslation: () => ({
         t: (_key: string, fallback?: string) => fallback ?? _key,
@@ -45,8 +46,8 @@ vi.mock('react-i18next', () => ({
 const { mockNavigate } = vi.hoisted(() => ({
     mockNavigate: vi.fn(),
 }))
-vi.mock('react-router-dom', async () => {
-    const actual: object = await vi.importActual('react-router-dom')
+vi.mock('react-router', async () => {
+    const actual: object = await vi.importActual('react-router')
     return { ...actual, useNavigate: () => mockNavigate }
 })
 

@@ -1,7 +1,7 @@
 import { vi, describe, test, expect, beforeEach, afterEach } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { MemoryRouter } from 'react-router-dom'
+import { MemoryRouter } from 'react-router'
 import * as Apollo from '@apollo/client'
 import SearchBar, { AlbumRow, PhotoRow, searchHighlighted } from './Searchbar'
 import * as utils from '../../helpers/utils'

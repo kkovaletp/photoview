@@ -22,6 +22,7 @@ RUN npm install --global npm \
     fi
 
 COPY ui/ /app/ui
+COPY ETHICAL_USE_LICENSE.md /app/
 
 # Set environment variable REACT_APP_API_ENDPOINT from build args, uses "<web server>/api" as default
 ARG REACT_APP_API_ENDPOINT
@@ -149,7 +150,7 @@ RUN find "${PHOTOVIEW_UI_PATH}/assets" -type f -name "SettingsPage.*.js" \
     # Archive static files for better performance
     && find /app/ui -type f \( \
         -name "*.js" -o -name "*.mjs" -o -name "*.json" \
-        -o -name "*.css" -o -name "*.html" -o -name "*.svg" \
+        -o -name "*.css" -o -name "*.html" -o -name "*.svg" -o -name "*.md" \
         -o -name "*.txt" -o -name "*.xml" -o -name "*.wasm" -o -name "*.map" \
         \) ! -name "*.gz" ! -name "*.br" ! -name "*.zst" \
     -exec sh -c 'for file; do \
@@ -179,6 +180,7 @@ HEALTHCHECK --interval=60s --timeout=10s --start-period=10s --retries=2 \
     || exit 1
 
 LABEL org.opencontainers.image.source=https://github.com/kkovaletp/photoview/
+LABEL org.opencontainers.image.licenses="AGPL-3.0-only AND LicenseRef-Photoview-Ethical-Use"
 USER photoview
 ENTRYPOINT ["/app/photoview"]
 
@@ -216,7 +218,7 @@ RUN apk add --no-cache curl bash \
     # Archive static files for better performance
     && find /srv -type f \( \
         -name "*.js" -o -name "*.mjs" -o -name "*.json" \
-        -o -name "*.css" -o -name "*.html" -o -name "*.svg" \
+        -o -name "*.css" -o -name "*.html" -o -name "*.svg" -o -name "*.md" \
         -o -name "*.txt" -o -name "*.xml" -o -name "*.wasm" -o -name "*.map" \
         \) ! -name "*.gz" ! -name "*.br" ! -name "*.zst" \
     -exec sh -c 'for file; do \
@@ -234,6 +236,7 @@ ENV HTTPS_PORT=8443
 EXPOSE 8080 ${HTTPS_PORT} ${HTTPS_PORT}/udp
 
 LABEL org.opencontainers.image.source=https://github.com/kkovaletp/photoview/
+LABEL org.opencontainers.image.licenses="AGPL-3.0-only AND LicenseRef-Photoview-Ethical-Use"
 
 HEALTHCHECK --interval=60s --timeout=5s --start-period=10s --retries=2 \
     CMD curl -kfsS "https://localhost:${HTTPS_PORT}/health-check" \

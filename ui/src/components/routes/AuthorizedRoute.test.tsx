@@ -1,6 +1,6 @@
 import AuthorizedRoute, { useIsAdmin } from './AuthorizedRoute'
 import { render, screen, waitFor } from '@testing-library/react'
-import { MemoryRouter, Route, Routes } from 'react-router-dom'
+import { MemoryRouter, Route, Routes } from 'react-router'
 
 import * as authentication from '../../helpers/authentication'
 import { MockedProvider } from '@apollo/client/testing'

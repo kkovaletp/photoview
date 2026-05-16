@@ -155,12 +155,13 @@ type ButtonProps = {
 
 export const buttonStyles = ({ variant, background }: ButtonProps) =>
   clsx(
-    'px-6 py-0.5 rounded border border-gray-200 focus:outline-none focus:border-blue-300 text-[#222] hover:bg-gray-100 whitespace-nowrap',
+    'px-6 py-0.5 rounded border border-gray-200 focus:outline-none focus:border-blue-300 text-[#222] whitespace-nowrap',
+    (!variant || variant == 'default') && 'hover:bg-gray-100',
     'dark:bg-dark-input-bg dark:border-dark-input-border dark:text-dark-input-text dark:focus:border-blue-300',
     variant === 'negative' &&
-    'text-red-600 hover:bg-red-600 hover:border-red-700 hover:text-white transition-colors focus:border-red-600 focus:hover:border-red-700',
+    'text-red-600 hover:bg-red-600 hover:border-red-700 hover:text-white transition-colors focus:border-red-600 focus:hover:border-red-700 dark:text-red-400 dark:hover:bg-red-700 dark:hover:border-red-600 dark:hover:text-white',
     variant === 'positive' &&
-    'text-green-600 hover:bg-green-600 hover:border-green-700 hover:text-white transition-colors focus:border-green-600 focus:hover:border-green-700',
+    'text-green-700 hover:bg-green-700 hover:border-green-800 hover:text-white transition-colors focus:border-green-700 focus:hover:border-green-800 dark:text-green-400 dark:hover:bg-green-700 dark:hover:border-green-600 dark:hover:text-white',
     background === 'white' ? 'bg-white' : 'bg-gray-50'
   )
 

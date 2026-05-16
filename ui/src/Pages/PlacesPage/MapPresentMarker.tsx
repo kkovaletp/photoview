@@ -1,7 +1,7 @@
 import { gql, useLazyQuery } from '@apollo/client'
 import { Dispatch, useEffect } from 'react'
 import PresentView from '../../components/photoGallery/presentView/PresentView'
-import type mapboxgl from 'mapbox-gl'
+import type * as mapboxgl from 'mapbox-gl'
 import { PresentMarker } from './PlacesPage'
 import {
   PlacePageQueryMediaQuery,
@@ -29,6 +29,10 @@ const getMediaFromMarker = (map: mapboxgl.Map, presentMarker: PresentMarker) =>
       mediaSource.getClusterLeaves(id as number, 1000, 0, (error, features) => {
         if (error) {
           reject(error)
+          return
+        }
+        if (!features) {
+          resolve([])
           return
         }
 

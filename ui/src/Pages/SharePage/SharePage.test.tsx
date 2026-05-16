@@ -2,7 +2,7 @@ import { vi } from 'vitest'
 
 vi.mock('../../hooks/useScrollPagination')
 vi.mock('../../Pages/SharePage/MediaSharePage', () => {
-  const originalModule = vi.importActual('../../Pages/SharePage/MediaSharePage')
+  const originalModule = vi.importActual('../../Pages/SharePage/MediaSharePage') as object
   // Define interface for the props
   interface MediaViewProps {
     media?: {
@@ -31,7 +31,7 @@ vi.mock('../../Pages/SharePage/MediaSharePage', () => {
   }
 })
 
-import { MemoryRouter, Routes, Route } from 'react-router-dom'
+import { MemoryRouter, Routes, Route } from 'react-router'
 import { MockedProvider } from '@apollo/client/testing'
 import { renderWithProviders } from '../../helpers/testUtils'
 
@@ -328,7 +328,7 @@ describe('load correct share page, based on graphql query', () => {
           password,
         },
       },
-      error: new Error(),
+      error: new Error(undefined),
     }
 
     // Remove the message property from the error

@@ -26,7 +26,7 @@ const ForwardedMapContainer = forwardRef<HTMLDivElement, HTMLProps<HTMLDivElemen
 
 type MapboxMapProps = {
   configureMapbox(map: mapboxgl.Map, mapboxLibrary: typeof mapboxgl): void
-  mapboxOptions?: Partial<mapboxgl.MapboxOptions>
+  mapboxOptions?: Partial<mapboxgl.MapOptions>
 }
 
 const useMapboxMap = ({
@@ -43,7 +43,7 @@ const useMapboxMap = ({
 
   useEffect(() => {
     async function loadMapboxLibrary() {
-      const mapbox = (await import('mapbox-gl')).default
+      const mapbox = (await import('mapbox-gl/esm')).default
 
       setMapboxLibrary(mapbox)
     }

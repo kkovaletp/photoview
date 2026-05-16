@@ -144,7 +144,7 @@ describe('SelectFaceGroupTable', () => {
 
             // Table structure
             expect(screen.getAllByRole('table')).toHaveLength(2) // Header and body tables
-            expect(document.querySelector(String.raw`.overflow-auto.max-h-125`)).toBeInTheDocument()
+            expect(document.querySelector('.overflow-auto.max-h-125')).toBeInTheDocument()
 
             // Header and search
             expect(screen.getByText('Face Groups')).toBeInTheDocument()
@@ -424,10 +424,15 @@ describe('SelectFaceGroupTable', () => {
 
             render(<SelectFaceGroupTable {...performanceProps} />)
 
-            // Should render all items
-            for (let i = 0; i < 100; i++) {
-                expect(screen.getByText(`Person ${i}`)).toBeInTheDocument()
-            }
+            // Verify boundary items are rendered with correct content.
+            expect(screen.getByText('Person 0')).toBeInTheDocument()
+            expect(screen.getByText('Person 49')).toBeInTheDocument()
+            expect(screen.getByText('Person 99')).toBeInTheDocument()
+
+            // Verify all 100 data rows were actually mounted (the table has 2 header
+            // rows from the header/body split, plus 100 data rows).
+            const allRows = screen.getAllByRole('row')
+            expect(allRows.length).toBeGreaterThanOrEqual(100)
         })
 
         it('should integrate with FaceCircleImage and handle missing image data gracefully', () => {

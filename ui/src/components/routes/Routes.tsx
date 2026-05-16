@@ -5,7 +5,7 @@ import {
   NavigateFunction,
   Outlet,
   useRoutes,
-} from 'react-router-dom'
+} from 'react-router'
 
 import Layout from '../layout/Layout'
 import { authToken, clearTokenCookie } from '../../helpers/authentication'
@@ -26,6 +26,10 @@ const PlacesPage = lazy(() => import('../../Pages/PlacesPage/PlacesPage'))
 const LoginPage = lazy(() => import('../../Pages/LoginPage/LoginPage'))
 const InitialSetupPage = lazy(
   () => import('../../Pages/LoginPage/InitialSetupPage')
+)
+
+const EthicalUseLicensePage = lazy(
+  () => import('../../Pages/EthicalUseLicensePage/EthicalUseLicensePage')
 )
 
 const SharePageTokenRoute = lazy(() =>
@@ -117,6 +121,10 @@ const Routes = () => {
       // for backwards-compatibility
       path: '/photos',
       element: <Navigate to="/timeline" />,
+    },
+    {
+      path: '/ethical-use-license',
+      element: <EthicalUseLicensePage />,
     },
     {
       path: '*',
