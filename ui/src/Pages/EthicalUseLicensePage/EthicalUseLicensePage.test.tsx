@@ -1,5 +1,5 @@
 import { describe, test, expect, vi, beforeEach, afterEach } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { act, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router-dom'
 import i18n from 'i18next'
@@ -244,6 +244,71 @@ describe('EthicalUseLicensePage', () => {
                 )
             )
         })
+
+        test('auto-updates locale when i18n fires languageChanged (no manual pick)', async () => {
+            vi.spyOn(i18n, 'language', 'get').mockReturnValue('en')
+
+            mockFetch
+                .mockResolvedValueOnce(okJson({ locales: ['en', 'de'] })) // manifest
+                .mockResolvedValueOnce(okText('# EN License'))             // en MD (initial)
+                .mockResolvedValueOnce(okText('# DE License'))             // de MD (after event)
+
+            renderPage()
+            await waitFor(() =>
+                expect(screen.queryByText(/loading/i)).not.toBeInTheDocument()
+            )
+
+            // Simulate the global app language switching to German externally.
+            vi.spyOn(i18n, 'language', 'get').mockReturnValue('de')
+            act(() => {
+                // i18next's EventEmitter exposes emit() at runtime; cast required for TS.
+                ; (i18n as unknown as { emit(e: string, lang: string): void })
+                    .emit('languageChanged', 'de')
+            })
+
+            await waitFor(() =>
+                expect(mockFetch).toHaveBeenCalledWith(
+                    expect.stringContaining('/de/ETHICAL_USE_LICENSE.md'),
+                    expect.any(Object)
+                )
+            )
+        })
+
+        test('does NOT change locale after the user has made a manual selection', async () => {
+            const user = userEvent.setup()
+            vi.spyOn(i18n, 'language', 'get').mockReturnValue('en')
+
+            mockFetch
+                .mockResolvedValueOnce(okJson({ locales: ['en', 'de', 'fr'] })) // manifest
+                .mockResolvedValueOnce(okText('# EN License'))                   // en MD (initial)
+                .mockResolvedValueOnce(okText('# DE License'))                   // de MD (manual pick)
+
+            renderPage()
+            await waitFor(() =>
+                expect(screen.queryByText(/loading/i)).not.toBeInTheDocument()
+            )
+
+            // User manually picks German — sets userHasPickedLocale = true.
+            await user.selectOptions(screen.getByRole('combobox'), 'de')
+            await waitFor(() =>
+                expect(mockFetch).toHaveBeenCalledWith(
+                    expect.stringContaining('/de/ETHICAL_USE_LICENSE.md'),
+                    expect.any(Object)
+                )
+            )
+
+            const fetchCallCount = mockFetch.mock.calls.length
+
+            // i18n now switches to French externally — should be ignored.
+            vi.spyOn(i18n, 'language', 'get').mockReturnValue('fr')
+            act(() => {
+                ; (i18n as unknown as { emit(e: string, lang: string): void })
+                    .emit('languageChanged', 'fr')
+            })
+
+            // No additional fetch for 'fr' should have been triggered.
+            expect(mockFetch).toHaveBeenCalledTimes(fetchCallCount)
+        })
     })
 
     // -----------------------------------------------------------------------
@@ -303,6 +368,41 @@ describe('EthicalUseLicensePage', () => {
             await waitFor(() =>
                 expect(screen.getByRole('combobox')).toBeInTheDocument()
             )
+        })
+
+        test('shows native display names from LOCALE_DISPLAY_NAMES in the language selector', async () => {
+            vi.spyOn(i18n, 'language', 'get').mockReturnValue('en')
+            mockFetch
+                .mockResolvedValueOnce(okJson({ locales: ['en', 'de', 'fr'] }))
+                .mockResolvedValueOnce(okText('# License'))
+
+            renderPage()
+
+            await waitFor(() =>
+                expect(screen.getByRole('combobox')).toBeInTheDocument()
+            )
+
+            const options = screen.getAllByRole('option') as HTMLOptionElement[]
+            expect(options.find(o => o.value === 'en')?.textContent).toBe('English')
+            expect(options.find(o => o.value === 'de')?.textContent).toBe('Deutsch')
+            expect(options.find(o => o.value === 'fr')?.textContent).toBe('Français')
+        })
+
+        test('falls back to the raw locale code as the label when no display name is mapped', async () => {
+            vi.spyOn(i18n, 'language', 'get').mockReturnValue('en')
+            // 'xx' is not in LOCALE_DISPLAY_NAMES, so the selector must show the code itself.
+            mockFetch
+                .mockResolvedValueOnce(okJson({ locales: ['en', 'xx'] }))
+                .mockResolvedValueOnce(okText('# License'))
+
+            renderPage()
+
+            await waitFor(() =>
+                expect(screen.getByRole('combobox')).toBeInTheDocument()
+            )
+
+            const options = screen.getAllByRole('option') as HTMLOptionElement[]
+            expect(options.find(o => o.value === 'xx')?.textContent).toBe('xx')
         })
     })
 
@@ -377,28 +477,72 @@ describe('EthicalUseLicensePage', () => {
 
     // -----------------------------------------------------------------------
     describe('page branding', () => {
-        test('renders the Photoview logo', () => {
-            mockFetch.mockReturnValue(new Promise(() => { }))
+        test('renders the Photoview logo', async () => {
+            mockFetch
+                .mockResolvedValueOnce(okJson({ locales: ['en'] }))
+                .mockResolvedValueOnce(okText('# License'))
 
             renderPage()
 
+            await waitFor(() =>
+                expect(screen.queryByText(/loading/i)).not.toBeInTheDocument()
+            )
             expect(screen.getByRole('img', { name: /photoview logo/i })).toBeInTheDocument()
         })
 
-        test('renders the app name', () => {
-            mockFetch.mockReturnValue(new Promise(() => { }))
+        test('renders the app name', async () => {
+            mockFetch
+                .mockResolvedValueOnce(okJson({ locales: ['en'] }))
+                .mockResolvedValueOnce(okText('# License'))
 
             renderPage()
 
+            await waitFor(() =>
+                expect(screen.queryByText(/loading/i)).not.toBeInTheDocument()
+            )
             expect(screen.getByText('Photoview')).toBeInTheDocument()
         })
 
-        test('renders the Ethical Use License page title in the toolbar', () => {
-            mockFetch.mockReturnValue(new Promise(() => { }))
+        test('renders the Ethical Use License page title in the toolbar', async () => {
+            mockFetch
+                .mockResolvedValueOnce(okJson({ locales: ['en'] }))
+                .mockResolvedValueOnce(okText('# License'))
 
             renderPage()
 
+            await waitFor(() =>
+                expect(screen.queryByText(/loading/i)).not.toBeInTheDocument()
+            )
             expect(screen.getByText(/ethical use license/i)).toBeInTheDocument()
+        })
+
+        test('updates document.title to include the license page title while rendered', async () => {
+            mockFetch
+                .mockResolvedValueOnce(okJson({ locales: ['en'] }))
+                .mockResolvedValueOnce(okText('# License'))
+
+            renderPage()
+
+            await waitFor(() =>
+                expect(document.title).toMatch(/Ethical Use License/i)
+            )
+            expect(document.title).toContain('Photoview')
+        })
+
+        test('resets document.title to "Photoview" on unmount', async () => {
+            mockFetch
+                .mockResolvedValueOnce(okJson({ locales: ['en'] }))
+                .mockResolvedValueOnce(okText('# License'))
+
+            const { unmount } = renderPage()
+
+            await waitFor(() =>
+                expect(document.title).toMatch(/Ethical Use License/i)
+            )
+
+            unmount()
+
+            expect(document.title).toBe('Photoview')
         })
     })
 })

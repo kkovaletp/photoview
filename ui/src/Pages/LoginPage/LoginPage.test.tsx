@@ -45,8 +45,15 @@ const authorizeMutation = gql`
 describe('LoginPage', () => {
   beforeEach(() => {
     vi.clearAllMocks()
+    localStorage.clear()
+    localStorage.setItem('ethical_use_terms_accepted', 'true')
     authToken.mockImplementation(() => undefined)
     mockNavigate.mockClear()
+  })
+
+  afterEach(() => {
+    localStorage.clear()
+    vi.restoreAllMocks()
   })
 
   describe('Redirects', () => {
