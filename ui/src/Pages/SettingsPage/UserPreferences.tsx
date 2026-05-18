@@ -100,7 +100,7 @@ const UserPreferences = () => {
   const [changePrefs, { loading: loadingPrefs, error }] = useMutation<
     ChangeUserPreferencesMutation,
     ChangeUserPreferencesMutationVariables
-  >(CHANGE_USER_PREFERENCES)
+  >(CHANGE_USER_PREFERENCES, { errorPolicy: 'all' })
 
   const sortedLanguagePrefs = useMemo(
     () => [...languagePreferences].sort((a, b) => a.label.localeCompare(b.label)),
@@ -139,10 +139,12 @@ const UserPreferences = () => {
         )}
         items={sortedLanguagePrefs}
         setSelected={language => {
-          changePrefs({
+          void changePrefs({
             variables: {
               language: language,
             },
+          }).catch(error => {
+            console.error('Failed to change user preferences', error)
           })
         }}
         selected={data?.myUserPreferences.language || undefined}

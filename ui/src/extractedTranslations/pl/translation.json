@@ -404,8 +404,10 @@
     },
     "sharing": {
       "add_share": "Dodaj udział",
+      "add_share_error": "",
       "copy_link": "Skopiuj link",
       "delete": "Usuń",
+      "delete_error": "",
       "error": "",
       "expiration_date": "",
       "more": "Więcej",

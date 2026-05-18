@@ -390,8 +390,10 @@
     },
     "sharing": {
       "add_share": "新增分享",
+      "add_share_error": "",
       "copy_link": "複製連結",
       "delete": "刪除",
+      "delete_error": "",
       "error": "",
       "expiration_date": "",
       "more": "更多",

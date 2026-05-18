@@ -32,7 +32,9 @@ const ScannerSection = () => {
       </InputLabelDescription>
       <Button
         onClick={() => {
-          startScanner()
+          void startScanner().catch(error => {
+            console.error('Failed to start scanner: ', error)
+          })
         }}
         disabled={called}
       >

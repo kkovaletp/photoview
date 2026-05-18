@@ -45,11 +45,13 @@ const EditRootPath = ({ album, user }: EditRootPathProps) => {
         variant="negative"
         disabled={loading}
         onClick={() =>
-          removeAlbumPath({
+          void removeAlbumPath({
             variables: {
               userId: user.id,
               albumId: album.id,
             },
+          }).catch(error => {
+            console.error('Failed to remove root path: ', error)
           })
         }
       >
@@ -93,11 +95,13 @@ const EditNewRootPath = ({ userID }: EditNewRootPathProps) => {
           const rootPath = normalizePath(value)
           if (rootPath === '') return
           setValue('')
-          addRootPath({
+          void addRootPath({
             variables: {
               id: userID,
               rootPath,
             },
+          }).catch(error => {
+            console.error('Failed to add root path: ', error)
           })
         }}
       >

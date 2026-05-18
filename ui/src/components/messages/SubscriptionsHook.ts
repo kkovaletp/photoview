@@ -93,7 +93,7 @@ export const SubscriptionsHook = ({
       const newNotification: Message = {
         key: msg.key,
         type: msg.type,
-        timeout: msg.timeout || undefined,
+        timeout: msg.timeout ?? undefined,
         timestamp,
         props: {
           header: msg.header,

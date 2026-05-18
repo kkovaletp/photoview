@@ -63,10 +63,12 @@ export const useLoadTranslations = () => {
       i18n.changeLanguage('en')
       return
     }
-    loadLang()
+    loadLang().catch(err => console.error('Failed to load user language', err))
   }, [token, loadLang])
 
   useEffect(() => {
+    if (!token) return
+
     const language = data?.myUserPreferences.language
     if (isNil(language)) {
       map_language = null
@@ -84,7 +86,7 @@ export const useLoadTranslations = () => {
           i18n.changeLanguage(locale)
         })
         .catch(err => console.error('Failed to load translation bundle', locale, err))
-  }, [data?.myUserPreferences.language])
+  }, [token, data?.myUserPreferences.language])
 }
 
 export const SetMapLanguages = (map: mapboxgl.Map) => {

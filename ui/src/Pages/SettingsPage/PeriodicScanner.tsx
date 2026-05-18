@@ -154,12 +154,19 @@ const PeriodicScanner = () => {
     const seconds = convertToSeconds(scanInterval)
 
     if (scanIntervalServerValue.current !== seconds) {
-      setScanIntervalMutation({
-        variables: {
-          interval: seconds,
-        },
+      const prev = scanIntervalServerValue.current
+      void setScanIntervalMutation({
+        variables: { interval: seconds },
+      }).then(() => {
+        scanIntervalServerValue.current = seconds
+      }).catch(err => {
+        console.error('Failed to update periodic scan interval:', err)
+        // Revert UI state to previous server value
+        if (prev !== null) {
+          const reverted = convertToAppropriateUnit({ value: prev, unit: TimeUnit.Second })
+          setScanInterval(reverted)
+        }
       })
-      scanIntervalServerValue.current = seconds
     }
   }
 

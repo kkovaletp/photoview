@@ -59,7 +59,7 @@ export const ScannerConcurrentWorkers = () => {
   const [setWorkersMutation, workersMutationData] = useMutation<
     SetConcurrentWorkersMutation,
     SetConcurrentWorkersMutationVariables
-  >(SET_CONCURRENT_WORKERS_MUTATION)
+  >(SET_CONCURRENT_WORKERS_MUTATION, { errorPolicy: 'all' })
 
   const updateWorkerAmount = (next: number) => {
     const prev = workerAmountServerValue.current
@@ -67,12 +67,13 @@ export const ScannerConcurrentWorkers = () => {
     if (inFlightNextRef.current === next) return
     inFlightNextRef.current = next
 
-    setWorkersMutation({
-      variables: {
-        workers: next,
-      },
+    void setWorkersMutation({
+      variables: { workers: next },
     }).then(res => {
-      const newValue = res.data?.setScannerConcurrentWorkers ?? next
+      if (!res.data || (Array.isArray(res.errors) && res.errors.length > 0)) {
+        throw new Error('GraphQL error while updating concurrent workers')
+      }
+      const newValue = res.data.setScannerConcurrentWorkers
       workerAmountServerValue.current = newValue
       setWorkerAmount(newValue)
       setInputValue(String(newValue))

@@ -394,8 +394,10 @@
     },
     "sharing": {
       "add_share": "Paylaşımlara ekle",
+      "add_share_error": "",
       "copy_link": "Bağlantıyı Kopyala",
       "delete": "Sil",
+      "delete_error": "",
       "error": "",
       "expiration_date": "",
       "more": "Diğer",

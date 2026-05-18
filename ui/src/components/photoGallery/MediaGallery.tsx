@@ -64,9 +64,11 @@ const MediaGallery = ({ loading, mediaState, dispatchMedia }: MediaGalleryProps)
             updateSidebar(<MediaSidebar media={mediaState.media[index]} />)
           }}
           clickFavorite={() => {
-            toggleFavoriteAction({
+            void toggleFavoriteAction({
               media,
               markFavorite,
+            }).catch(err => {
+              console.error('Failed to toggle favorite: ', err)
             })
           }}
           clickPresent={() => {

@@ -394,8 +394,10 @@
     },
     "sharing": {
       "add_share": "Share toevoegen",
+      "add_share_error": "",
       "copy_link": "Link kopiëren",
       "delete": "Verwijderen",
+      "delete_error": "",
       "error": "",
       "expiration_date": "",
       "more": "Meer",

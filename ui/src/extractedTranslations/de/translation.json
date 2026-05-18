@@ -394,8 +394,10 @@
     },
     "sharing": {
       "add_share": "Freigabe hinzufügen",
+      "add_share_error": "",
       "copy_link": "Link kopieren",
       "delete": "Freigabe löschen",
+      "delete_error": "",
       "error": "",
       "expiration_date": "",
       "more": "mehr infos",

@@ -64,9 +64,11 @@ const TimelineGroupAlbum = ({
         })
       }}
       clickFavorite={() => {
-        toggleFavoriteAction({
+        void toggleFavoriteAction({
           media,
           markFavorite,
+        }).catch(err => {
+          console.error('Failed to toggle favorite: ', err)
         })
       }}
       active={media.id === getActiveTimelineImage({ mediaState })?.id}

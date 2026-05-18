@@ -546,6 +546,20 @@ const SidebarShare = ({
   shareItem,
 }: SidebarShareProps) => {
   const { t } = useTranslation()
+  const { add } = useMessageState()
+  //TODO: refactor this and remove duplication with notifyError in MorePopoverSectionPassword and MorePopoverSectionExpiration
+  const notifyError = (header: string, error: unknown) => {
+    console.error(`${header}: `, error)
+    add({
+      key: (globalThis.crypto?.randomUUID?.() ?? Math.random().toString(36)),
+      type: NotificationType.Message,
+      props: {
+        negative: true,
+        header,
+        content: error instanceof Error ? error.message : 'An unexpected error occurred',
+      },
+    })
+  }
 
   const query = isPhoto ? SHARE_PHOTO_QUERY : SHARE_ALBUM_QUERY
 
@@ -587,7 +601,11 @@ const SidebarShare = ({
         </button>
         <button
           onClick={() => {
-            deleteShare({ variables: { token: share.token } })
+            void deleteShare({
+              variables: { token: share.token }
+            }).catch(err =>
+              notifyError(t('sidebar.sharing.delete_error', 'Failed to delete share'), err)
+            )
           }}
           className="align-middle p-1 ml-2 hover:text-red-600 focus:text-red-600"
           title={t('sidebar.sharing.delete', 'Delete')}
@@ -632,11 +650,11 @@ const SidebarShare = ({
                   className="text-green-500 font-bold uppercase text-xs"
                   disabled={loading}
                   onClick={() => {
-                    shareItem({
-                      variables: {
-                        id,
-                      },
-                    })
+                    void shareItem({
+                      variables: { id },
+                    }).catch(err =>
+                      notifyError(t('sidebar.sharing.add_share_error', 'Failed to add share'), err)
+                    )
                   }}
                 >
                   <AddIcon className="inline-block mr-2" />

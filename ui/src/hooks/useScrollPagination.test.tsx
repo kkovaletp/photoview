@@ -382,9 +382,7 @@ describe('useScrollPagination', () => {
             })
             await waitFor(() => expect(result.current.finished).toBe(true))
 
-            act(() => {
-                rerender({ data: { items: ['a', 'b'] } })
-            })
+            rerender({ data: { items: ['a', 'b'] } })
 
             expect(result.current.finished).toBe(false)
         })

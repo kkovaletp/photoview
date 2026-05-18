@@ -394,8 +394,10 @@
     },
     "sharing": {
       "add_share": "Gehitu partekatzeak",
+      "add_share_error": "",
       "copy_link": "Kopiatu esteka",
       "delete": "Ezabatu",
+      "delete_error": "",
       "error": "",
       "expiration_date": "",
       "more": "Gehiago",

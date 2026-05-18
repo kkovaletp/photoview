@@ -396,8 +396,10 @@ export default interface Resources {
       },
       "sharing": {
         "add_share": "Add shares",
+        "add_share_error": "Failed to add share",
         "copy_link": "Copy Link",
         "delete": "Delete",
+        "delete_error": "Failed to delete share",
         "error": "Error: {{message}}",
         "expiration_date": "Expiration date",
         "more": "More",

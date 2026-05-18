@@ -394,8 +394,10 @@
     },
     "sharing": {
       "add_share": "Tilføj deling",
+      "add_share_error": "",
       "copy_link": "Kopier link",
       "delete": "Slet",
+      "delete_error": "",
       "error": "",
       "expiration_date": "",
       "more": "Mere",

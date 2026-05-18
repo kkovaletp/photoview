@@ -394,8 +394,10 @@
     },
     "sharing": {
       "add_share": "Dela",
+      "add_share_error": "",
       "copy_link": "Kopiera länk",
       "delete": "",
+      "delete_error": "",
       "error": "",
       "expiration_date": "",
       "more": "",
