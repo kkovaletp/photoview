@@ -47,7 +47,7 @@
     "dompurify": "^3.4.5",
     "graphql-ws": "^6.0.8",
     "i18next": "26.2.0",
-    "js-cookie": "^3.0.5",
+    "js-cookie": "^3.0.7",
     "luxon": "^3.7.2",
     "mapbox-gl": "~3.23.1",
     "marked": "^18.0.2",
