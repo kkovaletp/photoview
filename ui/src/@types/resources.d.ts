@@ -202,6 +202,8 @@ export default interface Resources {
       "scanner": {
         "description": "Will scan all users for new or updated media",
         "scan_all_users": "Scan all users",
+        "scanning": "Scan in progress…",
+        "starting": "Starting…",
         "title": "Scanner"
       },
       "user_preferences": {

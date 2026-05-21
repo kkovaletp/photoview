@@ -200,6 +200,8 @@
     "scanner": {
       "description": "Irá procurar todos os utilizadores para encontrar mídia nova ou atualizada",
       "scan_all_users": "Procurar todos os utilizadores",
+      "scanning": "",
+      "starting": "",
       "title": "Procurar fotos dos utilizadores"
     },
     "user_preferences": {

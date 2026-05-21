@@ -200,6 +200,8 @@
     "scanner": {
       "description": "Neue und aktualisierte Medien aller Benutzer scannen",
       "scan_all_users": "Alle Benutzer scannen",
+      "scanning": "",
+      "starting": "",
       "title": "Scanner"
     },
     "user_preferences": {

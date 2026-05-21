@@ -47,7 +47,7 @@ const MediaGallery = ({ loading, mediaState, dispatchMedia }: MediaGalleryProps)
   const { updateSidebar } = useContext(SidebarContext)
 
   let mediaElements = []
-  if (media && !loading) {
+  if (media.length > 0) {
     mediaElements = media.map((media, index) => {
       const active = activeIndex === index
 
@@ -77,7 +77,7 @@ const MediaGallery = ({ loading, mediaState, dispatchMedia }: MediaGalleryProps)
         />
       )
     })
-  } else {
+  } else if (loading) {
     for (let i = 0; i < 6; i++) {
       mediaElements.push(<MediaPlaceholder key={i} />)
     }

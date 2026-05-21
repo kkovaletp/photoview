@@ -200,6 +200,8 @@
     "scanner": {
       "description": "將掃描所有使用者的新媒體或更新媒體",
       "scan_all_users": "掃描所有使用者",
+      "scanning": "",
+      "starting": "",
       "title": "掃描"
     },
     "user_preferences": {

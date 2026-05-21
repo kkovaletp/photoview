@@ -200,6 +200,8 @@
     "scanner": {
       "description": "Verranno effettuate delle scansioni per tutti gli utenti alla ricerca di media nuovi o aggiornati",
       "scan_all_users": "Scansiona per tutti",
+      "scanning": "",
+      "starting": "",
       "title": "Scansioni"
     },
     "user_preferences": {

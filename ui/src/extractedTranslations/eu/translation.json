@@ -200,6 +200,8 @@
     "scanner": {
       "description": "Erabiltzaile guztiak aztertuko ditugu eduki berri edo eguneratuen bila",
       "scan_all_users": "Aztertu erabiltzaile guztiak",
+      "scanning": "",
+      "starting": "",
       "title": "Azterketa"
     },
     "user_preferences": {

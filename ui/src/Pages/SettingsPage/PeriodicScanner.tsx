@@ -163,6 +163,7 @@ const PeriodicScanner = () => {
         console.error('Failed to update periodic scan interval:', err)
         // Revert UI state to previous server value
         if (prev !== null) {
+          setEnablePeriodicScanner(prev > 0)
           const reverted = convertToAppropriateUnit({ value: prev, unit: TimeUnit.Second })
           setScanInterval(reverted)
         }

@@ -94,12 +94,13 @@ const EditNewRootPath = ({ userID }: EditNewRootPathProps) => {
         onClick={() => {
           const rootPath = normalizePath(value)
           if (rootPath === '') return
-          setValue('')
           void addRootPath({
             variables: {
               id: userID,
               rootPath,
             },
+          }).then(() => {
+            setValue('')
           }).catch(error => {
             console.error('Failed to add root path: ', error)
           })

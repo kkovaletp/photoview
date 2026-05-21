@@ -200,6 +200,8 @@
     "scanner": {
       "description": "将扫描所有用户新添加及更新的媒体文件",
       "scan_all_users": "扫描所有用户",
+      "scanning": "",
+      "starting": "",
       "title": "扫描"
     },
     "user_preferences": {

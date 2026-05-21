@@ -200,6 +200,8 @@
     "scanner": {
       "description": "Yeni veya güncellenmiş medya için tüm kullanıcıları tarar",
       "scan_all_users": "Tüm kullanıcıları tara",
+      "scanning": "",
+      "starting": "",
       "title": "Tarayıcı"
     },
     "user_preferences": {

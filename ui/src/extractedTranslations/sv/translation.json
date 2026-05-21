@@ -200,6 +200,8 @@
     "scanner": {
       "description": "Ska skanna alla användare efter nya eller uppdaterade media ",
       "scan_all_users": "Skanna alla användare",
+      "scanning": "",
+      "starting": "",
       "title": "Skanner"
     },
     "user_preferences": {

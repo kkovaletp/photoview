@@ -92,6 +92,7 @@ export const SidebarPhotoCover = ({ cover_id }: SidebarPhotoCoverProps) => {
                       variables: { coverID: cover_id },
                     }).catch(error => {
                       console.error('Failed to set album cover: ', error)
+                      setButtonDisabled(false)
                     })
                   }}
                 >
@@ -156,6 +157,7 @@ export const SidebarAlbumCover = ({ id }: SidebarAlbumCoverProps) => {
                       variables: { albumID: id },
                     }).catch(error => {
                       console.error('Failed to reset album cover: ', error)
+                      setButtonDisabled(false)
                     })
                   }}
                 >

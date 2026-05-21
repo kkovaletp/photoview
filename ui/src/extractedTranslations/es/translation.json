@@ -200,6 +200,8 @@
     "scanner": {
       "description": "Escaneará todos los usuarios para buscar archivos nuevos o actualizados",
       "scan_all_users": "Escanear todos los usuarios",
+      "scanning": "",
+      "starting": "",
       "title": "Escáner"
     },
     "user_preferences": {
