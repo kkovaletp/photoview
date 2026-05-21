@@ -6,6 +6,7 @@ import { useTranslation } from 'react-i18next'
 import { ScanAllMutationMutation } from './__generated__/ScannerSection'
 import { Button } from '../../primitives/form/Input'
 import { useMessageState } from '../../components/messages/MessageState'
+import { useMemo } from 'react'
 
 const SCAN_MUTATION = gql`
   mutation scanAllMutation {
@@ -29,14 +30,15 @@ const ScannerSection = () => {
   const { messages } = useMessageState()
 
   // Derive scanner state from the exact key the backend emits
-  const scannerMsg = messages.find(m => m.key === SCANNER_GLOBAL_KEY)
-  const now = Date.now()
-  const isFresh =
-    scannerMsg?.timestamp != null &&
-    (now - scannerMsg.timestamp) < SCANNER_MSG_STALE_AFTER_MS
-
-  const scannerRunning =
-    !!scannerMsg && isFresh && scannerMsg.props.positive !== true
+  const scannerRunning = useMemo(() => {
+    const scannerMsg = messages.find(m => m.key === SCANNER_GLOBAL_KEY)
+    if (!scannerMsg) return false
+    const now = Date.now()
+    const isFresh =
+      scannerMsg?.timestamp != null &&
+      (now - scannerMsg.timestamp) < SCANNER_MSG_STALE_AFTER_MS
+    return isFresh && scannerMsg.props.positive !== true
+  }, [messages])
 
   // Disable policy:
   // - disable while the HTTP request is in-flight (loading)
