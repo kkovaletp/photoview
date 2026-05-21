@@ -31,9 +31,9 @@ const ScannerSection = () => {
   // Derive scanner state from the exact key the backend emits
   const scannerMsg = messages.find(m => m.key === SCANNER_GLOBAL_KEY)
   const now = Date.now()
-  const isFresh = scannerMsg?.timestamp == null
-    ? false
-    : (now - scannerMsg.timestamp) < SCANNER_MSG_STALE_AFTER_MS
+  const isFresh =
+    scannerMsg?.timestamp != null &&
+    (now - scannerMsg.timestamp) < SCANNER_MSG_STALE_AFTER_MS
 
   const scannerRunning =
     !!scannerMsg && isFresh && scannerMsg.props.positive !== true
@@ -65,7 +65,7 @@ const ScannerSection = () => {
   const stableButtonStyle = { minWidth: `${longestCh}ch` }
 
   const handleStart = () => {
-    void startScanner()
+    startScanner()
       .catch(error => {
         console.error('Failed to start scanner: ', error)
       })

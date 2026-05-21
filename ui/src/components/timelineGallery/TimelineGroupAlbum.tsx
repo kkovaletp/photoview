@@ -64,7 +64,7 @@ const TimelineGroupAlbum = ({
         })
       }}
       clickFavorite={() => {
-        void toggleFavoriteAction({
+        toggleFavoriteAction({
           media,
           markFavorite,
         }).catch(err => {

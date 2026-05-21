@@ -155,7 +155,7 @@ const PeriodicScanner = () => {
 
     if (scanIntervalServerValue.current !== seconds) {
       const prev = scanIntervalServerValue.current
-      void setScanIntervalMutation({
+      setScanIntervalMutation({
         variables: { interval: seconds },
       }).then(() => {
         scanIntervalServerValue.current = seconds

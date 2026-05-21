@@ -601,7 +601,7 @@ const SidebarShare = ({
         </button>
         <button
           onClick={() => {
-            void deleteShare({
+            deleteShare({
               variables: { token: share.token }
             }).catch(err =>
               notifyError(t('sidebar.sharing.delete_error', 'Failed to delete share'), err)

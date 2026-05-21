@@ -139,7 +139,7 @@ const UserPreferences = () => {
         )}
         items={sortedLanguagePrefs}
         setSelected={language => {
-          void changePrefs({
+          changePrefs({
             variables: {
               language: language,
             },

@@ -67,7 +67,7 @@ export const ScannerConcurrentWorkers = () => {
     if (inFlightNextRef.current === next) return
     inFlightNextRef.current = next
 
-    void setWorkersMutation({
+    setWorkersMutation({
       variables: { workers: next },
     }).then(res => {
       if (!res.data || (Array.isArray(res.errors) && res.errors.length > 0)) {
