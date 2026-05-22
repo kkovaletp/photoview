@@ -289,11 +289,8 @@ jobs:
             echo "Check for breaking/dangerous GraphQL schema changes against master..."
             git fetch origin master --depth=1 --quiet
             MASTER_SCHEMA_DIR=$(mktemp -d)
-            while IFS= read -r filepath; do
-              git show "origin/master:${filepath}" > "${MASTER_SCHEMA_DIR}/$(basename "${filepath}")"
-            done < <(
-              git ls-tree -r --name-only origin/master -- api/graphql/resolvers/ | grep '\.graphql$'
-            )
+            git archive FETCH_HEAD -- api/graphql/resolvers/ \
+              | tar -x -C "${MASTER_SCHEMA_DIR}" --strip-components=3
             ls -lah "${MASTER_SCHEMA_DIR}"
 
             npx graphql-inspector diff \
