@@ -294,12 +294,13 @@ jobs:
             done < <(
               git ls-tree -r --name-only origin/master -- api/graphql/resolvers/ | grep '\.graphql$'
             )
+            ls -lah "${MASTER_SCHEMA_DIR}"
 
             npx graphql-inspector diff \
               "${MASTER_SCHEMA_DIR}/*.graphql" \
               '../api/graphql/resolvers/*.graphql' \
-              --rule suppressRemovalOfDeprecatedField \
-              || echo "::warning:: ⚠️  Schema diff found breaking or dangerous changes — review the output above."
+              --rule suppressRemovalOfDeprecatedField 2>&1 \
+              | tee schema_diff_output.txt
           fi
           echo "----------------------------------------------------------"
 
@@ -307,3 +308,48 @@ jobs:
           export REACT_APP_BUILD_DATE="$(date -u +'%Y-%m-%dT%H:%M:%S+00:00(UTC)')"
           export REACT_APP_BUILD_COMMIT_SHA="$(git rev-parse --short HEAD)"
           npm run build -- --base="/"
+
+      - name: GQL diff comment
+        uses: actions/github-script@v9
+        if: ${{ github.event_name == 'pull_request' }}
+        with:
+          github-token: ${{ secrets.COMMENT_TOKEN }}
+          script: |
+            const fs = require('fs');
+            let scanResults = fs.readFileSync('schema_diff_output.txt', 'utf8');
+            let output = '';
+
+            const comments = await github.rest.issues.listComments({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo
+            });
+
+            const botComment = comments.data.find(
+              comment => comment.body.includes('GraphQL schema diff:')
+            );
+
+            if (scanResults) {
+              output += '#### GraphQL schema diff:\n';
+              output += '⚠️ Breaking or dangerous changes detected.\n';
+              output += '\n```\n' + scanResults + '\n```\n';
+              output += '\nReview the output above and decide whether to proceed with the changes.';
+            } else {
+              output += '#### GraphQL schema diff:\n';
+              output += 'No breaking or dangerous changes detected.\n';
+            }
+
+            if (botComment) {
+              await github.rest.issues.deleteComment({
+                comment_id: botComment.id,
+                owner: context.repo.owner,
+                repo: context.repo.repo
+              });
+            }
+
+            await github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: output
+            });
