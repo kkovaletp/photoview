@@ -277,8 +277,22 @@ jobs:
           npm ci --no-audit --no-fund
           echo "Check that the generated translations are in sync with the committed ones..."
           npm run extractTranslations:ci
+
           echo "Check that the generated GraphQL schema types are in sync with the committed ones..."
           bash ../scripts/ui_test_is_gql_code_in_sync.sh
+
+          echo "Validate all UI GraphQL operations against the API schema..."
+          npm run validateGQL
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            echo "Check for breaking/dangerous GraphQL schema changes against master..."
+            git fetch origin master --depth=1 --quiet
+            npx graphql-inspector diff \
+              'git:origin/master:api/graphql/resolvers/*.graphql' \
+              '../api/graphql/resolvers/*.graphql' \
+              --rule suppressRemovalOfDeprecatedField \
+              || echo "⚠️  Schema diff found breaking or dangerous changes — review the output above."
+          fi
+
           echo "Build the UI bundle with build info for Codecov..."
           export REACT_APP_BUILD_DATE="$(date -u +'%Y-%m-%dT%H:%M:%S+00:00(UTC)')"
           export REACT_APP_BUILD_COMMIT_SHA="$(git rev-parse --short HEAD)"
