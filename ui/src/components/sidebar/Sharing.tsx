@@ -25,7 +25,7 @@ import {
 } from './__generated__/Sharing'
 import { authToken } from '../../helpers/authentication'
 import { SidebarSection, SidebarSectionTitle } from './SidebarComponents'
-
+import { useNotifyError } from '../../hooks/useNotifyError'
 import LinkIcon from './icons/shareLinkIcon.svg?react'
 import CopyIcon from './icons/shareCopyIcon.svg?react'
 import DeleteIcon from './icons/shareDeleteIcon.svg?react'
@@ -34,8 +34,6 @@ import AddIcon from './icons/shareAddIcon.svg?react'
 import Checkbox from '../../primitives/form/Checkbox'
 import { TextField } from '../../primitives/form/Input'
 import styled from 'styled-components'
-import { useMessageState } from '../messages/MessageState'
-import { NotificationType } from '../../__generated__/globalTypes'
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import dayjs from 'dayjs'
@@ -159,7 +157,7 @@ const MorePopoverSectionPassword = ({
   query,
   id,
 }: MorePopoverSectionPasswordProps) => {
-  const { add } = useMessageState()
+  const notifyError = useNotifyError()
   const [addingPassword, setAddingPassword] = useState(false)
   const activated = addingPassword || share.hasPassword
 
@@ -202,15 +200,7 @@ const MorePopoverSectionPassword = ({
         setPasswordInputValue('')
       } catch (error) {
         console.error('Failed to remove password protection: ', error)
-        add({
-          key: (globalThis.crypto?.randomUUID?.() ?? Math.random().toString(36)),
-          type: NotificationType.Message,
-          props: {
-            negative: true,
-            header: 'Failed to remove password protection',
-            content: error instanceof Error ? error.message : 'An unexpected error occurred',
-          },
-        })
+        notifyError('Failed to remove password protection', error)
       }
     }
   }
@@ -229,15 +219,7 @@ const MorePopoverSectionPassword = ({
         }
       } catch (error) {
         console.error('Failed to update password: ', error)
-        add({
-          key: (globalThis.crypto?.randomUUID?.() ?? Math.random().toString(36)),
-          type: NotificationType.Message,
-          props: {
-            negative: true,
-            header: 'Failed to update password',
-            content: error instanceof Error ? error.message : 'An unexpected error occurred',
-          },
-        })
+        notifyError('Failed to update password', error)
       }
     }
   }
@@ -305,19 +287,7 @@ const MorePopoverSectionExpiration = ({
   }, [share.expire])
   const { t, i18n } = useTranslation()
 
-  const { add } = useMessageState()
-  const notifyError = (header: string, error: unknown) => {
-    console.error(`${header}: `, error)
-    add({
-      key: (globalThis.crypto?.randomUUID?.() ?? Math.random().toString(36)),
-      type: NotificationType.Message,
-      props: {
-        negative: true,
-        header,
-        content: error instanceof Error ? error.message : 'An unexpected error occurred',
-      },
-    })
-  }
+  const notifyError = useNotifyError()
 
   const dateFormatterOptions: Intl.DateTimeFormatOptions = {
     year: 'numeric',
@@ -346,6 +316,7 @@ const MorePopoverSectionExpiration = ({
       },
     }).catch(error => {
       notifyError('Failed to update expiration', error)
+      console.error('Failed to update expiration', error)
       // Revert to backend value on error
       setDate(share.expire ? new Date(share.expire) : null)
     })
@@ -374,6 +345,7 @@ const MorePopoverSectionExpiration = ({
               setEnabled(true)
               setDate(previousDate)
               notifyError('Failed to clear expiration', error)
+              console.error('Failed to update expiration', error)
             }
             return
           }
@@ -546,20 +518,7 @@ const SidebarShare = ({
   shareItem,
 }: SidebarShareProps) => {
   const { t } = useTranslation()
-  const { add } = useMessageState()
-  //TODO: refactor this and remove duplication with notifyError in MorePopoverSectionPassword and MorePopoverSectionExpiration
-  const notifyError = (header: string, error: unknown) => {
-    console.error(`${header}: `, error)
-    add({
-      key: (globalThis.crypto?.randomUUID?.() ?? Math.random().toString(36)),
-      type: NotificationType.Message,
-      props: {
-        negative: true,
-        header,
-        content: error instanceof Error ? error.message : 'An unexpected error occurred',
-      },
-    })
-  }
+  const notifyError = useNotifyError()
 
   const query = isPhoto ? SHARE_PHOTO_QUERY : SHARE_ALBUM_QUERY
 
@@ -603,9 +562,10 @@ const SidebarShare = ({
           onClick={() => {
             deleteShare({
               variables: { token: share.token }
-            }).catch(err =>
+            }).catch(err => {
               notifyError(t('sidebar.sharing.delete_error', 'Failed to delete share'), err)
-            )
+              console.error(t('sidebar.sharing.delete_error', 'Failed to delete share'), err)
+            })
           }}
           className="align-middle p-1 ml-2 hover:text-red-600 focus:text-red-600"
           title={t('sidebar.sharing.delete', 'Delete')}
@@ -650,11 +610,12 @@ const SidebarShare = ({
                   className="text-green-500 font-bold uppercase text-xs"
                   disabled={loading}
                   onClick={() => {
-                    void shareItem({
+                    shareItem({
                       variables: { id },
-                    }).catch(err =>
+                    }).catch(err => {
                       notifyError(t('sidebar.sharing.add_share_error', 'Failed to add share'), err)
-                    )
+                      console.error(t('sidebar.sharing.add_share_error', 'Failed to add share'), err)
+                    })
                   }}
                 >
                   <AddIcon className="inline-block mr-2" />

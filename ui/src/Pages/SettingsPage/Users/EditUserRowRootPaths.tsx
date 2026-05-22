@@ -45,7 +45,7 @@ const EditRootPath = ({ album, user }: EditRootPathProps) => {
         variant="negative"
         disabled={loading}
         onClick={() =>
-          void removeAlbumPath({
+          removeAlbumPath({
             variables: {
               userId: user.id,
               albumId: album.id,
@@ -94,7 +94,7 @@ const EditNewRootPath = ({ userID }: EditNewRootPathProps) => {
         onClick={() => {
           const rootPath = normalizePath(value)
           if (rootPath === '') return
-          void addRootPath({
+          addRootPath({
             variables: {
               id: userID,
               rootPath,
