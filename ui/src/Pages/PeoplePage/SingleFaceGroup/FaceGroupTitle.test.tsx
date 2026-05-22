@@ -313,4 +313,85 @@ describe('FaceGroupTitle', () => {
             expect(screen.queryByTestId('move-modal')).not.toBeInTheDocument()
         })
     })
+
+    describe('focus and blur behavior', () => {
+        test('focuses the input when entering edit mode', async () => {
+            renderComponent(labeledFaceGroup)
+
+            fireEvent.click(screen.getByRole('button', { name: 'Change label' }))
+            const input = screen.getByRole('textbox')
+
+            await waitFor(() => {
+                expect(input).toHaveFocus()
+            })
+        })
+
+        test('onBlur outside the TextField parent resets edit mode (closes input)', async () => {
+            renderComponent(labeledFaceGroup)
+
+            // Enter edit mode
+            fireEvent.click(screen.getByRole('button', { name: 'Change label' }))
+            const input = screen.getByRole('textbox')
+
+            // Blur without a relatedTarget → should reset/exit edit mode
+            fireEvent.blur(input)
+
+            await waitFor(() => {
+                expect(screen.queryByRole('textbox')).not.toBeInTheDocument()
+            })
+            expect(screen.getByRole('heading')).toHaveTextContent('Alice')
+        })
+
+        test('onBlur to an element inside the same parent does NOT reset edit mode', async () => {
+            renderComponent(labeledFaceGroup)
+
+            // Enter edit mode
+            fireEvent.click(screen.getByRole('button', { name: 'Change label' }))
+            const input = screen.getByRole('textbox')
+
+            // Create a child inside the same parent container and blur to it
+            const parent = input.parentElement as HTMLElement
+            const inner = document.createElement('button')
+            inner.type = 'button'
+            inner.textContent = 'inner'
+            parent.appendChild(inner)
+
+            // Blur to inner element (parent.contains(relatedTarget) === true)
+            fireEvent.blur(input, { relatedTarget: inner })
+
+            // Still in edit mode
+            expect(screen.getByRole('textbox')).toBeInTheDocument()
+        })
+    })
+
+    describe('edge cases', () => {
+        test('submitting while faceGroup becomes undefined no-ops (action guard) and keeps edit mode', async () => {
+            // Render directly (not using helper) to control rerender precisely
+            const { rerender } = render(
+                <MockedProvider>
+                    <FaceGroupTitle faceGroup={labeledFaceGroup} />
+                </MockedProvider>
+            )
+
+            // Enter edit mode
+            fireEvent.click(screen.getByRole('button', { name: 'Change label' }))
+            const input = screen.getByRole('textbox')
+            fireEvent.change(input, { target: { value: 'Alice New' } })
+
+            // Simulate faceGroup disappearing (e.g., route/data update)
+            rerender(
+                <MockedProvider>
+                    <FaceGroupTitle faceGroup={undefined} />
+                </MockedProvider>
+            )
+
+            // Press Enter to trigger TextField.action. Since faceGroup is now undefined,
+            // the component’s action guard (isNil(faceGroup)) returns early — no mutation call.
+            // If a mutation were attempted without a mock, MockedProvider would throw.
+            fireEvent.keyUp(screen.getByRole('textbox'), { key: 'Enter', code: 'Enter' })
+
+            // We should remain in edit mode (textbox still visible), and no unhandled errors occur.
+            expect(screen.getByRole('textbox')).toBeInTheDocument()
+        })
+    })
 })
