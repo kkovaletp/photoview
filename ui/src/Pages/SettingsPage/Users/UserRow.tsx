@@ -13,8 +13,7 @@ import {
   UpdateUserMutation, UpdateUserMutationVariables,
   DeleteUserMutation, DeleteUserMutationVariables,
 } from './__generated__/UserRow'
-import { useMessageState } from '../../../components/messages/MessageState'
-import { NotificationType } from '../../../__generated__/globalTypes'
+import { useNotifyError } from '../../../hooks/useNotifyError'
 
 const updateUserMutation = gql`
   mutation updateUser($id: ID!, $username: String, $admin: Boolean) {
@@ -75,24 +74,8 @@ export type UserRowProps = {
   refetchUsers: () => void
 }
 
-function notifyMutationError(
-  add: ReturnType<typeof useMessageState>['add'],
-  header: string,
-  err: unknown
-) {
-  add({
-    key: (globalThis.crypto?.randomUUID?.() ?? Math.random().toString(36)),
-    type: NotificationType.Message,
-    props: {
-      negative: true,
-      header,
-      content: err instanceof Error ? err.message : 'An unexpected error occurred',
-    },
-  })
-}
-
 const UserRow = ({ user, refetchUsers }: UserRowProps) => {
-  const { add } = useMessageState()
+  const notifyError = useNotifyError()
   const [state, setState] = useState<UserRowState>({
     ...user,
     editing: false,
@@ -130,7 +113,7 @@ const UserRow = ({ user, refetchUsers }: UserRowProps) => {
       return result
     } catch (error) {
       console.error('Failed to update user: ', error)
-      notifyMutationError(add, 'Failed to update user', error)
+      notifyError('Failed to update user', error)
       return { data: undefined, errors: undefined } as FetchResult<UpdateUserMutation>
     }
   }
@@ -147,7 +130,7 @@ const UserRow = ({ user, refetchUsers }: UserRowProps) => {
       return result
     } catch (error) {
       console.error('Failed to delete user: ', error)
-      notifyMutationError(add, 'Failed to delete user', error)
+      notifyError('Failed to delete user', error)
       return { data: undefined, errors: undefined } as FetchResult<DeleteUserMutation>
     }
   }
@@ -164,7 +147,7 @@ const UserRow = ({ user, refetchUsers }: UserRowProps) => {
       return result
     } catch (error) {
       console.error('Failed to scan user: ', error)
-      notifyMutationError(add, 'Failed to scan user', error)
+      notifyError('Failed to scan user', error)
       return { data: undefined, errors: undefined } as FetchResult<ScanUserMutation>
     }
   }

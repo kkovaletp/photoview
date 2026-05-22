@@ -31,14 +31,16 @@ vi.mock('./ScannerConcurrentWorkers', () => ({
 }))
 
 // ── Mock useMessageState while preserving other exports (MessageProvider) ───
-let mockMessages: Message[] = []
+const { mockMessageState } = vi.hoisted(() => ({
+    mockMessageState: { messages: [] as Message[] },
+}))
 
 vi.mock('../../components/messages/MessageState', async importOriginal => {
     const real = await importOriginal<typeof import('../../components/messages/MessageState')>()
     return {
         ...real,
         useMessageState: () => ({
-            messages: mockMessages,
+            messages: mockMessageState.messages,
             setMessages: vi.fn(),
             add: vi.fn(),
             removeKey: vi.fn(),
@@ -48,7 +50,7 @@ vi.mock('../../components/messages/MessageState', async importOriginal => {
 
 describe('ScannerSection', () => {
     beforeEach(() => {
-        mockMessages = []
+        mockMessageState.messages = []
     })
 
     afterEach(() => {
@@ -72,7 +74,7 @@ describe('ScannerSection', () => {
     })
 
     test('disables and shows "Scan in progress…" when a fresh global-scanner-progress message is present', () => {
-        mockMessages = [
+        mockMessageState.messages = [
             {
                 key: 'global-scanner-progress',
                 type: NotificationType.Message,
@@ -89,7 +91,7 @@ describe('ScannerSection', () => {
 
     test('ignores stale progress message (older than 2 minutes): button enabled with default label', () => {
         const STALE_MS = 2 * 60 * 1000 + 10
-        mockMessages = [
+        mockMessageState.messages = [
             {
                 key: 'global-scanner-progress',
                 type: NotificationType.Message,
@@ -105,7 +107,7 @@ describe('ScannerSection', () => {
     })
 
     test('treats positive=true as completed (not running): button enabled with default label', () => {
-        mockMessages = [
+        mockMessageState.messages = [
             {
                 key: 'global-scanner-progress',
                 type: NotificationType.Message,
@@ -198,7 +200,7 @@ describe('ScannerSection', () => {
 
         unmount()
 
-        mockMessages = [
+        mockMessageState.messages = [
             {
                 key: 'global-scanner-progress',
                 type: NotificationType.Message,

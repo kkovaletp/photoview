@@ -345,7 +345,7 @@ const MorePopoverSectionExpiration = ({
               setEnabled(true)
               setDate(previousDate)
               notifyError('Failed to clear expiration', error)
-              console.error('Failed to update expiration', error)
+              console.error('Failed to clear expiration', error)
             }
             return
           }
