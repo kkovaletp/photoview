@@ -287,10 +287,12 @@ jobs:
           npm run validateGQL
           if [ "${{ github.event_name }}" = "pull_request" ]; then
             echo "Check for breaking/dangerous GraphQL schema changes against master..."
-            git fetch origin master --depth=1 --quiet
             MASTER_SCHEMA_DIR=$(mktemp -d)
-            git archive FETCH_HEAD -- api/graphql/resolvers/ \
-              | tar -x -C "${MASTER_SCHEMA_DIR}" --strip-components=3
+            git ls-tree --name-only origin/master api/graphql/resolvers/ | grep '\.graphql$' \
+              | while read -r f; do
+                  git show "origin/master:api/graphql/resolvers/${f}" \
+                    > "${MASTER_SCHEMA_DIR}/${f}"
+                done
             ls -lah "${MASTER_SCHEMA_DIR}"
 
             npx graphql-inspector diff \
