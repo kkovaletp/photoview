@@ -258,27 +258,15 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
-      - name: Checkout base branch schema
-        if: github.event_name == 'pull_request'
-        uses: actions/checkout@v6
-        with:
-          ref: ${{ github.base_ref }}
-          path: master_schema
-          fetch-depth: 1
-
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
           node-version: "20"
           check-latest: true
 
-      - name: Test code sync and Build UI bundle
+      - name: Test code sync
         working-directory: ./ui
         shell: bash
-        env:
-          REACT_APP_BUILD_VERSION: "UI-bundle-${{ github.ref_name }}"
-          REACT_APP_API_ENDPOINT: "/api"
-          CODECOV_TKN: "${{ secrets.CODECOV_TKN }}"
         run: |
           git fetch --all --unshallow
           npm install --global npm
@@ -289,11 +277,23 @@ jobs:
 
           echo "Check that the generated GraphQL schema types are in sync with the committed ones..."
           bash ../scripts/ui_test_is_gql_code_in_sync.sh
-          echo "----------------------------------------------------------"
 
+      - name: Checkout base branch schema
+        if: always()
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.base_ref }}
+          path: master_schema
+          fetch-depth: 1
+
+      - name: Validate GQL schema
+        if: always()
+        working-directory: ./ui
+        shell: bash
+        run: |
           echo "Validate all UI GraphQL operations against the API schema..."
           npm run validateGQL
-          if [ "${{ github.event_name }}" = "pull_request" ]; then
+          if [[ "${{ github.event_name }}" = "pull_request" ]]; then
             echo "Check for breaking/dangerous GraphQL schema changes against master..."
 
             MASTER_SCHEMA_DIR="../master_schema/api/graphql/resolvers"
@@ -306,19 +306,17 @@ jobs:
               --rule suppressRemovalOfDeprecatedField 2>&1 \
               | tee ./schema_diff_output.txt
           fi
-          echo "----------------------------------------------------------"
-
-          echo "Build the UI bundle with build info for Codecov..."
-          export REACT_APP_BUILD_DATE="$(date -u +'%Y-%m-%dT%H:%M:%S+00:00(UTC)')"
-          export REACT_APP_BUILD_COMMIT_SHA="$(git rev-parse --short HEAD)"
-          npm run build -- --base="/"
 
       - name: GQL diff comment
         uses: actions/github-script@v9
-        if: ${{ github.event_name == 'pull_request' && always() }}
+        if: always()
         with:
           github-token: ${{ secrets.COMMENT_TOKEN }}
           script: |
+            if (${{ github.event_name }} !== 'pull_request') {
+              console.log('Not a pull request event, skipping comment creation.');
+              return;
+            }
             const fs = require('fs');
             let scanResults;
             try {
@@ -364,3 +362,17 @@ jobs:
               repo: context.repo.repo,
               body: output
             });
+
+      - name: Build UI bundle
+        if: always()
+        working-directory: ./ui
+        shell: bash
+        env:
+          REACT_APP_BUILD_VERSION: "UI-bundle-${{ github.ref_name }}"
+          REACT_APP_API_ENDPOINT: "/api"
+          CODECOV_TKN: "${{ secrets.CODECOV_TKN }}"
+        run: |
+          echo "Build the UI bundle with build info for Codecov..."
+          export REACT_APP_BUILD_DATE="$(date -u +'%Y-%m-%dT%H:%M:%S+00:00(UTC)')"
+          export REACT_APP_BUILD_COMMIT_SHA="$(git rev-parse --short HEAD)"
+          npm run build -- --base="/"

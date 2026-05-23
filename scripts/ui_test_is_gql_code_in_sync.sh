@@ -2,8 +2,6 @@
 set -euo pipefail
 
 cd "$(dirname "$0")/../ui"
-echo "master_schema/" >> ../.gitignore
-echo ".gitignore" >> ../.gitignore
 npm run genSchemaTypes
 
 if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
