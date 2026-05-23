@@ -334,7 +334,7 @@ jobs:
               comment => comment.body.includes('GraphQL schema diff:')
             );
 
-            if (scanResults) {
+            if (scanResults.trim() !== '[success] No changes detected') {
               output += '#### GraphQL schema diff:\n';
               output += '⚠️ Breaking or dangerous changes detected.\n';
               output += '\n```\n' + scanResults + '\n```\n';
