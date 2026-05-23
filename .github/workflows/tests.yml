@@ -295,12 +295,7 @@ jobs:
           npm run validateGQL
           if [[ "${{ github.event_name }}" = "pull_request" ]]; then
             echo "Check for breaking/dangerous GraphQL schema changes against master..."
-
-            MASTER_SCHEMA_DIR="../master_schema/api/graphql/resolvers"
-            echo "Master schema files:"
-            ls -lah "${MASTER_SCHEMA_DIR}"/*.graphql
-
-            graphql-inspector diff \
+            ./node_modules/.bin/graphql-inspector diff \
               "${MASTER_SCHEMA_DIR}/*.graphql" \
               '../api/graphql/resolvers/*.graphql' \
               --rule suppressRemovalOfDeprecatedField 2>&1 \
@@ -313,7 +308,7 @@ jobs:
         with:
           github-token: ${{ secrets.COMMENT_TOKEN }}
           script: |
-            if (${{ github.event_name }} !== 'pull_request') {
+            if ('${{ github.event_name }}' !== 'pull_request') {
               console.log('Not a pull request event, skipping comment creation.');
               return;
             }
