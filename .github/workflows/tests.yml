@@ -295,6 +295,7 @@ jobs:
           npm run validateGQL
           if [[ "${{ github.event_name }}" = "pull_request" ]]; then
             echo "Check for breaking/dangerous GraphQL schema changes against master..."
+            MASTER_SCHEMA_DIR="../master_schema/api/graphql/resolvers"
             ./node_modules/.bin/graphql-inspector diff \
               "${MASTER_SCHEMA_DIR}/*.graphql" \
               '../api/graphql/resolvers/*.graphql' \
