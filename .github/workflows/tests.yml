@@ -287,19 +287,32 @@ jobs:
           npm run validateGQL
           if [ "${{ github.event_name }}" = "pull_request" ]; then
             echo "Check for breaking/dangerous GraphQL schema changes against master..."
-            MASTER_SCHEMA_DIR=$(mktemp -d)
-            git ls-tree --name-only origin/master api/graphql/resolvers/ | grep '\.graphql$' \
-              | while read -r f; do
-                  git show "origin/master:api/graphql/resolvers/${f}" \
-                    > "${MASTER_SCHEMA_DIR}/${f}"
-                done
+
+            # Collect list of .graphql files from origin/master (repo root paths).
+            MASTER_SCHEMA_DIR="$(mktemp -d)"
+            mapfile -t master_files < <(git ls-tree -r --name-only origin/master -- \
+              | awk '/^api\/graphql\/resolvers\/.*\.graphql$/')
+
+            if [ "${`#master_files`[@]}" -eq 0 ]; then
+              echo "ERROR: No .graphql files found under api/graphql/resolvers on origin/master"
+              exit 1
+            fi
+
+            # Extract each file from origin/master into the temp dir (flattened by basename).
+            for f in "${master_files[@]}"; do
+              base="$(basename "$f")"
+              git show "origin/master:${f}" > "${MASTER_SCHEMA_DIR}/${base}"
+            done
+
+            echo "Master schema files copied to: ${MASTER_SCHEMA_DIR}"
             ls -lah "${MASTER_SCHEMA_DIR}"
 
+            # Run schema diff: master (left) vs current branch (right).
             npx graphql-inspector diff \
               "${MASTER_SCHEMA_DIR}/*.graphql" \
               '../api/graphql/resolvers/*.graphql' \
               --rule suppressRemovalOfDeprecatedField 2>&1 \
-              | tee schema_diff_output.txt
+              | tee ../schema_diff_output.txt
           fi
           echo "----------------------------------------------------------"
 
