@@ -293,7 +293,7 @@ jobs:
             mapfile -t master_files < <(git ls-tree -r --name-only origin/master -- \
               | awk '/^api\/graphql\/resolvers\/.*\.graphql$/')
 
-            if [ "${`#master_files`[@]}" -eq 0 ]; then
+            if [ "${#master_files[@]}" -eq 0 ]; then
               echo "ERROR: No .graphql files found under api/graphql/resolvers on origin/master"
               exit 1
             fi
