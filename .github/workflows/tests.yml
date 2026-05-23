@@ -258,6 +258,14 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
+      - name: Checkout base branch schema
+        if: github.event_name == 'pull_request'
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.base_ref }}
+          path: master_schema
+          fetch-depth: 1
+
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
@@ -288,31 +296,15 @@ jobs:
           if [ "${{ github.event_name }}" = "pull_request" ]; then
             echo "Check for breaking/dangerous GraphQL schema changes against master..."
 
-            # Collect list of .graphql files from origin/master (repo root paths).
-            MASTER_SCHEMA_DIR="$(mktemp -d)"
-            mapfile -t master_files < <(git ls-tree -r --name-only origin/master -- \
-              | awk '/^api\/graphql\/resolvers\/.*\.graphql$/')
+            MASTER_SCHEMA_DIR="../master_schema/api/graphql/resolvers"
+            echo "Master schema files:"
+            ls -lah "${MASTER_SCHEMA_DIR}"/*.graphql
 
-            if [ "${#master_files[@]}" -eq 0 ]; then
-              echo "ERROR: No .graphql files found under api/graphql/resolvers on origin/master"
-              exit 1
-            fi
-
-            # Extract each file from origin/master into the temp dir (flattened by basename).
-            for f in "${master_files[@]}"; do
-              base="$(basename "$f")"
-              git show "origin/master:${f}" > "${MASTER_SCHEMA_DIR}/${base}"
-            done
-
-            echo "Master schema files copied to: ${MASTER_SCHEMA_DIR}"
-            ls -lah "${MASTER_SCHEMA_DIR}"
-
-            # Run schema diff: master (left) vs current branch (right).
-            npx graphql-inspector diff \
+            graphql-inspector diff \
               "${MASTER_SCHEMA_DIR}/*.graphql" \
               '../api/graphql/resolvers/*.graphql' \
               --rule suppressRemovalOfDeprecatedField 2>&1 \
-              | tee ../schema_diff_output.txt
+              | tee ./schema_diff_output.txt
           fi
           echo "----------------------------------------------------------"
 
@@ -323,12 +315,12 @@ jobs:
 
       - name: GQL diff comment
         uses: actions/github-script@v9
-        if: ${{ github.event_name == 'pull_request' }}
+        if: ${{ github.event_name == 'pull_request' && always() }}
         with:
           github-token: ${{ secrets.COMMENT_TOKEN }}
           script: |
             const fs = require('fs');
-            let scanResults = fs.readFileSync('schema_diff_output.txt', 'utf8');
+            let scanResults = fs.readFileSync('./ui/schema_diff_output.txt', 'utf8');
             let output = '';
 
             const comments = await github.rest.issues.listComments({
@@ -348,7 +340,7 @@ jobs:
               output += '\nReview the output above and decide whether to proceed with the changes.';
             } else {
               output += '#### GraphQL schema diff:\n';
-              output += 'No breaking or dangerous changes detected.\n';
+              output += 'No breaking or dangerous changes detected or the job failed and no report generated.\n';
             }
 
             if (botComment) {
