@@ -45,6 +45,7 @@ func TestMain(m *testing.M) {
 		"PHOTOVIEW_LISTEN_IP="+listenIP,
 		"PHOTOVIEW_LISTEN_PORT="+testListenPort,
 		"PHOTOVIEW_SERVE_UI=0",
+		"PHOTOVIEW_UI_ENDPOINTS=http://127.0.0.1:1234",
 	)
 
 	// Launch API server: go run . (in ./api)
