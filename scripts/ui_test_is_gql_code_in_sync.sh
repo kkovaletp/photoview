@@ -1,8 +1,9 @@
-#!/bin/sh
-set -eu
+#!/bin/bash
+set -euo pipefail
 
 cd "$(dirname "$0")/../ui"
 echo "master_schema/" >> ../.gitignore
+echo ".gitignore" >> ../.gitignore
 npm run genSchemaTypes
 
 if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
@@ -10,7 +11,7 @@ if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
   exit 1
 fi
 
-if [ "$(git status -s 2>/dev/null | head -1)" != "" ]; then
+if [[ "$(git status -s 2>/dev/null | head -1)" != "" ]]; then
   # shellcheck disable=SC2016
   echo '--- FAIL: The generated GraphQL Schema types are out of sync with the recent changes. Please run `npm run genSchemaTypes` under `./ui` to regenerate them and commit them to this branch.'
   echo 'These are the changes:'

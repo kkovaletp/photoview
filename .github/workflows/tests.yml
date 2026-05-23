@@ -320,7 +320,14 @@ jobs:
           github-token: ${{ secrets.COMMENT_TOKEN }}
           script: |
             const fs = require('fs');
-            let scanResults = fs.readFileSync('./ui/schema_diff_output.txt', 'utf8');
+            let scanResults;
+            try {
+              scanResults = fs.readFileSync('./ui/schema_diff_output.txt', 'utf8');
+            } catch (err) {
+              // File doesn't exist (previous step likely failed or was skipped) — silently finish without posting a comment
+              if (err.code === 'ENOENT') return;
+              throw err;
+            }
             let output = '';
 
             const comments = await github.rest.issues.listComments({
@@ -340,7 +347,7 @@ jobs:
               output += '\nReview the output above and decide whether to proceed with the changes.';
             } else {
               output += '#### GraphQL schema diff:\n';
-              output += 'No breaking or dangerous changes detected or the job failed and no report generated.\n';
+              output += 'No breaking or dangerous changes detected.\n';
             }
 
             if (botComment) {
