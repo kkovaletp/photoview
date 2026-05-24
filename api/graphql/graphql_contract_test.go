@@ -155,9 +155,9 @@ func containsStr(xs []string, needle string) bool {
 
 // ---- Tests ------------------------------------------------------------------
 
-// 1) Runtime enum serialization: OrderDirection must expose Asc/Desc on the wire.
+// 1) Runtime enum serialization: OrderDirection must expose ASC/DESC on the wire.
 func Test_OrderDirection_EnumValues_OnWire(t *testing.T) {
-	t.Logf("[contract] Verify runtime enum serialization for OrderDirection == {Asc, Desc}")
+	t.Logf("[contract] Verify runtime enum serialization for OrderDirection == {ASC, DESC}")
 	resp := postGQL(t, "Introspection(OrderDirection)", `
 		query {
 			__type(name: "OrderDirection") {
@@ -171,20 +171,31 @@ func Test_OrderDirection_EnumValues_OnWire(t *testing.T) {
 			EnumValues []struct{ Name string } `json:"enumValues"`
 		} `json:"__type"`
 	}
+
 	if len(resp.Data) == 0 {
 		t.Fatalf("[contract] no data in response; errors=%v", resp.Errors)
 	}
+
 	var d enumWrap
 	if err := json.Unmarshal(resp.Data, &d); err != nil {
-		t.Fatalf("[contract] unmarshal data: %v", err)
+		t.Fatalf("[contract] unmarshal data: %v; raw=%s", err, string(resp.Data))
 	}
+
+	if len(d.Type.EnumValues) == 0 {
+		t.Fatalf("[contract] __type(OrderDirection) returned no enum values; raw=%s errors=%v", string(resp.Data), resp.Errors)
+	}
+
 	var names []string
 	for _, ev := range d.Type.EnumValues {
 		names = append(names, ev.Name)
 	}
-	if !containsStr(names, "Asc") || !containsStr(names, "Desc") {
-		t.Fatalf("[contract] OrderDirection mismatch; got %v; want to include Asc and Desc", names)
+
+	// GraphQL introspection returns the schema enum names verbatim.
+	// Our UI TS enum keys (Asc/Desc) serialize to 'ASC'/'DESC' on the wire, so this must match.
+	if !containsStr(names, "ASC") || !containsStr(names, "DESC") {
+		t.Fatalf("[contract] OrderDirection mismatch; got %v; want to include ASC and DESC", names)
 	}
+
 	t.Logf("[contract] OK: OrderDirection includes %v", names)
 }
 
