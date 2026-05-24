@@ -4,5 +4,5 @@ export type EarliestMediaQueryVariables = Types.Exact<{ [key: string]: never }>
 
 export type EarliestMediaQuery = {
   __typename?: 'Query'
-  myMedia: Array<{ __typename?: 'Media'; id: string; date: any }>
+  myMedia: Array<{ __typename?: 'Media'; id: string; date: string }>
 }

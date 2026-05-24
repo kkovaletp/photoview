@@ -14,7 +14,7 @@ export type SidebarGetPhotoSharesQuery = {
       id: string
       token: string
       hasPassword: boolean
-      expire?: any | null
+      expire?: string | null
     }>
   }
 }

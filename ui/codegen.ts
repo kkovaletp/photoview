@@ -43,6 +43,12 @@ const config: CodegenConfig = {
                 onlyOperationTypes: true,
                 // Keeps strict nullability (matches current tsconfig strict:true)
                 strictScalars: false,
+                enumsAsTypes: false,
+                // Keeps scalar types consistent with the existing project conventions
+                scalars: {
+                    Time: 'string',
+                    Upload: 'File',
+                },
             },
         },
     },

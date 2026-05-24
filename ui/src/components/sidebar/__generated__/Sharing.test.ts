@@ -14,7 +14,7 @@ export type SidebarGetPhotoSharesQuery = {
       id: string
       token: string
       hasPassword: boolean
-      expire?: any | null
+      expire?: string | null
     }>
   }
 }
@@ -33,7 +33,7 @@ export type SidebarGetAlbumSharesQuery = {
       id: string
       token: string
       hasPassword: boolean
-      expire?: any | null
+      expire?: string | null
     }>
   }
 }

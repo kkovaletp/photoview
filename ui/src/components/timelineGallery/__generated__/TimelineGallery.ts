@@ -16,7 +16,7 @@ export type MyTimelineQuery = {
     type: Types.MediaType
     blurhash?: string | null
     favorite: boolean
-    date: any
+    date: string
     thumbnail?: {
       __typename?: 'MediaURL'
       url: string
