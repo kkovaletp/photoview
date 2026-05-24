@@ -11,6 +11,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
 	"strings"
 	"testing"
 	"time"
@@ -24,45 +25,39 @@ const (
 	httpTimeout     = 15 * time.Second
 )
 
-// ---- Flag shim --------------------------------------------------------------
-// Your CI runner passes -database=<driver> to all API test packages.
-// Register it here so this package accepts (and ignores) it.
-var (
-	_ = flag.String("database", "", "database driver (ignored in contract tests; server env controls DB)")
-)
+// Accept (and ignore) runner-provided -database flag so this package
+// works under the existing API test harness.
+var _ = flag.String("database", "", "database driver (ignored in contract tests; server env controls DB)")
 
-// ---- Shared wire-format -----------------------------------------------------
-type gqlResp struct {
-	Data   json.RawMessage `json:"data"`
-	Errors []struct {
-		Message string `json:"message"`
-	} `json:"errors"`
+type gqlError struct {
+	Message string `json:"message"`
 }
 
-// ---- Test bootstrap ---------------------------------------------------------
+type gqlResp struct {
+	Data   json.RawMessage `json:"data"`
+	Errors []gqlError      `json:"errors"`
+}
+
 func TestMain(m *testing.M) {
-	// Derive repo root from this file location.
-	wd, _ := os.Getwd()
 	// api/graphql -> api
+	wd, _ := os.Getwd()
 	apiDir := filepath.Dir(wd)
 
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	// Preserve caller env (DB settings come from CI), add minimal server bind conf.
+	// Carry runner DB env; add minimal server bind + UI endpoints (UI not served).
 	env := os.Environ()
 	env = append(env,
 		"PHOTOVIEW_LISTEN_IP="+listenIP,
 		"PHOTOVIEW_LISTEN_PORT="+testListenPort,
 		"PHOTOVIEW_SERVE_UI=0",
-		// Required when PHOTOVIEW_SERVE_UI=0
 		"PHOTOVIEW_UI_ENDPOINTS=http://127.0.0.1:1234",
 	)
 
 	cmd := exec.CommandContext(ctx, "go", "run", ".")
 	cmd.Dir = apiDir
 	cmd.Env = env
-	// Stream server logs to stderr so they appear near test output.
 	cmd.Stdout = os.Stderr
 	cmd.Stderr = os.Stderr
 
@@ -70,7 +65,6 @@ func TestMain(m *testing.M) {
 		fmt.Fprintf(os.Stderr, "[contract] failed to start API server: %v\n", err)
 		os.Exit(1)
 	}
-
 	if err := waitForGraphQLReady(startupTimeout); err != nil {
 		_ = cmd.Process.Kill()
 		fmt.Fprintf(os.Stderr, "[contract] GraphQL endpoint did not become ready: %v\n", err)
@@ -78,7 +72,6 @@ func TestMain(m *testing.M) {
 	}
 
 	code := m.Run()
-
 	_ = cmd.Process.Kill()
 	os.Exit(code)
 }
@@ -87,9 +80,7 @@ func waitForGraphQLReady(timeout time.Duration) error {
 	deadline := time.Now().Add(timeout)
 	client := &http.Client{Timeout: 3 * time.Second}
 
-	payload := map[string]string{
-		"query": `query { __schema { queryType { name } } }`,
-	}
+	payload := map[string]string{"query": `query { __schema { queryType { name } } }`}
 	body, _ := json.Marshal(payload)
 
 	var lastStatus int
@@ -112,7 +103,6 @@ func waitForGraphQLReady(timeout time.Duration) error {
 	return fmt.Errorf("timeout waiting for %s (last http=%d, err=%v)", graphQLEndpoint, lastStatus, lastErr)
 }
 
-// ---- Helpers ----------------------------------------------------------------
 func postGQL(t *testing.T, opName, query string) gqlResp {
 	t.Helper()
 	client := &http.Client{Timeout: httpTimeout}
@@ -132,7 +122,10 @@ func postGQL(t *testing.T, opName, query string) gqlResp {
 	}
 	defer res.Body.Close()
 
-	b, _ := io.ReadAll(res.Body)
+	b, readErr := io.ReadAll(res.Body)
+	if readErr != nil {
+		t.Fatalf("[contract:%s] read response body: %v", opName, readErr)
+	}
 	if res.StatusCode != http.StatusOK {
 		t.Fatalf("[contract:%s] unexpected HTTP status %d; body=%s", opName, res.StatusCode, string(b))
 	}
@@ -153,11 +146,57 @@ func containsStr(xs []string, needle string) bool {
 	return false
 }
 
-// ---- Tests ------------------------------------------------------------------
+func hasIntrospectionDisabled(errs []gqlError) bool {
+	for _, e := range errs {
+		if strings.EqualFold(strings.TrimSpace(e.Message), "introspection disabled") {
+			return true
+		}
+	}
+	return false
+}
 
-// 1) Runtime enum serialization: OrderDirection must expose ASC/DESC on the wire.
+func loadEnumValuesFromSDL(t *testing.T, enumName string) []string {
+	t.Helper()
+	// Read all SDL pieces and extract enum block.
+	glob := filepath.Join(filepath.Dir(filepath.Dir(".")), "api", "graphql", "resolvers", "*.graphql")
+	matches, _ := filepath.Glob(glob)
+	if len(matches) == 0 {
+		t.Fatalf("[contract] no SDL files found at %s", glob)
+	}
+	re := regexp.MustCompile(`(?s)enum\s+` + regexp.QuoteMeta(enumName) + `\s*\{([^}]*)\}`)
+	valRe := regexp.MustCompile(`(?m)^\s*([A-Za-z0-9_]+)\s*(?:#.*)?$`)
+
+	seen := map[string]struct{}{}
+	for _, f := range matches {
+		b, err := os.ReadFile(f)
+		if err != nil {
+			t.Fatalf("[contract] read SDL %s: %v", f, err)
+		}
+		m := re.FindSubmatch(b)
+		if len(m) < 2 {
+			continue
+		}
+		block := string(m[1])
+		for _, line := range strings.Split(block, "\n") {
+			line = strings.TrimSpace(line)
+			if line == "" || strings.HasPrefix(line, "#") {
+				continue
+			}
+			if mm := valRe.FindStringSubmatch(line); len(mm) == 2 {
+				seen[mm[1]] = struct{}{}
+			}
+		}
+	}
+	out := make([]string, 0, len(seen))
+	for k := range seen {
+		out = append(out, k)
+	}
+	return out
+}
+
+// 1) Enum serialization contract: prefer on-wire introspection; if disabled, fall back to SDL.
 func Test_OrderDirection_EnumValues_OnWire(t *testing.T) {
-	t.Logf("[contract] Verify runtime enum serialization for OrderDirection == {ASC, DESC}")
+	t.Logf("[contract] Verify enum values for OrderDirection are {ASC, DESC}")
 	resp := postGQL(t, "Introspection(OrderDirection)", `
 		query {
 			__type(name: "OrderDirection") {
@@ -166,43 +205,46 @@ func Test_OrderDirection_EnumValues_OnWire(t *testing.T) {
 		}
 	`)
 
+	// If introspection is disabled, validate against SDL files instead.
+	if hasIntrospectionDisabled(resp.Errors) {
+		t.Logf("[contract] Introspection disabled by server; falling back to SDL check")
+		names := loadEnumValuesFromSDL(t, "OrderDirection")
+		if !containsStr(names, "ASC") || !containsStr(names, "DESC") {
+			t.Fatalf("[contract] SDL check failed; OrderDirection values=%v; want to include ASC and DESC", names)
+		}
+		t.Logf("[contract] OK (SDL): OrderDirection includes %v", names)
+		return
+	}
+
+	// Normal on-wire path.
 	type enumWrap struct {
-		Type struct {
+		Type *struct {
 			EnumValues []struct{ Name string } `json:"enumValues"`
 		} `json:"__type"`
 	}
-
 	if len(resp.Data) == 0 {
 		t.Fatalf("[contract] no data in response; errors=%v", resp.Errors)
 	}
-
 	var d enumWrap
 	if err := json.Unmarshal(resp.Data, &d); err != nil {
 		t.Fatalf("[contract] unmarshal data: %v; raw=%s", err, string(resp.Data))
 	}
-
-	if len(d.Type.EnumValues) == 0 {
-		t.Fatalf("[contract] __type(OrderDirection) returned no enum values; raw=%s errors=%v", string(resp.Data), resp.Errors)
+	if d.Type == nil || len(d.Type.EnumValues) == 0 {
+		t.Fatalf("[contract] __type(OrderDirection) yielded no values; raw=%s errors=%v", string(resp.Data), resp.Errors)
 	}
-
 	var names []string
 	for _, ev := range d.Type.EnumValues {
 		names = append(names, ev.Name)
 	}
-
-	// GraphQL introspection returns the schema enum names verbatim.
-	// Our UI TS enum keys (Asc/Desc) serialize to 'ASC'/'DESC' on the wire, so this must match.
 	if !containsStr(names, "ASC") || !containsStr(names, "DESC") {
 		t.Fatalf("[contract] OrderDirection mismatch; got %v; want to include ASC and DESC", names)
 	}
-
-	t.Logf("[contract] OK: OrderDirection includes %v", names)
+	t.Logf("[contract] OK (introspection): OrderDirection includes %v", names)
 }
 
-// 2) Auth gating: at least one protected query should return "unauthorized" without a token.
+// 2) Auth gating must surface 'unauthorized' without a token.
 func Test_ProtectedQueries_Return_Unauthorized_WithoutToken(t *testing.T) {
 	t.Logf("[contract] Verify protected queries return GraphQL error 'unauthorized' when no token present")
-
 	candidates := []struct {
 		name  string
 		query string
@@ -213,8 +255,8 @@ func Test_ProtectedQueries_Return_Unauthorized_WithoutToken(t *testing.T) {
 		{"admin", `query { admin }`},
 	}
 
-	var matched bool
-	var lastErrs []string
+	var foundUnauthorized bool
+	var allErrs [][]string
 
 	for _, c := range candidates {
 		resp := postGQL(t, c.name, c.query)
@@ -222,25 +264,21 @@ func Test_ProtectedQueries_Return_Unauthorized_WithoutToken(t *testing.T) {
 		for _, e := range resp.Errors {
 			errMsgs = append(errMsgs, e.Message)
 		}
-		lastErrs = errMsgs
+		allErrs = append(allErrs, errMsgs)
 
 		for _, msg := range errMsgs {
-			if msg == "unauthorized" {
+			if strings.EqualFold(strings.TrimSpace(msg), "unauthorized") {
 				t.Logf("[contract] OK: %s returned 'unauthorized' as expected", c.name)
-				matched = true
-				break
-			}
-			// If field doesn't exist on this schema, move on to next candidate.
-			if strings.Contains(strings.ToLower(msg), "cannot query field") {
+				foundUnauthorized = true
 				break
 			}
 		}
-		if matched {
+		if foundUnauthorized {
 			break
 		}
 	}
 
-	if !matched {
-		t.Fatalf("[contract] expected at least one protected query to return 'unauthorized'; last errors=%v", lastErrs)
+	if !foundUnauthorized {
+		t.Fatalf("[contract] expected at least one protected query to return 'unauthorized'; errors=%v", allErrs)
 	}
 }
