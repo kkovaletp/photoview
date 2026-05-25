@@ -102,20 +102,16 @@ const DetachImageFacesModal = ({
 
   useEffect(() => {
     if (!open) return
+    // Reset error/mutation state every time the modal opens
+    setInlineError(undefined)
+    resetDetach?.()
+    // Apply or clear preselected faces
     if (isNil(selectedImageFacesProp)) {
       setSelectedImageFaces([])
-      return
+    } else {
+      setSelectedImageFaces(selectedImageFacesProp)
     }
-    setSelectedImageFaces(selectedImageFacesProp)
-  }, [open, selectedImageFacesProp])
-
-  useEffect(() => {
-    if (!open) {
-      setSelectedImageFaces([])
-      setInlineError(undefined)
-      resetDetach?.()
-    }
-  }, [open, resetDetach])
+  }, [open, selectedImageFacesProp, resetDetach])
 
   if (!open) return null
 
@@ -125,6 +121,7 @@ const DetachImageFacesModal = ({
     if (isDetaching) return
     setOpen(false)
     setInlineError(undefined)
+    setSelectedImageFaces([])
     resetDetach?.()
   }
 

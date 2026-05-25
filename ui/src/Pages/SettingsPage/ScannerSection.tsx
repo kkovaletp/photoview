@@ -6,7 +6,7 @@ import { useTranslation } from 'react-i18next'
 import { ScanAllMutationMutation } from './__generated__/ScannerSection'
 import { Button } from '../../primitives/form/Input'
 import { useMessageState } from '../../components/messages/MessageState'
-import { useMemo } from 'react'
+import { useState, useEffect } from 'react'
 
 const SCAN_MUTATION = gql`
   mutation scanAllMutation {
@@ -28,16 +28,39 @@ const ScannerSection = () => {
   const { t } = useTranslation()
   const [startScanner, { loading }] = useMutation<ScanAllMutationMutation>(SCAN_MUTATION)
   const { messages } = useMessageState()
+  const [scannerRunning, setScannerRunning] = useState(false)
 
-  // Derive scanner state from the exact key the backend emits
-  const scannerRunning = useMemo(() => {
+  // Derive scanner state from the exact key the backend emits.
+  // Date.now() is intentionally called inside useEffect (not during render)
+  // to satisfy the purity rule for components.
+  useEffect(() => {
     const scannerMsg = messages.find(m => m.key === SCANNER_GLOBAL_KEY)
-    if (!scannerMsg) return false
+
+    if (scannerMsg?.timestamp == null) {
+      setScannerRunning(false)
+      return
+    }
+
     const now = Date.now()
-    const isFresh =
-      scannerMsg?.timestamp != null &&
-      (now - scannerMsg.timestamp) < SCANNER_MSG_STALE_AFTER_MS
-    return isFresh && scannerMsg.props.positive !== true
+    const elapsed = now - scannerMsg.timestamp
+    const remaining = SCANNER_MSG_STALE_AFTER_MS - elapsed
+
+    if (remaining <= 0) {
+      // Message is already stale — treat as unknown/not running
+      setScannerRunning(false)
+      return
+    }
+
+    const isRunning = scannerMsg.props.positive !== true
+    setScannerRunning(isRunning)
+
+    if (isRunning) {
+      // Auto-reset once the freshness window expires (handles backend crash / lost final notification)
+      const timer = setTimeout(() => {
+        setScannerRunning(false)
+      }, remaining)
+      return () => clearTimeout(timer)
+    }
   }, [messages])
 
   // Disable policy:
