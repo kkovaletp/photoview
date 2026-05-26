@@ -73,7 +73,7 @@ describe('ScannerSection', () => {
         expect(screen.getByTestId('scanner-concurrent-workers')).toBeInTheDocument()
     })
 
-    test('disables and shows "Scan in progress…" when a fresh global-scanner-progress message is present', () => {
+    test('disables and shows "Scan in progress…" when a fresh global-scanner-progress message is present', async () => {
         mockMessageState.messages = [
             {
                 key: 'global-scanner-progress',
@@ -85,7 +85,7 @@ describe('ScannerSection', () => {
 
         renderWithProviders(<ScannerSection />, { mocks: [] })
 
-        const btn = screen.getByRole('button', { name: 'Scan in progress…' })
+        const btn = await screen.findByRole('button', { name: 'Scan in progress…' })
         expect(btn).toBeDisabled()
     })
 
@@ -211,7 +211,7 @@ describe('ScannerSection', () => {
 
         renderWithProviders(<ScannerSection />, { mocks: [] })
 
-        btn = screen.getByRole('button', { name: 'Scan in progress…' })
+        btn = await screen.findByRole('button', { name: 'Scan in progress…' })
         const updatedMinWidth = (btn as HTMLButtonElement).style.minWidth
         expect(updatedMinWidth).toBe(initialMinWidth)
     })
