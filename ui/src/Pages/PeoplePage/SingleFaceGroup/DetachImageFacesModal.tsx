@@ -1,8 +1,7 @@
 import { gql, useMutation } from '@apollo/client'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router'
-import { isNil } from '../../../helpers/utils'
 import Modal from '../../../primitives/Modal'
 import { MY_FACES_QUERY } from '../PeoplePage'
 import { MyFacesQuery } from '../__generated__/PeoplePage'
@@ -61,13 +60,22 @@ type DetachImageFacesModalProps = {
   >
 }
 
-const DetachImageFacesModal = ({
+// Thin outer wrapper: just mounts/unmounts the real content
+const DetachImageFacesModal = (props: DetachImageFacesModalProps) => {
+  if (!props.open) return null
+  return <DetachImageFacesModalContent {...props} />
+}
+
+// Inner component: mounts fresh every time `open` becomes true.
+// All state is naturally reset on each open — no useEffect resets needed.
+const DetachImageFacesModalContent = ({
   open,
   setOpen,
   faceGroup,
   selectedImageFaces: selectedImageFacesProp,
 }: DetachImageFacesModalProps) => {
   const { t } = useTranslation()
+  // Fresh on every mount (every open):
   const [inlineError, setInlineError] = useState<string | undefined>(undefined)
   const [isDetaching, setIsDetaching] = useState(false)
 
@@ -76,15 +84,18 @@ const DetachImageFacesModal = ({
       MyFacesQuery['myFaceGroups'][0]['imageFaces'][0] |
       SingleFaceGroupQuery['faceGroup']['imageFaces'][0]
     >
-  >([])
-  const navigate = useNavigate()
+  >(() => selectedImageFacesProp ?? [])  // lazily initialized from prop on mount
 
+  const navigate = useNavigate()
   const { detachImageFaces, error: detachError, reset: resetDetach } = useDetachImageFaces()
 
   const detachImageFacesAction = () => {
     if (isDetaching) return
+
+    resetDetach()
     setIsDetaching(true)
     setInlineError(undefined)
+
     detachImageFaces(selectedImageFaces).then(({ data, errors }) => {
       if (!data?.detachImageFaces || (errors?.length ?? 0) > 0) return
       setOpen(false)
@@ -100,29 +111,11 @@ const DetachImageFacesModal = ({
     })
   }
 
-  useEffect(() => {
-    if (!open) return
-    // Reset error/mutation state every time the modal opens
-    setInlineError(undefined)
-    resetDetach?.()
-    // Apply or clear preselected faces
-    if (isNil(selectedImageFacesProp)) {
-      setSelectedImageFaces([])
-    } else {
-      setSelectedImageFaces(selectedImageFacesProp)
-    }
-  }, [open, selectedImageFacesProp, resetDetach])
-
-  if (!open) return null
-
   const imageFaces = faceGroup?.imageFaces ?? []
 
   const closeModal = () => {
     if (isDetaching) return
     setOpen(false)
-    setInlineError(undefined)
-    setSelectedImageFaces([])
-    resetDetach?.()
   }
 
   return (

@@ -37,8 +37,8 @@ const ScannerSection = () => {
     const scannerMsg = messages.find(m => m.key === SCANNER_GLOBAL_KEY)
 
     if (scannerMsg?.timestamp == null) {
-      setScannerRunning(false)
-      return
+      const timer = setTimeout(() => setScannerRunning(false), 0)
+      return () => clearTimeout(timer)
     }
 
     const now = Date.now()
@@ -47,19 +47,22 @@ const ScannerSection = () => {
 
     if (remaining <= 0) {
       // Message is already stale — treat as unknown/not running
-      setScannerRunning(false)
-      return
+      const timer = setTimeout(() => setScannerRunning(false), 0)
+      return () => clearTimeout(timer)
     }
 
     const isRunning = scannerMsg.props.positive !== true
-    setScannerRunning(isRunning)
+    const updateTimer = setTimeout(() => setScannerRunning(isRunning), 0)
 
+    let resetTimer: ReturnType<typeof setTimeout> | undefined
     if (isRunning) {
       // Auto-reset once the freshness window expires (handles backend crash / lost final notification)
-      const timer = setTimeout(() => {
-        setScannerRunning(false)
-      }, remaining)
-      return () => clearTimeout(timer)
+      resetTimer = setTimeout(() => setScannerRunning(false), remaining)
+    }
+
+    return () => {
+      clearTimeout(updateTimer)
+      if (resetTimer !== undefined) clearTimeout(resetTimer)
     }
   }, [messages])
 
