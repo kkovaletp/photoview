@@ -7,6 +7,7 @@ import MergeFaceGroupsModal, {
 } from './MergeFaceGroupsModal'
 import { MY_FACES_QUERY } from '../PeoplePage'
 import { MyFacesQuery } from '../__generated__/PeoplePage'
+import { SINGLE_FACE_GROUP } from './singleFaceGroupQuery'
 
 // ─── Mocks ────────────────────────────────────────────────────────────────────
 
@@ -162,6 +163,25 @@ function getCombineDataAndErrorsMock(
                 combineFaceGroups: { __typename: 'FaceGroup' as const, id: destinationID },
             },
             errors: [{ message }],
+        },
+    }
+}
+
+function getSingleFaceGroupMock(id: string) {
+    return {
+        request: {
+            query: SINGLE_FACE_GROUP,
+            variables: { id, limit: 200, offset: 0 },
+        },
+        result: {
+            data: {
+                faceGroup: {
+                    __typename: 'FaceGroup' as const,
+                    id,
+                    label: mockFaceGroups.find(fg => fg.id === id)?.label ?? null,
+                    imageFaces: [],
+                },
+            },
         },
     }
 }
@@ -401,7 +421,7 @@ describe('MergeFaceGroupsModal', () => {
 
     describe('successful merge', () => {
         test('merges a single source into destination and navigates', async () => {
-            const mocks = [myFacesMock, getCombineFacesMock('0', ['1'])]
+            const mocks = [myFacesMock, getCombineFacesMock('0', ['1']), getSingleFaceGroupMock('0')]
             const setState = await doMerge('0', ['1'], mocks)
             await waitFor(() => {
                 expect(setState).toHaveBeenCalledWith(MergeFaceGroupsModalState.Closed)
@@ -410,7 +430,7 @@ describe('MergeFaceGroupsModal', () => {
         })
 
         test('merges multiple sources into destination and navigates', async () => {
-            const mocks = [myFacesMock, getCombineFacesMock('0', ['1', '2'])]
+            const mocks = [myFacesMock, getCombineFacesMock('0', ['1', '2']), getSingleFaceGroupMock('0')]
             const setState = await doMerge('0', ['1', '2'], mocks)
             await waitFor(() => {
                 expect(setState).toHaveBeenCalledWith(MergeFaceGroupsModalState.Closed)
@@ -420,7 +440,7 @@ describe('MergeFaceGroupsModal', () => {
 
         test('merges all available source face groups into destination', async () => {
             const allSourceIDs = mockFaceGroups.slice(1).map(fg => fg.id)
-            const mocks = [myFacesMock, getCombineFacesMock('0', allSourceIDs)]
+            const mocks = [myFacesMock, getCombineFacesMock('0', allSourceIDs), getSingleFaceGroupMock('0')]
             const setState = await doMerge('0', allSourceIDs, mocks)
             await waitFor(() => {
                 expect(setState).toHaveBeenCalledWith(MergeFaceGroupsModalState.Closed)
@@ -556,7 +576,7 @@ describe('MergeFaceGroupsModal', () => {
 
         test('completes full merge flow with preselected destination', async () => {
             const setState = vi.fn()
-            const mocks = [myFacesMock, getCombineFacesMock('0', ['1'])]
+            const mocks = [myFacesMock, getCombineFacesMock('0', ['1']), getSingleFaceGroupMock('0')]
             const { rerender } = render(
                 <MockedProvider mocks={mocks}>
                     <MergeFaceGroupsModal

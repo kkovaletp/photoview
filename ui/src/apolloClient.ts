@@ -259,13 +259,15 @@ const linkError = onError(({ graphQLErrors, networkError }) => {
   }
 })
 
+// Mirrors Apollo Client's internal KeySpecifier type (not publicly exported in v3)
+type KeySpecifier = ReadonlyArray<string | KeySpecifier>
 type PaginateCacheType = {
-  keyArgs: string[]
+  keyArgs: KeySpecifier
   merge: FieldMergeFunction<unknown[], unknown[]>
 }
 
 // Modified version of Apollo's offsetLimitPagination()
-export const paginateCache = (keyArgs: string[]) =>
+export const paginateCache = (keyArgs: KeySpecifier) =>
 ({
   keyArgs,
   merge(existing, incoming, { args, fieldName }) {
@@ -327,7 +329,7 @@ const memoryCache = new InMemoryCache({
     },
     FaceGroup: {
       fields: {
-        imageFaces: paginateCache([]),
+        imageFaces: paginateCache([['paginate', ['limit']]]),
       },
     },
     Query: {

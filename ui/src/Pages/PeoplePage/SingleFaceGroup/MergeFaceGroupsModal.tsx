@@ -15,6 +15,7 @@ import {
   CombineFacesMutationVariables,
 } from './__generated__/MergeFaceGroupsModal'
 import { SingleFaceGroupQuery } from './__generated__/SingleFaceGroup'
+import { SINGLE_FACE_GROUP } from './singleFaceGroupQuery'
 
 export const COMBINE_FACES_MUTATION = gql`
   mutation combineFaces($destID: ID!, $srcIDs: [ID!]!) {
@@ -26,7 +27,7 @@ export const COMBINE_FACES_MUTATION = gql`
     }
   }
 `
-//TODO: fix the merge face groups modal style for the selected face
+
 export enum MergeFaceGroupsModalState {
   Closed = 'closed',
   SelectDestination = 'select_destination',
@@ -71,10 +72,6 @@ const MergeFaceGroupsModal = ({
     CombineFacesMutation,
     CombineFacesMutationVariables
   >(COMBINE_FACES_MUTATION, {
-    refetchQueries: ({ data, errors }) =>
-      data?.combineFaceGroups && (errors?.length ?? 0) === 0
-        ? refetchQueries
-        : [],
     errorPolicy: 'all',
   })
 
@@ -183,6 +180,18 @@ const MergeFaceGroupsModal = ({
         srcIDs: sourceGroupIDs,
         destID: selectedDestinationFaceGroup.id,
       },
+      refetchQueries: ({ data, errors }) =>
+        data?.combineFaceGroups && (errors?.length ?? 0) === 0
+          ? [...refetchQueries, {
+            query: SINGLE_FACE_GROUP,
+            variables: {
+              id: selectedDestinationFaceGroup.id,
+              limit: 200,
+              offset: 0,
+            },
+          }]
+          : [],
+      awaitRefetchQueries: true,
     }).then(({ data, errors }) => {
       if (!data?.combineFaceGroups || (errors?.length ?? 0) > 0) return
       setInlineError(undefined)

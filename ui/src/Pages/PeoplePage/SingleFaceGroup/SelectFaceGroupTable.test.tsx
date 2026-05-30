@@ -208,7 +208,7 @@ describe('SelectFaceGroupTable', () => {
 
             // Selection highlighting
             expect(screen.getByText('John Doe').closest('td')).toHaveClass('brightness-110')
-            expect(screen.getByText('John Doe')).toHaveClass('font-semibold', 'text-slate-100')
+            expect(screen.getByText('John Doe')).toHaveClass('font-semibold', 'text-slate-900', 'dark:text-slate-100')
             expect(screen.getByText('Jane Smith').closest('td')).toHaveClass('brightness-110')
 
             // Click handling

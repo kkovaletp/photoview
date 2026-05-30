@@ -57,7 +57,7 @@ const FaceGroupRow = ({
           />
         </FaceCircleWrapper>
         <span
-          className={`ml-3 ${faceSelected ? 'font-semibold text-slate-100' : 'text-gray-400'
+          className={`ml-3 ${faceSelected ? 'font-semibold text-slate-900 dark:text-slate-100' : 'text-gray-400'
             } ${!faceSelected && !faceGroup.label ? 'text-gray-600 italic' : ''}`}
         >
           {faceGroup.label ??
