@@ -27,7 +27,13 @@ export default defineConfig(async ({ command, mode }) => {
         srcDir: 'src',
         filename: 'service-worker.ts',
         manifest: false,
-        injectRegister: null
+        injectRegister: null,
+        injectManifest: {
+          // mapbox-gl is intentionally excluded from the SW precache:
+          // it is too large (>2 MiB) and requires live network access for
+          // map tiles anyway. This pattern covers any future hash-renamed variant.
+          globIgnores: ['**/mapbox-gl*.js'],
+        },
       }),
       ethicalLicensePlugin(),
       // Only add codecov plugin if it's available
@@ -47,6 +53,9 @@ export default defineConfig(async ({ command, mode }) => {
     esbuild: {
       target: 'es2020', // Ensure compatibility with browsers, not older than from 2021
       logOverride: { 'this-is-undefined-in-esm': 'silent' },
+    },
+    optimizeDeps: {
+      exclude: ['mapbox-gl'],
     },
     test: {
       globals: true,
