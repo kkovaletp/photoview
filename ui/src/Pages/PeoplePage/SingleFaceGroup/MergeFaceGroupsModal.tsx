@@ -26,7 +26,7 @@ export const COMBINE_FACES_MUTATION = gql`
     }
   }
 `
-
+//TODO: fix the merge face groups modal style for the selected face
 export enum MergeFaceGroupsModalState {
   Closed = 'closed',
   SelectDestination = 'select_destination',
