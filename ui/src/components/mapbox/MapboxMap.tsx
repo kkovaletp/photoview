@@ -4,6 +4,10 @@ import type mapboxgl from 'mapbox-gl'
 import styled from 'styled-components'
 
 import 'mapbox-gl/dist/mapbox-gl.css'
+// Vite emits this worker as a separate asset and returns its hashed URL,
+// which fixes the "disallowed MIME type" error when mapbox-gl tries to
+// spawn its internal web worker in the production build.
+import mapboxWorkerUrl from 'mapbox-gl/dist/mapbox-gl-csp-worker?url'
 import { MapboxTokenQuery } from './__generated__/MapboxMap'
 import { isDarkMode } from '../../theme'
 import { SetMapLanguages } from '../../localization'
@@ -45,10 +49,14 @@ const useMapboxMap = ({
     async function loadMapboxLibrary() {
       const mapbox = (await import('mapbox-gl/esm')).default
 
+      // Point mapbox-gl at the correctly-bundled worker asset so the browser
+      // can load it with the right MIME type (application/javascript).
+      mapbox.workerUrl = mapboxWorkerUrl
+
       setMapboxLibrary(mapbox)
     }
     loadMapboxLibrary()
-  }, [])
+
 
   useEffect(() => {
     if (

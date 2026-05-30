@@ -11,7 +11,6 @@ import { useUrlPresentModeSetup } from '../../components/photoGallery/mediaGalle
 import MapPresentMarker from './MapPresentMarker'
 import { PlacesAction, placesReducer } from './placesReducer'
 import { MediaGeoJsonQuery } from './__generated__/PlacesPage'
-//TODO: fix the map loading
 const MapWrapper = styled.div`
   width: 100%;
   height: calc(100vh - 120px);
