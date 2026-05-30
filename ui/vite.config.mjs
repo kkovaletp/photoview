@@ -26,11 +26,8 @@ export default defineConfig(async ({ command, mode }) => {
         strategies: 'injectManifest',
         srcDir: 'src',
         filename: 'service-worker.ts',
-        injectRegister: 'script',
         manifest: false,
-        injectManifest: {
-          injectionPoint: undefined
-        }
+        injectRegister: null
       }),
       ethicalLicensePlugin(),
       // Only add codecov plugin if it's available
