@@ -1,6 +1,8 @@
 import { useState, useRef, useEffect, forwardRef, HTMLProps } from 'react'
 import { gql, useQuery } from '@apollo/client'
 import type mapboxgl from 'mapbox-gl'
+// `@ts-expect-error` – Vite ?worker import; no bundled type declaration
+import MapboxWorker from 'mapbox-gl/dist/mapbox-gl-csp-worker?worker'
 import styled from 'styled-components'
 
 import 'mapbox-gl/dist/mapbox-gl.css'
@@ -43,7 +45,11 @@ const useMapboxMap = ({
 
   useEffect(() => {
     async function loadMapboxLibrary() {
-      const mapbox = (await import('mapbox-gl/esm')).default
+      const mapbox = (await import('mapbox-gl')).default
+      // Inject the CSP worker so Vite doesn't mangle the internal worker URL.
+      // Without this the browser receives an HTML SPA-fallback response for
+      // the worker script and refuses to execute it (MIME "text/html").
+      mapbox.workerClass = MapboxWorker as unknown as typeof mapbox.workerClass
 
       setMapboxLibrary(mapbox)
     }
