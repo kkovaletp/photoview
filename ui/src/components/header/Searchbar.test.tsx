@@ -115,6 +115,7 @@ describe('SearchBar Component', () => {
         const searchInput = screen.getByPlaceholderText('Search');
         expect(searchInput).toBeInTheDocument();
         expect(searchInput).toHaveAttribute('type', 'search');
+        expect(searchInput).not.toHaveAttribute('aria-activedescendant');
     });
 
     test('calls debounce with search term when typing', async () => {

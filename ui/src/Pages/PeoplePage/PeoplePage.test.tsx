@@ -129,6 +129,8 @@ describe('PeoplePage component', () => {
         .getAllByRole('link')
         .some(x => x.getAttribute('href') === '/people/3')
     ).toBeTruthy()
+
+    expect(screen.queryByLabelText('Loading more people')).not.toBeInTheDocument()
   })
 })
 

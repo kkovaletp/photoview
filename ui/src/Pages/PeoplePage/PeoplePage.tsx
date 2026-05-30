@@ -272,13 +272,13 @@ export const PeoplePage = () => {
   const [recognizeUnlabeled, { loading: recognizeUnlabeledLoading }] =
     useMutation<RecognizeUnlabeledFacesMutation>(RECOGNIZE_UNLABELED_FACES_MUTATION)
 
-  const { containerElem, finished: finishedLoadingMore } =
-    useScrollPagination<MyFacesQuery>({
-      loading,
-      fetchMore,
-      data,
-      getItems: data => data.myFaceGroups,
-    })
+  const { containerElem, loadingMore } = useScrollPagination<MyFacesQuery>({
+    loading,
+    fetchMore,
+    data,
+    getItems: data => data.myFaceGroups,
+    pageSize: 50,
+  })
 
   if (error) {
     return <div>{error.message}</div>
@@ -335,7 +335,7 @@ export const PeoplePage = () => {
 
       <FaceGroupsWrapper ref={containerElem}>{faces}</FaceGroupsWrapper>
       <PaginateLoader
-        active={!finishedLoadingMore && !loading}
+        active={loadingMore}
         text={t('general.loading.paginate.faces', 'Loading more people')}
       />
       {modals}

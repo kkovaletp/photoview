@@ -9,9 +9,9 @@ import { MEDIA_GALLERY_FRAGMENT } from '../../components/photoGallery/fragments'
 vi.mock('../../hooks/useScrollPagination', () => {
   return {
     default: () => ({
-      containerElem: { current: null },
-      finished: false
-    })
+      containerElem: vi.fn(),
+      finished: true,
+    }),
   }
 })
 
@@ -91,10 +91,11 @@ test('AlbumPage shows loading state', async () => {
   })
 
   await waitFor(() => {
-    // Using regex to match any text containing "Loading"
-    expect(screen.getByText(/Loading/)).toBeInTheDocument()
     expect(document.title).toContain('Loading album')
   })
+
+  expect(screen.getByTestId('Layout')).toBeInTheDocument()
+  expect(screen.queryByLabelText('Loading more media')).not.toBeInTheDocument()
 })
 
 test('AlbumPage shows not found state', async () => {

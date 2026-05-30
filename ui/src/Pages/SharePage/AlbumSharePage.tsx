@@ -61,12 +61,13 @@ const AlbumSharePage = ({ albumID, token, password }: AlbumSharePageProps) => {
     }
   )
 
-  const { containerElem, finished: finishedLoadingMore } =
+  const { containerElem, loadingMore } =
     useScrollPagination<ShareAlbumQueryQuery>({
       loading,
       fetchMore,
       data,
       getItems: data => data.album.media,
+      pageSize: 200,
     })
 
   if (error) {
@@ -91,7 +92,7 @@ const AlbumSharePage = ({ albumID, token, password }: AlbumSharePageProps) => {
           ordering={orderParams}
         />
         <PaginateLoader
-          active={!finishedLoadingMore && !loading}
+          active={loadingMore}
           text={t('general.loading.paginate.media', 'Loading more media')}
         />
       </Layout>

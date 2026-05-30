@@ -60,12 +60,13 @@ const SingleFaceGroup = ({ faceGroupID }: SingleFaceGroupProps) => {
     media: [],
   })
 
-  const { containerElem, finished: finishedLoadingMore } =
+  const { containerElem, loadingMore } =
     useScrollPagination<SingleFaceGroupQuery>({
       loading,
       fetchMore,
       data,
       getItems: data => data.faceGroup?.imageFaces ?? [],
+      pageSize: 200,
     })
 
   useEffect(() => {
@@ -93,7 +94,7 @@ const SingleFaceGroup = ({ faceGroupID }: SingleFaceGroupProps) => {
           mediaState={mediaState}
         />
         <PaginateLoader
-          active={!finishedLoadingMore && !loading}
+          active={loadingMore}
           text={t('general.loading.paginate.media', 'Loading more media')}
         />
       </div>

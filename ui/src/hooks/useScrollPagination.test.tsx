@@ -73,7 +73,7 @@ describe('useScrollPagination', () => {
     // ── return value ────────────────────────────────────────────────────────────
 
     describe('initial return value', () => {
-        test('returns finished=false and containerElem as a function', () => {
+        test('returns finished=true when loaded data is empty', () => {
             const { result } = renderHook(() =>
                 useScrollPagination({
                     loading: false,
@@ -83,7 +83,53 @@ describe('useScrollPagination', () => {
                 }),
             )
 
+            expect(result.current.finished).toBe(true)
+            expect(typeof result.current.containerElem).toBe('function')
+        })
+
+        test('returns finished=false when loaded data contains items', () => {
+            const { result } = renderHook(() =>
+                useScrollPagination({
+                    loading: false,
+                    data: { items: ['a'] },
+                    fetchMore: vi.fn(),
+                    getItems,
+                }),
+            )
+
             expect(result.current.finished).toBe(false)
+            expect(typeof result.current.containerElem).toBe('function')
+        })
+
+        test('returns finished=true when loaded item count is smaller than pageSize', () => {
+            const { result } = renderHook(() =>
+                useScrollPagination({
+                    loading: false,
+                    data: { items: ['a', 'b'] },
+                    fetchMore: vi.fn(),
+                    getItems,
+                    pageSize: 50,
+                }),
+            )
+
+            expect(result.current.finished).toBe(true)
+            expect(result.current.loadingMore).toBe(false)
+            expect(typeof result.current.containerElem).toBe('function')
+        })
+
+        test('returns finished=false when loaded item count reaches pageSize', () => {
+            const { result } = renderHook(() =>
+                useScrollPagination({
+                    loading: false,
+                    data: { items: ['a', 'b'] },
+                    fetchMore: vi.fn(),
+                    getItems,
+                    pageSize: 2,
+                }),
+            )
+
+            expect(result.current.finished).toBe(false)
+            expect(result.current.loadingMore).toBe(false)
             expect(typeof result.current.containerElem).toBe('function')
         })
     })
@@ -95,7 +141,7 @@ describe('useScrollPagination', () => {
             const { result } = renderHook(() =>
                 useScrollPagination({
                     loading: false,
-                    data: { items: [] },
+                    data: { items: ['a'] },
                     fetchMore: vi.fn(),
                     getItems,
                 }),
@@ -132,7 +178,7 @@ describe('useScrollPagination', () => {
             const { result } = renderHook(() =>
                 useScrollPagination({
                     loading: false,
-                    data: { items: [] },
+                    data: { items: ['a'] },
                     fetchMore: vi.fn(),
                     getItems,
                 }),
@@ -153,7 +199,7 @@ describe('useScrollPagination', () => {
             const { result } = renderHook(() =>
                 useScrollPagination({
                     loading: false,
-                    data: { items: [] },
+                    data: { items: ['a'] },
                     fetchMore: vi.fn(),
                     getItems,
                 }),
@@ -172,6 +218,23 @@ describe('useScrollPagination', () => {
 
             expect(mockDisconnect.mock.calls.length).toBeGreaterThan(disconnectCountAfterFirstAssign)
             expect(mockObserve).toHaveBeenCalledWith(elem2)
+        })
+
+        test('does not observe the element when loaded data is empty', () => {
+            const { result } = renderHook(() =>
+                useScrollPagination({
+                    loading: false,
+                    data: { items: [] },
+                    fetchMore: vi.fn(),
+                    getItems,
+                })
+            )
+
+            act(() => {
+                result.current.containerElem(document.createElement('div'))
+            })
+
+            expect(mockObserve).not.toHaveBeenCalled()
         })
     })
 
@@ -225,7 +288,7 @@ describe('useScrollPagination', () => {
             const { result } = renderHook(() =>
                 useScrollPagination({
                     loading: false,
-                    data: { items: [] },
+                    data: { items: ['a'] },
                     fetchMore,
                     getItems,
                 }),
@@ -282,6 +345,74 @@ describe('useScrollPagination', () => {
 
             expect(fetchMore).not.toHaveBeenCalled()
         })
+
+        test('sets loadingMore while fetchMore is in progress', async () => {
+            let resolveFetchMore: (value: ApolloQueryResult<SimpleData>) => void
+
+            const fetchMore = vi.fn(
+                () =>
+                    new Promise<ApolloQueryResult<SimpleData>>(resolve => {
+                        resolveFetchMore = resolve
+                    }),
+            )
+
+            const { result } = renderHook(() =>
+                useScrollPagination({
+                    loading: false,
+                    data: { items: ['a', 'b'] },
+                    fetchMore,
+                    getItems,
+                    pageSize: 2,
+                }),
+            )
+
+            act(() => {
+                result.current.containerElem(document.createElement('div'))
+            })
+
+            act(() => {
+                triggerIntersection([{ isIntersecting: true }])
+            })
+
+            expect(result.current.loadingMore).toBe(true)
+
+            await act(async () => {
+                resolveFetchMore!(makeResult([]))
+            })
+
+            await waitFor(() => {
+                expect(result.current.loadingMore).toBe(false)
+                expect(result.current.finished).toBe(true)
+            })
+        })
+
+        test('marks pagination as finished when fetchMore returns fewer items than pageSize', async () => {
+            const fetchMore = vi.fn().mockResolvedValue(makeResult(['c']))
+
+            const { result } = renderHook(() =>
+                useScrollPagination({
+                    loading: false,
+                    data: { items: ['a', 'b'] },
+                    fetchMore,
+                    getItems,
+                    pageSize: 2,
+                }),
+            )
+
+            act(() => {
+                result.current.containerElem(document.createElement('div'))
+            })
+
+            await act(async () => {
+                triggerIntersection([{ isIntersecting: true }])
+            })
+
+            expect(fetchMore).toHaveBeenCalledWith({ variables: { offset: 2 } })
+
+            await waitFor(() => {
+                expect(result.current.finished).toBe(true)
+            })
+        })
     })
 
     // ── finished flag ────────────────────────────────────────────────────────────
@@ -319,7 +450,7 @@ describe('useScrollPagination', () => {
                 (props: { loading: boolean }) =>
                     useScrollPagination({
                         loading: props.loading,
-                        data: { items: [] },
+                        data: { items: ['a'] },
                         fetchMore: vi.fn(),
                         getItems,
                     }),
@@ -341,7 +472,7 @@ describe('useScrollPagination', () => {
                 (props: { loading: boolean }) =>
                     useScrollPagination({
                         loading: props.loading,
-                        data: { items: [] },
+                        data: { items: ['a'] },
                         fetchMore: vi.fn(),
                         getItems,
                     }),
@@ -360,29 +491,52 @@ describe('useScrollPagination', () => {
 
     // ── data changes ─────────────────────────────────────────────────────────────
 
-    describe('data reference changes', () => {
-        test('resets finished to false when data changes to a new reference', async () => {
+    describe('top-level query/refetch changes', () => {
+        test('resets finished to false when a new top-level load starts', async () => {
+            const elem = document.createElement('div')
             const fetchMore = vi.fn().mockResolvedValue(makeResult([]))
+
             const { result, rerender } = renderHook(
-                (props: { data: SimpleData }) =>
+                (props: { loading: boolean; data: SimpleData }) =>
                     useScrollPagination({
-                        loading: false,
+                        loading: props.loading,
                         data: props.data,
                         fetchMore,
                         getItems,
                     }),
-                { initialProps: { data: { items: ['a'] } } },
+                {
+                    initialProps: {
+                        loading: false,
+                        data: { items: ['a'] },
+                    },
+                },
             )
+
             act(() => {
-                result.current.containerElem(document.createElement('div'))
+                result.current.containerElem(elem)
             })
 
             await act(async () => {
                 triggerIntersection([{ isIntersecting: true }])
             })
-            await waitFor(() => expect(result.current.finished).toBe(true))
 
-            rerender({ data: { items: ['a', 'b'] } })
+            await waitFor(() => {
+                expect(result.current.finished).toBe(true)
+            })
+
+            rerender({
+                loading: true,
+                data: { items: ['a'] },
+            })
+
+            await waitFor(() => {
+                expect(result.current.finished).toBe(false)
+            })
+
+            rerender({
+                loading: false,
+                data: { items: ['a', 'b'] },
+            })
 
             expect(result.current.finished).toBe(false)
         })

@@ -17,7 +17,6 @@ import {
 } from './timelineGalleryReducer'
 import { useUrlPresentModeSetup } from '../photoGallery/mediaGalleryReducer'
 import TimelineFilters from './TimelineFilters'
-import client from '../../apolloClient'
 
 export const MY_TIMELINE_QUERY = gql`
   query myTimeline(
@@ -91,7 +90,7 @@ const TimelineGallery = () => {
     },
   })
 
-  const { data, error, loading, refetch, fetchMore } = useQuery<
+  const { data, error, loading, fetchMore } = useQuery<
     MyTimelineQuery,
     MyTimelineQueryVariables
   >(MY_TIMELINE_QUERY, {
@@ -105,12 +104,13 @@ const TimelineGallery = () => {
     },
   })
 
-  const { containerElem, finished: finishedLoadingMore } =
+  const { containerElem, loadingMore } =
     useScrollPagination<MyTimelineQuery>({
       loading,
       fetchMore,
       data,
       getItems: data => data.myTimeline,
+      pageSize: 200,
     })
 
   useEffect(() => {
@@ -119,24 +119,6 @@ const TimelineGallery = () => {
       timeline: data?.myTimeline || [],
     })
   }, [data])
-
-  useEffect(() => {
-    (async () => {
-      client.cache.evict({
-        fieldName: 'myTimeline',
-        broadcast: false
-      });
-      client.cache.gc();
-      await refetch({
-        onlyFavorites,
-        fromDate: filterDate
-          ? `${Number.parseInt(filterDate) + 1}-01-01T00:00:00Z`
-          : undefined,
-        offset: 0,
-        limit: 200,
-      })
-    })()
-  }, [filterDate, onlyFavorites, refetch])
 
   useUrlPresentModeSetup({
     dispatchMedia,
@@ -173,7 +155,7 @@ const TimelineGallery = () => {
         {timelineGroups}
       </div>
       <PaginateLoader
-        active={!finishedLoadingMore && !loading}
+        active={loadingMore}
         text={t('general.loading.paginate.media', 'Loading more media')}
       />
       {mediaState.presenting && (

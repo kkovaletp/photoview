@@ -1,5 +1,5 @@
 import { screen, waitFor } from '@testing-library/react'
-import userEvent from '@testing-library/user-event';
+import userEvent from '@testing-library/user-event'
 import TimelineGallery, { MY_TIMELINE_QUERY } from './TimelineGallery'
 import { timelineData } from './timelineTestData'
 import { renderWithProviders } from '../../helpers/testUtils'
@@ -7,7 +7,6 @@ import { gql } from '@apollo/client'
 
 vi.mock('../../hooks/useScrollPagination')
 
-// Define the missing query that's used by TimelineFilters component
 const EARLIEST_MEDIA_QUERY = gql`
   query earliestMedia {
     myMedia(
@@ -20,12 +19,38 @@ const EARLIEST_MEDIA_QUERY = gql`
   }
 `
 
+beforeEach(() => {
+  globalThis.history.replaceState(null, '', '/timeline')
+})
+
+const earliestMediaMock = {
+  request: {
+    query: EARLIEST_MEDIA_QUERY,
+    variables: {},
+  },
+  result: {
+    data: {
+      myMedia: [
+        {
+          id: '1001',
+          date: '2020-01-01T00:00:00Z',
+        },
+      ],
+    },
+  },
+}
+
 test('timeline with media', async () => {
   const graphqlMocks = [
     {
       request: {
         query: MY_TIMELINE_QUERY,
-        variables: { onlyFavorites: false, offset: 0, limit: 200 },
+        variables: {
+          onlyFavorites: false,
+          fromDate: undefined,
+          offset: 0,
+          limit: 200,
+        },
       },
       result: {
         data: {
@@ -33,27 +58,12 @@ test('timeline with media', async () => {
         },
       },
     },
-    {
-      request: {
-        query: EARLIEST_MEDIA_QUERY,
-        variables: {},
-      },
-      result: {
-        data: {
-          myMedia: [
-            {
-              id: '1001',
-              date: '2020-01-01T00:00:00Z',
-            }
-          ]
-        }
-      }
-    }
+    earliestMediaMock,
   ]
 
   renderWithProviders(<TimelineGallery />, {
     mocks: graphqlMocks,
-    initialEntries: ['/timeline']
+    initialEntries: ['/timeline'],
   })
 
   expect(screen.getByLabelText('Show only favorites')).toBeInTheDocument()
@@ -62,108 +72,138 @@ test('timeline with media', async () => {
 })
 
 test('shows loading state', async () => {
-  const earliestMediaMock = {
+  const timelineMock = {
+    request: {
+      query: MY_TIMELINE_QUERY,
+      variables: {
+        onlyFavorites: false,
+        fromDate: undefined,
+        offset: 0,
+        limit: 200,
+      },
+    },
+    result: { data: { myTimeline: timelineData } },
+    delay: 200,
+  }
+
+  renderWithProviders(<TimelineGallery />, {
+    mocks: [earliestMediaMock, timelineMock],
+    initialEntries: ['/timeline'],
+  })
+
+  expect(screen.getByLabelText('Show only favorites')).toBeInTheDocument()
+  expect(screen.queryAllByRole('presentation')).toHaveLength(0)
+
+  expect(await screen.findAllByRole('presentation')).toHaveLength(5)
+})
+
+test('does not show pagination loader for an empty timeline', async () => {
+  const emptyEarliestMediaMock = {
     request: {
       query: EARLIEST_MEDIA_QUERY,
       variables: {},
     },
     result: {
       data: {
-        myMedia: [{ id: '1001', date: '2020-01-01T00:00:00Z' }]
-      }
+        myMedia: [],
+      },
     },
-  };
+  }
 
-  const timelineMock = {
+  const emptyTimelineMock = {
     request: {
       query: MY_TIMELINE_QUERY,
-      variables: { onlyFavorites: false, offset: 0, limit: 200 },
+      variables: {
+        onlyFavorites: false,
+        fromDate: undefined,
+        offset: 0,
+        limit: 200,
+      },
     },
-    result: { data: { myTimeline: timelineData } },
-    delay: 200 // Delay to ensure we catch the loading state
-  };
+    result: {
+      data: {
+        myTimeline: [],
+      },
+    },
+  }
 
   renderWithProviders(<TimelineGallery />, {
-    mocks: [earliestMediaMock, timelineMock],
-    initialEntries: ['/timeline']
-  });
+    mocks: [emptyEarliestMediaMock, emptyTimelineMock],
+    initialEntries: ['/timeline'],
+  })
 
-  // During loading, the favorites checkbox exists but no images yet
-  expect(screen.getByLabelText('Show only favorites')).toBeInTheDocument();
-  expect(screen.queryAllByRole('presentation')).toHaveLength(0);
+  await waitFor(() => {
+    expect(screen.getByLabelText('Show only favorites')).toBeInTheDocument()
+  })
 
-  // After loading completes, images should appear
-  expect(await screen.findAllByRole('presentation')).toHaveLength(5);
+  expect(screen.queryAllByRole('presentation')).toHaveLength(0)
+  expect(screen.queryByLabelText('Loading more media')).not.toBeInTheDocument()
 })
 
 test('filter by favorites', async () => {
-  // Create filtered data with known favorite items
-  const favoriteTimelineData = timelineData.filter(item => item.favorite);
+  const favoriteTimelineData = timelineData.filter(item => item.favorite)
 
-  // Make sure we have at least one favorite item in test data
   if (favoriteTimelineData.length === 0) {
-    // Create a copy with at least one favorite item if needed
-    favoriteTimelineData.push({ ...timelineData[0], favorite: true });
+    favoriteTimelineData.push({ ...timelineData[0], favorite: true })
   }
 
-  // Setup user event simulation separately
-  const user = userEvent.setup();
+  const user = userEvent.setup()
 
-  // Setup mocks - CRITICAL: Match exact variable ordering from error message
   const mocks = [
-    // EARLIEST_MEDIA_QUERY mock
-    {
-      request: {
-        query: EARLIEST_MEDIA_QUERY,
-        variables: {},
-      },
-      result: {
-        data: {
-          myMedia: [{ id: '1001', date: '2020-01-01T00:00:00Z' }]
-        }
-      },
-    },
-    // Initial view (all items) - match exact variable order from network request
+    earliestMediaMock,
     {
       request: {
         query: MY_TIMELINE_QUERY,
-        variables: { onlyFavorites: false, fromDate: undefined, offset: 0, limit: 200 },
+        variables: {
+          onlyFavorites: false,
+          fromDate: undefined,
+          offset: 0,
+          limit: 200,
+        },
       },
       result: { data: { myTimeline: timelineData } },
     },
-    // Favorites-only view - match exact variable order from network request
     {
       request: {
         query: MY_TIMELINE_QUERY,
-        variables: { onlyFavorites: true, fromDate: undefined, offset: 0, limit: 200 },
+        variables: {
+          onlyFavorites: true,
+          fromDate: undefined,
+          offset: 0,
+          limit: 200,
+        },
       },
       result: { data: { myTimeline: favoriteTimelineData } },
     },
-  ];
+  ]
 
   renderWithProviders(<TimelineGallery />, {
     mocks,
-    initialEntries: ['/timeline']
-  });
+    initialEntries: ['/timeline'],
+  })
 
-  // Wait for initial data to load
-  await waitFor(() => {
-    expect(screen.queryAllByRole('presentation').length).toBeGreaterThan(0);
-  }, { timeout: 2000 });
+  await waitFor(
+    () => {
+      expect(screen.queryAllByRole('presentation').length).toBeGreaterThan(0)
+    },
+    { timeout: 2000 }
+  )
 
-  // Toggle favorites filter
-  const checkbox = screen.getByLabelText('Show only favorites');
-  await user.click(checkbox);
+  const checkbox = screen.getByLabelText('Show only favorites')
+  await user.click(checkbox)
 
-  // Wait for filtered data to load
-  await waitFor(() => {
-    // Check URL parameter was updated first, as this happens immediately
-    expect(globalThis.location.search).toContain('favorites=1');
-  }, { timeout: 1000 });
+  await waitFor(
+    () => {
+      expect(globalThis.location.search).toContain('favorites=1')
+    },
+    { timeout: 1000 }
+  )
 
-  // Longer timeout for image loading
-  await waitFor(() => {
-    const images = screen.getAllByRole('presentation');
-    expect(images.length).toBe(favoriteTimelineData.length);
-  }, { timeout: 3000 });
+  await waitFor(
+    () => {
+      const images = screen.getAllByRole('presentation')
+      expect(images.length).toBe(favoriteTimelineData.length)
+    },
+    { timeout: 3000 }
+  )
 })

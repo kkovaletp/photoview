@@ -70,12 +70,13 @@ function AlbumPage() {
     },
   })
 
-  const { containerElem, finished: finishedLoadingMore } =
+  const { containerElem, loadingMore } =
     useScrollPagination<AlbumQueryQuery>({
       loading,
       fetchMore,
       data,
-      getItems: data => data.album.media,
+      getItems: data => data.album?.media ?? [],
+      pageSize: 200,
     })
 
   const toggleFavorites = useCallback(
@@ -122,7 +123,7 @@ function AlbumPage() {
         ordering={orderParams}
       />
       <PaginateLoader
-        active={!finishedLoadingMore && !loading}
+        active={loadingMore}
         text={t('general.loading.paginate.media', 'Loading more media')}
       />
     </Layout>

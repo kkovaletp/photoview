@@ -7,7 +7,7 @@ type PaginateLoaderProps = {
 
 const PaginateLoader = ({ active, text }: PaginateLoaderProps) => (
   <Loader
-    active
+    active={active}
     message={text}
     className={active ? 'opacity-100' : 'opacity-0'}
   />

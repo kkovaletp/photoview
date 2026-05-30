@@ -168,7 +168,7 @@ const SearchBar = () => {
         aria-haspopup="listbox"
         aria-autocomplete="list"
         aria-activedescendant={
-          selectedItemId ? `search-item-${selectedItemId}` : ''
+          selectedItemId === null ? undefined : `search-item-${selectedItemId}`
         }
         aria-expanded={expanded}
         className="w-full py-2 px-3 z-10 relative rounded-md bg-gray-50 focus:bg-white border border-gray-50 focus:border-blue-400 outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-50 dark:bg-dark-bg2 dark:border-dark-bg2 dark:focus:bg-[#2a2f35]"
