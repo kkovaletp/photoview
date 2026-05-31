@@ -10,9 +10,7 @@ import { SINGLE_FACE_GROUP } from './singleFaceGroupQuery'
 import {
   SingleFaceGroupQuery,
   SingleFaceGroupQueryVariables,
-} from './__generated__/SingleFaceGroup'
-
-export { SINGLE_FACE_GROUP }
+} from './__generated__/singleFaceGroupQuery'
 
 type SingleFaceGroupProps = {
   faceGroupID: string

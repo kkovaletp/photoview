@@ -20,7 +20,7 @@ import MergeFaceGroupsModal, {
   MergeFaceGroupsModalState,
 } from './MergeFaceGroupsModal'
 import MoveImageFacesModal from './MoveImageFacesModal'
-import { SingleFaceGroupQuery } from './__generated__/SingleFaceGroup'
+import { SingleFaceGroupQuery } from './__generated__/singleFaceGroupQuery'
 
 type FaceGroupTitleProps = {
   faceGroup?: SingleFaceGroupQuery['faceGroup']
@@ -125,6 +125,10 @@ const FaceGroupTitle = ({ faceGroup }: FaceGroupTitleProps) => {
           refetchQueries={[
             {
               query: MY_FACES_QUERY,
+              variables: {
+                limit: 50,
+                offset: 0,
+              },
             },
           ]}
         />

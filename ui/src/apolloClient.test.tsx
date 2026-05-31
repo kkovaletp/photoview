@@ -15,6 +15,7 @@ describe('paginateCache', () => {
                 ['single'],
                 ['onlyFavorites', 'order'], // Real usage from Album.media
                 ['onlyFavorites'], // Real usage from Query.myTimeline
+                [['paginate', ['limit']]],
             ]
 
             testCases.forEach(keyArgs => {
@@ -277,7 +278,8 @@ describe('paginateCache', () => {
         })
 
         it('should handle FaceGroup.imageFaces with empty keyArgs', () => {
-            const paginateFn = paginateCache([]) // Empty keyArgs as used in real code
+            // myFaceGroups separates paginated and unbounded lists by limit
+            const paginateFn = paginateCache([['paginate', ['limit']]])
 
             const existing = [
                 { id: 'face1', __typename: 'ImageFace' },
@@ -302,7 +304,8 @@ describe('paginateCache', () => {
         })
 
         it('should handle Query.myFaceGroups pagination', () => {
-            const paginateFn = paginateCache([]) // Empty keyArgs like myFaceGroups
+            // myFaceGroups separates paginated and unbounded lists by limit
+            const paginateFn = paginateCache([['paginate', ['limit']]])
 
             const existing = [{ __ref: 'FaceGroup:1' }, { __ref: 'FaceGroup:2' }]
             const incoming = [{ __ref: 'FaceGroup:2' }, { __ref: 'FaceGroup:3' }] // One duplicate

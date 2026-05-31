@@ -108,7 +108,9 @@ const PersonMoreMenu = ({
     )
       return
     setInlineError(null)
-    detachImageFaces([face]).then(({ data }) => {
+    detachImageFaces([face], {
+      sourceFaceGroupID: face.faceGroup.id,
+    }).then(({ data }) => {
       if (!data) return
       navigate(`/people/${data.detachImageFaces.id}`)
     }).catch((e: unknown) => {

@@ -4,7 +4,8 @@ import { MockedProvider } from '@apollo/client/testing'
 import { gql } from '@apollo/client'
 import DetachImageFacesModal from './DetachImageFacesModal'
 import { MY_FACES_QUERY } from '../PeoplePage'
-import { SingleFaceGroupQuery } from './__generated__/SingleFaceGroup'
+import { SINGLE_FACE_GROUP } from './singleFaceGroupQuery'
+import { SingleFaceGroupQuery } from './__generated__/singleFaceGroupQuery'
 import { MyFacesQuery } from '../__generated__/PeoplePage'
 
 // ─── Mocks ───────────────────────────────────────────────────────────────────
@@ -136,6 +137,38 @@ function makeMyFacesMock() {
     return {
         request: { query: MY_FACES_QUERY },
         result: { data: { myFaceGroups: [g1] } },
+    }
+}
+
+function makeMyFacesPageRefetchMock() {
+    return {
+        request: {
+            query: MY_FACES_QUERY,
+            variables: {
+                limit: 50,
+                offset: 0,
+            },
+        },
+        result: makeMyFacesMock().result,
+    }
+}
+
+function makeSingleFaceGroupMock(id: string) {
+    return {
+        request: {
+            query: SINGLE_FACE_GROUP,
+            variables: { id, limit: 200, offset: 0 },
+        },
+        result: {
+            data: {
+                faceGroup: {
+                    __typename: 'FaceGroup',
+                    id,
+                    label: id === faceGroup.id ? faceGroup.label : null,
+                    imageFaces: [],
+                },
+            },
+        },
     }
 }
 
@@ -278,7 +311,12 @@ describe('DetachImageFacesModal', () => {
 
     test('executes mutation with selected face IDs, then closes and navigates', async () => {
         const [f1] = faceGroup.imageFaces
-        const mocks = [makeDetachSuccessMock([f1.id], 'new-group-1'), makeMyFacesMock()]
+        const mocks = [
+            makeDetachSuccessMock([f1.id], 'new-group-1'),
+            makeMyFacesPageRefetchMock(),
+            makeSingleFaceGroupMock('new-group-1'),
+            makeSingleFaceGroupMock(faceGroup.id),
+        ]
         renderModal({}, mocks)
 
         const detachBtn = screen.getByRole('button', { name: /Detach image faces/i })
@@ -295,7 +333,12 @@ describe('DetachImageFacesModal', () => {
 
     test('uses preselected faces when selectedImageFaces prop is provided', async () => {
         const preselected = [faceGroup.imageFaces[1]]
-        const mocks = [makeDetachSuccessMock([preselected[0].id], 'new-group-2'), makeMyFacesMock()]
+        const mocks = [
+            makeDetachSuccessMock([preselected[0].id], 'new-group-2'),
+            makeMyFacesPageRefetchMock(),
+            makeSingleFaceGroupMock('new-group-2'),
+            makeSingleFaceGroupMock(faceGroup.id),
+        ]
         renderModal({ selectedImageFaces: preselected }, mocks)
 
         // Button should already be enabled with preselected faces

@@ -4,7 +4,7 @@ import { useNavigate } from 'react-router'
 import SelectFaceGroupTable from './SelectFaceGroupTable'
 import SelectImageFacesTable from './SelectImageFacesTable'
 import { MY_FACES_QUERY } from '../PeoplePage'
-import { SingleFaceGroupQuery } from './__generated__/SingleFaceGroup'
+import { SINGLE_FACE_GROUP } from './singleFaceGroupQuery'
 import {
   MyFacesQuery,
   MyFacesQueryVariables
@@ -16,6 +16,7 @@ import {
 } from './__generated__/MoveImageFacesModal'
 import { useTranslation } from 'react-i18next'
 import Modal, { ModalAction } from '../../../primitives/Modal'
+import { SingleFaceGroupQuery } from './__generated__/singleFaceGroupQuery'
 
 const MOVE_IMAGE_FACES_MUTATION = gql`
   mutation moveImageFaces($faceIDs: [ID!]!, $destFaceGroupID: ID!) {
@@ -66,7 +67,6 @@ const MoveImageFacesModal = ({
     MoveImageFacesMutationVariables
   >(MOVE_IMAGE_FACES_MUTATION, {
     errorPolicy: 'all',
-    refetchQueries: [{ query: MY_FACES_QUERY }],
   })
 
   const [loadFaceGroups, { data: faceGroupsData, error: loadError }] = useLazyQuery<
@@ -115,6 +115,36 @@ const MoveImageFacesModal = ({
         faceIDs,
         destFaceGroupID: destinationFaceGroupId,
       },
+      refetchQueries: ({ data, errors }) => {
+        if (!data?.moveImageFaces || (errors?.length ?? 0) > 0) return []
+
+        return [
+          {
+            query: MY_FACES_QUERY,
+            variables: {
+              limit: 50,
+              offset: 0,
+            },
+          },
+          {
+            query: SINGLE_FACE_GROUP,
+            variables: {
+              id: destinationFaceGroupId,
+              limit: 200,
+              offset: 0,
+            },
+          },
+          {
+            query: SINGLE_FACE_GROUP,
+            variables: {
+              id: faceGroup.id,
+              limit: 200,
+              offset: 0,
+            },
+          },
+        ]
+      },
+      awaitRefetchQueries: true,
     }).then(({ data, errors }) => {
       if (!data?.moveImageFaces || (errors?.length ?? 0) > 0) return
       setOpen(false)
@@ -152,19 +182,24 @@ const MoveImageFacesModal = ({
     } else if (loadError) {
       table = (
         <div className="space-y-2 text-sm">
-          <div className="text-red-600 dark:text-red-400">
+          <div
+            role="alert"
+            className="mb-2 rounded border border-red-300 bg-red-50 dark:bg-dark-900/50 px-3 py-2 text-sm text-red-800 dark:text-red-300"
+          >
             {t(
               'people_page.modal.move_image_faces.destination_face_group_table.load_error',
               'Failed to load face groups'
             )}
+            <div className="mt-2">
+              <button
+                type="button"
+                className="underline"
+                onClick={() => loadFaceGroups()}
+              >
+                {t('general.action.retry', 'Retry')}
+              </button>
+            </div>
           </div>
-          <button
-            type="button"
-            className="underline"
-            onClick={() => loadFaceGroups()}
-          >
-            {t('general.action.retry', 'Retry')}
-          </button>
         </div>
       )
     } else {
@@ -187,7 +222,6 @@ const MoveImageFacesModal = ({
   const inlineError =
     errMessage ??
     moveError?.message ??
-    loadError?.message ??
     undefined
 
   const handleClose = () => { if (!isMoving) setOpen(false) }

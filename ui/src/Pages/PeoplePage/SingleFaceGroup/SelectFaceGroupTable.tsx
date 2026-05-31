@@ -12,7 +12,7 @@ import {
 } from '../../../primitives/Table'
 import FaceCircleImage from '../FaceCircleImage'
 import { MyFacesQuery } from '../__generated__/PeoplePage'
-import { SingleFaceGroupQuery } from './__generated__/SingleFaceGroup'
+import { SingleFaceGroupQuery } from './__generated__/singleFaceGroupQuery'
 
 const FaceCircleWrapper = styled.div<{ $selected: boolean }>`
   display: inline-block;

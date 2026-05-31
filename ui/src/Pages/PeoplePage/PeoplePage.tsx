@@ -269,8 +269,31 @@ export const PeoplePage = () => {
     MergeFaceGroupsModalState.Closed
   )
 
-  const [recognizeUnlabeled, { loading: recognizeUnlabeledLoading }] =
-    useMutation<RecognizeUnlabeledFacesMutation>(RECOGNIZE_UNLABELED_FACES_MUTATION)
+  const [
+    recognizeUnlabeled,
+    {
+      loading: recognizeUnlabeledLoading,
+      error: recognizeUnlabeledError,
+    },
+  ] = useMutation<RecognizeUnlabeledFacesMutation>(
+    RECOGNIZE_UNLABELED_FACES_MUTATION,
+    {
+      errorPolicy: 'all',
+      refetchQueries: ({ data, errors }) =>
+        data?.recognizeUnlabeledFaces && (errors?.length ?? 0) === 0
+          ? [
+            {
+              query: MY_FACES_QUERY,
+              variables: {
+                limit: 50,
+                offset: 0,
+              },
+            },
+          ]
+          : [],
+      awaitRefetchQueries: true,
+    }
+  )
 
   const { containerElem, loadingMore } = useScrollPagination<MyFacesQuery>({
     loading,
@@ -299,6 +322,10 @@ export const PeoplePage = () => {
       refetchQueries={[
         {
           query: MY_FACES_QUERY,
+          variables: {
+            limit: 50,
+            offset: 0,
+          },
         },
       ]}
     />
@@ -312,7 +339,7 @@ export const PeoplePage = () => {
             aria-label={t('people_page.recognize_unlabeled_faces_button', 'Recognize unlabeled faces')}
             disabled={recognizeUnlabeledLoading}
             onClick={() => {
-              recognizeUnlabeled()
+              recognizeUnlabeled().catch(() => undefined)
             }}
           >
             {t(
@@ -332,7 +359,14 @@ export const PeoplePage = () => {
           </Button>
         </li>
       </ul>
-
+      {recognizeUnlabeledError && (
+        <div
+          role="alert"
+          className="mb-2 rounded border border-red-300 bg-red-50 dark:bg-dark-900/50 px-3 py-2 text-sm text-red-800 dark:text-red-300"
+        >
+          {recognizeUnlabeledError.message}
+        </div>
+      )}
       <FaceGroupsWrapper ref={containerElem}>{faces}</FaceGroupsWrapper>
       <PaginateLoader
         active={loadingMore}

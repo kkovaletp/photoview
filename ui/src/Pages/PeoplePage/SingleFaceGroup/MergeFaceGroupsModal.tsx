@@ -14,7 +14,7 @@ import {
   CombineFacesMutation,
   CombineFacesMutationVariables,
 } from './__generated__/MergeFaceGroupsModal'
-import { SingleFaceGroupQuery } from './__generated__/SingleFaceGroup'
+import { SingleFaceGroupQuery } from './__generated__/singleFaceGroupQuery'
 import { SINGLE_FACE_GROUP } from './singleFaceGroupQuery'
 
 export const COMBINE_FACES_MUTATION = gql`

@@ -2,7 +2,7 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest'
 import SelectFaceGroupTable from './SelectFaceGroupTable'
 import { MyFacesQuery } from '../__generated__/PeoplePage'
-import { SingleFaceGroupQuery } from './__generated__/SingleFaceGroup'
+import { SingleFaceGroupQuery } from './__generated__/singleFaceGroupQuery'
 
 // Mock react-i18next
 vi.mock('react-i18next', () => ({

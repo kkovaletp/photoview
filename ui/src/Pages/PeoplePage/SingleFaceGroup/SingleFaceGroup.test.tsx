@@ -1,5 +1,6 @@
 import { screen, waitFor } from '@testing-library/react'
-import SingleFaceGroup, { SINGLE_FACE_GROUP } from './SingleFaceGroup'
+import SingleFaceGroup from './SingleFaceGroup'
+import { SINGLE_FACE_GROUP } from './singleFaceGroupQuery'
 import { renderWithProviders } from '../../../helpers/testUtils'
 import { MY_FACES_QUERY } from '../PeoplePage'
 
