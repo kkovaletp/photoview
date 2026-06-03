@@ -110,6 +110,12 @@ const PersonMoreMenu = ({
     setInlineError(null)
     detachImageFaces([face], {
       sourceFaceGroupID: face.faceGroup.id,
+      additionalRefetchQueries: [
+        {
+          query: SIDEBAR_MEDIA_QUERY,
+          variables: { id: face.media.id },
+        },
+      ],
     }).then(({ data }) => {
       if (!data) return
       navigate(`/people/${data.detachImageFaces.id}`)

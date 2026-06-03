@@ -1,4 +1,4 @@
-import { gql, useMutation } from '@apollo/client'
+import { gql, PureQueryOptions, useMutation } from '@apollo/client'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router'
@@ -24,6 +24,7 @@ const DETACH_IMAGE_FACES_MUTATION = gql`
 
 type DetachImageFacesOptions = {
   sourceFaceGroupID?: string
+  additionalRefetchQueries?: PureQueryOptions[]
 }
 
 export const useDetachImageFaces = () => {
@@ -84,7 +85,7 @@ export const useDetachImageFaces = () => {
           })
         }
 
-        return queries
+        return [...queries, ...(options.additionalRefetchQueries ?? [])]
       },
       awaitRefetchQueries: true,
     })

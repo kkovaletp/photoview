@@ -67,6 +67,8 @@ const MergeFaceGroupsModal = ({
     refetch: refetchFaceGroups,
   } = useQuery<MyFacesQuery, MyFacesQueryVariables>(MY_FACES_QUERY, {
     skip: state === MergeFaceGroupsModalState.Closed,
+    variables: { limit: 50, offset: 0 },
+    fetchPolicy: 'network-only',
   })
   const [combineFacesMutation, { error: combineError, reset: resetCombine }] = useMutation<
     CombineFacesMutation,
@@ -179,6 +181,15 @@ const MergeFaceGroupsModal = ({
       variables: {
         srcIDs: sourceGroupIDs,
         destID: selectedDestinationFaceGroup.id,
+      },
+      update(cache, { data }) {
+        if (!data?.combineFaceGroups) return
+        // Evict merged-away source groups so stale references cannot survive in
+        // the normalized cache and produce invalid IDs on subsequent operations.
+        for (const srcID of sourceGroupIDs) {
+          cache.evict({ id: cache.identify({ __typename: 'FaceGroup', id: srcID }) })
+        }
+        cache.gc()
       },
       refetchQueries: ({ data, errors }) =>
         data?.combineFaceGroups && (errors?.length ?? 0) === 0

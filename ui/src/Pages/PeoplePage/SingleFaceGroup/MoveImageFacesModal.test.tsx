@@ -118,9 +118,6 @@ const MOVE_IMAGE_FACES_MUTATION = gql`
             destinationFaceGroupID: $destFaceGroupID
         ) {
             id
-            imageFaces {
-                id
-            }
         }
     }
 `
@@ -209,7 +206,6 @@ function makeMoveMock(faceIDs: string[], destFaceGroupID: string) {
                 moveImageFaces: {
                     __typename: 'FaceGroup',
                     id: destFaceGroupID,
-                    imageFaces: faceIDs.map(id => ({ __typename: 'ImageFace', id })),
                 },
             },
         },
@@ -584,7 +580,6 @@ describe('MoveImageFacesModal', () => {
                         moveImageFaces: {
                             __typename: 'FaceGroup',
                             id: destGroup1.id,
-                            imageFaces: [{ __typename: 'ImageFace', id: faceId }],
                         },
                     },
                     errors: [new GraphQLError('GraphQL error')],

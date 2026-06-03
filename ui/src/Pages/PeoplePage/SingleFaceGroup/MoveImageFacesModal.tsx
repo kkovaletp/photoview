@@ -25,9 +25,6 @@ const MOVE_IMAGE_FACES_MUTATION = gql`
       destinationFaceGroupID: $destFaceGroupID
     ) {
       id
-      imageFaces {
-        id
-      }
     }
   }
 `

@@ -202,7 +202,8 @@ describe('paginateCache', () => {
     })
 
     describe('Error Handling', () => {
-        it('should throw descriptive error for missing or invalid paginate argument', () => {
+        it('should warn and preserve existing data for missing or invalid paginate argument', () => {
+            const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => { })
             const existing = [{ id: '1' }]
             const incoming = [{ id: '2' }]
 
@@ -213,10 +214,16 @@ describe('paginateCache', () => {
             ]
 
             invalidCases.forEach(context => {
-                expect(() => {
-                    paginateFn.merge(existing, incoming, context as any)
-                }).toThrow('Paginate argument is missing for query: testField')
+                consoleWarnSpy.mockClear()
+                const result = paginateFn.merge(existing, incoming, context as any)
+                expect(consoleWarnSpy).toHaveBeenCalledWith(
+                    expect.stringContaining('Paginate argument is missing for field: testField')
+                )
+                // Existing cache must be preserved — not overwritten with incomplete data
+                expect(result).toEqual(existing)
             })
+
+            consoleWarnSpy.mockRestore()
         })
     })
 

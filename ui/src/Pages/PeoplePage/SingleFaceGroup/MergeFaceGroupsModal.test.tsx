@@ -106,7 +106,10 @@ const mockFaceGroups: MyFacesQuery['myFaceGroups'] = [
 ]
 
 const myFacesMock = {
-    request: { query: MY_FACES_QUERY },
+    request: {
+        query: MY_FACES_QUERY,
+        variables: { limit: 50, offset: 0 },
+    },
     result: { data: { myFaceGroups: mockFaceGroups } },
 }
 
@@ -469,7 +472,10 @@ describe('MergeFaceGroupsModal', () => {
     describe('error handling', () => {
         test('shows load error and retries loading face groups', async () => {
             const loadErrorMock = {
-                request: { query: MY_FACES_QUERY },
+                request: {
+                    query: MY_FACES_QUERY,
+                    variables: { limit: 50, offset: 0 },
+                },
                 error: new Error('Failed to load face groups'),
             }
             renderModal({}, [loadErrorMock, myFacesMock])

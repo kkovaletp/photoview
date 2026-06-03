@@ -330,7 +330,7 @@ describe('MediaSidebarPeople', () => {
             expect(confirmSpy).toHaveBeenCalledWith('Are you sure you want to detach this image?')
             expect(mockDetachImageFaces).toHaveBeenCalledWith(
                 [expect.objectContaining({ id: 'face-1' })],
-                { sourceFaceGroupID: 'group-1' }
+                expect.objectContaining({ sourceFaceGroupID: 'group-1' })
             )
         })
 
