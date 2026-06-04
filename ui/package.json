@@ -21,7 +21,7 @@
     "test:ci": "CI=true vitest --run --coverage",
     "genSchemaTypes": "apollo client:codegen --target=typescript --globalTypesFile=src/__generated__/globalTypes.ts --passthroughCustomScalars && prettier --write */**/__generated__/*.ts",
     "extractTranslations": "i18next-cli extract; i18next-cli types",
-    "extractTranslations:ci": "i18next-cli extract --ci --quiet",
+    "extractTranslations:ci": "i18next-cli extract --ci --quiet; i18next-cli types --ci --quiet",
     "lintTranslations": "i18next-cli lint"
   },
   "engines": {
@@ -118,5 +118,14 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "allowScripts": {
+    "@swc/core@1.15.40": true,
+    "esbuild@0.21.5": true,
+    "esbuild@0.28.0": true,
+    "fsevents@2.3.3": true,
+    "core-js": false,
+    "core-js-pure": false,
+    "yarn": false
   }
 }
