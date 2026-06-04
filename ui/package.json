@@ -21,7 +21,7 @@
     "test:ci": "CI=true vitest --run --coverage",
     "genSchemaTypes": "apollo client:codegen --target=typescript --globalTypesFile=src/__generated__/globalTypes.ts --passthroughCustomScalars && prettier --write */**/__generated__/*.ts",
     "extractTranslations": "i18next-cli extract; i18next-cli types",
-    "extractTranslations:ci": "i18next-cli extract --ci --quiet",
+    "extractTranslations:ci": "i18next-cli extract --ci --quiet; i18next-cli types --ci --quiet",
     "lintTranslations": "i18next-cli lint"
   },
   "engines": {
@@ -46,7 +46,7 @@
     "dayjs": "^1.11.20",
     "dompurify": "^3.4.5",
     "graphql-ws": "^6.0.8",
-    "i18next": "26.2.0",
+    "i18next": "26.3.1",
     "js-cookie": "^3.0.7",
     "luxon": "^3.7.2",
     "mapbox-gl": "~3.24.0",
@@ -89,7 +89,7 @@
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^7.1.1",
     "globals": "^17.6.0",
-    "i18next-cli": "^1.58.0",
+    "i18next-cli": "^1.60.0",
     "jsdom": "^26.1.0",
     "nodemon": "^3.1.14",
     "prettier": "^3.8.3",
@@ -118,5 +118,14 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "allowScripts": {
+    "@swc/core@1.15.40": true,
+    "esbuild@0.21.5": true,
+    "esbuild@0.28.0": true,
+    "fsevents@2.3.3": true,
+    "core-js": false,
+    "core-js-pure": false,
+    "yarn": false
   }
 }
