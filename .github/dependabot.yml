@@ -39,6 +39,9 @@ updates:
       tailwindcss:
         patterns:
           - "*tailwindcss*"
+      vitest:
+        patterns:
+          - "*vitest*"
 
   # Maintain dependencies for Dockerfiles
   - package-ecosystem: "docker"
