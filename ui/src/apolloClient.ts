@@ -313,7 +313,7 @@ export const paginateCache = (keyArgs: KeySpecifier) =>
       // moveImageFaces returning imageFaces { id }) write to a paginated field
       // without a pagination context. Preserve existing paginated data to avoid
       // overwriting the cache with incomplete mutation data.
-      return existing !== undefined ? existing : (incoming ?? [])
+      return existing ?? (incoming ?? [])
     }
   },
 } as PaginateCacheType)

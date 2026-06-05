@@ -1,5 +1,5 @@
 import { gql, PureQueryOptions, useMutation, useQuery } from '@apollo/client'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router'
 import { isNil } from '../../../helpers/utils'
@@ -101,29 +101,10 @@ const MergeFaceGroupsModal = ({
   )
 
   const isOpen = state !== MergeFaceGroupsModalState.Closed
-
-  const selectedDestinationID = selectedDestinationFaceGroup?.id
-
-  useEffect(() => {
-    if (!preselectedFaceGroup) return
-    if (preselectedRole !== 'destination') return
-    if (state !== MergeFaceGroupsModalState.SelectSources) return
-
-    const loadedDestination = data?.myFaceGroups.find(
-      faceGroup => faceGroup.id === preselectedFaceGroup.id
-    )
-
-    if (!loadedDestination) return
-    if (selectedDestinationID === loadedDestination.id) return
-
-    setSelectedDestinationFaceGroup(loadedDestination)
-  }, [
-    data?.myFaceGroups,
-    preselectedFaceGroup,
-    preselectedRole,
-    selectedDestinationID,
-    state,
-  ])
+  const effectiveDestinationFaceGroup: FaceGroupSelection | null =
+    preselectedRole === 'destination' && preselectedFaceGroup && data?.myFaceGroups
+      ? (data.myFaceGroups.find(fg => fg.id === preselectedFaceGroup.id) ?? selectedDestinationFaceGroup)
+      : selectedDestinationFaceGroup
 
   const closeModal = () => {
     if (isMerging) return
@@ -198,7 +179,7 @@ const MergeFaceGroupsModal = ({
   }
 
   const goNext = () => {
-    if (isNil(selectedDestinationFaceGroup)) {
+    if (isNil(effectiveDestinationFaceGroup)) {
       throw new Error('No selected face group')
     }
 
@@ -207,7 +188,7 @@ const MergeFaceGroupsModal = ({
   }
 
   const mergeFaceGroups = () => {
-    if (isNil(selectedDestinationFaceGroup)) {
+    if (isNil(effectiveDestinationFaceGroup)) {
       throw new Error('No selected destination face group')
     }
 
@@ -223,7 +204,7 @@ const MergeFaceGroupsModal = ({
     combineFacesMutation({
       variables: {
         srcIDs: sourceGroupIDs,
-        destID: selectedDestinationFaceGroup.id,
+        destID: effectiveDestinationFaceGroup.id,
       },
       update(cache, { data }) {
         if (!data?.combineFaceGroups) return
@@ -242,7 +223,7 @@ const MergeFaceGroupsModal = ({
             {
               query: SINGLE_FACE_GROUP,
               variables: {
-                id: selectedDestinationFaceGroup.id,
+                id: effectiveDestinationFaceGroup.id,
                 limit: 200,
                 offset: 0,
               },
@@ -255,7 +236,7 @@ const MergeFaceGroupsModal = ({
 
       setInlineError(undefined)
       setState(MergeFaceGroupsModalState.Closed)
-      navigate(`/people/${selectedDestinationFaceGroup.id}`)
+      navigate(`/people/${effectiveDestinationFaceGroup.id}`)
     }).catch((e: unknown) => {
       const message =
         e instanceof Error && e.message.trim().length > 0
@@ -277,7 +258,7 @@ const MergeFaceGroupsModal = ({
     label: t('people_page.modal.action.next', 'Next'),
     onClick: () => goNext(),
     variant: 'positive',
-    disabled: isNil(selectedDestinationFaceGroup),
+    disabled: isNil(effectiveDestinationFaceGroup),
   }
 
   const mergeAction: ModalAction = {
@@ -286,7 +267,7 @@ const MergeFaceGroupsModal = ({
     onClick: () => mergeFaceGroups(),
     variant: 'positive',
     disabled:
-      isNil(selectedDestinationFaceGroup) ||
+      isNil(effectiveDestinationFaceGroup) ||
       sourceGroupIDs.length === 0 ||
       isMerging,
   }
@@ -387,7 +368,7 @@ const MergeFaceGroupsModal = ({
         'people_page.modal.merge_face_groups.sources_table.title',
         'Select one or more source faces to merge into:'
       ) +
-      ` ${selectedDestinationFaceGroup?.label ??
+      ` ${effectiveDestinationFaceGroup?.label ??
       t('people_page.face_group.unlabeled', 'Unlabeled') ??
       'Unlabeled'
       }`,
@@ -408,7 +389,7 @@ const MergeFaceGroupsModal = ({
       }
 
       if (state === MergeFaceGroupsModalState.SelectSources) {
-        return faceGroup.id !== selectedDestinationFaceGroup?.id
+        return faceGroup.id !== effectiveDestinationFaceGroup?.id
       }
 
       return true
@@ -417,7 +398,7 @@ const MergeFaceGroupsModal = ({
   const selectedFaceGroupsForTable: Set<FaceGroupSelection | null> = new Set(
     filteredFaceGroups.filter(faceGroup =>
       state === MergeFaceGroupsModalState.SelectDestination
-        ? faceGroup.id === selectedDestinationFaceGroup?.id
+        ? faceGroup.id === effectiveDestinationFaceGroup?.id
         : selectedSourceFaceGroupIDs.has(faceGroup.id)
     )
   )
