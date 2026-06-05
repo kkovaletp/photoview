@@ -80,6 +80,49 @@ func getUserOwnedImageFaces(tx *gorm.DB, user *models.User, imageFaceIDs []int) 
 	return userOwnedImageFaces, nil
 }
 
+func faceGroupsWouldContainDuplicateMedia(db *gorm.DB, destinationFaceGroupID int, sourceFaceGroupIDs []int) (bool, error) {
+	faceGroupIDs := append([]int{destinationFaceGroupID}, sourceFaceGroupIDs...)
+
+	duplicateMediaQuery := db.
+		Table("image_faces").
+		Select("media_id").
+		Where("face_group_id IN ?", faceGroupIDs).
+		Group("media_id").
+		Having("COUNT(*) > 1")
+
+	var count int64
+	if err := db.
+		Table("(?) AS duplicate_media", duplicateMediaQuery).
+		Count(&count).Error; err != nil {
+		return false, err
+	}
+
+	return count > 0, nil
+}
+
+func movingImageFacesWouldCreateDuplicateMedia(db *gorm.DB, destinationFaceGroupID int, imageFaceIDs []int) (bool, error) {
+	duplicateMediaQuery := db.
+		Table("image_faces AS candidate").
+		Select("candidate.media_id").
+		Where(
+			"(candidate.face_group_id = ? AND candidate.id NOT IN ?) OR candidate.id IN ?",
+			destinationFaceGroupID,
+			imageFaceIDs,
+			imageFaceIDs,
+		).
+		Group("candidate.media_id").
+		Having("COUNT(*) > 1")
+
+	var count int64
+	if err := db.
+		Table("(?) AS duplicate_media", duplicateMediaQuery).
+		Count(&count).Error; err != nil {
+		return false, err
+	}
+
+	return count > 0, nil
+}
+
 func deleteEmptyFaceGroups(sourceFaceGroups []*models.FaceGroup, tx *gorm.DB) error {
 	for _, faceGroup := range sourceFaceGroups {
 		var count int64

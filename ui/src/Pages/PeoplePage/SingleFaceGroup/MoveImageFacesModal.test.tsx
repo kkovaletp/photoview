@@ -603,6 +603,41 @@ describe('MoveImageFacesModal', () => {
                 expect(screen.getByRole('alert')).toHaveTextContent(/GraphQL error/i)
             })
         })
+
+        test('stays open and shows duplicate image error when destination already contains selected media', async () => {
+            const faceId = sourceFaceGroup.imageFaces[0].id
+            const duplicateErrorMock = {
+                request: {
+                    query: MOVE_IMAGE_FACES_MUTATION,
+                    variables: { faceIDs: [faceId], destFaceGroupID: destGroup1.id },
+                },
+                result: {
+                    errors: [
+                        new GraphQLError(
+                            'cannot move faces because the destination would contain duplicate images'
+                        ),
+                    ],
+                },
+            }
+
+            renderModal({}, [makeMyFacesMock(), duplicateErrorMock])
+
+            fireEvent.click(screen.getByTestId(`image-face-row-${faceId}`))
+            fireEvent.click(screen.getByRole('button', { name: /Next/i }))
+
+            await waitFor(() =>
+                expect(screen.getByTestId('select-face-group-table')).toBeInTheDocument()
+            )
+
+            fireEvent.click(screen.getByTestId(`face-group-row-${destGroup1.id}`))
+            fireEvent.click(screen.getByRole('button', { name: /Move image faces/i }))
+
+            await waitFor(() => {
+                expect(defaultSetOpen).not.toHaveBeenCalled()
+                expect(mockNavigate).not.toHaveBeenCalled()
+                expect(screen.getByRole('alert')).toHaveTextContent(/duplicate images/i)
+            })
+        })
     })
 
     // ── preselectedImageFaces ──────────────────────────────────────────────────

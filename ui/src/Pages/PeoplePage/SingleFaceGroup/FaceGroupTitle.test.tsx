@@ -25,6 +25,7 @@ vi.mock('./MergeFaceGroupsModal', () => ({
         ),
     MergeFaceGroupsModalState: {
         Closed: 'closed',
+        SelectPreselectedRole: 'select_preselected_role',
         SelectDestination: 'select_destination',
         SelectSources: 'select_sources',
     },

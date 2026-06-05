@@ -93,6 +93,9 @@ const FaceGroupTitle = ({ faceGroup }: FaceGroupTitleProps) => {
         onBlur={event => {
           if (
             event.currentTarget.parentElement?.contains(
+              // Even while Sonar reports "This assertion is unnecessary since the receiver accepts
+              // the original type of the expression", it is actually needed to satisfy TypeScript
+              // that event.relatedTarget can be a Node or null, as opposed to the default HTMLInputElement | null
               event.relatedTarget as Node | null
             )
           ) {
@@ -121,7 +124,7 @@ const FaceGroupTitle = ({ faceGroup }: FaceGroupTitleProps) => {
         <MergeFaceGroupsModal
           state={mergeModalState}
           setState={setMergeModalState}
-          preselectedDestinationFaceGroup={faceGroup}
+          preselectedFaceGroup={faceGroup}
           refetchQueries={[
             {
               query: MY_FACES_QUERY,
@@ -164,7 +167,7 @@ const FaceGroupTitle = ({ faceGroup }: FaceGroupTitleProps) => {
           <li>
             <Button disabled={!faceGroup} onClick={() => {
               if (!faceGroup) return
-              setMergeModalState(MergeFaceGroupsModalState.SelectDestination)
+              setMergeModalState(MergeFaceGroupsModalState.SelectPreselectedRole)
             }}>
               {t('people_page.action_label.merge_face', 'Merge face')}
             </Button>

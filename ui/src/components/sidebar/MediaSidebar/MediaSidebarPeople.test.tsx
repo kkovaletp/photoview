@@ -64,9 +64,9 @@ vi.mock('../../../Pages/PeoplePage/PeoplePage', () => ({
 // Mock MergeFaceGroupsModal
 vi.mock('../../../Pages/PeoplePage/SingleFaceGroup/MergeFaceGroupsModal', () => ({
     __esModule: true,
-    default: ({ state, setState, preselectedDestinationFaceGroup }: any) => (
+    default: ({ state, setState, preselectedFaceGroup }: any) => (
         <div
-            data-testid={`merge-modal-${preselectedDestinationFaceGroup?.id}`}
+            data-testid={`merge-modal-${preselectedFaceGroup?.id}`}
             data-state={state}
         >
             {state !== 'closed' && (
@@ -76,6 +76,7 @@ vi.mock('../../../Pages/PeoplePage/SingleFaceGroup/MergeFaceGroupsModal', () => 
     ),
     MergeFaceGroupsModalState: {
         Closed: 'closed',
+        SelectPreselectedRole: 'select_preselected_role',
         SelectDestination: 'select_destination',
         SelectSources: 'select_sources',
     },
@@ -293,7 +294,7 @@ describe('MediaSidebarPeople', () => {
         await waitFor(() => {
             expect(screen.getByTestId('merge-modal-group-1')).toHaveAttribute(
                 'data-state',
-                'select_destination'
+                'select_preselected_role'
             )
         })
     })
@@ -311,6 +312,24 @@ describe('MediaSidebarPeople', () => {
         await waitFor(() => {
             expect(screen.getByTestId('move-modal-group-1')).toHaveAttribute('data-open', 'true')
         })
+    })
+
+    it('should not lock body scrolling when the people more-menu is opened', async () => {
+        const media = createMockMedia(threeDefaultFaces)
+        const user = userEvent.setup()
+
+        document.body.className = ''
+
+        renderWithProviders(<MediaSidebarPeople media={media} />)
+
+        await user.click(screen.getAllByRole('button')[0])
+
+        await waitFor(() => {
+            expect(screen.getByText('Merge face')).toBeInTheDocument()
+        })
+
+        expect(document.body).not.toHaveClass('overflow-hidden')
+        expect(document.body).not.toHaveClass('overflow-y-hidden')
     })
 
     // ── Detach image – success paths ───────────────────────────────────────────

@@ -14,7 +14,6 @@ import {
   CombineFacesMutation,
   CombineFacesMutationVariables,
 } from './__generated__/MergeFaceGroupsModal'
-import { SingleFaceGroupQuery } from './__generated__/singleFaceGroupQuery'
 import { SINGLE_FACE_GROUP } from './singleFaceGroupQuery'
 
 export const COMBINE_FACES_MUTATION = gql`
@@ -30,17 +29,21 @@ export const COMBINE_FACES_MUTATION = gql`
 
 export enum MergeFaceGroupsModalState {
   Closed = 'closed',
+  SelectPreselectedRole = 'select_preselected_role',
   SelectDestination = 'select_destination',
   SelectSources = 'select_sources',
+}
+
+type FaceGroupSelection = {
+  __typename?: 'FaceGroup'
+  id: string
+  label?: string | null
 }
 
 type MergeFaceGroupsModalProps = {
   state: MergeFaceGroupsModalState
   setState(state: MergeFaceGroupsModalState): void
-  preselectedDestinationFaceGroup?: {
-    __typename?: 'FaceGroup'
-    id: string
-  }
+  preselectedFaceGroup?: FaceGroupSelection
   refetchQueries: PureQueryOptions[]
 }
 
@@ -49,27 +52,30 @@ type StateContent = {
   searchTitle: string
 }
 
-type MyFaceGroupsOrSingleFaceGroupOrNull = MyFacesQuery['myFaceGroups'][0] | SingleFaceGroupQuery['faceGroup'] | null
+type PreselectedFaceGroupRole = 'source' | 'destination' | null
 
 const MergeFaceGroupsModal = ({
   state,
   setState,
-  preselectedDestinationFaceGroup,
+  preselectedFaceGroup,
   refetchQueries,
 }: MergeFaceGroupsModalProps) => {
   const { t } = useTranslation()
-
   const navigate = useNavigate()
+
   const {
     data,
     loading: faceGroupsLoading,
     error: faceGroupsError,
     refetch: refetchFaceGroups,
   } = useQuery<MyFacesQuery, MyFacesQueryVariables>(MY_FACES_QUERY, {
-    skip: state === MergeFaceGroupsModalState.Closed,
+    skip:
+      state === MergeFaceGroupsModalState.Closed ||
+      state === MergeFaceGroupsModalState.SelectPreselectedRole,
     variables: { limit: 50, offset: 0 },
     fetchPolicy: 'network-only',
   })
+
   const [combineFacesMutation, { error: combineError, reset: resetCombine }] = useMutation<
     CombineFacesMutation,
     CombineFacesMutationVariables
@@ -77,103 +83,140 @@ const MergeFaceGroupsModal = ({
     errorPolicy: 'all',
   })
 
-  // The destination face group
-  const [selectedDestinationFaceGroup, setSelectedDestinationFaceGroup] =
-    useState<MyFaceGroupsOrSingleFaceGroupOrNull>(null)
+  const [preselectedRole, setPreselectedRole] =
+    useState<PreselectedFaceGroupRole>(null)
 
-  // The set of currently selected face groups, on the modal page
-  const [selectedFaceGroups, setSelectedFaceGroups] = useState<
-    Set<MyFaceGroupsOrSingleFaceGroupOrNull>
-  >(new Set())
+  const [selectedDestinationFaceGroup, setSelectedDestinationFaceGroup] =
+    useState<FaceGroupSelection | null>(null)
+
+  const [selectedSourceFaceGroupIDs, setSelectedSourceFaceGroupIDs] =
+    useState<Set<string>>(new Set())
 
   const [inlineError, setInlineError] = useState<string | undefined>(undefined)
   const [isMerging, setIsMerging] = useState(false)
 
-  const addSelectedFaceGroup = (
-    faceGroup: MyFaceGroupsOrSingleFaceGroupOrNull
-  ) => setSelectedFaceGroups(prev => new Set(prev).add(faceGroup))
-  const removeSelectedFaceGroup = (
-    faceGroup: MyFaceGroupsOrSingleFaceGroupOrNull
-  ) => {
-    setSelectedFaceGroups(prev => {
-      const s = new Set(prev)
-      s.delete(faceGroup)
-      return s
+  const modalTitle = t(
+    'people_page.modal.merge_face_groups.title',
+    'Merge Face Groups'
+  )
+
+  const isOpen = state !== MergeFaceGroupsModalState.Closed
+
+  const selectedDestinationID = selectedDestinationFaceGroup?.id
+
+  useEffect(() => {
+    if (!preselectedFaceGroup) return
+    if (preselectedRole !== 'destination') return
+    if (state !== MergeFaceGroupsModalState.SelectSources) return
+
+    const loadedDestination = data?.myFaceGroups.find(
+      faceGroup => faceGroup.id === preselectedFaceGroup.id
+    )
+
+    if (!loadedDestination) return
+    if (selectedDestinationID === loadedDestination.id) return
+
+    setSelectedDestinationFaceGroup(loadedDestination)
+  }, [
+    data?.myFaceGroups,
+    preselectedFaceGroup,
+    preselectedRole,
+    selectedDestinationID,
+    state,
+  ])
+
+  const closeModal = () => {
+    if (isMerging) return
+
+    setState(MergeFaceGroupsModalState.Closed)
+    setInlineError(undefined)
+    resetCombine?.()
+    setPreselectedRole(null)
+    setSelectedDestinationFaceGroup(null)
+    setSelectedSourceFaceGroupIDs(new Set())
+  }
+
+  const cancelAction: ModalAction = {
+    key: 'cancel',
+    label: t('general.action.cancel', 'Cancel'),
+    onClick: closeModal,
+    disabled: isMerging,
+  }
+
+  const choosePreselectedAsDestination = () => {
+    if (!preselectedFaceGroup) return
+
+    setInlineError(undefined)
+    resetCombine?.()
+    setPreselectedRole('destination')
+    setSelectedDestinationFaceGroup(preselectedFaceGroup)
+    setSelectedSourceFaceGroupIDs(new Set())
+    setState(MergeFaceGroupsModalState.SelectSources)
+  }
+
+  const choosePreselectedAsSource = () => {
+    if (!preselectedFaceGroup) return
+
+    setInlineError(undefined)
+    resetCombine?.()
+    setPreselectedRole('source')
+    setSelectedDestinationFaceGroup(null)
+    setSelectedSourceFaceGroupIDs(new Set([preselectedFaceGroup.id]))
+    setState(MergeFaceGroupsModalState.SelectDestination)
+  }
+
+  const toggleSelectedSourceFaceGroup = (faceGroupID: string) => {
+    setSelectedSourceFaceGroupIDs(prev => {
+      const next = new Set(prev)
+      if (next.has(faceGroupID)) {
+        next.delete(faceGroupID)
+      } else {
+        next.add(faceGroupID)
+      }
+      return next
     })
   }
 
-  const setDestinationFaceGroup = (
-    faceGroup: MyFaceGroupsOrSingleFaceGroupOrNull
-  ) => {
-    if (isNil(faceGroup)) {
-      setSelectedFaceGroups(new Set())
-      setSelectedDestinationFaceGroup(null)
-      return
+  const getSourceGroupIDs = () => {
+    if (preselectedRole === 'source' && preselectedFaceGroup) {
+      return [preselectedFaceGroup.id]
     }
 
-    // Overwrite the selected face groups with a set containing only the selected group
-    setSelectedFaceGroups(
-      new Set<MyFaceGroupsOrSingleFaceGroupOrNull>().add(
-        faceGroup
-      )
-    )
-
-    setSelectedDestinationFaceGroup(faceGroup)
+    return [...selectedSourceFaceGroupIDs]
   }
 
-  // Go straight to the sources page if a destination face group is preselected, using the preselection as the destination
-  useEffect(() => {
-    if (isNil(preselectedDestinationFaceGroup)) return
-    if (state !== MergeFaceGroupsModalState.SelectDestination) return
-
-    const destinationFaceGroup = data?.myFaceGroups.find(
-      x => x.id === preselectedDestinationFaceGroup?.id
-    )
-    if (isNil(destinationFaceGroup)) return
-
-    setDestinationFaceGroup(destinationFaceGroup)
-  }, [state, preselectedDestinationFaceGroup, data?.myFaceGroups])
-
-  function handleFaceGroupToggled(newValue: MyFacesQuery['myFaceGroups'][0] | SingleFaceGroupQuery['faceGroup']) {
+  function handleFaceGroupToggled(faceGroup: FaceGroupSelection) {
     switch (state) {
       case MergeFaceGroupsModalState.SelectDestination:
-        setSelectedDestinationFaceGroup(newValue)
-        setSelectedFaceGroups(new Set([newValue]))
+        setSelectedDestinationFaceGroup(faceGroup)
         break
+
       case MergeFaceGroupsModalState.SelectSources:
-        if (selectedFaceGroups.has(newValue))
-          removeSelectedFaceGroup(newValue)
-        else addSelectedFaceGroup(newValue)
+        toggleSelectedSourceFaceGroup(faceGroup.id)
         break
     }
   }
 
-  // Show all face groups on the destination page, but filter out the destination group on the source page
-  const filteredFaceGroups =
-    data?.myFaceGroups.filter(
-      x =>
-        state === MergeFaceGroupsModalState.SelectDestination ||
-        x.id !== selectedDestinationFaceGroup?.id
-    ) ?? []
-
   const goNext = () => {
-    if (isNil(selectedDestinationFaceGroup))
+    if (isNil(selectedDestinationFaceGroup)) {
       throw new Error('No selected face group')
+    }
 
     setState(MergeFaceGroupsModalState.SelectSources)
-    setSelectedFaceGroups(new Set())
+    setSelectedSourceFaceGroupIDs(new Set())
   }
 
   const mergeFaceGroups = () => {
-    if (isNil(selectedDestinationFaceGroup))
+    if (isNil(selectedDestinationFaceGroup)) {
       throw new Error('No selected destination face group')
+    }
 
-    const sourceGroupIDs: string[] = [...selectedFaceGroups].filter(fc => fc !== null).map(fc => fc.id)
+    const sourceGroupIDs = getSourceGroupIDs()
 
     if (sourceGroupIDs.length === 0) return
     if (isMerging) return
-    setIsMerging(true)
 
+    setIsMerging(true)
     setInlineError(undefined)
     resetCombine?.()
 
@@ -184,27 +227,32 @@ const MergeFaceGroupsModal = ({
       },
       update(cache, { data }) {
         if (!data?.combineFaceGroups) return
-        // Evict merged-away source groups so stale references cannot survive in
-        // the normalized cache and produce invalid IDs on subsequent operations.
+
         for (const srcID of sourceGroupIDs) {
-          cache.evict({ id: cache.identify({ __typename: 'FaceGroup', id: srcID }) })
+          cache.evict({
+            id: cache.identify({ __typename: 'FaceGroup', id: srcID }),
+          })
         }
         cache.gc()
       },
       refetchQueries: ({ data, errors }) =>
         data?.combineFaceGroups && (errors?.length ?? 0) === 0
-          ? [...refetchQueries, {
-            query: SINGLE_FACE_GROUP,
-            variables: {
-              id: selectedDestinationFaceGroup.id,
-              limit: 200,
-              offset: 0,
+          ? [
+            ...refetchQueries,
+            {
+              query: SINGLE_FACE_GROUP,
+              variables: {
+                id: selectedDestinationFaceGroup.id,
+                limit: 200,
+                offset: 0,
+              },
             },
-          }]
+          ]
           : [],
       awaitRefetchQueries: true,
     }).then(({ data, errors }) => {
       if (!data?.combineFaceGroups || (errors?.length ?? 0) > 0) return
+
       setInlineError(undefined)
       setState(MergeFaceGroupsModalState.Closed)
       navigate(`/people/${selectedDestinationFaceGroup.id}`)
@@ -212,30 +260,17 @@ const MergeFaceGroupsModal = ({
       const message =
         e instanceof Error && e.message.trim().length > 0
           ? e.message
-          : t('people_page.modal.merge_face_groups.error.network', 'Network error while merging faces')
+          : t(
+            'people_page.modal.merge_face_groups.error.network',
+            'Network error while merging faces'
+          )
       setInlineError(message)
     }).finally(() => {
       setIsMerging(false)
     })
   }
 
-  const closeModal = () => {
-    if (isMerging) return
-    setState(MergeFaceGroupsModalState.Closed)
-    setInlineError(undefined)
-    resetCombine?.()
-    setSelectedDestinationFaceGroup(null)
-    setSelectedFaceGroups(new Set())
-  }
-
-  const isOpen: boolean = state !== MergeFaceGroupsModalState.Closed
-
-  const cancelAction: ModalAction = {
-    key: 'cancel',
-    label: t('general.action.cancel', 'Cancel'),
-    onClick: closeModal,
-    disabled: isMerging,
-  }
+  const sourceGroupIDs = getSourceGroupIDs()
 
   const nextAction: ModalAction = {
     key: 'next',
@@ -250,22 +285,83 @@ const MergeFaceGroupsModal = ({
     label: t('people_page.modal.action.merge', 'Merge'),
     onClick: () => mergeFaceGroups(),
     variant: 'positive',
-    disabled: selectedFaceGroups.size === 0 || isMerging,
+    disabled:
+      isNil(selectedDestinationFaceGroup) ||
+      sourceGroupIDs.length === 0 ||
+      isMerging,
   }
 
-  const modalTitle: string = t(
-    'people_page.modal.merge_face_groups.title',
-    'Merge Face Groups'
-  )
+  if (state === MergeFaceGroupsModalState.SelectPreselectedRole && preselectedFaceGroup) {
+    return (
+      <Modal
+        title={modalTitle}
+        description={t(
+          'people_page.modal.merge_face_groups.preselected_role_description',
+          'Choose how the current face should be merged.'
+        )}
+        actions={[cancelAction]}
+        onClose={closeModal}
+        open={isOpen}
+      >
+        <div className="space-y-3">
+          <button
+            type="button"
+            className="w-full rounded border border-gray-300 px-3 py-2 text-left hover:bg-gray-50 dark:hover:bg-dark-800"
+            onClick={choosePreselectedAsDestination}
+          >
+            <div className="font-semibold">
+              {t(
+                'people_page.modal.merge_face_groups.preselected_role.destination.title',
+                'Merge other faces into this face'
+              )}
+            </div>
+            <div className="text-sm text-gray-600 dark:text-gray-300">
+              {t(
+                'people_page.modal.merge_face_groups.preselected_role.destination.description',
+                'Keep the current face group and choose which other face groups should be merged into it.'
+              )}
+            </div>
+          </button>
+
+          <button
+            type="button"
+            className="w-full rounded border border-gray-300 px-3 py-2 text-left hover:bg-gray-50 dark:hover:bg-dark-800"
+            onClick={choosePreselectedAsSource}
+          >
+            <div className="font-semibold">
+              {t(
+                'people_page.modal.merge_face_groups.preselected_role.source.title',
+                'Merge this face into another face'
+              )}
+            </div>
+            <div className="text-sm text-gray-600 dark:text-gray-300">
+              {t(
+                'people_page.modal.merge_face_groups.preselected_role.source.description',
+                'Choose another destination face group. The current face group will be merged into it.'
+              )}
+            </div>
+          </button>
+        </div>
+      </Modal>
+    )
+  }
 
   const selectDestinationProps: StateContent = {
     props: {
       title: modalTitle,
-      description: t(
-        'people_page.modal.merge_face_groups.destination_description',
-        'Select the face group that other groups should be merged into.'
-      ),
-      actions: [cancelAction, nextAction],
+      description:
+        preselectedRole === 'source'
+          ? t(
+            'people_page.modal.merge_face_groups.source_role_destination_description',
+            'Select the destination face group that the current face should be merged into.'
+          )
+          : t(
+            'people_page.modal.merge_face_groups.destination_description',
+            'Select the face group that other groups should be merged into.'
+          ),
+      actions: preselectedRole === 'source'
+        ? [cancelAction, mergeAction]
+        : [cancelAction, nextAction],
       onClose: closeModal,
       open: isOpen,
     },
@@ -297,10 +393,34 @@ const MergeFaceGroupsModal = ({
       }`,
   }
 
-  const modalContent: StateContent =
+  const modalContent =
     state === MergeFaceGroupsModalState.SelectDestination
       ? selectDestinationProps
       : selectSourcesProps
+
+  const filteredFaceGroups =
+    data?.myFaceGroups.filter(faceGroup => {
+      if (
+        state === MergeFaceGroupsModalState.SelectDestination &&
+        preselectedRole === 'source'
+      ) {
+        return faceGroup.id !== preselectedFaceGroup?.id
+      }
+
+      if (state === MergeFaceGroupsModalState.SelectSources) {
+        return faceGroup.id !== selectedDestinationFaceGroup?.id
+      }
+
+      return true
+    }) ?? []
+
+  const selectedFaceGroupsForTable: Set<FaceGroupSelection | null> = new Set(
+    filteredFaceGroups.filter(faceGroup =>
+      state === MergeFaceGroupsModalState.SelectDestination
+        ? faceGroup.id === selectedDestinationFaceGroup?.id
+        : selectedSourceFaceGroupIDs.has(faceGroup.id)
+    )
+  )
 
   let faceGroupContent = null
   if (faceGroupsLoading) {
@@ -310,7 +430,10 @@ const MergeFaceGroupsModal = ({
   } else if (faceGroupsError) {
     faceGroupContent = (
       <div className="space-y-2 text-sm">
-        <div role="alert" className="mb-2 rounded border border-red-300 bg-red-50 dark:bg-dark-900/50 px-3 py-2 text-sm text-red-800 dark:text-red-300">
+        <div
+          role="alert"
+          className="mb-2 rounded border border-red-300 bg-red-50 dark:bg-dark-900/50 px-3 py-2 text-sm text-red-800 dark:text-red-300"
+        >
           {t(
             'people_page.modal.merge_face_groups.face_groups_load_error',
             'Failed to load face groups'
@@ -331,13 +454,9 @@ const MergeFaceGroupsModal = ({
     faceGroupContent = (
       <SelectFaceGroupTable
         title={modalContent.searchTitle}
-        frozen={
-          isMerging ||
-          (state === MergeFaceGroupsModalState.SelectDestination &&
-            preselectedDestinationFaceGroup !== undefined)
-        }
+        frozen={isMerging}
         faceGroups={filteredFaceGroups}
-        selectedFaceGroups={selectedFaceGroups}
+        selectedFaceGroups={selectedFaceGroupsForTable}
         toggleSelectedFaceGroup={(face) => {
           if (!isMerging && face !== null) handleFaceGroupToggled(face)
         }}
@@ -348,7 +467,10 @@ const MergeFaceGroupsModal = ({
   return (
     <Modal {...modalContent.props}>
       {(inlineError || combineError?.message) && (
-        <div role="alert" className="mb-2 rounded border border-red-300 bg-red-50 dark:bg-dark-900/50 px-3 py-2 text-sm text-red-800 dark:text-red-300">
+        <div
+          role="alert"
+          className="mb-2 rounded border border-red-300 bg-red-50 dark:bg-dark-900/50 px-3 py-2 text-sm text-red-800 dark:text-red-300"
+        >
           {inlineError ?? combineError?.message}
         </div>
       )}

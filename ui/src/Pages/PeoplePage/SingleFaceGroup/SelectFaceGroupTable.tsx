@@ -68,16 +68,20 @@ const FaceGroupRow = ({
   )
 }
 
+type SelectableFaceGroup =
+  | MyFacesQuery['myFaceGroups'][0]
+  | SingleFaceGroupQuery['faceGroup']
+
+type SelectedFaceGroupReference = {
+  id: string
+} | null
+
 type SelectFaceGroupTableProps = {
   faceGroups: MyFacesQuery['myFaceGroups']
-  selectedFaceGroup?: MyFacesQuery['myFaceGroups'][0] | SingleFaceGroupQuery['faceGroup'] | null
-  setSelectedFaceGroup?: Dispatch<(MyFacesQuery['myFaceGroups'][0] | SingleFaceGroupQuery['faceGroup'] | null)>
-  selectedFaceGroups?: Set<
-    SingleFaceGroupQuery['faceGroup'] | MyFacesQuery['myFaceGroups'][0] | null
-  >
-  toggleSelectedFaceGroup?: Dispatch<
-    SingleFaceGroupQuery['faceGroup'] | MyFacesQuery['myFaceGroups'][0] | null
-  >
+  selectedFaceGroup?: SelectedFaceGroupReference
+  setSelectedFaceGroup?: Dispatch<SelectableFaceGroup | null>
+  selectedFaceGroups?: Set<SelectedFaceGroupReference>
+  toggleSelectedFaceGroup?: Dispatch<SelectableFaceGroup | null>
   title: string
   frozen?: boolean
 }

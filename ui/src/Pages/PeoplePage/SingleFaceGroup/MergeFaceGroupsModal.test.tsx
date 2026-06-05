@@ -197,7 +197,7 @@ function renderModal(
     props: Partial<{
         state: MergeFaceGroupsModalState
         setState: typeof defaultSetState
-        preselectedDestinationFaceGroup: { __typename?: 'FaceGroup'; id: string }
+        preselectedFaceGroup: { __typename?: 'FaceGroup'; id: string; label?: string | null }
         refetchQueries: any[]
     }> = {},
     mocks: any[] = [myFacesMock]
@@ -341,11 +341,17 @@ describe('MergeFaceGroupsModal', () => {
             )
         })
 
-        test('table is frozen when preselectedDestinationFaceGroup is provided', async () => {
-            renderModal({ preselectedDestinationFaceGroup: { id: '0' } }, [myFacesMock])
-            await waitFor(() =>
-                expect(screen.getByTestId('face-group-table-frozen')).toHaveTextContent('frozen')
+        test('shows the preselected role choice step when a current face is provided', () => {
+            renderModal(
+                {
+                    state: MergeFaceGroupsModalState.SelectPreselectedRole,
+                    preselectedFaceGroup: { id: '0', label: 'Alice' },
+                },
+                []
             )
+
+            expect(screen.getByText('Merge other faces into this face')).toBeInTheDocument()
+            expect(screen.getByText('Merge this face into another face')).toBeInTheDocument()
         })
 
         test('clicking Next after selecting a destination calls setState(SelectSources)', async () => {
@@ -538,82 +544,107 @@ describe('MergeFaceGroupsModal', () => {
                 expect(screen.queryByRole('alert')).not.toBeInTheDocument()
             )
         })
+
+        test('shows duplicate image validation error and keeps modal open', async () => {
+            const mocks = [
+                myFacesMock,
+                getCombineGraphQLErrorMock(
+                    '0',
+                    ['1'],
+                    'cannot merge face groups because the destination would contain duplicate images'
+                ),
+            ]
+
+            const { setState } = await setupAndTriggerMerge('0', ['1'], mocks)
+
+            await waitFor(() => {
+                expect(screen.getByRole('alert')).toHaveTextContent(/duplicate images/i)
+                expect(setState).not.toHaveBeenCalledWith(MergeFaceGroupsModalState.Closed)
+                expect(mockNavigate).not.toHaveBeenCalled()
+            })
+        })
     })
 
     // ── Preselection ──────────────────────────────────────────────────────────
 
-    describe('preselectedDestinationFaceGroup', () => {
-        test('auto-selects destination when data loads and preselection is provided', async () => {
-            render(
-                <MockedProvider mocks={[myFacesMock]}>
-                    <MergeFaceGroupsModal
-                        state={MergeFaceGroupsModalState.SelectDestination}
-                        setState={vi.fn()}
-                        preselectedDestinationFaceGroup={{ id: '0' }}
-                        refetchQueries={[]}
-                    />
-                </MockedProvider>
-            )
-            await waitFor(() =>
-                expect(screen.getByTestId('facegroup-0')).toHaveAttribute('aria-pressed', 'true')
-            )
-        })
-
-        test('can click Next after preselection and advance to SelectSources', async () => {
-            const setState = vi.fn()
-            render(
-                <MockedProvider mocks={[myFacesMock]}>
-                    <MergeFaceGroupsModal
-                        state={MergeFaceGroupsModalState.SelectDestination}
-                        setState={setState}
-                        preselectedDestinationFaceGroup={{ id: '0' }}
-                        refetchQueries={[]}
-                    />
-                </MockedProvider>
-            )
-            await waitFor(() =>
-                expect(screen.getByTestId('facegroup-0')).toHaveAttribute('aria-pressed', 'true')
-            )
-            const nextBtn = screen.getByRole('button', { name: /Next/i })
-            expect(nextBtn).not.toBeDisabled()
-            fireEvent.click(nextBtn)
-            expect(setState).toHaveBeenCalledWith(MergeFaceGroupsModalState.SelectSources)
-        })
-
-        test('completes full merge flow with preselected destination', async () => {
+    describe('preselectedFaceGroup role choice', () => {
+        test('choosing current face as destination lets the user select sources', async () => {
             const setState = vi.fn()
             const mocks = [myFacesMock, getCombineFacesMock('0', ['1']), getSingleFaceGroupMock('0')]
+
             const { rerender } = render(
                 <MockedProvider mocks={mocks}>
                     <MergeFaceGroupsModal
-                        state={MergeFaceGroupsModalState.SelectDestination}
+                        state={MergeFaceGroupsModalState.SelectPreselectedRole}
                         setState={setState}
-                        preselectedDestinationFaceGroup={{ id: '0' }}
+                        preselectedFaceGroup={{ id: '0', label: 'Alice' }}
                         refetchQueries={[]}
                     />
                 </MockedProvider>
             )
-            await waitFor(() =>
-                expect(screen.getByTestId('facegroup-0')).toHaveAttribute('aria-pressed', 'true')
-            )
-            fireEvent.click(screen.getByRole('button', { name: /Next/i }))
+
+            fireEvent.click(screen.getByText('Merge other faces into this face'))
+            expect(setState).toHaveBeenCalledWith(MergeFaceGroupsModalState.SelectSources)
 
             rerender(
                 <MockedProvider mocks={mocks}>
                     <MergeFaceGroupsModal
                         state={MergeFaceGroupsModalState.SelectSources}
                         setState={setState}
-                        preselectedDestinationFaceGroup={{ id: '0' }}
+                        preselectedFaceGroup={{ id: '0', label: 'Alice' }}
                         refetchQueries={[]}
                     />
                 </MockedProvider>
             )
+
             await waitFor(() => screen.getByTestId('facegroup-1'))
             fireEvent.click(screen.getByTestId('facegroup-1'))
             fireEvent.click(screen.getByRole('button', { name: /Merge/i }))
+
             await waitFor(() => {
                 expect(setState).toHaveBeenCalledWith(MergeFaceGroupsModalState.Closed)
                 expect(mockNavigate).toHaveBeenCalledWith('/people/0')
+            })
+        })
+
+        test('choosing current face as source lets the user pick a different destination', async () => {
+            const setState = vi.fn()
+            const mocks = [myFacesMock, getCombineFacesMock('1', ['0']), getSingleFaceGroupMock('1')]
+
+            const { rerender } = render(
+                <MockedProvider mocks={mocks}>
+                    <MergeFaceGroupsModal
+                        state={MergeFaceGroupsModalState.SelectPreselectedRole}
+                        setState={setState}
+                        preselectedFaceGroup={{ id: '0', label: 'Alice' }}
+                        refetchQueries={[]}
+                    />
+                </MockedProvider>
+            )
+
+            fireEvent.click(screen.getByText('Merge this face into another face'))
+            expect(setState).toHaveBeenCalledWith(MergeFaceGroupsModalState.SelectDestination)
+
+            rerender(
+                <MockedProvider mocks={mocks}>
+                    <MergeFaceGroupsModal
+                        state={MergeFaceGroupsModalState.SelectDestination}
+                        setState={setState}
+                        preselectedFaceGroup={{ id: '0', label: 'Alice' }}
+                        refetchQueries={[]}
+                    />
+                </MockedProvider>
+            )
+
+            await waitFor(() => screen.getByTestId('facegroup-1'))
+            expect(screen.queryByTestId('facegroup-0')).not.toBeInTheDocument()
+
+            fireEvent.click(screen.getByTestId('facegroup-1'))
+            fireEvent.click(screen.getByRole('button', { name: /Merge/i }))
+
+            await waitFor(() => {
+                expect(setState).toHaveBeenCalledWith(MergeFaceGroupsModalState.Closed)
+                expect(mockNavigate).toHaveBeenCalledWith('/people/1')
             })
         })
     })
