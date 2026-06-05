@@ -127,6 +127,18 @@
           "network": "Помилка мережі під час обʼєднання обличь"
         },
         "face_groups_load_error": "Помилка завантаження груп обличь",
+        "preselected_role": {
+          "destination": {
+            "description": "",
+            "title": ""
+          },
+          "source": {
+            "description": "",
+            "title": ""
+          }
+        },
+        "preselected_role_description": "",
+        "source_role_destination_description": "",
         "sources_description": "Оберіть усі групи, обличчя з яких будуть переміщені до кінцевої групи.",
         "sources_table": {
           "title": "Оберіть 1 чи кілька груп для переміщення"

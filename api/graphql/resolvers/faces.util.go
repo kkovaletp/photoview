@@ -59,19 +59,34 @@ func userOwnedFaceGroup(db *gorm.DB, user *models.User, faceGroupID int) (*model
 }
 
 func getUserOwnedImageFaces(tx *gorm.DB, user *models.User, imageFaceIDs []int) ([]*models.ImageFace, error) {
-	if err := user.FillAlbums(tx); err != nil {
-		return nil, err
-	}
-
-	userAlbumIDs := make([]int, len(user.Albums))
-	for i, album := range user.Albums {
-		userAlbumIDs[i] = album.ID
-	}
-
 	var userOwnedImageFaces []*models.ImageFace
-	if err := tx.
-		Joins("JOIN media ON media.id = image_faces.media_id").
-		Where(mediaAlbumIDInQuestion, userAlbumIDs).
+
+	if len(imageFaceIDs) == 0 {
+		return userOwnedImageFaces, nil
+	}
+
+	query := tx.Model(&models.ImageFace{})
+
+	if !user.Admin {
+		if err := user.FillAlbums(tx); err != nil {
+			return nil, err
+		}
+
+		userAlbumIDs := make([]int, len(user.Albums))
+		for i, album := range user.Albums {
+			userAlbumIDs[i] = album.ID
+		}
+
+		if len(userAlbumIDs) == 0 {
+			return userOwnedImageFaces, nil
+		}
+
+		query = query.
+			Joins("JOIN media ON media.id = image_faces.media_id").
+			Where(mediaAlbumIDInQuestion, userAlbumIDs)
+	}
+
+	if err := query.
 		Where(imageFacesIDInQuestion, imageFaceIDs).
 		Find(&userOwnedImageFaces).Error; err != nil {
 		return nil, err

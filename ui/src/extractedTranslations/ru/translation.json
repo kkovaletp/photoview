@@ -127,6 +127,18 @@
           "network": "Ошибка сети при объединении лиц"
         },
         "face_groups_load_error": "Ошибка загрузки групп лиц",
+        "preselected_role": {
+          "destination": {
+            "description": "",
+            "title": ""
+          },
+          "source": {
+            "description": "",
+            "title": ""
+          }
+        },
+        "preselected_role_description": "",
+        "source_role_destination_description": "",
         "sources_description": "Выберите все группы, лица из которых будут перемещены в группу назначения",
         "sources_table": {
           "title": "Выберите 1 или несколько групп для перемещения лиц"

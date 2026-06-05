@@ -7,9 +7,5 @@ export type MoveImageFacesMutationVariables = Types.Exact<{
 
 export type MoveImageFacesMutation = {
   __typename?: 'Mutation'
-  moveImageFaces: {
-    __typename?: 'FaceGroup'
-    id: string
-    imageFaces: Array<{ __typename?: 'ImageFace'; id: string }>
-  }
+  moveImageFaces: { __typename?: 'FaceGroup'; id: string }
 }

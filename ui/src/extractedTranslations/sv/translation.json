@@ -127,6 +127,18 @@
           "network": ""
         },
         "face_groups_load_error": "",
+        "preselected_role": {
+          "destination": {
+            "description": "",
+            "title": ""
+          },
+          "source": {
+            "description": "",
+            "title": ""
+          }
+        },
+        "preselected_role_description": "",
+        "source_role_destination_description": "",
         "sources_description": "Välj en eller flera ansiktsgrupper att slå samman med målgruppen",
         "sources_table": {
           "title": "Välj minst ett ansikte att slå ihop med:"

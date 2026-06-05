@@ -127,6 +127,18 @@
           "network": "Netwerkfout. Controleer je verbinding en probeer opnieuw."
         },
         "face_groups_load_error": "Kan gezichtsgroepen niet laden",
+        "preselected_role": {
+          "destination": {
+            "description": "",
+            "title": ""
+          },
+          "source": {
+            "description": "",
+            "title": ""
+          }
+        },
+        "preselected_role_description": "",
+        "source_role_destination_description": "",
         "sources_description": "Selecteer alle gezichtsgroepen die samengevoegd worden met de doelgroep.",
         "sources_table": {
           "title": "Selecteer één of meer brongezichten:"

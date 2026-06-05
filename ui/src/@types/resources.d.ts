@@ -129,6 +129,18 @@ export default interface Resources {
             "network": "Network error while merging faces"
           },
           "face_groups_load_error": "Failed to load face groups",
+          "preselected_role": {
+            "destination": {
+              "description": "Keep the current face group and choose which other face groups should be merged into it.",
+              "title": "Merge other faces into this face"
+            },
+            "source": {
+              "description": "Choose another destination face group. The current face group will be merged into it.",
+              "title": "Merge this face into another face"
+            }
+          },
+          "preselected_role_description": "Choose how the current face should be merged.",
+          "source_role_destination_description": "Select the destination face group that the current face should be merged into.",
           "sources_description": "Select all face groups that will be merged into the destination group.",
           "sources_table": {
             "title": "Select one or more source faces to merge into:"

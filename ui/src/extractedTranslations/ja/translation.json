@@ -127,6 +127,18 @@
           "network": ""
         },
         "face_groups_load_error": "",
+        "preselected_role": {
+          "destination": {
+            "description": "",
+            "title": ""
+          },
+          "source": {
+            "description": "",
+            "title": ""
+          }
+        },
+        "preselected_role_description": "",
+        "source_role_destination_description": "",
         "sources_description": "統合する対象の顔グループをすべて選択してください。",
         "sources_table": {
           "title": "統合する対象の顔グループを1つ以上選択:"
