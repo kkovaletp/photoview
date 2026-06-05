@@ -129,16 +129,16 @@
         "face_groups_load_error": "Ошибка загрузки групп лиц",
         "preselected_role": {
           "destination": {
-            "description": "",
-            "title": ""
+            "description": "Оставить эту группу лиц и выбрать другие группы лиц для объединения в эту группу.",
+            "title": "Объединить другие группы лиц в эту группу"
           },
           "source": {
-            "description": "",
-            "title": ""
+            "description": "Выбрать другую группу лиц в качестве группы назначения и объединить эту группу лиц в выбранную группу.",
+            "title": "Объединить эту группу лиц в другую группу"
           }
         },
-        "preselected_role_description": "",
-        "source_role_destination_description": "",
+        "preselected_role_description": "Выберите, как эта группа должна быть объединена.",
+        "source_role_destination_description": "Выберите группу лиц назначения, в которую будет объединена эта группа лиц.",
         "sources_description": "Выберите все группы, лица из которых будут перемещены в группу назначения",
         "sources_table": {
           "title": "Выберите 1 или несколько групп для перемещения лиц"

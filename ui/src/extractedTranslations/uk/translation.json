@@ -129,16 +129,16 @@
         "face_groups_load_error": "Помилка завантаження груп обличь",
         "preselected_role": {
           "destination": {
-            "description": "",
-            "title": ""
+            "description": "Залишити цю групу обличь та вибрати інші групи обличь для обʼєднання в цю групу.",
+            "title": "Обʼєднати інші групи обличь в цю групу"
           },
           "source": {
-            "description": "",
-            "title": ""
+            "description": "Вибрати іншу групу обличь як групу призначення та обʼєднати цю групу обличь в обрану групу.",
+            "title": "Обʼєднати цю групу обличь в іншу групу"
           }
         },
-        "preselected_role_description": "",
-        "source_role_destination_description": "",
+        "preselected_role_description": "Оберіть, як ця група повинна бути обʼєднана.",
+        "source_role_destination_description": "Оберіть групу обличь призначення, в яку буде обʼєднана ця група обличь.",
         "sources_description": "Оберіть усі групи, обличчя з яких будуть переміщені до кінцевої групи.",
         "sources_table": {
           "title": "Оберіть 1 чи кілька груп для переміщення"
