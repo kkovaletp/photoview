@@ -72,7 +72,6 @@ const MergeFaceGroupsModal = ({
     skip:
       state === MergeFaceGroupsModalState.Closed ||
       state === MergeFaceGroupsModalState.SelectPreselectedRole,
-    variables: { limit: 50, offset: 0 },
     fetchPolicy: 'network-only',
   })
 
@@ -206,8 +205,8 @@ const MergeFaceGroupsModal = ({
         srcIDs: sourceGroupIDs,
         destID: effectiveDestinationFaceGroup.id,
       },
-      update(cache, { data }) {
-        if (!data?.combineFaceGroups) return
+      update(cache, { data, errors }) {
+        if (!data?.combineFaceGroups || (errors?.length ?? 0) > 0) return
 
         for (const srcID of sourceGroupIDs) {
           cache.evict({

@@ -105,12 +105,18 @@ const mockFaceGroups: MyFacesQuery['myFaceGroups'] = [
     { __typename: 'FaceGroup', id: '3', label: null, imageFaceCount: 0, imageFaces: [] },
 ]
 
-const myFacesMock = {
-    request: {
-        query: MY_FACES_QUERY,
-        variables: { limit: 50, offset: 0 },
-    },
-    result: { data: { myFaceGroups: mockFaceGroups } },
+function makeMyFacesMock() {
+    return {
+        request: {
+            query: MY_FACES_QUERY,
+            variables: { limit: 50, offset: 0 },
+        },
+        result: { data: { myFaceGroups: mockFaceGroups } },
+        // The modal uses fetchPolicy: 'network-only' and several tests rerender
+        // through the same flow. Keep this load mock reusable so tests exercise
+        // the modal behavior instead of failing on MockedProvider mock exhaustion.
+        maxUsageCount: Number.POSITIVE_INFINITY,
+    }
 }
 
 function getCombineFacesMock(destinationID: string, sourceIDs: string[]) {
@@ -200,7 +206,7 @@ function renderModal(
         preselectedFaceGroup: { __typename?: 'FaceGroup'; id: string; label?: string | null }
         refetchQueries: any[]
     }> = {},
-    mocks: any[] = [myFacesMock]
+    mocks: any[] = [makeMyFacesMock()]
 ) {
     const merged = {
         state: MergeFaceGroupsModalState.SelectDestination,
@@ -317,7 +323,7 @@ describe('MergeFaceGroupsModal', () => {
         })
 
         test('renders the search table title for destination', async () => {
-            renderModal({}, [myFacesMock])
+            renderModal({}, [makeMyFacesMock()])
             await waitFor(() =>
                 expect(screen.getByTestId('face-group-table-title')).toHaveTextContent(
                     'Select the destination face'
@@ -326,7 +332,7 @@ describe('MergeFaceGroupsModal', () => {
         })
 
         test('shows all face groups in the table', async () => {
-            renderModal({}, [myFacesMock])
+            renderModal({}, [makeMyFacesMock()])
             await waitFor(() => {
                 for (const fg of mockFaceGroups) {
                     expect(screen.getByTestId(`facegroup-${fg.id}`)).toBeInTheDocument()
@@ -335,7 +341,7 @@ describe('MergeFaceGroupsModal', () => {
         })
 
         test('table is not frozen when no preselection is provided', async () => {
-            renderModal({}, [myFacesMock])
+            renderModal({}, [makeMyFacesMock()])
             await waitFor(() =>
                 expect(screen.getByTestId('face-group-table-frozen')).toHaveTextContent('not-frozen')
             )
@@ -355,7 +361,7 @@ describe('MergeFaceGroupsModal', () => {
         })
 
         test('clicking Next after selecting a destination calls setState(SelectSources)', async () => {
-            renderModal({}, [myFacesMock])
+            renderModal({}, [makeMyFacesMock()])
             await waitFor(() => screen.getByTestId('facegroup-0'))
             const nextBtn = screen.getByRole('button', { name: /Next/i })
             expect(nextBtn).toBeDisabled()
@@ -370,7 +376,7 @@ describe('MergeFaceGroupsModal', () => {
 
     describe('SelectSources step', () => {
         test('shows correct sources description and Merge action instead of Next', async () => {
-            await advanceToSelectSources('0', [myFacesMock])
+            await advanceToSelectSources('0', [makeMyFacesMock()])
             expect(screen.getByTestId('modal-description')).toHaveTextContent(
                 'Select all face groups that will be merged into the destination group.'
             )
@@ -379,21 +385,21 @@ describe('MergeFaceGroupsModal', () => {
         })
 
         test('source table title includes the selected destination label', async () => {
-            await advanceToSelectSources('0', [myFacesMock])
+            await advanceToSelectSources('0', [makeMyFacesMock()])
             await waitFor(() =>
                 expect(screen.getByTestId('face-group-table-title')).toHaveTextContent(/Alice/)
             )
         })
 
         test('source table title falls back to "Unlabeled" when destination has null label', async () => {
-            await advanceToSelectSources('3', [myFacesMock])
+            await advanceToSelectSources('3', [makeMyFacesMock()])
             await waitFor(() =>
                 expect(screen.getByTestId('face-group-table-title')).toHaveTextContent(/Unlabeled/)
             )
         })
 
         test('destination face group is excluded from the source list', async () => {
-            await advanceToSelectSources('0', [myFacesMock])
+            await advanceToSelectSources('0', [makeMyFacesMock()])
             await waitFor(() => {
                 expect(screen.queryByTestId('facegroup-0')).not.toBeInTheDocument()
                 expect(screen.getByTestId('facegroup-1')).toBeInTheDocument()
@@ -402,7 +408,7 @@ describe('MergeFaceGroupsModal', () => {
         })
 
         test('can select a source face group (aria-pressed reflects selection)', async () => {
-            await advanceToSelectSources('0', [myFacesMock])
+            await advanceToSelectSources('0', [makeMyFacesMock()])
             await waitFor(() => screen.getByTestId('facegroup-1'))
             const sourceBtn = screen.getByTestId('facegroup-1')
             expect(sourceBtn).toHaveAttribute('aria-pressed', 'false')
@@ -411,7 +417,7 @@ describe('MergeFaceGroupsModal', () => {
         })
 
         test('can deselect an already-selected source face group', async () => {
-            await advanceToSelectSources('0', [myFacesMock])
+            await advanceToSelectSources('0', [makeMyFacesMock()])
             await waitFor(() => screen.getByTestId('facegroup-1'))
             const sourceBtn = screen.getByTestId('facegroup-1')
             fireEvent.click(sourceBtn) // select
@@ -421,7 +427,7 @@ describe('MergeFaceGroupsModal', () => {
         })
 
         test('table is not frozen in SelectSources step', async () => {
-            await advanceToSelectSources('0', [myFacesMock])
+            await advanceToSelectSources('0', [makeMyFacesMock()])
             expect(screen.getByTestId('face-group-table-frozen')).toHaveTextContent('not-frozen')
         })
     })
@@ -430,7 +436,7 @@ describe('MergeFaceGroupsModal', () => {
 
     describe('successful merge', () => {
         test('merges a single source into destination and navigates', async () => {
-            const mocks = [myFacesMock, getCombineFacesMock('0', ['1']), getSingleFaceGroupMock('0')]
+            const mocks = [makeMyFacesMock(), getCombineFacesMock('0', ['1']), getSingleFaceGroupMock('0')]
             const setState = await doMerge('0', ['1'], mocks)
             await waitFor(() => {
                 expect(setState).toHaveBeenCalledWith(MergeFaceGroupsModalState.Closed)
@@ -439,7 +445,7 @@ describe('MergeFaceGroupsModal', () => {
         })
 
         test('merges multiple sources into destination and navigates', async () => {
-            const mocks = [myFacesMock, getCombineFacesMock('0', ['1', '2']), getSingleFaceGroupMock('0')]
+            const mocks = [makeMyFacesMock(), getCombineFacesMock('0', ['1', '2']), getSingleFaceGroupMock('0')]
             const setState = await doMerge('0', ['1', '2'], mocks)
             await waitFor(() => {
                 expect(setState).toHaveBeenCalledWith(MergeFaceGroupsModalState.Closed)
@@ -449,7 +455,7 @@ describe('MergeFaceGroupsModal', () => {
 
         test('merges all available source face groups into destination', async () => {
             const allSourceIDs = mockFaceGroups.slice(1).map(fg => fg.id)
-            const mocks = [myFacesMock, getCombineFacesMock('0', allSourceIDs), getSingleFaceGroupMock('0')]
+            const mocks = [makeMyFacesMock(), getCombineFacesMock('0', allSourceIDs), getSingleFaceGroupMock('0')]
             const setState = await doMerge('0', allSourceIDs, mocks)
             await waitFor(() => {
                 expect(setState).toHaveBeenCalledWith(MergeFaceGroupsModalState.Closed)
@@ -466,7 +472,7 @@ describe('MergeFaceGroupsModal', () => {
                     return { data: null }
                 },
             }
-            const setState = await doMerge('0', ['1'], [myFacesMock, noDataMock])
+            const setState = await doMerge('0', ['1'], [makeMyFacesMock(), noDataMock])
             await waitFor(() => expect(onNoDataResult).toHaveBeenCalled())
             expect(mockNavigate).not.toHaveBeenCalled()
             expect(setState).not.toHaveBeenCalledWith(MergeFaceGroupsModalState.Closed)
@@ -484,7 +490,7 @@ describe('MergeFaceGroupsModal', () => {
                 },
                 error: new Error('Failed to load face groups'),
             }
-            renderModal({}, [loadErrorMock, myFacesMock])
+            renderModal({}, [loadErrorMock, makeMyFacesMock()])
 
             await waitFor(() => expect(screen.getByRole('alert')).toBeInTheDocument())
             fireEvent.click(screen.getByRole('button', { name: /Retry/i }))
@@ -495,7 +501,7 @@ describe('MergeFaceGroupsModal', () => {
         })
 
         test('shows inline alert and keeps modal open on network error', async () => {
-            const mocks = [myFacesMock, getCombineNetworkErrorMock('0', ['1'])]
+            const mocks = [makeMyFacesMock(), getCombineNetworkErrorMock('0', ['1'])]
             const { setState } = await setupAndTriggerMerge('0', ['1'], mocks)
             await waitFor(() => {
                 expect(screen.getByRole('alert')).toBeInTheDocument()
@@ -505,7 +511,7 @@ describe('MergeFaceGroupsModal', () => {
         })
 
         test('displays the network error message in the alert', async () => {
-            const mocks = [myFacesMock, getCombineNetworkErrorMock('0', ['1'])]
+            const mocks = [makeMyFacesMock(), getCombineNetworkErrorMock('0', ['1'])]
             await setupAndTriggerMerge('0', ['1'], mocks)
             await waitFor(() =>
                 expect(screen.getByRole('alert')).toHaveTextContent(/Network failure/i)
@@ -513,7 +519,7 @@ describe('MergeFaceGroupsModal', () => {
         })
 
         test('shows GraphQL error from Apollo (errorPolicy: all) and keeps modal open', async () => {
-            const mocks = [myFacesMock, getCombineGraphQLErrorMock('0', ['1'], 'Merge not allowed')]
+            const mocks = [makeMyFacesMock(), getCombineGraphQLErrorMock('0', ['1'], 'Merge not allowed')]
             const { setState } = await setupAndTriggerMerge('0', ['1'], mocks)
             await waitFor(() => {
                 expect(screen.getByRole('alert')).toBeInTheDocument()
@@ -523,7 +529,7 @@ describe('MergeFaceGroupsModal', () => {
         })
 
         test('keeps modal open when mutation resolves with data AND GraphQL errors', async () => {
-            const mocks = [myFacesMock, getCombineDataAndErrorsMock('0', ['1'], 'Merge not allowed')]
+            const mocks = [makeMyFacesMock(), getCombineDataAndErrorsMock('0', ['1'], 'Merge not allowed')]
             const { setState } = await setupAndTriggerMerge('0', ['1'], mocks)
 
             await waitFor(() => {
@@ -535,7 +541,7 @@ describe('MergeFaceGroupsModal', () => {
         })
 
         test('clears inline error when closeModal is called after a network error', async () => {
-            const mocks = [myFacesMock, getCombineNetworkErrorMock('0', ['1'])]
+            const mocks = [makeMyFacesMock(), getCombineNetworkErrorMock('0', ['1'])]
             await setupAndTriggerMerge('0', ['1'], mocks)
             await waitFor(() => expect(screen.getByRole('alert')).toBeInTheDocument())
 
@@ -547,7 +553,7 @@ describe('MergeFaceGroupsModal', () => {
 
         test('shows duplicate image validation error and keeps modal open', async () => {
             const mocks = [
-                myFacesMock,
+                makeMyFacesMock(),
                 getCombineGraphQLErrorMock(
                     '0',
                     ['1'],
@@ -570,7 +576,7 @@ describe('MergeFaceGroupsModal', () => {
     describe('preselectedFaceGroup role choice', () => {
         test('choosing current face as destination lets the user select sources', async () => {
             const setState = vi.fn()
-            const mocks = [myFacesMock, getCombineFacesMock('0', ['1']), getSingleFaceGroupMock('0')]
+            const mocks = [makeMyFacesMock(), getCombineFacesMock('0', ['1']), getSingleFaceGroupMock('0')]
 
             const { rerender } = render(
                 <MockedProvider mocks={mocks}>
@@ -609,7 +615,7 @@ describe('MergeFaceGroupsModal', () => {
 
         test('choosing current face as source lets the user pick a different destination', async () => {
             const setState = vi.fn()
-            const mocks = [myFacesMock, getCombineFacesMock('1', ['0']), getSingleFaceGroupMock('1')]
+            const mocks = [makeMyFacesMock(), getCombineFacesMock('1', ['0']), getSingleFaceGroupMock('1')]
 
             const { rerender } = render(
                 <MockedProvider mocks={mocks}>
@@ -661,7 +667,7 @@ describe('MergeFaceGroupsModal', () => {
         test('Cancel in SelectSources calls setState(Closed)', async () => {
             const setState = vi.fn()
             const { rerender } = render(
-                <MockedProvider mocks={[myFacesMock]}>
+                <MockedProvider mocks={[makeMyFacesMock()]}>
                     <MergeFaceGroupsModal
                         state={MergeFaceGroupsModalState.SelectDestination}
                         setState={setState}
@@ -673,7 +679,7 @@ describe('MergeFaceGroupsModal', () => {
             fireEvent.click(screen.getByTestId('facegroup-0'))
             fireEvent.click(screen.getByRole('button', { name: /Next/i }))
             rerender(
-                <MockedProvider mocks={[myFacesMock]}>
+                <MockedProvider mocks={[makeMyFacesMock()]}>
                     <MergeFaceGroupsModal
                         state={MergeFaceGroupsModalState.SelectSources}
                         setState={setState}

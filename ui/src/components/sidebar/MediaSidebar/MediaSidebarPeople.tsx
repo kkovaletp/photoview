@@ -116,8 +116,8 @@ const PersonMoreMenu = ({
           variables: { id: face.media.id },
         },
       ],
-    }).then(({ data }) => {
-      if (!data) return
+    }).then(({ data, errors }) => {
+      if (!data?.detachImageFaces || (errors?.length ?? 0) > 0) return
       navigate(`/people/${data.detachImageFaces.id}`)
     }).catch((e: unknown) => {
       console.error('Failed to detach image face', e)

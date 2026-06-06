@@ -1,5 +1,5 @@
 import { describe, test, expect, vi, beforeEach, afterEach } from 'vitest'
-import { screen, waitFor, within } from '@testing-library/react'
+import { act, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { gql } from '@apollo/client'
 import { MockedResponse } from '@apollo/client/testing'
@@ -73,23 +73,29 @@ describe('EditUserRowRootPaths', () => {
     test('removes a root path: sends correct variables and disables button while loading', async () => {
         const user = userEvent.setup()
 
+        let resolveRemoveMutation!: (value: {
+            data: { userRemoveRootAlbum: { __typename: 'Album'; id: string } }
+        }) => void
+
+        const removeMutationResult = new Promise<{
+            data: { userRemoveRootAlbum: { __typename: 'Album'; id: string } }
+        }>(resolve => {
+            resolveRemoveMutation = resolve
+        })
+
         const mocks: MockedResponse[] = [
             {
                 request: {
                     query: USER_REMOVE_ALBUM_PATH_MUTATION,
                     variables: { userId: 'user-1', albumId: 'album-1' },
                 },
-                result: {
-                    data: { userRemoveRootAlbum: { __typename: 'Album', id: 'album-1' } },
-                },
-                delay: 100,
+                result: () => removeMutationResult as any,
             },
             usersQueryMock,
         ]
 
         renderComponent(mocks)
 
-        // Target the remove button for /photos/A row
         const row = screen.getByText('/photos/A').closest('li') as HTMLElement
         const removeBtn = within(row).getByRole('button', { name: /remove/i })
 
@@ -97,10 +103,17 @@ describe('EditUserRowRootPaths', () => {
 
         await user.click(removeBtn)
 
-        // Becomes disabled while mutation is in-flight
         await waitFor(() => expect(removeBtn).toBeDisabled())
 
-        // Re-enables after completion
+        await act(async () => {
+            resolveRemoveMutation({
+                data: {
+                    userRemoveRootAlbum: { __typename: 'Album', id: 'album-1' },
+                },
+            })
+            await removeMutationResult
+        })
+
         await waitFor(() => expect(removeBtn).not.toBeDisabled())
 
         expect(consoleErrorSpy).not.toHaveBeenCalled()

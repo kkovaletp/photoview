@@ -210,20 +210,35 @@ describe('paginateCache', () => {
             const invalidCases = [
                 { args: {}, fieldName: 'testField' },
                 { args: { paginate: null }, fieldName: 'testField' },
-                { args: { paginate: undefined }, fieldName: 'testField' }
+                { args: { paginate: undefined }, fieldName: 'testField' },
             ]
 
-            invalidCases.forEach(context => {
-                consoleWarnSpy.mockClear()
-                const result = paginateFn.merge(existing, incoming, context as any)
-                expect(consoleWarnSpy).toHaveBeenCalledWith(
-                    expect.stringContaining('Paginate argument is missing for field: testField')
-                )
-                // Existing cache must be preserved — not overwritten with incomplete data
-                expect(result).toEqual(existing)
-            })
+            try {
+                invalidCases.forEach(context => {
+                    consoleWarnSpy.mockClear()
 
-            consoleWarnSpy.mockRestore()
+                    const result = paginateFn.merge(existing, incoming, context as any)
+
+                    expect(consoleWarnSpy).toHaveBeenCalledWith(
+                        expect.stringContaining('Paginate argument is missing for field: testField')
+                    )
+                    expect(result).toEqual(existing)
+                })
+
+                invalidCases.forEach(context => {
+                    consoleWarnSpy.mockClear()
+
+                    const result = paginateFn.merge(undefined, incoming, context as any)
+
+                    expect(consoleWarnSpy).toHaveBeenCalledWith(
+                        expect.stringContaining('Paginate argument is missing for field: testField')
+                    )
+                    expect(result).toEqual([])
+                    expect(result).not.toEqual(incoming)
+                })
+            } finally {
+                consoleWarnSpy.mockRestore()
+            }
         })
     })
 
