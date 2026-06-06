@@ -3,7 +3,7 @@ import { render, fireEvent, screen, waitFor } from '@testing-library/react'
 import { MockedProvider } from '@apollo/client/testing'
 import FaceGroupTitle from './FaceGroupTitle'
 import { SET_GROUP_LABEL_MUTATION } from '../PeoplePage'
-import { SingleFaceGroupQuery } from './__generated__/SingleFaceGroup'
+import { SingleFaceGroupQuery } from './__generated__/singleFaceGroupQuery'
 
 // ─── Mocks ───────────────────────────────────────────────────────────────────
 
@@ -25,6 +25,7 @@ vi.mock('./MergeFaceGroupsModal', () => ({
         ),
     MergeFaceGroupsModalState: {
         Closed: 'closed',
+        SelectPreselectedRole: 'select_preselected_role',
         SelectDestination: 'select_destination',
         SelectSources: 'select_sources',
     },

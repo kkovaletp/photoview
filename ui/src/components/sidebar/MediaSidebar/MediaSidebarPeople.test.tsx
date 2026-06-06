@@ -64,9 +64,9 @@ vi.mock('../../../Pages/PeoplePage/PeoplePage', () => ({
 // Mock MergeFaceGroupsModal
 vi.mock('../../../Pages/PeoplePage/SingleFaceGroup/MergeFaceGroupsModal', () => ({
     __esModule: true,
-    default: ({ state, setState, preselectedDestinationFaceGroup }: any) => (
+    default: ({ state, setState, preselectedFaceGroup }: any) => (
         <div
-            data-testid={`merge-modal-${preselectedDestinationFaceGroup?.id}`}
+            data-testid={`merge-modal-${preselectedFaceGroup?.id}`}
             data-state={state}
         >
             {state !== 'closed' && (
@@ -76,6 +76,7 @@ vi.mock('../../../Pages/PeoplePage/SingleFaceGroup/MergeFaceGroupsModal', () => 
     ),
     MergeFaceGroupsModalState: {
         Closed: 'closed',
+        SelectPreselectedRole: 'select_preselected_role',
         SelectDestination: 'select_destination',
         SelectSources: 'select_sources',
     },
@@ -293,7 +294,7 @@ describe('MediaSidebarPeople', () => {
         await waitFor(() => {
             expect(screen.getByTestId('merge-modal-group-1')).toHaveAttribute(
                 'data-state',
-                'select_destination'
+                'select_preselected_role'
             )
         })
     })
@@ -313,6 +314,24 @@ describe('MediaSidebarPeople', () => {
         })
     })
 
+    it('should not lock body scrolling when the people more-menu is opened', async () => {
+        const media = createMockMedia(threeDefaultFaces)
+        const user = userEvent.setup()
+
+        document.body.className = ''
+
+        renderWithProviders(<MediaSidebarPeople media={media} />)
+
+        await user.click(screen.getAllByRole('button')[0])
+
+        await waitFor(() => {
+            expect(screen.getByText('Merge face')).toBeInTheDocument()
+        })
+
+        expect(document.body).not.toHaveClass('overflow-hidden')
+        expect(document.body).not.toHaveClass('overflow-y-hidden')
+    })
+
     // ── Detach image – success paths ───────────────────────────────────────────
 
     it('should call detachImageFaces with the correct face when confirmation is accepted', async () => {
@@ -328,9 +347,10 @@ describe('MediaSidebarPeople', () => {
 
         await waitFor(() => {
             expect(confirmSpy).toHaveBeenCalledWith('Are you sure you want to detach this image?')
-            expect(mockDetachImageFaces).toHaveBeenCalledWith([
-                expect.objectContaining({ id: 'face-1' }),
-            ])
+            expect(mockDetachImageFaces).toHaveBeenCalledWith(
+                [expect.objectContaining({ id: 'face-1' })],
+                expect.objectContaining({ sourceFaceGroupID: 'group-1' })
+            )
         })
 
         confirmSpy.mockRestore()

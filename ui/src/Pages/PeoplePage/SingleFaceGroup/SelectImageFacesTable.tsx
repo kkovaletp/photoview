@@ -13,7 +13,7 @@ import {
   TableRow,
 } from '../../../primitives/Table'
 import { MyFacesQuery } from '../__generated__/PeoplePage'
-import { SingleFaceGroupQuery } from './__generated__/SingleFaceGroup'
+import { SingleFaceGroupQuery } from './__generated__/singleFaceGroupQuery'
 
 const SelectImagePreview = styled(ProtectedImage)`
   max-width: 120px;

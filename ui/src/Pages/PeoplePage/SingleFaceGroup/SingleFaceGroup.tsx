@@ -1,40 +1,16 @@
-import { gql, useQuery } from '@apollo/client'
+import { useQuery } from '@apollo/client'
 import { useEffect, useReducer } from 'react'
 import { useTranslation } from 'react-i18next'
 import PaginateLoader from '../../../components/PaginateLoader'
 import MediaGallery from '../../../components/photoGallery/MediaGallery'
-import { MEDIA_GALLERY_FRAGMENT } from '../../../components/photoGallery/fragments'
 import { mediaGalleryReducer } from '../../../components/photoGallery/mediaGalleryReducer'
 import useScrollPagination from '../../../hooks/useScrollPagination'
 import FaceGroupTitle from './FaceGroupTitle'
+import { SINGLE_FACE_GROUP } from './singleFaceGroupQuery'
 import {
   SingleFaceGroupQuery,
   SingleFaceGroupQueryVariables,
-} from './__generated__/SingleFaceGroup'
-
-export const SINGLE_FACE_GROUP = gql`
-  ${MEDIA_GALLERY_FRAGMENT}
-
-  query singleFaceGroup($id: ID!, $limit: Int!, $offset: Int!) {
-    faceGroup(id: $id) {
-      id
-      label
-      imageFaces(paginate: { limit: $limit, offset: $offset }) {
-        id
-        rectangle {
-          minX
-          maxX
-          minY
-          maxY
-        }
-        media {
-          ...MediaGalleryFields
-          title
-        }
-      }
-    }
-  }
-`
+} from './__generated__/singleFaceGroupQuery'
 
 type SingleFaceGroupProps = {
   faceGroupID: string

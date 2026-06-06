@@ -12,7 +12,7 @@ import {
 } from '../../../primitives/Table'
 import FaceCircleImage from '../FaceCircleImage'
 import { MyFacesQuery } from '../__generated__/PeoplePage'
-import { SingleFaceGroupQuery } from './__generated__/SingleFaceGroup'
+import { SingleFaceGroupQuery } from './__generated__/singleFaceGroupQuery'
 
 const FaceCircleWrapper = styled.div<{ $selected: boolean }>`
   display: inline-block;
@@ -57,7 +57,7 @@ const FaceGroupRow = ({
           />
         </FaceCircleWrapper>
         <span
-          className={`ml-3 ${faceSelected ? 'font-semibold text-slate-100' : 'text-gray-400'
+          className={`ml-3 ${faceSelected ? 'font-semibold text-slate-900 dark:text-slate-100' : 'text-gray-400'
             } ${!faceSelected && !faceGroup.label ? 'text-gray-600 italic' : ''}`}
         >
           {faceGroup.label ??
@@ -68,16 +68,20 @@ const FaceGroupRow = ({
   )
 }
 
+type SelectableFaceGroup =
+  | MyFacesQuery['myFaceGroups'][0]
+  | SingleFaceGroupQuery['faceGroup']
+
+type SelectedFaceGroupReference = {
+  id: string
+} | null
+
 type SelectFaceGroupTableProps = {
   faceGroups: MyFacesQuery['myFaceGroups']
-  selectedFaceGroup?: MyFacesQuery['myFaceGroups'][0] | SingleFaceGroupQuery['faceGroup'] | null
-  setSelectedFaceGroup?: Dispatch<(MyFacesQuery['myFaceGroups'][0] | SingleFaceGroupQuery['faceGroup'] | null)>
-  selectedFaceGroups?: Set<
-    SingleFaceGroupQuery['faceGroup'] | MyFacesQuery['myFaceGroups'][0] | null
-  >
-  toggleSelectedFaceGroup?: Dispatch<
-    SingleFaceGroupQuery['faceGroup'] | MyFacesQuery['myFaceGroups'][0] | null
-  >
+  selectedFaceGroup?: SelectedFaceGroupReference
+  setSelectedFaceGroup?: Dispatch<SelectableFaceGroup | null>
+  selectedFaceGroups?: Set<SelectedFaceGroupReference>
+  toggleSelectedFaceGroup?: Dispatch<SelectableFaceGroup | null>
   title: string
   frozen?: boolean
 }

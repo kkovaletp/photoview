@@ -259,13 +259,15 @@ const linkError = onError(({ graphQLErrors, networkError }) => {
   }
 })
 
+// Mirrors Apollo Client's internal KeySpecifier type (not publicly exported in v3)
+type KeySpecifier = ReadonlyArray<string | KeySpecifier>
 type PaginateCacheType = {
-  keyArgs: string[]
+  keyArgs: KeySpecifier
   merge: FieldMergeFunction<unknown[], unknown[]>
 }
 
 // Modified version of Apollo's offsetLimitPagination()
-export const paginateCache = (keyArgs: string[]) =>
+export const paginateCache = (keyArgs: KeySpecifier) =>
 ({
   keyArgs,
   merge(existing, incoming, { args, fieldName }) {
@@ -305,7 +307,13 @@ export const paginateCache = (keyArgs: string[]) =>
 
       return [...existingItems.filter(item => item != null), ...newItems]
     } else {
-      throw new Error(`Paginate argument is missing for query: ${fieldName}`)
+      // Log a warning instead of throwing to avoid surfacing this as a user-visible error.
+      console.warn(`[paginateCache] Paginate argument is missing for field: ${fieldName}. Preserving existing cache.`)
+      // No paginate argument — this occurs when mutation responses (e.g.
+      // moveImageFaces returning imageFaces { id }) write to a paginated field
+      // without a pagination context. Preserve existing paginated data to avoid
+      // overwriting the cache with incomplete mutation data.
+      return existing ?? []
     }
   },
 } as PaginateCacheType)
@@ -327,13 +335,13 @@ const memoryCache = new InMemoryCache({
     },
     FaceGroup: {
       fields: {
-        imageFaces: paginateCache([]),
+        imageFaces: paginateCache([['paginate', ['limit']]]),
       },
     },
     Query: {
       fields: {
         myTimeline: paginateCache(['onlyFavorites']),
-        myFaceGroups: paginateCache([]),
+        myFaceGroups: paginateCache([['paginate', ['limit']]]),
       },
     },
   },

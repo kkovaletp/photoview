@@ -1,4 +1,4 @@
-import { gql, useMutation } from '@apollo/client'
+import { gql, PureQueryOptions, useMutation } from '@apollo/client'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router'
@@ -6,11 +6,12 @@ import Modal from '../../../primitives/Modal'
 import { MY_FACES_QUERY } from '../PeoplePage'
 import { MyFacesQuery } from '../__generated__/PeoplePage'
 import SelectImageFacesTable from './SelectImageFacesTable'
+import { SINGLE_FACE_GROUP } from './singleFaceGroupQuery'
 import {
   DetachImageFacesMutation,
   DetachImageFacesMutationVariables,
 } from './__generated__/DetachImageFacesModal'
-import { SingleFaceGroupQuery } from './__generated__/SingleFaceGroup'
+import { SingleFaceGroupQuery } from './__generated__/singleFaceGroupQuery'
 
 const DETACH_IMAGE_FACES_MUTATION = gql`
   mutation detachImageFaces($faceIDs: [ID!]!) {
@@ -21,12 +22,16 @@ const DETACH_IMAGE_FACES_MUTATION = gql`
   }
 `
 
+type DetachImageFacesOptions = {
+  sourceFaceGroupID?: string
+  additionalRefetchQueries?: PureQueryOptions[]
+}
+
 export const useDetachImageFaces = () => {
   const [detachImageFacesMutation, { error: detachError, reset: resetDetach }] = useMutation<
     DetachImageFacesMutation,
     DetachImageFacesMutationVariables
   >(DETACH_IMAGE_FACES_MUTATION, {
-    refetchQueries: [{ query: MY_FACES_QUERY }],
     errorPolicy: 'all',
   })
 
@@ -34,7 +39,8 @@ export const useDetachImageFaces = () => {
     selectedImageFaces: Array<
       MyFacesQuery['myFaceGroups'][0]['imageFaces'][0] |
       SingleFaceGroupQuery['faceGroup']['imageFaces'][0]
-    >
+    >,
+    options: DetachImageFacesOptions = {}
   ) => {
     const faceIDs = selectedImageFaces.map(face => face.id)
 
@@ -42,6 +48,46 @@ export const useDetachImageFaces = () => {
       variables: {
         faceIDs,
       },
+      refetchQueries: ({ data, errors }) => {
+        if (!data?.detachImageFaces || (errors?.length ?? 0) > 0) return []
+
+        const newFaceGroupID = data.detachImageFaces.id
+
+        const queries = [
+          {
+            query: MY_FACES_QUERY,
+            variables: {
+              limit: 50,
+              offset: 0,
+            },
+          },
+          {
+            query: SINGLE_FACE_GROUP,
+            variables: {
+              id: newFaceGroupID,
+              limit: 200,
+              offset: 0,
+            },
+          },
+        ]
+
+        if (
+          options.sourceFaceGroupID &&
+          options.sourceFaceGroupID !== newFaceGroupID
+        ) {
+          queries.push({
+            query: SINGLE_FACE_GROUP,
+            variables: {
+              id: options.sourceFaceGroupID,
+              limit: 200,
+              offset: 0,
+            },
+          })
+        }
+
+        return [...queries, ...(options.additionalRefetchQueries ?? [])]
+      },
+      awaitRefetchQueries: true,
     })
 
     return result
@@ -96,7 +142,9 @@ const DetachImageFacesModalContent = ({
     setIsDetaching(true)
     setInlineError(undefined)
 
-    detachImageFaces(selectedImageFaces).then(({ data, errors }) => {
+    detachImageFaces(selectedImageFaces, {
+      sourceFaceGroupID: faceGroup.id,
+    }).then(({ data, errors }) => {
       if (!data?.detachImageFaces || (errors?.length ?? 0) > 0) return
       setOpen(false)
       navigate(`/people/${data.detachImageFaces.id}`)

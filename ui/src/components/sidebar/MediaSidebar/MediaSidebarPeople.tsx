@@ -83,7 +83,7 @@ const PersonMoreMenu = ({
   const modals = (
     <>
       <MergeFaceGroupsModal
-        preselectedDestinationFaceGroup={face.faceGroup}
+        preselectedFaceGroup={face.faceGroup}
         state={mergeModalState}
         setState={setMergeModalState}
         refetchQueries={refetchQueries}
@@ -108,8 +108,16 @@ const PersonMoreMenu = ({
     )
       return
     setInlineError(null)
-    detachImageFaces([face]).then(({ data }) => {
-      if (!data) return
+    detachImageFaces([face], {
+      sourceFaceGroupID: face.faceGroup.id,
+      additionalRefetchQueries: [
+        {
+          query: SIDEBAR_MEDIA_QUERY,
+          variables: { id: face.media.id },
+        },
+      ],
+    }).then(({ data, errors }) => {
+      if (!data?.detachImageFaces || (errors?.length ?? 0) > 0) return
       navigate(`/people/${data.detachImageFaces.id}`)
     }).catch((e: unknown) => {
       console.error('Failed to detach image face', e)
@@ -135,7 +143,7 @@ const PersonMoreMenu = ({
         <MenuButton as={Button} className="px-1.5 py-1.5 align-middle ml-1">
           <PeopleDotsIcon className="text-gray-500" />
         </MenuButton>
-        <MenuItems className="">
+        <MenuItems modal={false} className="">
           <ArrowPopoverPanel $width={120} $flipped={menuFlipped}>
             <PersonMoreMenuItem
               onClick={() => setChangeLabel(true)}
@@ -144,7 +152,7 @@ const PersonMoreMenu = ({
             />
             <PersonMoreMenuItem
               onClick={() =>
-                setMergeModalState(MergeFaceGroupsModalState.SelectDestination)
+                setMergeModalState(MergeFaceGroupsModalState.SelectPreselectedRole)
               }
               className="border-b"
               label={t('sidebar.people.action_label.merge_face', 'Merge face')}

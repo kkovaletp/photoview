@@ -2,7 +2,7 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest'
 import SelectFaceGroupTable from './SelectFaceGroupTable'
 import { MyFacesQuery } from '../__generated__/PeoplePage'
-import { SingleFaceGroupQuery } from './__generated__/SingleFaceGroup'
+import { SingleFaceGroupQuery } from './__generated__/singleFaceGroupQuery'
 
 // Mock react-i18next
 vi.mock('react-i18next', () => ({
@@ -208,7 +208,7 @@ describe('SelectFaceGroupTable', () => {
 
             // Selection highlighting
             expect(screen.getByText('John Doe').closest('td')).toHaveClass('brightness-110')
-            expect(screen.getByText('John Doe')).toHaveClass('font-semibold', 'text-slate-100')
+            expect(screen.getByText('John Doe')).toHaveClass('font-semibold', 'text-slate-900', 'dark:text-slate-100')
             expect(screen.getByText('Jane Smith').closest('td')).toHaveClass('brightness-110')
 
             // Click handling

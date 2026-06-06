@@ -5,7 +5,8 @@ import { gql } from '@apollo/client'
 import { GraphQLError } from 'graphql'
 import MoveImageFacesModal from './MoveImageFacesModal'
 import { MY_FACES_QUERY } from '../PeoplePage'
-import { SingleFaceGroupQuery } from './__generated__/SingleFaceGroup'
+import { SINGLE_FACE_GROUP } from './singleFaceGroupQuery'
+import { SingleFaceGroupQuery } from './__generated__/singleFaceGroupQuery'
 import { MyFacesQuery } from '../__generated__/PeoplePage'
 
 // ─── Mocks ───────────────────────────────────────────────────────────────────
@@ -117,9 +118,6 @@ const MOVE_IMAGE_FACES_MUTATION = gql`
             destinationFaceGroupID: $destFaceGroupID
         ) {
             id
-            imageFaces {
-                id
-            }
         }
     }
 `
@@ -208,10 +206,46 @@ function makeMoveMock(faceIDs: string[], destFaceGroupID: string) {
                 moveImageFaces: {
                     __typename: 'FaceGroup',
                     id: destFaceGroupID,
-                    imageFaces: faceIDs.map(id => ({ __typename: 'ImageFace', id })),
                 },
             },
         },
+    }
+}
+
+function makeSingleFaceGroupMock(id: string) {
+    const knownGroup =
+        id === sourceFaceGroup.id
+            ? sourceFaceGroup
+            : [destGroup1, destGroup2].find(group => group.id === id)
+
+    return {
+        request: {
+            query: SINGLE_FACE_GROUP,
+            variables: { id, limit: 200, offset: 0 },
+        },
+        result: {
+            data: {
+                faceGroup: {
+                    __typename: 'FaceGroup',
+                    id,
+                    label: knownGroup?.label ?? null,
+                    imageFaces: [],
+                },
+            },
+        },
+    }
+}
+
+function makeMyFacesPageRefetchMock() {
+    return {
+        request: {
+            query: MY_FACES_QUERY,
+            variables: {
+                limit: 50,
+                offset: 0,
+            },
+        },
+        result: makeMyFacesMock().result,
     }
 }
 
@@ -479,7 +513,13 @@ describe('MoveImageFacesModal', () => {
             const moveMock = makeMoveMock([faceId], destGroup1.id)
 
             // Provide MY_FACES_QUERY twice: once for loadFaceGroups, once for refetchQueries
-            renderModal({}, [makeMyFacesMock(), moveMock, makeMyFacesMock()])
+            renderModal({}, [
+                makeMyFacesMock(),
+                moveMock,
+                makeMyFacesPageRefetchMock(),
+                makeSingleFaceGroupMock(destGroup1.id),
+                makeSingleFaceGroupMock(sourceFaceGroup.id),
+            ])
 
             // Select one image face and advance to step 2
             fireEvent.click(screen.getByTestId(`image-face-row-${faceId}`))
@@ -504,7 +544,13 @@ describe('MoveImageFacesModal', () => {
             const faceId2 = sourceFaceGroup.imageFaces[1].id
             const moveMock = makeMoveMock([faceId1, faceId2], destGroup2.id)
 
-            renderModal({}, [makeMyFacesMock(), moveMock, makeMyFacesMock()])
+            renderModal({}, [
+                makeMyFacesMock(),
+                moveMock,
+                makeMyFacesPageRefetchMock(),
+                makeSingleFaceGroupMock(destGroup2.id),
+                makeSingleFaceGroupMock(sourceFaceGroup.id),
+            ])
 
             fireEvent.click(screen.getByTestId(`image-face-row-${faceId1}`))
             fireEvent.click(screen.getByTestId(`image-face-row-${faceId2}`))
@@ -534,7 +580,6 @@ describe('MoveImageFacesModal', () => {
                         moveImageFaces: {
                             __typename: 'FaceGroup',
                             id: destGroup1.id,
-                            imageFaces: [{ __typename: 'ImageFace', id: faceId }],
                         },
                     },
                     errors: [new GraphQLError('GraphQL error')],
@@ -556,6 +601,41 @@ describe('MoveImageFacesModal', () => {
                 expect(defaultSetOpen).not.toHaveBeenCalled()
                 expect(mockNavigate).not.toHaveBeenCalled()
                 expect(screen.getByRole('alert')).toHaveTextContent(/GraphQL error/i)
+            })
+        })
+
+        test('stays open and shows duplicate image error when destination already contains selected media', async () => {
+            const faceId = sourceFaceGroup.imageFaces[0].id
+            const duplicateErrorMock = {
+                request: {
+                    query: MOVE_IMAGE_FACES_MUTATION,
+                    variables: { faceIDs: [faceId], destFaceGroupID: destGroup1.id },
+                },
+                result: {
+                    errors: [
+                        new GraphQLError(
+                            'cannot move faces because the destination would contain duplicate images'
+                        ),
+                    ],
+                },
+            }
+
+            renderModal({}, [makeMyFacesMock(), duplicateErrorMock])
+
+            fireEvent.click(screen.getByTestId(`image-face-row-${faceId}`))
+            fireEvent.click(screen.getByRole('button', { name: /Next/i }))
+
+            await waitFor(() =>
+                expect(screen.getByTestId('select-face-group-table')).toBeInTheDocument()
+            )
+
+            fireEvent.click(screen.getByTestId(`face-group-row-${destGroup1.id}`))
+            fireEvent.click(screen.getByRole('button', { name: /Move image faces/i }))
+
+            await waitFor(() => {
+                expect(defaultSetOpen).not.toHaveBeenCalled()
+                expect(mockNavigate).not.toHaveBeenCalled()
+                expect(screen.getByRole('alert')).toHaveTextContent(/duplicate images/i)
             })
         })
     })
@@ -583,7 +663,13 @@ describe('MoveImageFacesModal', () => {
             const moveMock = makeMoveMock([faceId], destGroup1.id)
 
             // Provide MY_FACES_QUERY twice: initial load + refetch after mutation
-            renderModal({ preselectedImageFaces: preselected }, [makeMyFacesMock(), moveMock, makeMyFacesMock()])
+            renderModal({ preselectedImageFaces: preselected }, [
+                makeMyFacesMock(),
+                moveMock,
+                makeMyFacesPageRefetchMock(),
+                makeSingleFaceGroupMock(destGroup1.id),
+                makeSingleFaceGroupMock(sourceFaceGroup.id),
+            ])
 
             await waitFor(() =>
                 expect(screen.getByTestId('select-face-group-table')).toBeInTheDocument()

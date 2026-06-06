@@ -80,7 +80,9 @@ describe('EditUserRowRootPaths', () => {
                     variables: { userId: 'user-1', albumId: 'album-1' },
                 },
                 result: {
-                    data: { userRemoveRootAlbum: { __typename: 'Album', id: 'album-1' } },
+                    data: {
+                        userRemoveRootAlbum: { __typename: 'Album', id: 'album-1' },
+                    },
                 },
                 delay: 100,
             },
@@ -89,7 +91,6 @@ describe('EditUserRowRootPaths', () => {
 
         renderComponent(mocks)
 
-        // Target the remove button for /photos/A row
         const row = screen.getByText('/photos/A').closest('li') as HTMLElement
         const removeBtn = within(row).getByRole('button', { name: /remove/i })
 
@@ -97,10 +98,7 @@ describe('EditUserRowRootPaths', () => {
 
         await user.click(removeBtn)
 
-        // Becomes disabled while mutation is in-flight
         await waitFor(() => expect(removeBtn).toBeDisabled())
-
-        // Re-enables after completion
         await waitFor(() => expect(removeBtn).not.toBeDisabled())
 
         expect(consoleErrorSpy).not.toHaveBeenCalled()
