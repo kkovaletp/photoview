@@ -19,7 +19,7 @@ interface ChangePasswordModalProps {
   open: boolean
   user: SettingsUsersQueryQuery['user'][0]
 }
-
+//TODO: fix the description text
 const ChangePasswordModal = ({
   onClose,
   user,

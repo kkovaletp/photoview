@@ -44,7 +44,7 @@ type AddUserRowProps = {
   show: boolean
   onUserAdded(): void
 }
-
+//TODO: Fix the add user with an invalid root path flow, so the user is not created.
 const AddUserRow = ({ setShow, show, onUserAdded }: AddUserRowProps) => {
   const { t } = useTranslation()
   const [state, setState] = useState(initialState)
