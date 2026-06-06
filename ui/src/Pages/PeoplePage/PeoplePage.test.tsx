@@ -5,6 +5,7 @@ import {
   FaceGroup,
   MY_FACES_QUERY,
   SET_GROUP_LABEL_MUTATION,
+  RECOGNIZE_UNLABELED_FACES_MUTATION,
 } from './PeoplePage'
 import { MyFacesQuery } from './__generated__/PeoplePage'
 import { renderWithProviders } from '../../helpers/testUtils'
@@ -266,5 +267,144 @@ describe('FaceDetails component', () => {
     fireEvent.keyDown(input, { key: 'Escape', code: 'Escape' })
 
     expect(screen.queryByText('Unlabeled')).toBeInTheDocument()
+  })
+})
+
+describe('PeoplePage - recognize unlabeled faces button', () => {
+  // Reused minimal mock for the initial page load
+  const initialFacesMock = {
+    request: {
+      query: MY_FACES_QUERY,
+      variables: { limit: 50, offset: 0 },
+    },
+    result: {
+      data: {
+        myFaceGroups: [
+          {
+            __typename: 'FaceGroup' as const,
+            id: '3',
+            label: 'Person A',
+            imageFaceCount: 2,
+            imageFaces: [],
+          },
+        ],
+      },
+    },
+  }
+
+  test('shows error alert when the mutation fails with a network error', async () => {
+    // Network error causes the promise to reject → .catch fires, hook's error state is set
+    const mocks = [
+      initialFacesMock,
+      {
+        request: { query: RECOGNIZE_UNLABELED_FACES_MUTATION },
+        error: new Error('Network error'),
+      },
+    ]
+
+    renderWithProviders(<PeoplePage />, { mocks, initialEntries: ['/people'] })
+
+    await waitFor(() => {
+      expect(screen.getByText('Person A')).toBeInTheDocument()
+    })
+
+    fireEvent.click(
+      screen.getByRole('button', { name: /recognize unlabeled faces/i })
+    )
+
+    await waitFor(() => {
+      expect(screen.getByRole('alert')).toBeInTheDocument()
+      expect(screen.getByRole('alert')).toHaveTextContent('Network error')
+    })
+  })
+
+  test('shows error alert when the mutation returns GraphQL errors', async () => {
+    // errorPolicy:'all' keeps the promise resolved but sets hook error state;
+    // refetchQueries callback receives errors → returns [] (falsy branch)
+    const mocks = [
+      initialFacesMock,
+      {
+        request: { query: RECOGNIZE_UNLABELED_FACES_MUTATION },
+        result: {
+          data: { recognizeUnlabeledFaces: null },
+          errors: [{ message: 'Recognition service unavailable' }],
+        },
+      },
+    ]
+
+    renderWithProviders(<PeoplePage />, { mocks, initialEntries: ['/people'] })
+
+    await waitFor(() => {
+      expect(screen.getByText('Person A')).toBeInTheDocument()
+    })
+
+    fireEvent.click(
+      screen.getByRole('button', { name: /recognize unlabeled faces/i })
+    )
+
+    await waitFor(() => {
+      expect(screen.getByRole('alert')).toBeInTheDocument()
+      expect(screen.getByRole('alert')).toHaveTextContent(
+        'Recognition service unavailable'
+      )
+    })
+  })
+
+  test('refetches face groups and shows no error after successful recognition', async () => {
+    // Mutation succeeds with data and no errors →
+    // refetchQueries returns [{ query: MY_FACES_QUERY, variables: { limit:50, offset:0 } }]
+    // awaitRefetchQueries:true means the second MY_FACES_QUERY is consumed before the UI settles
+    const refetchSpy = vi.fn(() => ({
+      data: {
+        myFaceGroups: [
+          {
+            __typename: 'FaceGroup' as const,
+            id: '3',
+            label: 'Person A',
+            imageFaceCount: 5,  // changed count proves refetch happened
+            imageFaces: [],
+          },
+        ],
+      },
+    }))
+
+    const mocks = [
+      initialFacesMock,
+      {
+        request: { query: RECOGNIZE_UNLABELED_FACES_MUTATION },
+        result: {
+          data: {
+            recognizeUnlabeledFaces: [
+              { __typename: 'FaceGroup' as const, id: '3' },
+            ],
+          },
+        },
+      },
+      // MockedProvider consumes mocks in order; this second MY_FACES_QUERY
+      // entry is consumed when refetchQueries fires
+      {
+        request: {
+          query: MY_FACES_QUERY,
+          variables: { limit: 50, offset: 0 },
+        },
+        newData: refetchSpy,
+      },
+    ]
+
+    renderWithProviders(<PeoplePage />, { mocks, initialEntries: ['/people'] })
+
+    await waitFor(() => {
+      expect(screen.getByText('Person A')).toBeInTheDocument()
+    })
+
+    fireEvent.click(
+      screen.getByRole('button', { name: /recognize unlabeled faces/i })
+    )
+
+    await waitFor(() => {
+      expect(refetchSpy).toHaveBeenCalled()
+    })
+
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument()
   })
 })

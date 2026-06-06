@@ -68,6 +68,28 @@ func createFaceMutationFixtures(t *testing.T, r *mutationResolver) {
 	}
 }
 
+func setupNonAdminUserWithAlbum(t *testing.T, r *mutationResolver) (*models.User, context.Context) {
+	t.Helper()
+	db := r.database
+
+	pass := "5678"
+	user, err := models.RegisterUser(db, "test_nonadmin", &pass, false)
+	if err != nil {
+		t.Fatal("register non-admin user error:", err)
+	}
+
+	var album models.Album
+	if err := db.Where("path = ?", "/test-album").First(&album).Error; err != nil {
+		t.Fatal("find fixture album error:", err)
+	}
+
+	if err := db.Model(user).Association("Albums").Append(&album); err != nil {
+		t.Fatal("link non-admin user to album error:", err)
+	}
+
+	return user, auth.AddUserToContext(context.Background(), user)
+}
+
 func TestCombineFaceGroups(t *testing.T) {
 	t.Run("merges face groups when media does not overlap", func(t *testing.T) {
 		r, ctx, _ := setupFaceMutationTest(t)
@@ -159,6 +181,38 @@ func TestCombineFaceGroups(t *testing.T) {
 			t.Fatalf("expected duplicate image validation error, got: %v", err)
 		}
 	})
+
+	t.Run("non-admin user merges owned face groups", func(t *testing.T) {
+		r, _, _ := setupFaceMutationTest(t)
+		createFaceMutationFixtures(t, r)
+		_, ctx := setupNonAdminUserWithAlbum(t, r)
+
+		testDataList := []models.ImageFace{
+			{Model: models.Model{ID: 1}, FaceGroupID: 1, MediaID: 1},
+			{Model: models.Model{ID: 2}, FaceGroupID: 1, MediaID: 2},
+			{Model: models.Model{ID: 3}, FaceGroupID: 2, MediaID: 3},
+			{Model: models.Model{ID: 4}, FaceGroupID: 3, MediaID: 4},
+		}
+		if err := r.database.Create(&testDataList).Error; err != nil {
+			t.Fatal(err)
+		}
+
+		result, err := r.CombineFaceGroups(ctx, 1, []int{2, 3})
+		if err != nil {
+			t.Fatal("CombineFaceGroups failed for non-admin user:", err)
+		}
+		if result == nil || result.ID != 1 {
+			t.Fatalf("expected destination face group 1, got %#v", result)
+		}
+
+		var imageFaces []*models.ImageFace
+		if err := r.database.Where("face_group_id = ?", 1).Find(&imageFaces).Error; err != nil {
+			t.Fatal("failed to query destination image faces:", err)
+		}
+		if len(imageFaces) != 4 {
+			t.Fatalf("expected 4 image faces after non-admin merge, got %d", len(imageFaces))
+		}
+	})
 }
 
 func TestMoveImageFaces(t *testing.T) {
@@ -245,6 +299,76 @@ func TestMoveImageFaces(t *testing.T) {
 		}
 		if !strings.Contains(err.Error(), "duplicate images") {
 			t.Fatalf("expected duplicate image validation error, got: %v", err)
+		}
+	})
+
+	t.Run("non-admin user moves owned image faces", func(t *testing.T) {
+		r, _, _ := setupFaceMutationTest(t)
+		createFaceMutationFixtures(t, r)
+		_, ctx := setupNonAdminUserWithAlbum(t, r)
+
+		testDataList := []models.ImageFace{
+			{Model: models.Model{ID: 1}, FaceGroupID: 1, MediaID: 1},
+			{Model: models.Model{ID: 2}, FaceGroupID: 2, MediaID: 2},
+		}
+		if err := r.database.Create(&testDataList).Error; err != nil {
+			t.Fatal(err)
+		}
+
+		result, err := r.MoveImageFaces(ctx, []int{1}, 2)
+		if err != nil {
+			t.Fatal("MoveImageFaces failed for non-admin user:", err)
+		}
+		if result == nil || result.ID != 2 {
+			t.Fatalf("expected destination face group 2, got %#v", result)
+		}
+
+		var movedFace models.ImageFace
+		if err := r.database.First(&movedFace, 1).Error; err != nil {
+			t.Fatal(err)
+		}
+		if movedFace.FaceGroupID != 2 {
+			t.Fatalf("expected image face to move to group 2, got group %d", movedFace.FaceGroupID)
+		}
+	})
+}
+
+func TestGetUserOwnedImageFaces(t *testing.T) {
+	t.Run("returns empty when image face IDs list is empty", func(t *testing.T) {
+		r, _, user := setupFaceMutationTest(t)
+
+		faces, err := getUserOwnedImageFaces(r.database, user, []int{})
+		if err != nil {
+			t.Fatal("unexpected error:", err)
+		}
+		if len(faces) != 0 {
+			t.Fatalf("expected 0 faces for empty input, got %d", len(faces))
+		}
+	})
+
+	t.Run("non-admin user with no album associations returns empty", func(t *testing.T) {
+		r, _, _ := setupFaceMutationTest(t)
+		createFaceMutationFixtures(t, r)
+
+		testDataList := []models.ImageFace{
+			{Model: models.Model{ID: 1}, FaceGroupID: 1, MediaID: 1},
+		}
+		if err := r.database.Create(&testDataList).Error; err != nil {
+			t.Fatal(err)
+		}
+
+		pass := "5678"
+		userNoAlbums, err := models.RegisterUser(r.database, "test_noalbums", &pass, false)
+		if err != nil {
+			t.Fatal("register user error:", err)
+		}
+
+		faces, err := getUserOwnedImageFaces(r.database, userNoAlbums, []int{1})
+		if err != nil {
+			t.Fatal("unexpected error:", err)
+		}
+		if len(faces) != 0 {
+			t.Fatalf("expected 0 faces for user with no albums, got %d", len(faces))
 		}
 	})
 }

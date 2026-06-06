@@ -71,7 +71,7 @@ export const SET_GROUP_LABEL_MUTATION = gql`
   }
 `
 
-const RECOGNIZE_UNLABELED_FACES_MUTATION = gql`
+export const RECOGNIZE_UNLABELED_FACES_MUTATION = gql`
   mutation recognizeUnlabeledFaces {
     recognizeUnlabeledFaces {
       id
