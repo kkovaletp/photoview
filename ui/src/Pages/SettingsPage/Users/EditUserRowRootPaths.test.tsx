@@ -4,9 +4,8 @@ import userEvent from '@testing-library/user-event'
 import { gql } from '@apollo/client'
 import { MockedResponse } from '@apollo/client/testing'
 import { renderWithProviders } from '../../../helpers/testUtils'
-import { EditRootPaths } from './EditUserRowRootPaths'
+import { EditRootPaths, USER_ADD_ROOT_PATH_MUTATION } from './EditUserRowRootPaths'
 import { USERS_QUERY } from './UsersTable'
-import { USER_ADD_ROOT_PATH_MUTATION } from './AddUserRow'
 import { SettingsUsersQueryQuery } from './__generated__/UsersTable'
 
 // Re-declare the internal mutation for MockedProvider matching by printed query

@@ -3,6 +3,7 @@ import * as Types from '../../../../__generated__/globalTypes'
 export type CreateUserMutationVariables = Types.Exact<{
   username: Types.Scalars['String']['input']
   admin: Types.Scalars['Boolean']['input']
+  rootPath?: Types.InputMaybe<Types.Scalars['String']['input']>
 }>
 
 export type CreateUserMutation = {
@@ -13,14 +14,4 @@ export type CreateUserMutation = {
     username: string
     admin: boolean
   }
-}
-
-export type UserAddRootPathMutationVariables = Types.Exact<{
-  id: Types.Scalars['ID']['input']
-  rootPath: Types.Scalars['String']['input']
-}>
-
-export type UserAddRootPathMutation = {
-  __typename?: 'Mutation'
-  userAddRootPath?: { __typename?: 'Album'; id: string } | null
 }

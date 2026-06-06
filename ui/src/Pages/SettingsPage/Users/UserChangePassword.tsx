@@ -19,7 +19,7 @@ interface ChangePasswordModalProps {
   open: boolean
   user: SettingsUsersQueryQuery['user'][0]
 }
-//TODO: fix the description text
+
 const ChangePasswordModal = ({
   onClose,
   user,
@@ -37,7 +37,10 @@ const ChangePasswordModal = ({
       onClose={onClose}
       title={t('settings.users.password_reset.title', 'Change password')}
       description={
-        <Trans t={t} i18nKey="settings.users.password_reset.description">
+        <Trans t={t}
+          i18nKey="settings.users.password_reset.description"
+          values={{ username: user.username }}
+        >
           Change password for <b>{user.username}</b>
         </Trans>
       }

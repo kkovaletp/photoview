@@ -2,19 +2,27 @@ import { useState, ChangeEvent } from 'react'
 import { gql, useMutation } from '@apollo/client'
 import { USERS_QUERY } from './UsersTable'
 import { useTranslation } from 'react-i18next'
-import { USER_ADD_ROOT_PATH_MUTATION } from './AddUserRow'
 import {
   UserRemoveAlbumPathMutationMutation,
   UserRemoveAlbumPathMutationMutationVariables,
+  UserAddRootPathMutation,
+  UserAddRootPathMutationVariables,
 } from './__generated__/EditUserRowRootPaths'
 import { SettingsUsersQueryQuery } from './__generated__/UsersTable'
-import { UserAddRootPathMutation } from './__generated__/AddUserRow'
 import { Button, TextField } from '../../../primitives/form/Input'
 import { normalizePath } from '../../../helpers/normalize'
 
 const USER_REMOVE_ALBUM_PATH_MUTATION = gql`
   mutation userRemoveAlbumPathMutation($userId: ID!, $albumId: ID!) {
     userRemoveRootAlbum(userId: $userId, albumId: $albumId) {
+      id
+    }
+  }
+`
+
+export const USER_ADD_ROOT_PATH_MUTATION = gql`
+  mutation userAddRootPath($id: ID!, $rootPath: String!) {
+    userAddRootPath(id: $id, rootPath: $rootPath) {
       id
     }
   }
@@ -68,16 +76,16 @@ type EditNewRootPathProps = {
 const EditNewRootPath = ({ userID }: EditNewRootPathProps) => {
   const { t } = useTranslation()
   const [value, setValue] = useState('')
-  const [addRootPath, { loading }] = useMutation<UserAddRootPathMutation>(
-    USER_ADD_ROOT_PATH_MUTATION,
-    {
-      refetchQueries: [
-        {
-          query: USERS_QUERY,
-        },
-      ],
-    }
-  )
+  const [addRootPath, { loading }] = useMutation<
+    UserAddRootPathMutation,
+    UserAddRootPathMutationVariables
+  >(USER_ADD_ROOT_PATH_MUTATION, {
+    refetchQueries: [
+      {
+        query: USERS_QUERY,
+      },
+    ],
+  })
 
   return (
     <li className="flex gap-1 mt-2">
