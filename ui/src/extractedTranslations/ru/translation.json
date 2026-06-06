@@ -246,11 +246,15 @@
       },
       "confirm_delete_user": {
         "action": "Удалить {{user}}",
-        "description": "<0>Вы уверены что хотите удалить <1></1>?</0><p>Это действие необратимо</p>",
+        "description": "<line>Вы уверены что хотите удалить <bold>{{username}}</bold>?</line><line>Это действие необратимо</line>",
         "title": "Удалить пользователя"
       },
+      "edit": {
+        "add_path_error": "Ошибка добавления пути. Попробуйте снова.",
+        "remove_path_error": "Ошибка удаления пути. Попробуйте снова."
+      },
       "password_reset": {
-        "description": "Поменять пароль для <1></1>",
+        "description": "Поменять пароль для <bold>{{username}}</bold>",
         "error": "Ошибка смены пароля",
         "form": {
           "label": "Новый пароль",

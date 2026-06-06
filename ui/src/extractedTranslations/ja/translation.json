@@ -246,11 +246,15 @@
       },
       "confirm_delete_user": {
         "action": "{{user}} を削除",
-        "description": "<0><1></1> を削除してもよろしいですか？</0><p>この操作は元に戻せません</p>",
+        "description": "<line><bold>{{username}}</bold> を削除してもよろしいですか？</line><line>この操作は元に戻せません</line>",
         "title": "ユーザーを削除"
       },
+      "edit": {
+        "add_path_error": "",
+        "remove_path_error": ""
+      },
       "password_reset": {
-        "description": "<1>{{username}}</1> のパスワードを変更",
+        "description": "<bold>{{username}}</bold> のパスワードを変更",
         "error": "",
         "form": {
           "label": "新しいパスワード",

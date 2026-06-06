@@ -104,12 +104,14 @@ const ViewUserRow = ({
               <Trans
                 t={t}
                 i18nKey="settings.users.confirm_delete_user.description"
+                values={{ username: user.username }}
+                components={{ line: <span className="block" />, bold: <b /> }}
               >
-                <p>
+                <span className="block">
                   {`Are you sure, you want to delete `}
                   <b>{user.username}</b>?
-                </p>
-                <p>{`This action cannot be undone`}</p>
+                </span>
+                <span className="block">{`This action cannot be undone`}</span>
               </Trans>
             }
           />

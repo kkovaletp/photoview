@@ -246,11 +246,15 @@
       },
       "confirm_delete_user": {
         "action": "Slet {user}",
-        "description": "<0>Er du sikker på at du vil slette <1></1>?</0><p>Denne handling kan ikke fortrydes</p>",
+        "description": "<line>Er du sikker på at du vil slette <bold>{{username}}</bold>?</line><line>Denne handling kan ikke fortrydes</line>",
         "title": "Slet bruger"
       },
+      "edit": {
+        "add_path_error": "",
+        "remove_path_error": ""
+      },
       "password_reset": {
-        "description": "Ændre adgangskode for <1>{{username}}</1>",
+        "description": "Ændre adgangskode for <bold>{{username}}</bold>",
         "error": "",
         "form": {
           "label": "Ny adgangskode",

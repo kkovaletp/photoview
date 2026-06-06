@@ -246,11 +246,15 @@
       },
       "confirm_delete_user": {
         "action": "Usuń {{user}}",
-        "description": "<0>Czy jesteś pewien, że chcesz usunąć <1></1>?</0><p>Tej czynności nie można cofnąć</p>",
+        "description": "<line>Czy jesteś pewien, że chcesz usunąć <bold>{{username}}</bold>?</line><line>Tej czynności nie można cofnąć</line>",
         "title": "Usuń użytkownika"
       },
+      "edit": {
+        "add_path_error": "",
+        "remove_path_error": ""
+      },
       "password_reset": {
-        "description": "Zmiana hasła dla <1>{{username}}</1>",
+        "description": "Zmiana hasła dla <bold>{{username}}</bold>",
         "error": "",
         "form": {
           "label": "Nowe hasło",

@@ -246,11 +246,15 @@
       },
       "confirm_delete_user": {
         "action": "刪除 {{user}}",
-        "description": "<0>確定刪除 <1></1>?</0><p>此操作無法取消</p>",
+        "description": "<line>確定刪除 <bold>{{username}}</bold>?</line><line>此操作無法取消</line>",
         "title": "刪除使用者"
       },
+      "edit": {
+        "add_path_error": "",
+        "remove_path_error": ""
+      },
       "password_reset": {
-        "description": "更改 <1>{{username}}</1> 的密碼",
+        "description": "更改 <bold>{{username}}</bold> 的密碼",
         "error": "",
         "form": {
           "label": "新密碼",

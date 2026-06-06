@@ -246,11 +246,15 @@
       },
       "confirm_delete_user": {
         "action": "Apagar {{user}}",
-        "description": "<0>Tem a certeza de que pretende apagar <1></1>?</0><p>Esta ação não pode ser desfeita.</p>",
+        "description": "<line>Tem a certeza de que pretende apagar <bold>{{username}}</bold>?</line><line>Esta ação não pode ser desfeita.</line>",
         "title": "Apagar utilizador"
       },
+      "edit": {
+        "add_path_error": "",
+        "remove_path_error": ""
+      },
       "password_reset": {
-        "description": "Mudar palavra-passe para <1>{{username}}</1>",
+        "description": "Mudar palavra-passe para <bold>{{username}}</bold>",
         "error": "",
         "form": {
           "label": "Nova palavra-passe",

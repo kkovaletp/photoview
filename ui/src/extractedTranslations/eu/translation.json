@@ -246,11 +246,15 @@
       },
       "confirm_delete_user": {
         "action": "Ezabatu {{user}}",
-        "description": "<0>Ziur al zaude <1></1> ezabatu nahi duzula?</0><p>Eragiketa hau ezin da desegin</p>",
+        "description": "<line>Ziur al zaude <bold>{{username}}</bold> ezabatu nahi duzula?</line><line>Eragiketa hau ezin da desegin</line>",
         "title": "Ezabatu erabiltzailea"
       },
+      "edit": {
+        "add_path_error": "",
+        "remove_path_error": ""
+      },
       "password_reset": {
-        "description": "Aldatu <1>{{username}}</1>(r)en pasahitza",
+        "description": "Aldatu <bold>{{username}}</bold>(r)en pasahitza",
         "error": "",
         "form": {
           "label": "Pasahitz berria",

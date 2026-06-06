@@ -246,11 +246,15 @@
       },
       "confirm_delete_user": {
         "action": "Видалити {{user}}",
-        "description": "<0>Ви впевнені, що бажаєте видалити <1></1>?</0><p>Цю дію не можна буде скасувати</p>",
+        "description": "<line>Ви впевнені, що бажаєте видалити <bold>{{username}}</bold>?</line><line>Цю дію не можна буде скасувати</line>",
         "title": "Видалити користувача"
       },
+      "edit": {
+        "add_path_error": "Помилка додавання шляху. Спробуйте ще раз.",
+        "remove_path_error": "Помилка видалення шляху. Спробуйте ще раз."
+      },
       "password_reset": {
-        "description": "Зміна пароля для <1>{{username}}</1>",
+        "description": "Зміна пароля для <bold>{{username}}</bold>",
         "error": "Помилка зміни пароля",
         "form": {
           "label": "Новий пароль",
