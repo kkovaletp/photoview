@@ -52,11 +52,11 @@ const Modal = ({
         <DialogPanel className="fixed bg-white dark:bg-dark-bg max-w-[calc(100%-16px)] mx-auto rounded shadow-md border">
           <div className="p-4">
             <DialogTitle className="text-xl mb-1">{title}</DialogTitle>
-            <Description className="text-sm mb-4">
+            <Description as="div" className="text-sm mb-4">
               {description}
             </Description>
 
-            {children}
+
           </div>
 
           <div className="bg-gray-50 p-2 dark:bg-[#31363d] flex gap-2 justify-end mt-4">
