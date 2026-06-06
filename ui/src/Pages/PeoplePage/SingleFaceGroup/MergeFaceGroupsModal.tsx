@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router'
 import { isNil } from '../../../helpers/utils'
 import Modal, { ModalAction, ModalProps } from '../../../primitives/Modal'
+import useScrollPagination from '../../../hooks/useScrollPagination'
 import { MY_FACES_QUERY } from '../PeoplePage'
 import {
   MyFacesQuery,
@@ -54,6 +55,9 @@ type StateContent = {
 
 type PreselectedFaceGroupRole = 'source' | 'destination' | null
 
+const FACE_GROUP_PAGE_SIZE = 50
+const MODAL_SCROLL_ROOT_MARGIN = '0px 0px 160px 0px'
+
 const MergeFaceGroupsModal = ({
   state,
   setState,
@@ -68,7 +72,12 @@ const MergeFaceGroupsModal = ({
     loading: faceGroupsLoading,
     error: faceGroupsError,
     refetch: refetchFaceGroups,
+    fetchMore,
   } = useQuery<MyFacesQuery, MyFacesQueryVariables>(MY_FACES_QUERY, {
+    variables: {
+      limit: FACE_GROUP_PAGE_SIZE,
+      offset: 0,
+    },
     skip:
       state === MergeFaceGroupsModalState.Closed ||
       state === MergeFaceGroupsModalState.SelectPreselectedRole,
@@ -93,6 +102,19 @@ const MergeFaceGroupsModal = ({
 
   const [inlineError, setInlineError] = useState<string | undefined>(undefined)
   const [isMerging, setIsMerging] = useState(false)
+
+  const {
+    containerElem: paginationSentinelElem,
+    scrollRootElem: paginationScrollRootElem,
+    loadingMore: loadingMoreFaceGroups,
+  } = useScrollPagination<MyFacesQuery>({
+    loading: faceGroupsLoading,
+    fetchMore,
+    data,
+    getItems: data => data.myFaceGroups,
+    pageSize: FACE_GROUP_PAGE_SIZE,
+    rootMargin: MODAL_SCROLL_ROOT_MARGIN,
+  })
 
   const modalTitle = t(
     'people_page.modal.merge_face_groups.title',
@@ -432,15 +454,32 @@ const MergeFaceGroupsModal = ({
     )
   } else {
     faceGroupContent = (
-      <SelectFaceGroupTable
-        title={modalContent.searchTitle}
-        frozen={isMerging}
-        faceGroups={filteredFaceGroups}
-        selectedFaceGroups={selectedFaceGroupsForTable}
-        toggleSelectedFaceGroup={(face) => {
-          if (!isMerging && face !== null) handleFaceGroupToggled(face)
-        }}
-      />
+      <div
+        ref={paginationScrollRootElem}
+        className="max-h-125 overflow-y-auto pr-1"
+      >
+        <SelectFaceGroupTable
+          title={modalContent.searchTitle}
+          frozen={isMerging}
+          faceGroups={filteredFaceGroups}
+          selectedFaceGroups={selectedFaceGroupsForTable}
+          toggleSelectedFaceGroup={(face) => {
+            if (!isMerging && face !== null) handleFaceGroupToggled(face)
+          }}
+        />
+
+        <div
+          ref={paginationSentinelElem}
+          className="h-1"
+          aria-hidden="true"
+        />
+
+        {loadingMoreFaceGroups && (
+          <div className="py-2 text-center text-sm text-gray-500 dark:text-gray-400">
+            {t('general.loading.default', 'Loading...')}
+          </div>
+        )}
+      </div>
     )
   }
 

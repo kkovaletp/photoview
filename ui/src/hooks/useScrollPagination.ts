@@ -9,19 +9,29 @@ interface ScrollPaginationArgs<D> {
   }) => Promise<ApolloQueryResult<D>>
   getItems: (data: D) => unknown[]
   pageSize?: number
+  rootMargin?: string
+  threshold?: number
 }
 
 type ScrollPaginationResult = {
   finished: boolean
   loadingMore: boolean
   containerElem: (node: null | Element) => void
+  scrollRootElem: (node: null | Element) => void
 }
 
-const useScrollPagination = <D>({ loading, fetchMore, data, getItems, pageSize }:
-  ScrollPaginationArgs<D>): ScrollPaginationResult => {
-
+const useScrollPagination = <D>({
+  loading,
+  fetchMore,
+  data,
+  getItems,
+  pageSize,
+  rootMargin = '-100% 0px 0px 0px',
+  threshold = 0,
+}: ScrollPaginationArgs<D>): ScrollPaginationResult => {
   const observer = useRef<IntersectionObserver | null>(null)
   const observerElem = useRef<Element | null>(null)
+  const observerRootElem = useRef<Element | null>(null)
 
   const [loadingMore, setLoadingMore] = useState(false)
   const [finished, setFinished] = useState(false)
@@ -38,9 +48,9 @@ const useScrollPagination = <D>({ loading, fetchMore, data, getItems, pageSize }
 
   const reconfigureIntersectionObserver = useCallback(() => {
     const options = {
-      root: null,
-      rootMargin: '-100% 0px 0px 0px',
-      threshold: 0,
+      root: observerRootElem.current,
+      rootMargin,
+      threshold,
     }
 
     observer.current?.disconnect()
@@ -86,6 +96,8 @@ const useScrollPagination = <D>({ loading, fetchMore, data, getItems, pageSize }
     getItems,
     pageSize,
     paginationFinished,
+    rootMargin,
+    threshold,
   ])
 
   const containerElem = useCallback(
@@ -99,6 +111,19 @@ const useScrollPagination = <D>({ loading, fetchMore, data, getItems, pageSize }
       if (node != null) {
         reconfigureIntersectionObserver()
       }
+    },
+    [reconfigureIntersectionObserver]
+  )
+
+  const scrollRootElem = useCallback(
+    (node: null | Element): void => {
+      observerRootElem.current = node
+
+      if (observer.current != null) {
+        observer.current.disconnect()
+      }
+
+      reconfigureIntersectionObserver()
     },
     [reconfigureIntersectionObserver]
   )
@@ -125,6 +150,7 @@ const useScrollPagination = <D>({ loading, fetchMore, data, getItems, pageSize }
 
   return {
     containerElem,
+    scrollRootElem,
     finished: paginationFinished,
     loadingMore,
   }

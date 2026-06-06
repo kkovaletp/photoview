@@ -81,15 +81,27 @@ vi.mock('./SelectFaceGroupTable', () => ({
 }))
 
 let originalIntersectionObserver: typeof globalThis.IntersectionObserver | undefined
+let triggerIntersection: ((isIntersecting?: boolean) => void) | undefined
 
 beforeAll(() => {
     originalIntersectionObserver = globalThis.IntersectionObserver
     globalThis.IntersectionObserver = class {
-        constructor() { }
+        private readonly callback: IntersectionObserverCallback
+
+        constructor(callback: IntersectionObserverCallback) {
+            this.callback = callback
+            triggerIntersection = (isIntersecting = true) => {
+                this.callback(
+                    [{ isIntersecting } as IntersectionObserverEntry],
+                    this as unknown as IntersectionObserver
+                )
+            }
+        }
+
         observe() { }
         unobserve() { }
         disconnect() { }
-    } as any
+    } as unknown as typeof IntersectionObserver
 })
 
 afterAll(() => {
@@ -105,13 +117,22 @@ const mockFaceGroups: MyFacesQuery['myFaceGroups'] = [
     { __typename: 'FaceGroup', id: '3', label: null, imageFaceCount: 0, imageFaces: [] },
 ]
 
-function makeMyFacesMock() {
+const defaultMyFacesQueryVariables = { limit: 50, offset: 0 }
+
+function makeMyFacesMock(
+    faceGroups: MyFacesQuery['myFaceGroups'] = mockFaceGroups,
+    variables = defaultMyFacesQueryVariables,
+    onResult?: () => void
+) {
     return {
         request: {
             query: MY_FACES_QUERY,
-            variables: { limit: 50, offset: 0 },
+            variables,
         },
-        result: { data: { myFaceGroups: mockFaceGroups } },
+        result: () => {
+            onResult?.()
+            return { data: { myFaceGroups: faceGroups } }
+        },
         // The modal uses fetchPolicy: 'network-only' and several tests rerender
         // through the same flow. Keep this load mock reusable so tests exercise
         // the modal behavior instead of failing on MockedProvider mock exhaustion.
@@ -280,6 +301,7 @@ async function setupAndTriggerMerge(
 
 beforeEach(() => {
     vi.clearAllMocks()
+    triggerIntersection = undefined
 })
 
 describe('MergeFaceGroupsModal', () => {
@@ -369,6 +391,48 @@ describe('MergeFaceGroupsModal', () => {
             expect(nextBtn).not.toBeDisabled()
             fireEvent.click(nextBtn)
             expect(defaultSetState).toHaveBeenCalledWith(MergeFaceGroupsModalState.SelectSources)
+        })
+
+        test('loads the next face-group page when the modal scroll sentinel intersects', async () => {
+            const firstPageFaceGroups = Array.from({ length: 50 }, (_, index) => ({
+                __typename: 'FaceGroup' as const,
+                id: `${index}`,
+                label: `Person ${index}`,
+                imageFaceCount: 1,
+                imageFaces: [],
+            }))
+
+            const secondPageFaceGroups: MyFacesQuery['myFaceGroups'] = [
+                {
+                    __typename: 'FaceGroup',
+                    id: '50',
+                    label: 'Person 50',
+                    imageFaceCount: 1,
+                    imageFaces: [],
+                },
+            ]
+
+            const secondPageLoaded = vi.fn()
+
+            renderModal(
+                {},
+                [
+                    makeMyFacesMock(firstPageFaceGroups),
+                    makeMyFacesMock(
+                        secondPageFaceGroups,
+                        { limit: 50, offset: 50 },
+                        secondPageLoaded
+                    ),
+                ]
+            )
+
+            await waitFor(() =>
+                expect(screen.getByTestId('facegroup-49')).toBeInTheDocument()
+            )
+
+            triggerIntersection?.()
+
+            await waitFor(() => expect(secondPageLoaded).toHaveBeenCalled())
         })
     })
 
