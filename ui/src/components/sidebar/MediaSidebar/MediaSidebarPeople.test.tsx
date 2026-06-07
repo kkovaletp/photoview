@@ -317,19 +317,23 @@ describe('MediaSidebarPeople', () => {
     it('should not lock body scrolling when the people more-menu is opened', async () => {
         const media = createMockMedia(threeDefaultFaces)
         const user = userEvent.setup()
+        const originalBodyClassName = document.body.className
 
-        document.body.className = ''
+        try {
+            document.body.className = ''
 
-        renderWithProviders(<MediaSidebarPeople media={media} />)
+            renderWithProviders(<MediaSidebarPeople media={media} />)
 
-        await user.click(screen.getAllByRole('button')[0])
+            await user.click(screen.getAllByRole('button')[0])
 
-        await waitFor(() => {
-            expect(screen.getByText('Merge face')).toBeInTheDocument()
-        })
-
-        expect(document.body).not.toHaveClass('overflow-hidden')
-        expect(document.body).not.toHaveClass('overflow-y-hidden')
+            await waitFor(() => {
+                expect(screen.getByText('Merge face')).toBeInTheDocument()
+            })
+            expect(document.body).not.toHaveClass('overflow-hidden')
+            expect(document.body).not.toHaveClass('overflow-y-hidden')
+        } finally {
+            document.body.className = originalBodyClassName
+        }
     })
 
     // ── Detach image – success paths ───────────────────────────────────────────

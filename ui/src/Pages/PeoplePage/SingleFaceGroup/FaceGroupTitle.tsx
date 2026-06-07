@@ -85,6 +85,8 @@ const FaceGroupTitle = ({ faceGroup }: FaceGroupTitleProps) => {
               groupID: faceGroup.id,
               label: normalizeLabel(inputValue),
             },
+          }).catch(() => {
+            // Keep modal open; hook error state (`labelSaveError`) renders inline feedback.
           })
         }}
         value={inputValue}

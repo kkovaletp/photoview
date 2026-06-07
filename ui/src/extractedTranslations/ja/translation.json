@@ -401,6 +401,7 @@
       "action_label": {
         "detach_image": "顔グループの分割",
         "merge_face": "顔グループの統合",
+        "more_actions": "",
         "move_face": "顔グループの移動"
       },
       "confirm_image_detach": "この写真をこの顔グループから外しますか？",

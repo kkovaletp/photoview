@@ -401,6 +401,7 @@
       "action_label": {
         "detach_image": "移除相片",
         "merge_face": "合併人臉",
+        "more_actions": "",
         "move_face": "移動人臉"
       },
       "confirm_image_detach": "您確定要移除這張相片嗎？",

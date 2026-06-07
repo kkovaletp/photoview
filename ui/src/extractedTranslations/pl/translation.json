@@ -415,6 +415,7 @@
       "action_label": {
         "detach_image": "Odłącz zdjęcie",
         "merge_face": "Połącz twarz",
+        "more_actions": "",
         "move_face": "Przesuń twarz"
       },
       "confirm_image_detach": "Czy na pewno chcesz odłączyć to zdjęcie?",

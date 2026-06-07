@@ -405,6 +405,7 @@
       "action_label": {
         "detach_image": "Resmi ayır",
         "merge_face": "Yüzü birleştir",
+        "more_actions": "",
         "move_face": "Yüzü taşı"
       },
       "confirm_image_detach": "Bu resmi ayırmak istediğinizden emin misiniz?",

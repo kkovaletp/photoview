@@ -407,6 +407,7 @@ export default interface Resources {
         "action_label": {
           "detach_image": "Detach image",
           "merge_face": "Merge face",
+          "more_actions": "Face actions",
           "move_face": "Move face"
         },
         "confirm_image_detach": "Are you sure you want to detach this image?",

@@ -405,6 +405,7 @@
       "action_label": {
         "detach_image": "Afbeelding loskoppelen",
         "merge_face": "Gezicht samenvoegen",
+        "more_actions": "",
         "move_face": "Gezicht verplaatsen"
       },
       "confirm_image_detach": "Weet je zeker dat je deze afbeelding wilt loskoppelen?",

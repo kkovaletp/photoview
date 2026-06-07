@@ -140,7 +140,11 @@ const PersonMoreMenu = ({
         as="div"
         className={tailwindClassNames('relative inline-block', className)}
       >
-        <MenuButton as={Button} className="px-1.5 py-1.5 align-middle ml-1">
+        <MenuButton as={Button}
+          aria-label={t('sidebar.people.action_label.more_actions', 'Face actions')}
+          title={t('sidebar.people.action_label.more_actions', 'More actions')}
+          className="px-1.5 py-1.5 align-middle ml-1"
+        >
           <PeopleDotsIcon className="text-gray-500" />
         </MenuButton>
         <MenuItems modal={false} className="">

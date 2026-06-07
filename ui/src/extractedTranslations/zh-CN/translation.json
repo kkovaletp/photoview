@@ -401,6 +401,7 @@
       "action_label": {
         "detach_image": "解除面孔标记",
         "merge_face": "合并面孔",
+        "more_actions": "",
         "move_face": "移动面孔"
       },
       "confirm_image_detach": "您确认要取消该图片的面孔标记吗？",

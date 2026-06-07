@@ -1,5 +1,5 @@
 import { gql, PureQueryOptions, useMutation, useQuery } from '@apollo/client'
-import { useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router'
 import { isNil } from '../../../helpers/utils'
@@ -67,6 +67,9 @@ const MergeFaceGroupsModal = ({
   const { t } = useTranslation()
   const navigate = useNavigate()
 
+  const hasMissingPreselectedRole =
+    state === MergeFaceGroupsModalState.SelectPreselectedRole && !preselectedFaceGroup
+
   const {
     data,
     loading: faceGroupsLoading,
@@ -127,15 +130,29 @@ const MergeFaceGroupsModal = ({
       ? (data.myFaceGroups.find(fg => fg.id === preselectedFaceGroup.id) ?? selectedDestinationFaceGroup)
       : selectedDestinationFaceGroup
 
-  const closeModal = () => {
-    if (isMerging) return
-
-    setState(MergeFaceGroupsModalState.Closed)
+  const resetModalState = useCallback(() => {
     setInlineError(undefined)
     resetCombine?.()
     setPreselectedRole(null)
     setSelectedDestinationFaceGroup(null)
     setSelectedSourceFaceGroupIDs(new Set())
+  }, [resetCombine])
+
+  const closeModal = useCallback(() => {
+    if (isMerging) return
+    setState(MergeFaceGroupsModalState.Closed)
+    resetModalState()
+  }, [isMerging, resetModalState, setState])
+
+  useEffect(() => {
+    if (!hasMissingPreselectedRole) return
+    console.error('MergeFaceGroupsModal opened with SelectPreselectedRole state but no preselectedFaceGroup')
+    setState(MergeFaceGroupsModalState.Closed)
+    resetModalState()
+  }, [hasMissingPreselectedRole, resetModalState, setState])
+
+  if (hasMissingPreselectedRole) {
+    return null
   }
 
   const cancelAction: ModalAction = {
@@ -255,7 +272,7 @@ const MergeFaceGroupsModal = ({
     }).then(({ data, errors }) => {
       if (!data?.combineFaceGroups || (errors?.length ?? 0) > 0) return
 
-      setInlineError(undefined)
+      resetModalState()
       setState(MergeFaceGroupsModalState.Closed)
       navigate(`/people/${effectiveDestinationFaceGroup.id}`)
     }).catch((e: unknown) => {

@@ -39,6 +39,11 @@ type MoveImageFacesModalProps = {
   )[]
 }
 
+const FACE_GROUP_LIST_VARIABLES = {
+  limit: 50,
+  offset: 0,
+} as const
+
 const MoveImageFacesModal = ({
   open,
   setOpen,
@@ -79,7 +84,7 @@ const MoveImageFacesModal = ({
 
   useEffect(() => {
     if (open && imagesSelected) {
-      loadFaceGroups()
+      loadFaceGroups({ variables: FACE_GROUP_LIST_VARIABLES })
     }
   }, [open, imagesSelected, loadFaceGroups])
 
@@ -118,10 +123,7 @@ const MoveImageFacesModal = ({
         return [
           {
             query: MY_FACES_QUERY,
-            variables: {
-              limit: 50,
-              offset: 0,
-            },
+            variables: FACE_GROUP_LIST_VARIABLES,
           },
           {
             query: SINGLE_FACE_GROUP,
@@ -191,7 +193,7 @@ const MoveImageFacesModal = ({
               <button
                 type="button"
                 className="underline"
-                onClick={() => loadFaceGroups()}
+                onClick={() => loadFaceGroups({ variables: FACE_GROUP_LIST_VARIABLES })}
               >
                 {t('general.action.retry', 'Retry')}
               </button>

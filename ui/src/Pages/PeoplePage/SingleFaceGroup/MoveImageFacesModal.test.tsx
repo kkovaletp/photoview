@@ -122,6 +122,11 @@ const MOVE_IMAGE_FACES_MUTATION = gql`
     }
 `
 
+const FACE_GROUP_LIST_VARIABLES = {
+    limit: 50,
+    offset: 0,
+} as const
+
 // ─── Fixtures ─────────────────────────────────────────────────────────────────
 
 function makeImageFace(
@@ -182,7 +187,10 @@ const destGroup2 = makeDestGroup('dest-2', 'Charlie')
 
 function makeMyFacesMock() {
     return {
-        request: { query: MY_FACES_QUERY },
+        request: {
+            query: MY_FACES_QUERY,
+            variables: FACE_GROUP_LIST_VARIABLES,
+        },
         result: {
             data: {
                 myFaceGroups: [
@@ -240,10 +248,7 @@ function makeMyFacesPageRefetchMock() {
     return {
         request: {
             query: MY_FACES_QUERY,
-            variables: {
-                limit: 50,
-                offset: 0,
-            },
+            variables: FACE_GROUP_LIST_VARIABLES,
         },
         result: makeMyFacesMock().result,
     }
@@ -472,7 +477,10 @@ describe('MoveImageFacesModal', () => {
         test('shows an inline error and retries when destination face groups fail to load', async () => {
             const faceId = sourceFaceGroup.imageFaces[0].id
             const loadErrorMock = {
-                request: { query: MY_FACES_QUERY },
+                request: {
+                    query: MY_FACES_QUERY,
+                    variables: FACE_GROUP_LIST_VARIABLES,
+                },
                 error: new Error('Failed to load face groups'),
             }
 

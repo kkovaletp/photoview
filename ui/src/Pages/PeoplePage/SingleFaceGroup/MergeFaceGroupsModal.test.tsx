@@ -1,5 +1,6 @@
 import { vi, describe, test, beforeAll, afterAll, beforeEach, expect } from 'vitest'
 import { render, fireEvent, screen, waitFor } from '@testing-library/react'
+import { InMemoryCache } from '@apollo/client'
 import { MockedProvider } from '@apollo/client/testing'
 import MergeFaceGroupsModal, {
     MergeFaceGroupsModalState,
@@ -119,6 +120,35 @@ const mockFaceGroups: MyFacesQuery['myFaceGroups'] = [
 
 const defaultMyFacesQueryVariables = { limit: 50, offset: 0 }
 
+function createMyFaceGroupsPaginationCache() {
+    return new InMemoryCache({
+        typePolicies: {
+            Query: {
+                fields: {
+                    myFaceGroups: {
+                        keyArgs: [['paginate', ['limit']]],
+                        merge(existing = [], incoming, { args }) {
+                            const offset =
+                                (args?.paginate as { offset?: number } | undefined)?.offset ?? 0
+
+                            if (offset === 0) {
+                                return [...incoming]
+                            }
+
+                            const merged = existing.slice(0)
+                            for (let index = 0; index < incoming.length; index += 1) {
+                                merged[offset + index] = incoming[index]
+                            }
+
+                            return merged
+                        },
+                    },
+                },
+            },
+        },
+    })
+}
+
 function makeMyFacesMock(
     faceGroups: MyFacesQuery['myFaceGroups'] = mockFaceGroups,
     variables = defaultMyFacesQueryVariables,
@@ -236,7 +266,10 @@ function renderModal(
         ...props,
     }
     return render(
-        <MockedProvider mocks={mocks}>
+        <MockedProvider
+            mocks={mocks}
+            cache={createMyFaceGroupsPaginationCache()}
+        >
             <MergeFaceGroupsModal {...merged} />
         </MockedProvider>
     )
@@ -321,6 +354,42 @@ describe('MergeFaceGroupsModal', () => {
         test('renders the modal when state is SelectSources', () => {
             renderModal({ state: MergeFaceGroupsModalState.SelectSources })
             expect(screen.getByTestId('modal')).toBeInTheDocument()
+        })
+
+        test('renders nothing when state is Closed', () => {
+            renderModal({ state: MergeFaceGroupsModalState.Closed })
+            expect(screen.queryByTestId('modal')).not.toBeInTheDocument()
+        })
+
+        test('closes and reports invalid SelectPreselectedRole state without rendering', async () => {
+            const setState = vi.fn()
+            const consoleErrorSpy = vi
+                .spyOn(console, 'error')
+                .mockImplementation(() => undefined)
+
+            try {
+                renderModal(
+                    {
+                        state: MergeFaceGroupsModalState.SelectPreselectedRole,
+                        setState,
+                    },
+                    []
+                )
+
+                expect(screen.queryByTestId('modal')).not.toBeInTheDocument()
+
+                await waitFor(() => {
+                    expect(setState).toHaveBeenCalledWith(
+                        MergeFaceGroupsModalState.Closed
+                    )
+                })
+
+                expect(consoleErrorSpy).toHaveBeenCalledWith(
+                    'MergeFaceGroupsModal opened with SelectPreselectedRole state but no preselectedFaceGroup'
+                )
+            } finally {
+                consoleErrorSpy.mockRestore()
+            }
         })
     })
 
@@ -433,6 +502,7 @@ describe('MergeFaceGroupsModal', () => {
             triggerIntersection?.()
 
             await waitFor(() => expect(secondPageLoaded).toHaveBeenCalled())
+            expect(await screen.findByTestId('facegroup-50')).toBeInTheDocument()
         })
     })
 
