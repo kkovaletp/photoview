@@ -576,7 +576,7 @@ describe('AddUserRow', () => {
           {
             request: {
               query: CREATE_USER_MUTATION,
-              variables: { username: 'testuser', admin: false },
+              variables: { username: 'testuser', admin: false, rootPath: undefined },
             },
             result: {
               errors: [new GraphQLError('Something went wrong')],
