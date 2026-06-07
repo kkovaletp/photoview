@@ -246,11 +246,15 @@
       },
       "confirm_delete_user": {
         "action": "Eliminar {{user}}",
-        "description": "<0>¿Estás seguro de que quieres eliminar a <1></1>?</0><p>Esta acción no puede deshacerse</p>",
+        "description": "<line>¿Estás seguro de que quieres eliminar a <bold>{{username}}</bold>?</line><line>Esta acción no puede deshacerse</line>",
         "title": "Eliminar usuario"
       },
+      "edit": {
+        "add_path_error": "",
+        "remove_path_error": ""
+      },
       "password_reset": {
-        "description": "Cambiar contraseña a <1>{{username}}</1>",
+        "description": "Cambiar contraseña a <bold>{{username}}</bold>",
         "error": "",
         "form": {
           "label": "Nueva contraseña",

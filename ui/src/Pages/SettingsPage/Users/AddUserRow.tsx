@@ -9,13 +9,11 @@ import { normalizePath, normalizeUsername } from '../../../helpers/normalize'
 import {
   CreateUserMutation,
   CreateUserMutationVariables,
-  UserAddRootPathMutation,
-  UserAddRootPathMutationVariables,
 } from './__generated__/AddUserRow'
 
 export const CREATE_USER_MUTATION = gql`
-  mutation createUser($username: String!, $admin: Boolean!) {
-    createUser(username: $username, admin: $admin) {
+  mutation createUser($username: String!, $admin: Boolean!, $rootPath: String) {
+    createUser(username: $username, admin: $admin, rootPath: $rootPath) {
       id
       username
       admin
@@ -24,19 +22,10 @@ export const CREATE_USER_MUTATION = gql`
   }
 `
 
-export const USER_ADD_ROOT_PATH_MUTATION = gql`
-  mutation userAddRootPath($id: ID!, $rootPath: String!) {
-    userAddRootPath(id: $id, rootPath: $rootPath) {
-      id
-    }
-  }
-`
-
 const initialState = {
   username: '',
   rootPath: '',
   admin: false,
-  userAdded: false,
 }
 
 type AddUserRowProps = {
@@ -56,17 +45,10 @@ const AddUserRow = ({ setShow, show, onUserAdded }: AddUserRowProps) => {
     onUserAdded()
   }
 
-  const [addRootPath, { loading: addRootPathLoading }] = useMutation<
-    UserAddRootPathMutation,
-    UserAddRootPathMutationVariables
-  >(USER_ADD_ROOT_PATH_MUTATION)
-
-  const [createUser, { loading: createUserLoading }] = useMutation<
+  const [createUser, { loading }] = useMutation<
     CreateUserMutation,
     CreateUserMutationVariables
   >(CREATE_USER_MUTATION)
-
-  const loading = addRootPathLoading || createUserLoading
 
   const handleAddUser = async () => {
     setErrorMessage(null)
@@ -79,22 +61,15 @@ const AddUserRow = ({ setShow, show, onUserAdded }: AddUserRowProps) => {
         return
       }
 
-      const result = await createUser({
+      const rootPath = normalizePath(state.rootPath) || undefined
+
+      await createUser({
         variables: {
           username,
           admin: state.admin,
+          rootPath,
         },
       })
-
-      const rootPath = normalizePath(state.rootPath)
-      if (result.data?.createUser?.id && rootPath) {
-        await addRootPath({
-          variables: {
-            id: result.data.createUser.id,
-            rootPath,
-          },
-        })
-      }
 
       finished()
     } catch (error) {

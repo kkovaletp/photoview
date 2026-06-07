@@ -9,3 +9,13 @@ export type UserRemoveAlbumPathMutationMutation = {
   __typename?: 'Mutation'
   userRemoveRootAlbum?: { __typename?: 'Album'; id: string } | null
 }
+
+export type UserAddRootPathMutationVariables = Types.Exact<{
+  id: Types.Scalars['ID']['input']
+  rootPath: Types.Scalars['String']['input']
+}>
+
+export type UserAddRootPathMutation = {
+  __typename?: 'Mutation'
+  userAddRootPath?: { __typename?: 'Album'; id: string } | null
+}

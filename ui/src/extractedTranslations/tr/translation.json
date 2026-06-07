@@ -246,11 +246,15 @@
       },
       "confirm_delete_user": {
         "action": "Sil: {{user}}",
-        "description": "<0>Silmek istediğinize emin misiniz <1></1>?</0><p>Bu işlem geri alınamaz</p>",
+        "description": "<line>Silmek istediğinize emin misiniz <bold>{{username}}</bold>?</line><line>Bu işlem geri alınamaz</line>",
         "title": "Kullanıcı sil"
       },
+      "edit": {
+        "add_path_error": "",
+        "remove_path_error": ""
+      },
       "password_reset": {
-        "description": "<1>{{username}}</1> için parola değiştir",
+        "description": "<bold>{{username}}</bold> için parola değiştir",
         "error": "",
         "form": {
           "label": "Yeni parola",

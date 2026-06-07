@@ -248,11 +248,15 @@ export default interface Resources {
         },
         "confirm_delete_user": {
           "action": "Delete {{user}}",
-          "description": "<0>Are you sure, you want to delete <1></1>?</0><p>This action cannot be undone</p>",
+          "description": "<line>Are you sure, you want to delete <bold>{{username}}</bold>?</line><line>This action cannot be undone</line>",
           "title": "Delete user"
         },
+        "edit": {
+          "add_path_error": "Failed to add path. Please try again.",
+          "remove_path_error": "Failed to remove path. Please try again."
+        },
         "password_reset": {
-          "description": "Change password for <1>{{username}}</1>",
+          "description": "Change password for <bold>{{username}}</bold>",
           "error": "Failed to change password",
           "form": {
             "label": "New password",

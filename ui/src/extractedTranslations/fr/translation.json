@@ -246,11 +246,15 @@
       },
       "confirm_delete_user": {
         "action": "Supprimer {{user}}",
-        "description": "<0>Êtes-vous sûr de vouloir supprimer <1></1>?</0><p>Cette action est irreversible</p>",
+        "description": "<line>Êtes-vous sûr de vouloir supprimer <bold>{{username}}</bold>?</line><line>Cette action est irreversible</line>",
         "title": "Supprimer l'utilisateur"
       },
+      "edit": {
+        "add_path_error": "",
+        "remove_path_error": ""
+      },
       "password_reset": {
-        "description": "Modifier le mot de passe de <1>{{username}}</1>",
+        "description": "Modifier le mot de passe de <bold>{{username}}</bold>",
         "error": "",
         "form": {
           "label": "Nouveau mot de passe",

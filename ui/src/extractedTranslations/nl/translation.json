@@ -246,11 +246,15 @@
       },
       "confirm_delete_user": {
         "action": "Verwijder {{user}}",
-        "description": "<0>Weet je zeker dat je <1></1> wilt verwijderen?</0><p>Deze actie kan niet ongedaan worden gemaakt</p>",
+        "description": "<line>Weet je zeker dat je <bold>{{username}}</bold> wilt verwijderen?</line><line>Deze actie kan niet ongedaan worden gemaakt</line>",
         "title": "Gebruiker verwijderen"
       },
+      "edit": {
+        "add_path_error": "",
+        "remove_path_error": ""
+      },
       "password_reset": {
-        "description": "Wijzig wachtwoord voor <1>{{username}}</1>",
+        "description": "Wijzig wachtwoord voor <bold>{{username}}</bold>",
         "error": "",
         "form": {
           "label": "Nieuw wachtwoord",

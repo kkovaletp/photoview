@@ -301,6 +301,7 @@ export type MutationCombineFaceGroupsArgs = {
 export type MutationCreateUserArgs = {
   admin: Scalars['Boolean']['input']
   password?: InputMaybe<Scalars['String']['input']>
+  rootPath?: InputMaybe<Scalars['String']['input']>
   username: Scalars['String']['input']
 }
 

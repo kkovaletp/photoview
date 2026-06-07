@@ -37,7 +37,11 @@ const ChangePasswordModal = ({
       onClose={onClose}
       title={t('settings.users.password_reset.title', 'Change password')}
       description={
-        <Trans t={t} i18nKey="settings.users.password_reset.description">
+        <Trans t={t}
+          i18nKey="settings.users.password_reset.description"
+          values={{ username: user.username }}
+          components={{ bold: <b /> }}
+        >
           Change password for <b>{user.username}</b>
         </Trans>
       }
