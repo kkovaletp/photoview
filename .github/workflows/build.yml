@@ -81,7 +81,7 @@ jobs:
             '[ $images[] as $img | $tags[] | . + $img ]'
           )
 
-          echo "matrix=$MATRIX" | tee -a $GITHUB_OUTPUT
+          echo "matrix=$MATRIX" | tee -a "$GITHUB_OUTPUT"
 
     outputs:
       matrix: ${{ steps.prepare_matrix.outputs.matrix }}
@@ -109,7 +109,7 @@ jobs:
         run: |
           set -euo pipefail
           git fetch --all --unshallow
-          echo "COMMIT_SHORT_SHA=$(git rev-parse --short HEAD)" | tee -a $GITHUB_OUTPUT
+          echo "COMMIT_SHORT_SHA=$(git rev-parse --short HEAD)" | tee -a "$GITHUB_OUTPUT"
 
       - name: Hadolint report for Sonar
         uses: hadolint/hadolint-action@v3.3.0

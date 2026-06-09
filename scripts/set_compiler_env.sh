@@ -73,13 +73,15 @@ set -a
 source /env
 set +a
 
-echo CGO_ENABLED="${CGO_ENABLED}" >>/env
-echo GOOS="${GOOS}" >>/env
-echo GOARCH="${GOARCH}" >>/env
-echo GOARM="${GOARM}" >>/env
-echo AR="${DEB_HOST_MULTIARCH}-ar" >>/env
-echo CC="${DEB_HOST_MULTIARCH}-gcc" >>/env
-echo CXX="${DEB_HOST_MULTIARCH}-g++" >>/env
-echo PKG_CONFIG_PATH="/usr/lib/${DEB_HOST_MULTIARCH}/pkgconfig/" >>/env
+{
+  echo CGO_ENABLED="${CGO_ENABLED}"
+  echo GOOS="${GOOS}"
+  echo GOARCH="${GOARCH}"
+  echo GOARM="${GOARM}"
+  echo AR="${DEB_HOST_MULTIARCH}-ar"
+  echo CC="${DEB_HOST_MULTIARCH}-gcc"
+  echo CXX="${DEB_HOST_MULTIARCH}-g++"
+  echo PKG_CONFIG_PATH="/usr/lib/${DEB_HOST_MULTIARCH}/pkgconfig/"
+} >> /env
 
 cat /env
