@@ -13,6 +13,7 @@ describe('photo gallery reducer', () => {
         thumbnail: null,
         blurhash: null,
         type: MediaType.Photo,
+        favorite: false,
       },
       {
         __typename: 'Media',
@@ -21,6 +22,7 @@ describe('photo gallery reducer', () => {
         thumbnail: null,
         blurhash: null,
         type: MediaType.Photo,
+        favorite: false,
       },
       {
         __typename: 'Media',
@@ -29,6 +31,7 @@ describe('photo gallery reducer', () => {
         thumbnail: null,
         blurhash: null,
         type: MediaType.Photo,
+        favorite: false,
       },
     ],
   }

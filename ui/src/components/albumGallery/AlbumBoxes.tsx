@@ -1,10 +1,10 @@
 import { useTranslation } from 'react-i18next'
-import { albumQuery_album_subAlbums } from '../../Pages/AlbumPage/__generated__/albumQuery'
+import { AlbumQueryQuery } from '../../Pages/AlbumPage/__generated__/AlbumPage'
 import { AlbumBox } from './AlbumBox'
 
 type AlbumBoxesProps = {
   error?: Error
-  albums?: albumQuery_album_subAlbums[]
+  albums?: AlbumQueryQuery['album']['subAlbums']
   getCustomLink?(albumID: string): string
 }
 

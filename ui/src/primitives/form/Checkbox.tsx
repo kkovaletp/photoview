@@ -1,4 +1,4 @@
-import React from 'react'
+import { InputHTMLAttributes } from 'react'
 import styled from 'styled-components'
 
 const CheckboxLabelWrapper = styled.label`
@@ -54,7 +54,7 @@ const CheckboxLabelWrapper = styled.label`
   }
 `
 
-type CheckboxProps = React.InputHTMLAttributes<HTMLInputElement> & {
+type CheckboxProps = InputHTMLAttributes<HTMLInputElement> & {
   label: string
   className?: string
 }

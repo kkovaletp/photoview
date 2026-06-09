@@ -18,7 +18,9 @@
     }
   },
   "album_page": {
-    "load_error": ""
+    "load_error": "",
+    "loading": "",
+    "not_found": ""
   },
   "ethical_use_license_page": {
     "load_error": "",
@@ -31,6 +33,7 @@
       "cancel": "Avbryt",
       "close": "",
       "remove": "Ta bort",
+      "retry": "",
       "save": "Spara",
       "submit": ""
     },
@@ -58,7 +61,8 @@
       "result_type": {
         "albums": "Album",
         "media": ""
-      }
+      },
+      "results_label": ""
     }
   },
   "login_page": {
@@ -109,6 +113,9 @@
           "select_images": ""
         },
         "description": "",
+        "error": {
+          "network": ""
+        },
         "title": ""
       },
       "merge_face_groups": {
@@ -116,6 +123,22 @@
         "destination_table": {
           "title": "Välj målansiktet"
         },
+        "error": {
+          "network": ""
+        },
+        "face_groups_load_error": "",
+        "preselected_role": {
+          "destination": {
+            "description": "",
+            "title": ""
+          },
+          "source": {
+            "description": "",
+            "title": ""
+          }
+        },
+        "preselected_role_description": "",
+        "source_role_destination_description": "",
         "sources_description": "Välj en eller flera ansiktsgrupper att slå samman med målgruppen",
         "sources_table": {
           "title": "Välj minst ett ansikte att slå ihop med:"
@@ -125,8 +148,12 @@
       "move_image_faces": {
         "description": "",
         "destination_face_group_table": {
+          "load_error": "",
           "move_action": "",
           "title": ""
+        },
+        "error": {
+          "network": ""
         },
         "image_select_table": {
           "next_action": "",
@@ -185,6 +212,8 @@
     "scanner": {
       "description": "Ska skanna alla användare efter nya eller uppdaterade media ",
       "scan_all_users": "Skanna alla användare",
+      "scanning": "",
+      "starting": "",
       "title": "Skanner"
     },
     "user_preferences": {
@@ -217,11 +246,15 @@
       },
       "confirm_delete_user": {
         "action": "Radera {{user}}",
-        "description": "<0>Är du säker att du vill radera <1></1>?</0><p>Denna åtgärd kan inte ångras</p>",
+        "description": "<line>Är du säker att du vill radera <bold>{{username}}</bold>?</line><line>Denna åtgärd kan inte ångras</line>",
         "title": "Radera användare"
       },
+      "edit": {
+        "add_path_error": "",
+        "remove_path_error": ""
+      },
       "password_reset": {
-        "description": "Ändra lösenord för <1>{{username}}</1>",
+        "description": "Ändra lösenord för <bold>{{username}}</bold>",
         "error": "",
         "form": {
           "label": "Nytt lösenord",
@@ -372,6 +405,7 @@
       "action_label": {
         "detach_image": "",
         "merge_face": "",
+        "more_actions": "",
         "move_face": ""
       },
       "confirm_image_detach": "",
@@ -379,8 +413,10 @@
     },
     "sharing": {
       "add_share": "Dela",
+      "add_share_error": "",
       "copy_link": "Kopiera länk",
       "delete": "",
+      "delete_error": "",
       "error": "",
       "expiration_date": "",
       "more": "",
@@ -433,9 +469,7 @@
     }
   },
   "title": {
-    "loading_album": "Laddar album",
     "login": "",
-    "not_found": "",
     "people": "Personer",
     "settings": "Inställningar"
   }

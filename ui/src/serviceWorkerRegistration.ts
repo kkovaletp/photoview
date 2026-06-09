@@ -11,13 +11,11 @@
 // opt-in, read https://cra.link/PWA
 
 const isLocalhost = Boolean(
-  window.location.hostname === 'localhost' ||
+  globalThis.location.hostname === 'localhost' ||
   // [::1] is the IPv6 localhost address.
-  window.location.hostname === '[::1]' ||
+  globalThis.location.hostname === '[::1]' ||
   // 127.0.0.0/8 are considered localhost for IPv4.
-  window.location.hostname.match(
-    /^127(?:\.(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)){3}$/
-  )
+  new RegExp(/^127(?:\.(?:25[0-5]|2[0-4]\d|[01]?\d\d?)){3}$/).exec(globalThis.location.hostname)
 )
 
 type Config = {
@@ -35,8 +33,8 @@ type Config = {
 export function register(config?: Config) {
   if (import.meta.env.PROD && 'serviceWorker' in navigator) {
     // The URL constructor is available in all browsers that support SW.
-    const publicUrl = new URL(import.meta.env.BASE_URL, window.location.href)
-    if (publicUrl.origin !== window.location.origin) {
+    const publicUrl = new URL(import.meta.env.BASE_URL, globalThis.location.href)
+    if (publicUrl.origin !== globalThis.location.origin) {
       // Our service worker won't work if PUBLIC_URL is on a different origin
       // from what our page is served on. This might happen if a CDN is used to
       // serve assets; see https://github.com/facebook/create-react-app/issues/2374
@@ -88,7 +86,7 @@ function registerValidSW(swUrl: string, config?: Config) {
               // but the previous service worker will still serve the older
               // content until all client tabs are closed.
               // Execute callback
-              if (config && config.onUpdate) {
+              if (config?.onUpdate) {
                 config.onUpdate(registration)
               }
               // At this point, everything has been precached.
@@ -123,12 +121,12 @@ function checkValidServiceWorker(swUrl: string, config?: Config) {
       const contentType = response.headers.get('content-type')
       if (
         response.status === 404 ||
-        (contentType != null && contentType.indexOf('javascript') === -1)
+        (contentType?.indexOf('javascript') === -1)
       ) {
         // No service worker found. Probably a different app. Reload the page.
         navigator.serviceWorker.ready.then(registration => {
           registration.unregister().then(() => {
-            window.location.reload()
+            globalThis.location.reload()
           })
         })
       } else {

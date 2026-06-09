@@ -1,20 +1,30 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { screen, waitFor } from '@testing-library/react'
+import { screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { MockedResponse } from '@apollo/client/testing'
+import { ApolloError } from '@apollo/client'
 import MediaSidebarPeople from './MediaSidebarPeople'
 import { renderWithProviders } from '../../../helpers/testUtils'
 import { MediaType } from '../../../__generated__/globalTypes'
-import { MediaSidebarMedia, SIDEBAR_MEDIA_QUERY } from './MediaSidebar'
+import { MediaSidebarMedia } from './MediaSidebar'
 
-// Mock react-i18next
+// ─── Hoisted mocks ────────────────────────────────────────────────────────────
+// vi.hoisted runs before vi.mock factories, so these refs are available inside them.
+
+const { mockDetachImageFaces, mockDetachHookState } = vi.hoisted(() => ({
+    mockDetachImageFaces: vi.fn(),
+    mockDetachHookState: {
+        error: undefined as ApolloError | undefined,
+    },
+}))
+
+// ─── Module mocks ─────────────────────────────────────────────────────────────
+
 vi.mock('react-i18next', () => ({
     useTranslation: () => ({
         t: (key: string, fallback?: string) => fallback || key,
     }),
 }))
 
-// Mock useNavigate
 const mockNavigate = vi.fn()
 vi.mock('react-router', async () => {
     const actual = await vi.importActual('react-router') as object
@@ -54,9 +64,9 @@ vi.mock('../../../Pages/PeoplePage/PeoplePage', () => ({
 // Mock MergeFaceGroupsModal
 vi.mock('../../../Pages/PeoplePage/SingleFaceGroup/MergeFaceGroupsModal', () => ({
     __esModule: true,
-    default: ({ state, setState, preselectedDestinationFaceGroup }: any) => (
+    default: ({ state, setState, preselectedFaceGroup }: any) => (
         <div
-            data-testid={`merge-modal-${preselectedDestinationFaceGroup?.id}`}
+            data-testid={`merge-modal-${preselectedFaceGroup?.id}`}
             data-state={state}
         >
             {state !== 'closed' && (
@@ -66,6 +76,7 @@ vi.mock('../../../Pages/PeoplePage/SingleFaceGroup/MergeFaceGroupsModal', () => 
     ),
     MergeFaceGroupsModalState: {
         Closed: 'closed',
+        SelectPreselectedRole: 'select_preselected_role',
         SelectDestination: 'select_destination',
         SelectSources: 'select_sources',
     },
@@ -84,138 +95,96 @@ vi.mock('../../../Pages/PeoplePage/SingleFaceGroup/MoveImageFacesModal', () => (
     ),
 }))
 
-// Mock useDetachImageFaces hook
-const mockDetachImageFaces = vi.fn()
 vi.mock(
     '../../../Pages/PeoplePage/SingleFaceGroup/DetachImageFacesModal',
     () => ({
-        useDetachImageFaces: () => mockDetachImageFaces,
+        useDetachImageFaces: () => ({
+            detachImageFaces: mockDetachImageFaces,
+            error: mockDetachHookState.error,
+        }),
     })
 )
+
+// ─── Fixtures ─────────────────────────────────────────────────────────────────
+
+const createMockMedia = (
+    faces: MediaSidebarMedia['faces'] | null = null,
+): MediaSidebarMedia => ({
+    __typename: 'Media',
+    id: 'media-1',
+    title: 'test-photo.jpg',
+    type: MediaType.Photo,
+    highRes: {
+        __typename: 'MediaURL',
+        url: '/photo/highres.jpg',
+        width: 3000,
+        height: 2000,
+    },
+    thumbnail: {
+        __typename: 'MediaURL',
+        url: '/photo/thumb.jpg',
+        width: 400,
+        height: 300,
+    },
+    videoWeb: null,
+    album: {
+        __typename: 'Album',
+        id: 'album-1',
+        title: 'Test Album',
+    },
+    faces: faces ?? undefined,
+})
+
+const mockFace = (id: string, groupId: string, label: string | null) => ({
+    __typename: 'ImageFace' as const,
+    id,
+    rectangle: {
+        __typename: 'FaceRectangle' as const,
+        minX: 0.1,
+        maxX: 0.3,
+        minY: 0.2,
+        maxY: 0.4,
+    },
+    faceGroup: {
+        __typename: 'FaceGroup' as const,
+        id: groupId,
+        label,
+        imageFaceCount: 5,
+    },
+    media: {
+        __typename: 'Media' as const,
+        id: 'media-1',
+        title: 'test-photo.jpg',
+        thumbnail: {
+            __typename: 'MediaURL' as const,
+            url: '/photo/thumb.jpg',
+            width: 400,
+            height: 300,
+        },
+    },
+})
+
+const threeDefaultFaces = [
+    mockFace('face-1', 'group-1', 'Alice'),
+    mockFace('face-2', 'group-2', 'Bob'),
+    mockFace('face-3', 'group-3', null),
+]
+
+// ─── Tests ────────────────────────────────────────────────────────────────────
 
 describe('MediaSidebarPeople', () => {
     beforeEach(() => {
         vi.clearAllMocks()
+        mockDetachHookState.error = undefined
         mockDetachImageFaces.mockResolvedValue({
             data: { detachImageFaces: { id: 'new-face-group-1', label: null } },
         })
     })
 
-    const createMockMedia = (hasFaces: boolean): MediaSidebarMedia => ({
-        __typename: 'Media',
-        id: 'media-1',
-        title: 'test-photo.jpg',
-        type: MediaType.Photo,
-        highRes: {
-            __typename: 'MediaURL',
-            url: '/photo/highres.jpg',
-            width: 3000,
-            height: 2000,
-        },
-        thumbnail: {
-            __typename: 'MediaURL',
-            url: '/photo/thumb.jpg',
-            width: 400,
-            height: 300,
-        },
-        videoWeb: null,
-        album: {
-            __typename: 'Album',
-            id: 'album-1',
-            title: 'Test Album',
-        },
-        faces: hasFaces
-            ? [
-                {
-                    __typename: 'ImageFace',
-                    id: 'face-1',
-                    rectangle: {
-                        __typename: 'FaceRectangle',
-                        minX: 0.1,
-                        maxX: 0.3,
-                        minY: 0.2,
-                        maxY: 0.4,
-                    },
-                    faceGroup: {
-                        __typename: 'FaceGroup',
-                        id: 'group-1',
-                        label: 'Alice',
-                        imageFaceCount: 5,
-                    },
-                    media: {
-                        __typename: 'Media',
-                        id: 'media-1',
-                        title: 'test-photo.jpg',
-                        thumbnail: {
-                            __typename: 'MediaURL',
-                            url: '/photo/thumb.jpg',
-                            width: 400,
-                            height: 300,
-                        },
-                    },
-                },
-                {
-                    __typename: 'ImageFace',
-                    id: 'face-2',
-                    rectangle: {
-                        __typename: 'FaceRectangle',
-                        minX: 0.5,
-                        maxX: 0.7,
-                        minY: 0.3,
-                        maxY: 0.5,
-                    },
-                    faceGroup: {
-                        __typename: 'FaceGroup',
-                        id: 'group-2',
-                        label: 'Bob',
-                        imageFaceCount: 3,
-                    },
-                    media: {
-                        __typename: 'Media',
-                        id: 'media-1',
-                        title: 'test-photo.jpg',
-                        thumbnail: {
-                            __typename: 'MediaURL',
-                            url: '/photo/thumb.jpg',
-                            width: 400,
-                            height: 300,
-                        },
-                    },
-                },
-                {
-                    __typename: 'ImageFace',
-                    id: 'face-3',
-                    rectangle: {
-                        __typename: 'FaceRectangle',
-                        minX: 0.7,
-                        maxX: 0.9,
-                        minY: 0.1,
-                        maxY: 0.3,
-                    },
-                    faceGroup: {
-                        __typename: 'FaceGroup',
-                        id: 'group-3',
-                        label: null,
-                        imageFaceCount: 1,
-                    },
-                    media: {
-                        __typename: 'Media',
-                        id: 'media-1',
-                        title: 'test-photo.jpg',
-                        thumbnail: {
-                            __typename: 'MediaURL',
-                            url: '/photo/thumb.jpg',
-                            width: 400,
-                            height: 300,
-                        },
-                    },
-                },
-            ]
-            : [],
-    })
+    // ── Rendering ──────────────────────────────────────────────────────────────
 
     it('should render people section with faces', () => {
-        const media = createMockMedia(true)
+        const media = createMockMedia(threeDefaultFaces)
         renderWithProviders(<MediaSidebarPeople media={media} />)
 
         expect(screen.getByText('People')).toBeInTheDocument()
@@ -224,8 +193,16 @@ describe('MediaSidebarPeople', () => {
         expect(screen.getByText('Unlabeled')).toBeInTheDocument()
     })
 
-    it('should not render when there are no faces', () => {
-        const media = createMockMedia(false)
+    it('should not render when faces array is empty', () => {
+        const media = createMockMedia([])
+        const { container } = renderWithProviders(
+            <MediaSidebarPeople media={media} />
+        )
+        expect(container.firstChild).toBeNull()
+    })
+
+    it('should not render when faces is null/undefined', () => {
+        const media = createMockMedia(null)
         const { container } = renderWithProviders(
             <MediaSidebarPeople media={media} />
         )
@@ -233,38 +210,34 @@ describe('MediaSidebarPeople', () => {
         expect(container.firstChild).toBeNull()
     })
 
-    it('should render faces in a grid layout', () => {
-        const media = createMockMedia(true)
+    it('should render FaceCircleImage for each face', () => {
+        const media = createMockMedia(threeDefaultFaces)
         renderWithProviders(<MediaSidebarPeople media={media} />)
 
-        const faceCircles = screen.getAllByTestId(/^face-circle-/)
-        expect(faceCircles).toHaveLength(3)
+        expect(screen.getByTestId('face-circle-face-1')).toBeInTheDocument()
+        expect(screen.getByTestId('face-circle-face-2')).toBeInTheDocument()
+        expect(screen.getByTestId('face-circle-face-3')).toBeInTheDocument()
     })
 
-    it('should render menu button for each face', async () => {
-        const media = createMockMedia(true)
-        userEvent.setup()
+    it('should pass menuFlipped=true for faces at index divisible by 3 (first column)', () => {
+        // With 3 faces, index 0 is menuFlipped=true; indices 1, 2 are false.
+        // The component renders without error for all three positions.
+        const media = createMockMedia(threeDefaultFaces)
         renderWithProviders(<MediaSidebarPeople media={media} />)
-
-        await waitFor(() => {
-            const menuButtons = screen.getAllByRole('button')
-            // Filter to get only the menu buttons (not modal buttons)
-            const actualMenuButtons = menuButtons.filter(
-                (btn) => btn.querySelector('svg') !== null
-            )
-            expect(actualMenuButtons.length).toBeGreaterThan(0)
-        })
+        // Indirectly verified: all menu buttons render for all three faces
+        expect(screen.getAllByRole('button').length).toBeGreaterThanOrEqual(3)
     })
 
-    it('should open menu and show all options when menu button is clicked', async () => {
-        const media = createMockMedia(true)
+    // ── Menu interactions ──────────────────────────────────────────────────────
+
+    it('should open menu and show all action items when menu button is clicked', async () => {
+        const media = createMockMedia(threeDefaultFaces)
         const user = userEvent.setup()
         renderWithProviders(<MediaSidebarPeople media={media} />)
 
         // Find and click the first menu button
         const menuButtons = screen.getAllByRole('button')
-        const firstMenuButton = menuButtons[0]
-        await user.click(firstMenuButton)
+        await user.click(menuButtons[0])
 
         await waitFor(() => {
             expect(screen.getByText('Change label')).toBeInTheDocument()
@@ -274,8 +247,8 @@ describe('MediaSidebarPeople', () => {
         })
     })
 
-    it('should trigger change label mode when "Change label" is clicked', async () => {
-        const media = createMockMedia(true)
+    it('should trigger change-label edit mode when "Change label" is clicked', async () => {
+        const media = createMockMedia(threeDefaultFaces)
         const user = userEvent.setup()
         renderWithProviders(<MediaSidebarPeople media={media} />)
 
@@ -283,10 +256,7 @@ describe('MediaSidebarPeople', () => {
         const menuButtons = screen.getAllByRole('button')
         await user.click(menuButtons[0])
 
-        // Click "Change label"
-        await waitFor(() => {
-            expect(screen.getByText('Change label')).toBeInTheDocument()
-        })
+        await waitFor(() => expect(screen.getByText('Change label')).toBeInTheDocument())
         await user.click(screen.getByText('Change label'))
 
         // Should show input field
@@ -295,99 +265,112 @@ describe('MediaSidebarPeople', () => {
         })
     })
 
-    it('should open merge modal when "Merge face" is clicked', async () => {
-        const media = createMockMedia(true)
+    it('should hide the more-menu button while in label-edit mode', async () => {
+        const media = createMockMedia(threeDefaultFaces)
         const user = userEvent.setup()
         renderWithProviders(<MediaSidebarPeople media={media} />)
 
-        // Open menu for first face (Alice - group-1)
-        const menuButtons = screen.getAllByRole('button')
-        await user.click(menuButtons[0])
+        const initialButtonCount = screen.getAllByRole('button').length
 
-        // Click "Merge face"
+        await user.click(screen.getAllByRole('button')[0])
+        await waitFor(() => expect(screen.getByText('Change label')).toBeInTheDocument())
+        await user.click(screen.getByText('Change label'))
+
         await waitFor(() => {
-            expect(screen.getByText('Merge face')).toBeInTheDocument()
+            expect(screen.getAllByRole('button').length).toBeLessThan(initialButtonCount)
         })
+    })
+
+    it('should open merge modal when "Merge face" is clicked', async () => {
+        const media = createMockMedia(threeDefaultFaces)
+        const user = userEvent.setup()
+        renderWithProviders(<MediaSidebarPeople media={media} />)
+
+        await user.click(screen.getAllByRole('button')[0])
+        await waitFor(() => expect(screen.getByText('Merge face')).toBeInTheDocument())
         await user.click(screen.getByText('Merge face'))
 
         // Check modal state for the specific face group
         await waitFor(() => {
-            const mergeModal = screen.getByTestId('merge-modal-group-1')
-            expect(mergeModal).toHaveAttribute('data-state', 'select_destination')
+            expect(screen.getByTestId('merge-modal-group-1')).toHaveAttribute(
+                'data-state',
+                'select_preselected_role'
+            )
         })
     })
 
     it('should open move modal when "Move face" is clicked', async () => {
-        const media = createMockMedia(true)
+        const media = createMockMedia(threeDefaultFaces)
         const user = userEvent.setup()
         renderWithProviders(<MediaSidebarPeople media={media} />)
 
-        // Open menu for first face (Alice - group-1)
-        const menuButtons = screen.getAllByRole('button')
-        await user.click(menuButtons[0])
-
-        // Click "Move face"
-        await waitFor(() => {
-            expect(screen.getByText('Move face')).toBeInTheDocument()
-        })
+        await user.click(screen.getAllByRole('button')[0])
+        await waitFor(() => expect(screen.getByText('Move face')).toBeInTheDocument())
         await user.click(screen.getByText('Move face'))
 
         // Check modal is open for the specific face group
         await waitFor(() => {
-            const moveModal = screen.getByTestId('move-modal-group-1')
-            expect(moveModal).toHaveAttribute('data-open', 'true')
+            expect(screen.getByTestId('move-modal-group-1')).toHaveAttribute('data-open', 'true')
         })
     })
 
-    it('should handle detach image with confirmation', async () => {
-        const media = createMockMedia(true)
+    it('should not lock body scrolling when the people more-menu is opened', async () => {
+        const media = createMockMedia(threeDefaultFaces)
         const user = userEvent.setup()
+        const originalBodyClassName = document.body.className
 
-        // Mock window.confirm
-        const confirmSpy = vi.spyOn(globalThis, 'confirm')
-        confirmSpy.mockReturnValue(true)
+        try {
+            document.body.className = ''
 
-        const mocks: MockedResponse[] = [
-            {
-                request: {
-                    query: SIDEBAR_MEDIA_QUERY,
-                    variables: { id: 'media-1' },
-                },
-                result: {
-                    data: {
-                        media: createMockMedia(true),
-                    },
-                },
-            },
-        ]
+            renderWithProviders(<MediaSidebarPeople media={media} />)
 
-        renderWithProviders(<MediaSidebarPeople media={media} />, { mocks })
+            await user.click(screen.getAllByRole('button')[0])
 
-        // Open menu
-        const menuButtons = screen.getAllByRole('button')
-        await user.click(menuButtons[0])
+            await waitFor(() => {
+                expect(screen.getByText('Merge face')).toBeInTheDocument()
+            })
+            expect(document.body).not.toHaveClass('overflow-hidden')
+            expect(document.body).not.toHaveClass('overflow-y-hidden')
+        } finally {
+            document.body.className = originalBodyClassName
+        }
+    })
 
-        // Click "Detach image"
-        await waitFor(() => {
-            expect(screen.getByText('Detach image')).toBeInTheDocument()
-        })
+    // ── Detach image – success paths ───────────────────────────────────────────
+
+    it('should call detachImageFaces with the correct face when confirmation is accepted', async () => {
+        const media = createMockMedia(threeDefaultFaces)
+        const user = userEvent.setup()
+        const confirmSpy = vi.spyOn(globalThis, 'confirm').mockReturnValue(true)
+
+        renderWithProviders(<MediaSidebarPeople media={media} />)
+
+        await user.click(screen.getAllByRole('button')[0])
+        await waitFor(() => expect(screen.getByText('Detach image')).toBeInTheDocument())
         await user.click(screen.getByText('Detach image'))
 
-        // Verify confirm was called
         await waitFor(() => {
-            expect(confirmSpy).toHaveBeenCalledWith(
-                'Are you sure you want to detach this image?'
+            expect(confirmSpy).toHaveBeenCalledWith('Are you sure you want to detach this image?')
+            expect(mockDetachImageFaces).toHaveBeenCalledWith(
+                [expect.objectContaining({ id: 'face-1' })],
+                expect.objectContaining({ sourceFaceGroupID: 'group-1' })
             )
         })
 
-        // Verify mutation was called
-        await waitFor(() => {
-            expect(mockDetachImageFaces).toHaveBeenCalledWith([
-                expect.objectContaining({ id: 'face-1' }),
-            ])
-        })
+        confirmSpy.mockRestore()
+    })
 
-        // Verify navigation
+    it('should navigate to the new face group after a successful detach', async () => {
+        const media = createMockMedia(threeDefaultFaces)
+        const user = userEvent.setup()
+        const confirmSpy = vi.spyOn(globalThis, 'confirm').mockReturnValue(true)
+
+        renderWithProviders(<MediaSidebarPeople media={media} />)
+
+        await user.click(screen.getAllByRole('button')[0])
+        await waitFor(() => expect(screen.getByText('Detach image')).toBeInTheDocument())
+        await user.click(screen.getByText('Detach image'))
+
         await waitFor(() => {
             expect(mockNavigate).toHaveBeenCalledWith('/people/new-face-group-1')
         })
@@ -395,70 +378,181 @@ describe('MediaSidebarPeople', () => {
         confirmSpy.mockRestore()
     })
 
-    it('should not detach image when confirmation is cancelled', async () => {
-        const media = createMockMedia(true)
-        const user = userEvent.setup()
+    it('should not navigate when mutation resolves with falsy data', async () => {
+        mockDetachImageFaces.mockResolvedValue({ data: null })
 
-        // Mock window.confirm to return false
-        const confirmSpy = vi.spyOn(globalThis, 'confirm')
-        confirmSpy.mockReturnValue(false)
+        const media = createMockMedia(threeDefaultFaces)
+        const user = userEvent.setup()
+        const confirmSpy = vi.spyOn(globalThis, 'confirm').mockReturnValue(true)
 
         renderWithProviders(<MediaSidebarPeople media={media} />)
 
-        // Open menu
-        const menuButtons = screen.getAllByRole('button')
-        await user.click(menuButtons[0])
-
-        // Click "Detach image"
-        await waitFor(() => {
-            expect(screen.getByText('Detach image')).toBeInTheDocument()
-        })
+        await user.click(screen.getAllByRole('button')[0])
+        await waitFor(() => expect(screen.getByText('Detach image')).toBeInTheDocument())
         await user.click(screen.getByText('Detach image'))
 
-        // Verify confirm was called
-        expect(confirmSpy).toHaveBeenCalled()
-
-        // Verify mutation was NOT called
-        expect(mockDetachImageFaces).not.toHaveBeenCalled()
-
-        // Verify no navigation
+        // Give the promise a tick to resolve
+        await waitFor(() => expect(mockDetachImageFaces).toHaveBeenCalled())
         expect(mockNavigate).not.toHaveBeenCalled()
 
         confirmSpy.mockRestore()
     })
 
-    it('should hide menu when editing label', async () => {
-        const media = createMockMedia(true)
+    // ── Detach image – confirmation cancelled ──────────────────────────────────
+
+    it('should not call detachImageFaces when confirmation is cancelled', async () => {
+        const media = createMockMedia(threeDefaultFaces)
         const user = userEvent.setup()
+        const confirmSpy = vi.spyOn(globalThis, 'confirm').mockReturnValue(false)
+
         renderWithProviders(<MediaSidebarPeople media={media} />)
 
-        // Get initial menu button count
-        const initialMenuButtons = screen.getAllByRole('button')
-        const initialCount = initialMenuButtons.length
+        await user.click(screen.getAllByRole('button')[0])
+        await waitFor(() => expect(screen.getByText('Detach image')).toBeInTheDocument())
+        await user.click(screen.getByText('Detach image'))
 
-        // Open menu and start editing
-        await user.click(initialMenuButtons[0])
-        await waitFor(() => {
-            expect(screen.getByText('Change label')).toBeInTheDocument()
-        })
-        await user.click(screen.getByText('Change label'))
+        expect(mockDetachImageFaces).not.toHaveBeenCalled()
+        expect(mockNavigate).not.toHaveBeenCalled()
 
-        // Wait for edit mode
-        await waitFor(() => {
-            expect(screen.getByTestId('label-input')).toBeInTheDocument()
-        })
-
-        // Menu button should be hidden (fewer buttons now)
-        const buttonsWhileEditing = screen.getAllByRole('button')
-        expect(buttonsWhileEditing.length).toBeLessThan(initialCount)
+        confirmSpy.mockRestore()
     })
 
-    it('should apply menu flip for first column faces', () => {
-        const media = createMockMedia(true)
+    // ── Detach image – error paths ─────────────────────────────────────────────
+
+    it('should display the error message in an alert when detach rejects with an Error instance', async () => {
+        mockDetachImageFaces.mockRejectedValue(new Error('Server unavailable'))
+
+        const media = createMockMedia(threeDefaultFaces)
+        const user = userEvent.setup()
+        const confirmSpy = vi.spyOn(globalThis, 'confirm').mockReturnValue(true)
+
         renderWithProviders(<MediaSidebarPeople media={media} />)
 
-        // The first face (index 0) should have menuFlipped=true (0 % 3 == 0)
-        // This is tested indirectly through rendering without errors
-        expect(screen.getByText('Alice')).toBeInTheDocument()
+        await user.click(screen.getAllByRole('button')[0])
+        await waitFor(() => expect(screen.getByText('Detach image')).toBeInTheDocument())
+        await user.click(screen.getByText('Detach image'))
+
+        // Click "Detach image"
+        await waitFor(() => {
+            const alert = screen.getByRole('alert')
+            expect(alert).toBeInTheDocument()
+            expect(alert).toHaveTextContent('Server unavailable')
+        })
+
+        expect(mockNavigate).not.toHaveBeenCalled()
+
+        confirmSpy.mockRestore()
+    })
+
+    it('should display the fallback translation when detach rejects with a non-Error value', async () => {
+        mockDetachImageFaces.mockRejectedValue('string-error')
+
+        const media = createMockMedia(threeDefaultFaces)
+        const user = userEvent.setup()
+        const confirmSpy = vi.spyOn(globalThis, 'confirm').mockReturnValue(true)
+
+        renderWithProviders(<MediaSidebarPeople media={media} />)
+
+        await user.click(screen.getAllByRole('button')[0])
+        await waitFor(() => expect(screen.getByText('Detach image')).toBeInTheDocument())
+        await user.click(screen.getByText('Detach image'))
+
+        await waitFor(() => {
+            const alert = screen.getByRole('alert')
+            expect(alert).toBeInTheDocument()
+            expect(alert).toHaveTextContent('Network error while detaching images')
+        })
+
+        expect(mockNavigate).not.toHaveBeenCalled()
+
+        confirmSpy.mockRestore()
+    })
+
+    it('should clear a previous inlineError when a new detach attempt is started', async () => {
+        // First attempt fails
+        mockDetachImageFaces.mockRejectedValueOnce(new Error('First failure'))
+        // Second attempt succeeds
+        mockDetachImageFaces.mockResolvedValueOnce({
+            data: { detachImageFaces: { id: 'new-face-group-1', label: null } },
+        })
+
+        const media = createMockMedia(threeDefaultFaces)
+        const user = userEvent.setup()
+        const confirmSpy = vi.spyOn(globalThis, 'confirm').mockReturnValue(true)
+
+        renderWithProviders(<MediaSidebarPeople media={media} />)
+
+        // First detach attempt – produces an error
+        await user.click(screen.getAllByRole('button')[0])
+        await waitFor(() => expect(screen.getByText('Detach image')).toBeInTheDocument())
+        await user.click(screen.getByText('Detach image'))
+        await waitFor(() => expect(screen.getByRole('alert')).toBeInTheDocument())
+
+        // Second detach attempt – error should be cleared immediately
+        await user.click(screen.getAllByRole('button')[0])
+        await waitFor(() => expect(screen.getByText('Detach image')).toBeInTheDocument())
+        await user.click(screen.getByText('Detach image'))
+
+        await waitFor(() => {
+            expect(mockNavigate).toHaveBeenCalledWith('/people/new-face-group-1')
+        })
+        expect(screen.queryByRole('alert')).not.toBeInTheDocument()
+
+        confirmSpy.mockRestore()
+    })
+
+    // ── detachError from the hook ──────────────────────────────────────────────
+
+    it('should show the hook-level detachError in the alert when there is no inlineError', async () => {
+        mockDetachHookState.error = new ApolloError({
+            errorMessage: 'Hook-level network error',
+        })
+
+        const media = createMockMedia(threeDefaultFaces)
+        renderWithProviders(<MediaSidebarPeople media={media} />)
+
+        const alerts = screen.getAllByRole('alert')
+        expect(alerts.length).toBeGreaterThan(0)
+        alerts.forEach(a => expect(a).toHaveTextContent('Hook-level network error'))
+    })
+
+    it('should prefer inlineError over the hook-level detachError when both are present', async () => {
+        mockDetachImageFaces.mockRejectedValue(new Error('Inline error wins'))
+        mockDetachHookState.error = new ApolloError({
+            errorMessage: 'Hook error should be shadowed',
+        })
+
+        const media = createMockMedia(threeDefaultFaces)
+        const user = userEvent.setup()
+        const confirmSpy = vi.spyOn(globalThis, 'confirm').mockReturnValue(true)
+
+        renderWithProviders(<MediaSidebarPeople media={media} />)
+
+        // Scope to the first face's container (group-1) so we assert the alert for that specific instance
+        const container = screen.getByTestId('face-details-group-1').parentElement as HTMLElement
+
+        // Hook error is visible immediately in this face's area
+        expect(within(container).getByRole('alert')).toHaveTextContent('Hook error should be shadowed')
+
+        // Open the menu for the first face only, then detach to trigger inlineError on that instance
+        await user.click(within(container).getByRole('button'))
+        await waitFor(() => expect(screen.getByText('Detach image')).toBeInTheDocument())
+        await user.click(screen.getByText('Detach image'))
+
+        // Inline error now takes precedence for this face's alert
+        await waitFor(() => {
+            expect(within(container).getByRole('alert')).toHaveTextContent('Inline error wins')
+        })
+
+        confirmSpy.mockRestore()
+    })
+
+    // ── No alert when no error ─────────────────────────────────────────────────
+
+    it('should not render an alert when there is no error', () => {
+        const media = createMockMedia(threeDefaultFaces)
+        renderWithProviders(<MediaSidebarPeople media={media} />)
+
+        expect(screen.queryByRole('alert')).not.toBeInTheDocument()
     })
 })

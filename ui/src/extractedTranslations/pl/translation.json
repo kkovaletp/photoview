@@ -18,7 +18,9 @@
     }
   },
   "album_page": {
-    "load_error": ""
+    "load_error": "",
+    "loading": "",
+    "not_found": ""
   },
   "ethical_use_license_page": {
     "load_error": "",
@@ -31,6 +33,7 @@
       "cancel": "Anuluj",
       "close": "",
       "remove": "Usuń",
+      "retry": "",
       "save": "Zapisz",
       "submit": ""
     },
@@ -58,7 +61,8 @@
       "result_type": {
         "albums": "Albumy",
         "media": "Multimedia"
-      }
+      },
+      "results_label": ""
     }
   },
   "login_page": {
@@ -109,6 +113,9 @@
           "select_images": "Zaznacz zdjęcia do odłączenia"
         },
         "description": "Odłącz wybrane zdjęcia w tej grupie twarzy i przenieś je do nowej grupy twarzy",
+        "error": {
+          "network": ""
+        },
         "title": "Odłącz zdjęcia twarzy"
       },
       "merge_face_groups": {
@@ -116,6 +123,22 @@
         "destination_table": {
           "title": "Wybierz twarz"
         },
+        "error": {
+          "network": ""
+        },
+        "face_groups_load_error": "",
+        "preselected_role": {
+          "destination": {
+            "description": "",
+            "title": ""
+          },
+          "source": {
+            "description": "",
+            "title": ""
+          }
+        },
+        "preselected_role_description": "",
+        "source_role_destination_description": "",
         "sources_description": "",
         "sources_table": {
           "title": ""
@@ -125,8 +148,12 @@
       "move_image_faces": {
         "description": "Przenieś wybrane obrazy tej grupy twarzy do innej grupy twarzy",
         "destination_face_group_table": {
+          "load_error": "",
           "move_action": "Przenieś twarze z obrazu",
           "title": "Wybierz docelową grupę twarzy"
+        },
+        "error": {
+          "network": ""
         },
         "image_select_table": {
           "next_action": "Dalej",
@@ -185,6 +212,8 @@
     "scanner": {
       "description": "Skanuje wszystkich użytkowników w poszukiwaniu nowych lub zaktualizowanych mediów",
       "scan_all_users": "Przeskanuj wszystkich użytkowników",
+      "scanning": "",
+      "starting": "",
       "title": "Skaner"
     },
     "user_preferences": {
@@ -217,11 +246,15 @@
       },
       "confirm_delete_user": {
         "action": "Usuń {{user}}",
-        "description": "<0>Czy jesteś pewien, że chcesz usunąć <1></1>?</0><p>Tej czynności nie można cofnąć</p>",
+        "description": "<line>Czy jesteś pewien, że chcesz usunąć <bold>{{username}}</bold>?</line><line>Tej czynności nie można cofnąć</line>",
         "title": "Usuń użytkownika"
       },
+      "edit": {
+        "add_path_error": "",
+        "remove_path_error": ""
+      },
       "password_reset": {
-        "description": "Zmiana hasła dla <1>{{username}}</1>",
+        "description": "Zmiana hasła dla <bold>{{username}}</bold>",
         "error": "",
         "form": {
           "label": "Nowe hasło",
@@ -382,6 +415,7 @@
       "action_label": {
         "detach_image": "Odłącz zdjęcie",
         "merge_face": "Połącz twarz",
+        "more_actions": "",
         "move_face": "Przesuń twarz"
       },
       "confirm_image_detach": "Czy na pewno chcesz odłączyć to zdjęcie?",
@@ -389,8 +423,10 @@
     },
     "sharing": {
       "add_share": "Dodaj udział",
+      "add_share_error": "",
       "copy_link": "Skopiuj link",
       "delete": "Usuń",
+      "delete_error": "",
       "error": "",
       "expiration_date": "",
       "more": "Więcej",
@@ -443,9 +479,7 @@
     }
   },
   "title": {
-    "loading_album": "Ładowanie albumu",
     "login": "Logowanie",
-    "not_found": "",
     "people": "Ludzie",
     "settings": "Ustawienia"
   }

@@ -18,7 +18,9 @@
     }
   },
   "album_page": {
-    "load_error": ""
+    "load_error": "",
+    "loading": "",
+    "not_found": ""
   },
   "ethical_use_license_page": {
     "load_error": "",
@@ -31,6 +33,7 @@
       "cancel": "取消",
       "close": "",
       "remove": "刪除",
+      "retry": "",
       "save": "儲存",
       "submit": ""
     },
@@ -58,7 +61,8 @@
       "result_type": {
         "albums": "相簿",
         "media": "媒體"
-      }
+      },
+      "results_label": ""
     }
   },
   "login_page": {
@@ -109,6 +113,9 @@
           "select_images": "選擇分離相片"
         },
         "description": "分離已選擇相片中的臉孔群組及移動到新臉孔群組",
+        "error": {
+          "network": ""
+        },
         "title": "分離相片中的臉孔"
       },
       "merge_face_groups": {
@@ -116,6 +123,22 @@
         "destination_table": {
           "title": "選擇目標臉孔群組"
         },
+        "error": {
+          "network": ""
+        },
+        "face_groups_load_error": "",
+        "preselected_role": {
+          "destination": {
+            "description": "",
+            "title": ""
+          },
+          "source": {
+            "description": "",
+            "title": ""
+          }
+        },
+        "preselected_role_description": "",
+        "source_role_destination_description": "",
         "sources_description": "",
         "sources_table": {
           "title": ""
@@ -125,8 +148,12 @@
       "move_image_faces": {
         "description": "移動已選擇的臉孔群組到另一個面孔群組",
         "destination_face_group_table": {
+          "load_error": "",
           "move_action": "移動相片的面孔",
           "title": "選擇目標臉孔群組"
+        },
+        "error": {
+          "network": ""
         },
         "image_select_table": {
           "next_action": "下一步",
@@ -185,6 +212,8 @@
     "scanner": {
       "description": "將掃描所有使用者的新媒體或更新媒體",
       "scan_all_users": "掃描所有使用者",
+      "scanning": "",
+      "starting": "",
       "title": "掃描"
     },
     "user_preferences": {
@@ -217,11 +246,15 @@
       },
       "confirm_delete_user": {
         "action": "刪除 {{user}}",
-        "description": "<0>確定刪除 <1></1>?</0><p>此操作無法取消</p>",
+        "description": "<line>確定刪除 <bold>{{username}}</bold>?</line><line>此操作無法取消</line>",
         "title": "刪除使用者"
       },
+      "edit": {
+        "add_path_error": "",
+        "remove_path_error": ""
+      },
       "password_reset": {
-        "description": "更改 <1>{{username}}</1> 的密碼",
+        "description": "更改 <bold>{{username}}</bold> 的密碼",
         "error": "",
         "form": {
           "label": "新密碼",
@@ -368,6 +401,7 @@
       "action_label": {
         "detach_image": "",
         "merge_face": "",
+        "more_actions": "",
         "move_face": ""
       },
       "confirm_image_detach": "",
@@ -375,8 +409,10 @@
     },
     "sharing": {
       "add_share": "新增分享",
+      "add_share_error": "",
       "copy_link": "複製連結",
       "delete": "刪除分享",
+      "delete_error": "",
       "error": "",
       "expiration_date": "",
       "more": "更多",
@@ -429,9 +465,7 @@
     }
   },
   "title": {
-    "loading_album": "載入相簿",
     "login": "登入",
-    "not_found": "",
     "people": "人物",
     "settings": "設定"
   }

@@ -1,8 +1,8 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import { MockedProvider } from '@apollo/client/testing'
 import SelectImageFacesTable from './SelectImageFacesTable'
-import { myFaces_myFaceGroups_imageFaces } from '../__generated__/myFaces'
-import { singleFaceGroup_faceGroup_imageFaces } from './__generated__/singleFaceGroup'
+import { MyFacesQuery } from '../__generated__/PeoplePage'
+import { SingleFaceGroupQuery } from './__generated__/singleFaceGroupQuery'
 
 // Mock react-i18next
 vi.mock('react-i18next', () => ({
@@ -68,7 +68,7 @@ vi.mock('../../../primitives/Table', () => ({
 }))
 
 // Mock data for testing
-const mockImageFaces: myFaces_myFaceGroups_imageFaces[] = [
+const mockImageFaces: MyFacesQuery['myFaceGroups'][0]['imageFaces'] = [
     {
         __typename: 'ImageFace',
         id: '1',
@@ -194,7 +194,7 @@ describe('SelectImageFacesTable', () => {
 
             // CSS classes for layout
             expect(screen.getByTestId('table-body').closest('div'))
-                .toHaveClass('overflow-auto', 'max-h-[500px]', 'mt-2')
+                .toHaveClass('overflow-auto', 'max-h-125', 'mt-2')
         })
 
         it('handles empty state and missing data gracefully', () => {
@@ -347,7 +347,7 @@ describe('SelectImageFacesTable', () => {
     describe('Component Integration and Props', () => {
         it('integrates with different GraphQL types', () => {
             // Test with different GraphQL types
-            const typedFaces = mockImageFaces as unknown as singleFaceGroup_faceGroup_imageFaces[]
+            const typedFaces = mockImageFaces as unknown as SingleFaceGroupQuery['faceGroup']['imageFaces']
             expect(() => renderComponent({ imageFaces: typedFaces })).not.toThrow()
 
             // Verify it renders correctly with the typed faces

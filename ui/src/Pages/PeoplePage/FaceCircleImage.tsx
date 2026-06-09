@@ -1,13 +1,9 @@
-import React from 'react'
 import styled from 'styled-components'
 import {
   ProtectedImage,
   ProtectedImageProps,
 } from '../../components/photoGallery/ProtectedMedia'
-import {
-  myFaces_myFaceGroups_imageFaces_media,
-  myFaces_myFaceGroups_imageFaces_rectangle,
-} from './__generated__/myFaces'
+import { MyFacesQuery } from './__generated__/PeoplePage'
 
 type FaceImageProps = ProtectedImageProps & {
   origin: { x: number; y: number }
@@ -75,14 +71,14 @@ const CircleImageWrapper = styled.div<{ $size: string }>`
 `
 
 type FaceCircleImageFace = {
-  __typename: 'ImageFace'
+  __typename?: 'ImageFace'
   id: string
-  rectangle: myFaces_myFaceGroups_imageFaces_rectangle
-  media: myFaces_myFaceGroups_imageFaces_media
+  rectangle: MyFacesQuery['myFaceGroups'][0]['imageFaces'][0]['rectangle']
+  media: MyFacesQuery['myFaceGroups'][0]['imageFaces'][0]['media']
 }
 
 type FaceCircleImageProps = {
-  imageFace: FaceCircleImageFace
+  imageFace?: FaceCircleImageFace
   selectable: boolean
   size?: string
 }

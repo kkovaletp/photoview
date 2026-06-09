@@ -18,7 +18,9 @@
     }
   },
   "album_page": {
-    "load_error": ""
+    "load_error": "",
+    "loading": "",
+    "not_found": ""
   },
   "ethical_use_license_page": {
     "load_error": "",
@@ -31,6 +33,7 @@
       "cancel": "Annuller",
       "close": "",
       "remove": "Fjern",
+      "retry": "",
       "save": "Gem",
       "submit": ""
     },
@@ -58,7 +61,8 @@
       "result_type": {
         "albums": "Albums",
         "media": "Medie"
-      }
+      },
+      "results_label": ""
     }
   },
   "login_page": {
@@ -109,6 +113,9 @@
           "select_images": "Vælg billeder som skal løsrives"
         },
         "description": "Løsriv valgte billeder fra denne gruppe og flyt dem til sin egen gruppe",
+        "error": {
+          "network": ""
+        },
         "title": "Løsriv Billeder"
       },
       "merge_face_groups": {
@@ -116,6 +123,22 @@
         "destination_table": {
           "title": "Vælg destinationsgruppe"
         },
+        "error": {
+          "network": ""
+        },
+        "face_groups_load_error": "",
+        "preselected_role": {
+          "destination": {
+            "description": "",
+            "title": ""
+          },
+          "source": {
+            "description": "",
+            "title": ""
+          }
+        },
+        "preselected_role_description": "",
+        "source_role_destination_description": "",
         "sources_description": "",
         "sources_table": {
           "title": ""
@@ -125,8 +148,12 @@
       "move_image_faces": {
         "description": "Flyt valgte billeder fra denne gruppe til en anden gruppe",
         "destination_face_group_table": {
+          "load_error": "",
           "move_action": "Flyt ansigter",
           "title": "Vælg destinationsgruppe"
+        },
+        "error": {
+          "network": ""
         },
         "image_select_table": {
           "next_action": "Næste",
@@ -185,6 +212,8 @@
     "scanner": {
       "description": "Vil scanne alle brugere for nye eller opdaterede medier",
       "scan_all_users": "Scan alle brugere",
+      "scanning": "",
+      "starting": "",
       "title": "Scanner"
     },
     "user_preferences": {
@@ -217,11 +246,15 @@
       },
       "confirm_delete_user": {
         "action": "Slet {user}",
-        "description": "<0>Er du sikker på at du vil slette <1></1>?</0><p>Denne handling kan ikke fortrydes</p>",
+        "description": "<line>Er du sikker på at du vil slette <bold>{{username}}</bold>?</line><line>Denne handling kan ikke fortrydes</line>",
         "title": "Slet bruger"
       },
+      "edit": {
+        "add_path_error": "",
+        "remove_path_error": ""
+      },
       "password_reset": {
-        "description": "Ændre adgangskode for <1>{{username}}</1>",
+        "description": "Ændre adgangskode for <bold>{{username}}</bold>",
         "error": "",
         "form": {
           "label": "Ny adgangskode",
@@ -372,6 +405,7 @@
       "action_label": {
         "detach_image": "Løsriv billede",
         "merge_face": "Sammenflet person",
+        "more_actions": "",
         "move_face": "Flyt person"
       },
       "confirm_image_detach": "Er du sikker på at du vil løsrive dette billede?",
@@ -379,8 +413,10 @@
     },
     "sharing": {
       "add_share": "Tilføj deling",
+      "add_share_error": "",
       "copy_link": "Kopier link",
       "delete": "Slet",
+      "delete_error": "",
       "error": "",
       "expiration_date": "",
       "more": "Mere",
@@ -433,9 +469,7 @@
     }
   },
   "title": {
-    "loading_album": "Loader album",
     "login": "Log ind",
-    "not_found": "",
     "people": "Personer",
     "settings": "Indstillinger"
   }

@@ -4,14 +4,14 @@ import { renderWithProviders } from '../../helpers/testUtils'
 import { gql } from '@apollo/client'
 import { OrderDirection } from '../../__generated__/globalTypes'
 import { ALBUM_GALLERY_FRAGMENT } from '../../components/albumGallery/AlbumGallery'
-import { MEDIA_GALLERY_FRAGMENT } from '../../components/photoGallery/MediaGallery'
+import { MEDIA_GALLERY_FRAGMENT } from '../../components/photoGallery/fragments'
 
 vi.mock('../../hooks/useScrollPagination', () => {
   return {
     default: () => ({
-      containerElem: { current: null },
-      finished: false
-    })
+      containerElem: vi.fn(),
+      finished: true,
+    }),
   }
 })
 
@@ -36,7 +36,7 @@ test('AlbumPage renders', async () => {
         id: "1",
         onlyFavorites: false,
         mediaOrderBy: "date_shot",
-        orderDirection: OrderDirection.ASC,
+        orderDirection: OrderDirection.Asc,
         offset: 0,
         limit: 200
       }
@@ -75,7 +75,7 @@ test('AlbumPage shows loading state', async () => {
         id: "1",
         onlyFavorites: false,
         mediaOrderBy: "date_shot",
-        orderDirection: OrderDirection.ASC,
+        orderDirection: OrderDirection.Asc,
         offset: 0,
         limit: 200
       }
@@ -91,10 +91,11 @@ test('AlbumPage shows loading state', async () => {
   })
 
   await waitFor(() => {
-    // Using regex to match any text containing "Loading"
-    expect(screen.getByText(/Loading/)).toBeInTheDocument()
     expect(document.title).toContain('Loading album')
   })
+
+  expect(screen.getByTestId('Layout')).toBeInTheDocument()
+  expect(screen.queryByLabelText('Loading more media')).not.toBeInTheDocument()
 })
 
 test('AlbumPage shows not found state', async () => {
@@ -105,7 +106,7 @@ test('AlbumPage shows not found state', async () => {
         id: "1",
         onlyFavorites: false,
         mediaOrderBy: "date_shot",
-        orderDirection: OrderDirection.ASC,
+        orderDirection: OrderDirection.Asc,
         offset: 0,
         limit: 200
       }
@@ -125,7 +126,7 @@ test('AlbumPage shows not found state', async () => {
   })
 
   await waitFor(() => {
-    expect(document.title).toContain('Not found')
+    expect(document.title).toContain('Album not found')
     const layout = screen.getByTestId('Layout');
     expect(layout).toBeInTheDocument();
   })

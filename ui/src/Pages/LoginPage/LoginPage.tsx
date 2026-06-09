@@ -3,6 +3,7 @@ import { useQuery, gql, useMutation } from '@apollo/client'
 import { useForm } from 'react-hook-form'
 import { INITIAL_SETUP_QUERY, login } from './loginUtilities'
 import { authToken } from '../../helpers/authentication'
+import { normalizeUsername } from '../../helpers/normalize'
 import TermsOfUseModal, { useTermsAccepted } from '../../components/termsOfUse/TermsOfUseModal'
 import AccessDeniedScreen from '../../components/termsOfUse/AccessDeniedScreen'
 import { useTranslation } from 'react-i18next'
@@ -10,8 +11,8 @@ import { Helmet, HelmetProvider } from '@dr.pogodin/react-helmet'
 import { useNavigate } from 'react-router'
 import { TextField } from '../../primitives/form/Input'
 import MessageBox from '../../primitives/form/MessageBox'
-import { CheckInitialSetup } from './__generated__/CheckInitialSetup'
-import { Authorize, AuthorizeVariables } from './__generated__/Authorize'
+import { CheckInitialSetupQuery } from './__generated__/loginUtilities'
+import { AuthorizeMutation, AuthorizeMutationVariables } from './__generated__/LoginPage'
 
 const authorizeMutation = gql`
   mutation Authorize($username: String!, $password: String!) {
@@ -50,7 +51,7 @@ const LoginForm = () => {
 
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
-  const [authorize, { loading }] = useMutation<Authorize, AuthorizeVariables>(authorizeMutation)
+  const [authorize, { loading }] = useMutation<AuthorizeMutation, AuthorizeMutationVariables>(authorizeMutation)
 
   const onSubmit = handleSubmit(async (data) => {
     try {
@@ -58,7 +59,7 @@ const LoginForm = () => {
 
       const result = await authorize({
         variables: {
-          username: data.username,
+          username: normalizeUsername(data.username),
           password: data.password,
         },
       })
@@ -79,7 +80,6 @@ const LoginForm = () => {
     <form
       className="mx-auto max-w-125 px-4"
       onSubmit={onSubmit}
-    // loading={loading || (data && data.authorizeUser.success)}
     >
       <TextField
         sizeVariant="big"
@@ -129,7 +129,7 @@ const LoginPage = () => {
   const navigate = useNavigate()
   const token = authToken()
 
-  const { data: initialSetupData } = useQuery<CheckInitialSetup>(
+  const { data: initialSetupData } = useQuery<CheckInitialSetupQuery>(
     INITIAL_SETUP_QUERY,
     { variables: {} }
   )

@@ -1,17 +1,15 @@
-import React, { useState, useEffect } from 'react'
+import { useState, useEffect } from 'react'
 import { useMutation, gql } from '@apollo/client'
 import { useTranslation } from 'react-i18next'
 
 import { SidebarSection, SidebarSectionTitle } from './SidebarComponents'
 
 import {
-  setAlbumCover,
-  setAlbumCoverVariables,
-} from './__generated__/setAlbumCover'
-import {
-  resetAlbumCover,
-  resetAlbumCoverVariables,
-} from './__generated__/resetAlbumCover'
+  SetAlbumCoverMutation,
+  SetAlbumCoverMutationVariables,
+  ResetAlbumCoverMutation,
+  ResetAlbumCoverMutationVariables,
+} from './__generated__/AlbumCovers'
 import { authToken } from '../../helpers/authentication'
 
 const RESET_ALBUM_COVER_MUTATION = gql`
@@ -48,7 +46,7 @@ type SidebarPhotoCoverProps = {
 export const SidebarPhotoCover = ({ cover_id }: SidebarPhotoCoverProps) => {
   const { t } = useTranslation()
 
-  const [setAlbumCover] = useMutation<setAlbumCover, setAlbumCoverVariables>(
+  const [setAlbumCover] = useMutation<SetAlbumCoverMutation, SetAlbumCoverMutationVariables>(
     SET_ALBUM_COVER_MUTATION,
     {
       variables: {
@@ -75,6 +73,13 @@ export const SidebarPhotoCover = ({ cover_id }: SidebarPhotoCoverProps) => {
       </SidebarSectionTitle>
       <div>
         <table className="border-collapse w-full">
+          <thead className="sr-only">
+            <tr>
+              <th colSpan={2}>
+                {t('sidebar.album.album_cover', 'Album cover')}
+              </th>
+            </tr>
+          </thead>
           <tfoot>
             <tr className="text-left border-gray-100 dark:border-dark-border2 border-b border-t">
               <td colSpan={2} className="pl-4 py-2">
@@ -82,12 +87,13 @@ export const SidebarPhotoCover = ({ cover_id }: SidebarPhotoCoverProps) => {
                   className="disabled:opacity-50 text-green-500 font-bold uppercase text-xs"
                   disabled={buttonDisabled}
                   onClick={() => {
-                    setButtonDisabled(true),
-                      setAlbumCover({
-                        variables: {
-                          coverID: cover_id,
-                        },
-                      })
+                    setButtonDisabled(true)
+                    setAlbumCover({
+                      variables: { coverID: cover_id },
+                    }).catch(error => {
+                      console.error('Failed to set album cover: ', error)
+                      setButtonDisabled(false)
+                    })
                   }}
                 >
                   <span>
@@ -111,8 +117,8 @@ export const SidebarAlbumCover = ({ id }: SidebarAlbumCoverProps) => {
   const { t } = useTranslation()
 
   const [resetAlbumCover] = useMutation<
-    resetAlbumCover,
-    resetAlbumCoverVariables
+    ResetAlbumCoverMutation,
+    ResetAlbumCoverMutationVariables
   >(RESET_ALBUM_COVER_MUTATION, {
     variables: {
       albumID: id,
@@ -132,6 +138,13 @@ export const SidebarAlbumCover = ({ id }: SidebarAlbumCoverProps) => {
       </SidebarSectionTitle>
       <div>
         <table className="border-collapse w-full">
+          <thead className="sr-only">
+            <tr>
+              <th colSpan={2}>
+                {t('sidebar.album.album_cover', 'Album cover')}
+              </th>
+            </tr>
+          </thead>
           <tfoot>
             <tr className="text-left border-gray-100 dark:border-dark-border2 border-b border-t">
               <td colSpan={2} className="pl-4 py-2">
@@ -139,12 +152,13 @@ export const SidebarAlbumCover = ({ id }: SidebarAlbumCoverProps) => {
                   className="disabled:opacity-50 text-red-500 font-bold uppercase text-xs"
                   disabled={buttonDisabled}
                   onClick={() => {
-                    setButtonDisabled(true),
-                      resetAlbumCover({
-                        variables: {
-                          albumID: id,
-                        },
-                      })
+                    setButtonDisabled(true)
+                    resetAlbumCover({
+                      variables: { albumID: id },
+                    }).catch(error => {
+                      console.error('Failed to reset album cover: ', error)
+                      setButtonDisabled(false)
+                    })
                   }}
                 >
                   <span>

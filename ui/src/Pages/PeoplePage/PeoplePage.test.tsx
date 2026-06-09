@@ -5,8 +5,9 @@ import {
   FaceGroup,
   MY_FACES_QUERY,
   SET_GROUP_LABEL_MUTATION,
+  RECOGNIZE_UNLABELED_FACES_MUTATION,
 } from './PeoplePage'
-import { myFaces_myFaceGroups } from './__generated__/myFaces'
+import { MyFacesQuery } from './__generated__/PeoplePage'
 import { renderWithProviders } from '../../helpers/testUtils'
 
 vi.mock('../../hooks/useScrollPagination')
@@ -36,27 +37,27 @@ describe('PeoplePage component', () => {
         data: {
           myFaceGroups: [
             {
-              __typename: 'FaceGroup',
+              __typename: 'FaceGroup' as const,
               id: '3',
               label: 'Person A',
               imageFaceCount: 2,
               imageFaces: [
                 {
-                  __typename: 'ImageFace',
+                  __typename: 'ImageFace' as const,
                   id: '3',
                   rectangle: {
-                    __typename: 'FaceRectangle',
+                    __typename: 'FaceRectangle' as const,
                     minX: 0.2705079913139343,
                     maxX: 0.3408200144767761,
                     minY: 0.7691109776496887,
                     maxY: 0.881434977054596,
                   },
                   media: {
-                    __typename: 'Media',
+                    __typename: 'Media' as const,
                     id: '63',
                     title: 'image.jpg',
                     thumbnail: {
-                      __typename: 'MediaURL',
+                      __typename: 'MediaURL' as const,
                       url: '/photo/thumbnail_image_jpg_p9x8dLWr.jpg',
                       width: 1024,
                       height: 641,
@@ -66,7 +67,7 @@ describe('PeoplePage component', () => {
               ],
             },
             {
-              __typename: 'FaceGroup',
+              __typename: 'FaceGroup' as const,
               id: '1',
               label: 'Person B',
               imageFaceCount: 1,
@@ -85,14 +86,14 @@ describe('PeoplePage component', () => {
         data: {
           myFaceGroups: [
             {
-              __typename: 'FaceGroup',
+              __typename: 'FaceGroup' as const,
               id: '3',
               label: 'Person A',
               imageFaceCount: 2,
               imageFaces: [],
             },
             {
-              __typename: 'FaceGroup',
+              __typename: 'FaceGroup' as const,
               id: '1',
               label: 'Person B',
               imageFaceCount: 1,
@@ -121,19 +122,21 @@ describe('PeoplePage component', () => {
     expect(
       screen
         .getAllByRole('link')
-        .some(x => x.getAttribute('href') == '/people/1')
+        .some(x => x.getAttribute('href') === '/people/1')
     ).toBeTruthy()
 
     expect(
       screen
         .getAllByRole('link')
-        .some(x => x.getAttribute('href') == '/people/3')
+        .some(x => x.getAttribute('href') === '/people/3')
     ).toBeTruthy()
+
+    expect(screen.queryByLabelText('Loading more people')).not.toBeInTheDocument()
   })
 })
 
 describe('FaceDetails component', () => {
-  const faceGroup: myFaces_myFaceGroups = {
+  const faceGroup: MyFacesQuery['myFaceGroups'][0] = {
     id: '3',
     label: null,
     imageFaceCount: 2,
@@ -145,7 +148,7 @@ describe('FaceDetails component', () => {
           maxX: 0.3408200144767761,
           minY: 0.7691109776496887,
           maxY: 0.881434977054596,
-          __typename: 'FaceRectangle',
+          __typename: 'FaceRectangle' as const,
         },
         media: {
           id: '63',
@@ -154,18 +157,18 @@ describe('FaceDetails component', () => {
             url: '/photo/thumbnail_image_jpg_p9x8dLWr.jpg',
             width: 1024,
             height: 641,
-            __typename: 'MediaURL',
+            __typename: 'MediaURL' as const,
           },
-          __typename: 'Media',
+          __typename: 'Media' as const,
         },
-        __typename: 'ImageFace',
+        __typename: 'ImageFace' as const,
       },
     ],
-    __typename: 'FaceGroup',
+    __typename: 'FaceGroup' as const,
   }
 
   test('unlabeled, no images', () => {
-    const emptyFaceGroup: myFaces_myFaceGroups = {
+    const emptyFaceGroup: MyFacesQuery['myFaceGroups'][0] = {
       ...faceGroup,
       imageFaces: [],
     }
@@ -183,7 +186,7 @@ describe('FaceDetails component', () => {
   })
 
   test('labeled, with thumbnail', () => {
-    const labeledFaceGroup: myFaces_myFaceGroups = {
+    const labeledFaceGroup: MyFacesQuery['myFaceGroups'][0] = {
       ...faceGroup,
       label: 'Some label',
     }
@@ -214,7 +217,7 @@ describe('FaceDetails component', () => {
         newData: vi.fn(() => ({
           data: {
             setFaceGroupLabel: {
-              __typename: 'FaceGroup',
+              __typename: 'FaceGroup' as const,
               id: '3',
               label: 'John Doe',
             },
@@ -223,10 +226,7 @@ describe('FaceDetails component', () => {
       },
     ]
     renderWithProviders(<FaceGroup group={faceGroup} />, {
-      mocks: graphqlMocks,
-      apolloOptions: {
-        addTypename: false
-      }
+      mocks: graphqlMocks
     })
 
     const btn = screen.getByRole('button')
@@ -249,10 +249,7 @@ describe('FaceDetails component', () => {
 
   test('cancel add label to face group', () => {
     renderWithProviders(<FaceGroup group={faceGroup} />, {
-      mocks: [],
-      apolloOptions: {
-        addTypename: false
-      }
+      mocks: []
     })
 
     const btn = screen.getByRole('button')
@@ -270,5 +267,144 @@ describe('FaceDetails component', () => {
     fireEvent.keyDown(input, { key: 'Escape', code: 'Escape' })
 
     expect(screen.queryByText('Unlabeled')).toBeInTheDocument()
+  })
+})
+
+describe('PeoplePage - recognize unlabeled faces button', () => {
+  // Reused minimal mock for the initial page load
+  const initialFacesMock = {
+    request: {
+      query: MY_FACES_QUERY,
+      variables: { limit: 50, offset: 0 },
+    },
+    result: {
+      data: {
+        myFaceGroups: [
+          {
+            __typename: 'FaceGroup' as const,
+            id: '3',
+            label: 'Person A',
+            imageFaceCount: 2,
+            imageFaces: [],
+          },
+        ],
+      },
+    },
+  }
+
+  test('shows error alert when the mutation fails with a network error', async () => {
+    // Network error causes the promise to reject → .catch fires, hook's error state is set
+    const mocks = [
+      initialFacesMock,
+      {
+        request: { query: RECOGNIZE_UNLABELED_FACES_MUTATION },
+        error: new Error('Network error'),
+      },
+    ]
+
+    renderWithProviders(<PeoplePage />, { mocks, initialEntries: ['/people'] })
+
+    await waitFor(() => {
+      expect(screen.getByText('Person A')).toBeInTheDocument()
+    })
+
+    fireEvent.click(
+      screen.getByRole('button', { name: /recognize unlabeled faces/i })
+    )
+
+    await waitFor(() => {
+      expect(screen.getByRole('alert')).toBeInTheDocument()
+      expect(screen.getByRole('alert')).toHaveTextContent('Network error')
+    })
+  })
+
+  test('shows error alert when the mutation returns GraphQL errors', async () => {
+    // errorPolicy:'all' keeps the promise resolved but sets hook error state;
+    // refetchQueries callback receives errors → returns [] (falsy branch)
+    const mocks = [
+      initialFacesMock,
+      {
+        request: { query: RECOGNIZE_UNLABELED_FACES_MUTATION },
+        result: {
+          data: { recognizeUnlabeledFaces: null },
+          errors: [{ message: 'Recognition service unavailable' }],
+        },
+      },
+    ]
+
+    renderWithProviders(<PeoplePage />, { mocks, initialEntries: ['/people'] })
+
+    await waitFor(() => {
+      expect(screen.getByText('Person A')).toBeInTheDocument()
+    })
+
+    fireEvent.click(
+      screen.getByRole('button', { name: /recognize unlabeled faces/i })
+    )
+
+    await waitFor(() => {
+      expect(screen.getByRole('alert')).toBeInTheDocument()
+      expect(screen.getByRole('alert')).toHaveTextContent(
+        'Recognition service unavailable'
+      )
+    })
+  })
+
+  test('refetches face groups and shows no error after successful recognition', async () => {
+    // Mutation succeeds with data and no errors →
+    // refetchQueries returns [{ query: MY_FACES_QUERY, variables: { limit:50, offset:0 } }]
+    // awaitRefetchQueries:true means the second MY_FACES_QUERY is consumed before the UI settles
+    const refetchSpy = vi.fn(() => ({
+      data: {
+        myFaceGroups: [
+          {
+            __typename: 'FaceGroup' as const,
+            id: '3',
+            label: 'Person A',
+            imageFaceCount: 5,  // changed count proves refetch happened
+            imageFaces: [],
+          },
+        ],
+      },
+    }))
+
+    const mocks = [
+      initialFacesMock,
+      {
+        request: { query: RECOGNIZE_UNLABELED_FACES_MUTATION },
+        result: {
+          data: {
+            recognizeUnlabeledFaces: [
+              { __typename: 'FaceGroup' as const, id: '3' },
+            ],
+          },
+        },
+      },
+      // MockedProvider consumes mocks in order; this second MY_FACES_QUERY
+      // entry is consumed when refetchQueries fires
+      {
+        request: {
+          query: MY_FACES_QUERY,
+          variables: { limit: 50, offset: 0 },
+        },
+        newData: refetchSpy,
+      },
+    ]
+
+    renderWithProviders(<PeoplePage />, { mocks, initialEntries: ['/people'] })
+
+    await waitFor(() => {
+      expect(screen.getByText('Person A')).toBeInTheDocument()
+    })
+
+    fireEvent.click(
+      screen.getByRole('button', { name: /recognize unlabeled faces/i })
+    )
+
+    await waitFor(() => {
+      expect(refetchSpy).toHaveBeenCalled()
+    })
+
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument()
   })
 })

@@ -55,7 +55,7 @@ test('Layout sidebar component', async () => {
   ]
 
   render(
-    <MockedProvider mocks={mockedGraphql} addTypename={false}>
+    <MockedProvider mocks={mockedGraphql}>
       <MemoryRouter>
         <MainMenu />
       </MemoryRouter>
@@ -88,7 +88,7 @@ test('Layout sidebar with disabled features', async () => {
   ]
 
   render(
-    <MockedProvider mocks={disabledFeaturesMocks} addTypename={false}>
+    <MockedProvider mocks={disabledFeaturesMocks}>
       <MemoryRouter>
         <MainMenu />
       </MemoryRouter>
@@ -109,7 +109,7 @@ test('Layout sidebar when unauthenticated', () => {
   authTokenMock.mockImplementation(() => '')
 
   render(
-    <MockedProvider mocks={[]} addTypename={false}>
+    <MockedProvider mocks={[]}>
       <MemoryRouter>
         <MainMenu />
       </MemoryRouter>
@@ -141,7 +141,7 @@ test('Layout sidebar handles GraphQL errors gracefully', () => {
   ]
 
   render(
-    <MockedProvider mocks={errorMocks} addTypename={false}>
+    <MockedProvider mocks={errorMocks}>
       <MemoryRouter>
         <MainMenu />
       </MemoryRouter>

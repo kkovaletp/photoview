@@ -8,7 +8,7 @@ import {
 import { SidebarContext } from '../../components/sidebar/Sidebar'
 import MediaSidebar from '../../components/sidebar/MediaSidebar/MediaSidebar'
 import { useTranslation } from 'react-i18next'
-import { SharePageToken_shareToken_media } from './__generated__/SharePageToken'
+import { SharePageTokenQuery } from './__generated__/SharePage'
 import { MediaType } from '../../__generated__/globalTypes'
 import { exhaustiveCheck } from '../../helpers/utils'
 
@@ -24,7 +24,7 @@ const DisplayVideo = styled(ProtectedVideo)`
 `
 
 type MediaViewProps = {
-  media: SharePageToken_shareToken_media
+  media: NonNullable<SharePageTokenQuery['shareToken']['media']>
 }
 
 const MediaView = ({ media }: MediaViewProps) => {
@@ -47,7 +47,7 @@ const MediaView = ({ media }: MediaViewProps) => {
 }
 
 type MediaSharePageType = {
-  media: SharePageToken_shareToken_media
+  media: NonNullable<SharePageTokenQuery['shareToken']['media']>
 }
 
 const MediaSharePage = ({ media }: MediaSharePageType) => {

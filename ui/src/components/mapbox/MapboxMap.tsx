@@ -1,10 +1,12 @@
-import React, { useState, useRef, useEffect, forwardRef } from 'react'
+import { useState, useRef, useEffect, forwardRef, HTMLProps } from 'react'
 import { gql, useQuery } from '@apollo/client'
 import type mapboxgl from 'mapbox-gl'
+// `@ts-expect-error` – Vite ?worker import; no bundled type declaration
+import MapboxWorker from 'mapbox-gl/dist/mapbox-gl-csp-worker?worker'
 import styled from 'styled-components'
 
 import 'mapbox-gl/dist/mapbox-gl.css'
-import { mapboxToken } from './__generated__/mapboxToken'
+import { MapboxTokenQuery } from './__generated__/MapboxMap'
 import { isDarkMode } from '../../theme'
 import { SetMapLanguages } from '../../localization'
 
@@ -20,7 +22,7 @@ const MapContainer = styled.div`
   height: 100%;
 `
 
-const ForwardedMapContainer = forwardRef<HTMLDivElement, React.HTMLProps<HTMLDivElement>>((props, ref) => (
+const ForwardedMapContainer = forwardRef<HTMLDivElement, HTMLProps<HTMLDivElement>>((props, ref) => (
   <MapContainer {...props} ref={ref} />
 ))
 
@@ -37,13 +39,17 @@ const useMapboxMap = ({
   const mapContainer = useRef<HTMLDivElement | null>(null)
   const map = useRef<mapboxgl.Map | null>(null)
 
-  const { data: mapboxData } = useQuery<mapboxToken>(MAPBOX_TOKEN_QUERY, {
+  const { data: mapboxData } = useQuery<MapboxTokenQuery>(MAPBOX_TOKEN_QUERY, {
     fetchPolicy: 'cache-first',
   })
 
   useEffect(() => {
     async function loadMapboxLibrary() {
-      const mapbox = (await import('mapbox-gl/esm')).default
+      const mapbox = (await import('mapbox-gl')).default
+      // Inject the CSP worker so Vite doesn't mangle the internal worker URL.
+      // Without this the browser receives an HTML SPA-fallback response for
+      // the worker script and refuses to execute it (MIME "text/html").
+      mapbox.workerClass = MapboxWorker as unknown as typeof mapbox.workerClass
 
       setMapboxLibrary(mapbox)
     }

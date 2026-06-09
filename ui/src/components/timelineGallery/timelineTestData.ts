@@ -1,7 +1,7 @@
 import { MediaType } from '../../__generated__/globalTypes'
-import { myTimeline_myTimeline } from './__generated__/myTimeline'
+import { MyTimelineQuery } from './__generated__/TimelineGallery'
 
-export const timelineData: myTimeline_myTimeline[] = [
+export const timelineData: MyTimelineQuery['myTimeline'] = [
   {
     __typename: 'Media',
     id: '1058',

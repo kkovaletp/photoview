@@ -20,7 +20,9 @@ export default interface Resources {
       }
     },
     "album_page": {
-      "load_error": "Error loading album: {{message}}"
+      "load_error": "Error loading album: {{message}}",
+      "loading": "Loading album...",
+      "not_found": "Album not found"
     },
     "ethical_use_license_page": {
       "load_error": "Failed to load the license document. Please try again.",
@@ -33,6 +35,7 @@ export default interface Resources {
         "cancel": "Cancel",
         "close": "Close",
         "remove": "Remove",
+        "retry": "Retry",
         "save": "Save",
         "submit": "Submit"
       },
@@ -60,7 +63,8 @@ export default interface Resources {
         "result_type": {
           "albums": "Albums",
           "media": "Media"
-        }
+        },
+        "results_label": "Search results"
       }
     },
     "login_page": {
@@ -111,6 +115,9 @@ export default interface Resources {
             "select_images": "Select images to detach"
           },
           "description": "Detach selected images of this face group and move them to a new face groups",
+          "error": {
+            "network": "Network error while detaching images"
+          },
           "title": "Detach Image Faces"
         },
         "merge_face_groups": {
@@ -118,6 +125,22 @@ export default interface Resources {
           "destination_table": {
             "title": "Select the destination face"
           },
+          "error": {
+            "network": "Network error while merging faces"
+          },
+          "face_groups_load_error": "Failed to load face groups",
+          "preselected_role": {
+            "destination": {
+              "description": "Keep the current face group and choose which other face groups should be merged into it.",
+              "title": "Merge other faces into this face"
+            },
+            "source": {
+              "description": "Choose another destination face group. The current face group will be merged into it.",
+              "title": "Merge this face into another face"
+            }
+          },
+          "preselected_role_description": "Choose how the current face should be merged.",
+          "source_role_destination_description": "Select the destination face group that the current face should be merged into.",
           "sources_description": "Select all face groups that will be merged into the destination group.",
           "sources_table": {
             "title": "Select one or more source faces to merge into:"
@@ -127,8 +150,12 @@ export default interface Resources {
         "move_image_faces": {
           "description": "Move selected images of this face group to another face group",
           "destination_face_group_table": {
+            "load_error": "Failed to load face groups",
             "move_action": "Move image faces",
             "title": "Select destination face group"
+          },
+          "error": {
+            "network": "Network error while moving faces"
           },
           "image_select_table": {
             "next_action": "Next",
@@ -187,6 +214,8 @@ export default interface Resources {
       "scanner": {
         "description": "Will scan all users for new or updated media",
         "scan_all_users": "Scan all users",
+        "scanning": "Scan in progress…",
+        "starting": "Starting…",
         "title": "Scanner"
       },
       "user_preferences": {
@@ -219,11 +248,15 @@ export default interface Resources {
         },
         "confirm_delete_user": {
           "action": "Delete {{user}}",
-          "description": "<0>Are you sure, you want to delete <1></1>?</0><p>This action cannot be undone</p>",
+          "description": "<line>Are you sure, you want to delete <bold>{{username}}</bold>?</line><line>This action cannot be undone</line>",
           "title": "Delete user"
         },
+        "edit": {
+          "add_path_error": "Failed to add path. Please try again.",
+          "remove_path_error": "Failed to remove path. Please try again."
+        },
         "password_reset": {
-          "description": "Change password for <1>{{username}}</1>",
+          "description": "Change password for <bold>{{username}}</bold>",
           "error": "Failed to change password",
           "form": {
             "label": "New password",
@@ -374,6 +407,7 @@ export default interface Resources {
         "action_label": {
           "detach_image": "Detach image",
           "merge_face": "Merge face",
+          "more_actions": "Face actions",
           "move_face": "Move face"
         },
         "confirm_image_detach": "Are you sure you want to detach this image?",
@@ -381,8 +415,10 @@ export default interface Resources {
       },
       "sharing": {
         "add_share": "Add shares",
+        "add_share_error": "Failed to add share",
         "copy_link": "Copy Link",
         "delete": "Delete",
+        "delete_error": "Failed to delete share",
         "error": "Error: {{message}}",
         "expiration_date": "Expiration date",
         "more": "More",
@@ -435,9 +471,7 @@ export default interface Resources {
       }
     },
     "title": {
-      "loading_album": "Loading album",
       "login": "Login",
-      "not_found": "Not found",
       "people": "People",
       "settings": "Settings"
     }

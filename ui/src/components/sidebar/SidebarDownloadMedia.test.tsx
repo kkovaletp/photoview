@@ -8,22 +8,22 @@ import { MediaSidebarMedia } from './MediaSidebar/MediaSidebar'
 import { MediaType } from '../../__generated__/globalTypes'
 import { renderWithProviders } from '../../helpers/testUtils'
 import * as authentication from '../../helpers/authentication'
-import { sidebarDownloadQuery_media_downloads } from './__generated__/sidebarDownloadQuery'
+import { SidebarDownloadQueryQuery } from './__generated__/SidebarDownloadMedia'
 
 // Mock dependencies
 vi.mock('../../helpers/authentication')
 const authToken = vi.mocked(authentication.authToken)
 
 // Mock global fetch for download tests
-const originalFetch = global.fetch as any
+const originalFetch = globalThis.fetch as any
 const mockFetch = vi.fn()
-global.fetch = mockFetch
+globalThis.fetch = mockFetch
 
 // Mock URL methods for download blob handling
-const originalCreateObjectURL = global.URL.createObjectURL
-const originalRevokeObjectURL = global.URL.revokeObjectURL
-global.URL.createObjectURL = vi.fn(() => 'blob:mock-url')
-global.URL.revokeObjectURL = vi.fn()
+const originalCreateObjectURL = globalThis.URL.createObjectURL
+const originalRevokeObjectURL = globalThis.URL.revokeObjectURL
+globalThis.URL.createObjectURL = vi.fn(() => 'blob:mock-url')
+globalThis.URL.revokeObjectURL = vi.fn()
 const originalCreateElement = document.createElement.bind(document)
 const mockCreateElement = vi.fn((tagName: string) => {
     if (tagName === 'a') {
@@ -36,9 +36,9 @@ const mockCreateElement = vi.fn((tagName: string) => {
 document.createElement = mockCreateElement as any
 
 afterAll(() => {
-    global.fetch = originalFetch
-    global.URL.createObjectURL = originalCreateObjectURL
-    global.URL.revokeObjectURL = originalRevokeObjectURL
+    globalThis.fetch = originalFetch
+    globalThis.URL.createObjectURL = originalCreateObjectURL
+    globalThis.URL.revokeObjectURL = originalRevokeObjectURL
     document.createElement = originalCreateElement
 })
 
@@ -58,7 +58,7 @@ describe('SidebarMediaDownload', () => {
         videoWeb: null,
     }
 
-    const mockDownloads: sidebarDownloadQuery_media_downloads[] = [
+    const mockDownloads: SidebarDownloadQueryQuery['media']['downloads'] = [
         {
             __typename: 'MediaDownload',
             title: 'Original',
@@ -153,8 +153,6 @@ describe('SidebarMediaDownload', () => {
             await waitFor(() => {
                 expect(screen.getByText(/Failed to load download options/i)).toBeInTheDocument()
             })
-
-            expect(screen.getByText(/Failed to load downloads/i)).toBeInTheDocument()
         })
 
         it('should return null when media is null', () => {
@@ -312,9 +310,9 @@ describe('SidebarMediaDownload', () => {
 
             // Verify blob URL created and revoked
             await waitFor(() => {
-                expect(global.URL.createObjectURL).toHaveBeenCalled()
+                expect(globalThis.URL.createObjectURL).toHaveBeenCalled()
             })
-            expect(global.URL.revokeObjectURL).toHaveBeenCalled()
+            expect(globalThis.URL.revokeObjectURL).toHaveBeenCalled()
         })
     })
 

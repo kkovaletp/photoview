@@ -1,16 +1,16 @@
-import React, { useState } from 'react'
+import { Dispatch, SetStateAction, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, useNavigate } from 'react-router'
 import FaceCircleImage from '../../../Pages/PeoplePage/FaceCircleImage'
 import { SidebarSection, SidebarSectionTitle } from '../SidebarComponents'
 import { MediaSidebarMedia, SIDEBAR_MEDIA_QUERY } from './MediaSidebar'
-import { sidebarMediaQuery_media_faces } from './__generated__/sidebarMediaQuery'
+import { SidebarMediaQueryQuery } from './__generated__/MediaSidebar'
 
 import PeopleDotsIcon from './icons/peopleDotsIcon.svg?react'
 import { MenuItem, MenuItems, MenuButton, Menu } from '@headlessui/react'
 import { Button } from '../../../primitives/form/Input'
 import { ArrowPopoverPanel } from '../Sharing'
-import { isNil, tailwindClassNames } from '../../../helpers/utils'
+import { tailwindClassNames } from '../../../helpers/utils'
 import MergeFaceGroupsModal, {
   MergeFaceGroupsModalState,
 } from '../../../Pages/PeoplePage/SingleFaceGroup/MergeFaceGroupsModal'
@@ -48,8 +48,8 @@ const PersonMoreMenuItem = ({
 }
 
 type PersonMoreMenuProps = {
-  face: sidebarMediaQuery_media_faces
-  setChangeLabel: React.Dispatch<React.SetStateAction<boolean>>
+  face: SidebarMediaQueryQuery['media']['faces'][0]
+  setChangeLabel: Dispatch<SetStateAction<boolean>>
   className?: string
   menuFlipped: boolean
 }
@@ -66,6 +66,7 @@ const PersonMoreMenu = ({
     MergeFaceGroupsModalState.Closed
   )
   const [moveModalOpen, setMoveModalOpen] = useState(false)
+  const [inlineError, setInlineError] = useState<string | null>(null)
 
   const refetchQueries = [
     {
@@ -77,14 +78,12 @@ const PersonMoreMenu = ({
   ]
 
   const navigate = useNavigate()
-  const detachImageFaceMutation = useDetachImageFaces({
-    refetchQueries,
-  })
+  const { detachImageFaces, error: detachError } = useDetachImageFaces()
 
   const modals = (
     <>
       <MergeFaceGroupsModal
-        preselectedDestinationFaceGroup={face.faceGroup}
+        preselectedFaceGroup={face.faceGroup}
         state={mergeModalState}
         setState={setMergeModalState}
         refetchQueries={refetchQueries}
@@ -108,11 +107,32 @@ const PersonMoreMenu = ({
       )
     )
       return
-    detachImageFaceMutation([face]).then(({ data }) => {
-      if (isNil(data)) throw new Error('Expected data not to be null')
+    setInlineError(null)
+    detachImageFaces([face], {
+      sourceFaceGroupID: face.faceGroup.id,
+      additionalRefetchQueries: [
+        {
+          query: SIDEBAR_MEDIA_QUERY,
+          variables: { id: face.media.id },
+        },
+      ],
+    }).then(({ data, errors }) => {
+      if (!data?.detachImageFaces || (errors?.length ?? 0) > 0) return
       navigate(`/people/${data.detachImageFaces.id}`)
+    }).catch((e: unknown) => {
+      console.error('Failed to detach image face', e)
+      setInlineError(
+        e instanceof Error
+          ? e.message
+          : t(
+            'people_page.modal.detach_image_faces.error.network',
+            'Network error while detaching images'
+          )
+      )
     })
   }
+
+  const displayedError = inlineError ?? detachError?.message ?? null
 
   return (
     <>
@@ -120,10 +140,14 @@ const PersonMoreMenu = ({
         as="div"
         className={tailwindClassNames('relative inline-block', className)}
       >
-        <MenuButton as={Button} className="px-1.5 py-1.5 align-middle ml-1">
+        <MenuButton as={Button}
+          aria-label={t('sidebar.people.action_label.more_actions', 'Face actions')}
+          title={t('sidebar.people.action_label.more_actions', 'More actions')}
+          className="px-1.5 py-1.5 align-middle ml-1"
+        >
           <PeopleDotsIcon className="text-gray-500" />
         </MenuButton>
-        <MenuItems className="">
+        <MenuItems modal={false} className="">
           <ArrowPopoverPanel $width={120} $flipped={menuFlipped}>
             <PersonMoreMenuItem
               onClick={() => setChangeLabel(true)}
@@ -132,7 +156,7 @@ const PersonMoreMenu = ({
             />
             <PersonMoreMenuItem
               onClick={() =>
-                setMergeModalState(MergeFaceGroupsModalState.SelectDestination)
+                setMergeModalState(MergeFaceGroupsModalState.SelectPreselectedRole)
               }
               className="border-b"
               label={t('sidebar.people.action_label.merge_face', 'Merge face')}
@@ -152,13 +176,21 @@ const PersonMoreMenu = ({
           </ArrowPopoverPanel>
         </MenuItems>
       </Menu>
+      {displayedError && (
+        <div
+          role="alert"
+          className="text-red-500 text-xs mt-1 max-w-30 whitespace-normal wrap-break-word"
+        >
+          {displayedError}
+        </div>
+      )}
       {modals}
     </>
   )
 }
 
 type MediaSidebarFaceProps = {
-  face: sidebarMediaQuery_media_faces
+  face: SidebarMediaQueryQuery['media']['faces'][0]
   menuFlipped: boolean
 }
 
@@ -199,10 +231,10 @@ const MediaSidebarPeople = ({ media }: MediaSidebarFacesProps) => {
   const { t } = useTranslation()
 
   const faceElms = (media.faces ?? []).map((face, i) => (
-    <MediaSidebarPerson key={face.id} face={face} menuFlipped={i % 3 == 0} />
+    <MediaSidebarPerson key={face.id} face={face} menuFlipped={i % 3 === 0} />
   ))
 
-  if (faceElms.length == 0) return null
+  if (faceElms.length === 0) return null
 
   return (
     <SidebarSection>

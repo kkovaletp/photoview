@@ -1,10 +1,10 @@
-import React, { createContext, useContext, useState, ReactNode, useEffect } from 'react'
+import { createContext, useContext, useState, ReactNode, useEffect, useMemo, Dispatch, SetStateAction, useCallback } from 'react'
 import { Message } from './SubscriptionsHook'
 import { globalMessageHandler } from './globalMessageHandler'
 
 type MessageContextType = {
   messages: Message[]
-  setMessages: React.Dispatch<React.SetStateAction<Message[]>>
+  setMessages: Dispatch<SetStateAction<Message[]>>
   add: (message: Message) => void
   removeKey: (key: string) => void
 }
@@ -26,19 +26,19 @@ type MessageProviderProps = {
 export const MessageProvider = ({ children }: MessageProviderProps) => {
   const [messages, setMessages] = useState<Message[]>([])
 
-  const add = (message: Message) => {
+  const add = useCallback((message: Message) => {
     const timestampedMessage = { ...message, timestamp: Date.now() };
-    setMessages((prevMessages) => [...prevMessages, timestampedMessage])
-  }
+    setMessages(prevMessages => [...prevMessages, timestampedMessage])
+  }, [])
 
-  const removeKey = (key: string) => {
-    setMessages((prevMessages) => prevMessages.filter((msg) => msg.key !== key))
-  }
+  const removeKey = useCallback((key: string) => {
+    setMessages(prevMessages => prevMessages.filter(msg => msg.key !== key))
+  }, [])
 
   // Initialize global message handler with React state functions
   useEffect(() => {
     globalMessageHandler.initialize({ add, removeKey })
-  }, [])
+  }, [add, removeKey])
 
   const CLEANUP_INTERVAL = 60 * 60 * 1000; // 1 hour in ms
   const MESSAGE_LIFETIME = 24 * 60 * 60 * 1000; // 24 hours in ms
@@ -55,8 +55,13 @@ export const MessageProvider = ({ children }: MessageProviderProps) => {
     return () => clearInterval(cleanupInterval);
   }, []);
 
+  const contextValue = useMemo(
+    () => ({ messages, setMessages, add, removeKey }),
+    [messages, setMessages, add, removeKey]
+  );
+
   return (
-    <MessageContext.Provider value={{ messages, setMessages, add, removeKey }}>
+    <MessageContext.Provider value={contextValue}>
       {children}
     </MessageContext.Provider>
   )

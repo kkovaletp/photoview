@@ -1,17 +1,16 @@
-import React, { useEffect, useReducer } from 'react'
+import { ForwardedRef, forwardRef, useEffect, useReducer } from 'react'
 import AlbumTitle from '../album/AlbumTitle'
-import MediaGallery, {
-  MEDIA_GALLERY_FRAGMENT,
-} from '../photoGallery/MediaGallery'
+import MediaGallery from '../photoGallery/MediaGallery'
+import { MEDIA_GALLERY_FRAGMENT } from '../photoGallery/fragments'
 import AlbumBoxes from './AlbumBoxes'
 import AlbumFilter from '../album/AlbumFilter'
 import {
   mediaGalleryReducer,
-  urlPresentModeSetupHook,
+  useUrlPresentModeSetup,
 } from '../photoGallery/mediaGalleryReducer'
 import { MediaOrdering, SetOrderingFn } from '../../hooks/useOrderingParams'
 import { gql } from '@apollo/client'
-import { AlbumGalleryFields } from './__generated__/AlbumGalleryFields'
+import { AlbumGalleryFieldsFragment } from './__generated__/AlbumGallery'
 
 export const ALBUM_GALLERY_FRAGMENT = gql`
   ${MEDIA_GALLERY_FRAGMENT}
@@ -40,7 +39,7 @@ export const ALBUM_GALLERY_FRAGMENT = gql`
 `
 
 type AlbumGalleryProps = {
-  album?: AlbumGalleryFields
+  album?: AlbumGalleryFieldsFragment
   loading?: boolean
   customAlbumLink?(albumID: string): string
   showFilter?: boolean
@@ -48,10 +47,9 @@ type AlbumGalleryProps = {
   setOrdering?: SetOrderingFn
   ordering?: MediaOrdering
   onlyFavorites?: boolean
-  onFavorite?(): void
 }
 
-const AlbumGallery = React.forwardRef(
+const AlbumGallery = forwardRef(
   (
     {
       album,
@@ -63,7 +61,7 @@ const AlbumGallery = React.forwardRef(
       ordering,
       onlyFavorites = false,
     }: AlbumGalleryProps,
-    ref: React.ForwardedRef<HTMLDivElement>
+    ref: ForwardedRef<HTMLDivElement>
   ) => {
     const [mediaState, dispatchMedia] = useReducer(mediaGalleryReducer, {
       presenting: false,
@@ -75,7 +73,7 @@ const AlbumGallery = React.forwardRef(
       dispatchMedia({ type: 'replaceMedia', media: album?.media || [] })
     }, [album?.media])
 
-    urlPresentModeSetupHook({
+    useUrlPresentModeSetup({
       dispatchMedia,
       openPresentMode: event => {
         dispatchMedia({

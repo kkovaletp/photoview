@@ -11,13 +11,11 @@ import { useTranslation } from 'react-i18next'
 import PasswordProtectedShare from './PasswordProtectedShare'
 import { isNil } from '../../helpers/utils'
 import {
-  SharePageToken,
-  SharePageTokenVariables,
-} from './__generated__/SharePageToken'
-import {
-  ShareTokenValidatePassword,
-  ShareTokenValidatePasswordVariables,
-} from './__generated__/ShareTokenValidatePassword'
+  SharePageTokenQuery,
+  SharePageTokenQueryVariables,
+  ShareTokenValidatePasswordQuery,
+  ShareTokenValidatePasswordQueryVariables,
+} from './__generated__/SharePage'
 
 export const SHARE_TOKEN_QUERY = gql`
   query SharePageToken($token: String!, $password: String) {
@@ -91,15 +89,22 @@ const useTokenFromParams = () => {
   return token
 }
 
+type SharedSubAlbumPageProps = { token: string; password: string | null }
+const SharedSubAlbumPage = ({ token, password }: SharedSubAlbumPageProps) => {
+  const { subAlbum } = useParams()
+  if (isNil(subAlbum)) throw new Error('Expected `subAlbum` param to be defined')
+  return <AlbumSharePage albumID={subAlbum} token={token} password={password} />
+}
+
 const AuthorizedTokenRoute = () => {
   const { t } = useTranslation()
 
   const token = useTokenFromParams()
-  const password = getSharePassword(token)
+  const password = getSharePassword(token) ?? null
 
   const { loading, error, data } = useQuery<
-    SharePageToken,
-    SharePageTokenVariables
+    SharePageTokenQuery,
+    SharePageTokenQueryVariables
   >(SHARE_TOKEN_QUERY, {
     variables: {
       token,
@@ -108,22 +113,16 @@ const AuthorizedTokenRoute = () => {
   })
 
   if (!isNil(error)) return <div>{error.message || 'An unknown error occurred'}</div>
-  if (loading) return <div>{t('general.loading.default', 'Loading...')}</div>
+  if (loading) {
+    return <div aria-label={t('general.loading.default', 'Loading...')}>
+      {t('general.loading.default', 'Loading...')}
+    </div>
+  }
 
   if (data?.shareToken?.album) {
-    const SharedSubAlbumPage = () => {
-      const { subAlbum } = useParams()
-      if (isNil(subAlbum))
-        throw new Error('Expected `subAlbum` param to be defined')
-
-      return (
-        <AlbumSharePage albumID={subAlbum} token={token} password={password} />
-      )
-    }
-
     return (
       <Routes>
-        <Route path=":subAlbum" element={<SharedSubAlbumPage />} />
+        <Route path=":subAlbum" element={<SharedSubAlbumPage token={token} password={password} />} />
         <Route
           index
           element={
@@ -155,8 +154,8 @@ export const TokenRoute = () => {
   const token = useTokenFromParams()
 
   const { loading, error, data, refetch } = useQuery<
-    ShareTokenValidatePassword,
-    ShareTokenValidatePasswordVariables
+    ShareTokenValidatePasswordQuery,
+    ShareTokenValidatePasswordQueryVariables
   >(VALIDATE_TOKEN_PASSWORD_QUERY, {
     notifyOnNetworkStatusChange: true,
     variables: {
@@ -184,7 +183,9 @@ export const TokenRoute = () => {
   }
 
   if (loading && data === undefined) {
-    return <div>{t('general.loading.default', 'Loading...')}</div>
+    return <div aria-label={t('general.loading.default', 'Loading...')}>
+      {t('general.loading.default', 'Loading...')}
+    </div>
   }
 
   if (!data?.shareTokenValidatePassword) {
@@ -199,7 +200,11 @@ export const TokenRoute = () => {
     )
   }
 
-  if (loading) return <div>{t('general.loading.default', 'Loading...')}</div>
+  if (loading) {
+    return <div aria-label={t('general.loading.default', 'Loading...')}>
+      {t('general.loading.default', 'Loading...')}
+    </div>
+  }
 
   return <AuthorizedTokenRoute />
 }

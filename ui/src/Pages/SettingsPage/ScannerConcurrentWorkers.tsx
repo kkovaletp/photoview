@@ -1,12 +1,12 @@
-import React, { useRef, useState, useEffect } from 'react'
+import { useRef, useState, useEffect } from 'react'
 import { useQuery, useMutation, gql } from '@apollo/client'
 import { InputLabelTitle, InputLabelDescription } from './SettingsPage'
 import { useTranslation } from 'react-i18next'
-import { concurrentWorkersQuery } from './__generated__/concurrentWorkersQuery'
 import {
-  setConcurrentWorkers,
-  setConcurrentWorkersVariables,
-} from './__generated__/setConcurrentWorkers'
+  ConcurrentWorkersQueryQuery,
+  SetConcurrentWorkersMutation,
+  SetConcurrentWorkersMutationVariables,
+} from './__generated__/ScannerConcurrentWorkers'
 import { TextField } from '../../primitives/form/Input'
 
 export const CONCURRENT_WORKERS_QUERY = gql`
@@ -32,7 +32,7 @@ export const ScannerConcurrentWorkers = () => {
   const [workerAmount, setWorkerAmount] = useState(0)
   const [inputValue, setInputValue] = useState('')
 
-  const workerAmountQuery = useQuery<concurrentWorkersQuery>(CONCURRENT_WORKERS_QUERY)
+  const workerAmountQuery = useQuery<ConcurrentWorkersQueryQuery>(CONCURRENT_WORKERS_QUERY)
 
   useEffect(() => {
     if (workerAmountQuery.error) {
@@ -57,9 +57,9 @@ export const ScannerConcurrentWorkers = () => {
   }, [workerAmountQuery.data, workerAmountQuery.error])
 
   const [setWorkersMutation, workersMutationData] = useMutation<
-    setConcurrentWorkers,
-    setConcurrentWorkersVariables
-  >(SET_CONCURRENT_WORKERS_MUTATION)
+    SetConcurrentWorkersMutation,
+    SetConcurrentWorkersMutationVariables
+  >(SET_CONCURRENT_WORKERS_MUTATION, { errorPolicy: 'all' })
 
   const updateWorkerAmount = (next: number) => {
     const prev = workerAmountServerValue.current
@@ -68,11 +68,12 @@ export const ScannerConcurrentWorkers = () => {
     inFlightNextRef.current = next
 
     setWorkersMutation({
-      variables: {
-        workers: next,
-      },
+      variables: { workers: next },
     }).then(res => {
-      const newValue = res.data?.setScannerConcurrentWorkers ?? next
+      if (!res.data || (Array.isArray(res.errors) && res.errors.length > 0)) {
+        throw new Error('GraphQL error while updating concurrent workers')
+      }
+      const newValue = res.data.setScannerConcurrentWorkers
       workerAmountServerValue.current = newValue
       setWorkerAmount(newValue)
       setInputValue(String(newValue))

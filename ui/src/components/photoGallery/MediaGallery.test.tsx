@@ -68,6 +68,46 @@ test('photo gallery with media', () => {
   ).toHaveLength(3)
 })
 
+test('keeps existing thumbnails when loading is true (no flicker)', () => {
+  const dispatchMedia = vi.fn()
+
+  const mediaState: MediaGalleryState = {
+    activeIndex: 0,
+    media: [
+      {
+        __typename: 'Media' as const,
+        id: '1',
+        type: MediaType.Photo,
+        thumbnail: {
+          url: 'http://localhost/thumb.jpg',
+          width: 80,
+          height: 80,
+          __typename: 'MediaURL' as const,
+        },
+        highRes: null,
+        videoWeb: null,
+        blurhash: null,
+        favorite: false,
+      },
+    ],
+    presenting: false,
+  }
+
+  renderWithProviders(
+    <MediaGallery
+      dispatchMedia={dispatchMedia}
+      mediaState={mediaState}
+      loading={true}   // background refetch in progress — thumbnail must still show
+    />,
+    { mocks: [] }
+  )
+
+  // One real thumbnail must be visible, not replaced by placeholders
+  expect(
+    screen.getByTestId('photo-gallery-wrapper').querySelectorAll('img')
+  ).toHaveLength(1)
+})
+
 describe('photo gallery presenting', () => {
   const dispatchMedia = vi.fn()
 

@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import { Dispatch, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import styled from 'styled-components'
 import { TextField } from '../../../primitives/form/Input'
@@ -11,8 +11,8 @@ import {
   TableRow,
 } from '../../../primitives/Table'
 import FaceCircleImage from '../FaceCircleImage'
-import { myFaces_myFaceGroups } from '../__generated__/myFaces'
-import { singleFaceGroup_faceGroup } from './__generated__/singleFaceGroup'
+import { MyFacesQuery } from '../__generated__/PeoplePage'
+import { SingleFaceGroupQuery } from './__generated__/singleFaceGroupQuery'
 
 const FaceCircleWrapper = styled.div<{ $selected: boolean }>`
   display: inline-block;
@@ -33,7 +33,7 @@ export const RowLabel = styled.span<{ $selected: boolean }>`
 `
 
 type FaceGroupRowProps = {
-  faceGroup: myFaces_myFaceGroups
+  faceGroup: MyFacesQuery['myFaceGroups'][0]
   faceSelected: boolean
   selectable: boolean
   toggleFaceSelected(): void
@@ -57,7 +57,7 @@ const FaceGroupRow = ({
           />
         </FaceCircleWrapper>
         <span
-          className={`ml-3 ${faceSelected ? 'font-semibold text-slate-100' : 'text-gray-400'
+          className={`ml-3 ${faceSelected ? 'font-semibold text-slate-900 dark:text-slate-100' : 'text-gray-400'
             } ${!faceSelected && !faceGroup.label ? 'text-gray-600 italic' : ''}`}
         >
           {faceGroup.label ??
@@ -68,44 +68,67 @@ const FaceGroupRow = ({
   )
 }
 
+type SelectableFaceGroup =
+  | MyFacesQuery['myFaceGroups'][0]
+  | SingleFaceGroupQuery['faceGroup']
+
+type SelectedFaceGroupReference = {
+  id: string
+} | null
+
 type SelectFaceGroupTableProps = {
-  faceGroups: myFaces_myFaceGroups[]
-  selectedFaceGroups: Set<
-    singleFaceGroup_faceGroup | myFaces_myFaceGroups | null
-  >
-  toggleSelectedFaceGroup: React.Dispatch<
-    singleFaceGroup_faceGroup | myFaces_myFaceGroups | null
-  >
-  title: string,
-  frozen: boolean
+  faceGroups: MyFacesQuery['myFaceGroups']
+  selectedFaceGroup?: SelectedFaceGroupReference
+  setSelectedFaceGroup?: Dispatch<SelectableFaceGroup | null>
+  selectedFaceGroups?: Set<SelectedFaceGroupReference>
+  toggleSelectedFaceGroup?: Dispatch<SelectableFaceGroup | null>
+  title: string
+  frozen?: boolean
 }
 
 const SelectFaceGroupTable = ({
   faceGroups,
+  selectedFaceGroup,
+  setSelectedFaceGroup,
   selectedFaceGroups,
   toggleSelectedFaceGroup,
   title,
-  frozen
+  frozen = false
 }: SelectFaceGroupTableProps) => {
   const { t } = useTranslation()
+  const selectedIds = useMemo(() => {
+    if (selectedFaceGroup) return new Set<string>([selectedFaceGroup.id])
+    if (selectedFaceGroups && selectedFaceGroups.size > 0) {
+      return new Set<string>(
+        [...selectedFaceGroups]
+          .filter((x): x is NonNullable<typeof x> => x !== null)
+          .map(x => x.id)
+      )
+    }
+    return new Set<string>()
+  }, [selectedFaceGroup, selectedFaceGroups])
 
   const [searchValue, setSearchValue] = useState('')
 
   const rows = faceGroups
-    .filter(
-      x =>
-        searchValue == '' ||
-        (x.label && x.label.toLowerCase().includes(searchValue.toLowerCase()))
-    )
-    .map(face => (
-      <FaceGroupRow
-        key={face.id}
-        faceGroup={face}
-        faceSelected={[...selectedFaceGroups].some(val => val?.id === face.id)}
-        selectable={!frozen}
-        toggleFaceSelected={() => !frozen && toggleSelectedFaceGroup(face)}
-      />
-    ))
+    .filter(x => (x.label ?? '').toLowerCase().includes(searchValue.toLowerCase()))
+    .map(face => {
+      const isSelected = selectedIds.has(face.id)
+      const onToggle = () => {
+        if (frozen) return
+        if (setSelectedFaceGroup) setSelectedFaceGroup(face)
+        else toggleSelectedFaceGroup?.(face)
+      }
+      return (
+        <FaceGroupRow
+          key={face.id}
+          faceGroup={face}
+          faceSelected={isSelected}
+          selectable={!frozen}
+          toggleFaceSelected={onToggle}
+        />
+      )
+    })
 
   return (
     <>
@@ -129,7 +152,7 @@ const SelectFaceGroupTable = ({
           </TableRow>
         </TableHeader>
       </Table>
-      <div className="overflow-auto max-h-[500px] mt-2">
+      <div className="overflow-auto max-h-125 mt-2">
         <Table className="w-full">
           <TableBody>{rows}</TableBody>
         </Table>

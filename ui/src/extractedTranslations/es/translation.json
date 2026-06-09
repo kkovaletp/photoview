@@ -18,7 +18,9 @@
     }
   },
   "album_page": {
-    "load_error": ""
+    "load_error": "",
+    "loading": "",
+    "not_found": ""
   },
   "ethical_use_license_page": {
     "load_error": "",
@@ -31,6 +33,7 @@
       "cancel": "Cancelar",
       "close": "",
       "remove": "Borrar",
+      "retry": "",
       "save": "Guardar",
       "submit": ""
     },
@@ -58,7 +61,8 @@
       "result_type": {
         "albums": "Álbumes",
         "media": ""
-      }
+      },
+      "results_label": ""
     }
   },
   "login_page": {
@@ -109,6 +113,9 @@
           "select_images": ""
         },
         "description": "",
+        "error": {
+          "network": ""
+        },
         "title": ""
       },
       "merge_face_groups": {
@@ -116,6 +123,22 @@
         "destination_table": {
           "title": ""
         },
+        "error": {
+          "network": ""
+        },
+        "face_groups_load_error": "",
+        "preselected_role": {
+          "destination": {
+            "description": "",
+            "title": ""
+          },
+          "source": {
+            "description": "",
+            "title": ""
+          }
+        },
+        "preselected_role_description": "",
+        "source_role_destination_description": "",
         "sources_description": "",
         "sources_table": {
           "title": ""
@@ -125,8 +148,12 @@
       "move_image_faces": {
         "description": "",
         "destination_face_group_table": {
+          "load_error": "",
           "move_action": "",
           "title": ""
+        },
+        "error": {
+          "network": ""
         },
         "image_select_table": {
           "next_action": "",
@@ -185,6 +212,8 @@
     "scanner": {
       "description": "Escaneará todos los usuarios para buscar archivos nuevos o actualizados",
       "scan_all_users": "Escanear todos los usuarios",
+      "scanning": "",
+      "starting": "",
       "title": "Escáner"
     },
     "user_preferences": {
@@ -217,11 +246,15 @@
       },
       "confirm_delete_user": {
         "action": "Eliminar {{user}}",
-        "description": "<0>¿Estás seguro de que quieres eliminar a <1></1>?</0><p>Esta acción no puede deshacerse</p>",
+        "description": "<line>¿Estás seguro de que quieres eliminar a <bold>{{username}}</bold>?</line><line>Esta acción no puede deshacerse</line>",
         "title": "Eliminar usuario"
       },
+      "edit": {
+        "add_path_error": "",
+        "remove_path_error": ""
+      },
       "password_reset": {
-        "description": "Cambiar contraseña a <1>{{username}}</1>",
+        "description": "Cambiar contraseña a <bold>{{username}}</bold>",
         "error": "",
         "form": {
           "label": "Nueva contraseña",
@@ -377,6 +410,7 @@
       "action_label": {
         "detach_image": "",
         "merge_face": "",
+        "more_actions": "",
         "move_face": ""
       },
       "confirm_image_detach": "",
@@ -384,8 +418,10 @@
     },
     "sharing": {
       "add_share": "Añadir compartido",
+      "add_share_error": "",
       "copy_link": "Copiar enlace",
       "delete": "",
+      "delete_error": "",
       "error": "",
       "expiration_date": "",
       "more": "",
@@ -438,9 +474,7 @@
     }
   },
   "title": {
-    "loading_album": "Cargando álbum",
     "login": "",
-    "not_found": "",
     "people": "Personas",
     "settings": "Opciones"
   }

@@ -19,10 +19,10 @@ function useOrderingParams(
   const rawOrderBy = getParam('orderBy', defaultOrderBy)
   const orderBy = rawOrderBy === null || rawOrderBy === '' ? defaultOrderBy : rawOrderBy
 
-  const rawOrderDir = getParam('orderDirection', OrderDirection.ASC)
+  const rawOrderDir = getParam('orderDirection', OrderDirection.Asc)
   const orderDirection =
     Object.values(OrderDirection).includes(rawOrderDir as OrderDirection)
-      ? (rawOrderDir as OrderDirection) : OrderDirection.ASC
+      ? (rawOrderDir as OrderDirection) : OrderDirection.Asc
 
   const setOrdering: SetOrderingFn = useCallback(
     ({ orderBy, orderDirection }) => {

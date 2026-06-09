@@ -1,7 +1,7 @@
 import { describe, test, expect, vi, beforeEach, afterEach } from 'vitest'
 import { act, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { MemoryRouter } from 'react-router-dom'
+import { MemoryRouter } from 'react-router'
 import i18n from 'i18next'
 import DOMPurify from 'dompurify'
 import EthicalUseLicensePage, { DOMPURIFY_CONFIG } from './EthicalUseLicensePage'
@@ -11,8 +11,8 @@ import EthicalUseLicensePage, { DOMPURIFY_CONFIG } from './EthicalUseLicensePage
 // ---------------------------------------------------------------------------
 
 const mockNavigate = vi.fn()
-vi.mock('react-router-dom', async () => {
-    const actual = await vi.importActual('react-router-dom') as object
+vi.mock('react-router', async () => {
+    const actual = await vi.importActual('react-router') as object
     return { ...actual, useNavigate: () => mockNavigate }
 })
 

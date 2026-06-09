@@ -15,6 +15,7 @@ describe('paginateCache', () => {
                 ['single'],
                 ['onlyFavorites', 'order'], // Real usage from Album.media
                 ['onlyFavorites'], // Real usage from Query.myTimeline
+                [['paginate', ['limit']]],
             ]
 
             testCases.forEach(keyArgs => {
@@ -201,21 +202,43 @@ describe('paginateCache', () => {
     })
 
     describe('Error Handling', () => {
-        it('should throw descriptive error for missing or invalid paginate argument', () => {
+        it('should warn and preserve existing data for missing or invalid paginate argument', () => {
+            const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => { })
             const existing = [{ id: '1' }]
             const incoming = [{ id: '2' }]
 
             const invalidCases = [
                 { args: {}, fieldName: 'testField' },
                 { args: { paginate: null }, fieldName: 'testField' },
-                { args: { paginate: undefined }, fieldName: 'testField' }
+                { args: { paginate: undefined }, fieldName: 'testField' },
             ]
 
-            invalidCases.forEach(context => {
-                expect(() => {
-                    paginateFn.merge(existing, incoming, context as any)
-                }).toThrow('Paginate argument is missing for query: testField')
-            })
+            try {
+                invalidCases.forEach(context => {
+                    consoleWarnSpy.mockClear()
+
+                    const result = paginateFn.merge(existing, incoming, context as any)
+
+                    expect(consoleWarnSpy).toHaveBeenCalledWith(
+                        expect.stringContaining('Paginate argument is missing for field: testField')
+                    )
+                    expect(result).toEqual(existing)
+                })
+
+                invalidCases.forEach(context => {
+                    consoleWarnSpy.mockClear()
+
+                    const result = paginateFn.merge(undefined, incoming, context as any)
+
+                    expect(consoleWarnSpy).toHaveBeenCalledWith(
+                        expect.stringContaining('Paginate argument is missing for field: testField')
+                    )
+                    expect(result).toEqual([])
+                    expect(result).not.toEqual(incoming)
+                })
+            } finally {
+                consoleWarnSpy.mockRestore()
+            }
         })
     })
 
@@ -277,7 +300,8 @@ describe('paginateCache', () => {
         })
 
         it('should handle FaceGroup.imageFaces with empty keyArgs', () => {
-            const paginateFn = paginateCache([]) // Empty keyArgs as used in real code
+            // myFaceGroups separates paginated and unbounded lists by limit
+            const paginateFn = paginateCache([['paginate', ['limit']]])
 
             const existing = [
                 { id: 'face1', __typename: 'ImageFace' },
@@ -302,7 +326,8 @@ describe('paginateCache', () => {
         })
 
         it('should handle Query.myFaceGroups pagination', () => {
-            const paginateFn = paginateCache([]) // Empty keyArgs like myFaceGroups
+            // myFaceGroups separates paginated and unbounded lists by limit
+            const paginateFn = paginateCache([['paginate', ['limit']]])
 
             const existing = [{ __ref: 'FaceGroup:1' }, { __ref: 'FaceGroup:2' }]
             const incoming = [{ __ref: 'FaceGroup:2' }, { __ref: 'FaceGroup:3' }] // One duplicate

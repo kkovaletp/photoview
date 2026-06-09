@@ -6,7 +6,7 @@ import { SidebarContext } from '../sidebar/Sidebar'
 import AlbumSidebar from '../sidebar/AlbumSidebar'
 import { useLazyQuery, gql } from '@apollo/client'
 import { authToken } from '../../helpers/authentication'
-import { albumPathQuery } from './__generated__/albumPathQuery'
+import { AlbumPathQueryQuery } from './__generated__/AlbumTitle'
 import useDelay from '../../hooks/useDelay'
 
 import GearIcon from './icons/gear.svg?react'
@@ -49,21 +49,23 @@ type AlbumTitleProps = {
 
 const AlbumTitle = ({ album, disableLink = false }: AlbumTitleProps) => {
   const [fetchPath, { data: pathData }] =
-    useLazyQuery<albumPathQuery>(ALBUM_PATH_QUERY)
+    useLazyQuery<AlbumPathQueryQuery>(ALBUM_PATH_QUERY)
   const { t } = useTranslation()
   const { updateSidebar } = useContext(SidebarContext)
+  const token = authToken()
+  const albumId = album?.id
 
   useEffect(() => {
-    if (!album) return
+    if (!albumId) return
+    if (!token || !disableLink) return
 
-    if (authToken() && disableLink) {
-      fetchPath({
-        variables: {
-          id: album.id,
-        },
-      })
-    }
-  }, [album])
+    fetchPath({
+      variables: {
+        id: albumId,
+      },
+    })
+
+  }, [albumId, token, disableLink, fetchPath])
 
   const delay = useDelay(200, [album])
 
@@ -104,7 +106,7 @@ const AlbumTitle = ({ album, disableLink = false }: AlbumTitleProps) => {
         </nav>
         <h1 className="text-2xl truncate min-w-0">{title}</h1>
       </div>
-      {authToken() && (
+      {token && (
         <button
           title={t('sidebar.album.title', 'Album options')}
           aria-label={t('sidebar.album.title', 'Album options')}

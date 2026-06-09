@@ -18,7 +18,9 @@
     }
   },
   "album_page": {
-    "load_error": ""
+    "load_error": "",
+    "loading": "",
+    "not_found": ""
   },
   "ethical_use_license_page": {
     "load_error": "",
@@ -31,6 +33,7 @@
       "cancel": "Annuler",
       "close": "",
       "remove": "Supprimer",
+      "retry": "",
       "save": "Sauvegarder",
       "submit": ""
     },
@@ -58,7 +61,8 @@
       "result_type": {
         "albums": "Albums",
         "media": "Médias"
-      }
+      },
+      "results_label": ""
     }
   },
   "login_page": {
@@ -109,6 +113,9 @@
           "select_images": "Sélectionner les images de visages à détacher"
         },
         "description": "Détachez les images sélectionnées de ce groupe de visages et déplacez-les vers un nouveau groupe de visages",
+        "error": {
+          "network": ""
+        },
         "title": "Détacher les visages des images"
       },
       "merge_face_groups": {
@@ -116,6 +123,22 @@
         "destination_table": {
           "title": "Sélectionner le visage de destination"
         },
+        "error": {
+          "network": ""
+        },
+        "face_groups_load_error": "",
+        "preselected_role": {
+          "destination": {
+            "description": "",
+            "title": ""
+          },
+          "source": {
+            "description": "",
+            "title": ""
+          }
+        },
+        "preselected_role_description": "",
+        "source_role_destination_description": "",
         "sources_description": "Sélectionnez tous les groupes de visages qui seront fusionnés dans le groupe de destination.",
         "sources_table": {
           "title": "Sélectionnez un ou plusieurs groupes sources à fusionner :"
@@ -125,8 +148,12 @@
       "move_image_faces": {
         "description": "Déplacer les images sélectionnées de ce groupe de visages vers un autre groupe de visages",
         "destination_face_group_table": {
+          "load_error": "",
           "move_action": "Déplacer les visages de l'image",
           "title": "Sélectionner le groupe de visages de destination"
+        },
+        "error": {
+          "network": ""
         },
         "image_select_table": {
           "next_action": "Suivant",
@@ -185,6 +212,8 @@
     "scanner": {
       "description": "Analyser tous les utilisateurs pour détecter de nouveaux médias ou des médias mis à jour",
       "scan_all_users": "Analyser tous les utilisateurs",
+      "scanning": "",
+      "starting": "",
       "title": "Analyse"
     },
     "user_preferences": {
@@ -217,11 +246,15 @@
       },
       "confirm_delete_user": {
         "action": "Supprimer {{user}}",
-        "description": "<0>Êtes-vous sûr de vouloir supprimer <1></1>?</0><p>Cette action est irreversible</p>",
+        "description": "<line>Êtes-vous sûr de vouloir supprimer <bold>{{username}}</bold>?</line><line>Cette action est irreversible</line>",
         "title": "Supprimer l'utilisateur"
       },
+      "edit": {
+        "add_path_error": "",
+        "remove_path_error": ""
+      },
       "password_reset": {
-        "description": "Modifier le mot de passe de <1>{{username}}</1>",
+        "description": "Modifier le mot de passe de <bold>{{username}}</bold>",
         "error": "",
         "form": {
           "label": "Nouveau mot de passe",
@@ -377,6 +410,7 @@
       "action_label": {
         "detach_image": "Détacher l'image",
         "merge_face": "Fusionner le visage",
+        "more_actions": "",
         "move_face": "Déplacer le visage"
       },
       "confirm_image_detach": "Êtes-vous sûr de vouloir détacher cette image ?",
@@ -384,8 +418,10 @@
     },
     "sharing": {
       "add_share": "Ajouter un partage",
+      "add_share_error": "",
       "copy_link": "Copier le lien",
       "delete": "Supprimer",
+      "delete_error": "",
       "error": "",
       "expiration_date": "",
       "more": "Plus",
@@ -438,9 +474,7 @@
     }
   },
   "title": {
-    "loading_album": "Chargement de l'album",
     "login": "Connexion",
-    "not_found": "",
     "people": "Personnes",
     "settings": "Paramètres"
   }

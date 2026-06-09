@@ -1,11 +1,10 @@
-import React from 'react'
+import { ReactNode } from 'react'
 import { NavLink } from 'react-router'
 import { useQuery, gql } from '@apollo/client'
 import { authToken } from '../../helpers/authentication'
 import { useTranslation } from 'react-i18next'
-import { mapboxEnabledQuery } from '../../__generated__/mapboxEnabledQuery'
+import { MapboxEnabledQueryQuery, FaceDetectionEnabledQuery } from './__generated__/MainMenu'
 import { tailwindClassNames } from '../../helpers/utils'
-import { faceDetectionEnabled } from './__generated__/faceDetectionEnabled'
 
 export const MAPBOX_QUERY = gql`
   query mapboxEnabledQuery {
@@ -28,7 +27,7 @@ type MenuButtonProps = {
   background: string
   activeClasses?: string
   className?: string
-  icon?: React.ReactNode
+  icon?: ReactNode
 }
 
 const MenuButton = ({
@@ -75,11 +74,11 @@ export const MainMenu = () => {
   const { t } = useTranslation()
   const token = authToken();
 
-  const mapboxQuery = useQuery<mapboxEnabledQuery>(
+  const mapboxQuery = useQuery<MapboxEnabledQueryQuery>(
     MAPBOX_QUERY,
     { skip: !token }
   );
-  const faceDetectionEnabledQuery = useQuery<faceDetectionEnabled>(
+  const faceDetectionEnabledQuery = useQuery<FaceDetectionEnabledQuery>(
     FACE_DETECTION_ENABLED_QUERY,
     { skip: !token }
   );

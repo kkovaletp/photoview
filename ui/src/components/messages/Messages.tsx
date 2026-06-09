@@ -1,4 +1,3 @@
-import React from 'react'
 import styled from 'styled-components'
 import { authToken } from '../../helpers/authentication'
 import MessageProgress from './MessageProgress'
@@ -20,67 +19,49 @@ const Container = styled.div`
   }
 `
 
+type MessageItemProps = {
+  message: Message
+  onDismiss: (message: Message) => void
+}
+
+const MessageItem = ({ message, onDismiss }: MessageItemProps) => {
+  switch (message.type) {
+    case NotificationType.Message:
+      return (
+        <MessagePlain
+          onDismiss={() => onDismiss(message)}
+          {...message.props}
+        />
+      )
+    case NotificationType.Progress:
+      return (
+        <MessageProgress
+          onDismiss={() => onDismiss(message)}
+          {...message.props}
+        />
+      )
+    default:
+      console.error('Unknown message type encountered for message key: ' + message.key)
+      return null
+  }
+}
+
 const Messages = () => {
   const { messages, setMessages } = useMessageState()
 
-  const getMessageElement = (message: Message): React.FunctionComponent => {
-    const dismissMessage = (message: Message) => {
-      message.onDismiss?.()
-      setMessages(prevMessages => prevMessages.filter(msg => msg.key != message.key))
-    }
-
-    switch (message.type) {
-      case NotificationType.Message:
-        return props => (
-          <MessagePlain
-            onDismiss={() => {
-              dismissMessage(message)
-            }}
-            {...message.props}
-            {...props}
-          />
-        )
-      case NotificationType.Progress:
-        return props => (
-          <MessageProgress
-            onDismiss={() => {
-              dismissMessage(message)
-            }}
-            {...message.props}
-            {...props}
-          />
-        )
-      default:
-        throw new Error(`Invalid message type: ${message.type}`)
-    }
+  const dismissMessage = (message: Message) => {
+    message.onDismiss?.()
+    setMessages(prevMessages => prevMessages.filter(msg => msg.key !== message.key))
   }
-
-  // const transitions = useTransition(messages.slice().reverse(), x => x.key, {
-  //   from: {
-  //     opacity: 0,
-  //     height: '0px',
-  //   },
-  //   enter: {
-  //     opacity: 1,
-  //     height: `100px`,
-  //   },
-  //   leave: { opacity: 0, height: '0px' },
-  // })
-
-  const messageElems = messages.map(msg => {
-    const Elem = getMessageElement(msg)
-    return (
-      <div key={msg.key}>
-        <Elem />
-      </div>
-    )
-  })
+  const messageElems = messages.map(msg => (
+    <MessageItem key={msg.key} message={msg} onDismiss={dismissMessage} />
+  ))
 
   return (
     <Container>
       {messageElems}
       {authToken() && (
-        <SubscriptionsHook messages={messages} setMessages={setMessages} />
+        <SubscriptionsHook setMessages={setMessages} />
       )}
     </Container>
   )

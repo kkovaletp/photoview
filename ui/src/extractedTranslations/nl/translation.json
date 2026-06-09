@@ -18,7 +18,9 @@
     }
   },
   "album_page": {
-    "load_error": ""
+    "load_error": "Kan album niet laden",
+    "loading": "Album laden...",
+    "not_found": "Album niet gevonden"
   },
   "ethical_use_license_page": {
     "load_error": "",
@@ -31,6 +33,7 @@
       "cancel": "Annuleren",
       "close": "",
       "remove": "Verwijderen",
+      "retry": "Opnieuw proberen",
       "save": "Opslaan",
       "submit": ""
     },
@@ -58,7 +61,8 @@
       "result_type": {
         "albums": "Albums",
         "media": "Media"
-      }
+      },
+      "results_label": "Zoekresultaten"
     }
   },
   "login_page": {
@@ -109,6 +113,9 @@
           "select_images": "Selecteer afbeeldingen om los te koppelen"
         },
         "description": "Koppel geselecteerde afbeeldingen los van deze gezichtsgroep en verplaats ze naar een nieuwe groep",
+        "error": {
+          "network": "Netwerkfout. Controleer je verbinding en probeer opnieuw."
+        },
         "title": "Gezichten loskoppelen"
       },
       "merge_face_groups": {
@@ -116,6 +123,22 @@
         "destination_table": {
           "title": "Selecteer doelgezicht"
         },
+        "error": {
+          "network": "Netwerkfout. Controleer je verbinding en probeer opnieuw."
+        },
+        "face_groups_load_error": "Kan gezichtsgroepen niet laden",
+        "preselected_role": {
+          "destination": {
+            "description": "",
+            "title": ""
+          },
+          "source": {
+            "description": "",
+            "title": ""
+          }
+        },
+        "preselected_role_description": "",
+        "source_role_destination_description": "",
         "sources_description": "Selecteer alle gezichtsgroepen die samengevoegd worden met de doelgroep.",
         "sources_table": {
           "title": "Selecteer één of meer brongezichten:"
@@ -125,8 +148,12 @@
       "move_image_faces": {
         "description": "Verplaats geselecteerde afbeeldingen naar een andere gezichtsgroep",
         "destination_face_group_table": {
+          "load_error": "Kan gezichtsgroepen niet laden",
           "move_action": "Gezichten verplaatsen",
           "title": "Selecteer doelgezichtsgroep"
+        },
+        "error": {
+          "network": "Netwerkfout. Controleer je verbinding en probeer opnieuw."
         },
         "image_select_table": {
           "next_action": "Volgende",
@@ -185,6 +212,8 @@
     "scanner": {
       "description": "Scant alle gebruikers op nieuwe of gewijzigde media",
       "scan_all_users": "Scan alle gebruikers",
+      "scanning": "",
+      "starting": "",
       "title": "Scanner"
     },
     "user_preferences": {
@@ -217,11 +246,15 @@
       },
       "confirm_delete_user": {
         "action": "Verwijder {{user}}",
-        "description": "<0>Weet je zeker dat je <1></1> wilt verwijderen?</0><p>Deze actie kan niet ongedaan worden gemaakt</p>",
+        "description": "<line>Weet je zeker dat je <bold>{{username}}</bold> wilt verwijderen?</line><line>Deze actie kan niet ongedaan worden gemaakt</line>",
         "title": "Gebruiker verwijderen"
       },
+      "edit": {
+        "add_path_error": "",
+        "remove_path_error": ""
+      },
       "password_reset": {
-        "description": "Wijzig wachtwoord voor <1>{{username}}</1>",
+        "description": "Wijzig wachtwoord voor <bold>{{username}}</bold>",
         "error": "",
         "form": {
           "label": "Nieuw wachtwoord",
@@ -372,6 +405,7 @@
       "action_label": {
         "detach_image": "Afbeelding loskoppelen",
         "merge_face": "Gezicht samenvoegen",
+        "more_actions": "",
         "move_face": "Gezicht verplaatsen"
       },
       "confirm_image_detach": "Weet je zeker dat je deze afbeelding wilt loskoppelen?",
@@ -379,8 +413,10 @@
     },
     "sharing": {
       "add_share": "Share toevoegen",
+      "add_share_error": "",
       "copy_link": "Link kopiëren",
       "delete": "Verwijderen",
+      "delete_error": "",
       "error": "",
       "expiration_date": "",
       "more": "Meer",
@@ -433,9 +469,7 @@
     }
   },
   "title": {
-    "loading_album": "Album laden",
     "login": "Inloggen",
-    "not_found": "",
     "people": "Personen",
     "settings": "Instellingen"
   }
