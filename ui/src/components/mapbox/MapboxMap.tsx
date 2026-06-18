@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect, forwardRef } from 'react'
 import { gql, useQuery } from '@apollo/client'
-import type mapboxgl from 'mapbox-gl'
+import type * as mapboxgl from 'mapbox-gl'
 import styled from 'styled-components'
 
 import 'mapbox-gl/dist/mapbox-gl.css'
@@ -43,8 +43,7 @@ const useMapboxMap = ({
 
   useEffect(() => {
     async function loadMapboxLibrary() {
-      const mapbox = (await import('mapbox-gl/esm')).default
-
+      const mapbox = await import('mapbox-gl/esm')
       setMapboxLibrary(mapbox)
     }
     loadMapboxLibrary()
@@ -60,14 +59,12 @@ const useMapboxMap = ({
       return
     }
 
-    if (mapboxData.mapboxToken)
-      mapboxLibrary.accessToken = mapboxData.mapboxToken
-
     map.current = new mapboxLibrary.Map({
       container: mapContainer.current,
       style: isDarkMode()
         ? 'mapbox://styles/mapbox/dark-v10'
         : 'mapbox://styles/mapbox/streets-v11',
+      ...(mapboxData.mapboxToken ? { accessToken: mapboxData.mapboxToken } : {}),
       ...mapboxOptions,
     })
 
