@@ -1,5 +1,5 @@
 import { gql, useQuery } from '@apollo/client'
-import type * as mapboxgl from 'mapbox-gl'
+import type * as mapboxgl from 'mapbox-gl/esm'
 import { Dispatch, useReducer } from 'react'
 import { Helmet, HelmetProvider } from '@dr.pogodin/react-helmet'
 import { useTranslation } from 'react-i18next'

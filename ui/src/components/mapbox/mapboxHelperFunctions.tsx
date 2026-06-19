@@ -1,4 +1,4 @@
-import type * as mapboxgl from 'mapbox-gl'
+import type * as mapboxgl from 'mapbox-gl/esm'
 import { Dispatch } from 'react'
 import { createRoot } from 'react-dom/client'
 import MapClusterMarker from '../../Pages/PlacesPage/MapClusterMarker'

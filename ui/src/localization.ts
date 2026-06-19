@@ -7,7 +7,7 @@ import type { TFunction } from 'i18next'
 import { LanguageTranslation } from './__generated__/globalTypes'
 import { authToken } from './helpers/authentication'
 import { isNil } from './helpers/utils'
-import type * as mapboxgl from 'mapbox-gl'
+import type * as mapboxgl from 'mapbox-gl/esm'
 import {
   LANGUAGE_TRANSLATION_TO_LOCALE,
   LANGUAGE_TRANSLATION_TO_MAPBOX_LOCALE,
