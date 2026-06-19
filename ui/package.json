@@ -21,8 +21,8 @@
     "test:ci": "CI=true vitest --run --coverage",
     "genSchemaTypes": "find src -type f -path '*/__generated__/*.ts' -delete && graphql-codegen --config codegen.ts && prettier --write \"src/**/__generated__/*.ts\"",
     "validateGQL": "graphql-inspector validate 'src/**/*.{ts,tsx}' '../api/graphql/resolvers/*.graphql' --deprecated",
-    "extractTranslations": "i18next-cli extract; i18next-cli types",
-    "extractTranslations:ci": "i18next-cli extract --ci --quiet; i18next-cli types --ci --quiet",
+    "extractTranslations": "i18next-cli extract && i18next-cli types",
+    "extractTranslations:ci": "i18next-cli extract --ci --quiet && i18next-cli types --ci --quiet",
     "lintTranslations": "i18next-cli lint"
   },
   "engines": {

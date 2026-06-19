@@ -117,7 +117,20 @@ const PersonMoreMenu = ({
         },
       ],
     }).then(({ data, errors }) => {
-      if (!data?.detachImageFaces || (errors?.length ?? 0) > 0) return
+      if ((errors?.length ?? 0) > 0) return
+      if (!data?.detachImageFaces) {
+        console.error('Detach image face returned no destination group', {
+          faceId: face.id,
+          sourceFaceGroupID: face.faceGroup.id,
+        })
+        setInlineError(
+          t(
+            'people_page.modal.detach_image_faces.error.network',
+            'Network error while detaching images'
+          )
+        )
+        return
+      }
       navigate(`/people/${data.detachImageFaces.id}`)
     }).catch((e: unknown) => {
       console.error('Failed to detach image face', e)
