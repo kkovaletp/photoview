@@ -7,7 +7,7 @@ import type { TFunction } from 'i18next'
 import { LanguageTranslation } from './__generated__/globalTypes'
 import { authToken } from './helpers/authentication'
 import { isNil } from './helpers/utils'
-import MapboxLanguage from '@mapbox/mapbox-gl-language'
+import type * as mapboxgl from 'mapbox-gl'
 import {
   LANGUAGE_TRANSLATION_TO_LOCALE,
   LANGUAGE_TRANSLATION_TO_MAPBOX_LOCALE,
@@ -92,5 +92,5 @@ export const SetMapLanguages = (map: mapboxgl.Map) => {
   const mapboxLocale = isNil(map_language)
     ? 'en'
     : (LANGUAGE_TRANSLATION_TO_MAPBOX_LOCALE[map_language] ?? 'en')
-  map.addControl(new MapboxLanguage({ defaultLanguage: mapboxLocale }))
+  map.setLanguage(mapboxLocale)
 }

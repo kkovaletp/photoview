@@ -12,7 +12,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        database: ["sqlite", "mysql", "postgres"]
+        database: [ "sqlite", "mysql", "postgres" ]
 
     services:
       mariadb:
@@ -82,14 +82,14 @@ jobs:
           docker cp test:/app/api/test-api-coverage-report.xml ./api/
 
       - name: Upload coverage
-        uses: codecov/codecov-action@v6
+        uses: codecov/codecov-action@v7
         if: ${{ steps.test.conclusion == 'success' || steps.test.conclusion == 'failure' }}
         with:
           token: ${{ secrets.CODECOV_TKN }}
           flags: api-${{ matrix.database }}
 
       - name: Upload test execution results
-        uses: codecov/codecov-action@v6
+        uses: codecov/codecov-action@v7
         if: ${{ steps.test.conclusion == 'success' || steps.test.conclusion == 'failure' }}
         with:
           token: ${{ secrets.CODECOV_TKN }}
@@ -142,14 +142,14 @@ jobs:
           docker cp test:/app/ui/junit-report.xml ./ui/
 
       - name: Upload coverage
-        uses: codecov/codecov-action@v6
+        uses: codecov/codecov-action@v7
         if: ${{ steps.test.conclusion == 'success' || steps.test.conclusion == 'failure' }}
         with:
           token: ${{ secrets.CODECOV_TKN }}
           flags: ui
 
       - name: Upload test execution results
-        uses: codecov/codecov-action@v6
+        uses: codecov/codecov-action@v7
         if: ${{ steps.test.conclusion == 'success' || steps.test.conclusion == 'failure' }}
         with:
           token: ${{ secrets.CODECOV_TKN }}

@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect, forwardRef, HTMLProps } from 'react'
 import { gql, useQuery } from '@apollo/client'
-import type mapboxgl from 'mapbox-gl'
+import type * as mapboxgl from 'mapbox-gl'
 // `@ts-expect-error` – Vite ?worker import; no bundled type declaration
 import MapboxWorker from 'mapbox-gl/dist/mapbox-gl-csp-worker?worker'
 import styled from 'styled-components'
@@ -45,12 +45,15 @@ const useMapboxMap = ({
 
   useEffect(() => {
     async function loadMapboxLibrary() {
-      const mapbox = (await import('mapbox-gl')).default
+      const mapbox = await import('mapbox-gl/esm')
       // Inject the CSP worker so Vite doesn't mangle the internal worker URL.
       // Without this the browser receives an HTML SPA-fallback response for
       // the worker script and refuses to execute it (MIME "text/html").
+      //TODO: fix the "Property 'workerClass' does not exist on type '{ Evented: typeof Evented; LngLat: typeof LngLat; LngLatBounds: typeof LngLatBounds; TargetFeature: typeof TargetFeature; MercatorCoordinate: typeof MercatorCoordinate; ... 52 more ...; default: typeof import("/Users/kkoval/Documents/Repos/photoview/ui/node_modules/mapbox-gl/dist/esm/mapbox-gl"); }'."
       mapbox.workerClass = MapboxWorker as unknown as typeof mapbox.workerClass
 
+      //TODO: fix the "Excessive stack depth comparing types '{ Evented: typeof Evented; LngLat: typeof LngLat; LngLatBounds: typeof LngLatBounds; TargetFeature: typeof TargetFeature; MercatorCoordinate: typeof MercatorCoordinate; ... 52 more ...; default: typeof import("/Users/kkoval/Documents/Repos/photoview/ui/node_modules/mapbox-gl/dist/esm/mapbox-gl"); }' and 'SetStateAction<typeof import("/Users/kkoval/Documents/Repos/photoview/ui/node_modules/mapbox-gl/dist/mapbox-gl") | undefined>'." and "Argument of type '{ Evented: typeof Evented; LngLat: typeof LngLat; LngLatBounds: typeof LngLatBounds; TargetFeature: typeof TargetFeature; MercatorCoordinate: typeof MercatorCoordinate; ... 52 more ...; default: typeof import("/Users/kkoval/Documents/Repos/photoview/ui/node_modules/mapbox-gl/dist/esm/mapbox-gl"); }' is not assignable to parameter of type 'SetStateAction<typeof import("/Users/kkoval/Documents/Repos/photoview/ui/node_modules/mapbox-gl/dist/mapbox-gl") | undefined>'.
+      // Excessive stack depth comparing types '{ Evented: typeof Evented; LngLat: typeof LngLat; LngLatBounds: typeof LngLatBounds; TargetFeature: typeof TargetFeature; MercatorCoordinate: typeof MercatorCoordinate; ... 52 more ...; default: typeof import("/Users/kkoval/Documents/Repos/photoview/ui/node_modules/mapbox-gl/dist/esm/mapbox-gl"); }' and 'SetStateAction<typeof import("/Users/kkoval/Documents/Repos/photoview/ui/node_modules/mapbox-gl/dist/mapbox-gl") | undefined>'."
       setMapboxLibrary(mapbox)
     }
     loadMapboxLibrary()
@@ -66,14 +69,12 @@ const useMapboxMap = ({
       return
     }
 
-    if (mapboxData.mapboxToken)
-      mapboxLibrary.accessToken = mapboxData.mapboxToken
-
     map.current = new mapboxLibrary.Map({
       container: mapContainer.current,
       style: isDarkMode()
         ? 'mapbox://styles/mapbox/dark-v10'
         : 'mapbox://styles/mapbox/streets-v11',
+      ...(mapboxData.mapboxToken ? { accessToken: mapboxData.mapboxToken } : {}),
       ...mapboxOptions,
     })
 

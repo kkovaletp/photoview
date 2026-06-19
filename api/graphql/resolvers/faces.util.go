@@ -59,10 +59,9 @@ func userOwnedFaceGroup(db *gorm.DB, user *models.User, faceGroupID int) (*model
 }
 
 func getUserOwnedImageFaces(tx *gorm.DB, user *models.User, imageFaceIDs []int) ([]*models.ImageFace, error) {
-	var userOwnedImageFaces []*models.ImageFace
 
 	if len(imageFaceIDs) == 0 {
-		return userOwnedImageFaces, nil
+		return nil, nil
 	}
 
 	query := tx.Model(&models.ImageFace{})
@@ -78,7 +77,7 @@ func getUserOwnedImageFaces(tx *gorm.DB, user *models.User, imageFaceIDs []int) 
 		}
 
 		if len(userAlbumIDs) == 0 {
-			return userOwnedImageFaces, nil
+			return nil, nil
 		}
 
 		query = query.
@@ -86,6 +85,7 @@ func getUserOwnedImageFaces(tx *gorm.DB, user *models.User, imageFaceIDs []int) 
 			Where(mediaAlbumIDInQuestion, userAlbumIDs)
 	}
 
+	var userOwnedImageFaces []*models.ImageFace
 	if err := query.
 		Where(imageFacesIDInQuestion, imageFaceIDs).
 		Find(&userOwnedImageFaces).Error; err != nil {
@@ -95,8 +95,7 @@ func getUserOwnedImageFaces(tx *gorm.DB, user *models.User, imageFaceIDs []int) 
 	return userOwnedImageFaces, nil
 }
 
-func faceGroupsWouldContainDuplicateMedia(db *gorm.DB, destinationFaceGroupID int, sourceFaceGroupIDs []int) (bool, error) {
-	faceGroupIDs := append([]int{destinationFaceGroupID}, sourceFaceGroupIDs...)
+func hasDuplicateMediaInFaceGroupsUnion(db *gorm.DB, faceGroupIDs ...int) (bool, error) {
 
 	duplicateMediaQuery := db.
 		Table("image_faces").
@@ -115,13 +114,13 @@ func faceGroupsWouldContainDuplicateMedia(db *gorm.DB, destinationFaceGroupID in
 	return count > 0, nil
 }
 
-func movingImageFacesWouldCreateDuplicateMedia(db *gorm.DB, destinationFaceGroupID int, imageFaceIDs []int) (bool, error) {
+func doesFaceGroupContainImages(db *gorm.DB, faceGroupID int, imageFaceIDs []int) (bool, error) {
 	duplicateMediaQuery := db.
 		Table("image_faces AS candidate").
 		Select("candidate.media_id").
 		Where(
 			"(candidate.face_group_id = ? AND candidate.id NOT IN ?) OR candidate.id IN ?",
-			destinationFaceGroupID,
+			faceGroupID,
 			imageFaceIDs,
 			imageFaceIDs,
 		).
