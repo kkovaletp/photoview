@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path"
+	"path/filepath"
 
 	"github.com/kkovaletp/photoview/api/graphql/models"
 	"github.com/kkovaletp/photoview/api/log"
@@ -17,6 +18,7 @@ import (
 )
 
 func NewRootAlbum(db *gorm.DB, rootPath string, owner *models.User) (*models.Album, error) {
+	rootPath = filepath.Clean(rootPath)
 
 	if !ValidRootPath(rootPath) {
 		return nil, ErrorInvalidRootPath
@@ -75,10 +77,21 @@ func NewRootAlbum(db *gorm.DB, rootPath string, owner *models.User) (*models.Alb
 var ErrorInvalidRootPath = errors.New("invalid root path")
 
 func ValidRootPath(rootPath string) bool {
-	//TODO: Uncontrolled data used in path expression. Accessing files using paths constructed from user-controlled data can allow an attacker to access unexpected resources. This can result in sensitive information being revealed or deleted, or an attacker being able to influence behavior by modifying unexpected files. Paths that are naively constructed from data controlled by a user may be absolute paths, or may contain unexpected special characters such as "..". Such a path could point anywhere on the file system. The traced flow is: Step 1 definition of rootPath `api/graphql/resolvers/user.go:57` > Step 2 rootPath `api/graphql/resolvers/user.go:68` > Step 3 capture variable rootPath `api/graphql/resolvers/user.go:72` > Step 4 rootPath `api/graphql/resolvers/user.go:82` > Step 5 definition of rootPath `api/scanner/scanner_album.go:19` > Step 6 rootPath `api/scanner/scanner_album.go:21` > Step 7 definition of rootPath `api/scanner/scanner_album.go:77` > Step 8 rootPath `api/scanner/scanner_album.go:78`.
-	_, err := os.Stat(rootPath)
+	resolvedPath, err := filepath.EvalSymlinks(rootPath)
 	if err != nil {
 		log.Warn(nil, "invalid root path", "root_path", rootPath, "error", err)
+		return false
+	}
+
+	// Confirm the resolved path is actually a directory, not a file.
+	info, err := os.Stat(resolvedPath)
+	if err != nil {
+		log.Warn(nil, "invalid root path after symlink resolution",
+			"root_path", rootPath, "resolved_path", resolvedPath, "error", err)
+		return false
+	}
+	if !info.IsDir() {
+		log.Warn(nil, "root path is not a directory", "root_path", rootPath)
 		return false
 	}
 
