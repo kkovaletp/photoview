@@ -109,6 +109,7 @@ export const ScannerConcurrentWorkers = () => {
     )
   }
 
+  //TODO: The "Scanner concurrent workers" input has up and down arrows to iteratively change the value, but it is not sent to the server, while if change it manually and exit from the field, it is updated on the server
   return (
     <div>
       <label htmlFor="scanner_concurrent_workers_field">
