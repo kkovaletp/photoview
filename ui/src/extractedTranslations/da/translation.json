@@ -186,6 +186,13 @@
   "routes": {
     "page_not_found": "Side ikke fundet"
   },
+  "service_worker": {
+    "update_available": {
+      "action": "",
+      "content": "",
+      "header": ""
+    }
+  },
   "settings": {
     "concurrent_workers": {
       "description": "Det maksimale antal medier som må skannes samtidig",

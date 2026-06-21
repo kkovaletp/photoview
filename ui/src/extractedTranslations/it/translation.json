@@ -186,6 +186,13 @@
   "routes": {
     "page_not_found": "Pagina non trovata"
   },
+  "service_worker": {
+    "update_available": {
+      "action": "",
+      "content": "",
+      "header": ""
+    }
+  },
   "settings": {
     "concurrent_workers": {
       "description": "Numero massimo di scansioni contemporanee",

@@ -186,6 +186,13 @@
   "routes": {
     "page_not_found": "找不到頁面"
   },
+  "service_worker": {
+    "update_available": {
+      "action": "",
+      "content": "",
+      "header": ""
+    }
+  },
   "settings": {
     "concurrent_workers": {
       "description": "允許同時執行的掃描工作數量上限",

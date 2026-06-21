@@ -77,11 +77,19 @@ registerRoute(
 
 // This allows the web app to trigger skipWaiting via
 // registration.waiting.postMessage({type: 'SKIP_WAITING'})
-//TODO:Missing origin verification in `postMessage` handler. Postmessage handler has no origin check. The "message" event is used to send messages between windows. An untrusted window can send a message to a trusted window, and it is up to the receiver to verify the legitimacy of the message. One way of performing that verification is to check the origin of the message ensure that it originates from a trusted window.
 self.addEventListener('message', event => {
+  // Only process messages from the same origin (defense-in-depth;
+  // the browser already restricts SW messages to controlled same-origin clients).
+  if (event.origin !== self.location.origin) {
+    return
+  }
   // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
   if (event.data?.type === 'SKIP_WAITING') {
     self.skipWaiting()
+      .then(() => self.clients.matchAll({ type: 'window' }))
+      .then(clients => {
+        clients.forEach(client => client.postMessage({ type: 'RELOAD_PAGE' }))
+      })
   }
 })
 

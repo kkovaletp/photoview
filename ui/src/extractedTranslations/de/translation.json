@@ -186,6 +186,13 @@
   "routes": {
     "page_not_found": "Seite nicht gefunden"
   },
+  "service_worker": {
+    "update_available": {
+      "action": "",
+      "content": "",
+      "header": ""
+    }
+  },
   "settings": {
     "concurrent_workers": {
       "description": "Die maximale erlaubte Anzahl an gleichzeitig laufenden Scanner Jobs",

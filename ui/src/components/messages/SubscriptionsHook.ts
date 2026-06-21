@@ -32,10 +32,12 @@ export interface Message {
   onDismiss?: () => void
   props: {
     header: string
-    content: string
+    content?: string
     negative?: boolean
     positive?: boolean
     percent?: number
+    actionLabel?: string
+    onAction?: () => void
   }
 }
 

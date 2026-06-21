@@ -8,11 +8,13 @@ export type MessageProps = {
   onDismiss?(): void
   negative?: boolean
   positive?: boolean
+  actionLabel?: string
+  onAction?(): void
 }
 
 const Message = forwardRef(
   (
-    { onDismiss, header, children, content, negative, positive }: MessageProps,
+    { onDismiss, header, children, content, negative, positive, actionLabel, onAction }: MessageProps,
     ref: ForwardedRef<HTMLDivElement>
   ) => {
     let backgroundColorClass = 'bg-white dark:bg-dark-bg2'
@@ -39,7 +41,7 @@ const Message = forwardRef(
         <div
           className="text-sm overflow-y-auto"
           style={{
-            maxHeight: '6rem', // approx. 5 lines
+            maxHeight: '6rem',
             overflowY: 'auto',
             whiteSpace: 'pre-wrap',
             wordWrap: 'break-word',
@@ -48,6 +50,15 @@ const Message = forwardRef(
         >
           {content}
         </div>
+        {actionLabel !== undefined && onAction !== undefined && (
+          <button
+            type="button"
+            onClick={onAction}
+            className="mt-1 text-xs font-semibold underline hover:no-underline focus:outline-none cursor-pointer"
+          >
+            {actionLabel}
+          </button>
+        )}
         {children}
       </div>
     )

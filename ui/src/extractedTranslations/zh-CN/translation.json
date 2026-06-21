@@ -186,6 +186,13 @@
   "routes": {
     "page_not_found": "找不到网页"
   },
+  "service_worker": {
+    "update_available": {
+      "action": "",
+      "content": "",
+      "header": ""
+    }
+  },
   "settings": {
     "concurrent_workers": {
       "description": "最多允许同时进行的扫描任务数目",

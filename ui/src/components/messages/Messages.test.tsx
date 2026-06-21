@@ -243,6 +243,56 @@ describe('Messages', () => {
     })
   })
 
+  // ── Action button ─────────────────────────────────────────────────────────────
+
+  describe('MessageItem — action button', () => {
+    it('renders an action button when actionLabel and onAction are provided', () => {
+      renderMessages()
+      const onAction = vi.fn()
+      injectMessages([
+        makeMessage({
+          props: {
+            header: 'Update available',
+            content: 'New version ready.',
+            positive: true,
+            actionLabel: 'Reload now',
+            onAction,
+          },
+        }),
+      ])
+      expect(screen.getByRole('button', { name: 'Reload now' })).toBeInTheDocument()
+    })
+
+    it('calls onAction when the action button is clicked', () => {
+      renderMessages()
+      const onAction = vi.fn()
+      injectMessages([
+        makeMessage({
+          props: {
+            header: 'Update available',
+            content: 'New version ready.',
+            positive: true,
+            actionLabel: 'Reload now',
+            onAction,
+          },
+        }),
+      ])
+      fireEvent.click(screen.getByRole('button', { name: 'Reload now' }))
+      expect(onAction).toHaveBeenCalledTimes(1)
+    })
+
+    it('does not render an action button when actionLabel and onAction are absent', () => {
+      renderMessages()
+      injectMessages([
+        makeMessage({ props: { header: 'Plain message', content: 'no button here' } }),
+      ])
+      // Only the dismiss button should exist
+      const buttons = screen.getAllByRole('button')
+      expect(buttons).toHaveLength(1)
+      expect(buttons[0]).toHaveAttribute('aria-label', 'Dismiss message')
+    })
+  })
+
   // ── setMessages passed to SubscriptionsHook ───────────────────────────────────
 
   describe('setMessages passed to SubscriptionsHook', () => {

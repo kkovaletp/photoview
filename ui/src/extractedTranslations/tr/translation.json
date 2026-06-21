@@ -186,6 +186,13 @@
   "routes": {
     "page_not_found": "Sayfa bulunamadı"
   },
+  "service_worker": {
+    "update_available": {
+      "action": "",
+      "content": "",
+      "header": ""
+    }
+  },
   "settings": {
     "concurrent_workers": {
       "description": "Aynı anda çalışmasına izin verilen tarayıcı işi miktarı",

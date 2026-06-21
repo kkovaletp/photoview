@@ -186,6 +186,13 @@
   "routes": {
     "page_not_found": "Ez da orrialdea aurkitu"
   },
+  "service_worker": {
+    "update_available": {
+      "action": "",
+      "content": "",
+      "header": ""
+    }
+  },
   "settings": {
     "concurrent_workers": {
       "description": "Aldi berean jardun dezaketen baimendutako azterketa-lan kopuru maximoa",
