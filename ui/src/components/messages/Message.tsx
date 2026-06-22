@@ -5,11 +5,11 @@ export type MessageProps = {
   header: string
   content?: string
   children?: ReactNode
-  onDismiss?(): void
+  onDismiss?: () => void
   negative?: boolean
   positive?: boolean
   actionLabel?: string
-  onAction?(): void
+  onAction?: () => void
 }
 
 const Message = forwardRef(

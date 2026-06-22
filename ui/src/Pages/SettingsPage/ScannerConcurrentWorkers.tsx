@@ -1,4 +1,4 @@
-import { useRef, useState, useEffect } from 'react'
+import { useRef, useState, useEffect, ChangeEvent, KeyboardEvent } from 'react'
 import { useQuery, useMutation, gql } from '@apollo/client'
 import { InputLabelTitle, InputLabelDescription } from './SettingsPage'
 import { useTranslation } from 'react-i18next'
@@ -23,12 +23,17 @@ export const SET_CONCURRENT_WORKERS_MUTATION = gql`
   }
 `
 
+// Delay (ms) before auto-committing a value changed via the spinner arrows.
+// Long enough to avoid spamming the server while the user clicks step-by-step.
+const DEBOUNCE_DELAY_MS = 800
+
 export const ScannerConcurrentWorkers = () => {
   const { t } = useTranslation()
 
   const workerAmountServerValue = useRef<null | number>(null)
   const inFlightNextRef = useRef<number | null>(null)
   const initializedRef = useRef(false)
+  const debounceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const [workerAmount, setWorkerAmount] = useState(0)
   const [inputValue, setInputValue] = useState('')
 
@@ -55,6 +60,15 @@ export const ScannerConcurrentWorkers = () => {
       }
     }
   }, [workerAmountQuery.data, workerAmountQuery.error])
+
+  // Cancel any pending debounce timer when the component unmounts.
+  useEffect(() => {
+    return () => {
+      if (debounceTimerRef.current !== null) {
+        clearTimeout(debounceTimerRef.current)
+      }
+    }
+  }, [])
 
   const [setWorkersMutation, workersMutationData] = useMutation<
     SetConcurrentWorkersMutation,
@@ -94,6 +108,42 @@ export const ScannerConcurrentWorkers = () => {
     updateWorkerAmount(bounded)
   }
 
+  // Always point to the latest commitValue to avoid stale closures inside the timer.
+  const commitValueRef = useRef(commitValue)
+  commitValueRef.current = commitValue
+
+  const cancelDebounce = () => {
+    if (debounceTimerRef.current !== null) {
+      clearTimeout(debounceTimerRef.current)
+      debounceTimerRef.current = null
+    }
+  }
+
+  // Fires for every onChange (including spinner arrow clicks).
+  // Schedules a commit after DEBOUNCE_DELAY_MS of inactivity.
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setInputValue(e.target.value)
+    cancelDebounce()
+    debounceTimerRef.current = setTimeout(() => {
+      debounceTimerRef.current = null
+      commitValueRef.current()
+    }, DEBOUNCE_DELAY_MS)
+  }
+
+  // Blur: cancel the pending debounce and commit immediately.
+  const handleBlur = () => {
+    cancelDebounce()
+    commitValue()
+  }
+
+  // Enter: same as blur – cancel debounce and commit right away.
+  const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      cancelDebounce()
+      commitValue()
+    }
+  }
+
   if (workerAmountQuery.error) {
     return (
       <div>
@@ -109,7 +159,6 @@ export const ScannerConcurrentWorkers = () => {
     )
   }
 
-  //TODO: The "Scanner concurrent workers" input has up and down arrows to iteratively change the value, but it is not sent to the server, while if change it manually and exit from the field, it is updated on the server
   return (
     <div>
       <label htmlFor="scanner_concurrent_workers_field">
@@ -130,13 +179,9 @@ export const ScannerConcurrentWorkers = () => {
         max="24"
         id="scanner_concurrent_workers_field"
         value={inputValue}
-        onChange={e => setInputValue(e.target.value)}
-        onBlur={commitValue}
-        onKeyDown={e => {
-          if (e.key === 'Enter') {
-            commitValue()
-          }
-        }}
+        onChange={handleChange}
+        onBlur={handleBlur}
+        onKeyDown={handleKeyDown}
       />
     </div>
   )

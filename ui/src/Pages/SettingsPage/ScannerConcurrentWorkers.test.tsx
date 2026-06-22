@@ -1,4 +1,4 @@
-import { describe, test, expect, vi, beforeEach, afterEach } from 'vitest'
+import { describe, test, expect, vi, beforeEach } from 'vitest'
 import { renderWithProviders } from '../../helpers/testUtils'
 import { fireEvent, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
@@ -16,10 +16,6 @@ describe('ScannerConcurrentWorkers', () => {
 
   beforeEach(() => {
     consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => { })
-  })
-
-  afterEach(() => {
-    vi.restoreAllMocks()
   })
 
   describe('Query Loading', () => {
@@ -1110,6 +1106,129 @@ describe('ScannerConcurrentWorkers', () => {
       await waitFor(() => {
         expect(mutationCallCount).toBe(2)
       }, { timeout: 500 })
+    })
+  })
+
+  describe('Debounced spinner-arrow behavior', () => {
+    const baseQueryMock = (workers: number): MockedResponse => ({
+      request: { query: CONCURRENT_WORKERS_QUERY },
+      result: {
+        data: {
+          siteInfo: { __typename: 'SiteInfo', concurrentWorkers: workers },
+        },
+      },
+    })
+
+    const mutationMock = (
+      to: number,
+      spy: ReturnType<typeof vi.fn>
+    ): MockedResponse => ({
+      request: { query: SET_CONCURRENT_WORKERS_MUTATION, variables: { workers: to } },
+      result: () => {
+        spy()
+        return { data: { setScannerConcurrentWorkers: to } }
+      },
+    })
+
+    /** Render the component and wait until the input is loaded and enabled. */
+    const getLoadedInput = async (
+      initialWorkers: number,
+      mocks: MockedResponse[]
+    ) => {
+      renderWithProviders(<ScannerConcurrentWorkers />, { mocks })
+      const input = (await screen.findByRole('spinbutton', {
+        name: /scanner concurrent workers/i,
+      })) as HTMLInputElement
+      await waitFor(() => {
+        expect(input.value).toBe(String(initialWorkers))
+        expect(input).not.toBeDisabled()
+      })
+      return input
+    }
+
+    test('should trigger mutation after debounce delay when value changes without blur', async () => {
+      const mutationSpy = vi.fn()
+      const mocks = [baseQueryMock(4), mutationMock(5, mutationSpy)]
+      const input = await getLoadedInput(4, mocks)
+
+      // Simulate a single spinner-arrow click: onChange only, no blur.
+      fireEvent.change(input, { target: { value: '5' } })
+
+      // Must not fire immediately (debounce is pending).
+      expect(mutationSpy).not.toHaveBeenCalled()
+
+      // Wait for the 800 ms debounce to expire and the mutation to resolve.
+      await waitFor(() => expect(mutationSpy).toHaveBeenCalledTimes(1), {
+        timeout: 2000,
+      })
+    })
+
+    test('should debounce multiple rapid arrow clicks and only send the final value', async () => {
+      const mutationSpy = vi.fn()
+      // Only the final value (7) should be sent; 5 and 6 must not reach the server.
+      const mocks = [baseQueryMock(4), mutationMock(7, mutationSpy)]
+      const input = await getLoadedInput(4, mocks)
+
+      // Three rapid changes — each resets the debounce timer.
+      // They execute synchronously so the first two timers are cancelled
+      // before they can expire.
+      fireEvent.change(input, { target: { value: '5' } })
+      fireEvent.change(input, { target: { value: '6' } })
+      fireEvent.change(input, { target: { value: '7' } })
+
+      expect(mutationSpy).not.toHaveBeenCalled()
+
+      // Only the last value should be committed after the debounce.
+      await waitFor(() => expect(mutationSpy).toHaveBeenCalledTimes(1), {
+        timeout: 2000,
+      })
+    })
+
+    test('should cancel debounce and commit immediately when onBlur fires', async () => {
+      const mutationSpy = vi.fn()
+      const mocks = [baseQueryMock(4), mutationMock(7, mutationSpy)]
+      const input = await getLoadedInput(4, mocks)
+
+      fireEvent.change(input, { target: { value: '7' } })
+      expect(mutationSpy).not.toHaveBeenCalled()
+
+      // Blur should cancel the pending debounce and commit immediately.
+      fireEvent.blur(input)
+      await waitFor(() => expect(mutationSpy).toHaveBeenCalledTimes(1))
+
+      // The debounce window (800 ms) passes — must not fire a second time.
+      await new Promise(resolve => setTimeout(resolve, 900))
+      expect(mutationSpy).toHaveBeenCalledTimes(1)
+    })
+
+    test('should cancel debounce and commit immediately when Enter key is pressed', async () => {
+      const mutationSpy = vi.fn()
+      const mocks = [baseQueryMock(4), mutationMock(7, mutationSpy)]
+      const input = await getLoadedInput(4, mocks)
+
+      fireEvent.change(input, { target: { value: '7' } })
+      expect(mutationSpy).not.toHaveBeenCalled()
+
+      // Enter should cancel the pending debounce and commit immediately.
+      fireEvent.keyDown(input, { key: 'Enter' })
+      await waitFor(() => expect(mutationSpy).toHaveBeenCalledTimes(1))
+
+      // The debounce window passes — must not fire a second time.
+      await new Promise(resolve => setTimeout(resolve, 900))
+      expect(mutationSpy).toHaveBeenCalledTimes(1)
+    })
+
+    test('should not send mutation when debounce fires but value equals server value', async () => {
+      const mutationSpy = vi.fn()
+      const mocks = [baseQueryMock(4)]
+      const input = await getLoadedInput(4, mocks)
+
+      // "Change" to the same value the server already holds.
+      fireEvent.change(input, { target: { value: '4' } })
+
+      // Wait longer than the 800 ms debounce to confirm no mutation is sent.
+      await new Promise(resolve => setTimeout(resolve, 1000))
+      expect(mutationSpy).not.toHaveBeenCalled()
     })
   })
 })
