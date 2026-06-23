@@ -110,7 +110,9 @@ export const ScannerConcurrentWorkers = () => {
 
   // Always point to the latest commitValue to avoid stale closures inside the timer.
   const commitValueRef = useRef(commitValue)
-  commitValueRef.current = commitValue
+  useEffect(() => {
+    commitValueRef.current = commitValue
+  }) // The useEffect with no dependency array runs after every render, keeping the ref perfectly in sync
 
   const cancelDebounce = () => {
     if (debounceTimerRef.current !== null) {
