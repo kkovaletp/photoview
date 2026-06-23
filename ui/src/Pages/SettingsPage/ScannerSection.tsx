@@ -69,7 +69,6 @@ const ScannerSection = () => {
   // Disable policy:
   // - disable while the HTTP request is in-flight (loading)
   // - disable while the scanner is actually running (from notifications)
-  //TODO: "Scan all users" button remains enabled during the scan and related notifications on screen.
   const disabled = loading || scannerRunning
 
   const startingLabel = t('settings.scanner.starting', 'Starting…')

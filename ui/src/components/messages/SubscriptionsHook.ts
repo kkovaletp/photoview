@@ -110,7 +110,7 @@ export const SubscriptionsHook = ({
       if (i === -1) next.push(newNotification)
       else next[i] = {
         ...newNotification,
-        timestamp: next[i].timestamp ?? timestamp,
+        timestamp,
       }
       return next
     })

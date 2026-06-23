@@ -314,6 +314,9 @@ describe('Messages', () => {
 // ── MessagesWithProvider (default export) ─────────────────────────────────────
 
 describe('MessagesWithProvider', () => {
+  const renderWithProvider = (ui: React.ReactElement) =>
+    render(<MessageProvider>{ui}</MessageProvider>)
+
   beforeEach(() => {
     mockAuthToken.mockReturnValue('test-auth-token')
     capturedSetMessages = undefined
@@ -323,24 +326,24 @@ describe('MessagesWithProvider', () => {
     vi.clearAllMocks()
   })
 
-  it('renders without crashing', () => {
-    expect(() => render(<MessagesWithProvider />)).not.toThrow()
+  it('renders without crashing when wrapped in an outer MessageProvider', () => {
+    expect(() => renderWithProvider(<MessagesWithProvider />)).not.toThrow()
   })
 
   it('mounts the SubscriptionsHook when authenticated', () => {
-    render(<MessagesWithProvider />)
+    renderWithProvider(<MessagesWithProvider />)
     expect(screen.getByTestId('subscriptions-hook')).toBeInTheDocument()
   })
 
   it('does not mount the SubscriptionsHook when not authenticated', () => {
     mockAuthToken.mockReturnValue(undefined)
-    render(<MessagesWithProvider />)
+    renderWithProvider(<MessagesWithProvider />)
     expect(screen.queryByTestId('subscriptions-hook')).not.toBeInTheDocument()
   })
 
-  it('provides a MessageProvider context — useMessageState does not throw inside it', () => {
-    // If MessageProvider is absent, useMessageState() throws. A clean render
-    // confirms the provider is correctly wired.
-    expect(() => render(<MessagesWithProvider />)).not.toThrow()
+  it('works correctly inside an outer MessageProvider — useMessageState does not throw', () => {
+    // This mirrors the production hierarchy: index.tsx provides the
+    // MessageProvider; MessagesWithProvider is a plain consumer.
+    expect(() => renderWithProvider(<MessagesWithProvider />)).not.toThrow()
   })
 })

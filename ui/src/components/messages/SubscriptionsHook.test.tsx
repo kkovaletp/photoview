@@ -328,6 +328,43 @@ describe('SubscriptionsHook', () => {
                 ])
             )
         })
+
+        it('refreshes the timestamp when an existing message is updated', () => {
+            const key = uniqueKey()
+            const OLD_TIMESTAMP = 1000
+            const NEW_TIMESTAMP = 99_999
+
+            const existing: Message = {
+                key,
+                type: NotificationType.Message,
+                props: { header: 'Old Header', content: 'Old Content' },
+                timestamp: OLD_TIMESTAMP,
+            }
+            const notification = makeNotification(key, {
+                header: 'Updated Header',
+                content: 'Updated Content',
+            })
+
+            const dateSpy = vi.spyOn(Date, 'now').mockReturnValue(NEW_TIMESTAMP)
+            try {
+                mockUseSubscription.mockReturnValue({
+                    data: { notification },
+                    error: undefined,
+                    loading: false,
+                })
+
+                render(<SubscriptionsHook setMessages={setMessages} />)
+
+                const last = setMessages.mock.calls.length - 1
+                const result = applyUpdater(setMessages, last, [existing])
+
+                // Timestamp must be the NEW value from Date.now(), not the original OLD_TIMESTAMP
+                expect(result[0].timestamp).toBe(NEW_TIMESTAMP)
+                expect(result[0].props.header).toBe('Updated Header')
+            } finally {
+                dateSpy.mockRestore()
+            }
+        })
     })
 
     // ── Close message ──────────────────────────────────────────────────────────
