@@ -1,5 +1,6 @@
 import { ForwardedRef, forwardRef, ReactNode } from 'react'
 import DismissIcon from './icons/dismissIcon.svg?react'
+import { Button } from '../../primitives/form/Input'
 
 export type MessageProps = {
   header: string
@@ -51,13 +52,15 @@ const Message = forwardRef(
           {content}
         </div>
         {actionLabel !== undefined && onAction !== undefined && (
-          <button
+          <Button
             type="button"
             onClick={onAction}
-            className="mt-1 rounded text-xs font-semibold underline hover:no-underline focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 cursor-pointer"
+            variant="positive"
+            background="white"
+            className="mt-2 px-3 py-0.5 text-xs"
           >
             {actionLabel}
-          </button>
+          </Button>
         )}
         {children}
       </div>
