@@ -291,6 +291,28 @@ describe('Messages', () => {
       expect(buttons).toHaveLength(1)
       expect(buttons[0]).toHaveAttribute('aria-label', 'Dismiss message')
     })
+
+    it('uses the standard keyboard-focus classes on the action button', () => {
+      renderMessages()
+      injectMessages([
+        makeMessage({
+          props: {
+            header: 'Update available',
+            content: 'New version ready.',
+            positive: true,
+            actionLabel: 'Reload now',
+            onAction: vi.fn(),
+          },
+        }),
+      ])
+
+      expect(screen.getByRole('button', { name: 'Reload now' })).toHaveClass(
+        'rounded',
+        'focus:outline-none',
+        'focus-visible:ring-2',
+        'focus-visible:ring-blue-500'
+      )
+    })
   })
 
   // ── setMessages passed to SubscriptionsHook ───────────────────────────────────

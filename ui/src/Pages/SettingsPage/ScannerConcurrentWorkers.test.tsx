@@ -1220,7 +1220,7 @@ describe('ScannerConcurrentWorkers', () => {
 
     test('should not send mutation when debounce fires but value equals server value', async () => {
       const mutationSpy = vi.fn()
-      const mocks = [baseQueryMock(4)]
+      const mocks = [baseQueryMock(4), mutationMock(4, mutationSpy)]
       const input = await getLoadedInput(4, mocks)
 
       // "Change" to the same value the server already holds.

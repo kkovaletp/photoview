@@ -85,11 +85,16 @@ self.addEventListener('message', event => {
   }
   // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
   if (event.data?.type === 'SKIP_WAITING') {
-    self.skipWaiting()
-      .then(() => self.clients.matchAll({ type: 'window' }))
-      .then(clients => {
-        clients.forEach(client => client.postMessage({ type: 'RELOAD_PAGE' }))
-      })
+    event.waitUntil(
+      self.skipWaiting()
+        .then(() => self.clients.matchAll({ type: 'window', includeUncontrolled: true }))
+        .then(clients => {
+          clients.forEach(client => client.postMessage({ type: 'RELOAD_PAGE' }))
+        })
+        .catch(error => {
+          console.error('[Service Worker] Failed to broadcast RELOAD_PAGE', error)
+        })
+    )
   }
 })
 
