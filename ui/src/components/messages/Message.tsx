@@ -54,7 +54,7 @@ const Message = forwardRef(
           <button
             type="button"
             onClick={onAction}
-            className="mt-1 text-xs font-semibold underline hover:no-underline focus:outline-none cursor-pointer"
+            className="mt-1 rounded text-xs font-semibold underline hover:no-underline focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 cursor-pointer"
           >
             {actionLabel}
           </button>
