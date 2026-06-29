@@ -90,6 +90,7 @@ const ScannerSection = () => {
     inProgressLabel.length,
     defaultLabel.length
   ) + 2
+  //TODO: Fix the button styles for the disabled states
   const stableButtonStyle = { minWidth: `${longestCh}ch` }
 
   const handleStart = () => {
