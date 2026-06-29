@@ -111,8 +111,6 @@ const wsLink = new GraphQLWsLink(
           return false
         }
       }
-
-      // Retry indefinitely for transient/server/network failures.
       return true
     },
     // Control retry timing (exponential backoff with jitter)
