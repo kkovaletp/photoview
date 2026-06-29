@@ -186,13 +186,6 @@
   "routes": {
     "page_not_found": "Pagina niet gevonden"
   },
-  "service_worker": {
-    "update_available": {
-      "action": "",
-      "content": "",
-      "header": ""
-    }
-  },
   "settings": {
     "concurrent_workers": {
       "description": "Het maximale aantal scanprocessen dat tegelijk mag draaien",
@@ -479,5 +472,10 @@
     "login": "Inloggen",
     "people": "Personen",
     "settings": "Instellingen"
+  },
+  "update_available_page": {
+    "action": "",
+    "content": "",
+    "header": ""
   }
 }

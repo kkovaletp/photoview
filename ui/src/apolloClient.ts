@@ -31,9 +31,7 @@ type CachedItem = Reference | {
   [key: string]: unknown
 }
 
-// Track retry state outside the client creation
-let retryCount = 0
-const MAX_RETRIES = 5
+const MAX_RETRY_DELAY = 30_000
 
 const httpLink = new HttpLink({
   uri: GRAPHQL_ENDPOINT,
@@ -51,10 +49,9 @@ websocketUri.protocol = apiProtocol === 'https:' ? 'wss:' : 'ws:'
  */
 export const calculateRetryDelay = (retries: number): number => {
   const BASE_DELAY = 1000
-  const MAX_DELAY = 30000
-  const exponentialDelay = Math.min(MAX_DELAY, BASE_DELAY * Math.pow(2, retries))
+  const exponentialDelay = Math.min(MAX_RETRY_DELAY, BASE_DELAY * Math.pow(2, retries))
   const jitter = exponentialDelay * (0.5 + Math.random())
-  return Math.min(jitter, MAX_DELAY)
+  return Math.min(jitter, MAX_RETRY_DELAY)
 }
 
 const wsLink = new GraphQLWsLink(
@@ -70,14 +67,7 @@ const wsLink = new GraphQLWsLink(
       }
       return {}
     },
-    shouldRetry: (errOrCloseEvent) => {
-      // Check if we've exceeded max retries
-      if (retryCount >= MAX_RETRIES) {
-        console.error('[WebSocket] Max retries reached, stopping reconnection attempts')
-        retryCount = 0 // Reset for future manual reconnects
-        return false
-      }
-
+    shouldRetry: errOrCloseEvent => {
       // Type guard for CloseEvent
       if (
         errOrCloseEvent &&
@@ -90,21 +80,18 @@ const wsLink = new GraphQLWsLink(
         if (closeEvent.code === 4401) {
           console.error('[WebSocket] Unauthorized (4401), clearing token')
           clearTokenCookie()
-          retryCount = 0
           return false
         }
 
         // Don't retry on forbidden errors (4403)
         if (closeEvent.code === 4403) {
           console.error('[WebSocket] Forbidden (4403), stopping retries')
-          retryCount = 0
           return false
         }
 
-        // Don't retry on client errors (4400-4499 range, except transient ones)
+        // Don't retry on other client-side protocol/application errors (4400-4499 range, except transient ones)
         if (closeEvent.code >= 4400 && closeEvent.code < 4500) {
           console.error(`[WebSocket] Client error (${closeEvent.code}), stopping retries`)
-          retryCount = 0
           return false
         }
       }
@@ -121,33 +108,30 @@ const wsLink = new GraphQLWsLink(
         ) {
           console.error('[WebSocket] Authentication error from server, clearing token')
           clearTokenCookie()
-          retryCount = 0
           return false
         }
       }
 
-      // Allow retry for transient errors
-      retryCount++
+      // Retry indefinitely for transient/server/network failures.
       return true
     },
     // Control retry timing (exponential backoff with jitter)
-    retryWait: async (retries) => {
+    retryWait: async retries => {
       const delay = calculateRetryDelay(retries)
 
       console.log(
-        `[WebSocket] Waiting ${Math.round(delay)}ms before retry ${retries + 1}/${MAX_RETRIES}`
+        `[WebSocket] Waiting ${Math.round(delay)}ms before retry ${retries + 1}`
       )
 
       // Return a Promise that resolves after the delay
       await new Promise(resolve => setTimeout(resolve, delay))
     },
     on: {
-      error: (error) => {
+      error: error => {
         console.error('[WebSocket error]: ', error)
       },
       connected: () => {
-        // Reset retry count on successful connection
-        retryCount = 0
+        console.info('[WebSocket] Connection restored')
       },
     },
   })

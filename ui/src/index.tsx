@@ -1,34 +1,107 @@
+import { Component, ReactNode } from 'react'
 import { createRoot } from 'react-dom/client'
 import App from './App'
 import client from './apolloClient'
 import { ApolloProvider } from '@apollo/client'
 import { BrowserRouter as Router } from 'react-router'
+import i18n from 'i18next'
 import { setupLocalization } from './localization'
 import { updateTheme } from './theme'
 import * as serviceWorkerRegistration from './serviceWorkerRegistration'
-import i18n from 'i18next'
-
 import './index.css'
 import { SidebarProvider } from './components/sidebar/Sidebar'
 import { MessageProvider } from './components/messages/MessageState'
-import { globalMessageHandler } from './components/messages/globalMessageHandler'
-import { NotificationType } from './__generated__/globalTypes'
+import { Button } from './primitives/form/Input'
 
 updateTheme()
 setupLocalization()
 
-// Listen for the RELOAD_PAGE broadcast the service worker sends to all
-// controlled clients after skipWaiting() completes. Registered here so
-// every open Photoview tab reloads together when any one tab triggers an update.
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.addEventListener(
-    'message',
-    (event: MessageEvent<{ type?: string }>) => {
-      if (event.data?.type === 'RELOAD_PAGE') {
-        globalThis.location.reload()
-      }
-    }
+//TODO: Refactor: extract all extractable logic to an external file and cover by tests.
+function isChunkLoadFailure(error: unknown): boolean {
+  const message =
+    typeof error === 'string'
+      ? error
+      : error instanceof Error
+        ? error.message
+        : typeof error === 'object' && error !== null && 'message' in error
+          ? String((error as { message?: unknown }).message)
+          : ''
+
+  const normalized = message.toLowerCase()
+
+  return (
+    normalized.includes('failed to fetch dynamically imported module') ||
+    normalized.includes('error loading dynamically imported module') ||
+    normalized.includes('importing a module script failed') ||
+    normalized.includes('loading module') ||
+    normalized.includes('loading chunk') ||
+    normalized.includes('chunkloaderror')
   )
+}
+
+type ReloadRequiredBoundaryProps = {
+  children: ReactNode
+}
+
+type ReloadRequiredBoundaryState = {
+  reloadRequired: boolean
+}
+
+class ReloadRequiredBoundary extends Component<
+  ReloadRequiredBoundaryProps,
+  ReloadRequiredBoundaryState
+> {
+  state: ReloadRequiredBoundaryState = {
+    reloadRequired: false,
+  }
+
+  static getDerivedStateFromError(error: unknown): ReloadRequiredBoundaryState | null {
+    if (isChunkLoadFailure(error)) {
+      return { reloadRequired: true }
+    }
+
+    return null
+  }
+
+  componentDidCatch(error: unknown) {
+    if (!isChunkLoadFailure(error)) {
+      console.error('[UI] Unhandled render error', error)
+    }
+  }
+
+  render() {
+    if (this.state.reloadRequired) {
+      return (
+        <div className="min-h-screen flex items-center justify-center px-6 bg-white dark:bg-dark-bg">
+          <div className="max-w-lg rounded border border-gray-200 dark:border-dark-border bg-white dark:bg-dark-bg2 shadow-md p-5">
+            <h1 className="text-lg font-semibold mb-3">
+              {i18n.t('update_available_page.header', 'Page refresh required')}
+            </h1>
+            <p className="text-sm whitespace-pre-wrap">
+              {i18n.t(
+                'update_available_page.content',
+                'This tab is using an older UI build and some page files are no longer available on the server. Please refresh the page to continue.'
+              )}
+
+            </p>
+            <Button
+              type="button"
+              onClick={() => {
+                globalThis.location.reload()
+              }}
+              variant="positive"
+              background="white"
+              className="mt-4 px-4 py-2 rounded border bg-green-600 text-white hover:bg-green-700"
+            >
+              {i18n.t('update_available_page.action', 'Refresh page')}
+            </Button>
+          </div>
+        </div>
+      )
+    }
+
+    return this.props.children
+  }
 }
 
 const Main = () => (
@@ -36,7 +109,9 @@ const Main = () => (
     <Router basename={import.meta.env.BASE_URL}>
       <MessageProvider>
         <SidebarProvider>
-          <App />
+          <ReloadRequiredBoundary>
+            <App />
+          </ReloadRequiredBoundary>
         </SidebarProvider>
       </MessageProvider>
     </Router>
@@ -46,24 +121,4 @@ const Main = () => (
 const root = createRoot(document.getElementById('root')!)
 root.render(<Main />)
 
-serviceWorkerRegistration.register({
-  onUpdate: (registration: ServiceWorkerRegistration) => {
-    if (!registration.waiting) return
-
-    globalMessageHandler.add({
-      key: 'app-update-available',
-      type: NotificationType.Message,
-      props: {
-        header: i18n.t('service_worker.update_available.header', 'Photoview version update available'),
-        content: i18n.t(
-          'service_worker.update_available.content',
-          'A new version of Photoview is available on the server. Click "Update" to reload all Photoview tabs and apply the update. Or close this message to continue using the current version and reload manually later.'),
-        positive: true,
-        actionLabel: i18n.t('service_worker.update_available.action', 'Update'),
-        onAction: () => {
-          registration.waiting?.postMessage({ type: 'SKIP_WAITING' })
-        },
-      },
-    })
-  },
-})
+serviceWorkerRegistration.register()

@@ -186,13 +186,6 @@
   "routes": {
     "page_not_found": "Página no encontrada"
   },
-  "service_worker": {
-    "update_available": {
-      "action": "",
-      "content": "",
-      "header": ""
-    }
-  },
   "settings": {
     "concurrent_workers": {
       "description": "La cantidad máxima de tareas de escaneo que pueden ejecutarse al mismo tiempo",
@@ -484,5 +477,10 @@
     "login": "",
     "people": "Personas",
     "settings": "Opciones"
+  },
+  "update_available_page": {
+    "action": "",
+    "content": "",
+    "header": ""
   }
 }

@@ -97,6 +97,14 @@ func (h SpaHandler) serveOriginal(w http.ResponseWriter, r *http.Request, fullPa
 	// Check whether a file exists at the given path
 	_, err := os.Stat(fullPath)
 	if os.IsNotExist(err) {
+		// Missing file-like requests should return 404 so the browser does not
+		// receive index.html for JavaScript/CSS/source-map/manifest requests.
+		// Extension-less paths are treated as SPA routes and served index.html.
+		if filepath.Ext(relPath) != "" {
+			http.NotFound(w, r)
+			return
+		}
+
 		// File does not exist, serve index.html (SPA routing)
 		h.serveIndexHTML(w, r)
 		return

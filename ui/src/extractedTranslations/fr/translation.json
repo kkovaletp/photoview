@@ -186,13 +186,6 @@
   "routes": {
     "page_not_found": "Page non trouvée"
   },
-  "service_worker": {
-    "update_available": {
-      "action": "",
-      "content": "",
-      "header": ""
-    }
-  },
   "settings": {
     "concurrent_workers": {
       "description": "Nombre maximal de tâches d'analyse simultanées.",
@@ -484,5 +477,10 @@
     "login": "Connexion",
     "people": "Personnes",
     "settings": "Paramètres"
+  },
+  "update_available_page": {
+    "action": "",
+    "content": "",
+    "header": ""
   }
 }

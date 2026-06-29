@@ -186,13 +186,6 @@
   "routes": {
     "page_not_found": "找不到頁面"
   },
-  "service_worker": {
-    "update_available": {
-      "action": "",
-      "content": "",
-      "header": ""
-    }
-  },
   "settings": {
     "concurrent_workers": {
       "description": "允許同時執行的掃描工作數量上限",
@@ -475,5 +468,10 @@
     "login": "登入",
     "people": "人物",
     "settings": "設定"
+  },
+  "update_available_page": {
+    "action": "",
+    "content": "",
+    "header": ""
   }
 }

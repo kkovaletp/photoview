@@ -186,13 +186,6 @@
   "routes": {
     "page_not_found": "Sidan hittades inte"
   },
-  "service_worker": {
-    "update_available": {
-      "action": "",
-      "content": "",
-      "header": ""
-    }
-  },
   "settings": {
     "concurrent_workers": {
       "description": "Max antal skannerjobb som får köras sammtidigt",
@@ -479,5 +472,10 @@
     "login": "",
     "people": "Personer",
     "settings": "Inställningar"
+  },
+  "update_available_page": {
+    "action": "",
+    "content": "",
+    "header": ""
   }
 }

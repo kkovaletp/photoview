@@ -186,13 +186,6 @@
   "routes": {
     "page_not_found": "Sayfa bulunamadı"
   },
-  "service_worker": {
-    "update_available": {
-      "action": "",
-      "content": "",
-      "header": ""
-    }
-  },
   "settings": {
     "concurrent_workers": {
       "description": "Aynı anda çalışmasına izin verilen tarayıcı işi miktarı",
@@ -479,5 +472,10 @@
     "login": "Oturum Aç",
     "people": "Kişiler",
     "settings": "Ayarlar"
+  },
+  "update_available_page": {
+    "action": "",
+    "content": "",
+    "header": ""
   }
 }

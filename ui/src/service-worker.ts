@@ -75,27 +75,4 @@ registerRoute(
   })
 )
 
-// This allows the web app to trigger skipWaiting via
-// registration.waiting.postMessage({type: 'SKIP_WAITING'})
-self.addEventListener('message', event => {
-  // Only process messages from the same origin (defense-in-depth;
-  // the browser already restricts SW messages to controlled same-origin clients).
-  if (event.origin !== self.location.origin) {
-    return
-  }
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-  if (event.data?.type === 'SKIP_WAITING') {
-    event.waitUntil(
-      self.skipWaiting()
-        .then(() => self.clients.matchAll({ type: 'window', includeUncontrolled: true }))
-        .then(clients => {
-          clients.forEach(client => client.postMessage({ type: 'RELOAD_PAGE' }))
-        })
-        .catch(error => {
-          console.error('[Service Worker] Failed to broadcast RELOAD_PAGE', error)
-        })
-    )
-  }
-})
-
 // Any other custom service worker logic can go here.

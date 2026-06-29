@@ -135,10 +135,25 @@
         }
     }
 
+    # Serve real files directly.
+    `@existing` file
+    handle `@existing` {
+        file_server {
+            precompressed
+        }
+    }
+
+    # Missing file-like requests should stay 404 instead of falling back to index.html.
+    `@missingFileLike` {
+        path_regexp fileLike ^.+\.[^/]+$
+        not file
+    }
+    respond `@missingFileLike` 404
+
     # Serve frontend static website with SPA fallback
     handle {
         # Try to serve the file, or fallback to index.html for client-side routing
-        try_files {path} /index.html
+        try_files /index.html
         file_server {
             precompressed
         }

@@ -186,13 +186,6 @@
   "routes": {
     "page_not_found": "Page not found"
   },
-  "service_worker": {
-    "update_available": {
-      "action": "Update",
-      "content": "A new version of Photoview is available on the server. Click \"Update\" to reload all Photoview tabs and apply the update. Or close this message to continue using the current version and reload manually later.",
-      "header": "Photoview version update available"
-    }
-  },
   "settings": {
     "concurrent_workers": {
       "description": "The maximum amount of scanner jobs that is allowed to run at once",
@@ -479,5 +472,10 @@
     "login": "Login",
     "people": "People",
     "settings": "Settings"
+  },
+  "update_available_page": {
+    "action": "Refresh page",
+    "content": "This tab is using an older UI build and some page files are no longer available on the server. Please refresh the page to continue.",
+    "header": "Page refresh required"
   }
 }
