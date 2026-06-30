@@ -28,6 +28,11 @@ describe('chunkLoadFailure helpers', () => {
             expect(getErrorMessage({ message: undefined })).toBe('')
             expect(getErrorMessage({ message: null })).toBe('')
         })
+
+        it('returns an empty string when the message field is not a string', () => {
+            expect(getErrorMessage({ message: { text: 'boom' } })).toBe('')
+            expect(getErrorMessage({ message: ['boom'] })).toBe('')
+        })
     })
 
     describe('isChunkLoadFailure', () => {

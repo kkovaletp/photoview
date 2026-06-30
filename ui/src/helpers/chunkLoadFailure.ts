@@ -25,7 +25,7 @@ export function getErrorMessage(error: unknown): string {
     }
 
     const message = (error as { message?: unknown }).message
-    return message == null ? '' : String(message)
+    return typeof message === 'string' ? message : ''
 }
 
 export function isChunkLoadFailure(error: unknown): boolean {
