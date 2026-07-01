@@ -513,6 +513,17 @@ describe('Pure Helper Functions', () => {
             expect(isLegitimateClose(closeEvent, true, 1)).toBe(false)
         })
 
+        it('should treat a clean page-navigation closure (code 1001) as benign regardless of history', () => {
+            const closeEvent = { code: 1001, reason: '', wasClean: true }
+            expect(isLegitimateClose(closeEvent, false, 1)).toBe(true)
+            expect(isLegitimateClose(closeEvent, true, 3)).toBe(true)
+        })
+
+        it('should NOT treat a non-clean 1001 as benign (that would be a real abnormal closure, not a refresh)', () => {
+            const closeEvent = { code: 1001, reason: '', wasClean: false }
+            expect(isLegitimateClose(closeEvent, true, 2)).toBe(false)
+        })
+
         it('should not treat non-clean closures without a code as benign', () => {
             expect(isLegitimateClose(new Error('boom'), false, 2)).toBe(false)
         })

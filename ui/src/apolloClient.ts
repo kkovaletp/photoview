@@ -57,6 +57,7 @@ export const calculateRetryDelay = (retries: number): number => {
 
 let retryAttemptCount = 0
 let hasConnectedOnce = false
+let isPageUnloading = false
 
 /**
  * Decides whether a "closed" event is a benign/expected closure that
@@ -73,7 +74,7 @@ export const isLegitimateClose = (
     closeEvent &&
     typeof closeEvent === 'object' &&
     'code' in closeEvent &&
-    (closeEvent as CloseEvent).code === 1000 &&
+    ((closeEvent as CloseEvent).code === 1000 || (closeEvent as CloseEvent).code === 1001) &&
     (closeEvent as CloseEvent).wasClean
   ) {
     return true
@@ -82,132 +83,156 @@ export const isLegitimateClose = (
   return !hasConnectedBefore && currentRetryAttemptCount <= 1
 }
 
-const wsLink = new GraphQLWsLink(
-  createClient({
-    url: websocketUri.toString(),
-    retryAttempts: MAX_RETRY_ATTEMPTS,
-    connectionParams: () => {
-      const token = authToken()
-      // Only include authorization if token exists
-      if (token) {
-        return {
-          Authorization: `Bearer ${token}`,
-        }
+const wsClient = createClient({
+  url: websocketUri.toString(),
+  retryAttempts: MAX_RETRY_ATTEMPTS,
+  // Don't wait forever for the server's handshake reply. This bounds how
+  // long we'll sit stuck on that single attempt before treating it as
+  // failed and retrying
+  connectionAckWaitTimeout: 10_000,
+  connectionParams: () => {
+    const token = authToken()
+    // Only include authorization if token exists
+    if (token) {
+      return {
+        Authorization: `Bearer ${token}`,
       }
-      return {}
-    },
-    shouldRetry: errOrCloseEvent => {
-      // Type guard for CloseEvent
+    }
+    return {}
+  },
+  shouldRetry: errOrCloseEvent => {
+    if (isPageUnloading) return false
+
+    // Type guard for CloseEvent
+    if (
+      errOrCloseEvent &&
+      typeof errOrCloseEvent === 'object' &&
+      'code' in errOrCloseEvent
+    ) {
+      const closeEvent = errOrCloseEvent as CloseEvent
+
+      // Don't retry on authentication errors (4401)
+      if (closeEvent.code === 4401) {
+        console.error('[WebSocket] Unauthorized (4401), clearing token')
+        clearTokenCookie()
+        return false
+      }
+
+      // Don't retry on forbidden errors (4403)
+      if (closeEvent.code === 4403) {
+        console.error('[WebSocket] Forbidden (4403), stopping retries')
+        return false
+      }
+
+      // Don't retry on other client-side protocol/application errors (4400-4499 range, except transient ones)
+      if (closeEvent.code >= 4400 && closeEvent.code < 4500) {
+        console.error(`[WebSocket] Client error (${closeEvent.code}), stopping retries`)
+        return false
+      }
+    }
+
+    // Type guard for Error objects
+    if (errOrCloseEvent instanceof Error) {
+      const errorMessage = errOrCloseEvent.message.toLowerCase()
+
+      // Don't retry on authentication errors
       if (
-        errOrCloseEvent &&
-        typeof errOrCloseEvent === 'object' &&
-        'code' in errOrCloseEvent
+        errorMessage.includes('unauthorized') ||
+        errorMessage.includes('invalid authorization token') ||
+        errorMessage.includes('authentication failed')
       ) {
-        const closeEvent = errOrCloseEvent as CloseEvent
-
-        // Don't retry on authentication errors (4401)
-        if (closeEvent.code === 4401) {
-          console.error('[WebSocket] Unauthorized (4401), clearing token')
-          clearTokenCookie()
-          return false
-        }
-
-        // Don't retry on forbidden errors (4403)
-        if (closeEvent.code === 4403) {
-          console.error('[WebSocket] Forbidden (4403), stopping retries')
-          return false
-        }
-
-        // Don't retry on other client-side protocol/application errors (4400-4499 range, except transient ones)
-        if (closeEvent.code >= 4400 && closeEvent.code < 4500) {
-          console.error(`[WebSocket] Client error (${closeEvent.code}), stopping retries`)
-          return false
-        }
+        console.error('[WebSocket] Authentication error from server, clearing token')
+        clearTokenCookie()
+        return false
       }
+    }
+    return true
+  },
+  // Control retry timing (exponential backoff with jitter)
+  retryWait: async retries => {
+    retryAttemptCount = retries + 1
+    const delay = calculateRetryDelay(retries)
 
-      // Type guard for Error objects
-      if (errOrCloseEvent instanceof Error) {
-        const errorMessage = errOrCloseEvent.message.toLowerCase()
+    if (!isPageUnloading && (hasConnectedOnce || retries > 0)) {
+      console.log(
+        `[WebSocket] Waiting ${Math.round(delay)}ms before retry ${retryAttemptCount}/${MAX_RETRY_ATTEMPTS}`
+      )
+    }
 
-        // Don't retry on authentication errors
-        if (
-          errorMessage.includes('unauthorized') ||
-          errorMessage.includes('invalid authorization token') ||
-          errorMessage.includes('authentication failed')
-        ) {
-          console.error('[WebSocket] Authentication error from server, clearing token')
-          clearTokenCookie()
-          return false
-        }
-      }
-      return true
+    // Return a Promise that resolves after the delay
+    await new Promise(resolve => setTimeout(resolve, delay))
+  },
+  on: {
+    connecting: () => {
+      if (isPageUnloading) return
+      console.log('[WebSocket] Connecting...')
     },
-    // Control retry timing (exponential backoff with jitter)
-    retryWait: async retries => {
-      retryAttemptCount = retries + 1
-      const delay = calculateRetryDelay(retries)
+    error: error => {
+      if (isPageUnloading || (!hasConnectedOnce && retryAttemptCount - 1 === 0)) return
 
-      if (hasConnectedOnce || retries > 0) {
-        console.log(
-          `[WebSocket] Waiting ${Math.round(delay)}ms before retry ${retryAttemptCount}/${MAX_RETRY_ATTEMPTS}`
-        )
+      if (retryAttemptCount >= MAX_RETRY_ATTEMPTS) {
+        console.error(`[WebSocket] Exhausted all ${MAX_RETRY_ATTEMPTS} retry attempts, giving up:`, error)
+        // The error thrown by graphql-ws here has no GraphQL/server "result"
+        // shape, so Apollo's linkError -> getServerErrorMessages() never
+        // surfaces anything to the user for this case. Show an explicit
+        // message so the app doesn't go silently dark.
+        globalMessageHandler.add({
+          key: 'websocket-retries-exhausted',
+          type: NotificationType.Message,
+          props: {
+            negative: true,
+            header: 'Live updates disconnected',
+            content:
+              'Could not reconnect to the server after multiple attempts. Please refresh the page once the server is back online.',
+          },
+        })
+        return
       }
-
-      // Return a Promise that resolves after the delay
-      await new Promise(resolve => setTimeout(resolve, delay))
+      console.warn(
+        `[WebSocket] Connection attempt failed (after ${retryAttemptCount}/${MAX_RETRY_ATTEMPTS} retries so far):`,
+        error
+      )
     },
-    on: {
-      error: error => {
-        if (!hasConnectedOnce && retryAttemptCount - 1 === 0) return
+    closed: event => {
+      if (isPageUnloading || isLegitimateClose(event, hasConnectedOnce, retryAttemptCount)) return
 
-        if (retryAttemptCount >= MAX_RETRY_ATTEMPTS) {
-          console.error(`[WebSocket] Exhausted all ${MAX_RETRY_ATTEMPTS} retry attempts, giving up:`, error)
-          // The error thrown by graphql-ws here has no GraphQL/server "result"
-          // shape, so Apollo's linkError -> getServerErrorMessages() never
-          // surfaces anything to the user for this case. Show an explicit
-          // message so the app doesn't go silently dark.
-          globalMessageHandler.add({
-            key: 'websocket-retries-exhausted',
-            type: NotificationType.Message,
-            props: {
-              negative: true,
-              header: 'Live updates disconnected',
-              content:
-                'Could not reconnect to the server after multiple attempts. Please refresh the page once the server is back online.',
-            },
-          })
-          return
-        }
+      if (event && typeof event === 'object' && 'code' in event) {
+        const closeEvent = event as CloseEvent
         console.warn(
-          `[WebSocket] Connection attempt failed (after ${retryAttemptCount}/${MAX_RETRY_ATTEMPTS} retries so far):`,
-          error
+          `[WebSocket] Closed (code: ${closeEvent.code}, reason: "${closeEvent.reason || 'none'}", clean: ${closeEvent.wasClean})`
         )
-      },
-      closed: event => {
-        if (isLegitimateClose(event, hasConnectedOnce, retryAttemptCount)) return
-
-        if (event && typeof event === 'object' && 'code' in event) {
-          const closeEvent = event as CloseEvent
-          console.warn(
-            `[WebSocket] Closed (code: ${closeEvent.code}, reason: "${closeEvent.reason || 'none'}", clean: ${closeEvent.wasClean})`
-          )
-        } else {
-          console.warn('[WebSocket] Closed unexpectedly', event)
-        }
-      },
-      connected: (_socket, _payload, wasRetry) => {
-        hasConnectedOnce = true
-
-        if (wasRetry) {
-          console.info(`[WebSocket] Connection restored after ${retryAttemptCount} retry(ies)`)
-        } else {
-          console.info('[WebSocket] Connected')
-        }
-        retryAttemptCount = 0
-      },
+      } else {
+        console.warn('[WebSocket] Closed unexpectedly', event)
+      }
     },
-  })
-)
+    connected: (_socket, _payload, wasRetry) => {
+      hasConnectedOnce = true
+
+      if (wasRetry) {
+        console.info(`[WebSocket] Connection restored after ${retryAttemptCount} retry(ies)`)
+      } else {
+        console.info('[WebSocket] Connected')
+      }
+      retryAttemptCount = 0
+    },
+  },
+})
+
+// Say "goodbye" to the server the instant the page starts leaving (refresh,
+// navigation, or tab close), instead of letting the browser force-close the
+// socket and having our own code mistake that for a real outage.
+if (globalThis.window !== undefined) {
+  globalThis.window.addEventListener(
+    'pagehide',
+    () => {
+      isPageUnloading = true
+      wsClient.dispose()
+    },
+    { once: true }
+  )
+}
+
+const wsLink = new GraphQLWsLink(wsClient)
 
 const link = split(
   // split based on the operation type
