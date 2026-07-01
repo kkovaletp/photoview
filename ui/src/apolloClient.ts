@@ -154,7 +154,7 @@ const wsClient = createClient({
     const delay = calculateRetryDelay(retries)
 
     if (!isPageUnloading && (hasConnectedOnce || retries > 0)) {
-      console.log(
+      console.info(
         `[WebSocket] Waiting ${Math.round(delay)}ms before retry ${retryAttemptCount}/${MAX_RETRY_ATTEMPTS}`
       )
     }
@@ -165,7 +165,7 @@ const wsClient = createClient({
   on: {
     connecting: () => {
       if (isPageUnloading) return
-      console.log('[WebSocket] Connecting...')
+      console.info('[WebSocket] Connecting...')
     },
     error: error => {
       if (isPageUnloading || (!hasConnectedOnce && retryAttemptCount - 1 === 0)) return
@@ -222,14 +222,13 @@ const wsClient = createClient({
 // navigation, or tab close), instead of letting the browser force-close the
 // socket and having our own code mistake that for a real outage.
 if (globalThis.window !== undefined) {
-  globalThis.window.addEventListener(
-    'pagehide',
-    () => {
-      isPageUnloading = true
-      wsClient.dispose()
-    },
-    { once: true }
-  )
+  const teardownWsClient = () => {
+    if (isPageUnloading) return
+    isPageUnloading = true
+    wsClient.dispose()
+  }
+  globalThis.window.addEventListener('beforeunload', teardownWsClient, { once: true })
+  globalThis.window.addEventListener('pagehide', teardownWsClient, { once: true })
 }
 
 const wsLink = new GraphQLWsLink(wsClient)
