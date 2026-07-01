@@ -56,6 +56,32 @@ export const calculateRetryDelay = (retries: number): number => {
 }
 
 let retryAttemptCount = 0
+let hasConnectedOnce = false
+
+/**
+ * Decides whether a "closed" event is a benign/expected closure that
+ * shouldn't be surfaced as a warning:
+ * - deliberate, clean closures (code 1000) are never a problem, and
+ * - a single transient closure before the connection has ever succeeded
+ */
+export const isLegitimateClose = (
+  closeEvent: unknown,
+  hasConnectedBefore: boolean,
+  currentRetryAttemptCount: number
+): boolean => {
+  if (
+    closeEvent &&
+    typeof closeEvent === 'object' &&
+    'code' in closeEvent &&
+    (closeEvent as CloseEvent).code === 1000 &&
+    (closeEvent as CloseEvent).wasClean
+  ) {
+    return true
+  }
+
+  return !hasConnectedBefore && currentRetryAttemptCount <= 1
+}
+
 const wsLink = new GraphQLWsLink(
   createClient({
     url: websocketUri.toString(),
@@ -121,18 +147,45 @@ const wsLink = new GraphQLWsLink(
       retryAttemptCount = retries + 1
       const delay = calculateRetryDelay(retries)
 
-      console.log(
-        `[WebSocket] Waiting ${Math.round(delay)}ms before retry ${retryAttemptCount}/${MAX_RETRY_ATTEMPTS}`
-      )
+      if (hasConnectedOnce || retries > 0) {
+        console.log(
+          `[WebSocket] Waiting ${Math.round(delay)}ms before retry ${retryAttemptCount}/${MAX_RETRY_ATTEMPTS}`
+        )
+      }
 
       // Return a Promise that resolves after the delay
       await new Promise(resolve => setTimeout(resolve, delay))
     },
     on: {
       error: error => {
-        console.error(`[WebSocket] Giving up after ${retryAttemptCount} retry(ies):`, error)
+        if (!hasConnectedOnce && retryAttemptCount - 1 === 0) return
+
+        if (retryAttemptCount >= MAX_RETRY_ATTEMPTS) {
+          console.error(`[WebSocket] Exhausted all ${MAX_RETRY_ATTEMPTS} retry attempts, giving up:`, error)
+          // The error thrown by graphql-ws here has no GraphQL/server "result"
+          // shape, so Apollo's linkError -> getServerErrorMessages() never
+          // surfaces anything to the user for this case. Show an explicit
+          // message so the app doesn't go silently dark.
+          globalMessageHandler.add({
+            key: 'websocket-retries-exhausted',
+            type: NotificationType.Message,
+            props: {
+              negative: true,
+              header: 'Live updates disconnected',
+              content:
+                'Could not reconnect to the server after multiple attempts. Please refresh the page once the server is back online.',
+            },
+          })
+          return
+        }
+        console.warn(
+          `[WebSocket] Connection attempt failed (after ${retryAttemptCount}/${MAX_RETRY_ATTEMPTS} retries so far):`,
+          error
+        )
       },
       closed: event => {
+        if (isLegitimateClose(event, hasConnectedOnce, retryAttemptCount)) return
+
         if (event && typeof event === 'object' && 'code' in event) {
           const closeEvent = event as CloseEvent
           console.warn(
@@ -142,11 +195,14 @@ const wsLink = new GraphQLWsLink(
           console.warn('[WebSocket] Closed unexpectedly', event)
         }
       },
-      connected: () => {
-        const afterRetriesSubString = retryAttemptCount > 0 ? `after ${retryAttemptCount} retry(ies)` : ''
-        console.info(
-          `[WebSocket] Connection restored ${afterRetriesSubString}`
-        )
+      connected: (_socket, _payload, wasRetry) => {
+        hasConnectedOnce = true
+
+        if (wasRetry) {
+          console.info(`[WebSocket] Connection restored after ${retryAttemptCount} retry(ies)`)
+        } else {
+          console.info('[WebSocket] Connected')
+        }
         retryAttemptCount = 0
       },
     },

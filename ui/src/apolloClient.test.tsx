@@ -1,5 +1,12 @@
 import { describe, it, expect, beforeEach } from 'vitest'
-import { calculateRetryDelay, formatPath, getServerErrorMessages, isAuthNetworkError, paginateCache } from './apolloClient'
+import {
+    calculateRetryDelay,
+    formatPath,
+    getServerErrorMessages,
+    isAuthNetworkError,
+    paginateCache,
+    isLegitimateClose
+} from './apolloClient'
 
 describe('paginateCache', () => {
     let paginateFn: ReturnType<typeof paginateCache>
@@ -480,6 +487,34 @@ describe('Pure Helper Functions', () => {
         it('should return false for a 0 status code (network unreachable)', () => {
             const networkError = Object.assign(new Error('Failed to fetch'), { statusCode: 0 })
             expect(isAuthNetworkError(networkError)).toBe(false)
+        })
+    })
+
+    describe('isLegitimateClose', () => {
+        it('should treat a clean, normal closure (code 1000) as benign regardless of history', () => {
+            const closeEvent = { code: 1000, reason: '', wasClean: true }
+            expect(isLegitimateClose(closeEvent, false, 1)).toBe(true)
+            expect(isLegitimateClose(closeEvent, true, 3)).toBe(true)
+        })
+
+        it('should treat a single closure before ever connecting as benign', () => {
+            const closeEvent = { code: 1006, reason: '', wasClean: false }
+            expect(isLegitimateClose(closeEvent, false, 1)).toBe(true)
+            expect(isLegitimateClose(closeEvent, false, 0)).toBe(true)
+        })
+
+        it('should not treat repeated closures before ever connecting as benign', () => {
+            const closeEvent = { code: 1006, reason: '', wasClean: false }
+            expect(isLegitimateClose(closeEvent, false, 2)).toBe(false)
+        })
+
+        it('should not treat closures as benign once a connection has succeeded before', () => {
+            const closeEvent = { code: 1006, reason: '', wasClean: false }
+            expect(isLegitimateClose(closeEvent, true, 1)).toBe(false)
+        })
+
+        it('should not treat non-clean closures without a code as benign', () => {
+            expect(isLegitimateClose(new Error('boom'), false, 2)).toBe(false)
         })
     })
 })
