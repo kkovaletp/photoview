@@ -32,6 +32,7 @@ type CachedItem = Reference | {
 }
 
 const MAX_RETRY_DELAY = 30_000
+const MAX_RETRY_ATTEMPTS = 100
 
 const httpLink = new HttpLink({
   uri: GRAPHQL_ENDPOINT,
@@ -54,9 +55,11 @@ export const calculateRetryDelay = (retries: number): number => {
   return Math.min(jitter, MAX_RETRY_DELAY)
 }
 
+let retryAttemptCount = 0
 const wsLink = new GraphQLWsLink(
   createClient({
     url: websocketUri.toString(),
+    retryAttempts: MAX_RETRY_ATTEMPTS,
     connectionParams: () => {
       const token = authToken()
       // Only include authorization if token exists
@@ -115,10 +118,11 @@ const wsLink = new GraphQLWsLink(
     },
     // Control retry timing (exponential backoff with jitter)
     retryWait: async retries => {
+      retryAttemptCount = retries + 1
       const delay = calculateRetryDelay(retries)
 
       console.log(
-        `[WebSocket] Waiting ${Math.round(delay)}ms before retry ${retries + 1}`
+        `[WebSocket] Waiting ${Math.round(delay)}ms before retry ${retryAttemptCount}/${MAX_RETRY_ATTEMPTS}`
       )
 
       // Return a Promise that resolves after the delay
@@ -126,10 +130,24 @@ const wsLink = new GraphQLWsLink(
     },
     on: {
       error: error => {
-        console.error('[WebSocket error]: ', error)
+        console.error(`[WebSocket] Giving up after ${retryAttemptCount} retry(ies):`, error)
+      },
+      closed: event => {
+        if (event && typeof event === 'object' && 'code' in event) {
+          const closeEvent = event as CloseEvent
+          console.warn(
+            `[WebSocket] Closed (code: ${closeEvent.code}, reason: "${closeEvent.reason || 'none'}", clean: ${closeEvent.wasClean})`
+          )
+        } else {
+          console.warn('[WebSocket] Closed unexpectedly', event)
+        }
       },
       connected: () => {
-        console.info('[WebSocket] Connection restored')
+        const afterRetriesSubString = retryAttemptCount > 0 ? `after ${retryAttemptCount} retry(ies)` : ''
+        console.info(
+          `[WebSocket] Connection restored ${afterRetriesSubString}`
+        )
+        retryAttemptCount = 0
       },
     },
   })
@@ -174,6 +192,20 @@ export function getServerErrorMessages(networkError: Error | undefined): Error[]
 export const formatPath = (path: readonly (string | number)[] | undefined): string =>
   path?.join('::') ?? 'undefined'
 
+/**
+ * Determines whether a network error represents an authentication/authorization
+ * failure (HTTP 401/403), as opposed to a transient/generic network problem
+ * such as the backend restarting during a deployment.
+ */
+export function isAuthNetworkError(networkError: Error | undefined): boolean {
+  if (!networkError) return false
+  if ('statusCode' in networkError) {
+    const statusCode = (networkError as ServerError).statusCode
+    return statusCode === 401 || statusCode === 403
+  }
+  return false
+}
+
 const linkError = onError(({ graphQLErrors, networkError }) => {
   const errorMessages = []
 
@@ -209,19 +241,26 @@ const linkError = onError(({ graphQLErrors, networkError }) => {
 
   if (networkError) {
     console.error(`[Network error]: ${JSON.stringify(networkError)}`)
-    clearTokenCookie()
+    const isAuthError = isAuthNetworkError(networkError)
+    if (isAuthError) {
+      console.error('[Authentication failure (401/403)] Clearing token cookie')
+      clearTokenCookie()
+    }
 
     const errors = getServerErrorMessages(networkError);
     if (errors.length === 1) {
       errorMessages.push({
-        header: 'Server error',
-        content: `You are being logged out in an attempt to recover.\n${errors[0].message}`,
+        header: isAuthError ? 'Server error' : 'Connection problem',
+        content: isAuthError
+          ? `You are being logged out in an attempt to recover.\n${errors[0].message}`
+          : `A temporary connection problem occurred: ${errors[0].message}`,
       })
     } else if (errors.length > 1) {
       errorMessages.push({
-        header: 'Multiple server errors',
-        content: `Received ${graphQLErrors?.length
-          || 0} errors from the server. You are being logged out in an attempt to recover.`,
+        header: isAuthError ? 'Multiple server errors' : 'Multiple connection problems',
+        content: `Received ${graphQLErrors?.length || 0} errors from the server.${isAuthError
+          ? ' You are being logged out in an attempt to recover.'
+          : ' Retrying automatically.'}`,
       })
     }
   }

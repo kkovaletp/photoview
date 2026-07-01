@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest'
-import { calculateRetryDelay, formatPath, getServerErrorMessages, paginateCache } from './apolloClient'
+import { calculateRetryDelay, formatPath, getServerErrorMessages, isAuthNetworkError, paginateCache } from './apolloClient'
 
 describe('paginateCache', () => {
     let paginateFn: ReturnType<typeof paginateCache>
@@ -449,6 +449,37 @@ describe('Pure Helper Functions', () => {
             expect(errors[0]).toEqual({ message: 'Error 1' })
             expect(errors[1]).toEqual({ message: 'Error 2' })
             expect(errors[2]).toEqual({ message: 'Error 3' })
+        })
+    })
+
+    describe('isAuthNetworkError', () => {
+        it('should return false for undefined', () => {
+            expect(isAuthNetworkError(undefined)).toBe(false)
+        })
+
+        it('should return false for a plain error without statusCode', () => {
+            const networkError = new Error('Network error')
+            expect(isAuthNetworkError(networkError)).toBe(false)
+        })
+
+        it('should return true for a 401 status code', () => {
+            const networkError = Object.assign(new Error('Unauthorized'), { statusCode: 401 })
+            expect(isAuthNetworkError(networkError)).toBe(true)
+        })
+
+        it('should return true for a 403 status code', () => {
+            const networkError = Object.assign(new Error('Forbidden'), { statusCode: 403 })
+            expect(isAuthNetworkError(networkError)).toBe(true)
+        })
+
+        it('should return false for a 500 status code', () => {
+            const networkError = Object.assign(new Error('Server error'), { statusCode: 500 })
+            expect(isAuthNetworkError(networkError)).toBe(false)
+        })
+
+        it('should return false for a 0 status code (network unreachable)', () => {
+            const networkError = Object.assign(new Error('Failed to fetch'), { statusCode: 0 })
+            expect(isAuthNetworkError(networkError)).toBe(false)
         })
     })
 })
