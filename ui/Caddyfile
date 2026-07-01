@@ -136,19 +136,19 @@
     }
 
     # Serve real files directly.
-    `@existing` file
-    handle `@existing` {
+    @existing file
+    handle @existing {
         file_server {
             precompressed
         }
     }
 
     # Missing file-like requests should stay 404 instead of falling back to index.html.
-    `@missingStaticAsset` {
+    @missingStaticAsset {
         path_regexp staticAsset \.(?:js|mjs|css|html?|md|map|json|webmanifest|png|svg|ico|jpe?g|gif|webp|avif|woff2?|ttf|eot|txt|xml|wasm)$
         not file
     }
-    respond `@missingStaticAsset` 404
+    respond @missingStaticAsset 404
 
     # Serve frontend static website with SPA fallback
     handle {
