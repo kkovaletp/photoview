@@ -22,6 +22,57 @@
     "loading": "",
     "not_found": ""
   },
+  "apollo_client": {
+    "notification": {
+      "graphql": {
+        "multiple": {
+          "content_other": "",
+          "header": ""
+        },
+        "single": {
+          "content": "",
+          "header": ""
+        }
+      },
+      "network": {
+        "auth": {
+          "generic": {
+            "content": "",
+            "header": ""
+          },
+          "multiple": {
+            "content_other": "",
+            "header": ""
+          },
+          "single": {
+            "content": "",
+            "header": ""
+          }
+        },
+        "retry": {
+          "generic": {
+            "content": ""
+          },
+          "header": "",
+          "multiple": {
+            "content_other": "",
+            "header": ""
+          },
+          "single": {
+            "content": ""
+          }
+        }
+      },
+      "websocket_exhausted": {
+        "content": "",
+        "header": ""
+      },
+      "websocket_restored": {
+        "content": "",
+        "header": ""
+      }
+    }
+  },
   "ethical_use_license_page": {
     "load_error": "",
     "loading": "",

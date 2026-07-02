@@ -28,7 +28,13 @@ export const MessageProvider = ({ children }: MessageProviderProps) => {
 
   const add = useCallback((message: Message) => {
     const timestampedMessage = { ...message, timestamp: Date.now() };
-    setMessages(prevMessages => [...prevMessages, timestampedMessage])
+    setMessages(prevMessages => {
+      const existingIndex = prevMessages.findIndex(m => m.key === timestampedMessage.key)
+      if (existingIndex === -1) return [...prevMessages, timestampedMessage]
+      const next = [...prevMessages]
+      next[existingIndex] = timestampedMessage
+      return next
+    })
   }, [])
 
   const removeKey = useCallback((key: string) => {

@@ -10,7 +10,7 @@ import {
 } from '@apollo/client'
 import { getMainDefinition } from '@apollo/client/utilities'
 import { onError } from '@apollo/client/link/error'
-
+import i18n from 'i18next'
 import urlJoin from 'url-join'
 import { authToken, clearTokenCookie } from './helpers/authentication'
 import { globalMessageHandler } from './components/messages/globalMessageHandler'
@@ -82,6 +82,10 @@ export const isLegitimateClose = (
 
   return !hasConnectedBefore && currentRetryAttemptCount <= 1
 }
+
+const WS_STATUS_KEY = 'apollo-ws-status'
+const GRAPHQL_ERROR_KEY = 'apollo-graphql-error'
+const NETWORK_ERROR_KEY = 'apollo-network-error'
 
 const wsClient = createClient({
   url: websocketUri.toString(),
@@ -178,13 +182,18 @@ const wsClient = createClient({
         // surfaces anything to the user for this case. Show an explicit
         // message so the app doesn't go silently dark.
         globalMessageHandler.add({
-          key: 'websocket-retries-exhausted',
+          key: WS_STATUS_KEY,
           type: NotificationType.Message,
           props: {
             negative: true,
-            header: 'Live updates disconnected',
-            content:
-              'Could not reconnect to the server after multiple attempts. Please refresh the page once the server is back online.',
+            header: i18n.t(
+              'apollo_client.notification.websocket_exhausted.header',
+              'Live updates disconnected'
+            ),
+            content: i18n.t(
+              'apollo_client.notification.websocket_exhausted.content',
+              'Could not reconnect to the server after multiple attempts. Please refresh the page once the server is back online.'
+            ),
           },
         })
         return
@@ -211,6 +220,21 @@ const wsClient = createClient({
 
       if (wasRetry) {
         console.info(`[WebSocket] Connection restored after ${retryAttemptCount} retry(ies)`)
+        globalMessageHandler.add({
+          key: WS_STATUS_KEY,
+          type: NotificationType.Message,
+          props: {
+            positive: true,
+            header: i18n.t(
+              'apollo_client.notification.websocket_restored.header',
+              'Live updates restored'
+            ),
+            content: i18n.t(
+              'apollo_client.notification.websocket_restored.content',
+              'Reconnected to the server successfully.'
+            ),
+          },
+        })
       } else {
         console.info('[WebSocket] Connected')
       }
@@ -288,7 +312,7 @@ export function isAuthNetworkError(networkError: Error | undefined): boolean {
 }
 
 const linkError = onError(({ graphQLErrors, networkError }) => {
-  const errorMessages = []
+  const errorMessages: { key: string; header: string; content: string }[] = []
 
   if (graphQLErrors) {
     graphQLErrors.map(({ message, locations, path }) =>
@@ -301,15 +325,32 @@ const linkError = onError(({ graphQLErrors, networkError }) => {
 
     if (graphQLErrors.length === 1) {
       errorMessages.push({
-        header: 'Something went wrong',
-        content: `Server error: ${graphQLErrors[0].message} at (${formatPath(
-          graphQLErrors[0].path
-        )})`,
+        key: GRAPHQL_ERROR_KEY,
+        header: i18n.t(
+          'apollo_client.notification.graphql.single.header',
+          'Something went wrong'
+        ),
+        content: i18n.t(
+          'apollo_client.notification.graphql.single.content',
+          'Server error: {{message}} at ({{path}})',
+          {
+            message: graphQLErrors[0].message,
+            path: formatPath(graphQLErrors[0].path),
+          }
+        ),
       })
     } else if (graphQLErrors.length > 1) {
       errorMessages.push({
-        header: 'Multiple things went wrong',
-        content: `Received ${graphQLErrors.length} errors from the server. See the console for more information`,
+        key: GRAPHQL_ERROR_KEY,
+        header: i18n.t(
+          'apollo_client.notification.graphql.multiple.header',
+          'Multiple things went wrong'
+        ),
+        content: i18n.t(
+          'apollo_client.notification.graphql.multiple.content',
+          'Received {{count}} errors from the server. See the browser\'s dev tools console for more information',
+          { count: graphQLErrors.length }
+        ),
       })
     }
 
@@ -331,35 +372,85 @@ const linkError = onError(({ graphQLErrors, networkError }) => {
     const errors = getServerErrorMessages(networkError);
     if (errors.length === 1) {
       errorMessages.push({
-        header: isAuthError ? 'Server error' : 'Connection problem',
+        key: NETWORK_ERROR_KEY,
+        header: isAuthError
+          ? i18n.t(
+            'apollo_client.notification.network.auth.single.header',
+            'Server error'
+          )
+          : i18n.t(
+            'apollo_client.notification.network.retry.header',
+            'Connection problem'
+          ),
         content: isAuthError
-          ? `You are being logged out in an attempt to recover.\n${errors[0].message}`
-          : `A temporary connection problem occurred: ${errors[0].message}`,
+          ? i18n.t(
+            'apollo_client.notification.network.auth.single.content',
+            'You are being logged out in an attempt to recover.\n{{message}}',
+            { message: errors[0].message }
+          )
+          : i18n.t(
+            'apollo_client.notification.network.retry.single.content',
+            'A temporary connection problem occurred: {{message}}',
+            { message: errors[0].message }
+          ),
       })
     } else if (errors.length > 1) {
       errorMessages.push({
-        header: isAuthError ? 'Multiple server errors' : 'Multiple connection problems',
-        content: `Received ${errors.length} errors from the server.${isAuthError
-          ? ' You are being logged out in an attempt to recover.'
-          : ' Retrying automatically.'}`,
+        key: NETWORK_ERROR_KEY,
+        header: isAuthError
+          ? i18n.t(
+            'apollo_client.notification.network.auth.multiple.header',
+            'Multiple server errors'
+          )
+          : i18n.t(
+            'apollo_client.notification.network.retry.multiple.header',
+            'Multiple connection problems'
+          ),
+        content: isAuthError
+          ? i18n.t(
+            'apollo_client.notification.network.auth.multiple.content',
+            'Received {{count}} errors from the server. You are being logged out in an attempt to recover.',
+            { count: errors.length }
+          )
+          : i18n.t(
+            'apollo_client.notification.network.retry.multiple.content',
+            'Received {{count}} errors from the server. Retrying automatically.',
+            { count: errors.length }
+          ),
       })
     } else {
       errorMessages.push({
-        header: isAuthError ? 'Authentication error' : 'Connection problem',
+        key: NETWORK_ERROR_KEY,
+        header: isAuthError
+          ? i18n.t(
+            'apollo_client.notification.network.auth.generic.header',
+            'Authentication error'
+          )
+          : i18n.t(
+            'apollo_client.notification.network.retry.header',
+            'Connection problem'
+          ),
         content: isAuthError
-          ? 'You are being logged out in an attempt to recover.'
-          : 'A temporary connection problem occurred. Retrying automatically.',
+          ? i18n.t(
+            'apollo_client.notification.network.auth.generic.content',
+            'You are being logged out in an attempt to recover.'
+          )
+          : i18n.t(
+            'apollo_client.notification.network.retry.generic.content',
+            'A temporary connection problem occurred. Retrying automatically.'
+          ),
       })
     }
   }
 
   if (errorMessages.length > 0) {
-    const newMessages: Message[] = errorMessages.map(msg => ({
-      key: Math.random().toString(26),
+    const newMessages: Message[] = errorMessages.map(({ key, header, content }) => ({
+      key,
       type: NotificationType.Message,
       props: {
         negative: true,
-        ...msg,
+        header,
+        content,
       },
     }))
 

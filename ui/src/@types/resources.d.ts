@@ -24,6 +24,60 @@ export default interface Resources {
       "loading": "Loading album...",
       "not_found": "Album not found"
     },
+    "apollo_client": {
+      "notification": {
+        "graphql": {
+          "multiple": {
+            "content_one": "Received {{count}} errors from the server. See the browser's dev tools console for more information",
+            "content_other": "Received {{count}} errors from the server. See the browser's dev tools console for more information",
+            "header": "Multiple things went wrong"
+          },
+          "single": {
+            "content": "Server error: {{message}} at ({{path}})",
+            "header": "Something went wrong"
+          }
+        },
+        "network": {
+          "auth": {
+            "generic": {
+              "content": "You are being logged out in an attempt to recover.",
+              "header": "Authentication error"
+            },
+            "multiple": {
+              "content_one": "Received {{count}} errors from the server. You are being logged out in an attempt to recover.",
+              "content_other": "Received {{count}} errors from the server. You are being logged out in an attempt to recover.",
+              "header": "Multiple server errors"
+            },
+            "single": {
+              "content": "You are being logged out in an attempt to recover.\n{{message}}",
+              "header": "Server error"
+            }
+          },
+          "retry": {
+            "generic": {
+              "content": "A temporary connection problem occurred. Retrying automatically."
+            },
+            "header": "Connection problem",
+            "multiple": {
+              "content_one": "Received {{count}} errors from the server. Retrying automatically.",
+              "content_other": "Received {{count}} errors from the server. Retrying automatically.",
+              "header": "Multiple connection problems"
+            },
+            "single": {
+              "content": "A temporary connection problem occurred: {{message}}"
+            }
+          }
+        },
+        "websocket_exhausted": {
+          "content": "Could not reconnect to the server after multiple attempts. Please refresh the page once the server is back online.",
+          "header": "Live updates disconnected"
+        },
+        "websocket_restored": {
+          "content": "Reconnected to the server successfully.",
+          "header": "Live updates restored"
+        }
+      }
+    },
     "ethical_use_license_page": {
       "load_error": "Failed to load the license document. Please try again.",
       "loading": "Loading…",
