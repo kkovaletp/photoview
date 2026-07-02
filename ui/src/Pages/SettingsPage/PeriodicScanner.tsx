@@ -1,13 +1,12 @@
-import { gql } from '@apollo/client'
-import React, { useEffect, useRef, useState } from 'react'
-import { useMutation, useQuery } from '@apollo/client'
+import { useEffect, useRef, useState } from 'react'
+import { gql, useMutation, useQuery } from '@apollo/client'
 import { InputLabelDescription, InputLabelTitle } from './SettingsPage'
 import { useTranslation } from 'react-i18next'
-import { scanIntervalQuery } from './__generated__/scanIntervalQuery'
 import {
-  changeScanIntervalMutation,
-  changeScanIntervalMutationVariables,
-} from './__generated__/changeScanIntervalMutation'
+  ScanIntervalQueryQuery,
+  ChangeScanIntervalMutationMutation,
+  ChangeScanIntervalMutationMutationVariables,
+} from './__generated__/PeriodicScanner'
 import Checkbox from '../../primitives/form/Checkbox'
 import { TextField } from '../../primitives/form/Input'
 import Dropdown, { DropdownItem } from '../../primitives/form/Dropdown'
@@ -64,11 +63,11 @@ type TimeValue = {
 }
 
 const convertToSeconds = ({ value, unit }: TimeValue) => {
-  return value * (timeUnits.find(x => x.value == unit)?.multiplier as number)
+  return value * (timeUnits.find(x => x.value === unit)?.multiplier as number)
 }
 
 const convertToAppropriateUnit = ({ value, unit }: TimeValue): TimeValue => {
-  if (value == 0) {
+  if (value === 0) {
     return {
       unit: TimeUnit.Second,
       value: 0,
@@ -81,7 +80,7 @@ const convertToAppropriateUnit = ({ value, unit }: TimeValue): TimeValue => {
   for (const unit of timeUnits) {
     if (
       seconds / unit.multiplier >= 1 &&
-      (seconds / unit.multiplier) % 1 == 0
+      (seconds / unit.multiplier) % 1 === 0
     ) {
       resultingUnit = unit
     } else {
@@ -106,7 +105,7 @@ const PeriodicScanner = () => {
 
   const scanIntervalServerValue = useRef<number | null>(null)
   const hasInitialized = useRef(false)
-  const { data, loading, error } = useQuery<scanIntervalQuery>(SCAN_INTERVAL_QUERY)
+  const { data, loading, error } = useQuery<ScanIntervalQueryQuery>(SCAN_INTERVAL_QUERY)
 
   useEffect(() => {
     if (error) {
@@ -139,8 +138,8 @@ const PeriodicScanner = () => {
 
   const [setScanIntervalMutation, { loading: scanIntervalMutationLoading }] =
     useMutation<
-      changeScanIntervalMutation,
-      changeScanIntervalMutationVariables
+      ChangeScanIntervalMutationMutation,
+      ChangeScanIntervalMutationMutationVariables
     >(SCAN_INTERVAL_MUTATION)
 
   const onScanIntervalCheckboxChange = (checked: boolean) => {
@@ -154,13 +153,21 @@ const PeriodicScanner = () => {
   const onScanIntervalUpdate = (scanInterval: TimeValue) => {
     const seconds = convertToSeconds(scanInterval)
 
-    if (scanIntervalServerValue.current != seconds) {
+    if (scanIntervalServerValue.current !== seconds) {
+      const prev = scanIntervalServerValue.current
       setScanIntervalMutation({
-        variables: {
-          interval: seconds,
-        },
+        variables: { interval: seconds },
+      }).then(() => {
+        scanIntervalServerValue.current = seconds
+      }).catch(err => {
+        console.error('Failed to update periodic scan interval:', err)
+        // Revert UI state to previous server value
+        if (prev !== null) {
+          setEnablePeriodicScanner(prev > 0)
+          const reverted = convertToAppropriateUnit({ value: prev, unit: TimeUnit.Second })
+          setScanInterval(reverted)
+        }
       })
-      scanIntervalServerValue.current = seconds
     }
   }
 

@@ -1,9 +1,9 @@
-import React from 'react'
+import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import AlbumBoxes from '../../components/albumGallery/AlbumBoxes'
 import Layout from '../../components/layout/Layout'
 import { useQuery, gql } from '@apollo/client'
-import { getMyAlbums, getMyAlbumsVariables } from './__generated__/getMyAlbums'
+import { GetMyAlbumsQuery, GetMyAlbumsQueryVariables } from './__generated__/AlbumsPage'
 import useURLParameters from '../../hooks/useURLParameters'
 import useOrderingParams from '../../hooks/useOrderingParams'
 import AlbumFilter from '../../components/album/AlbumFilter'
@@ -33,7 +33,7 @@ const AlbumsPage = () => {
   const urlParams = useURLParameters()
   const orderParams = useOrderingParams(urlParams, 'updated_at')
 
-  const { error, data } = useQuery<getMyAlbums, getMyAlbumsVariables>(
+  const { error, data } = useQuery<GetMyAlbumsQuery, GetMyAlbumsQueryVariables>(
     getAlbumsQuery,
     {
       variables: {
@@ -43,7 +43,7 @@ const AlbumsPage = () => {
     }
   )
 
-  const sortingOptions = React.useMemo(
+  const sortingOptions = useMemo(
     () => [
       {
         value: 'updated_at' as const,

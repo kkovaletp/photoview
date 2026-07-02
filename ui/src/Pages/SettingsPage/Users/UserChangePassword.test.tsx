@@ -6,7 +6,7 @@ import { GraphQLError } from 'graphql'
 import { MockedResponse } from '@apollo/client/testing'
 import ChangePasswordModal from './UserChangePassword'
 import { renderWithProviders } from '../../../helpers/testUtils'
-import { settingsUsersQuery_user } from './__generated__/settingsUsersQuery'
+import { SettingsUsersQueryQuery } from './__generated__/UsersTable'
 
 const changeUserPasswordMutation = gql`
   mutation changeUserPassword($userId: ID!, $password: String!) {
@@ -16,7 +16,7 @@ const changeUserPasswordMutation = gql`
   }
 `
 
-const mockUser: settingsUsersQuery_user = {
+const mockUser: SettingsUsersQueryQuery['user'][0] = {
   __typename: 'User',
   id: 'user-123',
   username: 'testuser',

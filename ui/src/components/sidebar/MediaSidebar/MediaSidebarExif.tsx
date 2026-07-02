@@ -1,4 +1,4 @@
-import React, { JSX } from 'react'
+import { JSX } from 'react'
 import { useTranslation } from 'react-i18next'
 import styled from 'styled-components'
 import { isNil } from '../../../helpers/utils'
@@ -27,7 +27,7 @@ const ExifDetails = ({ media }: ExifDetailsProps) => {
     }
 
     const exifKeys = Object.keys(exifName).filter(
-      x => mediaExif[x] !== null && x != '__typename'
+      x => mediaExif[x] !== null && x !== '__typename'
     )
 
     const exif = exifKeys.reduce((prev, curr) => {

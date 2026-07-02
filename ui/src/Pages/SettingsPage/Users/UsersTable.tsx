@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import { useState, JSX } from 'react'
 import {
   Table,
   TableHeader,
@@ -13,7 +13,7 @@ import UserRow from './UserRow'
 import AddUserRow from './AddUserRow'
 import { SectionTitle } from '../SettingsPage'
 import { useTranslation } from 'react-i18next'
-import { settingsUsersQuery } from './__generated__/settingsUsersQuery'
+import { SettingsUsersQueryQuery } from './__generated__/UsersTable'
 import { Button } from '../../../primitives/form/Input'
 import Loader from '../../../primitives/Loader'
 
@@ -36,7 +36,7 @@ const UsersTable = () => {
   const [showAddUser, setShowAddUser] = useState(false)
 
   const { loading, error, data, refetch } =
-    useQuery<settingsUsersQuery>(USERS_QUERY)
+    useQuery<SettingsUsersQueryQuery>(USERS_QUERY)
 
   if (error) {
     return <div>{`Users table error: ${error.message}`}</div>

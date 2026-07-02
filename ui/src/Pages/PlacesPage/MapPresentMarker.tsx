@@ -1,39 +1,22 @@
 import { gql, useLazyQuery } from '@apollo/client'
-import React, { useEffect } from 'react'
+import { Dispatch, useEffect } from 'react'
 import PresentView from '../../components/photoGallery/presentView/PresentView'
-import type * as mapboxgl from 'mapbox-gl'
+import type * as mapboxgl from 'mapbox-gl/esm'
 import { PresentMarker } from './PlacesPage'
 import {
-  placePageQueryMedia,
-  placePageQueryMediaVariables,
-} from './__generated__/placePageQueryMedia'
+  PlacePageQueryMediaQuery,
+  PlacePageQueryMediaQueryVariables,
+} from './__generated__/MapPresentMarker'
+import { MEDIA_GALLERY_FRAGMENT } from '../../components/photoGallery/fragments'
 import { PlacesAction, PlacesState } from './placesReducer'
 
 const QUERY_MEDIA = gql`
   query placePageQueryMedia($mediaIDs: [ID!]!) {
     mediaList(ids: $mediaIDs) {
-      id
-      title
-      blurhash
-      thumbnail {
-        url
-        width
-        height
-      }
-      highRes {
-        url
-        width
-        height
-      }
-      videoWeb {
-        url
-        width
-        height
-      }
-      type
-      favorite
+      ...MediaGalleryFields
     }
   }
+  ${MEDIA_GALLERY_FRAGMENT}
 `
 
 const getMediaFromMarker = (map: mapboxgl.Map, presentMarker: PresentMarker) =>
@@ -62,7 +45,7 @@ const getMediaFromMarker = (map: mapboxgl.Map, presentMarker: PresentMarker) =>
         ?.properties as MediaMarker | undefined
 
       if (media === undefined) {
-        reject(new Error('media is undefined'))
+        reject(new Error('ERROR: media is undefined'))
         return
       }
 
@@ -82,7 +65,7 @@ export interface MediaMarker {
 type MapPresetMarkerProps = {
   map: mapboxgl.Map | null
   markerMediaState: PlacesState
-  dispatchMarkerMedia: React.Dispatch<PlacesAction>
+  dispatchMarkerMedia: Dispatch<PlacesAction>
 }
 
 /**
@@ -94,8 +77,8 @@ const MapPresentMarker = ({
   dispatchMarkerMedia,
 }: MapPresetMarkerProps) => {
   const [loadMedia, { data: loadedMedia }] = useLazyQuery<
-    placePageQueryMedia,
-    placePageQueryMediaVariables
+    PlacePageQueryMediaQuery,
+    PlacePageQueryMediaQueryVariables
   >(QUERY_MEDIA)
 
   useEffect(() => {
@@ -108,16 +91,20 @@ const MapPresentMarker = ({
     }
 
     getMediaFromMarker(map, presentMarker).then(mediaMarkers => {
-      loadMedia({
+      return loadMedia({
         variables: {
           mediaIDs: mediaMarkers.map(x => x.media_id),
         },
       })
+    }).catch(() => {
+      dispatchMarkerMedia({
+        type: 'closePresentMode',
+      })
     })
-  }, [markerMediaState.presentMarker])
+  }, [markerMediaState.presentMarker, map, loadMedia, dispatchMarkerMedia])
 
   useEffect(() => {
-    const mediaList = loadedMedia?.mediaList || []
+    const mediaList = loadedMedia?.mediaList ?? []
     dispatchMarkerMedia({
       type: 'replaceMedia',
       media: mediaList,
@@ -128,7 +115,7 @@ const MapPresentMarker = ({
         activeIndex: 0,
       })
     }
-  }, [loadedMedia])
+  }, [loadedMedia, dispatchMarkerMedia])
 
   if (markerMediaState.presenting) {
     return (

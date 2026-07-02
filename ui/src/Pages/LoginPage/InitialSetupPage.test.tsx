@@ -83,7 +83,7 @@ describe('InitialSetupPage - Form Submission', () => {
       },
     }
 
-    await renderWithProviders(<InitialSetupPage />, {
+    renderWithProviders(<InitialSetupPage />, {
       mocks: [mockInitialSetupGraphql(true), setupMock],
       initialEntries: ['/initialSetup'],
     })
@@ -125,7 +125,7 @@ describe('InitialSetupPage - Form Submission', () => {
       },
     }
 
-    await renderWithProviders(<InitialSetupPage />, {
+    renderWithProviders(<InitialSetupPage />, {
       mocks: [mockInitialSetupGraphql(true), setupMock],
       initialEntries: ['/initialSetup'],
     })
@@ -157,7 +157,7 @@ describe('InitialSetupPage - Form Submission', () => {
       error: new Error('Network error'),
     }
 
-    await renderWithProviders(<InitialSetupPage />, {
+    renderWithProviders(<InitialSetupPage />, {
       mocks: [mockInitialSetupGraphql(true), setupMock],
       initialEntries: ['/initialSetup'],
     })
@@ -197,7 +197,7 @@ describe('InitialSetupPage - Form Submission', () => {
       delay: 100, // Simulate network delay
     }
 
-    await renderWithProviders(<InitialSetupPage />, {
+    renderWithProviders(<InitialSetupPage />, {
       mocks: [mockInitialSetupGraphql(true), setupMock],
       initialEntries: ['/initialSetup'],
     })
@@ -261,7 +261,7 @@ describe('InitialSetupPage - Form Submission', () => {
       },
     }
 
-    await renderWithProviders(<InitialSetupPage />, {
+    renderWithProviders(<InitialSetupPage />, {
       mocks: [mockInitialSetupGraphql(true), failedSetupMock, successSetupMock],
       initialEntries: ['/initialSetup'],
     })
@@ -290,7 +290,7 @@ describe('InitialSetupPage - Form Submission', () => {
   })
 
   test('form validation - required fields', async () => {
-    await renderWithProviders(<InitialSetupPage />, {
+    renderWithProviders(<InitialSetupPage />, {
       mocks: [mockInitialSetupGraphql(true)],
       initialEntries: ['/initialSetup'],
     })
@@ -310,7 +310,7 @@ describe('InitialSetupPage - Form Submission', () => {
   })
 
   test('message box is hidden when no error', async () => {
-    await renderWithProviders(<InitialSetupPage />, {
+    renderWithProviders(<InitialSetupPage />, {
       mocks: [mockInitialSetupGraphql(true)],
       initialEntries: ['/initialSetup'],
     })

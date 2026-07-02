@@ -1,9 +1,9 @@
-import React from 'react'
+import type { MouseEventHandler } from 'react'
 import styled from 'styled-components'
 import { ProtectedImage } from './ProtectedMedia'
 import { MediaType } from '../../__generated__/globalTypes'
 import VideoThumbnailIconSVG from './icons/videoThumbnailIcon.svg?react'
-import { MediaGalleryFields } from './__generated__/MediaGalleryFields'
+import { MediaGalleryFieldsFragment } from './__generated__/fragments'
 
 const MediaContainer = styled.div`
   grow: 1;
@@ -26,7 +26,7 @@ const StyledPhoto = styled(ProtectedImage)`
 
 type LazyPhotoProps = {
   src?: string
-  blurhash: string | null
+  blurhash: string | null | undefined
 }
 
 const LazyPhoto = (photoProps: LazyPhotoProps) => {
@@ -74,7 +74,7 @@ const HoverIcon = styled.button`
 
 type FavoriteIconProps = {
   favorite: boolean
-  onClick(e: React.MouseEvent<HTMLButtonElement, MouseEvent>): void
+  onClick: MouseEventHandler<HTMLButtonElement>
 }
 
 const FavoriteIcon = ({ favorite, onClick }: FavoriteIconProps) => {
@@ -102,7 +102,7 @@ const FavoriteIcon = ({ favorite, onClick }: FavoriteIconProps) => {
 }
 
 type SidebarIconProps = {
-  onClick(e: React.MouseEvent<HTMLButtonElement, MouseEvent>): void
+  onClick: MouseEventHandler<HTMLButtonElement>
 }
 
 const SidebarIcon = ({ onClick }: SidebarIconProps) => (
@@ -137,7 +137,7 @@ const VideoThumbnailIcon = styled(VideoThumbnailIconSVG)`
 `
 
 type MediaThumbnailProps = {
-  media: MediaGalleryFields
+  media: MediaGalleryFieldsFragment
   active: boolean
   selectImage(): void
   clickPresent(): void
@@ -165,7 +165,7 @@ export const MediaThumbnail = ({
   }
 
   let videoIcon = null
-  if (media.type == MediaType.Video) {
+  if (media.type === MediaType.Video) {
     videoIcon = <VideoThumbnailIcon />
   }
 

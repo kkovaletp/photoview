@@ -1,16 +1,16 @@
 import { gql, useQuery } from '@apollo/client'
-import type * as mapboxgl from 'mapbox-gl'
-import React, { useReducer } from 'react'
+import type * as mapboxgl from 'mapbox-gl/esm'
+import { Dispatch, useReducer } from 'react'
 import { Helmet, HelmetProvider } from '@dr.pogodin/react-helmet'
 import { useTranslation } from 'react-i18next'
 import styled from 'styled-components'
 import Layout from '../../components/layout/Layout'
 import { registerMediaMarkers } from '../../components/mapbox/mapboxHelperFunctions'
 import useMapboxMap from '../../components/mapbox/MapboxMap'
-import { urlPresentModeSetupHook } from '../../components/photoGallery/mediaGalleryReducer'
+import { useUrlPresentModeSetup } from '../../components/photoGallery/mediaGalleryReducer'
 import MapPresentMarker from './MapPresentMarker'
 import { PlacesAction, placesReducer } from './placesReducer'
-import { mediaGeoJson } from './__generated__/mediaGeoJson'
+import { MediaGeoJsonQuery } from './__generated__/PlacesPage'
 
 const MapWrapper = styled.div`
   width: 100%;
@@ -31,7 +31,7 @@ export type PresentMarker = {
 const MapPage = () => {
   const { t } = useTranslation()
 
-  const { data: mapboxData } = useQuery<mediaGeoJson>(MAPBOX_DATA_QUERY, {
+  const { data: mapboxData } = useQuery<MediaGeoJsonQuery>(MAPBOX_DATA_QUERY, {
     fetchPolicy: 'cache-first',
   })
 
@@ -50,7 +50,7 @@ const MapPage = () => {
     },
   })
 
-  urlPresentModeSetupHook({
+  useUrlPresentModeSetup({
     dispatchMedia: dispatchMarkerMedia,
     openPresentMode: event => {
       dispatchMarkerMedia({
@@ -102,8 +102,8 @@ const configureMapbox =
     mapboxData,
     dispatchMarkerMedia,
   }: {
-    mapboxData?: mediaGeoJson
-    dispatchMarkerMedia: React.Dispatch<PlacesAction>
+    mapboxData?: MediaGeoJsonQuery
+    dispatchMarkerMedia: Dispatch<PlacesAction>
   }) =>
     (map: mapboxgl.Map, mapboxLibrary: typeof mapboxgl) => {
       // Add map navigation control

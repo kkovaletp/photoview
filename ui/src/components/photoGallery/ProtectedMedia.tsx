@@ -1,5 +1,5 @@
 import { clsx } from 'clsx'
-import React, { DetailedHTMLProps, ImgHTMLAttributes, useRef, useState, useEffect } from 'react'
+import { DetailedHTMLProps, ImgHTMLAttributes, useRef, useState, useEffect } from 'react'
 import { BlurhashCanvas } from 'react-blurhash'
 import { isNil } from '../../helpers/utils'
 
@@ -52,7 +52,7 @@ export const ProtectedImage = ({
 
   if (!lazyLoading) {
     return (
-      <img {...props} src={url} loading="eager" crossOrigin="use-credentials" />
+      <img {...props} src={url} loading="eager" crossOrigin="use-credentials" alt={props.alt ?? ''} />
     )
   }
 
@@ -68,6 +68,7 @@ export const ProtectedImage = ({
         src={url}
         loading="lazy"
         crossOrigin="use-credentials"
+        alt={props.alt ?? ''}
         onLoad={didLoad}
       />
       {blurhash && !loaded && (
@@ -129,7 +130,7 @@ const FallbackLazyloadedImage = ({
     return () => {
       observer.disconnect()
     }
-  }, [imgRef])
+  }, [imgRef, inView])
 
   if (inView) {
     return (
@@ -140,6 +141,7 @@ const FallbackLazyloadedImage = ({
           src={src}
           onLoad={didLoad}
           crossOrigin="use-credentials"
+          alt={props.alt ?? ''}
         />
         {blurhash && !loaded && (
           <BlurhashCanvas
@@ -163,21 +165,21 @@ const FallbackLazyloadedImage = ({
   }
 }
 
-export interface ProtectedVideoProps_Media {
-  __typename: 'Media'
+export interface ProtectedVideoPropsMedia {
+  __typename?: 'Media'
   id: string
   thumbnail?: null | {
-    __typename: 'MediaURL'
+    __typename?: 'MediaURL'
     url: string
   }
   videoWeb?: null | {
-    __typename: 'MediaURL'
+    __typename?: 'MediaURL'
     url: string
   }
 }
 
 export interface ProtectedVideoProps {
-  media: ProtectedVideoProps_Media
+  media: ProtectedVideoPropsMedia
 }
 
 export const ProtectedVideo = ({ media, ...props }: ProtectedVideoProps) => {
@@ -195,6 +197,7 @@ export const ProtectedVideo = ({ media, ...props }: ProtectedVideoProps) => {
       poster={getProtectedUrl(media.thumbnail?.url)}
     >
       <source src={getProtectedUrl(media.videoWeb.url)} type="video/mp4" />
+      <track kind="captions" />
     </video>
   )
 }

@@ -65,8 +65,8 @@ describe('Modal Component', () => {
                 // Layout and styling
                 expect(screen.getByRole('dialog')).toHaveClass('fixed', 'z-40', 'inset-0', 'overflow-y-auto');
 
-                const panel = document.querySelector('.fixed.bg-white.dark\\:bg-dark-bg');
-                const actionsContainer = document.querySelector('.bg-gray-50.p-2.dark\\:bg-\\[\\#31363d\\]');
+                const panel = document.querySelector(String.raw`.fixed.bg-white.dark\:bg-dark-bg`);
+                const actionsContainer = document.querySelector(String.raw`.bg-gray-50.p-2.dark\:bg-\[\#31363d\]`);
                 expect(document.querySelector('.fixed.inset-0.bg-black.opacity-30')).toBeInTheDocument();
                 expect(panel).toBeInTheDocument();
                 expect(panel).toHaveClass('max-w-[calc(100%-16px)]', 'mx-auto', 'rounded', 'shadow-md', 'border');
@@ -74,8 +74,8 @@ describe('Modal Component', () => {
                 expect(actionsContainer).toHaveClass('flex', 'gap-2', 'justify-end', 'mt-4');
 
                 // Dark mode classes
-                expect(document.querySelector('.dark\\:bg-dark-bg')).toBeInTheDocument();
-                expect(document.querySelector('.dark\\:bg-\\[\\#31363d\\]')).toBeInTheDocument();
+                expect(document.querySelector(String.raw`.dark\:bg-dark-bg`)).toBeInTheDocument();
+                expect(document.querySelector(String.raw`.dark\:bg-\[\#31363d\]`)).toBeInTheDocument();
             });
         });
 

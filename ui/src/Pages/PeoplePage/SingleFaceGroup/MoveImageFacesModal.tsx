@@ -1,26 +1,22 @@
 import { gql, useLazyQuery, useMutation } from '@apollo/client'
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState, Dispatch, SetStateAction } from 'react'
 import { useNavigate } from 'react-router'
 import SelectFaceGroupTable from './SelectFaceGroupTable'
 import SelectImageFacesTable from './SelectImageFacesTable'
 import { MY_FACES_QUERY } from '../PeoplePage'
+import { SINGLE_FACE_GROUP } from './singleFaceGroupQuery'
 import {
-  singleFaceGroup_faceGroup,
-  singleFaceGroup_faceGroup_imageFaces,
-} from './__generated__/singleFaceGroup'
-import {
-  myFaces,
-  myFacesVariables,
-  myFaces_myFaceGroups,
-  myFaces_myFaceGroups_imageFaces,
-} from '../__generated__/myFaces'
+  MyFacesQuery,
+  MyFacesQueryVariables
+} from '../__generated__/PeoplePage'
 import { isNil } from '../../../helpers/utils'
 import {
-  moveImageFaces,
-  moveImageFacesVariables,
-} from './__generated__/moveImageFaces'
+  MoveImageFacesMutation,
+  MoveImageFacesMutationVariables,
+} from './__generated__/MoveImageFacesModal'
 import { useTranslation } from 'react-i18next'
 import Modal, { ModalAction } from '../../../primitives/Modal'
+import { SingleFaceGroupQuery } from './__generated__/singleFaceGroupQuery'
 
 const MOVE_IMAGE_FACES_MUTATION = gql`
   mutation moveImageFaces($faceIDs: [ID!]!, $destFaceGroupID: ID!) {
@@ -29,22 +25,24 @@ const MOVE_IMAGE_FACES_MUTATION = gql`
       destinationFaceGroupID: $destFaceGroupID
     ) {
       id
-      imageFaces {
-        id
-      }
     }
   }
 `
 
 type MoveImageFacesModalProps = {
   open: boolean
-  setOpen: React.Dispatch<React.SetStateAction<boolean>>
-  faceGroup: singleFaceGroup_faceGroup
+  setOpen: Dispatch<SetStateAction<boolean>>
+  faceGroup: SingleFaceGroupQuery['faceGroup']
   preselectedImageFaces?: (
-    | singleFaceGroup_faceGroup_imageFaces
-    | myFaces_myFaceGroups_imageFaces
+    | SingleFaceGroupQuery['faceGroup']['imageFaces'][0]
+    | MyFacesQuery['myFaceGroups'][0]['imageFaces'][0]
   )[]
 }
+
+const FACE_GROUP_LIST_VARIABLES = {
+  limit: 50,
+  offset: 0,
+} as const
 
 const MoveImageFacesModal = ({
   open,
@@ -54,50 +52,52 @@ const MoveImageFacesModal = ({
 }: MoveImageFacesModalProps) => {
   const { t } = useTranslation()
 
+  const [errMessage, setErrMessage] = useState<string | null>(null)
+  const [isMoving, setIsMoving] = useState(false)
+
   const [selectedImageFaces, setSelectedImageFaces] = useState<
-    (singleFaceGroup_faceGroup_imageFaces | myFaces_myFaceGroups_imageFaces)[]
+    (SingleFaceGroupQuery['faceGroup']['imageFaces'][0] | MyFacesQuery['myFaceGroups'][0]['imageFaces'][0])[]
   >([])
   const [selectedFaceGroup, setSelectedFaceGroup] = useState<
-    myFaces_myFaceGroups | singleFaceGroup_faceGroup | null
+    MyFacesQuery['myFaceGroups'][0] | SingleFaceGroupQuery['faceGroup'] | null
   >(null)
   const [imagesSelected, setImagesSelected] = useState(false)
   const navigate = useNavigate()
 
-  const [moveImageFacesMutation] = useMutation<
-    moveImageFaces,
-    moveImageFacesVariables
+  const [moveImageFacesMutation, { error: moveError, reset: resetMoveImageFaces }] = useMutation<
+    MoveImageFacesMutation,
+    MoveImageFacesMutationVariables
   >(MOVE_IMAGE_FACES_MUTATION, {
-    refetchQueries: [
-      {
-        query: MY_FACES_QUERY,
-      },
-    ],
+    errorPolicy: 'all',
   })
 
-  const [loadFaceGroups, { data: faceGroupsData }] = useLazyQuery<
-    myFaces,
-    myFacesVariables
+  const [loadFaceGroups, { data: faceGroupsData, error: loadError }] = useLazyQuery<
+    MyFacesQuery,
+    MyFacesQueryVariables
   >(MY_FACES_QUERY)
 
   useEffect(() => {
-    if (isNil(preselectedImageFaces)) return
+    if (!open || isNil(preselectedImageFaces) || preselectedImageFaces.length === 0) return
     setSelectedImageFaces(preselectedImageFaces)
     setImagesSelected(true)
-  }, [preselectedImageFaces])
+  }, [open, preselectedImageFaces])
 
   useEffect(() => {
-    if (imagesSelected) {
-      loadFaceGroups()
+    if (open && imagesSelected) {
+      loadFaceGroups({ variables: FACE_GROUP_LIST_VARIABLES })
     }
-  }, [imagesSelected])
+  }, [open, imagesSelected, loadFaceGroups])
 
   useEffect(() => {
     if (!open) {
       setImagesSelected(false)
       setSelectedImageFaces([])
       setSelectedFaceGroup(null)
+      setErrMessage(null)
+      setIsMoving(false)
+      resetMoveImageFaces()
     }
-  }, [open])
+  }, [open, resetMoveImageFaces])
 
   if (!open) return null
 
@@ -107,15 +107,55 @@ const MoveImageFacesModal = ({
     if (isNil(selectedFaceGroup)) {
       throw new Error('Expected selectedFaceGroup not to be null')
     }
+    if (isMoving) return
+    const destinationFaceGroupId = selectedFaceGroup.id
+    setErrMessage(null)
+    setIsMoving(true)
 
     moveImageFacesMutation({
       variables: {
         faceIDs,
-        destFaceGroupID: selectedFaceGroup.id,
+        destFaceGroupID: destinationFaceGroupId,
       },
-    }).then(() => {
+      refetchQueries: ({ data, errors }) => {
+        if (!data?.moveImageFaces || (errors?.length ?? 0) > 0) return []
+
+        return [
+          {
+            query: MY_FACES_QUERY,
+            variables: FACE_GROUP_LIST_VARIABLES,
+          },
+          {
+            query: SINGLE_FACE_GROUP,
+            variables: {
+              id: destinationFaceGroupId,
+              limit: 200,
+              offset: 0,
+            },
+          },
+          {
+            query: SINGLE_FACE_GROUP,
+            variables: {
+              id: faceGroup.id,
+              limit: 200,
+              offset: 0,
+            },
+          },
+        ]
+      },
+      awaitRefetchQueries: true,
+    }).then(({ data, errors }) => {
+      if (!data?.moveImageFaces || (errors?.length ?? 0) > 0) return
       setOpen(false)
-      navigate(`/people/${selectedFaceGroup.id}`)
+      navigate(`/people/${destinationFaceGroupId}`)
+    }).catch((e) => {
+      setErrMessage(
+        e instanceof Error && e.message.trim().length > 0
+          ? e.message
+          : t('people_page.modal.move_image_faces.error.network', 'Network error while moving faces')
+      )
+    }).finally(() => {
+      setIsMoving(false)
     })
   }
 
@@ -125,7 +165,7 @@ const MoveImageFacesModal = ({
   if (imagesSelected) {
     if (faceGroupsData && faceGroup) {
       const filteredFaceGroups = faceGroupsData.myFaceGroups.filter(
-        x => x.id != faceGroup.id
+        x => x.id !== faceGroup.id
       )
       table = (
         <SelectFaceGroupTable
@@ -137,6 +177,29 @@ const MoveImageFacesModal = ({
           selectedFaceGroup={selectedFaceGroup}
           setSelectedFaceGroup={setSelectedFaceGroup}
         />
+      )
+    } else if (loadError) {
+      table = (
+        <div className="space-y-2 text-sm">
+          <div
+            role="alert"
+            className="mb-2 rounded border border-red-300 bg-red-50 dark:bg-dark-900/50 px-3 py-2 text-sm text-red-800 dark:text-red-300"
+          >
+            {t(
+              'people_page.modal.move_image_faces.destination_face_group_table.load_error',
+              'Failed to load face groups'
+            )}
+            <div className="mt-2">
+              <button
+                type="button"
+                className="underline"
+                onClick={() => loadFaceGroups({ variables: FACE_GROUP_LIST_VARIABLES })}
+              >
+                {t('general.action.retry', 'Retry')}
+              </button>
+            </div>
+          </div>
+        </div>
       )
     } else {
       table = <div>{t('general.loading.default', 'Loading...')}</div>
@@ -155,6 +218,13 @@ const MoveImageFacesModal = ({
     )
   }
 
+  const inlineError =
+    errMessage ??
+    moveError?.message ??
+    undefined
+
+  const handleClose = () => { if (!isMoving) setOpen(false) }
+
   let positiveButton: ModalAction
   if (imagesSelected) {
     positiveButton = {
@@ -163,8 +233,12 @@ const MoveImageFacesModal = ({
         'people_page.modal.move_image_faces.destination_face_group_table.move_action',
         'Move image faces'
       ),
-      onClick: () => moveImageFaces(),
+      onClick: () => {
+        if (isNil(selectedFaceGroup)) return
+        moveImageFaces()
+      },
       variant: 'positive',
+      disabled: isNil(selectedFaceGroup) || isMoving,
     }
   } else {
     positiveButton = {
@@ -173,8 +247,12 @@ const MoveImageFacesModal = ({
         'people_page.modal.move_image_faces.image_select_table.next_action',
         'Next'
       ),
-      onClick: () => setImagesSelected(true),
+      onClick: () => {
+        if (selectedImageFaces.length === 0) return
+        setImagesSelected(true)
+      },
       variant: 'positive',
+      disabled: selectedImageFaces.length === 0,
     }
   }
 
@@ -185,17 +263,23 @@ const MoveImageFacesModal = ({
         'people_page.modal.move_image_faces.description',
         'Move selected images of this face group to another face group'
       )}
-      onClose={() => setOpen(false)}
+      onClose={handleClose}
       open={open}
       actions={[
         {
           key: 'cancel',
           label: t('general.action.cancel', 'Cancel'),
-          onClick: () => setOpen(false),
+          onClick: handleClose,
+          disabled: isMoving,
         },
         positiveButton,
       ]}
     >
+      {inlineError && (
+        <div role="alert" className="mb-2 rounded border border-red-300 bg-red-50 dark:bg-dark-900/50 px-3 py-2 text-sm text-red-800 dark:text-red-300">
+          {inlineError}
+        </div>
+      )}
       {table}
     </Modal>
   )

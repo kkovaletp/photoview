@@ -1,4 +1,4 @@
-import React, { useContext } from 'react'
+import { Dispatch, useContext } from 'react'
 import styled from 'styled-components'
 import { MediaThumbnail, MediaPlaceholder } from './MediaThumbnail'
 import PresentView from './presentView/PresentView'
@@ -13,7 +13,6 @@ import {
 } from './photoGalleryMutations'
 import MediaSidebar from '../sidebar/MediaSidebar/MediaSidebar'
 import { SidebarContext } from '../sidebar/Sidebar'
-import { gql } from '@apollo/client'
 
 const Gallery = styled.div`
   display: flex;
@@ -34,33 +33,13 @@ export const PhotoFiller = styled.div`
   grow: 999999;
 `
 
-export const MEDIA_GALLERY_FRAGMENT = gql`
-  fragment MediaGalleryFields on Media {
-    id
-    type
-    blurhash
-    thumbnail {
-      url
-      width
-      height
-    }
-    highRes {
-      url
-    }
-    videoWeb {
-      url
-    }
-    favorite
-  }
-`
-
 type MediaGalleryProps = {
   loading: boolean
   mediaState: MediaGalleryState
-  dispatchMedia: React.Dispatch<PhotoGalleryAction>
+  dispatchMedia: Dispatch<PhotoGalleryAction>
 }
 
-const MediaGallery = ({ mediaState, dispatchMedia }: MediaGalleryProps) => {
+const MediaGallery = ({ loading, mediaState, dispatchMedia }: MediaGalleryProps) => {
   const [markFavorite] = useMarkFavoriteMutation()
 
   const { media, activeIndex, presenting } = mediaState
@@ -68,9 +47,9 @@ const MediaGallery = ({ mediaState, dispatchMedia }: MediaGalleryProps) => {
   const { updateSidebar } = useContext(SidebarContext)
 
   let mediaElements = []
-  if (media) {
+  if (media.length > 0) {
     mediaElements = media.map((media, index) => {
-      const active = activeIndex == index
+      const active = activeIndex === index
 
       return (
         <MediaThumbnail
@@ -88,6 +67,8 @@ const MediaGallery = ({ mediaState, dispatchMedia }: MediaGalleryProps) => {
             toggleFavoriteAction({
               media,
               markFavorite,
+            }).catch(err => {
+              console.error('Failed to toggle favorite: ', err)
             })
           }}
           clickPresent={() => {
@@ -96,7 +77,7 @@ const MediaGallery = ({ mediaState, dispatchMedia }: MediaGalleryProps) => {
         />
       )
     })
-  } else {
+  } else if (loading) {
     for (let i = 0; i < 6; i++) {
       mediaElements.push(<MediaPlaceholder key={i} />)
     }

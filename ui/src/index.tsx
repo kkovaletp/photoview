@@ -6,10 +6,10 @@ import { BrowserRouter as Router } from 'react-router'
 import { setupLocalization } from './localization'
 import { updateTheme } from './theme'
 import * as serviceWorkerRegistration from './serviceWorkerRegistration'
-
 import './index.css'
 import { SidebarProvider } from './components/sidebar/Sidebar'
 import { MessageProvider } from './components/messages/MessageState'
+import ReloadRequiredBoundary from './components/ReloadRequiredBoundary'
 
 updateTheme()
 setupLocalization()
@@ -19,11 +19,13 @@ const Main = () => (
     <Router basename={import.meta.env.BASE_URL}>
       <MessageProvider>
         <SidebarProvider>
-          <App />
+          <ReloadRequiredBoundary>
+            <App />
+          </ReloadRequiredBoundary>
         </SidebarProvider>
       </MessageProvider>
-    </Router >
-  </ApolloProvider >
+    </Router>
+  </ApolloProvider>
 )
 
 const root = createRoot(document.getElementById('root')!)

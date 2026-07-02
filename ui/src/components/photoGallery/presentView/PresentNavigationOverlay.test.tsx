@@ -1,4 +1,3 @@
-import React from 'react'
 import PresentNavigationOverlay from './PresentNavigationOverlay'
 import { fireEvent, render, screen, act } from '@testing-library/react'
 

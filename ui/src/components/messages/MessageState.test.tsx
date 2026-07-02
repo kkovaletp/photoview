@@ -1,3 +1,4 @@
+import { ReactNode } from 'react'
 import { renderHook, act } from '@testing-library/react'
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest'
 import { useMessageState, MessageProvider } from './MessageState'
@@ -13,7 +14,7 @@ describe('MessageState', () => {
             vi.useFakeTimers({
                 toFake: ['setTimeout', 'setInterval', 'clearTimeout', 'clearInterval']
             })
-            clearIntervalSpy = vi.spyOn(window, 'clearInterval')
+            clearIntervalSpy = vi.spyOn(globalThis, 'clearInterval')
         } catch (error) {
             Date.now = originalDateNow
             throw error
@@ -29,7 +30,7 @@ describe('MessageState', () => {
         }
     })
 
-    const wrapper = ({ children }: { children: React.ReactNode }) => (
+    const wrapper = ({ children }: { children: ReactNode }) => (
         <MessageProvider>{children}</MessageProvider>
     )
 

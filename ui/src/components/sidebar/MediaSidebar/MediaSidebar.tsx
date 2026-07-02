@@ -11,25 +11,20 @@ import { SidebarContext } from '../Sidebar'
 import {
   ProtectedImage,
   ProtectedVideo,
-  ProtectedVideoProps_Media,
+  ProtectedVideoPropsMedia,
 } from '../../photoGallery/ProtectedMedia'
 import { SidebarPhotoCover } from '../AlbumCovers'
 import { SidebarPhotoShare } from '../Sharing'
 import SidebarMediaDownload from '../SidebarDownloadMedia'
 import SidebarHeader from '../SidebarHeader'
-import { sidebarDownloadQuery_media_downloads } from '../__generated__/sidebarDownloadQuery'
+import { SidebarDownloadQueryQuery } from '../__generated__/SidebarDownloadMedia'
 import ExifDetails from './MediaSidebarExif'
 import MediaSidebarPeople from './MediaSidebarPeople'
 import MediaSidebarMap from './MediaSidebarMap'
 import {
-  sidebarMediaQuery,
-  sidebarMediaQueryVariables,
-  sidebarMediaQuery_media_album_path,
-  sidebarMediaQuery_media_exif,
-  sidebarMediaQuery_media_faces,
-  sidebarMediaQuery_media_thumbnail,
-  sidebarMediaQuery_media_videoMetadata,
-} from './__generated__/sidebarMediaQuery'
+  SidebarMediaQueryQuery,
+  SidebarMediaQueryQueryVariables
+} from './__generated__/MediaSidebar'
 import { BreadcrumbList } from '../../album/AlbumTitle'
 
 export const SIDEBAR_MEDIA_QUERY = gql`
@@ -134,7 +129,7 @@ const PreviewVideo = styled(ProtectedVideo)`
   left: 0;
 `
 
-interface PreviewMediaPropsMedia extends ProtectedVideoProps_Media {
+interface PreviewMediaPropsMedia extends ProtectedVideoPropsMedia {
   type: MediaType
 }
 
@@ -240,32 +235,32 @@ const SidebarContent = ({ media, hidePreview }: SidebarContentProps) => {
 }
 
 export interface MediaSidebarMedia {
-  __typename: 'Media'
+  __typename?: 'Media'
   id: string
   title?: string
   type: MediaType
   highRes?: null | {
-    __typename: 'MediaURL'
+    __typename?: 'MediaURL'
     url: string
     width?: number
     height?: number
   }
-  thumbnail?: sidebarMediaQuery_media_thumbnail | null
+  thumbnail?: SidebarMediaQueryQuery['media']['thumbnail'] | null
   videoWeb?: null | {
-    __typename: 'MediaURL'
+    __typename?: 'MediaURL'
     url: string
     width?: number
     height?: number
   }
-  videoMetadata?: sidebarMediaQuery_media_videoMetadata | null
-  exif?: sidebarMediaQuery_media_exif | null
-  faces?: sidebarMediaQuery_media_faces[]
-  downloads?: sidebarDownloadQuery_media_downloads[]
+  videoMetadata?: SidebarMediaQueryQuery['media']['videoMetadata'] | null
+  exif?: SidebarMediaQueryQuery['media']['exif'] | null
+  faces?: SidebarMediaQueryQuery['media']['faces']
+  downloads?: SidebarDownloadQueryQuery['media']['downloads']
   album?: {
-    __typename: 'Album'
+    __typename?: 'Album'
     id: string
     title: string
-    path?: sidebarMediaQuery_media_album_path[]
+    path?: SidebarMediaQueryQuery['media']['album']['path']
   }
 }
 
@@ -276,24 +271,25 @@ type MediaSidebarType = {
 
 const MediaSidebar = ({ media, hidePreview }: MediaSidebarType) => {
   const { t } = useTranslation()
+  const token = authToken()
   const [loadMedia, { loading, error, data }] = useLazyQuery<
-    sidebarMediaQuery,
-    sidebarMediaQueryVariables
+    SidebarMediaQueryQuery,
+    SidebarMediaQueryQueryVariables
   >(SIDEBAR_MEDIA_QUERY)
 
   useEffect(() => {
-    if (media != null && authToken()) {
+    if (media != null && token) {
       loadMedia({
         variables: {
           id: media.id,
         },
       })
     }
-  }, [media, loadMedia])
+  }, [media, media?.id, token, loadMedia])
 
   if (!media) return null
 
-  if (!authToken()) {
+  if (!token) {
     return <SidebarContent media={media} hidePreview={hidePreview} />
   }
 

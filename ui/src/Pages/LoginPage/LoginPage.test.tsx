@@ -60,7 +60,7 @@ describe('LoginPage', () => {
     test('redirects to root when auth token exists', async () => {
       authToken.mockImplementation(() => 'mock-token')
 
-      await renderWithProviders(<LoginPage />, {
+      renderWithProviders(<LoginPage />, {
         mocks: [mockInitialSetupGraphql(false)],
         initialEntries: ['/login'],
       })
@@ -71,7 +71,7 @@ describe('LoginPage', () => {
     })
 
     test('redirects to initial setup when initialSetup is true', async () => {
-      await renderWithProviders(<LoginPage />, {
+      renderWithProviders(<LoginPage />, {
         mocks: [mockInitialSetupGraphql(true)],
         initialEntries: ['/login'],
       })
@@ -84,7 +84,7 @@ describe('LoginPage', () => {
 
   describe('Form Rendering', () => {
     test('renders login form', async () => {
-      await renderWithProviders(<LoginPage />, {
+      renderWithProviders(<LoginPage />, {
         mocks: [mockInitialSetupGraphql(false)],
         initialEntries: ['/login'],
       })
@@ -122,7 +122,7 @@ describe('LoginPage', () => {
         },
       }
 
-      await renderWithProviders(<LoginPage />, {
+      renderWithProviders(<LoginPage />, {
         mocks: [mockInitialSetupGraphql(false), authMock],
         initialEntries: ['/login'],
       })
@@ -163,7 +163,7 @@ describe('LoginPage', () => {
         },
       }
 
-      await renderWithProviders(<LoginPage />, {
+      renderWithProviders(<LoginPage />, {
         mocks: [mockInitialSetupGraphql(false), authMock],
         initialEntries: ['/login'],
       })
@@ -202,7 +202,7 @@ describe('LoginPage', () => {
         .spyOn(console, 'error')
         .mockImplementation(() => { })
 
-      await renderWithProviders(<LoginPage />, {
+      renderWithProviders(<LoginPage />, {
         mocks: [mockInitialSetupGraphql(false), authMock],
         initialEntries: ['/login'],
       })
@@ -255,7 +255,7 @@ describe('LoginPage', () => {
         delay: 100, // Add delay to observe loading state
       }
 
-      await renderWithProviders(<LoginPage />, {
+      renderWithProviders(<LoginPage />, {
         mocks: [mockInitialSetupGraphql(false), authMock],
         initialEntries: ['/login'],
       })
@@ -283,7 +283,7 @@ describe('LoginPage', () => {
     })
 
     test('form validation - required username field', async () => {
-      await renderWithProviders(<LoginPage />, {
+      renderWithProviders(<LoginPage />, {
         mocks: [mockInitialSetupGraphql(false)],
         initialEntries: ['/login'],
       })
@@ -341,7 +341,7 @@ describe('LoginPage', () => {
         },
       }
 
-      await renderWithProviders(<LoginPage />, {
+      renderWithProviders(<LoginPage />, {
         mocks: [mockInitialSetupGraphql(false), failedAuthMock, successAuthMock],
         initialEntries: ['/login'],
       })
@@ -375,7 +375,7 @@ describe('LoginPage', () => {
     })
 
     test('message box is hidden when no error exists', async () => {
-      await renderWithProviders(<LoginPage />, {
+      renderWithProviders(<LoginPage />, {
         mocks: [mockInitialSetupGraphql(false)],
         initialEntries: ['/login'],
       })

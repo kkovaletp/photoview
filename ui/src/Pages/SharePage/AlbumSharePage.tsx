@@ -1,90 +1,30 @@
-import React from 'react'
 import Layout from '../../components/layout/Layout'
-import AlbumGallery from '../../components/albumGallery/AlbumGallery'
 import styled from 'styled-components'
 import { gql, useQuery } from '@apollo/client'
 import { useTranslation } from 'react-i18next'
 import useURLParameters from '../../hooks/useURLParameters'
 import useOrderingParams from '../../hooks/useOrderingParams'
-import { shareAlbumQuery } from './__generated__/shareAlbumQuery'
+import { ShareAlbumQueryQuery } from './__generated__/AlbumSharePage'
+import AlbumGallery, { ALBUM_GALLERY_FRAGMENT } from '../../components/albumGallery/AlbumGallery'
+import { MEDIA_GALLERY_FRAGMENT } from '../../components/photoGallery/fragments'
 import useScrollPagination from '../../hooks/useScrollPagination'
 import PaginateLoader from '../../components/PaginateLoader'
 
 export const SHARE_ALBUM_QUERY = gql`
+  ${MEDIA_GALLERY_FRAGMENT}
+  ${ALBUM_GALLERY_FRAGMENT}
   query shareAlbumQuery(
     $id: ID!
     $token: String!
     $password: String
-    $mediaOrderBy: String
-    $mediaOrderDirection: OrderDirection
-    $limit: Int
-    $offset: Int
+    $limit: Int!
+    $offset: Int!
+    $mediaOrderBy: String!
+    $orderDirection: OrderDirection!
+    $onlyFavorites: Boolean
   ) {
     album(id: $id, tokenCredentials: { token: $token, password: $password }) {
-      id
-      title
-      subAlbums(order: { order_by: "title" }) {
-        id
-        title
-        thumbnail {
-          id
-          thumbnail {
-            url
-          }
-        }
-      }
-      media(
-        paginate: { limit: $limit, offset: $offset }
-        order: {
-          order_by: $mediaOrderBy
-          order_direction: $mediaOrderDirection
-        }
-      ) {
-        id
-        title
-        type
-        blurhash
-        thumbnail {
-          url
-          width
-          height
-        }
-        downloads {
-          title
-          mediaUrl {
-            url
-            width
-            height
-            fileSize
-          }
-        }
-        highRes {
-          url
-          width
-          height
-        }
-        videoWeb {
-          url
-        }
-        exif {
-          id
-          description
-          camera
-          maker
-          lens
-          dateShot
-          exposure
-          aperture
-          iso
-          focalLength
-          flash
-          exposureProgram
-          coordinates {
-            latitude
-            longitude
-          }
-        }
-      }
+      ...AlbumGalleryFields
     }
   }
 `
@@ -105,7 +45,7 @@ const AlbumSharePage = ({ albumID, token, password }: AlbumSharePageProps) => {
   const urlParams = useURLParameters()
   const orderParams = useOrderingParams(urlParams)
 
-  const { data, error, loading, fetchMore } = useQuery<shareAlbumQuery>(
+  const { data, error, loading, fetchMore } = useQuery<ShareAlbumQueryQuery>(
     SHARE_ALBUM_QUERY,
     {
       variables: {
@@ -115,17 +55,19 @@ const AlbumSharePage = ({ albumID, token, password }: AlbumSharePageProps) => {
         limit: 200,
         offset: 0,
         mediaOrderBy: orderParams.orderBy,
-        mediaOrderDirection: orderParams.orderDirection,
+        orderDirection: orderParams.orderDirection,
+        onlyFavorites: false,
       },
     }
   )
 
-  const { containerElem, finished: finishedLoadingMore } =
-    useScrollPagination<shareAlbumQuery>({
+  const { containerElem, loadingMore } =
+    useScrollPagination<ShareAlbumQueryQuery>({
       loading,
       fetchMore,
       data,
       getItems: data => data.album.media,
+      pageSize: 200,
     })
 
   if (error) {
@@ -150,7 +92,7 @@ const AlbumSharePage = ({ albumID, token, password }: AlbumSharePageProps) => {
           ordering={orderParams}
         />
         <PaginateLoader
-          active={!finishedLoadingMore && !loading}
+          active={loadingMore}
           text={t('general.loading.paginate.media', 'Loading more media')}
         />
       </Layout>

@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Link } from 'react-router'
 import { ProtectedImage } from '../photoGallery/ProtectedMedia'
-import { albumQuery_album_subAlbums } from '../../Pages/AlbumPage/__generated__/albumQuery'
+import { AlbumQueryQuery } from '../../Pages/AlbumPage/__generated__/AlbumPage'
 
 interface AlbumBoxImageProps {
   src?: string
@@ -38,7 +38,7 @@ const AlbumBoxImage = ({ src, ...props }: AlbumBoxImageProps) => {
 }
 
 type AlbumBoxProps = {
-  album?: albumQuery_album_subAlbums
+  album?: AlbumQueryQuery['album']['subAlbums'][0]
   customLink?: string
 }
 

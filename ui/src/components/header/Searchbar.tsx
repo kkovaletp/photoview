@@ -1,15 +1,11 @@
-import React, { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect, ReactNode, ChangeEvent, Dispatch, SetStateAction } from 'react'
 import styled from 'styled-components'
 import { useLazyQuery, gql } from '@apollo/client'
 import { debounce, DebouncedFn } from '../../helpers/utils'
 import { ProtectedImage } from '../photoGallery/ProtectedMedia'
 import { NavLink, useNavigate, useLocation } from 'react-router'
 import { useTranslation } from 'react-i18next'
-import {
-  searchQuery,
-  searchQuery_search_albums,
-  searchQuery_search_media,
-} from './__generated__/searchQuery'
+import { SearchQueryQuery } from './__generated__/Searchbar'
 import { clsx } from 'clsx'
 
 const SEARCH_QUERY = gql`
@@ -45,7 +41,7 @@ const SearchWrapper = styled.div.attrs({
 
 const SearchBar = () => {
   const { t } = useTranslation()
-  const [fetchSearches, fetchResult] = useLazyQuery<searchQuery>(SEARCH_QUERY)
+  const [fetchSearches, fetchResult] = useLazyQuery<SearchQueryQuery>(SEARCH_QUERY)
   const [query, setQuery] = useState('')
   const [fetched, setFetched] = useState(false)
   const [expanded, setExpanded] = useState(false)
@@ -66,13 +62,11 @@ const SearchBar = () => {
     return () => {
       debouncedFetch.current?.cancel()
     }
-  }, [])
+  }, [fetchSearches])
 
-  const fetchEvent = (e: React.ChangeEvent<HTMLInputElement>) => {
-    e.persist()
-
+  const fetchEvent = (e: ChangeEvent<HTMLInputElement>) => {
     setQuery(e.target.value)
-    if (e.target.value.trim() != '' && debouncedFetch.current) {
+    if (e.target.value.trim() !== '' && debouncedFetch.current) {
       debouncedFetch.current(e.target.value.trim())
     } else {
       setFetched(false)
@@ -130,13 +124,13 @@ const SearchBar = () => {
     const keydownEvent = (event: KeyboardEvent) => {
       if (!expanded) return
 
-      if (event.key == 'ArrowDown') {
+      if (event.key === 'ArrowDown') {
         event.preventDefault()
         setSelectedItem(i => (i === null ? 0 : Math.min(totalItems - 1, i + 1)))
-      } else if (event.key == 'ArrowUp') {
+      } else if (event.key === 'ArrowUp') {
         event.preventDefault()
         setSelectedItem(i => (i === null ? 0 : Math.max(0, i - 1)))
-      } else if (event.key == 'Escape') {
+      } else if (event.key === 'Escape') {
         // setExpanded(false)
         inputEl.current?.blur()
       }
@@ -147,7 +141,7 @@ const SearchBar = () => {
     return () => {
       document.removeEventListener('keydown', keydownEvent)
     }
-  }, [searchData])
+  }, [searchData, expanded, albums.length, media.length])
 
   let results = null
   if (query.trim().length > 0 && fetched) {
@@ -167,13 +161,14 @@ const SearchBar = () => {
   return (
     <SearchWrapper>
       <input
+        role="combobox"
         ref={inputEl}
         autoComplete="off"
         aria-controls="search-results"
         aria-haspopup="listbox"
         aria-autocomplete="list"
         aria-activedescendant={
-          selectedItemId ? `search-item-${selectedItemId}` : ''
+          selectedItemId === null ? undefined : `search-item-${selectedItemId}`
         }
         aria-expanded={expanded}
         className="w-full py-2 px-3 z-10 relative rounded-md bg-gray-50 focus:bg-white border border-gray-50 focus:border-blue-400 outline-none focus:ring-2 focus:ring-blue-400 focus:ring-opacity-50 dark:bg-dark-bg2 dark:border-dark-bg2 dark:focus:bg-[#2a2f35]"
@@ -193,11 +188,11 @@ const ResultTitle = styled.h1.attrs({
 })``
 
 type SearchResultsProps = {
-  albums: searchQuery_search_albums[]
-  media: searchQuery_search_media[]
+  albums: SearchQueryQuery['search']['albums']
+  media: SearchQueryQuery['search']['media']
   loading: boolean
   selectedItem: number | null
-  setSelectedItem: React.Dispatch<React.SetStateAction<number | null>>
+  setSelectedItem: Dispatch<SetStateAction<number | null>>
   query: string
   expanded: boolean
 }
@@ -218,7 +213,7 @@ const SearchResults = ({
       key={album.id}
       query={query}
       album={album}
-      selected={selectedItem == i}
+      selected={selectedItem === i}
       setSelected={() => setSelectedItem(i)}
     />
   ))
@@ -228,22 +223,24 @@ const SearchResults = ({
       key={media.id}
       query={query}
       media={media}
-      selected={selectedItem == i + albumElements.length}
+      selected={selectedItem === i + albumElements.length}
       setSelected={() => setSelectedItem(i + albumElements.length)}
     />
   ))
 
   let message = null
   if (loading) message = t('header.search.loading', 'Loading results...')
-  else if (media.length == 0 && albums.length == 0)
+  else if (media.length === 0 && albums.length === 0)
     message = t('header.search.no_results', 'No results found')
 
   if (message) message = <div className="mt-8 text-center">{message}</div>
 
+  //NOSONAR: Custom ARIA combobox/listbox pattern is required here; native <select>/<datalist> cannot replicate the UX
   return (
     <div
       id="search-results"
       role="listbox"
+      aria-label={t('header.search.results_label', 'Search results')}
       className={clsx(
         'absolute bg-white dark:bg-dark-bg left-0 right-0 top-18 overflow-y-auto h-[calc(100vh-152px)] border dark:border-dark-border px-4 z-0',
         'lg:top-10 lg:shadow-md lg:rounded-b lg:max-h-140',
@@ -279,8 +276,8 @@ const SearchResults = ({
 type SearchRowProps = {
   id: string
   link: string
-  preview: React.ReactNode
-  label: React.ReactNode
+  preview: ReactNode
+  label: ReactNode
   selected: boolean
   setSelected(): void
 }
@@ -298,7 +295,7 @@ const SearchRow = ({
 
   useEffect(() => {
     const keydownEvent = (event: KeyboardEvent) => {
-      if (event.key == 'Enter') navigate(link)
+      if (event.key === 'Enter' && selected) navigate(link)
     }
 
     document.addEventListener('keydown', keydownEvent)
@@ -306,7 +303,7 @@ const SearchRow = ({
     return () => {
       document.removeEventListener('keydown', keydownEvent)
     }
-  })
+  }, [selected, link, navigate])
 
   if (selected) {
     rowEl.current?.scrollIntoView({
@@ -314,6 +311,7 @@ const SearchRow = ({
     })
   }
 
+  //NOSONAR: Using role="option" within custom listbox; interactions provided via mouseover/focus
   return (
     <li
       id={`search-item-${id}`}
@@ -321,6 +319,8 @@ const SearchRow = ({
       role="option"
       aria-selected={selected}
       onMouseOver={() => setSelected()}
+      onFocus={() => setSelected()}
+      tabIndex={0}
       className={clsx('rounded p-1 mt-1', {
         'bg-gray-100 dark:bg-dark-bg2': selected,
       })}
@@ -335,7 +335,7 @@ const SearchRow = ({
 
 type PhotoRowArgs = {
   query: string
-  media: searchQuery_search_media
+  media: SearchQueryQuery['search']['media'][0]
   selected: boolean
   setSelected(): void
 }
@@ -366,7 +366,7 @@ const PhotoRow = (props: PhotoRowArgs) => {
 
 type AlbumRowArgs = {
   query: string
-  album: searchQuery_search_albums
+  album: SearchQueryQuery['search']['albums'][0]
   selected: boolean
   setSelected(): void
 }
@@ -398,7 +398,7 @@ const AlbumRow = (props: AlbumRowArgs) => {
 const searchHighlighted = (query: string, text: string) => {
   const i = text.toLowerCase().indexOf(query.toLowerCase())
 
-  if (i == -1) {
+  if (i === -1) {
     return text
   }
 

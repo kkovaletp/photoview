@@ -26,11 +26,14 @@ export default defineConfig(async ({ command, mode }) => {
         strategies: 'injectManifest',
         srcDir: 'src',
         filename: 'service-worker.ts',
-        injectRegister: 'script',
         manifest: false,
+        injectRegister: null,
         injectManifest: {
-          injectionPoint: undefined
-        }
+          // mapbox-gl is intentionally excluded from the SW precache:
+          // it is too large (>2 MiB) and requires live network access for
+          // map tiles anyway. This pattern covers any future hash-renamed variant.
+          globIgnores: ['**/mapbox-gl*.js'],
+        },
       }),
       ethicalLicensePlugin(),
       // Only add codecov plugin if it's available
@@ -51,16 +54,21 @@ export default defineConfig(async ({ command, mode }) => {
       target: 'es2020', // Ensure compatibility with browsers, not older than from 2021
       logOverride: { 'this-is-undefined-in-esm': 'silent' },
     },
+    optimizeDeps: {
+      exclude: ['mapbox-gl'],
+    },
     test: {
       globals: true,
       environment: 'jsdom',
       setupFiles: './testing/setupTests.ts',
+      exclude: ['**/node_modules/**', '**/dist/**', '**/__generated__/**'],
       reporters: ['verbose', 'junit'],
       outputFile: {
         junit: './junit-report.xml',
       },
       coverage: {
         reporter: ['text', 'lcov', 'json', 'html'],
+        exclude: ['**/node_modules/**', '**/dist/**', '**/__generated__/**'],
         reportOnFailure: true,
       },
     },

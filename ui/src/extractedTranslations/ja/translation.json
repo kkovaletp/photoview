@@ -18,7 +18,60 @@
     }
   },
   "album_page": {
-    "load_error": ""
+    "load_error": "",
+    "loading": "",
+    "not_found": ""
+  },
+  "apollo_client": {
+    "notification": {
+      "graphql": {
+        "multiple": {
+          "content_other": "",
+          "header": ""
+        },
+        "single": {
+          "content": "",
+          "header": ""
+        }
+      },
+      "network": {
+        "auth": {
+          "generic": {
+            "content": "",
+            "header": ""
+          },
+          "multiple": {
+            "content_other": "",
+            "header": ""
+          },
+          "single": {
+            "content": "",
+            "header": ""
+          }
+        },
+        "retry": {
+          "generic": {
+            "content": ""
+          },
+          "header": "",
+          "multiple": {
+            "content_other": "",
+            "header": ""
+          },
+          "single": {
+            "content": ""
+          }
+        }
+      },
+      "websocket_exhausted": {
+        "content": "",
+        "header": ""
+      },
+      "websocket_restored": {
+        "content": "",
+        "header": ""
+      }
+    }
   },
   "ethical_use_license_page": {
     "load_error": "",
@@ -31,6 +84,7 @@
       "cancel": "キャンセル",
       "close": "",
       "remove": "削除",
+      "retry": "",
       "save": "保存",
       "submit": ""
     },
@@ -58,7 +112,8 @@
       "result_type": {
         "albums": "アルバム",
         "media": "メディア"
-      }
+      },
+      "results_label": ""
     }
   },
   "login_page": {
@@ -109,6 +164,9 @@
           "select_images": "写真を選択"
         },
         "description": "選択した写真をこの顔グループから削除し、新しい顔グループに移動します",
+        "error": {
+          "network": ""
+        },
         "title": "写真の顔グループを分割"
       },
       "merge_face_groups": {
@@ -116,6 +174,22 @@
         "destination_table": {
           "title": "統合先の顔グループを選択"
         },
+        "error": {
+          "network": ""
+        },
+        "face_groups_load_error": "",
+        "preselected_role": {
+          "destination": {
+            "description": "",
+            "title": ""
+          },
+          "source": {
+            "description": "",
+            "title": ""
+          }
+        },
+        "preselected_role_description": "",
+        "source_role_destination_description": "",
         "sources_description": "統合する対象の顔グループをすべて選択してください。",
         "sources_table": {
           "title": "統合する対象の顔グループを1つ以上選択:"
@@ -125,8 +199,12 @@
       "move_image_faces": {
         "description": "この顔グループの選択した写真を別の顔グループに移動します",
         "destination_face_group_table": {
+          "load_error": "",
           "move_action": "写真の顔グループを移動",
           "title": "対象の顔グループを選択"
+        },
+        "error": {
+          "network": ""
         },
         "image_select_table": {
           "next_action": "次へ",
@@ -185,6 +263,8 @@
     "scanner": {
       "description": "すべてのユーザーに対して新しく追加または更新されたメディアをスキャンします",
       "scan_all_users": "すべてのユーザーをスキャン",
+      "scanning": "",
+      "starting": "",
       "title": "スキャン"
     },
     "user_preferences": {
@@ -217,11 +297,15 @@
       },
       "confirm_delete_user": {
         "action": "{{user}} を削除",
-        "description": "<0><1></1> を削除してもよろしいですか？</0><p>この操作は元に戻せません</p>",
+        "description": "<line><bold>{{username}}</bold> を削除してもよろしいですか？</line><line>この操作は元に戻せません</line>",
         "title": "ユーザーを削除"
       },
+      "edit": {
+        "add_path_error": "",
+        "remove_path_error": ""
+      },
       "password_reset": {
-        "description": "<1>{{username}}</1> のパスワードを変更",
+        "description": "<bold>{{username}}</bold> のパスワードを変更",
         "error": "",
         "form": {
           "label": "新しいパスワード",
@@ -368,6 +452,7 @@
       "action_label": {
         "detach_image": "顔グループの分割",
         "merge_face": "顔グループの統合",
+        "more_actions": "",
         "move_face": "顔グループの移動"
       },
       "confirm_image_detach": "この写真をこの顔グループから外しますか？",
@@ -375,8 +460,10 @@
     },
     "sharing": {
       "add_share": "共有を追加",
+      "add_share_error": "",
       "copy_link": "リンクをコピー",
       "delete": "削除",
+      "delete_error": "",
       "error": "",
       "expiration_date": "",
       "more": "その他",
@@ -429,10 +516,13 @@
     }
   },
   "title": {
-    "loading_album": "アルバムを読み込み中",
     "login": "ログイン",
-    "not_found": "",
     "people": "人物",
     "settings": "設定"
+  },
+  "update_available_page": {
+    "action": "",
+    "content": "",
+    "header": ""
   }
 }

@@ -6,7 +6,7 @@ import { GraphQLError } from 'graphql'
 import { gql } from '@apollo/client'
 import UserRow from './UserRow'
 import { renderWithProviders } from '../../../helpers/testUtils'
-import { settingsUsersQuery_user } from './__generated__/settingsUsersQuery'
+import { SettingsUsersQueryQuery } from './__generated__/UsersTable'
 
 const updateUserMutation = gql`
     mutation updateUser($id: ID!, $username: String, $admin: Boolean) {
@@ -36,7 +36,7 @@ const scanUserMutation = gql`
 `
 
 describe('UserRow', () => {
-    const mockUser: settingsUsersQuery_user = {
+    const mockUser: SettingsUsersQueryQuery['user'][0] = {
         __typename: 'User',
         id: '1',
         username: 'testuser',
@@ -110,7 +110,7 @@ describe('UserRow', () => {
         })
 
         test('displays admin user with checked checkbox', () => {
-            const adminUser: settingsUsersQuery_user = {
+            const adminUser: SettingsUsersQueryQuery['user'][0] = {
                 ...mockUser,
                 admin: true,
             }
@@ -130,7 +130,7 @@ describe('UserRow', () => {
         })
 
         test('displays multiple root album paths', () => {
-            const userWithMultipleAlbums: settingsUsersQuery_user = {
+            const userWithMultipleAlbums: SettingsUsersQueryQuery['user'][0] = {
                 ...mockUser,
                 rootAlbums: [
                     {

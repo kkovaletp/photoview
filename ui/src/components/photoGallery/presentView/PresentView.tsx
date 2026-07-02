@@ -1,9 +1,9 @@
-import React, { useEffect } from 'react'
+import { Dispatch, useEffect } from 'react'
 import styled, { createGlobalStyle } from 'styled-components'
 import PresentNavigationOverlay from './PresentNavigationOverlay'
 import PresentMedia from './PresentMedia'
 import { closePresentModeAction, GalleryAction } from '../mediaGalleryReducer'
-import { MediaGalleryFields } from '../__generated__/MediaGalleryFields'
+import { MediaGalleryFieldsFragment } from '../__generated__/fragments'
 
 const StyledContainer = styled.div`
   position: fixed;
@@ -25,8 +25,8 @@ const PreventScroll = createGlobalStyle`
 type PresentViewProps = {
   className?: string
   imageLoaded?(): void
-  activeMedia: MediaGalleryFields
-  dispatchMedia: React.Dispatch<GalleryAction>
+  activeMedia: MediaGalleryFieldsFragment
+  dispatchMedia: Dispatch<GalleryAction>
   disableSaveCloseInHistory?: boolean
 }
 
@@ -39,17 +39,17 @@ const PresentView = ({
 }: PresentViewProps) => {
   useEffect(() => {
     const keyDownEvent = (e: KeyboardEvent) => {
-      if (e.key == 'ArrowRight') {
+      if (e.key === 'ArrowRight') {
         e.stopPropagation()
         dispatchMedia({ type: 'nextImage' })
       }
 
-      if (e.key == 'ArrowLeft') {
+      if (e.key === 'ArrowLeft') {
         e.stopPropagation()
         dispatchMedia({ type: 'previousImage' })
       }
 
-      if (e.key == 'Escape') {
+      if (e.key === 'Escape') {
         e.stopPropagation()
 
         if (disableSaveCloseInHistory === true) {
@@ -65,7 +65,7 @@ const PresentView = ({
     return function cleanup() {
       document.removeEventListener('keydown', keyDownEvent)
     }
-  })
+  }, [dispatchMedia, disableSaveCloseInHistory])
 
   return (
     <StyledContainer className={className}>

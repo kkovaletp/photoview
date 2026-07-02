@@ -1,4 +1,10 @@
-import React, { forwardRef } from 'react'
+import {
+  forwardRef,
+  InputHTMLAttributes,
+  ForwardedRef,
+  KeyboardEvent,
+  ButtonHTMLAttributes
+} from 'react'
 import { useTranslation } from 'react-i18next'
 import { clsx, type ClassValue } from 'clsx'
 import ActionArrowIcon from './icons/textboxActionArrow.svg?react'
@@ -15,7 +21,7 @@ type TextFieldProps = {
   fullWidth?: boolean
   action?: () => void
   loading?: boolean
-} & Omit<React.InputHTMLAttributes<HTMLInputElement>, 'className'>
+} & Omit<InputHTMLAttributes<HTMLInputElement>, 'className'>
 
 export const TextField = forwardRef(
   (
@@ -30,7 +36,7 @@ export const TextField = forwardRef(
       loading,
       ...inputProps
     }: TextFieldProps,
-    ref: React.ForwardedRef<HTMLInputElement>
+    ref: ForwardedRef<HTMLInputElement>
   ) => {
     const disabled = !!inputProps.disabled
     sizeVariant = sizeVariant ?? 'default'
@@ -45,10 +51,10 @@ export const TextField = forwardRef(
 
     let keyUpEvent = undefined
     if (action) {
-      keyUpEvent = (event: React.KeyboardEvent<HTMLInputElement>) => {
+      keyUpEvent = (event: KeyboardEvent<HTMLInputElement>) => {
         if (inputProps.onKeyUp) inputProps.onKeyUp(event)
 
-        if (event.key == 'Enter') {
+        if (event.key === 'Enter') {
           event.preventDefault()
           action()
         }
@@ -62,7 +68,7 @@ export const TextField = forwardRef(
           'block border rounded-md focus:ring-2 focus:outline-none px-2',
           'dark:bg-dark-input-bg dark:border-dark-input-border',
           variant,
-          sizeVariant == 'big' ? 'py-2' : 'py-1',
+          sizeVariant === 'big' ? 'py-2' : 'py-1',
           { 'w-full': fullWidth },
           className
         )}
@@ -104,7 +110,7 @@ export const TextField = forwardRef(
           >
             <ActionArrowIcon
               className={clsx(
-                sizeVariant == 'big' && 'w-4 h-4 mt-1 mr-1'
+                sizeVariant === 'big' && 'w-4 h-4 mt-1 mr-1'
               )}
             />
           </button>
@@ -116,7 +122,7 @@ export const TextField = forwardRef(
     if (error) errorElm = <div className="text-red-800">{error}</div>
 
     const wrapperClasses = clsx(
-      sizeVariant == 'default' && 'text-sm',
+      sizeVariant === 'default' && 'text-sm',
       wrapperClassName
     )
 
@@ -150,13 +156,15 @@ type ButtonProps = {
 export const buttonStyles = ({ variant, background }: ButtonProps) =>
   clsx(
     'px-6 py-0.5 rounded border border-gray-200 focus:outline-none focus:border-blue-300 text-[#222] whitespace-nowrap',
+    'disabled:text-gray-500 disabled:border-gray-200 disabled:bg-gray-50 disabled:cursor-default disabled:hover:bg-gray-50',
     (!variant || variant == 'default') && 'hover:bg-gray-100',
     'dark:bg-dark-input-bg dark:border-dark-input-border dark:text-dark-input-text dark:focus:border-blue-300',
-    variant == 'negative' &&
+    'dark:disabled:text-gray-400 dark:disabled:bg-dark-input-bg dark:disabled:border-dark-input-border',
+    variant === 'negative' &&
     'text-red-600 hover:bg-red-600 hover:border-red-700 hover:text-white transition-colors focus:border-red-600 focus:hover:border-red-700 dark:text-red-400 dark:hover:bg-red-700 dark:hover:border-red-600 dark:hover:text-white',
-    variant == 'positive' &&
+    variant === 'positive' &&
     'text-green-700 hover:bg-green-700 hover:border-green-800 hover:text-white transition-colors focus:border-green-700 focus:hover:border-green-800 dark:text-green-400 dark:hover:bg-green-700 dark:hover:border-green-600 dark:hover:text-white',
-    background == 'white' ? 'bg-white' : 'bg-gray-50'
+    background === 'white' ? 'bg-white' : 'bg-gray-50'
   )
 
 type SubmitProps = ButtonProps & {
@@ -170,7 +178,7 @@ export const Submit = ({
   background,
   children,
   ...props
-}: SubmitProps & React.ButtonHTMLAttributes<HTMLInputElement>) => (
+}: SubmitProps & ButtonHTMLAttributes<HTMLInputElement>) => (
   <input
     className={tailwindClassNames(
       buttonStyles({ variant, background }),
@@ -188,7 +196,7 @@ export const Button = ({
   background,
   className,
   ...props
-}: ButtonProps & React.ButtonHTMLAttributes<HTMLButtonElement>) => (
+}: ButtonProps & ButtonHTMLAttributes<HTMLButtonElement>) => (
   <button
     className={tailwindClassNames(
       buttonStyles({ variant, background }),

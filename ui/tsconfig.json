@@ -27,6 +27,7 @@
     "src",
     "vite.config.mjs",
     "eslint.config.js",
-    "apollo.config.js"
+    "codegen.ts",
+    "i18next.config.ts"
   ]
 }

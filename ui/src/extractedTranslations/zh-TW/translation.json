@@ -18,7 +18,60 @@
     }
   },
   "album_page": {
-    "load_error": ""
+    "load_error": "",
+    "loading": "",
+    "not_found": ""
+  },
+  "apollo_client": {
+    "notification": {
+      "graphql": {
+        "multiple": {
+          "content_other": "",
+          "header": ""
+        },
+        "single": {
+          "content": "",
+          "header": ""
+        }
+      },
+      "network": {
+        "auth": {
+          "generic": {
+            "content": "",
+            "header": ""
+          },
+          "multiple": {
+            "content_other": "",
+            "header": ""
+          },
+          "single": {
+            "content": "",
+            "header": ""
+          }
+        },
+        "retry": {
+          "generic": {
+            "content": ""
+          },
+          "header": "",
+          "multiple": {
+            "content_other": "",
+            "header": ""
+          },
+          "single": {
+            "content": ""
+          }
+        }
+      },
+      "websocket_exhausted": {
+        "content": "",
+        "header": ""
+      },
+      "websocket_restored": {
+        "content": "",
+        "header": ""
+      }
+    }
   },
   "ethical_use_license_page": {
     "load_error": "",
@@ -31,6 +84,7 @@
       "cancel": "取消",
       "close": "",
       "remove": "移除",
+      "retry": "",
       "save": "儲存",
       "submit": ""
     },
@@ -58,7 +112,8 @@
       "result_type": {
         "albums": "相簿",
         "media": "媒體"
-      }
+      },
+      "results_label": ""
     }
   },
   "login_page": {
@@ -109,6 +164,9 @@
           "select_images": "選擇要移除的相片"
         },
         "description": "將選取的相片從此人臉群組中移除，並移至新的人臉群組",
+        "error": {
+          "network": ""
+        },
         "title": "移除相片中的人臉"
       },
       "merge_face_groups": {
@@ -116,6 +174,22 @@
         "destination_table": {
           "title": "選擇目標人臉"
         },
+        "error": {
+          "network": ""
+        },
+        "face_groups_load_error": "",
+        "preselected_role": {
+          "destination": {
+            "description": "",
+            "title": ""
+          },
+          "source": {
+            "description": "",
+            "title": ""
+          }
+        },
+        "preselected_role_description": "",
+        "source_role_destination_description": "",
         "sources_description": "",
         "sources_table": {
           "title": ""
@@ -125,8 +199,12 @@
       "move_image_faces": {
         "description": "將此人臉群組中選取的相片移至其他人臉群組",
         "destination_face_group_table": {
+          "load_error": "",
           "move_action": "移動相片中的人臉",
           "title": "選擇目標人臉群組"
+        },
+        "error": {
+          "network": ""
         },
         "image_select_table": {
           "next_action": "下一步",
@@ -185,6 +263,8 @@
     "scanner": {
       "description": "將會掃描所有使用者以取得新增或更新的媒體",
       "scan_all_users": "掃描所有使用者",
+      "scanning": "",
+      "starting": "",
       "title": "掃描器"
     },
     "user_preferences": {
@@ -217,11 +297,15 @@
       },
       "confirm_delete_user": {
         "action": "刪除 {{user}}",
-        "description": "<0>您確定要刪除 <1></1> 嗎？</0><p>此動作無法復原</p>",
+        "description": "<line>您確定要刪除 <bold>{{username}}</bold> 嗎？</line><line>此動作無法復原</line>",
         "title": "刪除使用者"
       },
+      "edit": {
+        "add_path_error": "",
+        "remove_path_error": ""
+      },
       "password_reset": {
-        "description": "變更 <1>{{username}}</1> 的密碼",
+        "description": "變更 <bold>{{username}}</bold> 的密碼",
         "error": "",
         "form": {
           "label": "新密碼",
@@ -368,6 +452,7 @@
       "action_label": {
         "detach_image": "移除相片",
         "merge_face": "合併人臉",
+        "more_actions": "",
         "move_face": "移動人臉"
       },
       "confirm_image_detach": "您確定要移除這張相片嗎？",
@@ -375,8 +460,10 @@
     },
     "sharing": {
       "add_share": "新增分享",
+      "add_share_error": "",
       "copy_link": "複製連結",
       "delete": "刪除",
+      "delete_error": "",
       "error": "",
       "expiration_date": "",
       "more": "更多",
@@ -429,10 +516,13 @@
     }
   },
   "title": {
-    "loading_album": "正在載入相簿",
     "login": "登入",
-    "not_found": "",
     "people": "人物",
     "settings": "設定"
+  },
+  "update_available_page": {
+    "action": "",
+    "content": "",
+    "header": ""
   }
 }

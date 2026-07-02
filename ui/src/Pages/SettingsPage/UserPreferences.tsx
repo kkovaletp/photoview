@@ -16,10 +16,10 @@ import {
   LANGUAGE_TRANSLATION_TO_LOCALE,
 } from '../../helpers/localeDisplayNames'
 import {
-  changeUserPreferences,
-  changeUserPreferencesVariables,
-} from './__generated__/changeUserPreferences'
-import { myUserPreferences } from './__generated__/myUserPreferences'
+  MyUserPreferencesQuery,
+  ChangeUserPreferencesMutation,
+  ChangeUserPreferencesMutationVariables,
+} from './__generated__/UserPreferences'
 import { TranslationFn } from '../../localization'
 import { changeTheme, getTheme } from '../../theme'
 
@@ -95,12 +95,12 @@ const UserPreferences = () => {
     setTheme(value)
   }
 
-  const { data } = useQuery<myUserPreferences>(MY_USER_PREFERENCES)
+  const { data } = useQuery<MyUserPreferencesQuery>(MY_USER_PREFERENCES)
 
   const [changePrefs, { loading: loadingPrefs, error }] = useMutation<
-    changeUserPreferences,
-    changeUserPreferencesVariables
-  >(CHANGE_USER_PREFERENCES)
+    ChangeUserPreferencesMutation,
+    ChangeUserPreferencesMutationVariables
+  >(CHANGE_USER_PREFERENCES, { errorPolicy: 'all' })
 
   const sortedLanguagePrefs = useMemo(
     () => [...languagePreferences].sort((a, b) => a.label.localeCompare(b.label)),
@@ -141,8 +141,10 @@ const UserPreferences = () => {
         setSelected={language => {
           changePrefs({
             variables: {
-              language: language as LanguageTranslation,
+              language: language,
             },
+          }).catch(error => {
+            console.error('Failed to change user preferences', error)
           })
         }}
         selected={data?.myUserPreferences.language || undefined}
