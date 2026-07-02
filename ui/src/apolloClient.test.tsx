@@ -1,5 +1,12 @@
 import { describe, it, expect, beforeEach } from 'vitest'
-import { calculateRetryDelay, formatPath, getServerErrorMessages, paginateCache } from './apolloClient'
+import {
+    calculateRetryDelay,
+    formatPath,
+    getServerErrorMessages,
+    isAuthNetworkError,
+    paginateCache,
+    isLegitimateClose
+} from './apolloClient'
 
 describe('paginateCache', () => {
     let paginateFn: ReturnType<typeof paginateCache>
@@ -449,6 +456,76 @@ describe('Pure Helper Functions', () => {
             expect(errors[0]).toEqual({ message: 'Error 1' })
             expect(errors[1]).toEqual({ message: 'Error 2' })
             expect(errors[2]).toEqual({ message: 'Error 3' })
+        })
+    })
+
+    describe('isAuthNetworkError', () => {
+        it('should return false for undefined', () => {
+            expect(isAuthNetworkError(undefined)).toBe(false)
+        })
+
+        it('should return false for a plain error without statusCode', () => {
+            const networkError = new Error('Network error')
+            expect(isAuthNetworkError(networkError)).toBe(false)
+        })
+
+        it('should return true for a 401 status code', () => {
+            const networkError = Object.assign(new Error('Unauthorized'), { statusCode: 401 })
+            expect(isAuthNetworkError(networkError)).toBe(true)
+        })
+
+        it('should return true for a 403 status code', () => {
+            const networkError = Object.assign(new Error('Forbidden'), { statusCode: 403 })
+            expect(isAuthNetworkError(networkError)).toBe(true)
+        })
+
+        it('should return false for a 500 status code', () => {
+            const networkError = Object.assign(new Error('Server error'), { statusCode: 500 })
+            expect(isAuthNetworkError(networkError)).toBe(false)
+        })
+
+        it('should return false for a 0 status code (network unreachable)', () => {
+            const networkError = Object.assign(new Error('Failed to fetch'), { statusCode: 0 })
+            expect(isAuthNetworkError(networkError)).toBe(false)
+        })
+    })
+
+    describe('isLegitimateClose', () => {
+        it('should treat a clean, normal closure (code 1000) as benign regardless of history', () => {
+            const closeEvent = { code: 1000, reason: '', wasClean: true }
+            expect(isLegitimateClose(closeEvent, false, 1)).toBe(true)
+            expect(isLegitimateClose(closeEvent, true, 3)).toBe(true)
+        })
+
+        it('should treat a single closure before ever connecting as benign', () => {
+            const closeEvent = { code: 1006, reason: '', wasClean: false }
+            expect(isLegitimateClose(closeEvent, false, 1)).toBe(true)
+            expect(isLegitimateClose(closeEvent, false, 0)).toBe(true)
+        })
+
+        it('should not treat repeated closures before ever connecting as benign', () => {
+            const closeEvent = { code: 1006, reason: '', wasClean: false }
+            expect(isLegitimateClose(closeEvent, false, 2)).toBe(false)
+        })
+
+        it('should not treat closures as benign once a connection has succeeded before', () => {
+            const closeEvent = { code: 1006, reason: '', wasClean: false }
+            expect(isLegitimateClose(closeEvent, true, 1)).toBe(false)
+        })
+
+        it('should treat a clean page-navigation closure (code 1001) as benign regardless of history', () => {
+            const closeEvent = { code: 1001, reason: '', wasClean: true }
+            expect(isLegitimateClose(closeEvent, false, 1)).toBe(true)
+            expect(isLegitimateClose(closeEvent, true, 3)).toBe(true)
+        })
+
+        it('should NOT treat a non-clean 1001 as benign (that would be a real abnormal closure, not a refresh)', () => {
+            const closeEvent = { code: 1001, reason: '', wasClean: false }
+            expect(isLegitimateClose(closeEvent, true, 2)).toBe(false)
+        })
+
+        it('should not treat non-clean closures without a code as benign', () => {
+            expect(isLegitimateClose(new Error('boom'), false, 2)).toBe(false)
         })
     })
 })

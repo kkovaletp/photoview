@@ -10,7 +10,7 @@ import {
 } from '@apollo/client'
 import { getMainDefinition } from '@apollo/client/utilities'
 import { onError } from '@apollo/client/link/error'
-
+import i18n from 'i18next'
 import urlJoin from 'url-join'
 import { authToken, clearTokenCookie } from './helpers/authentication'
 import { globalMessageHandler } from './components/messages/globalMessageHandler'
@@ -31,9 +31,8 @@ type CachedItem = Reference | {
   [key: string]: unknown
 }
 
-// Track retry state outside the client creation
-let retryCount = 0
-const MAX_RETRIES = 5
+const MAX_RETRY_DELAY = 30_000
+const MAX_RETRY_ATTEMPTS = 100
 
 const httpLink = new HttpLink({
   uri: GRAPHQL_ENDPOINT,
@@ -51,107 +50,213 @@ websocketUri.protocol = apiProtocol === 'https:' ? 'wss:' : 'ws:'
  */
 export const calculateRetryDelay = (retries: number): number => {
   const BASE_DELAY = 1000
-  const MAX_DELAY = 30000
-  const exponentialDelay = Math.min(MAX_DELAY, BASE_DELAY * Math.pow(2, retries))
+  const exponentialDelay = Math.min(MAX_RETRY_DELAY, BASE_DELAY * Math.pow(2, retries))
   const jitter = exponentialDelay * (0.5 + Math.random())
-  return Math.min(jitter, MAX_DELAY)
+  return Math.min(jitter, MAX_RETRY_DELAY)
 }
 
-const wsLink = new GraphQLWsLink(
-  createClient({
-    url: websocketUri.toString(),
-    connectionParams: () => {
-      const token = authToken()
-      // Only include authorization if token exists
-      if (token) {
-        return {
-          Authorization: `Bearer ${token}`,
-        }
+let retryAttemptCount = 0
+let hasConnectedOnce = false
+let isPageUnloading = false
+
+/**
+ * Decides whether a "closed" event is a benign/expected closure that
+ * shouldn't be surfaced as a warning:
+ * - deliberate, clean closures (code 1000) are never a problem, and
+ * - a single transient closure before the connection has ever succeeded
+ */
+export const isLegitimateClose = (
+  closeEvent: unknown,
+  hasConnectedBefore: boolean,
+  currentRetryAttemptCount: number
+): boolean => {
+  if (
+    closeEvent &&
+    typeof closeEvent === 'object' &&
+    'code' in closeEvent &&
+    ((closeEvent as CloseEvent).code === 1000 || (closeEvent as CloseEvent).code === 1001) &&
+    (closeEvent as CloseEvent).wasClean
+  ) {
+    return true
+  }
+
+  return !hasConnectedBefore && currentRetryAttemptCount <= 1
+}
+
+const WS_STATUS_KEY = 'apollo-ws-status'
+const GRAPHQL_ERROR_KEY = 'apollo-graphql-error'
+const NETWORK_ERROR_KEY = 'apollo-network-error'
+
+const wsClient = createClient({
+  url: websocketUri.toString(),
+  retryAttempts: MAX_RETRY_ATTEMPTS,
+  // Don't wait forever for the server's handshake reply. This bounds how
+  // long we'll sit stuck on that single attempt before treating it as
+  // failed and retrying
+  connectionAckWaitTimeout: 10_000,
+  connectionParams: () => {
+    const token = authToken()
+    // Only include authorization if token exists
+    if (token) {
+      return {
+        Authorization: `Bearer ${token}`,
       }
-      return {}
-    },
-    shouldRetry: (errOrCloseEvent) => {
-      // Check if we've exceeded max retries
-      if (retryCount >= MAX_RETRIES) {
-        console.error('[WebSocket] Max retries reached, stopping reconnection attempts')
-        retryCount = 0 // Reset for future manual reconnects
+    }
+    return {}
+  },
+  shouldRetry: errOrCloseEvent => {
+    if (isPageUnloading) return false
+
+    // Type guard for CloseEvent
+    if (
+      errOrCloseEvent &&
+      typeof errOrCloseEvent === 'object' &&
+      'code' in errOrCloseEvent
+    ) {
+      const closeEvent = errOrCloseEvent as CloseEvent
+
+      // Don't retry on authentication errors (4401)
+      if (closeEvent.code === 4401) {
+        console.error('[WebSocket] Unauthorized (4401), clearing token')
+        clearTokenCookie()
         return false
       }
 
-      // Type guard for CloseEvent
+      // Don't retry on forbidden errors (4403)
+      if (closeEvent.code === 4403) {
+        console.error('[WebSocket] Forbidden (4403), clearing token')
+        clearTokenCookie()
+        return false
+      }
+
+      // Don't retry on other client-side protocol/application errors (4400-4499 range, except transient ones)
+      if (closeEvent.code >= 4400 && closeEvent.code < 4500) {
+        console.error(`[WebSocket] Client error (${closeEvent.code}), stopping retries`)
+        return false
+      }
+    }
+
+    // Type guard for Error objects
+    if (errOrCloseEvent instanceof Error) {
+      const errorMessage = errOrCloseEvent.message.toLowerCase()
+
+      // Don't retry on authentication errors
       if (
-        errOrCloseEvent &&
-        typeof errOrCloseEvent === 'object' &&
-        'code' in errOrCloseEvent
+        errorMessage.includes('unauthorized') ||
+        errorMessage.includes('invalid authorization token') ||
+        errorMessage.includes('authentication failed')
       ) {
-        const closeEvent = errOrCloseEvent as CloseEvent
-
-        // Don't retry on authentication errors (4401)
-        if (closeEvent.code === 4401) {
-          console.error('[WebSocket] Unauthorized (4401), clearing token')
-          clearTokenCookie()
-          retryCount = 0
-          return false
-        }
-
-        // Don't retry on forbidden errors (4403)
-        if (closeEvent.code === 4403) {
-          console.error('[WebSocket] Forbidden (4403), stopping retries')
-          retryCount = 0
-          return false
-        }
-
-        // Don't retry on client errors (4400-4499 range, except transient ones)
-        if (closeEvent.code >= 4400 && closeEvent.code < 4500) {
-          console.error(`[WebSocket] Client error (${closeEvent.code}), stopping retries`)
-          retryCount = 0
-          return false
-        }
+        console.error('[WebSocket] Authentication error from server, clearing token')
+        clearTokenCookie()
+        return false
       }
+    }
+    return true
+  },
+  // Control retry timing (exponential backoff with jitter)
+  retryWait: async retries => {
+    retryAttemptCount = retries + 1
+    const delay = calculateRetryDelay(retries)
 
-      // Type guard for Error objects
-      if (errOrCloseEvent instanceof Error) {
-        const errorMessage = errOrCloseEvent.message.toLowerCase()
-
-        // Don't retry on authentication errors
-        if (
-          errorMessage.includes('unauthorized') ||
-          errorMessage.includes('invalid authorization token') ||
-          errorMessage.includes('authentication failed')
-        ) {
-          console.error('[WebSocket] Authentication error from server, clearing token')
-          clearTokenCookie()
-          retryCount = 0
-          return false
-        }
-      }
-
-      // Allow retry for transient errors
-      retryCount++
-      return true
-    },
-    // Control retry timing (exponential backoff with jitter)
-    retryWait: async (retries) => {
-      const delay = calculateRetryDelay(retries)
-
-      console.log(
-        `[WebSocket] Waiting ${Math.round(delay)}ms before retry ${retries + 1}/${MAX_RETRIES}`
+    if (!isPageUnloading && (hasConnectedOnce || retries > 0)) {
+      console.info(
+        `[WebSocket] Waiting ${Math.round(delay)}ms before retry ${retryAttemptCount}/${MAX_RETRY_ATTEMPTS}`
       )
+    }
 
-      // Return a Promise that resolves after the delay
-      await new Promise(resolve => setTimeout(resolve, delay))
+    // Return a Promise that resolves after the delay
+    await new Promise(resolve => setTimeout(resolve, delay))
+  },
+  on: {
+    connecting: () => {
+      if (isPageUnloading) return
+      console.info('[WebSocket] Connecting...')
     },
-    on: {
-      error: (error) => {
-        console.error('[WebSocket error]: ', error)
-      },
-      connected: () => {
-        // Reset retry count on successful connection
-        retryCount = 0
-      },
+    error: error => {
+      if (isPageUnloading || (!hasConnectedOnce && retryAttemptCount - 1 === 0)) return
+
+      if (retryAttemptCount >= MAX_RETRY_ATTEMPTS) {
+        console.error(`[WebSocket] Exhausted all ${MAX_RETRY_ATTEMPTS} retry attempts, giving up:`, error)
+        // The error thrown by graphql-ws here has no GraphQL/server "result"
+        // shape, so Apollo's linkError -> getServerErrorMessages() never
+        // surfaces anything to the user for this case. Show an explicit
+        // message so the app doesn't go silently dark.
+        globalMessageHandler.add({
+          key: WS_STATUS_KEY,
+          type: NotificationType.Message,
+          props: {
+            negative: true,
+            header: i18n.t(
+              'apollo_client.notification.websocket_exhausted.header',
+              'Live updates disconnected'
+            ),
+            content: i18n.t(
+              'apollo_client.notification.websocket_exhausted.content',
+              'Could not reconnect to the server after multiple attempts. Please refresh the page once the server is back online.'
+            ),
+          },
+        })
+        return
+      }
+      console.warn(
+        `[WebSocket] Connection attempt failed (after ${retryAttemptCount}/${MAX_RETRY_ATTEMPTS} retries so far):`,
+        error
+      )
     },
-  })
-)
+    closed: event => {
+      if (isPageUnloading || isLegitimateClose(event, hasConnectedOnce, retryAttemptCount)) return
+
+      if (event && typeof event === 'object' && 'code' in event) {
+        const closeEvent = event as CloseEvent
+        console.warn(
+          `[WebSocket] Closed (code: ${closeEvent.code}, reason: "${closeEvent.reason || 'none'}", clean: ${closeEvent.wasClean})`
+        )
+      } else {
+        console.warn('[WebSocket] Closed unexpectedly', event)
+      }
+    },
+    connected: (_socket, _payload, wasRetry) => {
+      hasConnectedOnce = true
+
+      if (wasRetry) {
+        console.info(`[WebSocket] Connection restored after ${retryAttemptCount} retry(ies)`)
+        globalMessageHandler.add({
+          key: WS_STATUS_KEY,
+          type: NotificationType.Message,
+          props: {
+            positive: true,
+            header: i18n.t(
+              'apollo_client.notification.websocket_restored.header',
+              'Live updates restored'
+            ),
+            content: i18n.t(
+              'apollo_client.notification.websocket_restored.content',
+              'Reconnected to the server successfully.'
+            ),
+          },
+        })
+      } else {
+        console.info('[WebSocket] Connected')
+      }
+      retryAttemptCount = 0
+    },
+  },
+})
+
+// Say "goodbye" to the server the instant the page starts leaving (refresh,
+// navigation, or tab close), instead of letting the browser force-close the
+// socket and having our own code mistake that for a real outage.
+if (globalThis.window !== undefined) {
+  const teardownWsClient = () => {
+    if (isPageUnloading) return
+    isPageUnloading = true
+    wsClient.dispose()
+  }
+  globalThis.window.addEventListener('beforeunload', teardownWsClient, { once: true })
+  globalThis.window.addEventListener('pagehide', teardownWsClient, { once: true })
+}
+
+const wsLink = new GraphQLWsLink(wsClient)
 
 const link = split(
   // split based on the operation type
@@ -192,8 +297,22 @@ export function getServerErrorMessages(networkError: Error | undefined): Error[]
 export const formatPath = (path: readonly (string | number)[] | undefined): string =>
   path?.join('::') ?? 'undefined'
 
+/**
+ * Determines whether a network error represents an authentication/authorization
+ * failure (HTTP 401/403), as opposed to a transient/generic network problem
+ * such as the backend restarting during a deployment.
+ */
+export function isAuthNetworkError(networkError: Error | undefined): boolean {
+  if (!networkError) return false
+  if ('statusCode' in networkError) {
+    const statusCode = (networkError as ServerError).statusCode
+    return statusCode === 401 || statusCode === 403
+  }
+  return false
+}
+
 const linkError = onError(({ graphQLErrors, networkError }) => {
-  const errorMessages = []
+  const errorMessages: { key: string; header: string; content: string }[] = []
 
   if (graphQLErrors) {
     graphQLErrors.map(({ message, locations, path }) =>
@@ -206,15 +325,32 @@ const linkError = onError(({ graphQLErrors, networkError }) => {
 
     if (graphQLErrors.length === 1) {
       errorMessages.push({
-        header: 'Something went wrong',
-        content: `Server error: ${graphQLErrors[0].message} at (${formatPath(
-          graphQLErrors[0].path
-        )})`,
+        key: GRAPHQL_ERROR_KEY,
+        header: i18n.t(
+          'apollo_client.notification.graphql.single.header',
+          'Something went wrong'
+        ),
+        content: i18n.t(
+          'apollo_client.notification.graphql.single.content',
+          'Server error: {{message}} at ({{path}})',
+          {
+            message: graphQLErrors[0].message,
+            path: formatPath(graphQLErrors[0].path),
+          }
+        ),
       })
     } else if (graphQLErrors.length > 1) {
       errorMessages.push({
-        header: 'Multiple things went wrong',
-        content: `Received ${graphQLErrors.length} errors from the server. See the console for more information`,
+        key: GRAPHQL_ERROR_KEY,
+        header: i18n.t(
+          'apollo_client.notification.graphql.multiple.header',
+          'Multiple things went wrong'
+        ),
+        content: i18n.t(
+          'apollo_client.notification.graphql.multiple.content',
+          'Received {{count}} errors from the server. See the browser\'s dev tools console for more information',
+          { count: graphQLErrors.length }
+        ),
       })
     }
 
@@ -227,30 +363,94 @@ const linkError = onError(({ graphQLErrors, networkError }) => {
 
   if (networkError) {
     console.error(`[Network error]: ${JSON.stringify(networkError)}`)
-    clearTokenCookie()
+    const isAuthError = isAuthNetworkError(networkError)
+    if (isAuthError) {
+      console.error('[Authentication failure (401/403)] Clearing token cookie')
+      clearTokenCookie()
+    }
 
     const errors = getServerErrorMessages(networkError);
     if (errors.length === 1) {
       errorMessages.push({
-        header: 'Server error',
-        content: `You are being logged out in an attempt to recover.\n${errors[0].message}`,
+        key: NETWORK_ERROR_KEY,
+        header: isAuthError
+          ? i18n.t(
+            'apollo_client.notification.network.auth.single.header',
+            'Server error'
+          )
+          : i18n.t(
+            'apollo_client.notification.network.retry.header',
+            'Connection problem'
+          ),
+        content: isAuthError
+          ? i18n.t(
+            'apollo_client.notification.network.auth.single.content',
+            'You are being logged out in an attempt to recover.\n{{message}}',
+            { message: errors[0].message }
+          )
+          : i18n.t(
+            'apollo_client.notification.network.retry.single.content',
+            'A temporary connection problem occurred: {{message}}',
+            { message: errors[0].message }
+          ),
       })
     } else if (errors.length > 1) {
       errorMessages.push({
-        header: 'Multiple server errors',
-        content: `Received ${graphQLErrors?.length
-          || 0} errors from the server. You are being logged out in an attempt to recover.`,
+        key: NETWORK_ERROR_KEY,
+        header: isAuthError
+          ? i18n.t(
+            'apollo_client.notification.network.auth.multiple.header',
+            'Multiple server errors'
+          )
+          : i18n.t(
+            'apollo_client.notification.network.retry.multiple.header',
+            'Multiple connection problems'
+          ),
+        content: isAuthError
+          ? i18n.t(
+            'apollo_client.notification.network.auth.multiple.content',
+            'Received {{count}} errors from the server. You are being logged out in an attempt to recover.',
+            { count: errors.length }
+          )
+          : i18n.t(
+            'apollo_client.notification.network.retry.multiple.content',
+            'Received {{count}} errors from the server. Retrying automatically.',
+            { count: errors.length }
+          ),
+      })
+    } else {
+      errorMessages.push({
+        key: NETWORK_ERROR_KEY,
+        header: isAuthError
+          ? i18n.t(
+            'apollo_client.notification.network.auth.generic.header',
+            'Authentication error'
+          )
+          : i18n.t(
+            'apollo_client.notification.network.retry.header',
+            'Connection problem'
+          ),
+        content: isAuthError
+          ? i18n.t(
+            'apollo_client.notification.network.auth.generic.content',
+            'You are being logged out in an attempt to recover.'
+          )
+          : i18n.t(
+            'apollo_client.notification.network.retry.generic.content',
+            'A temporary connection problem occurred. Retrying automatically.'
+          ),
       })
     }
   }
 
   if (errorMessages.length > 0) {
-    const newMessages: Message[] = errorMessages.map(msg => ({
-      key: Math.random().toString(26),
+    const newMessages: Message[] = errorMessages.map(({ key, header, content }) => ({
+      key,
       type: NotificationType.Message,
       props: {
         negative: true,
-        ...msg,
+        header,
+        content,
       },
     }))
 

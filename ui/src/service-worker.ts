@@ -75,13 +75,4 @@ registerRoute(
   })
 )
 
-// This allows the web app to trigger skipWaiting via
-// registration.waiting.postMessage({type: 'SKIP_WAITING'})
-self.addEventListener('message', event => {
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-  if (event.data?.type === 'SKIP_WAITING') {
-    self.skipWaiting()
-  }
-})
-
 // Any other custom service worker logic can go here.

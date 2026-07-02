@@ -243,6 +243,56 @@ describe('Messages', () => {
     })
   })
 
+  // ── Action button ─────────────────────────────────────────────────────────────
+
+  describe('MessageItem — action button', () => {
+    it('renders an action button when actionLabel and onAction are provided', () => {
+      renderMessages()
+      const onAction = vi.fn()
+      injectMessages([
+        makeMessage({
+          props: {
+            header: 'Update available',
+            content: 'New version ready.',
+            positive: true,
+            actionLabel: 'Reload now',
+            onAction,
+          },
+        }),
+      ])
+      expect(screen.getByRole('button', { name: 'Reload now' })).toBeInTheDocument()
+    })
+
+    it('calls onAction when the action button is clicked', () => {
+      renderMessages()
+      const onAction = vi.fn()
+      injectMessages([
+        makeMessage({
+          props: {
+            header: 'Update available',
+            content: 'New version ready.',
+            positive: true,
+            actionLabel: 'Reload now',
+            onAction,
+          },
+        }),
+      ])
+      fireEvent.click(screen.getByRole('button', { name: 'Reload now' }))
+      expect(onAction).toHaveBeenCalledTimes(1)
+    })
+
+    it('does not render an action button when actionLabel and onAction are absent', () => {
+      renderMessages()
+      injectMessages([
+        makeMessage({ props: { header: 'Plain message', content: 'no button here' } }),
+      ])
+      // Only the dismiss button should exist
+      const buttons = screen.getAllByRole('button')
+      expect(buttons).toHaveLength(1)
+      expect(buttons[0]).toHaveAttribute('aria-label', 'Dismiss message')
+    })
+  })
+
   // ── setMessages passed to SubscriptionsHook ───────────────────────────────────
 
   describe('setMessages passed to SubscriptionsHook', () => {
@@ -264,6 +314,9 @@ describe('Messages', () => {
 // ── MessagesWithProvider (default export) ─────────────────────────────────────
 
 describe('MessagesWithProvider', () => {
+  const renderWithProvider = (ui: React.ReactElement) =>
+    render(<MessageProvider>{ui}</MessageProvider>)
+
   beforeEach(() => {
     mockAuthToken.mockReturnValue('test-auth-token')
     capturedSetMessages = undefined
@@ -273,24 +326,24 @@ describe('MessagesWithProvider', () => {
     vi.clearAllMocks()
   })
 
-  it('renders without crashing', () => {
-    expect(() => render(<MessagesWithProvider />)).not.toThrow()
+  it('renders without crashing when wrapped in an outer MessageProvider', () => {
+    expect(() => renderWithProvider(<MessagesWithProvider />)).not.toThrow()
   })
 
   it('mounts the SubscriptionsHook when authenticated', () => {
-    render(<MessagesWithProvider />)
+    renderWithProvider(<MessagesWithProvider />)
     expect(screen.getByTestId('subscriptions-hook')).toBeInTheDocument()
   })
 
   it('does not mount the SubscriptionsHook when not authenticated', () => {
     mockAuthToken.mockReturnValue(undefined)
-    render(<MessagesWithProvider />)
+    renderWithProvider(<MessagesWithProvider />)
     expect(screen.queryByTestId('subscriptions-hook')).not.toBeInTheDocument()
   })
 
-  it('provides a MessageProvider context — useMessageState does not throw inside it', () => {
-    // If MessageProvider is absent, useMessageState() throws. A clean render
-    // confirms the provider is correctly wired.
-    expect(() => render(<MessagesWithProvider />)).not.toThrow()
+  it('works correctly inside an outer MessageProvider — useMessageState does not throw', () => {
+    // This mirrors the production hierarchy: index.tsx provides the
+    // MessageProvider; MessagesWithProvider is a plain consumer.
+    expect(() => renderWithProvider(<MessagesWithProvider />)).not.toThrow()
   })
 })

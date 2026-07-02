@@ -1,18 +1,21 @@
 import { ForwardedRef, forwardRef, ReactNode } from 'react'
 import DismissIcon from './icons/dismissIcon.svg?react'
+import { Button } from '../../primitives/form/Input'
 
 export type MessageProps = {
   header: string
   content?: string
   children?: ReactNode
-  onDismiss?(): void
+  onDismiss?: () => void
   negative?: boolean
   positive?: boolean
+  actionLabel?: string
+  onAction?: () => void
 }
 
 const Message = forwardRef(
   (
-    { onDismiss, header, children, content, negative, positive }: MessageProps,
+    { onDismiss, header, children, content, negative, positive, actionLabel, onAction }: MessageProps,
     ref: ForwardedRef<HTMLDivElement>
   ) => {
     let backgroundColorClass = 'bg-white dark:bg-dark-bg2'
@@ -39,7 +42,7 @@ const Message = forwardRef(
         <div
           className="text-sm overflow-y-auto"
           style={{
-            maxHeight: '6rem', // approx. 5 lines
+            maxHeight: '6rem',
             overflowY: 'auto',
             whiteSpace: 'pre-wrap',
             wordWrap: 'break-word',
@@ -48,6 +51,17 @@ const Message = forwardRef(
         >
           {content}
         </div>
+        {actionLabel !== undefined && onAction !== undefined && (
+          <Button
+            type="button"
+            onClick={onAction}
+            variant="positive"
+            background="white"
+            className="mt-2 px-3 py-0.5 text-xs"
+          >
+            {actionLabel}
+          </Button>
+        )}
         {children}
       </div>
     )

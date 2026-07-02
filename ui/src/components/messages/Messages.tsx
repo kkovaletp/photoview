@@ -4,7 +4,7 @@ import MessageProgress from './MessageProgress'
 import MessagePlain from './Message'
 import { SubscriptionsHook, Message } from './SubscriptionsHook'
 import { NotificationType } from '../../__generated__/globalTypes'
-import { useMessageState, MessageProvider } from './MessageState'
+import { useMessageState } from './MessageState'
 
 const Container = styled.div`
   position: fixed;
@@ -67,11 +67,7 @@ const Messages = () => {
   )
 }
 
-const MessagesWithProvider = () => (
-  <MessageProvider>
-    <Messages />
-  </MessageProvider>
-)
+const MessagesWithProvider = () => <Messages />
 
 export { Messages }
 export default MessagesWithProvider

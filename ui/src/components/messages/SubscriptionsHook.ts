@@ -32,10 +32,12 @@ export interface Message {
   onDismiss?: () => void
   props: {
     header: string
-    content: string
+    content?: string
     negative?: boolean
     positive?: boolean
     percent?: number
+    actionLabel?: string
+    onAction?: () => void
   }
 }
 
@@ -108,7 +110,7 @@ export const SubscriptionsHook = ({
       if (i === -1) next.push(newNotification)
       else next[i] = {
         ...newNotification,
-        timestamp: next[i].timestamp ?? timestamp,
+        timestamp,
       }
       return next
     })
