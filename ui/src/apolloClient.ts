@@ -120,7 +120,8 @@ const wsClient = createClient({
 
       // Don't retry on forbidden errors (4403)
       if (closeEvent.code === 4403) {
-        console.error('[WebSocket] Forbidden (4403), stopping retries')
+        console.error('[WebSocket] Forbidden (4403), clearing token')
+        clearTokenCookie()
         return false
       }
 
@@ -338,9 +339,16 @@ const linkError = onError(({ graphQLErrors, networkError }) => {
     } else if (errors.length > 1) {
       errorMessages.push({
         header: isAuthError ? 'Multiple server errors' : 'Multiple connection problems',
-        content: `Received ${graphQLErrors?.length || 0} errors from the server.${isAuthError
+        content: `Received ${errors.length} errors from the server.${isAuthError
           ? ' You are being logged out in an attempt to recover.'
           : ' Retrying automatically.'}`,
+      })
+    } else {
+      errorMessages.push({
+        header: isAuthError ? 'Authentication error' : 'Connection problem',
+        content: isAuthError
+          ? 'You are being logged out in an attempt to recover.'
+          : 'A temporary connection problem occurred. Retrying automatically.',
       })
     }
   }
