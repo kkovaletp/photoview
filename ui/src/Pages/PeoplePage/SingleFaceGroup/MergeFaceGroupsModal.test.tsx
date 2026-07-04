@@ -361,7 +361,7 @@ describe('MergeFaceGroupsModal', () => {
             expect(screen.queryByTestId('modal')).not.toBeInTheDocument()
         })
 
-        test('closes and reports invalid SelectPreselectedRole state without rendering', async () => {
+        test('reports invalid SelectPreselectedRole state without rendering', () => {
             const setState = vi.fn()
             const consoleErrorSpy = vi
                 .spyOn(console, 'error')
@@ -378,11 +378,7 @@ describe('MergeFaceGroupsModal', () => {
 
                 expect(screen.queryByTestId('modal')).not.toBeInTheDocument()
 
-                await waitFor(() => {
-                    expect(setState).toHaveBeenCalledWith(
-                        MergeFaceGroupsModalState.Closed
-                    )
-                })
+                expect(setState).not.toHaveBeenCalled()
 
                 expect(consoleErrorSpy).toHaveBeenCalledWith(
                     'MergeFaceGroupsModal opened with SelectPreselectedRole state but no preselectedFaceGroup'

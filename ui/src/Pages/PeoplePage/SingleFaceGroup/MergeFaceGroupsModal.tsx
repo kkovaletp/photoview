@@ -1,5 +1,5 @@
 import { gql, PureQueryOptions, useMutation, useQuery } from '@apollo/client'
-import { useCallback, useEffect, useState } from 'react'
+import { useCallback, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router'
 import { isNil } from '../../../helpers/utils'
@@ -58,7 +58,26 @@ type PreselectedFaceGroupRole = 'source' | 'destination' | null
 const FACE_GROUP_PAGE_SIZE = 50
 const MODAL_SCROLL_ROOT_MARGIN = '0px 0px 160px 0px'
 
-const MergeFaceGroupsModal = ({
+const MergeFaceGroupsModal = (props: MergeFaceGroupsModalProps) => {
+  const { state, preselectedFaceGroup } = props
+
+  if (state === MergeFaceGroupsModalState.Closed) {
+    return null
+  }
+
+  if (
+    state === MergeFaceGroupsModalState.SelectPreselectedRole && !preselectedFaceGroup
+  ) {
+    console.error(
+      'MergeFaceGroupsModal opened with SelectPreselectedRole state but no preselectedFaceGroup'
+    )
+    return null
+  }
+
+  return <MergeFaceGroupsModalContent {...props} />
+}
+
+const MergeFaceGroupsModalContent = ({
   state,
   setState,
   preselectedFaceGroup,
@@ -66,9 +85,6 @@ const MergeFaceGroupsModal = ({
 }: MergeFaceGroupsModalProps) => {
   const { t } = useTranslation()
   const navigate = useNavigate()
-
-  const hasMissingPreselectedRole =
-    state === MergeFaceGroupsModalState.SelectPreselectedRole && !preselectedFaceGroup
 
   const {
     data,
@@ -143,18 +159,6 @@ const MergeFaceGroupsModal = ({
     setState(MergeFaceGroupsModalState.Closed)
     resetModalState()
   }, [isMerging, resetModalState, setState])
-
-  useEffect(() => {
-    if (!hasMissingPreselectedRole) return
-    console.error('MergeFaceGroupsModal opened with SelectPreselectedRole state but no preselectedFaceGroup')
-    setState(MergeFaceGroupsModalState.Closed)
-    //TODO: Fix the "Calling setState synchronously in useEffect may cause unexpected behavior" issue
-    resetModalState()
-  }, [hasMissingPreselectedRole, resetModalState, setState])
-
-  if (hasMissingPreselectedRole) {
-    return null
-  }
 
   const cancelAction: ModalAction = {
     key: 'cancel',
