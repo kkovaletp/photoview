@@ -58,6 +58,9 @@ type PreselectedFaceGroupRole = 'source' | 'destination' | null
 const FACE_GROUP_PAGE_SIZE = 50
 const MODAL_SCROLL_ROOT_MARGIN = '0px 0px 160px 0px'
 
+// Thin outer wrapper: only mounts the stateful modal content for valid, open
+// states. This deliberately avoids effect-driven setState (see PR discussion)
+// and gives the inner component fresh local state on every (re)mount.
 const MergeFaceGroupsModal = (props: MergeFaceGroupsModalProps) => {
   const { state, preselectedFaceGroup } = props
 
