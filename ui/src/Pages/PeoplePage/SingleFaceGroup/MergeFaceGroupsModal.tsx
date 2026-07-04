@@ -148,6 +148,7 @@ const MergeFaceGroupsModal = ({
     if (!hasMissingPreselectedRole) return
     console.error('MergeFaceGroupsModal opened with SelectPreselectedRole state but no preselectedFaceGroup')
     setState(MergeFaceGroupsModalState.Closed)
+    //TODO: Fix the "Calling setState synchronously in useEffect may cause unexpected behavior" issue
     resetModalState()
   }, [hasMissingPreselectedRole, resetModalState, setState])
 
