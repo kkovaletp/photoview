@@ -245,6 +245,7 @@ export interface MediaSidebarMedia {
     width?: number
     height?: number
   }
+  //TODO: Consistently fix the "Consider removing 'undefined' type or '?' specifier, one of them is redundant" issue
   thumbnail?: SidebarMediaQueryQuery['media']['thumbnail'] | null
   videoWeb?: null | {
     __typename?: 'MediaURL'
@@ -252,6 +253,7 @@ export interface MediaSidebarMedia {
     width?: number
     height?: number
   }
+  //TODO: Consistently fix the "Consider removing 'undefined' type or '?' specifier, one of them is redundant" issue
   videoMetadata?: SidebarMediaQueryQuery['media']['videoMetadata'] | null
   exif?: SidebarMediaQueryQuery['media']['exif'] | null
   faces?: SidebarMediaQueryQuery['media']['faces']
