@@ -4,7 +4,7 @@ import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest'
 import { NotificationType } from '../../__generated__/globalTypes'
 import { MessageProvider } from './MessageState'
 import { Message } from './SubscriptionsHook'
-import MessagesWithProvider, { Messages } from './Messages'
+import MessagesWithoutProvider, { Messages } from './Messages'
 
 // ── Hoisted mock factories ─────────────────────────────────────────────────────
 
@@ -327,23 +327,23 @@ describe('MessagesWithProvider', () => {
   })
 
   it('renders without crashing when wrapped in an outer MessageProvider', () => {
-    expect(() => renderWithProvider(<MessagesWithProvider />)).not.toThrow()
+    expect(() => renderWithProvider(<MessagesWithoutProvider />)).not.toThrow()
   })
 
   it('mounts the SubscriptionsHook when authenticated', () => {
-    renderWithProvider(<MessagesWithProvider />)
+    renderWithProvider(<MessagesWithoutProvider />)
     expect(screen.getByTestId('subscriptions-hook')).toBeInTheDocument()
   })
 
   it('does not mount the SubscriptionsHook when not authenticated', () => {
     mockAuthToken.mockReturnValue(undefined)
-    renderWithProvider(<MessagesWithProvider />)
+    renderWithProvider(<MessagesWithoutProvider />)
     expect(screen.queryByTestId('subscriptions-hook')).not.toBeInTheDocument()
   })
 
   it('works correctly inside an outer MessageProvider — useMessageState does not throw', () => {
     // This mirrors the production hierarchy: index.tsx provides the
     // MessageProvider; MessagesWithProvider is a plain consumer.
-    expect(() => renderWithProvider(<MessagesWithProvider />)).not.toThrow()
+    expect(() => renderWithProvider(<MessagesWithoutProvider />)).not.toThrow()
   })
 })

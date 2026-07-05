@@ -2,8 +2,6 @@ const CHUNK_LOAD_FAILURE_PATTERNS = [
     'failed to fetch dynamically imported module',
     'error loading dynamically imported module',
     'importing a module script failed',
-    'loading module',
-    'loading chunk',
     'chunkloaderror',
 ] as const
 

@@ -108,10 +108,7 @@ export const SubscriptionsHook = ({
       const next = [...prev]
       const i = next.findIndex(m => m.key === newNotification.key)
       if (i === -1) next.push(newNotification)
-      else next[i] = {
-        ...newNotification,
-        timestamp,
-      }
+      else next[i] = newNotification
       return next
     })
   }, [data, error, setMessages])

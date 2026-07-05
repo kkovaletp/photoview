@@ -67,7 +67,7 @@ const Messages = () => {
   )
 }
 
-const MessagesWithProvider = () => <Messages />
+const MessagesWithoutProvider = () => <Messages />
 
 export { Messages }
-export default MessagesWithProvider
+export default MessagesWithoutProvider

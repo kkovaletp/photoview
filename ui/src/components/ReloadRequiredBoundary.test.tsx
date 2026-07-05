@@ -5,7 +5,7 @@ import ReloadRequiredBoundary from './ReloadRequiredBoundary'
 const originalLocation = Object.getOwnPropertyDescriptor(globalThis, 'location')
 
 const ThrowChunkLoadError = () => {
-    throw new Error('Loading chunk 5 failed')
+    throw new Error('ChunkLoadError: Loading chunk 5 failed')
 }
 
 describe('ReloadRequiredBoundary', () => {

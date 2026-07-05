@@ -1,4 +1,4 @@
-import { describe, test, expect, vi, beforeEach } from 'vitest'
+import { describe, test, expect, vi, beforeEach, afterEach } from 'vitest'
 import { renderWithProviders } from '../../helpers/testUtils'
 import { fireEvent, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
@@ -17,6 +17,8 @@ describe('ScannerConcurrentWorkers', () => {
   beforeEach(() => {
     consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => { })
   })
+
+  afterEach(() => vi.restoreAllMocks())
 
   describe('Query Loading', () => {
     test('should load data and enable input with correct value', async () => {

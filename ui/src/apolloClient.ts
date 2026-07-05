@@ -173,7 +173,7 @@ const wsClient = createClient({
       console.info('[WebSocket] Connecting...')
     },
     error: error => {
-      if (isPageUnloading || (!hasConnectedOnce && retryAttemptCount - 1 === 0)) return
+      if (isPageUnloading || (!hasConnectedOnce && retryAttemptCount === 0)) return
 
       if (retryAttemptCount >= MAX_RETRY_ATTEMPTS) {
         console.error(`[WebSocket] Exhausted all ${MAX_RETRY_ATTEMPTS} retry attempts, giving up:`, error)
