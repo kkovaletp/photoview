@@ -369,6 +369,8 @@ const linkError = onError(({ graphQLErrors, networkError }) => {
       clearTokenCookie()
     }
 
+    //TODO: the header/content ternaries repeat 6x.
+    //For a non - developer lens: this block is basically the same "pick the right sign to hang on the door" decision made six separate times(auth vs.retry, crossed with single / multiple / generic).Functionally it's all correct — I traced every branch against the translation JSON files and the keys line up perfectly — but a small helper that takes (isAuthError, variant) and returns {header, content} would collapse this into one reusable spot, so a future new variant doesn't require touching six near - identical blocks.
     const errors = getServerErrorMessages(networkError);
     if (errors.length === 1) {
       errorMessages.push({

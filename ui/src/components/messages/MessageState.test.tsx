@@ -4,6 +4,9 @@ import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest'
 import { useMessageState, MessageProvider } from './MessageState'
 import { NotificationType } from '../../__generated__/globalTypes'
 
+// TODO: Good fix for duplicate message keys.
+// Replacing an existing entry by key instead of always appending should stop the same notification key from piling up multiple times in the list(which previously could trigger React key - collision warnings when rendered).Logic and memoization look correct.
+// One small ask: since MessageState.test.tsx exists, it'd be good to confirm it has a case asserting that adding a message with an existing key replaces rather than duplicates it, since that's the core behavior change here.
 describe('MessageState', () => {
     let originalDateNow: () => number
     let clearIntervalSpy: any

@@ -13,6 +13,8 @@ export type MessageProps = {
   onAction?: () => void
 }
 
+// TODO: Small React 19 cleanup: drop forwardRef here
+// React 19 lets this component accept ref as a normal prop, so forwardRef can be removed if you want to simplify this file.MessageProgress would need the same update to keep the ref path intact.
 const Message = forwardRef(
   (
     { onDismiss, header, children, content, negative, positive, actionLabel, onAction }: MessageProps,
