@@ -311,6 +311,77 @@ export function isAuthNetworkError(networkError: Error | undefined): boolean {
   return false
 }
 
+/**
+ * The three shapes a network-error notification can take, based on how many
+ * server errors came back in the response.
+ */
+export type NetworkErrorVariant = 'single' | 'multiple' | 'generic'
+
+/**
+ * Builds the header/content notification texts for a network-error banner,
+ * based on whether it's an auth failure (401/403) and how many server
+ * errors were received. Centralizes the previously duplicated
+ * auth × single/multiple/generic decision matrix.
+ */
+export function getNetworkErrorNotification(
+  isAuthError: boolean,
+  variant: NetworkErrorVariant,
+  params: { message?: string; count?: number } = {}
+): { header: string; content: string } {
+  switch (variant) {
+    case 'single':
+      return {
+        header: isAuthError
+          ? i18n.t('apollo_client.notification.network.auth.single.header', 'Server error')
+          : i18n.t('apollo_client.notification.network.retry.header', 'Connection problem'),
+        content: isAuthError
+          ? i18n.t(
+            'apollo_client.notification.network.auth.single.content',
+            'You are being logged out in an attempt to recover.\n{{message}}',
+            { message: params.message }
+          )
+          : i18n.t(
+            'apollo_client.notification.network.retry.single.content',
+            'A temporary connection problem occurred: {{message}}',
+            { message: params.message }
+          ),
+      }
+    case 'multiple':
+      return {
+        header: isAuthError
+          ? i18n.t('apollo_client.notification.network.auth.multiple.header', 'Multiple server errors')
+          : i18n.t('apollo_client.notification.network.retry.multiple.header', 'Multiple connection problems'),
+        content: isAuthError
+          ? i18n.t(
+            'apollo_client.notification.network.auth.multiple.content',
+            'Received {{count}} errors from the server. You are being logged out in an attempt to recover.',
+            { count: params.count }
+          )
+          : i18n.t(
+            'apollo_client.notification.network.retry.multiple.content',
+            'Received {{count}} errors from the server. Retrying automatically.',
+            { count: params.count }
+          ),
+      }
+    case 'generic':
+    default:
+      return {
+        header: isAuthError
+          ? i18n.t('apollo_client.notification.network.auth.generic.header', 'Authentication error')
+          : i18n.t('apollo_client.notification.network.retry.header', 'Connection problem'),
+        content: isAuthError
+          ? i18n.t(
+            'apollo_client.notification.network.auth.generic.content',
+            'You are being logged out in an attempt to recover.'
+          )
+          : i18n.t(
+            'apollo_client.notification.network.retry.generic.content',
+            'A temporary connection problem occurred. Retrying automatically.'
+          ),
+      }
+  }
+}
+
 const linkError = onError(({ graphQLErrors, networkError }) => {
   const errorMessages: { key: string; header: string; content: string }[] = []
 
@@ -370,77 +441,19 @@ const linkError = onError(({ graphQLErrors, networkError }) => {
     }
 
     const errors = getServerErrorMessages(networkError);
+    let variant: NetworkErrorVariant
     if (errors.length === 1) {
-      errorMessages.push({
-        key: NETWORK_ERROR_KEY,
-        header: isAuthError
-          ? i18n.t(
-            'apollo_client.notification.network.auth.single.header',
-            'Server error'
-          )
-          : i18n.t(
-            'apollo_client.notification.network.retry.header',
-            'Connection problem'
-          ),
-        content: isAuthError
-          ? i18n.t(
-            'apollo_client.notification.network.auth.single.content',
-            'You are being logged out in an attempt to recover.\n{{message}}',
-            { message: errors[0].message }
-          )
-          : i18n.t(
-            'apollo_client.notification.network.retry.single.content',
-            'A temporary connection problem occurred: {{message}}',
-            { message: errors[0].message }
-          ),
-      })
+      variant = 'single'
     } else if (errors.length > 1) {
-      errorMessages.push({
-        key: NETWORK_ERROR_KEY,
-        header: isAuthError
-          ? i18n.t(
-            'apollo_client.notification.network.auth.multiple.header',
-            'Multiple server errors'
-          )
-          : i18n.t(
-            'apollo_client.notification.network.retry.multiple.header',
-            'Multiple connection problems'
-          ),
-        content: isAuthError
-          ? i18n.t(
-            'apollo_client.notification.network.auth.multiple.content',
-            'Received {{count}} errors from the server. You are being logged out in an attempt to recover.',
-            { count: errors.length }
-          )
-          : i18n.t(
-            'apollo_client.notification.network.retry.multiple.content',
-            'Received {{count}} errors from the server. Retrying automatically.',
-            { count: errors.length }
-          ),
-      })
+      variant = 'multiple'
     } else {
-      errorMessages.push({
-        key: NETWORK_ERROR_KEY,
-        header: isAuthError
-          ? i18n.t(
-            'apollo_client.notification.network.auth.generic.header',
-            'Authentication error'
-          )
-          : i18n.t(
-            'apollo_client.notification.network.retry.header',
-            'Connection problem'
-          ),
-        content: isAuthError
-          ? i18n.t(
-            'apollo_client.notification.network.auth.generic.content',
-            'You are being logged out in an attempt to recover.'
-          )
-          : i18n.t(
-            'apollo_client.notification.network.retry.generic.content',
-            'A temporary connection problem occurred. Retrying automatically.'
-          ),
-      })
+      variant = 'generic'
     }
+    const { header, content } = getNetworkErrorNotification(isAuthError, variant, {
+      message: errors[0]?.message,
+      count: errors.length,
+    })
+    errorMessages.push({ key: NETWORK_ERROR_KEY, header, content })
   }
 
   if (errorMessages.length > 0) {

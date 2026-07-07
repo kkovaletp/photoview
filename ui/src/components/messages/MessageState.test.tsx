@@ -87,6 +87,38 @@ describe('MessageState', () => {
         expect(result.current.messages[1].key).toBe('msg2')
     })
 
+    it('should replace an existing message by key instead of duplicating it', () => {
+        const now = 1643673600000
+        Date.now = vi.fn(() => now)
+
+        const { result } = renderHook(() => useMessageState(), { wrapper })
+
+        act(() => {
+            result.current.add({
+                key: 'duplicate-key',
+                type: NotificationType.Message,
+                props: { header: 'First', content: 'First content' }
+            })
+        })
+
+        expect(result.current.messages).toHaveLength(1)
+
+        const later = now + 1000
+        act(() => {
+            Date.now = vi.fn(() => later)
+            result.current.add({
+                key: 'duplicate-key',
+                type: NotificationType.Message,
+                props: { header: 'Second', content: 'Second content' }
+            })
+        })
+
+        // Same key must replace the previous entry, not add a new one
+        expect(result.current.messages).toHaveLength(1)
+        expect(result.current.messages[0].props.header).toBe('Second')
+        expect(result.current.messages[0].timestamp).toBe(later)
+    })
+
     it('should add timestamp to new messages', async () => {
         const now = 1643673600000
         Date.now = vi.fn(() => now)
