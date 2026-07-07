@@ -4,9 +4,6 @@ import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest'
 import { useMessageState, MessageProvider } from './MessageState'
 import { NotificationType } from '../../__generated__/globalTypes'
 
-// TODO: Good fix for duplicate message keys.
-// Replacing an existing entry by key instead of always appending should stop the same notification key from piling up multiple times in the list(which previously could trigger React key - collision warnings when rendered).Logic and memoization look correct.
-// One small ask: since MessageState.test.tsx exists, it'd be good to confirm it has a case asserting that adding a message with an existing key replaces rather than duplicates it, since that's the core behavior change here.
 describe('MessageState', () => {
     let originalDateNow: () => number
     let clearIntervalSpy: any
@@ -88,6 +85,34 @@ describe('MessageState', () => {
         expect(result.current.messages).toHaveLength(2)
         expect(result.current.messages[0].key).toBe('msg1')
         expect(result.current.messages[1].key).toBe('msg2')
+    })
+
+    it('should replace an existing message instead of duplicating it when adding with the same key', async () => {
+        const now = 1643673600000
+        Date.now = vi.fn(() => now)
+
+        const { result } = renderHook(() => useMessageState(), { wrapper })
+
+        await act(async () => {
+            result.current.add({
+                key: 'dup',
+                type: NotificationType.Message,
+                props: { header: 'First', content: 'First content' }
+            })
+        })
+
+        await act(async () => {
+            result.current.add({
+                key: 'dup',
+                type: NotificationType.Message,
+                props: { header: 'Second', content: 'Second content' }
+            })
+        })
+
+        expect(result.current.messages).toHaveLength(1)
+        expect(result.current.messages[0].key).toBe('dup')
+        expect(result.current.messages[0].props.header).toBe('Second')
+        expect(result.current.messages[0].props.content).toBe('Second content')
     })
 
     it('should add timestamp to new messages', async () => {
