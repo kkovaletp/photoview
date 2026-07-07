@@ -12,9 +12,9 @@ const MessageProgress = ({
   ...props
 }: MessageProgressProps) => {
   const PROGRESS_LEVELS = {
-    LOW: { threshold: 0, color: '`#dc2625`', state: 'low progress' },
-    MEDIUM: { threshold: 33, color: '`#fbbf24`', state: 'medium progress' },
-    HIGH: { threshold: 66, color: '`#56e263`', state: 'high progress' }
+    LOW: { threshold: 0, color: '#dc2625', state: 'low progress' },
+    MEDIUM: { threshold: 33, color: '#fbbf24', state: 'medium progress' },
+    HIGH: { threshold: 66, color: '#56e263', state: 'high progress' }
   } as const;
 
   type ProgressLevel = typeof PROGRESS_LEVELS[keyof typeof PROGRESS_LEVELS];

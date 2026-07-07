@@ -87,13 +87,13 @@ describe('MessageState', () => {
         expect(result.current.messages[1].key).toBe('msg2')
     })
 
-    it('should replace an existing message by key instead of duplicating it', async () => {
+    it('should replace an existing message by key instead of duplicating it', () => {
         const now = 1643673600000
         Date.now = vi.fn(() => now)
 
         const { result } = renderHook(() => useMessageState(), { wrapper })
 
-        await act(async () => {
+        act(() => {
             result.current.add({
                 key: 'duplicate-key',
                 type: NotificationType.Message,
@@ -104,7 +104,7 @@ describe('MessageState', () => {
         expect(result.current.messages).toHaveLength(1)
 
         const later = now + 1000
-        await act(async () => {
+        act(() => {
             Date.now = vi.fn(() => later)
             result.current.add({
                 key: 'duplicate-key',
