@@ -3,6 +3,7 @@ import {
     calculateRetryDelay,
     formatPath,
     getServerErrorMessages,
+    getNetworkErrorNotification,
     isAuthNetworkError,
     paginateCache,
     isLegitimateClose
@@ -526,6 +527,46 @@ describe('Pure Helper Functions', () => {
 
         it('should not treat non-clean closures without a code as benign', () => {
             expect(isLegitimateClose(new Error('boom'), false, 2)).toBe(false)
+        })
+    })
+
+    describe('getNetworkErrorNotification', () => {
+        it('should build single/non-auth notification', () => {
+            const result = getNetworkErrorNotification(false, 'single', { message: 'boom' })
+            expect(result.header).toBe('Connection problem')
+            expect(result.content).toBe('A temporary connection problem occurred: boom')
+        })
+
+        it('should build single/auth notification', () => {
+            const result = getNetworkErrorNotification(true, 'single', { message: 'boom' })
+            expect(result.header).toBe('Server error')
+            expect(result.content).toBe('You are being logged out in an attempt to recover.\nboom')
+        })
+
+        it('should build multiple/non-auth notification', () => {
+            const result = getNetworkErrorNotification(false, 'multiple', { count: 3 })
+            expect(result.header).toBe('Multiple connection problems')
+            expect(result.content).toBe('Received 3 errors from the server. Retrying automatically.')
+        })
+
+        it('should build multiple/auth notification', () => {
+            const result = getNetworkErrorNotification(true, 'multiple', { count: 3 })
+            expect(result.header).toBe('Multiple server errors')
+            expect(result.content).toBe(
+                'Received 3 errors from the server. You are being logged out in an attempt to recover.'
+            )
+        })
+
+        it('should build generic/non-auth notification', () => {
+            const result = getNetworkErrorNotification(false, 'generic')
+            expect(result.header).toBe('Connection problem')
+            expect(result.content).toBe('A temporary connection problem occurred. Retrying automatically.')
+        })
+
+        it('should build generic/auth notification', () => {
+            const result = getNetworkErrorNotification(true, 'generic')
+            expect(result.header).toBe('Authentication error')
+            expect(result.content).toBe('You are being logged out in an attempt to recover.')
         })
     })
 })
