@@ -18,7 +18,63 @@
     }
   },
   "album_page": {
-    "load_error": ""
+    "load_error": "",
+    "loading": "",
+    "not_found": ""
+  },
+  "apollo_client": {
+    "notification": {
+      "graphql": {
+        "multiple": {
+          "content_one": "",
+          "content_other": "",
+          "header": ""
+        },
+        "single": {
+          "content": "",
+          "header": ""
+        }
+      },
+      "network": {
+        "auth": {
+          "generic": {
+            "content": "",
+            "header": ""
+          },
+          "multiple": {
+            "content_one": "",
+            "content_other": "",
+            "header": ""
+          },
+          "single": {
+            "content": "",
+            "header": ""
+          }
+        },
+        "retry": {
+          "generic": {
+            "content": ""
+          },
+          "header": "",
+          "multiple": {
+            "content_one": "",
+            "content_other": "",
+            "header": ""
+          },
+          "single": {
+            "content": ""
+          }
+        }
+      },
+      "websocket_exhausted": {
+        "content": "",
+        "header": ""
+      },
+      "websocket_restored": {
+        "content": "",
+        "header": ""
+      }
+    }
   },
   "ethical_use_license_page": {
     "load_error": "",
@@ -31,6 +87,7 @@
       "cancel": "Abbrechen",
       "close": "",
       "remove": "Entfernen",
+      "retry": "",
       "save": "Speichern",
       "submit": ""
     },
@@ -58,7 +115,8 @@
       "result_type": {
         "albums": "Alben",
         "media": ""
-      }
+      },
+      "results_label": ""
     }
   },
   "login_page": {
@@ -109,6 +167,9 @@
           "select_images": "Bilder auswählen"
         },
         "description": "Ausgewählte Bilder werden von dieser Person abgelöst.",
+        "error": {
+          "network": ""
+        },
         "title": "Bilder von Person ablösen"
       },
       "merge_face_groups": {
@@ -116,6 +177,22 @@
         "destination_table": {
           "title": "Personen zusammenführen"
         },
+        "error": {
+          "network": ""
+        },
+        "face_groups_load_error": "",
+        "preselected_role": {
+          "destination": {
+            "description": "",
+            "title": ""
+          },
+          "source": {
+            "description": "",
+            "title": ""
+          }
+        },
+        "preselected_role_description": "",
+        "source_role_destination_description": "",
         "sources_description": "",
         "sources_table": {
           "title": ""
@@ -125,8 +202,12 @@
       "move_image_faces": {
         "description": "Verschiebe ausgewählte Bilder in eine andere Person",
         "destination_face_group_table": {
+          "load_error": "",
           "move_action": "Verschiebe",
           "title": "Verschiebe Bilder zu Person"
+        },
+        "error": {
+          "network": ""
         },
         "image_select_table": {
           "next_action": "weiter...",
@@ -185,6 +266,8 @@
     "scanner": {
       "description": "Neue und aktualisierte Medien aller Benutzer scannen",
       "scan_all_users": "Alle Benutzer scannen",
+      "scanning": "",
+      "starting": "",
       "title": "Scanner"
     },
     "user_preferences": {
@@ -217,11 +300,15 @@
       },
       "confirm_delete_user": {
         "action": "Lösche {{user}}",
-        "description": "<0>Du bist dabei, den Nutzer <1></1> endgültig zu löschen.</0><p>Diese Aktion kann nicht rückgängig gemacht werden. Bist du sicher?</p>",
+        "description": "<line>Du bist dabei, den Nutzer <bold>{{username}}</bold> endgültig zu löschen.</line><line>Diese Aktion kann nicht rückgängig gemacht werden. Bist du sicher?</line>",
         "title": "Benutzer löschen"
       },
+      "edit": {
+        "add_path_error": "",
+        "remove_path_error": ""
+      },
       "password_reset": {
-        "description": "Passwort von diesem Benutzer zurücksetzen.",
+        "description": "Passwort von <bold>{{username}}</bold> zurücksetzen.",
         "error": "",
         "form": {
           "label": "Neues Passwort",
@@ -372,6 +459,7 @@
       "action_label": {
         "detach_image": "Bilder ablösen",
         "merge_face": "Gesichter zusammenführen",
+        "more_actions": "",
         "move_face": "Gesicht verschieben"
       },
       "confirm_image_detach": "Ablösen",
@@ -379,8 +467,10 @@
     },
     "sharing": {
       "add_share": "Freigabe hinzufügen",
+      "add_share_error": "",
       "copy_link": "Link kopieren",
       "delete": "Freigabe löschen",
+      "delete_error": "",
       "error": "",
       "expiration_date": "",
       "more": "mehr infos",
@@ -433,10 +523,13 @@
     }
   },
   "title": {
-    "loading_album": "Lade Album",
     "login": "Login",
-    "not_found": "",
     "people": "Personen",
     "settings": "Einstellungen"
+  },
+  "update_available_page": {
+    "action": "",
+    "content": "",
+    "header": ""
   }
 }

@@ -1,164 +1,349 @@
-import { render, screen, fireEvent, renderHook } from '@testing-library/react'
-import React, { useState } from 'react'
+import { render, screen, act, fireEvent } from '@testing-library/react'
+import { Dispatch, SetStateAction } from 'react'
+import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest'
 import { NotificationType } from '../../__generated__/globalTypes'
 import { MessageProvider } from './MessageState'
-import MessagePlain from './Message'
-import MessageProgress from './MessageProgress'
 import { Message } from './SubscriptionsHook'
+import MessagesWithoutProvider, { Messages } from './Messages'
 
-interface MockSubscriptionsHookProps {
-  messages: Message[]
-  setMessages: React.Dispatch<React.SetStateAction<Message[]>>
-}
+// ── Hoisted mock factories ─────────────────────────────────────────────────────
 
-// Define the mock for SubscriptionsHook before using it
-const MockSubscriptionsHook = ({ messages, setMessages }: MockSubscriptionsHookProps) => {
-  return (
-    <div>
-      <button
-        type="button"
-        onClick={() => setMessages((prev: Message[]) => [...prev, ...messages])}
-        data-testid="trigger-messages"
-      >
-        Trigger Messages
-      </button>
-    </div>
-  )
-}
-
-vi.mock('./SubscriptionsHook', () => ({
-  __esModule: true,
-  default: MockSubscriptionsHook,
+const { mockAuthToken } = vi.hoisted(() => ({
+  mockAuthToken: vi.fn(),
 }))
 
-const PROGRESS_COLORS = {
-  LOW: '#dc2625',    // red for < 30%
-  MEDIUM: '#fbbf24', // yellow for 30-70%
-  HIGH: '#56e263'    // green for > 70%
+// ── Capture variable for the setMessages prop passed to SubscriptionsHook ─────
+//
+// Updated on every render of the mocked SubscriptionsHook so that injectMessages()
+// can call the same setter that the component holds internally.
+
+let capturedSetMessages: Dispatch<SetStateAction<Message[]>> | undefined
+
+// ── Module mocks ───────────────────────────────────────────────────────────────
+
+vi.mock('../../helpers/authentication', () => ({
+  authToken: mockAuthToken,
+}))
+
+vi.mock('./SubscriptionsHook', async importOriginal => {
+  // Re-export Message, SubscriptionHookProps, etc. from the real module.
+  const real = await importOriginal<typeof import('./SubscriptionsHook')>()
+
+  const MockSubscriptionsHook = ({
+    setMessages,
+  }: {
+    setMessages: Dispatch<SetStateAction<Message[]>>
+  }) => {
+    capturedSetMessages = setMessages
+    return <div data-testid="subscriptions-hook" />
+  }
+
+  return {
+    ...(real as object),
+    SubscriptionsHook: MockSubscriptionsHook,
+  }
+})
+
+// ── Test helpers ───────────────────────────────────────────────────────────────
+
+/** Build a minimal Message fixture (NotificationType.Message). */
+const makeMessage = (overrides: Partial<Message> = {}): Message => ({
+  key: 'msg-key-1',
+  type: NotificationType.Message,
+  props: {
+    header: 'Test Header',
+    content: 'Test content',
+  },
+  ...overrides,
+})
+
+/** Build a minimal Message fixture (NotificationType.Progress). */
+const makeProgressMessage = (overrides: Partial<Message> = {}): Message => ({
+  key: 'prog-key-1',
+  type: NotificationType.Progress,
+  props: {
+    header: 'Progress Header',
+    content: 'Progress content',
+    percent: 50,
+  },
+  ...overrides,
+})
+
+/** Render `Messages` inside the required `MessageProvider`. */
+const renderMessages = () =>
+  render(
+    <MessageProvider>
+      <Messages />
+    </MessageProvider>
+  )
+
+/**
+ * Inject messages into the component state by calling the `setMessages`
+ * function that was captured from the last render of the mocked
+ * `SubscriptionsHook`.
+ *
+ * Requires `authToken()` to return a truthy value so the hook is mounted.
+ */
+const injectMessages = (messages: Message[]) => {
+  if (!capturedSetMessages) {
+    throw new Error(
+      'capturedSetMessages is undefined — ensure authToken() returns a truthy ' +
+      'value before calling injectMessages() so SubscriptionsHook is mounted.'
+    )
+  }
+  act(() => {
+    capturedSetMessages!(() => messages)
+  })
 }
 
-const messages = [
-  {
-    key: '1',
-    type: NotificationType.Message,
-    timeout: 5000,
-    props: {
-      header: 'Info Message',
-      content: 'This is a neutral message.',
-    },
-  },
-  {
-    key: '2',
-    type: NotificationType.Message,
-    timeout: 5000,
-    props: {
-      header: 'Success Message',
-      content: 'This is a positive message.',
-      positive: true,
-    },
-  },
-  {
-    key: '3',
-    type: NotificationType.Message,
-    timeout: 5000,
-    props: {
-      header: 'Error Message',
-      content: 'This is a negative message.',
-      negative: true,
-    },
-  },
-  {
-    key: '4',
-    type: NotificationType.Progress,
-    timeout: 5000,
-    props: {
-      header: 'Progress Message',
-      content: 'This is a progress message.',
-      percent: 50,
-    },
-  },
-]
+// ── Tests ──────────────────────────────────────────────────────────────────────
 
-describe('Messages Component', () => {
-  test('renders different types of messages with correct background colors', () => {
-    render(
-      <MessageProvider>
-        <MessagePlain {...messages[0].props} />
-        <MessagePlain {...messages[1].props} />
-        <MessagePlain {...messages[2].props} />
-      </MessageProvider>
-    )
-
-    const neutralMessage = screen.getByText('This is a neutral message.').closest('div')
-    const positiveMessage = screen.getByText('This is a positive message.').closest('div')
-    const negativeMessage = screen.getByText('This is a negative message.').closest('div')
-
-    expect(neutralMessage?.parentElement).toHaveClass('bg-white')
-    expect(neutralMessage?.parentElement).toHaveClass('dark:bg-dark-bg2')
-    expect(positiveMessage?.parentElement).toHaveClass('bg-green-100')
-    expect(positiveMessage?.parentElement).toHaveClass('dark:bg-green-900')
-    expect(negativeMessage?.parentElement).toHaveClass('bg-red-100')
-    expect(negativeMessage?.parentElement).toHaveClass('dark:bg-red-900')
+describe('Messages', () => {
+  beforeEach(() => {
+    mockAuthToken.mockReturnValue('test-auth-token')
+    capturedSetMessages = undefined
   })
 
-  test('renders messages with overflow and scroll behavior', () => {
-    const longContent = 'This is a very long message '.repeat(10).trim()
+  afterEach(() => {
+    vi.clearAllMocks()
+  })
 
-    render(
-      <MessageProvider>
-        <MessagePlain
-          {...messages[0].props}
-          content={longContent}
-        />
-      </MessageProvider>
-    )
+  // ── Empty state ──────────────────────────────────────────────────────────────
 
-    const longMessage = screen.getByText((content, element) => {
-      return element?.textContent === longContent
+  describe('when the message list is empty', () => {
+    it('renders no message headings', () => {
+      renderMessages()
+      expect(screen.queryByRole('heading')).toBeNull()
     })
-    expect(longMessage.closest('div')).toHaveStyle({ maxHeight: '6rem' })
-    expect(longMessage.closest('div')).toHaveStyle({ overflowY: 'auto' })
+
+    it('renders the SubscriptionsHook when the user is authenticated', () => {
+      renderMessages()
+      expect(screen.getByTestId('subscriptions-hook')).toBeInTheDocument()
+    })
+
+    it('does NOT render the SubscriptionsHook when the user is not authenticated', () => {
+      mockAuthToken.mockReturnValue(undefined)
+      renderMessages()
+      expect(screen.queryByTestId('subscriptions-hook')).not.toBeInTheDocument()
+    })
   })
 
-  test('renders progress messages with correct progress bar color and width', () => {
-    const { container } = render(
-      <MessageProvider>
-        <MessageProgress {...messages[3].props} />
-      </MessageProvider>
-    )
+  // ── MessageItem: NotificationType.Message ────────────────────────────────────
 
-    const progressBar = container.querySelector('div[role="progressbar"][style*="width: 50%"]')
-    expect(progressBar).toBeInTheDocument()
-    expect(progressBar).toHaveStyle(`background-color: ${PROGRESS_COLORS.MEDIUM}`)
+  describe('MessageItem — NotificationType.Message', () => {
+    it('renders the message header and content', () => {
+      renderMessages()
+      injectMessages([
+        makeMessage({ props: { header: 'Hello world', content: 'Some detail here' } }),
+      ])
+      expect(screen.getByText('Hello world')).toBeInTheDocument()
+      expect(screen.getByText('Some detail here')).toBeInTheDocument()
+    })
+
+    it('renders multiple Message-type notifications', () => {
+      renderMessages()
+      injectMessages([
+        makeMessage({ key: 'k1', props: { header: 'First', content: 'first content' } }),
+        makeMessage({ key: 'k2', props: { header: 'Second', content: 'second content' } }),
+      ])
+      expect(screen.getByText('First')).toBeInTheDocument()
+      expect(screen.getByText('Second')).toBeInTheDocument()
+    })
   })
 
-  test('renders progress bar with correct colors based on percent value', () => {
-    render(
-      <MessageProvider>
-        <MessageProgress {...messages[3].props} percent={20} />
-        <MessageProgress {...messages[3].props} percent={50} />
-        <MessageProgress {...messages[3].props} percent={80} />
-      </MessageProvider>
-    )
+  // ── MessageItem: NotificationType.Progress ───────────────────────────────────
 
-    const progressBars = screen.getAllByRole('progressbar')
+  describe('MessageItem — NotificationType.Progress', () => {
+    it('renders a progress bar with the correct aria value', () => {
+      renderMessages()
+      injectMessages([
+        makeProgressMessage({
+          props: { header: 'Uploading', content: 'please wait', percent: 42 },
+        }),
+      ])
+      const bar = screen.getByRole('progressbar')
+      expect(bar).toBeInTheDocument()
+      expect(bar).toHaveAttribute('aria-valuenow', '42')
+    })
 
-    expect(progressBars[0]).toHaveStyle(`background-color: ${PROGRESS_COLORS.LOW}`) // red for 20%
-    expect(progressBars[1]).toHaveStyle(`background-color: ${PROGRESS_COLORS.MEDIUM}`) // yellow for 50%
-    expect(progressBars[2]).toHaveStyle(`background-color: ${PROGRESS_COLORS.HIGH}`) // green for 80%
+    it('renders the progress message header', () => {
+      renderMessages()
+      injectMessages([makeProgressMessage()])
+      expect(screen.getByText('Progress Header')).toBeInTheDocument()
+    })
   })
 
-  test('subscriptions hook triggers messages correctly', () => {
-    const { result } = renderHook(() => useState<Message[]>([]))
-    const [, setMessages] = result.current
+  // ── MessageItem: unknown type ─────────────────────────────────────────────────
 
-    render(
-      <MessageProvider>
-        <MockSubscriptionsHook messages={messages} setMessages={setMessages} />
-      </MessageProvider>
-    )
+  describe('MessageItem — unknown type', () => {
+    it('calls console.error and renders nothing for an unrecognised message type', () => {
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => { })
+      renderMessages()
+      injectMessages([makeMessage({ key: 'bad', type: 'UNKNOWN_TYPE' as NotificationType })])
 
-    fireEvent.click(screen.getByTestId('trigger-messages'))
-    expect(result.current[0]).toEqual(expect.arrayContaining(messages))
+      expect(consoleSpy).toHaveBeenCalledOnce()
+      expect(consoleSpy).toHaveBeenCalledWith(expect.stringContaining('bad'))
+      // No heading should be rendered for the bad message
+      expect(screen.queryByText('Test Header')).not.toBeInTheDocument()
+      consoleSpy.mockRestore()
+    })
+  })
+
+  // ── Dismiss behaviour ─────────────────────────────────────────────────────────
+
+  describe('dismiss behaviour', () => {
+    it('removes the dismissed message from the list', () => {
+      renderMessages()
+      injectMessages([makeMessage({ props: { header: 'Goodbye', content: 'soon gone' } })])
+      expect(screen.getByText('Goodbye')).toBeInTheDocument()
+
+      fireEvent.click(screen.getByRole('button', { name: /dismiss message/i }))
+
+      expect(screen.queryByText('Goodbye')).not.toBeInTheDocument()
+    })
+
+    it('calls message.onDismiss when the message is dismissed', () => {
+      const onDismiss = vi.fn()
+      renderMessages()
+      injectMessages([
+        makeMessage({ onDismiss, props: { header: 'Watch me', content: 'content' } }),
+      ])
+
+      fireEvent.click(screen.getByRole('button', { name: /dismiss message/i }))
+
+      expect(onDismiss).toHaveBeenCalledTimes(1)
+    })
+
+    it('does not throw when message.onDismiss is undefined', () => {
+      renderMessages()
+      injectMessages([makeMessage({ props: { header: 'No callback', content: 'safe' } })])
+
+      expect(() =>
+        fireEvent.click(screen.getByRole('button', { name: /dismiss message/i }))
+      ).not.toThrow()
+    })
+
+    it('removes only the dismissed message and keeps the others', () => {
+      renderMessages()
+      injectMessages([
+        makeMessage({ key: 'keep', props: { header: 'Keep me', content: 'stay' } }),
+        makeMessage({ key: 'drop', props: { header: 'Drop me', content: 'gone' } }),
+      ])
+
+      expect(screen.getByText('Keep me')).toBeInTheDocument()
+      expect(screen.getByText('Drop me')).toBeInTheDocument()
+
+      // Click the second dismiss button (belongs to "Drop me")
+      const buttons = screen.getAllByRole('button', { name: /dismiss message/i })
+      expect(buttons).toHaveLength(2)
+      fireEvent.click(buttons[1])
+
+      expect(screen.getByText('Keep me')).toBeInTheDocument()
+      expect(screen.queryByText('Drop me')).not.toBeInTheDocument()
+    })
+  })
+
+  // ── Action button ─────────────────────────────────────────────────────────────
+
+  describe('MessageItem — action button', () => {
+    it('renders an action button when actionLabel and onAction are provided', () => {
+      renderMessages()
+      const onAction = vi.fn()
+      injectMessages([
+        makeMessage({
+          props: {
+            header: 'Update available',
+            content: 'New version ready.',
+            positive: true,
+            actionLabel: 'Reload now',
+            onAction,
+          },
+        }),
+      ])
+      expect(screen.getByRole('button', { name: 'Reload now' })).toBeInTheDocument()
+    })
+
+    it('calls onAction when the action button is clicked', () => {
+      renderMessages()
+      const onAction = vi.fn()
+      injectMessages([
+        makeMessage({
+          props: {
+            header: 'Update available',
+            content: 'New version ready.',
+            positive: true,
+            actionLabel: 'Reload now',
+            onAction,
+          },
+        }),
+      ])
+      fireEvent.click(screen.getByRole('button', { name: 'Reload now' }))
+      expect(onAction).toHaveBeenCalledTimes(1)
+    })
+
+    it('does not render an action button when actionLabel and onAction are absent', () => {
+      renderMessages()
+      injectMessages([
+        makeMessage({ props: { header: 'Plain message', content: 'no button here' } }),
+      ])
+      // Only the dismiss button should exist
+      const buttons = screen.getAllByRole('button')
+      expect(buttons).toHaveLength(1)
+      expect(buttons[0]).toHaveAttribute('aria-label', 'Dismiss message')
+    })
+  })
+
+  // ── setMessages passed to SubscriptionsHook ───────────────────────────────────
+
+  describe('setMessages passed to SubscriptionsHook', () => {
+    it('provides a setMessages function to SubscriptionsHook', () => {
+      renderMessages()
+      expect(capturedSetMessages).toBeTypeOf('function')
+    })
+
+    it('the setMessages callback updates the rendered message list', () => {
+      renderMessages()
+      injectMessages([
+        makeMessage({ props: { header: 'Dynamic', content: 'via setMessages' } }),
+      ])
+      expect(screen.getByText('Dynamic')).toBeInTheDocument()
+    })
+  })
+})
+
+// ── MessagesWithProvider (default export) ─────────────────────────────────────
+
+describe('MessagesWithProvider', () => {
+  const renderWithProvider = (ui: React.ReactElement) =>
+    render(<MessageProvider>{ui}</MessageProvider>)
+
+  beforeEach(() => {
+    mockAuthToken.mockReturnValue('test-auth-token')
+    capturedSetMessages = undefined
+  })
+
+  afterEach(() => {
+    vi.clearAllMocks()
+  })
+
+  it('renders without crashing when wrapped in an outer MessageProvider', () => {
+    expect(() => renderWithProvider(<MessagesWithoutProvider />)).not.toThrow()
+  })
+
+  it('mounts the SubscriptionsHook when authenticated', () => {
+    renderWithProvider(<MessagesWithoutProvider />)
+    expect(screen.getByTestId('subscriptions-hook')).toBeInTheDocument()
+  })
+
+  it('does not mount the SubscriptionsHook when not authenticated', () => {
+    mockAuthToken.mockReturnValue(undefined)
+    renderWithProvider(<MessagesWithoutProvider />)
+    expect(screen.queryByTestId('subscriptions-hook')).not.toBeInTheDocument()
+  })
+
+  it('works correctly inside an outer MessageProvider — useMessageState does not throw', () => {
+    // This mirrors the production hierarchy: index.tsx provides the
+    // MessageProvider; MessagesWithProvider is a plain consumer.
+    expect(() => renderWithProvider(<MessagesWithoutProvider />)).not.toThrow()
   })
 })

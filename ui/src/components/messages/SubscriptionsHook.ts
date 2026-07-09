@@ -1,7 +1,6 @@
-import { notificationSubscription } from './__generated__/notificationSubscription'
-import React, { useEffect } from 'react'
+import { NotificationSubscriptionSubscription } from './__generated__/SubscriptionsHook'
+import { Dispatch, SetStateAction, useEffect } from 'react'
 import { useSubscription, gql } from '@apollo/client'
-import { authToken } from '../../helpers/authentication'
 import { NotificationType } from '../../__generated__/globalTypes'
 
 const NOTIFICATION_SUBSCRIPTION = gql`
@@ -19,6 +18,10 @@ const NOTIFICATION_SUBSCRIPTION = gql`
   }
 `
 
+const KNOWN_NOTIFICATION_TYPES = new Set<string>(
+  Object.values(NotificationType)
+)
+
 const messageTimeoutHandles = new Map<string, number>()
 
 export interface Message {
@@ -29,34 +32,30 @@ export interface Message {
   onDismiss?: () => void
   props: {
     header: string
-    content: string
+    content?: string
     negative?: boolean
     positive?: boolean
     percent?: number
+    actionLabel?: string
+    onAction?: () => void
   }
 }
 
 type SubscriptionHookProps = {
-  messages: Message[]
-  setMessages: React.Dispatch<React.SetStateAction<Message[]>>
+  setMessages: Dispatch<SetStateAction<Message[]>>
 }
 
 export const SubscriptionsHook = ({
-  messages,
   setMessages,
 }: SubscriptionHookProps) => {
-  if (!authToken()) {
-    return null
-  }
-
-  const { data, error } = useSubscription<notificationSubscription>(
+  const { data, error } = useSubscription<NotificationSubscriptionSubscription>(
     NOTIFICATION_SUBSCRIPTION
   )
 
   useEffect(() => {
     if (error) {
-      setMessages(state => [
-        ...state,
+      setMessages(prev => [
+        ...prev,
         {
           key: `download-${Date.now()}-${Math.random().toString(36).slice(2, 11)}`,
           type: NotificationType.Message,
@@ -68,56 +67,51 @@ export const SubscriptionsHook = ({
         },
       ])
     }
-
     if (!data) return
-
-    const newMessages = [...messages]
-
     const msg = data.notification
-
-    if (msg.type == 'Close') {
-      setMessages(messages => messages.filter(m => m.key != msg.key))
+    if (!KNOWN_NOTIFICATION_TYPES.has(msg.type)) {
+      // Silently discard notifications with unknown types from the server
       return
     }
-
-    const newNotification: Message = {
-      key: msg.key,
-      type: msg.type,
-      timeout: msg.timeout || undefined,
-      props: {
-        header: msg.header,
-        content: msg.content,
-        negative: msg.negative,
-        positive: msg.positive,
-        percent: msg.progress || undefined,
-      },
+    // Handle timeouts independent of outer "messages"
+    const existing = messageTimeoutHandles.get(msg.key)
+    if (existing) {
+      clearTimeout(existing)
+      messageTimeoutHandles.delete(msg.key)
     }
 
-    if (msg.timeout) {
-      // Clear old timeout, to replace it with the new one
-      if (messageTimeoutHandles.get(msg.key)) {
-        const timeoutHandle = messageTimeoutHandles.get(msg.key)
-        clearTimeout(timeoutHandle)
-      }
-
+    if (msg.timeout != null) {
       const timeoutHandle = setTimeout(() => {
-        setMessages(messages => messages.filter(m => m.key != msg.key))
+        messageTimeoutHandles.delete(msg.key)
+        setMessages(prev => prev.filter(m => m.key !== msg.key))
       }, msg.timeout) as unknown as number
-
       messageTimeoutHandles.set(msg.key, timeoutHandle)
     }
-
-    const notifyIndex = newMessages.findIndex(
-      msg => msg.key == newNotification.key
-    )
-    if (notifyIndex != -1) {
-      newMessages[notifyIndex] = newNotification
-    } else {
-      newMessages.push(newNotification)
-    }
-
-    setMessages(newMessages)
-  }, [data, error])
+    setMessages(prev => {
+      if (msg.type === NotificationType.Close) {
+        return prev.filter(m => m.key !== msg.key)
+      }
+      const timestamp = Date.now()
+      const newNotification: Message = {
+        key: msg.key,
+        type: msg.type,
+        timeout: msg.timeout ?? undefined,
+        timestamp,
+        props: {
+          header: msg.header,
+          content: msg.content,
+          negative: msg.negative,
+          positive: msg.positive,
+          percent: msg.progress ?? undefined,
+        },
+      }
+      const next = [...prev]
+      const i = next.findIndex(m => m.key === newNotification.key)
+      if (i === -1) next.push(newNotification)
+      else next[i] = newNotification
+      return next
+    })
+  }, [data, error, setMessages])
 
   return null
 }

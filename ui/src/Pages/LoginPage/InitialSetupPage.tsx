@@ -3,17 +3,15 @@ import { gql, useQuery, useMutation } from '@apollo/client'
 import { useNavigate } from 'react-router'
 import TermsOfUseModal, { useTermsAccepted } from '../../components/termsOfUse/TermsOfUseModal'
 import AccessDeniedScreen from '../../components/termsOfUse/AccessDeniedScreen'
-import { INITIAL_SETUP_QUERY, login, Container } from './loginUtilities'
+import { Container, INITIAL_SETUP_QUERY, login } from './loginUtilities'
 import { authToken } from '../../helpers/authentication'
+import { normalizePath, normalizeUsername } from '../../helpers/normalize'
 import { useTranslation } from 'react-i18next'
-import { CheckInitialSetup } from './__generated__/CheckInitialSetup'
+import { CheckInitialSetupQuery } from './__generated__/loginUtilities'
+import { InitialSetupMutation, InitialSetupMutationVariables } from './__generated__/InitialSetupPage'
 import { useForm } from 'react-hook-form'
 import { Submit, TextField } from '../../primitives/form/Input'
 import MessageBox from '../../primitives/form/MessageBox'
-import {
-  InitialSetup,
-  InitialSetupVariables,
-} from './__generated__/InitialSetup'
 
 const initialSetupMutation = gql`
   mutation InitialSetup(
@@ -43,19 +41,22 @@ const InitialSetupPage = () => {
   const { t } = useTranslation()
   const { accepted, accept, declined, decline } = useTermsAccepted()
   const navigate = useNavigate()
+  const token = authToken()
 
   const {
     register,
+    clearErrors,
+    setError,
     handleSubmit,
     formState: { errors: formErrors },
   } = useForm<InitialSetupFormData>()
 
   useEffect(() => {
-    if (authToken()) navigate('/')
-  }, [])
+    if (token) navigate('/')
+  }, [token, navigate])
 
   const { data: initialSetupData } =
-    useQuery<CheckInitialSetup>(INITIAL_SETUP_QUERY)
+    useQuery<CheckInitialSetupQuery>(INITIAL_SETUP_QUERY)
 
   const notInitialSetup = initialSetupData?.siteInfo?.initialSetup === false
 
@@ -66,17 +67,34 @@ const InitialSetupPage = () => {
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
   const [authorize, { loading: authorizeLoading }] =
-    useMutation<InitialSetup, InitialSetupVariables>(initialSetupMutation)
+    useMutation<InitialSetupMutation, InitialSetupMutationVariables>(initialSetupMutation)
 
   const signIn = handleSubmit(async (data) => {
     try {
       setErrorMessage(null)
+      clearErrors(['username', 'rootPath'])
+
+      const username = normalizeUsername(data.username)
+      const rootPath = normalizePath(data.rootPath)
+      let hasError = false
+
+      if (username === '') {
+        setError('username', { type: 'required' })
+        hasError = true
+      }
+
+      if (rootPath === '') {
+        setError('rootPath', { type: 'required' })
+        hasError = true
+      }
+
+      if (hasError) return
 
       const result = await authorize({
         variables: {
-          username: data.username,
+          username,
           password: data.password,
-          rootPath: data.rootPath,
+          rootPath,
         },
       })
 
@@ -92,7 +110,7 @@ const InitialSetupPage = () => {
     }
   })
 
-  if (authToken() || notInitialSetup) {
+  if (token || notInitialSetup) {
     return null
   }
 
@@ -114,7 +132,7 @@ const InitialSetupPage = () => {
             {...register('username', { required: true })}
             label={t('login_page.field.username', 'Username')}
             error={
-              formErrors.username?.type == 'required'
+              formErrors.username?.type === 'required'
                 ? 'Please enter a username'
                 : undefined
             }
@@ -125,7 +143,7 @@ const InitialSetupPage = () => {
             {...register('password', { required: true })}
             label={t('login_page.field.password', 'Password')}
             error={
-              formErrors.password?.type == 'required'
+              formErrors.password?.type === 'required'
                 ? 'Please enter a password'
                 : undefined
             }
@@ -143,7 +161,7 @@ const InitialSetupPage = () => {
               '/path/to/photos'
             )}
             error={
-              formErrors.password?.type == 'required'
+              formErrors.rootPath?.type === 'required'
                 ? 'Please enter a photo path'
                 : undefined
             }

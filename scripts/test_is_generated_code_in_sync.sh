@@ -10,6 +10,7 @@ if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
 fi
 
 if [[ "$(git status -s 2>/dev/null | head -1)" != "" ]]; then
+  # shellcheck disable=SC2016
   echo '--- FAIL: The generated API code is out of sync with the recent changes. Please run `go generate ./...` under `./api` to regenerate it and commit it to this branch.'
   echo 'These are the changes:'
   git status -s

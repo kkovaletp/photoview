@@ -1,5 +1,13 @@
 import { describe, it, expect, beforeEach } from 'vitest'
-import { calculateRetryDelay, formatPath, getServerErrorMessages, paginateCache } from './apolloClient'
+import {
+    calculateRetryDelay,
+    formatPath,
+    getServerErrorMessages,
+    getNetworkErrorNotification,
+    isAuthNetworkError,
+    paginateCache,
+    isLegitimateClose
+} from './apolloClient'
 
 describe('paginateCache', () => {
     let paginateFn: ReturnType<typeof paginateCache>
@@ -15,6 +23,7 @@ describe('paginateCache', () => {
                 ['single'],
                 ['onlyFavorites', 'order'], // Real usage from Album.media
                 ['onlyFavorites'], // Real usage from Query.myTimeline
+                [['paginate', ['limit']]],
             ]
 
             testCases.forEach(keyArgs => {
@@ -201,21 +210,43 @@ describe('paginateCache', () => {
     })
 
     describe('Error Handling', () => {
-        it('should throw descriptive error for missing or invalid paginate argument', () => {
+        it('should warn and preserve existing data for missing or invalid paginate argument', () => {
+            const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => { })
             const existing = [{ id: '1' }]
             const incoming = [{ id: '2' }]
 
             const invalidCases = [
                 { args: {}, fieldName: 'testField' },
                 { args: { paginate: null }, fieldName: 'testField' },
-                { args: { paginate: undefined }, fieldName: 'testField' }
+                { args: { paginate: undefined }, fieldName: 'testField' },
             ]
 
-            invalidCases.forEach(context => {
-                expect(() => {
-                    paginateFn.merge(existing, incoming, context as any)
-                }).toThrow('Paginate argument is missing for query: testField')
-            })
+            try {
+                invalidCases.forEach(context => {
+                    consoleWarnSpy.mockClear()
+
+                    const result = paginateFn.merge(existing, incoming, context as any)
+
+                    expect(consoleWarnSpy).toHaveBeenCalledWith(
+                        expect.stringContaining('Paginate argument is missing for field: testField')
+                    )
+                    expect(result).toEqual(existing)
+                })
+
+                invalidCases.forEach(context => {
+                    consoleWarnSpy.mockClear()
+
+                    const result = paginateFn.merge(undefined, incoming, context as any)
+
+                    expect(consoleWarnSpy).toHaveBeenCalledWith(
+                        expect.stringContaining('Paginate argument is missing for field: testField')
+                    )
+                    expect(result).toEqual([])
+                    expect(result).not.toEqual(incoming)
+                })
+            } finally {
+                consoleWarnSpy.mockRestore()
+            }
         })
     })
 
@@ -277,7 +308,8 @@ describe('paginateCache', () => {
         })
 
         it('should handle FaceGroup.imageFaces with empty keyArgs', () => {
-            const paginateFn = paginateCache([]) // Empty keyArgs as used in real code
+            // myFaceGroups separates paginated and unbounded lists by limit
+            const paginateFn = paginateCache([['paginate', ['limit']]])
 
             const existing = [
                 { id: 'face1', __typename: 'ImageFace' },
@@ -302,7 +334,8 @@ describe('paginateCache', () => {
         })
 
         it('should handle Query.myFaceGroups pagination', () => {
-            const paginateFn = paginateCache([]) // Empty keyArgs like myFaceGroups
+            // myFaceGroups separates paginated and unbounded lists by limit
+            const paginateFn = paginateCache([['paginate', ['limit']]])
 
             const existing = [{ __ref: 'FaceGroup:1' }, { __ref: 'FaceGroup:2' }]
             const incoming = [{ __ref: 'FaceGroup:2' }, { __ref: 'FaceGroup:3' }] // One duplicate
@@ -424,6 +457,116 @@ describe('Pure Helper Functions', () => {
             expect(errors[0]).toEqual({ message: 'Error 1' })
             expect(errors[1]).toEqual({ message: 'Error 2' })
             expect(errors[2]).toEqual({ message: 'Error 3' })
+        })
+    })
+
+    describe('isAuthNetworkError', () => {
+        it('should return false for undefined', () => {
+            expect(isAuthNetworkError(undefined)).toBe(false)
+        })
+
+        it('should return false for a plain error without statusCode', () => {
+            const networkError = new Error('Network error')
+            expect(isAuthNetworkError(networkError)).toBe(false)
+        })
+
+        it('should return true for a 401 status code', () => {
+            const networkError = Object.assign(new Error('Unauthorized'), { statusCode: 401 })
+            expect(isAuthNetworkError(networkError)).toBe(true)
+        })
+
+        it('should return true for a 403 status code', () => {
+            const networkError = Object.assign(new Error('Forbidden'), { statusCode: 403 })
+            expect(isAuthNetworkError(networkError)).toBe(true)
+        })
+
+        it('should return false for a 500 status code', () => {
+            const networkError = Object.assign(new Error('Server error'), { statusCode: 500 })
+            expect(isAuthNetworkError(networkError)).toBe(false)
+        })
+
+        it('should return false for a 0 status code (network unreachable)', () => {
+            const networkError = Object.assign(new Error('Failed to fetch'), { statusCode: 0 })
+            expect(isAuthNetworkError(networkError)).toBe(false)
+        })
+    })
+
+    describe('isLegitimateClose', () => {
+        it('should treat a clean, normal closure (code 1000) as benign regardless of history', () => {
+            const closeEvent = { code: 1000, reason: '', wasClean: true }
+            expect(isLegitimateClose(closeEvent, false, 1)).toBe(true)
+            expect(isLegitimateClose(closeEvent, true, 3)).toBe(true)
+        })
+
+        it('should treat a single closure before ever connecting as benign', () => {
+            const closeEvent = { code: 1006, reason: '', wasClean: false }
+            expect(isLegitimateClose(closeEvent, false, 1)).toBe(true)
+            expect(isLegitimateClose(closeEvent, false, 0)).toBe(true)
+        })
+
+        it('should not treat repeated closures before ever connecting as benign', () => {
+            const closeEvent = { code: 1006, reason: '', wasClean: false }
+            expect(isLegitimateClose(closeEvent, false, 2)).toBe(false)
+        })
+
+        it('should not treat closures as benign once a connection has succeeded before', () => {
+            const closeEvent = { code: 1006, reason: '', wasClean: false }
+            expect(isLegitimateClose(closeEvent, true, 1)).toBe(false)
+        })
+
+        it('should treat a clean page-navigation closure (code 1001) as benign regardless of history', () => {
+            const closeEvent = { code: 1001, reason: '', wasClean: true }
+            expect(isLegitimateClose(closeEvent, false, 1)).toBe(true)
+            expect(isLegitimateClose(closeEvent, true, 3)).toBe(true)
+        })
+
+        it('should NOT treat a non-clean 1001 as benign (that would be a real abnormal closure, not a refresh)', () => {
+            const closeEvent = { code: 1001, reason: '', wasClean: false }
+            expect(isLegitimateClose(closeEvent, true, 2)).toBe(false)
+        })
+
+        it('should not treat non-clean closures without a code as benign', () => {
+            expect(isLegitimateClose(new Error('boom'), false, 2)).toBe(false)
+        })
+    })
+
+    describe('getNetworkErrorNotification', () => {
+        it('should build single/non-auth notification', () => {
+            const result = getNetworkErrorNotification(false, 'single', { message: 'boom' })
+            expect(result.header).toBe('Connection problem')
+            expect(result.content).toBe('A temporary connection problem occurred: boom')
+        })
+
+        it('should build single/auth notification', () => {
+            const result = getNetworkErrorNotification(true, 'single', { message: 'boom' })
+            expect(result.header).toBe('Server error')
+            expect(result.content).toBe('You are being logged out in an attempt to recover.\nboom')
+        })
+
+        it('should build multiple/non-auth notification', () => {
+            const result = getNetworkErrorNotification(false, 'multiple', { count: 3 })
+            expect(result.header).toBe('Multiple connection problems')
+            expect(result.content).toBe('Received 3 errors from the server. Retrying automatically.')
+        })
+
+        it('should build multiple/auth notification', () => {
+            const result = getNetworkErrorNotification(true, 'multiple', { count: 3 })
+            expect(result.header).toBe('Multiple server errors')
+            expect(result.content).toBe(
+                'Received 3 errors from the server. You are being logged out in an attempt to recover.'
+            )
+        })
+
+        it('should build generic/non-auth notification', () => {
+            const result = getNetworkErrorNotification(false, 'generic')
+            expect(result.header).toBe('Connection problem')
+            expect(result.content).toBe('A temporary connection problem occurred. Retrying automatically.')
+        })
+
+        it('should build generic/auth notification', () => {
+            const result = getNetworkErrorNotification(true, 'generic')
+            expect(result.header).toBe('Authentication error')
+            expect(result.content).toBe('You are being logged out in an attempt to recover.')
         })
     })
 })

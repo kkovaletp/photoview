@@ -1,27 +1,29 @@
 import { useMutation } from '@apollo/client'
-import React, {
+import {
   useState,
   useEffect,
-  createRef,
   KeyboardEventHandler,
+  useRef,
+  useCallback,
 } from 'react'
 import { useTranslation } from 'react-i18next'
 import { isNil } from '../../../helpers/utils'
+import { normalizeLabel } from '../../../helpers/normalize'
 import { Button, TextField } from '../../../primitives/form/Input'
 import { MY_FACES_QUERY, SET_GROUP_LABEL_MUTATION } from '../PeoplePage'
 import {
-  setGroupLabel,
-  setGroupLabelVariables,
-} from '../__generated__/setGroupLabel'
+  SetGroupLabelMutation,
+  SetGroupLabelMutationVariables,
+} from '../__generated__/PeoplePage'
 import DetachImageFacesModal from './DetachImageFacesModal'
 import MergeFaceGroupsModal, {
   MergeFaceGroupsModalState,
 } from './MergeFaceGroupsModal'
 import MoveImageFacesModal from './MoveImageFacesModal'
-import { singleFaceGroup_faceGroup } from './__generated__/singleFaceGroup'
+import { SingleFaceGroupQuery } from './__generated__/singleFaceGroupQuery'
 
 type FaceGroupTitleProps = {
-  faceGroup?: singleFaceGroup_faceGroup
+  faceGroup?: SingleFaceGroupQuery['faceGroup']
 }
 
 const FaceGroupTitle = ({ faceGroup }: FaceGroupTitleProps) => {
@@ -29,81 +31,91 @@ const FaceGroupTitle = ({ faceGroup }: FaceGroupTitleProps) => {
 
   const [editLabel, setEditLabel] = useState(false)
   const [inputValue, setInputValue] = useState(faceGroup?.label ?? '')
-  const inputRef = createRef<HTMLInputElement>()
+  const inputRef = useRef<HTMLInputElement>(null)
   const [mergeModalState, setMergeModalState] = useState(
     MergeFaceGroupsModalState.Closed
   )
   const [moveModalOpen, setMoveModalOpen] = useState(false)
   const [detachModalOpen, setDetachModalOpen] = useState(false)
 
-  const [setGroupLabel, { loading: setLabelLoading }] = useMutation<
+  const [
     setGroupLabel,
-    setGroupLabelVariables
-  >(SET_GROUP_LABEL_MUTATION)
+    {
+      loading: setLabelLoading,
+      error: labelSaveError,
+      reset: resetSetGroupLabel,
+    }] = useMutation<
+      SetGroupLabelMutation,
+      SetGroupLabelMutationVariables
+    >(SET_GROUP_LABEL_MUTATION, {
+      errorPolicy: 'all',
+      onCompleted: () => setEditLabel(false),
+    })
 
-  const resetLabel = () => {
+  const resetLabel = useCallback(() => {
+    resetSetGroupLabel()
     setInputValue(faceGroup?.label ?? '')
     setEditLabel(false)
-  }
+  }, [faceGroup?.label, resetSetGroupLabel])
 
   useEffect(() => {
-    if (inputRef.current) {
-      inputRef.current.focus()
+    if (editLabel) {
+      inputRef.current?.focus()
     }
-  }, [inputRef])
-
-  useEffect(() => {
-    if (!setLabelLoading) {
-      resetLabel()
-    }
-  }, [setLabelLoading])
+  }, [editLabel])
 
   const onKeyDown: KeyboardEventHandler<HTMLInputElement> = e => {
-    if (e.key == 'Escape') {
+    if (e.key === 'Escape') {
       resetLabel()
-      return
     }
   }
 
   let title
-  if (!editLabel) {
+  if (editLabel) {
     title = (
-      <>
-        <h1
-          className={`text-2xl font-semibold ${faceGroup?.label ? '' : 'text-gray-600 dark:text-gray-400'
-            }`}
-        >
-          {faceGroup?.label ??
-            t('people_page.face_group.unlabeled_person', 'Unlabeled person')}
-        </h1>
-      </>
+      <TextField
+        loading={setLabelLoading}
+        ref={inputRef}
+        error={labelSaveError?.message}
+        placeholder={t('people_page.face_group.label_placeholder', 'Label')}
+        action={() => {
+          if (isNil(faceGroup)) return
+          setGroupLabel({
+            variables: {
+              groupID: faceGroup.id,
+              label: normalizeLabel(inputValue),
+            },
+          }).catch(() => {
+            // Keep modal open; hook error state (`labelSaveError`) renders inline feedback.
+          })
+        }}
+        value={inputValue}
+        onKeyDown={onKeyDown}
+        onChange={e => setInputValue(e.target.value)}
+        onBlur={event => {
+          if (
+            event.currentTarget.parentElement?.contains(
+              // Even while Sonar reports "This assertion is unnecessary since the receiver accepts
+              // the original type of the expression", it is actually needed to satisfy TypeScript
+              // that event.relatedTarget can be a Node or null, as opposed to the default HTMLInputElement | null
+              event.relatedTarget as Node | null
+            )
+          ) {
+            return
+          }
+          resetLabel()
+        }}
+      />
     )
   } else {
     title = (
-      <>
-        <TextField
-          loading={setLabelLoading}
-          ref={inputRef}
-          placeholder={t('people_page.face_group.label_placeholder', 'Label')}
-          action={() => {
-            if (isNil(faceGroup))
-              throw new Error('Expected faceGroup to be defined')
-
-            setGroupLabel({
-              variables: {
-                groupID: faceGroup.id,
-                label: inputValue ? inputValue : null,
-              },
-            })
-          }}
-          value={inputValue}
-          onKeyDown={onKeyDown}
-          onChange={e => setInputValue(e.target.value)}
-          onBlur={() => {
-            resetLabel()
-          }}
-        />
-      </>
+      <h1
+        className={`text-2xl font-semibold ${faceGroup?.label ? '' : 'text-gray-600 dark:text-gray-400'
+          }`}
+      >
+        {faceGroup?.label ??
+          t('people_page.face_group.unlabeled_person', 'Unlabeled person')}
+      </h1>
     )
   }
 
@@ -114,10 +126,14 @@ const FaceGroupTitle = ({ faceGroup }: FaceGroupTitleProps) => {
         <MergeFaceGroupsModal
           state={mergeModalState}
           setState={setMergeModalState}
-          preselectedDestinationFaceGroup={faceGroup}
+          preselectedFaceGroup={faceGroup}
           refetchQueries={[
             {
               query: MY_FACES_QUERY,
+              variables: {
+                limit: 50,
+                offset: 0,
+              },
             },
           ]}
         />
@@ -141,26 +157,36 @@ const FaceGroupTitle = ({ faceGroup }: FaceGroupTitleProps) => {
         <div className="mb-2">{title}</div>
         <ul className="flex gap-2 flex-wrap mb-6">
           <li>
-            <Button onClick={() => setEditLabel(true)}>
+            <Button disabled={!faceGroup} onClick={() => {
+              if (!faceGroup) return
+              resetSetGroupLabel()
+              setInputValue(faceGroup.label ?? '')
+              setEditLabel(true)
+            }}>
               {t('people_page.action_label.change_label', 'Change label')}
             </Button>
           </li>
           <li>
-            <Button
-              onClick={() =>
-                setMergeModalState(MergeFaceGroupsModalState.SelectDestination)
-              }
-            >
+            <Button disabled={!faceGroup} onClick={() => {
+              if (!faceGroup) return
+              setMergeModalState(MergeFaceGroupsModalState.SelectPreselectedRole)
+            }}>
               {t('people_page.action_label.merge_face', 'Merge face')}
             </Button>
           </li>
           <li>
-            <Button onClick={() => setDetachModalOpen(true)}>
+            <Button disabled={!faceGroup} onClick={() => {
+              if (!faceGroup) return
+              setDetachModalOpen(true)
+            }}>
               {t('people_page.action_label.detach_images', 'Detach images')}
             </Button>
           </li>
           <li>
-            <Button onClick={() => setMoveModalOpen(true)}>
+            <Button disabled={!faceGroup} onClick={() => {
+              if (!faceGroup) return
+              setMoveModalOpen(true)
+            }}>
               {t('people_page.action_label.move_faces', 'Move faces')}
             </Button>
           </li>

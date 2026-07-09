@@ -1,12 +1,12 @@
-import React, { createContext, useContext, useEffect, useState } from 'react'
+import { createContext, useContext, useEffect, useState, ReactNode, useMemo, useCallback } from 'react'
 
-export type UpdateSidebarFn = (content: React.ReactNode) => void
+export type UpdateSidebarFn = (content: ReactNode) => void
 export type SidebarPinnedFn = (pin: boolean) => void
 
 interface SidebarContextType {
   updateSidebar: UpdateSidebarFn
   setPinned: SidebarPinnedFn
-  content: React.ReactNode
+  content: ReactNode
   pinned: boolean
 }
 
@@ -29,39 +29,42 @@ export const SidebarContext = createContext<SidebarContextType>({
 SidebarContext.displayName = 'SidebarContext'
 
 type SidebarProviderProps = {
-  children: React.ReactChild | React.ReactChild[]
+  children: ReactNode
 }
 
 export const SidebarProvider = ({ children }: SidebarProviderProps) => {
   const [state, setState] = useState<{
-    content: React.ReactNode | null
+    content: ReactNode | null
     pinned: boolean
   }>({
     content: null,
     pinned: false,
   })
 
-  const updateSidebar = (content: React.ReactNode | null) => {
-    if (content) {
-      setState(state => ({ ...state, content }))
-    } else {
+  const updateSidebar = useCallback((content: ReactNode | null) => {
+    if (content === null) {
       setState(state => ({ ...state, content: null, pinned: false }))
+    } else {
+      setState(state => ({ ...state, content }))
     }
-  }
+  }, [])
 
-  const setPinned = (pinned: boolean) => {
+  const setPinned = useCallback((pinned: boolean) => {
     setState(state => ({ ...state, pinned }))
-  }
+  }, [])
+
+  const contextValue = useMemo(
+    () => ({
+      updateSidebar,
+      setPinned,
+      content: state.content,
+      pinned: state.pinned,
+    }),
+    [updateSidebar, setPinned, state.content, state.pinned]
+  )
 
   return (
-    <SidebarContext.Provider
-      value={{
-        updateSidebar,
-        setPinned,
-        content: state.content,
-        pinned: state.pinned,
-      }}
-    >
+    <SidebarContext.Provider value={contextValue}>
       {children}
     </SidebarContext.Provider>
   )
@@ -74,26 +77,21 @@ export const Sidebar = () => {
     const body = document.body
 
     if (content == null) {
-      body.classList.remove('overflow-y-hidden')
-      body.classList.remove('lg:overflow-y-auto')
+      body.classList.remove('overflow-y-hidden', 'lg:overflow-y-auto')
     } else {
-      body.classList.add('overflow-y-hidden')
-      body.classList.add('lg:overflow-y-auto')
+      body.classList.add('overflow-y-hidden', 'lg:overflow-y-auto')
     }
 
     return () => {
-      body.classList.remove('overflow-y-hidden')
-      body.classList.remove('lg:overflow-y-auto')
+      body.classList.remove('overflow-y-hidden', 'lg:overflow-y-auto')
     }
-  })
+  }, [content])
 
   return (
     <div
-      className={`fixed top-[72px] bg-white dark:bg-dark-bg2 dark:border-dark-border2 bottom-0 w-full overflow-y-auto transform transition-transform motion-reduce:transition-none ${
-        content == null && !pinned ? 'translate-x-full' : 'translate-x-0'
-      } ${
-        pinned ? 'lg:border-l' : 'lg:shadow-separator'
-      } lg:w-[420px] lg:right-0 lg:top-0 lg:z-40`}
+      className={`fixed top-18 bg-white dark:bg-dark-bg2 dark:border-dark-border2 bottom-0 w-full overflow-y-auto transform transition-transform motion-reduce:transition-none ${content == null && !pinned ? 'translate-x-full' : 'translate-x-0'
+        } ${pinned ? 'lg:border-l' : 'lg:shadow-separator'
+        } lg:w-105 lg:right-0 lg:top-0 lg:z-40`}
     >
       {content}
       <div className="h-24"></div>

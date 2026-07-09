@@ -18,7 +18,63 @@
     }
   },
   "album_page": {
-    "load_error": ""
+    "load_error": "",
+    "loading": "",
+    "not_found": ""
+  },
+  "apollo_client": {
+    "notification": {
+      "graphql": {
+        "multiple": {
+          "content_one": "",
+          "content_other": "",
+          "header": ""
+        },
+        "single": {
+          "content": "",
+          "header": ""
+        }
+      },
+      "network": {
+        "auth": {
+          "generic": {
+            "content": "",
+            "header": ""
+          },
+          "multiple": {
+            "content_one": "",
+            "content_other": "",
+            "header": ""
+          },
+          "single": {
+            "content": "",
+            "header": ""
+          }
+        },
+        "retry": {
+          "generic": {
+            "content": ""
+          },
+          "header": "",
+          "multiple": {
+            "content_one": "",
+            "content_other": "",
+            "header": ""
+          },
+          "single": {
+            "content": ""
+          }
+        }
+      },
+      "websocket_exhausted": {
+        "content": "",
+        "header": ""
+      },
+      "websocket_restored": {
+        "content": "",
+        "header": ""
+      }
+    }
   },
   "ethical_use_license_page": {
     "load_error": "",
@@ -31,6 +87,7 @@
       "cancel": "Utzi",
       "close": "",
       "remove": "Kendu",
+      "retry": "",
       "save": "Gorde",
       "submit": ""
     },
@@ -58,7 +115,8 @@
       "result_type": {
         "albums": "Albumak",
         "media": "Edukia"
-      }
+      },
+      "results_label": ""
     }
   },
   "login_page": {
@@ -109,6 +167,9 @@
           "select_images": "Aukeratu aurpegiak kentzeko irudiak"
         },
         "description": "Kendu aukeratutako irudiak aurpegi-multzo honetatik eta mugitu beste aurpegi-multzo batera",
+        "error": {
+          "network": ""
+        },
         "title": "Kendu irudiko aurpegiak"
       },
       "merge_face_groups": {
@@ -116,6 +177,22 @@
         "destination_table": {
           "title": "Aukeratu zein aurpegira mugituko d(ir)en"
         },
+        "error": {
+          "network": ""
+        },
+        "face_groups_load_error": "",
+        "preselected_role": {
+          "destination": {
+            "description": "",
+            "title": ""
+          },
+          "source": {
+            "description": "",
+            "title": ""
+          }
+        },
+        "preselected_role_description": "",
+        "source_role_destination_description": "",
         "sources_description": "",
         "sources_table": {
           "title": ""
@@ -125,8 +202,12 @@
       "move_image_faces": {
         "description": "Mugitu aurpegi-multzo honetan aukeratutako irudiak beste aurpegi-multzo batera",
         "destination_face_group_table": {
+          "load_error": "",
           "move_action": "Mugitu irudiko aurpegiak",
           "title": "Aukeratu zein aurpegi-multzora mugituko d(ir)en"
+        },
+        "error": {
+          "network": ""
         },
         "image_select_table": {
           "next_action": "Hurrengoa",
@@ -185,6 +266,8 @@
     "scanner": {
       "description": "Erabiltzaile guztiak aztertuko ditugu eduki berri edo eguneratuen bila",
       "scan_all_users": "Aztertu erabiltzaile guztiak",
+      "scanning": "",
+      "starting": "",
       "title": "Azterketa"
     },
     "user_preferences": {
@@ -217,11 +300,15 @@
       },
       "confirm_delete_user": {
         "action": "Ezabatu {{user}}",
-        "description": "<0>Ziur al zaude <1></1> ezabatu nahi duzula?</0><p>Eragiketa hau ezin da desegin</p>",
+        "description": "<line>Ziur al zaude <bold>{{username}}</bold> ezabatu nahi duzula?</line><line>Eragiketa hau ezin da desegin</line>",
         "title": "Ezabatu erabiltzailea"
       },
+      "edit": {
+        "add_path_error": "",
+        "remove_path_error": ""
+      },
       "password_reset": {
-        "description": "Aldatu <1>{{username}}</1>(r)en pasahitza",
+        "description": "Aldatu <bold>{{username}}</bold>(r)en pasahitza",
         "error": "",
         "form": {
           "label": "Pasahitz berria",
@@ -372,6 +459,7 @@
       "action_label": {
         "detach_image": "Kendu irudia",
         "merge_face": "Bateratu aurpegia",
+        "more_actions": "",
         "move_face": "Mugitu aurpegia"
       },
       "confirm_image_detach": "Ziur al zaude irudi hau kendu nahi duzula?",
@@ -379,8 +467,10 @@
     },
     "sharing": {
       "add_share": "Gehitu partekatzeak",
+      "add_share_error": "",
       "copy_link": "Kopiatu esteka",
       "delete": "Ezabatu",
+      "delete_error": "",
       "error": "",
       "expiration_date": "",
       "more": "Gehiago",
@@ -433,10 +523,13 @@
     }
   },
   "title": {
-    "loading_album": "Albuma kargatzen",
     "login": "Saioa",
-    "not_found": "",
     "people": "Jendea",
     "settings": "Ezarpenak"
+  },
+  "update_available_page": {
+    "action": "",
+    "content": "",
+    "header": ""
   }
 }

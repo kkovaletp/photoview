@@ -1,12 +1,11 @@
 import { render, screen } from '@testing-library/react'
 
-import React from 'react'
 import { MediaType } from '../../../__generated__/globalTypes'
-import { MediaGalleryFields } from '../__generated__/MediaGalleryFields'
+import { MediaGalleryFieldsFragment } from '../__generated__/fragments'
 import PresentMedia from './PresentMedia'
 
 test('render present image', () => {
-  const media: MediaGalleryFields = {
+  const media: MediaGalleryFieldsFragment = {
     __typename: 'Media',
     id: '123',
     type: MediaType.Photo,
@@ -34,7 +33,7 @@ test('render present image', () => {
 })
 
 test('render present video', () => {
-  const media: MediaGalleryFields = {
+  const media: MediaGalleryFieldsFragment = {
     __typename: 'Media',
     id: '123',
     type: MediaType.Video,

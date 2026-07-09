@@ -6,14 +6,13 @@ import { TranslationFn } from '../../localization'
 import { useMessageState } from '../messages/MessageState'
 import { Message } from '../messages/SubscriptionsHook'
 import { MediaSidebarMedia } from './MediaSidebar/MediaSidebar'
-import React, { useEffect } from 'react'
+import { useEffect } from 'react'
 import { SidebarSection, SidebarSectionTitle } from './SidebarComponents'
 import SidebarTable from './SidebarTable'
 import {
-  sidebarDownloadQuery,
-  sidebarDownloadQueryVariables,
-  sidebarDownloadQuery_media_downloads,
-} from './__generated__/sidebarDownloadQuery'
+  SidebarDownloadQueryQuery,
+  SidebarDownloadQueryQueryVariables,
+} from './__generated__/SidebarDownloadMedia'
 
 const DOWNLOAD_COMPLETE_NOTIFICATION_DURATION = 2000
 
@@ -35,7 +34,7 @@ export const SIDEBAR_DOWNLOAD_QUERY = gql`
 `
 
 const formatBytes = (t: TranslationFn) => (bytes: number) => {
-  if (bytes == 0)
+  if (bytes === 0)
     return t('sidebar.download.filesize.byte', '{{count}} Byte', { count: 0 })
 
   const i = Math.floor(Math.log(bytes) / Math.log(1024))
@@ -64,13 +63,13 @@ const downloadMedia = (
   removeKey: (key: string) => void
 ) => async (url: string) => {
   const imgUrl = new URL(
-    `${import.meta.env.BASE_URL}${url}`.replace(/\/\//g, '/'),
+    `${import.meta.env.BASE_URL}${url}`.replaceAll('//', '/'),
     location.origin
   )
 
   if (authToken() == null) {
     // Get share token if not authorized
-    const token = location.pathname.match(/^\/share\/([\d\w]+)(\/?.*)$/)
+    const token = /^\/share\/(\w+)/.exec(location.pathname)
     if (token) {
       imgUrl.searchParams.set('token', token[1])
     }
@@ -91,14 +90,12 @@ const downloadMedia = (
     return
   }
 
-  const filenameMatch = url.match(/[^/]*$/)
-
-  if (filenameMatch == null) {
+  const lastSlashIndex = url.lastIndexOf('/')
+  const filename = url.slice(lastSlashIndex + 1)
+  if (!filename) {
     console.error('Could not extract filename', url)
     return
   }
-
-  const filename = filenameMatch[0]
   downloadBlob(blob, filename)
 }
 
@@ -228,7 +225,7 @@ const downloadMediaShowProgress =
   }
 
 const downloadBlob = (blob: Blob, filename: string) => {
-  const objectUrl = window.URL.createObjectURL(blob)
+  const objectUrl = globalThis.URL.createObjectURL(blob)
 
   const anchor = document.createElement('a')
   document.body.appendChild(anchor)
@@ -239,7 +236,7 @@ const downloadBlob = (blob: Blob, filename: string) => {
 
   anchor.remove()
 
-  window.URL.revokeObjectURL(objectUrl)
+  globalThis.URL.revokeObjectURL(objectUrl)
 }
 
 type SidebarDownloadTableRow = {
@@ -308,22 +305,22 @@ const SidebarMediaDownload = ({ media }: SidebarMediaDownladProps) => {
   const { t } = useTranslation()
   const { add, removeKey } = useMessageState()
 
-  const [loadPhotoDownloads, { called, loading, data, error }] = useLazyQuery<
-    sidebarDownloadQuery,
-    sidebarDownloadQueryVariables
+  const [loadPhotoDownloads, { loading, data, error }] = useLazyQuery<
+    SidebarDownloadQueryQuery,
+    SidebarDownloadQueryQueryVariables
   >(SIDEBAR_DOWNLOAD_QUERY, {})
 
   useEffect(() => {
-    if (media?.id && !media.downloads && !called) {
+    if (media?.id && !media.downloads && !loading && !error && data?.media?.id !== media.id) {
       loadPhotoDownloads({
         variables: { mediaId: media.id }
       })
     }
-  }, [media?.id, media?.downloads, called, loadPhotoDownloads])
+  }, [media?.id, media?.downloads, loading, error, data?.media?.id, loadPhotoDownloads])
 
-  if (!media || !media.id) return null
+  if (!media?.id) return null
 
-  if (error) {
+  if (error && !loading) {
     console.error('Failed to load download options: ', error)
     return (
       <SidebarSection>
@@ -337,10 +334,11 @@ const SidebarMediaDownload = ({ media }: SidebarMediaDownladProps) => {
     )
   }
 
-  let downloads: sidebarDownloadQuery_media_downloads[] = []
+  let downloads: SidebarDownloadQueryQuery['media']['downloads'] = []
+  const queryMatchesCurrentMedia = data?.media?.id === media?.id
 
-  if (called && !loading) {
-    downloads = (data && data.media.downloads) || []
+  if (queryMatchesCurrentMedia && !loading) {
+    downloads = data?.media?.downloads || []
   } else if (media.downloads) {
     downloads = media.downloads
   }

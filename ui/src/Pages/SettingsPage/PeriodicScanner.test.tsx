@@ -59,9 +59,7 @@ describe('PeriodicScanner', () => {
       renderWithProviders(<PeriodicScanner />, { mocks })
 
       await waitFor(() => {
-        const checkbox = screen.getByLabelText(
-          'Enable periodic scanner'
-        ) as HTMLInputElement
+        const checkbox = screen.getByLabelText('Enable periodic scanner') as HTMLInputElement
         expect(checkbox).not.toBeDisabled()
         expect(checkbox.checked).toBe(false)
       })
@@ -88,9 +86,7 @@ describe('PeriodicScanner', () => {
       renderWithProviders(<PeriodicScanner />, { mocks })
 
       await waitFor(() => {
-        const checkbox = screen.getByLabelText(
-          'Enable periodic scanner'
-        ) as HTMLInputElement
+        const checkbox = screen.getByLabelText('Enable periodic scanner') as HTMLInputElement
         expect(checkbox.checked).toBe(true)
       })
 
@@ -417,9 +413,7 @@ describe('PeriodicScanner', () => {
       renderWithProviders(<PeriodicScanner />, { mocks })
 
       await waitFor(() => {
-        const checkbox = screen.getByLabelText(
-          'Enable periodic scanner'
-        ) as HTMLInputElement
+        const checkbox = screen.getByLabelText('Enable periodic scanner') as HTMLInputElement
         expect(checkbox.checked).toBe(true)
       })
 
@@ -465,9 +459,7 @@ describe('PeriodicScanner', () => {
       renderWithProviders(<PeriodicScanner />, { mocks })
 
       await waitFor(() => {
-        const checkbox = screen.getByLabelText(
-          'Enable periodic scanner'
-        ) as HTMLInputElement
+        const checkbox = screen.getByLabelText('Enable periodic scanner') as HTMLInputElement
         expect(checkbox.checked).toBe(true)
       })
 
@@ -477,9 +469,7 @@ describe('PeriodicScanner', () => {
       // The mutation should be triggered with interval: 0
       // Wait for mutation to complete - no error should occur
       await waitFor(() => {
-        const checkbox = screen.getByLabelText(
-          'Enable periodic scanner'
-        ) as HTMLInputElement
+        const checkbox = screen.getByLabelText('Enable periodic scanner') as HTMLInputElement
         expect(checkbox.checked).toBe(false)
       })
     })
@@ -737,9 +727,7 @@ describe('PeriodicScanner', () => {
         expect(unitDropdown).toBeEnabled()
       })
 
-      const unitDropdown = screen.getByLabelText(
-        'Interval unit'
-      ) as HTMLSelectElement
+      const unitDropdown = screen.getByLabelText('Interval unit') as HTMLSelectElement
       await user.selectOptions(unitDropdown, 'hour')
 
       await waitFor(() => {

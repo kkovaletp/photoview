@@ -1,4 +1,4 @@
-import React from 'react'
+import { ReactNode, lazy, Suspense } from 'react'
 import {
   Navigate,
   useNavigate,
@@ -14,41 +14,41 @@ import type { TFunction } from 'i18next'
 import Loader from '../../primitives/Loader'
 import AuthorizedRoute from './AuthorizedRoute'
 
-const AlbumsPage = React.lazy(
+const AlbumsPage = lazy(
   () => import('../../Pages/AllAlbumsPage/AlbumsPage')
 )
-const AlbumPage = React.lazy(() => import('../../Pages/AlbumPage/AlbumPage'))
-const TimelinePage = React.lazy(
+const AlbumPage = lazy(() => import('../../Pages/AlbumPage/AlbumPage'))
+const TimelinePage = lazy(
   () => import('../../Pages/TimelinePage/TimelinePage')
 )
-const PlacesPage = React.lazy(() => import('../../Pages/PlacesPage/PlacesPage'))
+const PlacesPage = lazy(() => import('../../Pages/PlacesPage/PlacesPage'))
 
-const LoginPage = React.lazy(() => import('../../Pages/LoginPage/LoginPage'))
-const InitialSetupPage = React.lazy(
+const LoginPage = lazy(() => import('../../Pages/LoginPage/LoginPage'))
+const InitialSetupPage = lazy(
   () => import('../../Pages/LoginPage/InitialSetupPage')
 )
 
-const EthicalUseLicensePage = React.lazy(
+const EthicalUseLicensePage = lazy(
   () => import('../../Pages/EthicalUseLicensePage/EthicalUseLicensePage')
 )
 
-const SharePageTokenRoute = React.lazy(() =>
+const SharePageTokenRoute = lazy(() =>
   import('../../Pages/SharePage/SharePage').then(x => ({
     default: x.TokenRoute,
   }))
 )
 
-const SettingsPage = React.lazy(
+const SettingsPage = lazy(
   () => import('../../Pages/SettingsPage/SettingsPage')
 )
 
-const PeoplePage = React.lazy(() =>
+const PeoplePage = lazy(() =>
   import('../../Pages/PeoplePage/PeoplePage').then(x => ({
     default: x.PeoplePage,
   }))
 )
 
-const PersonPage = React.lazy(() =>
+const PersonPage = lazy(() =>
   import('../../Pages/PeoplePage/PeoplePage').then(x => ({
     default: x.PersonPage,
   }))
@@ -58,7 +58,7 @@ const Routes = () => {
   const { t } = useTranslation()
   const navigate = useNavigate()
 
-  const authorized = (element: React.ReactNode) => (
+  const authorized = (element: ReactNode) => (
     <AuthorizedRoute>{element}</AuthorizedRoute>
   )
 
@@ -133,7 +133,7 @@ const Routes = () => {
   ])
 
   return (
-    <React.Suspense
+    <Suspense
       fallback={
         <Layout title={t('general.loading.page', 'Loading page')}>
           <Loader message={t('general.loading.page', 'Loading page')} active />
@@ -141,7 +141,7 @@ const Routes = () => {
       }
     >
       {routes}
-    </React.Suspense>
+    </Suspense>
   )
 }
 

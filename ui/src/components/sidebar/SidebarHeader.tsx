@@ -1,4 +1,4 @@
-import React, { useContext } from 'react'
+import { useContext } from 'react'
 import { useTranslation } from 'react-i18next'
 import CloseIcon from './icons/closeSidebarIcon.svg?react'
 import PinIconOutline from './icons/pinSidebarIconOutline.svg?react'

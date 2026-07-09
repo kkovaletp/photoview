@@ -1,4 +1,4 @@
-import React, { ReactElement } from 'react'
+import { ReactElement, createElement } from 'react'
 import styled from 'styled-components'
 import { useTranslation } from 'react-i18next'
 import {
@@ -14,7 +14,7 @@ const COMMIT_SHA = import.meta.env.REACT_APP_BUILD_COMMIT_SHA
 let commitLink: ReactElement
 
 if (COMMIT_SHA) {
-  commitLink = React.createElement(
+  commitLink = createElement(
     'a',
     {
       href: 'https://github.com/kkovaletp/photoview/commit/' + COMMIT_SHA,

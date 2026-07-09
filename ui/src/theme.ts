@@ -2,7 +2,7 @@ export const updateTheme = () => {
   if (
     localStorage.theme === 'dark' ||
     (!('theme' in localStorage) &&
-      window.matchMedia('(prefers-color-scheme: dark)').matches)
+      globalThis.matchMedia('(prefers-color-scheme: dark)').matches)
   ) {
     document.documentElement.classList.add('dark')
   } else {
@@ -11,9 +11,9 @@ export const updateTheme = () => {
 }
 
 export const changeTheme = (value: string) => {
-  if (value == 'light') {
+  if (value === 'light') {
     localStorage.theme = 'light'
-  } else if (value == 'dark') {
+  } else if (value === 'dark') {
     localStorage.theme = 'dark'
   } else {
     // use OS preference
@@ -24,9 +24,9 @@ export const changeTheme = (value: string) => {
 }
 
 export const getTheme = () => {
-  if (localStorage.theme == 'light') {
+  if (localStorage.theme === 'light') {
     return 'light'
-  } else if (localStorage.theme == 'dark') {
+  } else if (localStorage.theme === 'dark') {
     return 'dark'
   } else {
     return 'auto'

@@ -1,12 +1,11 @@
 import { useQuery } from '@apollo/client'
 import gql from 'graphql-tag'
-import React from 'react'
 import { useTranslation } from 'react-i18next'
 import Dropdown, { DropdownItem } from '../../primitives/form/Dropdown'
 import { FavoriteCheckboxProps, FavoritesCheckbox } from '../album/AlbumFilter'
 
 import DateIcon from './icons/date.svg?react'
-import { earliestMedia } from './__generated__/earliestMedia'
+import { EarliestMediaQuery } from './__generated__/TimelineFilters'
 
 const EARLIEST_MEDIA_QUERY = gql`
   query earliestMedia {
@@ -28,7 +27,7 @@ type DateSelectorProps = {
 const DateSelector = ({ filterDate, setFilterDate }: DateSelectorProps) => {
   const { t } = useTranslation()
 
-  const { data, loading } = useQuery<earliestMedia>(EARLIEST_MEDIA_QUERY)
+  const { data, loading } = useQuery<EarliestMediaQuery>(EARLIEST_MEDIA_QUERY)
 
   let items: DropdownItem[] = [
     {
@@ -38,7 +37,7 @@ const DateSelector = ({ filterDate, setFilterDate }: DateSelectorProps) => {
   ]
 
   if (data) {
-    if (data.myMedia.length != 0) {
+    if (data.myMedia.length !== 0) {
       const dateStr = data.myMedia[0].date
       const date = new Date(dateStr)
       const now = new Date()
@@ -74,7 +73,7 @@ const DateSelector = ({ filterDate, setFilterDate }: DateSelectorProps) => {
         <Dropdown
           aria-labelledby="filter_group_date-label"
           setSelected={date =>
-            date == 'all' ? setFilterDate(null) : setFilterDate(date)
+            date === 'all' ? setFilterDate(null) : setFilterDate(date)
           }
           value={filterDate || 'all'}
           items={items}

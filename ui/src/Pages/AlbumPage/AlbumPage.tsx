@@ -8,7 +8,7 @@ import useURLParameters from '../../hooks/useURLParameters'
 import useScrollPagination from '../../hooks/useScrollPagination'
 import PaginateLoader from '../../components/PaginateLoader'
 import { useTranslation } from 'react-i18next'
-import { albumQuery, albumQueryVariables } from './__generated__/albumQuery'
+import { AlbumQueryQuery, AlbumQueryQueryVariables } from './__generated__/AlbumPage'
 import useOrderingParams from '../../hooks/useOrderingParams'
 import { useParams } from 'react-router'
 import { isNil } from '../../helpers/utils'
@@ -50,15 +50,15 @@ function AlbumPage() {
   const urlParams = useURLParameters()
   const orderParams = useOrderingParams(urlParams)
 
-  const onlyFavorites = urlParams.getParam('favorites') == '1'
+  const onlyFavorites = urlParams.getParam('favorites') === '1'
   const setOnlyFavorites = useCallback((favorites: boolean) =>
     urlParams.setParam('favorites', favorites ? '1' : '0'),
     [urlParams]
   )
 
   const { loading, error, data, refetch, fetchMore } = useQuery<
-    albumQuery,
-    albumQueryVariables
+    AlbumQueryQuery,
+    AlbumQueryQueryVariables
   >(ALBUM_QUERY, {
     variables: {
       id: albumId,
@@ -70,12 +70,13 @@ function AlbumPage() {
     },
   })
 
-  const { containerElem, finished: finishedLoadingMore } =
-    useScrollPagination<albumQuery>({
+  const { containerElem, loadingMore } =
+    useScrollPagination<AlbumQueryQuery>({
       loading,
       fetchMore,
       data,
-      getItems: data => data.album.media,
+      getItems: data => data.album?.media ?? [],
+      pageSize: 200,
     })
 
   const toggleFavorites = useCallback(
@@ -100,13 +101,16 @@ function AlbumPage() {
 
   if (error) return <div>{t('album_page.load_error', 'Error loading album: {{message}}', { message: error.message })}</div>
 
+  let pageTitle: string
+  if (data) {
+    pageTitle = data.album?.title ?? t('album_page.not_found', 'Album not found')
+  } else {
+    pageTitle = t('album_page.loading', 'Loading album...')
+  }
+
   return (
     <Layout
-      title={
-        data ? data.album ? data.album.title :
-          t('title.not_found', 'Not found') :
-          t('title.loading_album', 'Loading album')
-      }
+      title={pageTitle}
     >
       <AlbumGallery
         ref={containerElem}
@@ -114,13 +118,12 @@ function AlbumPage() {
         loading={loading}
         setOnlyFavorites={toggleFavorites}
         onlyFavorites={onlyFavorites}
-        onFavorite={() => (refetchNeededAll = refetchNeededFavorites = true)}
         showFilter
         setOrdering={orderParams.setOrdering}
         ordering={orderParams}
       />
       <PaginateLoader
-        active={!finishedLoadingMore && !loading}
+        active={loadingMore}
         text={t('general.loading.paginate.media', 'Loading more media')}
       />
     </Layout>

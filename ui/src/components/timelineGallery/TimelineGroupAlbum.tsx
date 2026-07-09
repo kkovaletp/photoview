@@ -1,4 +1,4 @@
-import React, { useContext } from 'react'
+import { Dispatch, useContext } from 'react'
 import { Link } from 'react-router'
 import { MediaThumbnail } from '../photoGallery/MediaThumbnail'
 import { PhotoFiller } from '../photoGallery/MediaGallery'
@@ -19,7 +19,7 @@ type TimelineGroupAlbumProps = {
   dateIndex: number
   albumIndex: number
   mediaState: TimelineGalleryState
-  dispatchMedia: React.Dispatch<TimelineGalleryAction>
+  dispatchMedia: Dispatch<TimelineGalleryAction>
 }
 
 const TimelineGroupAlbum = ({
@@ -67,6 +67,8 @@ const TimelineGroupAlbum = ({
         toggleFavoriteAction({
           media,
           markFavorite,
+        }).catch(err => {
+          console.error('Failed to toggle favorite: ', err)
         })
       }}
       active={media.id === getActiveTimelineImage({ mediaState })?.id}

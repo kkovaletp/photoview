@@ -1,4 +1,15 @@
-import React, { JSX, createRef, useEffect, useState } from 'react'
+import {
+  DetailedHTMLProps,
+  Dispatch,
+  HTMLAttributes,
+  JSX,
+  SetStateAction,
+  useEffect,
+  useState,
+  KeyboardEvent,
+  useCallback,
+  useRef,
+} from 'react'
 import { gql, useMutation, useQuery } from '@apollo/client'
 import Layout from '../../components/layout/Layout'
 import styled from 'styled-components'
@@ -10,16 +21,14 @@ import useScrollPagination from '../../hooks/useScrollPagination'
 import PaginateLoader from '../../components/PaginateLoader'
 import { useTranslation } from 'react-i18next'
 import {
-  setGroupLabel,
-  setGroupLabelVariables,
-} from './__generated__/setGroupLabel'
-import {
-  myFaces,
-  myFacesVariables,
-  myFaces_myFaceGroups,
-} from './__generated__/myFaces'
-import { recognizeUnlabeledFaces } from './__generated__/recognizeUnlabeledFaces'
+  SetGroupLabelMutation,
+  SetGroupLabelMutationVariables,
+  MyFacesQuery,
+  MyFacesQueryVariables,
+  RecognizeUnlabeledFacesMutation
+} from './__generated__/PeoplePage'
 import { isNil, tailwindClassNames } from '../../helpers/utils'
+import { normalizeLabel } from '../../helpers/normalize'
 import { clsx } from 'clsx'
 import MergeFaceGroupsModal, {
   MergeFaceGroupsModalState,
@@ -62,7 +71,7 @@ export const SET_GROUP_LABEL_MUTATION = gql`
   }
 `
 
-const RECOGNIZE_UNLABELED_FACES_MUTATION = gql`
+export const RECOGNIZE_UNLABELED_FACES_MUTATION = gql`
   mutation recognizeUnlabeledFaces {
     recognizeUnlabeledFaces {
       id
@@ -73,8 +82,8 @@ const RECOGNIZE_UNLABELED_FACES_MUTATION = gql`
 type FaceDetailsWrapperProps = {
   labeled: boolean
   className?: string
-} & React.DetailedHTMLProps<
-  React.HTMLAttributes<HTMLSpanElement>,
+} & DetailedHTMLProps<
+  HTMLAttributes<HTMLSpanElement>,
   HTMLSpanElement
 >
 
@@ -102,17 +111,16 @@ const FaceDetailsWrapper = styled(FaceDetailsWrapperInner)`
   }
 `
 
+type FaceDetailsGroup = Pick<MyFacesQuery['myFaceGroups'][0], 'id' | 'label' | 'imageFaceCount'> & {
+  imageFaces?: MyFacesQuery['myFaceGroups'][0]['imageFaces']
+}
+
 type FaceDetailsProps = {
-  group: {
-    __typename: 'FaceGroup'
-    id: string
-    label: string | null
-    imageFaceCount: number
-  }
+  group: FaceDetailsGroup
   className?: string
   textFieldClassName?: string
   editLabel: boolean
-  setEditLabel: React.Dispatch<React.SetStateAction<boolean>>
+  setEditLabel: Dispatch<SetStateAction<boolean>>
 }
 
 export const FaceDetails = ({
@@ -124,34 +132,31 @@ export const FaceDetails = ({
 }: FaceDetailsProps) => {
   const { t } = useTranslation()
   const [inputValue, setInputValue] = useState(group.label ?? '')
-  const inputRef = createRef<HTMLInputElement>()
+  const inputRef = useRef<HTMLInputElement>(null)
 
-  const [setGroupLabel, { loading }] = useMutation<
-    setGroupLabel,
-    setGroupLabelVariables
+  const [setGroupLabel, { loading, error: mutationError }] = useMutation<
+    SetGroupLabelMutation,
+    SetGroupLabelMutationVariables
   >(SET_GROUP_LABEL_MUTATION, {
     variables: {
       groupID: group.id,
     },
+    onCompleted: () => setEditLabel(false),
   })
 
-  const resetLabel = () => {
+  const resetLabel = useCallback(() => {
     setInputValue(group.label ?? '')
     setEditLabel(false)
-  }
+  }, [group.label, setEditLabel])
 
   useEffect(() => {
-    inputRef.current?.focus()
-  }, [inputRef])
-
-  useEffect(() => {
-    if (!loading) {
-      resetLabel()
+    if (editLabel) {
+      inputRef.current?.focus()
     }
-  }, [loading])
+  }, [editLabel])
 
-  const onKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key == 'Escape') {
+  const onKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Escape') {
       resetLabel()
     }
   }
@@ -163,6 +168,7 @@ export const FaceDetails = ({
         <TextField
           className={textFieldClassName}
           loading={loading}
+          error={mutationError?.message}
           ref={inputRef}
           // size="mini"
           placeholder={t('people_page.face_group.label_placeholder', 'Label')}
@@ -172,7 +178,7 @@ export const FaceDetails = ({
             setGroupLabel({
               variables: {
                 groupID: group.id,
-                label: inputValue == '' ? null : inputValue,
+                label: normalizeLabel(inputValue),
               },
             })
           }
@@ -192,7 +198,10 @@ export const FaceDetails = ({
           'whitespace-nowrap inline-block overflow-hidden text-clip'
         )}
         labeled={!!group.label}
-        onClick={() => setEditLabel(true)}
+        onClick={() => {
+          setInputValue(group.label ?? '')
+          setEditLabel(true)
+        }}
       >
         <FaceImagesCount>{group.imageFaceCount}</FaceImagesCount>
         <button className="">
@@ -212,7 +221,7 @@ const FaceImagesCount = styled.span.attrs({
 })``
 
 type FaceGroupProps = {
-  group: myFaces_myFaceGroups
+  group: MyFacesQuery['myFaceGroups'][0]
 }
 
 export const FaceGroup = ({ group }: FaceGroupProps) => {
@@ -247,8 +256,8 @@ const FaceGroupsWrapper = styled.div`
 export const PeoplePage = () => {
   const { t } = useTranslation()
   const { data, error, loading, fetchMore } = useQuery<
-    myFaces,
-    myFacesVariables
+    MyFacesQuery,
+    MyFacesQueryVariables
   >(MY_FACES_QUERY, {
     variables: {
       limit: 50,
@@ -260,16 +269,39 @@ export const PeoplePage = () => {
     MergeFaceGroupsModalState.Closed
   )
 
-  const [recognizeUnlabeled, { loading: recognizeUnlabeledLoading }] =
-    useMutation<recognizeUnlabeledFaces>(RECOGNIZE_UNLABELED_FACES_MUTATION)
+  const [
+    recognizeUnlabeled,
+    {
+      loading: recognizeUnlabeledLoading,
+      error: recognizeUnlabeledError,
+    },
+  ] = useMutation<RecognizeUnlabeledFacesMutation>(
+    RECOGNIZE_UNLABELED_FACES_MUTATION,
+    {
+      errorPolicy: 'all',
+      refetchQueries: ({ data, errors }) =>
+        data?.recognizeUnlabeledFaces && (errors?.length ?? 0) === 0
+          ? [
+            {
+              query: MY_FACES_QUERY,
+              variables: {
+                limit: 50,
+                offset: 0,
+              },
+            },
+          ]
+          : [],
+      awaitRefetchQueries: true,
+    }
+  )
 
-  const { containerElem, finished: finishedLoadingMore } =
-    useScrollPagination<myFaces>({
-      loading,
-      fetchMore,
-      data,
-      getItems: data => data.myFaceGroups,
-    })
+  const { containerElem, loadingMore } = useScrollPagination<MyFacesQuery>({
+    loading,
+    fetchMore,
+    data,
+    getItems: data => data.myFaceGroups,
+    pageSize: 50,
+  })
 
   if (error) {
     return <div>{error.message}</div>
@@ -290,6 +322,10 @@ export const PeoplePage = () => {
       refetchQueries={[
         {
           query: MY_FACES_QUERY,
+          variables: {
+            limit: 50,
+            offset: 0,
+          },
         },
       ]}
     />
@@ -303,7 +339,7 @@ export const PeoplePage = () => {
             aria-label={t('people_page.recognize_unlabeled_faces_button', 'Recognize unlabeled faces')}
             disabled={recognizeUnlabeledLoading}
             onClick={() => {
-              recognizeUnlabeled()
+              recognizeUnlabeled().catch(() => undefined)
             }}
           >
             {t(
@@ -323,10 +359,17 @@ export const PeoplePage = () => {
           </Button>
         </li>
       </ul>
-
+      {recognizeUnlabeledError && (
+        <div
+          role="alert"
+          className="mb-2 rounded border border-red-300 bg-red-50 dark:bg-dark-900/50 px-3 py-2 text-sm text-red-800 dark:text-red-300"
+        >
+          {recognizeUnlabeledError.message}
+        </div>
+      )}
       <FaceGroupsWrapper ref={containerElem}>{faces}</FaceGroupsWrapper>
       <PaginateLoader
-        active={!finishedLoadingMore && !loading}
+        active={loadingMore}
         text={t('general.loading.paginate.faces', 'Loading more people')}
       />
       {modals}

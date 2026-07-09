@@ -1,11 +1,11 @@
-import React from 'react'
+import { ChangeEvent } from 'react'
 import { useTranslation } from 'react-i18next'
 import { EditRootPaths } from './EditUserRowRootPaths'
 import { UserRowChildProps } from './UserRow'
 import { TableRow, TableCell } from '../../../primitives/Table'
-import { TextField } from '../../../primitives/form/Input'
-import { Button, ButtonGroup } from '../../../primitives/form/Input'
+import { TextField, Button, ButtonGroup } from '../../../primitives/form/Input'
 import Checkbox from '../../../primitives/form/Checkbox'
+import { normalizeUsername } from '../../../helpers/normalize'
 
 const EditUserRow = ({
   user,
@@ -17,7 +17,7 @@ const EditUserRow = ({
   const { t } = useTranslation()
 
   function updateInput(
-    event: React.ChangeEvent<HTMLInputElement>,
+    event: ChangeEvent<HTMLInputElement>,
     key: string
   ) {
     setState(state => ({
@@ -67,15 +67,17 @@ const EditUserRow = ({
           <Button
             disabled={updateUserLoading}
             variant="positive"
-            onClick={() =>
+            onClick={() => {
+              const username =
+                normalizeUsername(state.username)
               updateUser({
                 variables: {
                   id: user.id,
-                  username: state.username,
+                  username,
                   admin: state.admin,
                 },
               })
-            }
+            }}
           >
             {t('general.action.save', 'Save')}
           </Button>

@@ -1,3 +1,4 @@
+import { ReactNode } from 'react'
 import { renderHook, act } from '@testing-library/react'
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest'
 import { useMessageState, MessageProvider } from './MessageState'
@@ -13,7 +14,7 @@ describe('MessageState', () => {
             vi.useFakeTimers({
                 toFake: ['setTimeout', 'setInterval', 'clearTimeout', 'clearInterval']
             })
-            clearIntervalSpy = vi.spyOn(window, 'clearInterval')
+            clearIntervalSpy = vi.spyOn(globalThis, 'clearInterval')
         } catch (error) {
             Date.now = originalDateNow
             throw error
@@ -29,7 +30,7 @@ describe('MessageState', () => {
         }
     })
 
-    const wrapper = ({ children }: { children: React.ReactNode }) => (
+    const wrapper = ({ children }: { children: ReactNode }) => (
         <MessageProvider>{children}</MessageProvider>
     )
 
@@ -84,6 +85,38 @@ describe('MessageState', () => {
         expect(result.current.messages).toHaveLength(2)
         expect(result.current.messages[0].key).toBe('msg1')
         expect(result.current.messages[1].key).toBe('msg2')
+    })
+
+    it('should replace an existing message by key instead of duplicating it', () => {
+        const now = 1643673600000
+        Date.now = vi.fn(() => now)
+
+        const { result } = renderHook(() => useMessageState(), { wrapper })
+
+        act(() => {
+            result.current.add({
+                key: 'duplicate-key',
+                type: NotificationType.Message,
+                props: { header: 'First', content: 'First content' }
+            })
+        })
+
+        expect(result.current.messages).toHaveLength(1)
+
+        const later = now + 1000
+        act(() => {
+            Date.now = vi.fn(() => later)
+            result.current.add({
+                key: 'duplicate-key',
+                type: NotificationType.Message,
+                props: { header: 'Second', content: 'Second content' }
+            })
+        })
+
+        // Same key must replace the previous entry, not add a new one
+        expect(result.current.messages).toHaveLength(1)
+        expect(result.current.messages[0].props.header).toBe('Second')
+        expect(result.current.messages[0].timestamp).toBe(later)
     })
 
     it('should add timestamp to new messages', async () => {

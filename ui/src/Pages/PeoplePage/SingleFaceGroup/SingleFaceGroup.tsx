@@ -1,4 +1,4 @@
-import { gql, useQuery } from '@apollo/client'
+import { useQuery } from '@apollo/client'
 import { useEffect, useReducer } from 'react'
 import { useTranslation } from 'react-i18next'
 import PaginateLoader from '../../../components/PaginateLoader'
@@ -6,44 +6,11 @@ import MediaGallery from '../../../components/photoGallery/MediaGallery'
 import { mediaGalleryReducer } from '../../../components/photoGallery/mediaGalleryReducer'
 import useScrollPagination from '../../../hooks/useScrollPagination'
 import FaceGroupTitle from './FaceGroupTitle'
+import { SINGLE_FACE_GROUP } from './singleFaceGroupQuery'
 import {
-  singleFaceGroup,
-  singleFaceGroupVariables,
-} from './__generated__/singleFaceGroup'
-import { MediaGalleryFields } from '../../../components/photoGallery/__generated__/MediaGalleryFields'
-
-export const SINGLE_FACE_GROUP = gql`
-  query singleFaceGroup($id: ID!, $limit: Int!, $offset: Int!) {
-    faceGroup(id: $id) {
-      id
-      label
-      imageFaces(paginate: { limit: $limit, offset: $offset }) {
-        id
-        rectangle {
-          minX
-          maxX
-          minY
-          maxY
-        }
-        media {
-          id
-          type
-          title
-          blurhash
-          thumbnail {
-            url
-            width
-            height
-          }
-          highRes {
-            url
-          }
-          favorite
-        }
-      }
-    }
-  }
-`
+  SingleFaceGroupQuery,
+  SingleFaceGroupQueryVariables,
+} from './__generated__/singleFaceGroupQuery'
 
 type SingleFaceGroupProps = {
   faceGroupID: string
@@ -53,8 +20,8 @@ const SingleFaceGroup = ({ faceGroupID }: SingleFaceGroupProps) => {
   const { t } = useTranslation()
 
   const { data, error, loading, fetchMore } = useQuery<
-    singleFaceGroup,
-    singleFaceGroupVariables
+    SingleFaceGroupQuery,
+    SingleFaceGroupQueryVariables
   >(SINGLE_FACE_GROUP, {
     variables: {
       limit: 200,
@@ -69,19 +36,17 @@ const SingleFaceGroup = ({ faceGroupID }: SingleFaceGroupProps) => {
     media: [],
   })
 
-  const { containerElem, finished: finishedLoadingMore } =
-    useScrollPagination<singleFaceGroup>({
+  const { containerElem, loadingMore } =
+    useScrollPagination<SingleFaceGroupQuery>({
       loading,
       fetchMore,
       data,
-      getItems: data => data.faceGroup.imageFaces,
+      getItems: data => data.faceGroup?.imageFaces ?? [],
+      pageSize: 200,
     })
 
   useEffect(() => {
-    const media = (data?.faceGroup?.imageFaces?.map(x => ({
-      ...x.media,
-      videoWeb: null
-    })) || []) as MediaGalleryFields[]
+    const media = data?.faceGroup?.imageFaces?.map(x => x.media) ?? []
     dispatchMedia({ type: 'replaceMedia', media })
   }, [data])
 
@@ -105,7 +70,7 @@ const SingleFaceGroup = ({ faceGroupID }: SingleFaceGroupProps) => {
           mediaState={mediaState}
         />
         <PaginateLoader
-          active={!finishedLoadingMore && !loading}
+          active={loadingMore}
           text={t('general.loading.paginate.media', 'Loading more media')}
         />
       </div>

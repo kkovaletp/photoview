@@ -11,7 +11,7 @@ import { setupLocalization } from '../src/localization'
 setupLocalization()
 
 // Mock ResizeObserver for Headless UI components
-global.ResizeObserver = class ResizeObserver {
+globalThis.ResizeObserver = class ResizeObserver {
     observe() { }
     unobserve() { }
     disconnect() { }

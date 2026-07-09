@@ -1,21 +1,22 @@
 import { useLazyQuery } from '@apollo/client'
-import React, { JSX, useEffect } from 'react'
+import { useEffect, JSX, ReactNode } from 'react'
 import { Navigate } from 'react-router'
 import { authToken } from '../../helpers/authentication'
-import { adminQuery } from '../../__generated__/adminQuery'
+import { AdminQueryQuery } from '../layout/__generated__/Layout'
 import { ADMIN_QUERY } from '../layout/Layout'
 
 export const useIsAdmin = () => {
   const [fetchAdminQuery, { data, called }] =
-    useLazyQuery<adminQuery>(ADMIN_QUERY)
+    useLazyQuery<AdminQueryQuery>(ADMIN_QUERY)
+  const token = authToken()
 
   useEffect(() => {
-    if (authToken() && !called) {
+    if (token && !called) {
       fetchAdminQuery()
     }
-  }, [authToken()])
+  }, [token, called, fetchAdminQuery])
 
-  if (!authToken()) {
+  if (!token) {
     return false
   }
 
@@ -29,7 +30,7 @@ export const Authorized = ({ children }: { children: JSX.Element }) => {
 }
 
 interface AuthorizedRouteProps {
-  children: React.ReactNode
+  children: ReactNode
 }
 
 const AuthorizedRoute = ({ children }: AuthorizedRouteProps) => {

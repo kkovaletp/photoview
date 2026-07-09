@@ -5,7 +5,6 @@ import { describe, test, expect, vi, beforeEach } from 'vitest'
 import { GraphQLError } from 'graphql'
 import AddUserRow, {
   CREATE_USER_MUTATION,
-  USER_ADD_ROOT_PATH_MUTATION,
 } from './AddUserRow'
 import { renderWithProviders } from '../../../helpers/testUtils'
 
@@ -40,29 +39,9 @@ describe('AddUserRow', () => {
         {
           request: {
             query: CREATE_USER_MUTATION,
-            variables: { username: 'testuser', admin: false },
+            variables: { username: 'testuser', admin: false, rootPath: '/tmp' },
           },
-          result: {
-            data: {
-              createUser: {
-                id: '123',
-                username: 'testuser',
-                admin: false,
-                __typename: 'User',
-              },
-            },
-          },
-        },
-        {
-          request: {
-            query: USER_ADD_ROOT_PATH_MUTATION,
-            variables: { id: '123', rootPath: '/tmp' },
-          },
-          result: {
-            data: {
-              userAddRootPath: { id: '567', __typename: 'Album' },
-            },
-          },
+          result: { data: { createUser: { id: '123', username: 'testuser', admin: false, __typename: 'User' } } },
         },
       ]
 
@@ -89,7 +68,7 @@ describe('AddUserRow', () => {
         {
           request: {
             query: CREATE_USER_MUTATION,
-            variables: { username: 'testuser', admin: false },
+            variables: { username: 'testuser', admin: false, rootPath: undefined },
           },
           result: {
             data: {
@@ -125,7 +104,7 @@ describe('AddUserRow', () => {
         {
           request: {
             query: CREATE_USER_MUTATION,
-            variables: { username: 'adminuser', admin: true },
+            variables: { username: 'adminuser', admin: true, rootPath: undefined },
           },
           result: {
             data: {
@@ -166,7 +145,7 @@ describe('AddUserRow', () => {
           {
             request: {
               query: CREATE_USER_MUTATION,
-              variables: { username: 'testuser', admin: false },
+              variables: { username: 'testuser', admin: false, rootPath: undefined },
             },
             result: {
               errors: [new GraphQLError('User already exists')],
@@ -203,23 +182,7 @@ describe('AddUserRow', () => {
           {
             request: {
               query: CREATE_USER_MUTATION,
-              variables: { username: 'testuser', admin: false },
-            },
-            result: {
-              data: {
-                createUser: {
-                  id: '123',
-                  username: 'testuser',
-                  admin: false,
-                  __typename: 'User',
-                },
-              },
-            },
-          },
-          {
-            request: {
-              query: USER_ADD_ROOT_PATH_MUTATION,
-              variables: { id: '123', rootPath: '/invalid/path' },
+              variables: { username: 'testuser', admin: false, rootPath: '/invalid/path' },
             },
             result: {
               errors: [new GraphQLError('Invalid path')],
@@ -258,7 +221,7 @@ describe('AddUserRow', () => {
           {
             request: {
               query: CREATE_USER_MUTATION,
-              variables: { username: 'testuser', admin: false },
+              variables: { username: 'testuser', admin: false, rootPath: undefined },
             },
             error: new Error('Network error'),
           },
@@ -293,25 +256,18 @@ describe('AddUserRow', () => {
           {
             request: {
               query: CREATE_USER_MUTATION,
-              variables: { username: 'testuser', admin: false },
+              variables: { username: 'testuser', admin: false, rootPath: undefined },
             },
-            result: {
-              errors: [new GraphQLError('Database error')],
-            },
+            result: { errors: [new GraphQLError('Database error')] },
           },
           {
             request: {
               query: CREATE_USER_MUTATION,
-              variables: { username: 'testuser', admin: false },
+              variables: { username: 'testuser', admin: false, rootPath: undefined },
             },
             result: {
               data: {
-                createUser: {
-                  id: '123',
-                  username: 'testuser',
-                  admin: false,
-                  __typename: 'User',
-                },
+                createUser: { id: '123', username: 'testuser', admin: false, __typename: 'User' },
               },
             },
           },
@@ -355,11 +311,9 @@ describe('AddUserRow', () => {
           {
             request: {
               query: CREATE_USER_MUTATION,
-              variables: { username: 'testuser', admin: false },
+              variables: { username: 'testuser', admin: false, rootPath: undefined },
             },
-            result: {
-              errors: [new GraphQLError('Test error')],
-            },
+            result: { errors: [new GraphQLError('Test error')] },
           },
         ]
 
@@ -381,6 +335,63 @@ describe('AddUserRow', () => {
         consoleErrorSpy.mockRestore()
       }
     })
+
+    test('retry with corrected path succeeds after initial invalid path error', async () => {
+      const user = userEvent.setup()
+      const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => { })
+
+      try {
+        const mocks: MockedResponse[] = [
+          {
+            // First attempt: path is invalid → entire operation rolled back, no user in DB
+            request: {
+              query: CREATE_USER_MUTATION,
+              variables: { username: 'testuser', admin: false, rootPath: '/invalid/path' },
+            },
+            result: { errors: [new GraphQLError('Invalid path')] },
+          },
+          {
+            // Second attempt: corrected path → succeeds cleanly (no duplicate-username conflict)
+            request: {
+              query: CREATE_USER_MUTATION,
+              variables: { username: 'testuser', admin: false, rootPath: '/valid/path' },
+            },
+            result: {
+              data: {
+                createUser: { id: '123', username: 'testuser', admin: false, __typename: 'User' },
+              },
+            },
+          },
+        ]
+
+        renderComponent(mocks)
+
+        const usernameInput = screen.getByPlaceholderText('Username')
+        const pathInput = screen.getByPlaceholderText('/path/to/photos')
+        const addUserBtn = screen.getByRole('button', { name: /add user/i })
+
+        await user.type(usernameInput, 'testuser')
+        await user.type(pathInput, '/invalid/path')
+        await user.click(addUserBtn)
+
+        // Error is shown; user was NOT created
+        await screen.findByText('Invalid path')
+        expect(onUserAddedMock).not.toHaveBeenCalled()
+
+        // Admin corrects the path and retries
+        await user.clear(pathInput)
+        await user.type(pathInput, '/valid/path')
+        await user.click(addUserBtn)
+
+        // Should succeed — no DB constraint violation
+        await waitFor(() => {
+          expect(onUserAddedMock).toHaveBeenCalledTimes(1)
+        })
+        expect(screen.queryByText('Invalid path')).not.toBeInTheDocument()
+      } finally {
+        consoleErrorSpy.mockRestore()
+      }
+    })
   })
 
   describe('Loading States', () => {
@@ -390,16 +401,11 @@ describe('AddUserRow', () => {
         {
           request: {
             query: CREATE_USER_MUTATION,
-            variables: { username: 'testuser', admin: false },
+            variables: { username: 'testuser', admin: false, rootPath: undefined },
           },
           result: {
             data: {
-              createUser: {
-                id: '123',
-                username: 'testuser',
-                admin: false,
-                __typename: 'User',
-              },
+              createUser: { id: '123', username: 'testuser', admin: false, __typename: 'User' },
             },
           },
           delay: 100,
@@ -432,27 +438,11 @@ describe('AddUserRow', () => {
         {
           request: {
             query: CREATE_USER_MUTATION,
-            variables: { username: 'testuser', admin: false },
+            variables: { username: 'testuser', admin: false, rootPath: '/tmp' },
           },
           result: {
             data: {
-              createUser: {
-                id: '123',
-                username: 'testuser',
-                admin: false,
-                __typename: 'User',
-              },
-            },
-          },
-        },
-        {
-          request: {
-            query: USER_ADD_ROOT_PATH_MUTATION,
-            variables: { id: '123', rootPath: '/tmp' },
-          },
-          result: {
-            data: {
-              userAddRootPath: { id: '567', __typename: 'Album' },
+              createUser: { id: '123', username: 'testuser', admin: false, __typename: 'User' },
             },
           },
           delay: 100,
@@ -504,9 +494,7 @@ describe('AddUserRow', () => {
 
       renderComponent(mocks)
 
-      const usernameInput = screen.getByPlaceholderText(
-        'Username'
-      ) as HTMLInputElement
+      const usernameInput = screen.getByPlaceholderText('Username') as HTMLInputElement
 
       await user.type(usernameInput, 'newuser')
 
@@ -519,9 +507,7 @@ describe('AddUserRow', () => {
 
       renderComponent(mocks)
 
-      const pathInput = screen.getByPlaceholderText(
-        '/path/to/photos'
-      ) as HTMLInputElement
+      const pathInput = screen.getByPlaceholderText('/path/to/photos') as HTMLInputElement
 
       await user.type(pathInput, '/home/photos')
 
@@ -590,7 +576,7 @@ describe('AddUserRow', () => {
           {
             request: {
               query: CREATE_USER_MUTATION,
-              variables: { username: 'testuser', admin: false },
+              variables: { username: 'testuser', admin: false, rootPath: undefined },
             },
             result: {
               errors: [new GraphQLError('Something went wrong')],

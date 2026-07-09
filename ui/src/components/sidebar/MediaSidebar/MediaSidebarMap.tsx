@@ -1,27 +1,28 @@
-import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { isNil } from '../../../helpers/utils'
 import useMapboxMap from '../../mapbox/MapboxMap'
 import { SidebarSection, SidebarSectionTitle } from '../SidebarComponents'
-import { sidebarMediaQuery_media_exif_coordinates } from './__generated__/sidebarMediaQuery'
+import { SidebarMediaQueryQuery } from './__generated__/MediaSidebar'
 
 type MediaSidebarMapProps = {
-  coordinates: sidebarMediaQuery_media_exif_coordinates
+  coordinates: NonNullable<SidebarMediaQueryQuery['media']['exif']>['coordinates']
 }
 
 const MediaSidebarMap = ({ coordinates }: MediaSidebarMapProps) => {
   const { t } = useTranslation()
 
+  const hasCoordinates = !isNil(coordinates)
+  const latitude = hasCoordinates ? coordinates.latitude : 0
+  const longitude = hasCoordinates ? coordinates.longitude : 0
+
   const { mapContainer, mapboxToken } = useMapboxMap({
     mapboxOptions: {
       interactive: false,
       zoom: 12,
-      center: {
-        lat: coordinates.latitude,
-        lng: coordinates.longitude,
-      },
+      center: { lat: latitude, lng: longitude },
     },
     configureMapbox: (map, mapboxLibrary) => {
+      if (!hasCoordinates) return
       map.addControl(
         new mapboxLibrary.NavigationControl({ showCompass: false })
       )
@@ -31,14 +32,14 @@ const MediaSidebarMap = ({ coordinates }: MediaSidebarMapProps) => {
         scale: 0.8,
       })
       centerMarker.setLngLat({
-        lat: coordinates.latitude,
-        lng: coordinates.longitude,
+        lat: latitude,
+        lng: longitude,
       })
       centerMarker.addTo(map)
     },
   })
 
-  if (isNil(mapboxToken)) {
+  if (!hasCoordinates || isNil(mapboxToken)) {
     return null
   }
 

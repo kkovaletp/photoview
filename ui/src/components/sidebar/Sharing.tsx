@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import {
   useMutation,
   useQuery,
@@ -10,30 +10,22 @@ import copy from 'copy-to-clipboard'
 import { useTranslation } from 'react-i18next'
 import { Popover, PopoverButton, PopoverPanel } from '@headlessui/react'
 import {
-  sidebareDeleteShare,
-  sidebareDeleteShareVariables,
-} from './__generated__/sidebareDeleteShare'
-import {
-  sidebarPhotoAddShare,
-  sidebarPhotoAddShareVariables,
-} from './__generated__/sidebarPhotoAddShare'
-import {
-  sidebarAlbumAddShare,
-  sidebarAlbumAddShareVariables,
-} from './__generated__/sidebarAlbumAddShare'
-import {
-  sidebarGetPhotoShares,
-  sidebarGetPhotoSharesVariables,
-  sidebarGetPhotoShares_media_shares,
-} from './__generated__/sidebarGetPhotoShares'
-import {
-  sidebarGetAlbumShares,
-  sidebarGetAlbumSharesVariables,
-  sidebarGetAlbumShares_album_shares,
-} from './__generated__/sidebarGetAlbumShares'
+  SidebareDeleteShareMutation,
+  SidebareDeleteShareMutationVariables,
+  SidebarPhotoAddShareMutation,
+  SidebarPhotoAddShareMutationVariables,
+  SidebarAlbumAddShareMutation,
+  SidebarAlbumAddShareMutationVariables,
+  SidebarGetPhotoSharesQuery,
+  SidebarGetPhotoSharesQueryVariables,
+  SidebarGetAlbumSharesQuery,
+  SidebarGetAlbumSharesQueryVariables,
+  SidebarProtectShareMutation,
+  SidebarProtectShareMutationVariables,
+} from './__generated__/Sharing'
 import { authToken } from '../../helpers/authentication'
 import { SidebarSection, SidebarSectionTitle } from './SidebarComponents'
-
+import { useNotifyError } from '../../hooks/useNotifyError'
 import LinkIcon from './icons/shareLinkIcon.svg?react'
 import CopyIcon from './icons/shareCopyIcon.svg?react'
 import DeleteIcon from './icons/shareDeleteIcon.svg?react'
@@ -42,12 +34,6 @@ import AddIcon from './icons/shareAddIcon.svg?react'
 import Checkbox from '../../primitives/form/Checkbox'
 import { TextField } from '../../primitives/form/Input'
 import styled from 'styled-components'
-import {
-  sidebarProtectShare,
-  sidebarProtectShareVariables,
-} from './__generated__/sidebarProtectShare'
-import { useMessageState } from '../messages/MessageState'
-import { NotificationType } from '../../__generated__/globalTypes'
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import dayjs from 'dayjs'
@@ -156,8 +142,12 @@ export const ArrowPopoverPanel = styled.div.attrs({
   }
 `
 
+type ShareItem =
+  | SidebarGetAlbumSharesQuery['album']['shares'][0]
+  | SidebarGetPhotoSharesQuery['media']['shares'][0]
+
 type MorePopoverSectionPasswordProps = {
-  share: sidebarGetAlbumShares_album_shares
+  share: ShareItem
   query: DocumentNode
   id: string
 }
@@ -167,7 +157,7 @@ const MorePopoverSectionPassword = ({
   query,
   id,
 }: MorePopoverSectionPasswordProps) => {
-  const { add } = useMessageState()
+  const notifyError = useNotifyError()
   const [addingPassword, setAddingPassword] = useState(false)
   const activated = addingPassword || share.hasPassword
 
@@ -177,8 +167,8 @@ const MorePopoverSectionPassword = ({
   const [passwordHidden, setPasswordHidden] = useState(share.hasPassword)
 
   const [setPassword, { loading: setPasswordLoading }] = useMutation<
-    sidebarProtectShare,
-    sidebarProtectShareVariables
+    SidebarProtectShareMutation,
+    SidebarProtectShareMutationVariables
   >(PROTECT_SHARE_MUTATION, {
     refetchQueries: [{ query: query, variables: { id } }],
     awaitRefetchQueries: true,
@@ -210,15 +200,7 @@ const MorePopoverSectionPassword = ({
         setPasswordInputValue('')
       } catch (error) {
         console.error('Failed to remove password protection: ', error)
-        add({
-          key: (globalThis.crypto?.randomUUID?.() ?? Math.random().toString(36)),
-          type: NotificationType.Message,
-          props: {
-            negative: true,
-            header: 'Failed to remove password protection',
-            content: error instanceof Error ? error.message : 'An unexpected error occurred',
-          },
-        })
+        notifyError('Failed to remove password protection', error)
       }
     }
   }
@@ -237,15 +219,7 @@ const MorePopoverSectionPassword = ({
         }
       } catch (error) {
         console.error('Failed to update password: ', error)
-        add({
-          key: (globalThis.crypto?.randomUUID?.() ?? Math.random().toString(36)),
-          type: NotificationType.Message,
-          props: {
-            negative: true,
-            header: 'Failed to update password',
-            content: error instanceof Error ? error.message : 'An unexpected error occurred',
-          },
-        })
+        notifyError('Failed to update password', error)
       }
     }
   }
@@ -270,9 +244,9 @@ const MorePopoverSectionPassword = ({
             event.altKey ||
             event.ctrlKey ||
             event.metaKey ||
-            event.key == 'Enter' ||
-            event.key == 'Tab' ||
-            event.key == 'Escape'
+            event.key === 'Enter' ||
+            event.key === 'Tab' ||
+            event.key === 'Escape'
           ) {
             return
           }
@@ -290,7 +264,7 @@ const MorePopoverSectionPassword = ({
 }
 
 type MorePopoverSectionExpirationProps = {
-  share: sidebarGetAlbumShares_album_shares
+  share: ShareItem
   id: string
   query: DocumentNode
 }
@@ -313,19 +287,7 @@ const MorePopoverSectionExpiration = ({
   }, [share.expire])
   const { t, i18n } = useTranslation()
 
-  const { add } = useMessageState()
-  const notifyError = (header: string, error: unknown) => {
-    console.error(`${header}: `, error)
-    add({
-      key: (globalThis.crypto?.randomUUID?.() ?? Math.random().toString(36)),
-      type: NotificationType.Message,
-      props: {
-        negative: true,
-        header,
-        content: error instanceof Error ? error.message : 'An unexpected error occurred',
-      },
-    })
-  }
+  const notifyError = useNotifyError()
 
   const dateFormatterOptions: Intl.DateTimeFormatOptions = {
     year: 'numeric',
@@ -354,6 +316,7 @@ const MorePopoverSectionExpiration = ({
       },
     }).catch(error => {
       notifyError('Failed to update expiration', error)
+      console.error('Failed to update expiration', error)
       // Revert to backend value on error
       setDate(share.expire ? new Date(share.expire) : null)
     })
@@ -382,6 +345,7 @@ const MorePopoverSectionExpiration = ({
               setEnabled(true)
               setDate(previousDate)
               notifyError('Failed to clear expiration', error)
+              console.error('Failed to clear expiration', error)
             }
             return
           }
@@ -415,7 +379,7 @@ const MorePopoverSectionExpiration = ({
 type MorePopoverProps = {
   id: string
   query: DocumentNode
-  share: sidebarGetAlbumShares_album_shares
+  share: ShareItem
 }
 
 const MorePopover = ({ id, share, query }: MorePopoverProps) => {
@@ -451,14 +415,14 @@ export const SidebarAlbumShare = ({ id }: SidebarShareAlbumProps) => {
     loading: queryLoading,
     error: sharesError,
     data: sharesData,
-  } = useQuery<sidebarGetAlbumShares, sidebarGetAlbumSharesVariables>(
+  } = useQuery<SidebarGetAlbumSharesQuery, SidebarGetAlbumSharesQueryVariables>(
     SHARE_ALBUM_QUERY,
     { variables: { id } }
   )
 
   const [shareAlbum, { loading: mutationLoading }] = useMutation<
-    sidebarAlbumAddShare,
-    sidebarAlbumAddShareVariables
+    SidebarAlbumAddShareMutation,
+    SidebarAlbumAddShareMutationVariables
   >(ADD_ALBUM_SHARE_MUTATION, {
     refetchQueries: [{ query: SHARE_ALBUM_QUERY, variables: { id } }],
     awaitRefetchQueries: true,
@@ -490,31 +454,32 @@ type SidebarSharePhotoProps = {
 
 export const SidebarPhotoShare = ({ id }: SidebarSharePhotoProps) => {
   const { t } = useTranslation()
+  const token = authToken()
 
   const [
     loadShares,
     { loading: queryLoading, error: sharesError, data: sharesData },
-  ] = useLazyQuery<sidebarGetPhotoShares, sidebarGetPhotoSharesVariables>(
+  ] = useLazyQuery<SidebarGetPhotoSharesQuery, SidebarGetPhotoSharesQueryVariables>(
     SHARE_PHOTO_QUERY
   )
 
   const [sharePhoto, { loading: mutationLoading }] = useMutation<
-    sidebarPhotoAddShare,
-    sidebarPhotoAddShareVariables
+    SidebarPhotoAddShareMutation,
+    SidebarPhotoAddShareMutationVariables
   >(ADD_MEDIA_SHARE_MUTATION, {
     refetchQueries: [{ query: SHARE_PHOTO_QUERY, variables: { id } }],
     awaitRefetchQueries: true,
   })
 
   useEffect(() => {
-    if (authToken()) {
+    if (token) {
       loadShares({
         variables: {
           id,
         },
       })
     }
-  }, [loadShares, id])
+  }, [loadShares, id, token])
 
   const loading = queryLoading || mutationLoading
 
@@ -541,7 +506,7 @@ type SidebarShareProps = {
   id: string
   isPhoto: boolean
   loading: boolean
-  shares?: sidebarGetPhotoShares_media_shares[]
+  shares?: ShareItem[]
   shareItem: (item: { variables: { id: string } }) => Promise<unknown>
 }
 
@@ -553,12 +518,13 @@ const SidebarShare = ({
   shareItem,
 }: SidebarShareProps) => {
   const { t } = useTranslation()
+  const notifyError = useNotifyError()
 
   const query = isPhoto ? SHARE_PHOTO_QUERY : SHARE_ALBUM_QUERY
 
   const [deleteShare] = useMutation<
-    sidebareDeleteShare,
-    sidebareDeleteShareVariables
+    SidebareDeleteShareMutation,
+    SidebareDeleteShareMutationVariables
   >(DELETE_SHARE_MUTATION, {
     refetchQueries: [{ query: query, variables: { id } }],
     awaitRefetchQueries: true,
@@ -594,7 +560,12 @@ const SidebarShare = ({
         </button>
         <button
           onClick={() => {
-            deleteShare({ variables: { token: share.token } })
+            deleteShare({
+              variables: { token: share.token }
+            }).catch(err => {
+              notifyError(t('sidebar.sharing.delete_error', 'Failed to delete share'), err)
+              console.error(t('sidebar.sharing.delete_error', 'Failed to delete share'), err)
+            })
           }}
           className="align-middle p-1 ml-2 hover:text-red-600 focus:text-red-600"
           title={t('sidebar.sharing.delete', 'Delete')}
@@ -608,7 +579,7 @@ const SidebarShare = ({
     </tr>
   ))
 
-  if (optionsRows.length == 0) {
+  if (optionsRows.length === 0) {
     optionsRows.push(
       <tr
         key="no-shares"
@@ -640,9 +611,10 @@ const SidebarShare = ({
                   disabled={loading}
                   onClick={() => {
                     shareItem({
-                      variables: {
-                        id,
-                      },
+                      variables: { id },
+                    }).catch(err => {
+                      notifyError(t('sidebar.sharing.add_share_error', 'Failed to add share'), err)
+                      console.error(t('sidebar.sharing.add_share_error', 'Failed to add share'), err)
                     })
                   }}
                 >
