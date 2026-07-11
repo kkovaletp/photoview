@@ -51,21 +51,23 @@ func configureTestEndpointsFromEnv(t *testing.T) {
 
 					switch scheme {
 					case "http":
-						if port == "" {
+						switch port {
+						case "":
 							// Add variant with explicit port 80
 							withPort, _ := url.Parse("http://" + host + ":80")
 							uiEndpoints = append(uiEndpoints, withPort)
-						} else if port == "80" {
+						case "80":
 							// Add variant without port
 							withoutPort, _ := url.Parse("http://" + host)
 							uiEndpoints = append(uiEndpoints, withoutPort)
 						}
 					case "https":
-						if port == "" {
+						switch port {
+						case "":
 							// Add variant with explicit port 443
 							withPort, _ := url.Parse("https://" + host + ":443")
 							uiEndpoints = append(uiEndpoints, withPort)
-						} else if port == "443" {
+						case "443":
 							// Add variant without port
 							withoutPort, _ := url.Parse("https://" + host)
 							uiEndpoints = append(uiEndpoints, withoutPort)
@@ -85,11 +87,11 @@ func configureTestEndpointsFromEnv(t *testing.T) {
 }
 
 // =============================================================================
-// WebsocketUpgrader CheckOrigin Tests
+// websocketCheckOrigin Tests
 // =============================================================================
 
-func TestWebsocketUpgraderDevModeAllowsAllOrigins(t *testing.T) {
-	upgrader := WebsocketUpgrader(true)
+func TestWebsocketCheckOriginDevModeAllowsAllOrigins(t *testing.T) {
+	checkOrigin := websocketCheckOrigin(true)
 
 	testCases := []struct {
 		name   string
@@ -108,17 +110,17 @@ func TestWebsocketUpgraderDevModeAllowsAllOrigins(t *testing.T) {
 				req.Header.Set("Origin", tc.origin)
 			}
 
-			result := upgrader.CheckOrigin(req)
+			result := checkOrigin(req)
 			assert.True(t, result, "DevMode should allow all origins")
 		})
 	}
 }
 
-func TestWebsocketUpgraderShouldServeUIAllowsAllOrigins(t *testing.T) {
+func TestWebsocketCheckOriginShouldServeUIAllowsAllOrigins(t *testing.T) {
 	t.Setenv("PHOTOVIEW_SERVE_UI", "1")
 	configureTestEndpointsFromEnv(t)
 
-	upgrader := WebsocketUpgrader(false)
+	checkOrigin := websocketCheckOrigin(false)
 
 	testCases := []struct {
 		name   string
@@ -136,52 +138,52 @@ func TestWebsocketUpgraderShouldServeUIAllowsAllOrigins(t *testing.T) {
 				req.Header.Set("Origin", tc.origin)
 			}
 
-			result := upgrader.CheckOrigin(req)
+			result := checkOrigin(req)
 			assert.True(t, result, "When serving UI internally, should allow all origins")
 		})
 	}
 }
 
-func TestWebsocketUpgraderEmptyOriginAllowed(t *testing.T) {
+func TestWebsocketCheckOriginEmptyOriginAllowed(t *testing.T) {
 	t.Setenv("PHOTOVIEW_SERVE_UI", "0")
 	t.Setenv("PHOTOVIEW_UI_ENDPOINTS", "https://ui.example.com")
 	configureTestEndpointsFromEnv(t)
 
-	upgrader := WebsocketUpgrader(false)
+	checkOrigin := websocketCheckOrigin(false)
 	req := httptest.NewRequest("GET", "/ws", nil)
 	// Explicitly not setting Origin header
 
-	result := upgrader.CheckOrigin(req)
+	result := checkOrigin(req)
 	assert.True(t, result, "Empty origin header should be allowed")
 }
 
-func TestWebsocketUpgraderInvalidOriginRejected(t *testing.T) {
+func TestWebsocketCheckOriginInvalidOriginRejected(t *testing.T) {
 	t.Setenv("PHOTOVIEW_SERVE_UI", "0")
 	t.Setenv("PHOTOVIEW_UI_ENDPOINTS", "https://ui.example.com")
 	configureTestEndpointsFromEnv(t)
 
-	upgrader := WebsocketUpgrader(false)
+	checkOrigin := websocketCheckOrigin(false)
 	req := httptest.NewRequest("GET", "/ws", nil)
 	req.Header.Set("Origin", "://invalid-url")
 
-	result := upgrader.CheckOrigin(req)
+	result := checkOrigin(req)
 	assert.False(t, result, "Invalid origin URL should be rejected")
 }
 
-func TestWebsocketUpgraderMatchingSingleEndpointAllowed(t *testing.T) {
+func TestWebsocketCheckOriginMatchingSingleEndpointAllowed(t *testing.T) {
 	t.Setenv("PHOTOVIEW_SERVE_UI", "0")
 	t.Setenv("PHOTOVIEW_UI_ENDPOINTS", "https://ui.example.com")
 	configureTestEndpointsFromEnv(t)
 
-	upgrader := WebsocketUpgrader(false)
+	checkOrigin := websocketCheckOrigin(false)
 	req := httptest.NewRequest("GET", "/ws", nil)
 	req.Header.Set("Origin", "https://ui.example.com")
 
-	result := upgrader.CheckOrigin(req)
+	result := checkOrigin(req)
 	assert.True(t, result, "Origin matching configured UI endpoint should be allowed")
 }
 
-func TestWebsocketUpgraderMatchingMultipleEndpoints(t *testing.T) {
+func TestWebsocketCheckOriginMatchingMultipleEndpoints(t *testing.T) {
 	t.Setenv("PHOTOVIEW_SERVE_UI", "0")
 	t.Setenv("PHOTOVIEW_UI_ENDPOINTS", "https://ui1.example.com,https://ui2.example.com,https://ui3.example.com")
 	configureTestEndpointsFromEnv(t)
@@ -200,18 +202,18 @@ func TestWebsocketUpgraderMatchingMultipleEndpoints(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			upgrader := WebsocketUpgrader(false)
+			checkOrigin := websocketCheckOrigin(false)
 			req := httptest.NewRequest("GET", "/ws", nil)
 			req.Header.Set("Origin", tc.origin)
 
-			result := upgrader.CheckOrigin(req)
+			result := checkOrigin(req)
 			assert.Equal(t, tc.shouldBeAllowed, result,
 				"Origin %s should be %v", tc.origin, tc.shouldBeAllowed)
 		})
 	}
 }
 
-func TestWebsocketUpgraderNonMatchingOriginRejected(t *testing.T) {
+func TestWebsocketCheckOriginNonMatchingOriginRejected(t *testing.T) {
 	t.Setenv("PHOTOVIEW_SERVE_UI", "0")
 	t.Setenv("PHOTOVIEW_UI_ENDPOINTS", "https://ui.example.com")
 	configureTestEndpointsFromEnv(t)
@@ -228,17 +230,17 @@ func TestWebsocketUpgraderNonMatchingOriginRejected(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			upgrader := WebsocketUpgrader(false)
+			checkOrigin := websocketCheckOrigin(false)
 			req := httptest.NewRequest("GET", "/ws", nil)
 			req.Header.Set("Origin", tc.origin)
 
-			result := upgrader.CheckOrigin(req)
+			result := checkOrigin(req)
 			assert.False(t, result, "Origin %s should be rejected", tc.origin)
 		})
 	}
 }
 
-func TestWebsocketUpgraderPortMatching(t *testing.T) {
+func TestWebsocketCheckOriginPortMatching(t *testing.T) {
 	t.Setenv("PHOTOVIEW_SERVE_UI", "0")
 	t.Setenv("PHOTOVIEW_UI_ENDPOINTS", "https://ui.example.com:8443")
 	configureTestEndpointsFromEnv(t)
@@ -255,18 +257,18 @@ func TestWebsocketUpgraderPortMatching(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			upgrader := WebsocketUpgrader(false)
+			checkOrigin := websocketCheckOrigin(false)
 			req := httptest.NewRequest("GET", "/ws", nil)
 			req.Header.Set("Origin", tc.origin)
 
-			result := upgrader.CheckOrigin(req)
+			result := checkOrigin(req)
 			assert.Equal(t, tc.shouldBeAllowed, result,
 				"Origin %s should be %v", tc.origin, tc.shouldBeAllowed)
 		})
 	}
 }
 
-func TestWebsocketUpgraderWhitespaceInEndpoints(t *testing.T) {
+func TestWebsocketCheckOriginWhitespaceInEndpoints(t *testing.T) {
 	t.Setenv("PHOTOVIEW_SERVE_UI", "0")
 	t.Setenv("PHOTOVIEW_UI_ENDPOINTS", " https://ui1.example.com , https://ui2.example.com , https://ui3.example.com ")
 	configureTestEndpointsFromEnv(t)
@@ -279,17 +281,17 @@ func TestWebsocketUpgraderWhitespaceInEndpoints(t *testing.T) {
 
 	for _, origin := range testCases {
 		t.Run(origin, func(t *testing.T) {
-			upgrader := WebsocketUpgrader(false)
+			checkOrigin := websocketCheckOrigin(false)
 			req := httptest.NewRequest("GET", "/ws", nil)
 			req.Header.Set("Origin", origin)
 
-			result := upgrader.CheckOrigin(req)
+			result := checkOrigin(req)
 			assert.True(t, result, "Should handle whitespace in endpoint list")
 		})
 	}
 }
 
-func TestWebsocketUpgraderCaseInsensitiveHostMatching(t *testing.T) {
+func TestWebsocketCheckOriginCaseInsensitiveHostMatching(t *testing.T) {
 	t.Setenv("PHOTOVIEW_SERVE_UI", "0")
 	t.Setenv("PHOTOVIEW_UI_ENDPOINTS", "https://UI.EXAMPLE.COM")
 	configureTestEndpointsFromEnv(t)
@@ -306,18 +308,18 @@ func TestWebsocketUpgraderCaseInsensitiveHostMatching(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			upgrader := WebsocketUpgrader(false)
+			checkOrigin := websocketCheckOrigin(false)
 			req := httptest.NewRequest("GET", "/ws", nil)
 			req.Header.Set("Origin", tc.origin)
 
-			result := upgrader.CheckOrigin(req)
+			result := checkOrigin(req)
 			assert.Equal(t, tc.shouldBeAllowed, result,
 				"Host matching should be case-insensitive per URL spec")
 		})
 	}
 }
 
-func TestWebsocketUpgraderSanitizationOfMaliciousOrigin(t *testing.T) {
+func TestWebsocketCheckOriginSanitizationOfMaliciousOrigin(t *testing.T) {
 	t.Setenv("PHOTOVIEW_SERVE_UI", "0")
 	t.Setenv("PHOTOVIEW_UI_ENDPOINTS", "https://ui.example.com")
 	configureTestEndpointsFromEnv(t)
@@ -333,18 +335,18 @@ func TestWebsocketUpgraderSanitizationOfMaliciousOrigin(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			upgrader := WebsocketUpgrader(false)
+			checkOrigin := websocketCheckOrigin(false)
 			req := httptest.NewRequest("GET", "/ws", nil)
 			req.Header.Set("Origin", tc.origin)
 
-			result := upgrader.CheckOrigin(req)
+			result := checkOrigin(req)
 			assert.False(t, result, "Malicious origin should be rejected")
 			// The test passes if it doesn't panic and properly sanitizes the log output
 		})
 	}
 }
 
-func TestWebsocketUpgraderIPv6Endpoints(t *testing.T) {
+func TestWebsocketCheckOriginIPv6Endpoints(t *testing.T) {
 	t.Setenv("PHOTOVIEW_SERVE_UI", "0")
 	t.Setenv("PHOTOVIEW_UI_ENDPOINTS", "https://[::1]:8080,https://[2001:db8::1]:443")
 	configureTestEndpointsFromEnv(t)
@@ -362,18 +364,18 @@ func TestWebsocketUpgraderIPv6Endpoints(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			upgrader := WebsocketUpgrader(false)
+			checkOrigin := websocketCheckOrigin(false)
 			req := httptest.NewRequest("GET", "/ws", nil)
 			req.Header.Set("Origin", tc.origin)
 
-			result := upgrader.CheckOrigin(req)
+			result := checkOrigin(req)
 			assert.Equal(t, tc.shouldBeAllowed, result,
 				"IPv6 origin %s should be %v", tc.origin, tc.shouldBeAllowed)
 		})
 	}
 }
 
-func TestWebsocketUpgraderPathsDoNotAffectMatching(t *testing.T) {
+func TestWebsocketCheckOriginPathsDoNotAffectMatching(t *testing.T) {
 	t.Setenv("PHOTOVIEW_SERVE_UI", "0")
 	t.Setenv("PHOTOVIEW_UI_ENDPOINTS", "https://ui.example.com")
 	configureTestEndpointsFromEnv(t)
@@ -390,11 +392,11 @@ func TestWebsocketUpgraderPathsDoNotAffectMatching(t *testing.T) {
 
 	for _, tc := range testCases {
 		t.Run(tc.name, func(t *testing.T) {
-			upgrader := WebsocketUpgrader(false)
+			checkOrigin := websocketCheckOrigin(false)
 			req := httptest.NewRequest("GET", "/ws", nil)
 			req.Header.Set("Origin", tc.origin)
 
-			result := upgrader.CheckOrigin(req)
+			result := checkOrigin(req)
 			assert.True(t, result, "Path/query/fragment should not affect host matching")
 		})
 	}

@@ -9,7 +9,6 @@ import (
 
 	"github.com/99designs/gqlgen/graphql/handler/transport"
 	coderws "github.com/coder/websocket"
-	"github.com/gorilla/websocket"
 	"github.com/kkovaletp/photoview/api/utils"
 )
 
@@ -38,12 +37,6 @@ func (w websocketImplementation) Accept(rw http.ResponseWriter, r *http.Request,
 	}
 
 	return w.accept.Accept(rw, r, options)
-}
-
-func WebsocketUpgrader(devMode bool) websocket.Upgrader {
-	return websocket.Upgrader{
-		CheckOrigin: websocketCheckOrigin(devMode),
-	}
 }
 
 func websocketCheckOrigin(devMode bool) func(r *http.Request) bool {
