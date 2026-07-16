@@ -95,7 +95,7 @@
     "i18next-cli": "^1.65.0",
     "jsdom": "^26.1.0",
     "nodemon": "^3.1.14",
-    "prettier": "^3.9.4",
+    "prettier": "^3.9.5",
     "tsx": "^4.23.0",
     "typescript": "^6.0.3",
     "vitest": "^3.2.6"
