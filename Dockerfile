@@ -9,8 +9,9 @@ ENV NODE_ENV=${NODE_ENV}
 WORKDIR /app/ui
 
 COPY ui/package.json ui/package-lock.json /app/ui/
+# The NPM installation package contains important scripts, so using `--ignore-scripts` is not an option.
 # hadolint ignore=DL3016
-RUN npm install --global npm \
+RUN npm install --global npm --no-audit --no-fund \
     # Project dependencies with install scripts (esbuild,core-js) are required for the build.
     # Using `--ignore-scripts` is not an option.
     && if [ "$NODE_ENV" = "production" ]; then \
@@ -146,7 +147,8 @@ COPY --from=ui /app/ui/dist "${PHOTOVIEW_UI_PATH}"
 # and not rebuilt every new commit because of the build_arg value change.
 ARG COMMIT_SHA=NoCommit
 # how to fix the `find` command to not hardcode the page name? (SettingsPage.*.js) - maybe use a regex to find the file that contains the placeholder string instead of hardcoding the page name.
-RUN find "${PHOTOVIEW_UI_PATH}/assets" -type f -name "SettingsPage.*.js" \
+RUN find "${PHOTOVIEW_UI_PATH}/assets" -type f \( -name "*.js" -o -name "*.mjs" \) \
+        -exec grep -qF -- '"-=<GitHub-CI-commit-sha-placeholder>=-"' {} \; \
         -exec sed -i 's/"-=<GitHub-CI-commit-sha-placeholder>=-"/"'"${COMMIT_SHA}"'"/g' {} \; \
     # Archive static files for better performance
     && find /app/ui -type f \( \
@@ -214,7 +216,8 @@ ARG COMMIT_SHA=NoCommit
 # hadolint ignore=DL3018
 RUN apk add --no-cache curl bash \
     && apk add --no-cache --virtual .build-compress gzip brotli zstd \
-    && find /srv/assets -type f -name "SettingsPage.*.js" \
+    RUN find "${PHOTOVIEW_UI_PATH}/assets" -type f \( -name "*.js" -o -name "*.mjs" \) \
+        -exec grep -qF -- '"-=<GitHub-CI-commit-sha-placeholder>=-"' {} \; \
         -exec sed -i 's/"-=<GitHub-CI-commit-sha-placeholder>=-"/"'"${COMMIT_SHA}"'"/g' {} \; \
     # Archive static files for better performance
     && find /srv -type f \( \
