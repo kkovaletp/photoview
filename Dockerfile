@@ -145,6 +145,7 @@ COPY --from=ui /app/ui/dist "${PHOTOVIEW_UI_PATH}"
 # This is a w/a for letting the UI build stage to be cached
 # and not rebuilt every new commit because of the build_arg value change.
 ARG COMMIT_SHA=NoCommit
+# how to fix the `find` command to not hardcode the page name? (SettingsPage.*.js) - maybe use a regex to find the file that contains the placeholder string instead of hardcoding the page name.
 RUN find "${PHOTOVIEW_UI_PATH}/assets" -type f -name "SettingsPage.*.js" \
         -exec sed -i 's/"-=<GitHub-CI-commit-sha-placeholder>=-"/"'"${COMMIT_SHA}"'"/g' {} \; \
     # Archive static files for better performance
