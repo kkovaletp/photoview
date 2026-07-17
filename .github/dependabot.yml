@@ -42,6 +42,9 @@ updates:
       vitest:
         patterns:
           - "*vitest*"
+      graphql-codegen:
+        patterns:
+          - "@graphql-codegen/*"
 
   # Maintain dependencies for Dockerfiles
   - package-ecosystem: "docker"
