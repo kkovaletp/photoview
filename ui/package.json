@@ -45,7 +45,7 @@
     "copy-to-clipboard": "^4.0.2",
     "dayjs": "^1.11.21",
     "dompurify": "^3.4.12",
-    "graphql-ws": "^6.0.8",
+    "graphql-ws": "^6.1.0",
     "i18next": "26.3.6",
     "js-cookie": "^3.0.8",
     "luxon": "^3.7.2",
