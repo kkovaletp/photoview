@@ -11,7 +11,7 @@ const App = () => {
   const { pathname } = useLocation()
 
   loadTranslations()
-
+  //TODO: init comment for the listener
   useEffect(() => {
     window.scrollTo(0, 0)
     if (document.activeElement != document.body)
