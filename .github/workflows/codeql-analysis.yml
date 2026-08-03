@@ -188,7 +188,7 @@ jobs:
 
       - name: Lint Dockerfile
         id: hadolint
-        uses: hadolint/hadolint-action@v3.3.0
+        uses: hadolint/hadolint-action@v3.4.0
         continue-on-error: true
         with:
           dockerfile: Dockerfile
@@ -242,7 +242,7 @@ jobs:
             });
 
       - name: Generate report
-        uses: hadolint/hadolint-action@v3.3.0
+        uses: hadolint/hadolint-action@v3.4.0
         id: hadolint-report
         continue-on-error: true
         if: always()
