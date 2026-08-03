@@ -93,7 +93,7 @@
     "eslint-plugin-react-hooks": "^7.1.1",
     "globals": "^17.8.0",
     "i18next-cli": "^1.67.3",
-    "jsdom": "^26.1.0",
+    "jsdom": "^30.0.1",
     "nodemon": "^3.1.14",
     "prettier": "^3.9.6",
     "tsx": "^4.23.1",
