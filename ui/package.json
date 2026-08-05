@@ -30,7 +30,7 @@
   },
   "dependencies": {
     "@apollo/client": "~3.14.0",
-    "@dr.pogodin/react-helmet": "^3.2.2",
+    "@dr.pogodin/react-helmet": "^3.2.3",
     "@headlessui/react": "^2.2.10",
     "@tailwindcss/vite": "^4.3.3",
     "@types/geojson": "^7946.0.16",
