@@ -6,9 +6,10 @@ import (
 
 type ShareToken struct {
 	Model
-	Value    string     `gorm:"not null"`
-	OwnerID  int        `gorm:"not null;index"`
-	Owner    User       `gorm:"constraint:OnDelete:CASCADE;"`
+	Value    string `gorm:"not null"`
+	OwnerID  int    `gorm:"not null;index"`
+	Owner    User   `gorm:"constraint:OnDelete:CASCADE;"`
+	Label    *string
 	Expire   *time.Time `gorm:"index"`
 	Password *string
 	AlbumID  *int   `gorm:"index"`

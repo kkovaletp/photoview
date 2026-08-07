@@ -1,13 +1,13 @@
 {
   "album_filter": {
     "only_favorites": "Показати тільки улюблені",
-    "sort": "Сортування",
-    "sort_by": "Сортувати за",
-    "sort_direction": "Напрям сортування",
     "order_direction": {
       "ascending": "За зростанням",
       "descending": "За спаданням"
     },
+    "sort": "Сортування",
+    "sort_by": "Сортувати за",
+    "sort_direction": "Напрям сортування",
     "sorting_options": {
       "date_imported": "Дата імпортування",
       "date_shot": "Дата фотографування",
@@ -338,6 +338,9 @@
       "more": "Більше",
       "no_shares_found": "Спільних доступів не знайдено",
       "public_link": "Публічне посилання",
+      "share_label": "Мітка спільного доступу",
+      "share_label_placeholder": "Сім’я, клієнт, вебсайт...",
+      "share_label_update_error": "Не вдалося оновити мітку спільного доступу",
       "title": "Параметри спільного доступу"
     }
   },
