@@ -50,7 +50,7 @@
     "js-cookie": "^3.0.8",
     "luxon": "^3.7.2",
     "mapbox-gl": "~3.27.0",
-    "marked": "^18.0.7",
+    "marked": "^18.0.9",
     "react": "19.2.8",
     "react-blurhash": "^0.3.0",
     "react-datepicker": "^9.0.0",
