@@ -44,7 +44,7 @@
     "connect-history-api-fallback": "^2.0.0",
     "copy-to-clipboard": "^4.0.2",
     "dayjs": "^1.11.21",
-    "dompurify": "^3.4.12",
+    "dompurify": "^3.4.13",
     "graphql-ws": "^6.2.0",
     "i18next": "26.3.6",
     "js-cookie": "^3.0.8",
