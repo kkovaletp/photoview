@@ -49,7 +49,6 @@ describe('SidebarMediaDownload', () => {
         title: 'test-photo.jpg',
         type: MediaType.Photo,
         thumbnail: {
-            __typename: 'MediaURL',
             url: '/thumbnail.jpg',
             width: 200,
             height: 150,
@@ -60,10 +59,8 @@ describe('SidebarMediaDownload', () => {
 
     const mockDownloads: SidebarDownloadQueryQuery['media']['downloads'] = [
         {
-            __typename: 'MediaDownload',
             title: 'Original',
             mediaUrl: {
-                __typename: 'MediaURL',
                 url: '/photo/original.jpg',
                 width: 4000,
                 height: 3000,
@@ -71,10 +68,8 @@ describe('SidebarMediaDownload', () => {
             },
         },
         {
-            __typename: 'MediaDownload',
             title: 'Thumbnail',
             mediaUrl: {
-                __typename: 'MediaURL',
                 url: '/photo/thumbnail.jpg',
                 width: 400,
                 height: 300,
@@ -322,10 +317,8 @@ describe('SidebarMediaDownload', () => {
                 ...mockMedia,
                 downloads: [
                     {
-                        __typename: 'MediaDownload',
                         title: 'Test',
                         mediaUrl: {
-                            __typename: 'MediaURL',
                             url: '/test.jpg',
                             width: 100,
                             height: 100,

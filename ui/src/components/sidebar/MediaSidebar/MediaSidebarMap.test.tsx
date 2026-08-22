@@ -26,7 +26,6 @@ import type { SidebarMediaQueryQuery } from './__generated__/MediaSidebar'
 type CoordinatesType = NonNullable<SidebarMediaQueryQuery['media']['exif']>['coordinates']
 
 const validCoordinates: CoordinatesType = {
-    __typename: 'Coordinates',
     latitude: 41.40338,
     longitude: 2.17403,
 }
@@ -66,6 +65,7 @@ describe('MediaSidebarMap', () => {
         })
 
         test('renders nothing when coordinates is undefined', () => {
+            //TODO: how to fix the "Type 'undefined' is not assignable to type '{ latitude: number; longitude: number; } | null'.            MediaSidebarMap.tsx(8, 3): The expected type comes from property 'coordinates' which is declared here on type 'IntrinsicAttributes & MediaSidebarMapProps'" error?
             const { container } = render(<MediaSidebarMap coordinates={undefined} />)
             expect(container.firstChild).toBeNull()
         })
@@ -124,6 +124,7 @@ describe('MediaSidebarMap', () => {
         })
 
         test('passes { lat: 0, lng: 0 } as center when coordinates are undefined', () => {
+            //TODO: how to fix the "Type 'undefined' is not assignable to type '{ latitude: number; longitude: number; } | null'.            MediaSidebarMap.tsx(8, 3): The expected type comes from property 'coordinates' which is declared here on type 'IntrinsicAttributes & MediaSidebarMapProps'" error?
             render(<MediaSidebarMap coordinates={undefined} />)
             expect(mockUseMapboxMap).toHaveBeenCalledWith(
                 expect.objectContaining({
@@ -162,6 +163,7 @@ describe('MediaSidebarMap', () => {
 
         test('returns early without adding controls or marker when coordinates are undefined', () => {
             const { getCb } = captureConfigureMapbox()
+            //TODO: how to fix the "Type 'undefined' is not assignable to type '{ latitude: number; longitude: number; } | null'.            MediaSidebarMap.tsx(8, 3): The expected type comes from property 'coordinates' which is declared here on type 'IntrinsicAttributes & MediaSidebarMapProps'" error?
             render(<MediaSidebarMap coordinates={undefined} />)
 
             const { mockMap, NavigationControl, Marker } = makeMockMapLib()
