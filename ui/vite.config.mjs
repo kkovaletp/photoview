@@ -2,12 +2,14 @@
 
 import { defineConfig } from 'vite'
 import svgr from 'vite-plugin-svgr'
-import react from '@vitejs/plugin-react'
+import react from '@vitejs/plugin-react-swc'
 import { VitePWA } from 'vite-plugin-pwa'
 import tailwindcss from '@tailwindcss/vite'
 import { ethicalLicensePlugin } from './vite-plugins/ethicalLicensePlugin'
 
 export default defineConfig(async ({ command, mode }) => {
+  const isProductionBuild = command === 'build' && mode === 'production'
+
   // Conditionally import codecov plugin only if it's installed
   let codecovVitePlugin = null
   try {
@@ -19,7 +21,20 @@ export default defineConfig(async ({ command, mode }) => {
 
   return {
     plugins: [
-      react(),
+      react({
+        plugins: [
+          ['@swc/plugin-styled-components',
+            {
+              displayName: !isProductionBuild,
+              fileName: !isProductionBuild,
+              ssr: true,
+              minify: isProductionBuild,
+              transpileTemplateLiterals: isProductionBuild,
+              pure: true,
+            },
+          ],
+        ],
+      }),
       svgr(),
       tailwindcss(),
       VitePWA({

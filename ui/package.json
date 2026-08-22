@@ -32,13 +32,15 @@
     "@apollo/client": "~3.14.0",
     "@dr.pogodin/react-helmet": "^3.2.3",
     "@headlessui/react": "^2.2.10",
+    "@swc/core": "^1.16.1",
+    "@swc/plugin-styled-components": "^13.0.0",
     "@tailwindcss/vite": "^4.3.3",
     "@types/geojson": "^7946.0.16",
     "@types/js-cookie": "^3.0.6",
     "@types/luxon": "^3.7.4",
     "@types/react": "19.2.18",
     "@types/react-dom": "19.2.4",
-    "@vitejs/plugin-react": "^5.2.0",
+    "@vitejs/plugin-react-swc": "^4.3.3",
     "blurhash": "^2.0.5",
     "clsx": "^2.1.1",
     "connect-history-api-fallback": "^2.0.0",
@@ -126,6 +128,6 @@
     "core-js": false,
     "core-js-pure": false,
     "yarn": false,
-    "@swc/core@1.15.41": true
+    "@swc/core@1.16.1": true
   }
 }
