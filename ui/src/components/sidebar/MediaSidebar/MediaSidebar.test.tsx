@@ -35,7 +35,6 @@ describe('MediaSidebar', () => {
     title: '122A6069.jpg',
     type: MediaType.Photo,
     thumbnail: {
-      __typename: 'MediaURL',
       url: '/photo/thumbnail.jpg',
       width: 1024,
       height: 839,

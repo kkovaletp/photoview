@@ -1,84 +1,74 @@
+/** Internal type. DO NOT USE DIRECTLY. */
+type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] }
+/** Internal type. DO NOT USE DIRECTLY. */
+export type Incremental<T> =
+  | T
+  | {
+      [P in keyof T]?: P extends ' $fragmentName' | '__typename' ? T[P] : never
+    }
 import * as Types from '../../../__generated__/globalTypes'
 
-export type SidebarGetPhotoSharesQueryVariables = Types.Exact<{
-  id: Types.Scalars['ID']['input']
+export type SidebarGetPhotoSharesQueryVariables = Exact<{
+  id: string | number
 }>
 
 export type SidebarGetPhotoSharesQuery = {
-  __typename?: 'Query'
   media: {
-    __typename?: 'Media'
     id: string
     shares: Array<{
-      __typename?: 'ShareToken'
       id: string
       token: string
       hasPassword: boolean
-      expire?: string | null
+      expire: string | null
     }>
   }
 }
 
-export type SidebarGetAlbumSharesQueryVariables = Types.Exact<{
-  id: Types.Scalars['ID']['input']
+export type SidebarGetAlbumSharesQueryVariables = Exact<{
+  id: string | number
 }>
 
 export type SidebarGetAlbumSharesQuery = {
-  __typename?: 'Query'
   album: {
-    __typename?: 'Album'
     id: string
     shares: Array<{
-      __typename?: 'ShareToken'
       id: string
       token: string
       hasPassword: boolean
-      expire?: string | null
+      expire: string | null
     }>
   }
 }
 
-export type SidebarPhotoAddShareMutationVariables = Types.Exact<{
-  id: Types.Scalars['ID']['input']
-  password?: Types.InputMaybe<Types.Scalars['String']['input']>
-  expire?: Types.InputMaybe<Types.Scalars['Time']['input']>
+export type SidebarPhotoAddShareMutationVariables = Exact<{
+  id: string | number
+  password?: string | null | undefined
+  expire?: string | null | undefined
 }>
 
-export type SidebarPhotoAddShareMutation = {
-  __typename?: 'Mutation'
-  shareMedia: { __typename?: 'ShareToken'; token: string }
-}
+export type SidebarPhotoAddShareMutation = { shareMedia: { token: string } }
 
-export type SidebarAlbumAddShareMutationVariables = Types.Exact<{
-  id: Types.Scalars['ID']['input']
-  password?: Types.InputMaybe<Types.Scalars['String']['input']>
-  expire?: Types.InputMaybe<Types.Scalars['Time']['input']>
+export type SidebarAlbumAddShareMutationVariables = Exact<{
+  id: string | number
+  password?: string | null | undefined
+  expire?: string | null | undefined
 }>
 
-export type SidebarAlbumAddShareMutation = {
-  __typename?: 'Mutation'
-  shareAlbum: { __typename?: 'ShareToken'; token: string }
-}
+export type SidebarAlbumAddShareMutation = { shareAlbum: { token: string } }
 
-export type SidebarProtectShareMutationVariables = Types.Exact<{
-  token: Types.Scalars['String']['input']
-  password?: Types.InputMaybe<Types.Scalars['String']['input']>
+export type SidebarProtectShareMutationVariables = Exact<{
+  token: string
+  password?: string | null | undefined
 }>
 
 export type SidebarProtectShareMutation = {
-  __typename?: 'Mutation'
-  protectShareToken: {
-    __typename?: 'ShareToken'
-    token: string
-    hasPassword: boolean
-  }
+  protectShareToken: { token: string; hasPassword: boolean }
 }
 
-export type SidebareDeleteShareMutationVariables = Types.Exact<{
-  token: Types.Scalars['String']['input']
+export type SidebareDeleteShareMutationVariables = Exact<{
+  token: string
 }>
 
 export type SidebareDeleteShareMutation = {
-  __typename?: 'Mutation'
-  deleteShareToken: { __typename?: 'ShareToken'; token: string }
+  deleteShareToken: { token: string }
 }

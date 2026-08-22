@@ -42,6 +42,7 @@ const makeUpdateMarkers =
 
       // for every media on the screen, create an HTML marker for it (if we didn't yet),
       // and add it to the map if it's not there already
+      //TODO: how to fix the "Property 'geometry' does not exist on type 'GeoJSONFeature'." and the "Property 'properties' does not exist on type 'GeoJSONFeature'." errors in this loop?
       for (const feature of features) {
         if (!feature.geometry) {
           console.warn('WARN: geojson feature had no geometry', { feature })

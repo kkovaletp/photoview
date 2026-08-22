@@ -1,11 +1,16 @@
+/** Internal type. DO NOT USE DIRECTLY. */
+type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] }
+/** Internal type. DO NOT USE DIRECTLY. */
+export type Incremental<T> =
+  | T
+  | {
+      [P in keyof T]?: P extends ' $fragmentName' | '__typename' ? T[P] : never
+    }
 import * as Types from '../../../../__generated__/globalTypes'
 
-export type CombineFacesMutationVariables = Types.Exact<{
-  destID: Types.Scalars['ID']['input']
-  srcIDs: Array<Types.Scalars['ID']['input']> | Types.Scalars['ID']['input']
+export type CombineFacesMutationVariables = Exact<{
+  destID: string | number
+  srcIDs: Array<string | number> | string | number
 }>
 
-export type CombineFacesMutation = {
-  __typename?: 'Mutation'
-  combineFaceGroups: { __typename?: 'FaceGroup'; id: string }
-}
+export type CombineFacesMutation = { combineFaceGroups: { id: string } }
