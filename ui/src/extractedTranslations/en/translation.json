@@ -196,7 +196,7 @@
         "source_role_destination_description": "Select the destination face group that the current face should be merged into.",
         "sources_description": "Select all face groups that will be merged into the destination group.",
         "sources_table": {
-          "title": "Select one or more source faces to merge into:"
+          "title": "Select one or more source faces to merge into: {{destination}}"
         },
         "title": "Merge Face Groups"
       },

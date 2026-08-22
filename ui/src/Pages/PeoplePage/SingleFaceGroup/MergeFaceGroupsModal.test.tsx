@@ -41,7 +41,14 @@ vi.mock('../../../primitives/Modal', () => ({
 // Mock useTranslation to prevent i18n issues
 vi.mock('react-i18next', () => ({
     useTranslation: () => ({
-        t: (_key: string, fallback?: string) => fallback ?? _key,
+        t: (
+            key: string,
+            defaultValue?: string,
+            options?: Record<string, unknown>
+        ) =>
+            (defaultValue ?? key).replace(/\{\{(\w+)\}\}/g, (placeholder, name) =>
+                String(options?.[name] ?? placeholder)
+            ),
     }),
 }))
 

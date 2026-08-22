@@ -199,7 +199,7 @@
         "source_role_destination_description": "",
         "sources_description": "Sélectionnez tous les groupes de visages qui seront fusionnés dans le groupe de destination.",
         "sources_table": {
-          "title": "Sélectionnez un ou plusieurs groupes sources à fusionner :"
+          "title": "Sélectionnez un ou plusieurs groupes sources à fusionner : {{destination}}"
         },
         "title": "Fusionner des groupes de visages"
       },

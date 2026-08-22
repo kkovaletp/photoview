@@ -196,7 +196,7 @@
         "source_role_destination_description": "",
         "sources_description": "Selecteer alle gezichtsgroepen die samengevoegd worden met de doelgroep.",
         "sources_table": {
-          "title": "Selecteer één of meer brongezichten:"
+          "title": "Selecteer één of meer brongezichten: {{destination}}"
         },
         "title": "Gezichtsgroepen samenvoegen"
       },
