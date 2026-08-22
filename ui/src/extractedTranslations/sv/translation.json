@@ -86,6 +86,7 @@
       "add": "Lägg till",
       "cancel": "Avbryt",
       "close": "",
+      "dismiss_message": "",
       "remove": "Ta bort",
       "retry": "",
       "save": "Spara",
@@ -232,7 +233,6 @@
       "create_at": "",
       "description": "",
       "env_var": "",
-      "mapbox_link_label": "",
       "title": ""
     },
     "title": ""

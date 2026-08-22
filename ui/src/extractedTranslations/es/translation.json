@@ -89,6 +89,7 @@
       "add": "Añadir",
       "cancel": "Cancelar",
       "close": "",
+      "dismiss_message": "",
       "remove": "Borrar",
       "retry": "",
       "save": "Guardar",
@@ -235,7 +236,6 @@
       "create_at": "",
       "description": "",
       "env_var": "",
-      "mapbox_link_label": "",
       "title": ""
     },
     "title": "Lugares"

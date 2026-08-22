@@ -86,6 +86,7 @@
       "add": "Toevoegen",
       "cancel": "Annuleren",
       "close": "",
+      "dismiss_message": "",
       "remove": "Verwijderen",
       "retry": "Opnieuw proberen",
       "save": "Opslaan",
@@ -232,7 +233,6 @@
       "create_at": "",
       "description": "",
       "env_var": "",
-      "mapbox_link_label": "",
       "title": ""
     },
     "title": "Locaties"
@@ -523,7 +523,7 @@
     }
   },
   "title": {
-    "login": "Inloggen",
+    "login": "Inloggen - Photoview",
     "people": "Personen",
     "settings": "Instellingen"
   },

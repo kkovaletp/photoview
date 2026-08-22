@@ -89,6 +89,7 @@
       "add": "Ajouter",
       "cancel": "Annuler",
       "close": "",
+      "dismiss_message": "",
       "remove": "Supprimer",
       "retry": "",
       "save": "Sauvegarder",
@@ -235,7 +236,6 @@
       "create_at": "",
       "description": "",
       "env_var": "",
-      "mapbox_link_label": "",
       "title": ""
     },
     "title": "Lieux"
@@ -531,7 +531,7 @@
     }
   },
   "title": {
-    "login": "Connexion",
+    "login": "Connexion - Photoview",
     "people": "Personnes",
     "settings": "Paramètres"
   },

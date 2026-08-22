@@ -398,6 +398,10 @@ const MergeFaceGroupsModalContent = ({
     ),
   }
 
+  const destinationLabel =
+    effectiveDestinationFaceGroup?.label ??
+    t('people_page.face_group.unlabeled', 'Unlabeled')
+
   const selectSourcesProps: StateContent = {
     props: {
       title: modalTitle,
@@ -409,15 +413,11 @@ const MergeFaceGroupsModalContent = ({
       onClose: closeModal,
       open: isOpen,
     },
-    searchTitle:
-      t(
-        'people_page.modal.merge_face_groups.sources_table.title',
-        'Select one or more source faces to merge into:'
-      ) +
-      ` ${effectiveDestinationFaceGroup?.label ??
-      t('people_page.face_group.unlabeled', 'Unlabeled') ??
-      'Unlabeled'
-      }`,
+    searchTitle: t(
+      'people_page.modal.merge_face_groups.sources_table.title',
+      'Select one or more source faces to merge into: {{destination}}',
+      { destination: destinationLabel }
+    ),
   }
 
   const modalContent =

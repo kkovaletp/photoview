@@ -23,7 +23,7 @@
     "validateGQL": "graphql-inspector validate 'src/**/*.{ts,tsx}' '../api/graphql/resolvers/*.graphql' --deprecated",
     "extractTranslations": "i18next-cli extract && i18next-cli types",
     "extractTranslations:ci": "i18next-cli extract --ci --quiet && i18next-cli types --ci --quiet",
-    "lintTranslations": "i18next-cli lint"
+    "lintTranslations": "i18next-cli lint && echo && i18next-cli status en --unused"
   },
   "engines": {
     "node": "^24.0.0"

@@ -83,6 +83,7 @@
       "add": "追加",
       "cancel": "キャンセル",
       "close": "",
+      "dismiss_message": "",
       "remove": "削除",
       "retry": "",
       "save": "保存",
@@ -229,7 +230,6 @@
       "create_at": "",
       "description": "",
       "env_var": "",
-      "mapbox_link_label": "",
       "title": ""
     },
     "title": "場所"
@@ -516,7 +516,7 @@
     }
   },
   "title": {
-    "login": "ログイン",
+    "login": "ログイン - Photoview",
     "people": "人物",
     "settings": "設定"
   },

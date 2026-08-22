@@ -83,6 +83,7 @@
       "add": "加入",
       "cancel": "取消",
       "close": "",
+      "dismiss_message": "",
       "remove": "刪除",
       "retry": "",
       "save": "儲存",
@@ -229,7 +230,6 @@
       "create_at": "",
       "description": "",
       "env_var": "",
-      "mapbox_link_label": "",
       "title": ""
     },
     "title": "地點"
@@ -516,7 +516,7 @@
     }
   },
   "title": {
-    "login": "登入",
+    "login": "登入 - Photoview",
     "people": "人物",
     "settings": "設定"
   },
