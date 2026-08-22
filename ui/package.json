@@ -94,7 +94,7 @@
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^7.1.1",
     "globals": "^17.11.0",
-    "i18next-cli": "^1.67.8",
+    "i18next-cli": "^1.71.0",
     "jsdom": "^26.1.0",
     "nodemon": "^3.1.14",
     "prettier": "^3.9.6",
