@@ -154,7 +154,7 @@ const LoginPage = () => {
     <>
       <HelmetProvider>
         <Helmet>
-          <title>{t('title.login', 'Login')} - {t('meta.app_name', 'Photoview')}</title>
+          <title>{t('title.login', 'Login - Photoview')}</title>
         </Helmet>
       </HelmetProvider>
       <TermsOfUseModal open={!accepted} onAccept={accept} onDecline={decline} />

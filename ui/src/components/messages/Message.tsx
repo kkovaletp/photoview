@@ -1,4 +1,5 @@
 import { Ref, ReactNode } from 'react'
+import { useTranslation } from 'react-i18next'
 import DismissIcon from './icons/dismissIcon.svg?react'
 import { Button } from '../../primitives/form/Input'
 
@@ -25,6 +26,7 @@ const Message = ({
   actionLabel,
   onAction,
 }: MessageProps) => {
+  const { t } = useTranslation()
   let backgroundColorClass = 'bg-white dark:bg-dark-bg2'
   if (negative) {
     backgroundColorClass = 'bg-red-100 dark:bg-red-900'
@@ -40,7 +42,7 @@ const Message = ({
       <button
         type="button"
         onClick={onDismiss}
-        aria-label="Dismiss message"
+        aria-label={t('general.action.dismiss_message', 'Dismiss message')}
         className="absolute top-3 right-2"
       >
         <DismissIcon aria-hidden="true" className="w-2.5 h-2.5 text-gray-700 dark:text-gray-200" />

@@ -88,6 +88,7 @@ export default interface Resources {
         "add": "Add",
         "cancel": "Cancel",
         "close": "Close",
+        "dismiss_message": "Dismiss message",
         "remove": "Remove",
         "retry": "Retry",
         "save": "Save",
@@ -197,7 +198,7 @@ export default interface Resources {
           "source_role_destination_description": "Select the destination face group that the current face should be merged into.",
           "sources_description": "Select all face groups that will be merged into the destination group.",
           "sources_table": {
-            "title": "Select one or more source faces to merge into:"
+            "title": "Select one or more source faces to merge into: {{destination}}"
           },
           "title": "Merge Face Groups"
         },
@@ -234,7 +235,6 @@ export default interface Resources {
         "create_at": "A mapbox token can be created for free at",
         "description": "To use map related features a mapbox token is needed.",
         "env_var": "Make sure the access token is added as the MAPBOX_TOKEN environment variable.",
-        "mapbox_link_label": "mapbox.com",
         "title": "Mapbox token is not set"
       },
       "title": "Places"
@@ -525,7 +525,7 @@ export default interface Resources {
       }
     },
     "title": {
-      "login": "Login",
+      "login": "Login - Photoview",
       "people": "People",
       "settings": "Settings"
     },

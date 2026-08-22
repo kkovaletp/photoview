@@ -92,6 +92,7 @@
       "add": "Dodaj",
       "cancel": "Anuluj",
       "close": "",
+      "dismiss_message": "",
       "remove": "Usuń",
       "retry": "",
       "save": "Zapisz",
@@ -238,7 +239,6 @@
       "create_at": "",
       "description": "",
       "env_var": "",
-      "mapbox_link_label": "",
       "title": ""
     },
     "title": "Miejsca"
@@ -539,7 +539,7 @@
     }
   },
   "title": {
-    "login": "Logowanie",
+    "login": "Logowanie - Photoview",
     "people": "Ludzie",
     "settings": "Ustawienia"
   },

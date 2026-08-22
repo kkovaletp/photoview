@@ -543,7 +543,7 @@ const SidebarShare = ({
         <span className="text-[#585858] dark:text-[#C0C3C4] mr-2">
           <LinkIcon className="inline-block mr-2" />
           <span className="text-xs uppercase font-bold">
-            {t('sidebar.sharing.public_link', 'Public Link') + ' '}
+            {t('sidebar.sharing.public_link', 'Public Link')}
           </span>
         </span>
         <span className="text-sm">{share.token}</span>

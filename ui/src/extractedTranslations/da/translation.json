@@ -86,6 +86,7 @@
       "add": "Tilføj",
       "cancel": "Annuller",
       "close": "",
+      "dismiss_message": "",
       "remove": "Fjern",
       "retry": "",
       "save": "Gem",
@@ -232,7 +233,6 @@
       "create_at": "",
       "description": "",
       "env_var": "",
-      "mapbox_link_label": "",
       "title": ""
     },
     "title": "Kort"
@@ -523,7 +523,7 @@
     }
   },
   "title": {
-    "login": "Log ind",
+    "login": "Log ind - Photoview",
     "people": "Personer",
     "settings": "Indstillinger"
   },
