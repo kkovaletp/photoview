@@ -322,7 +322,7 @@ describe('Modal Component', () => {
             await waitFor(() => {
                 expect(screen.getByText('Test Child')).toBeInTheDocument();
             });
-            expect(renderSpy.mock.calls.length).toBe(initialRenders * 2); // Expected for strict mode
+            expect(renderSpy.mock.calls).toHaveLength(initialRenders * 2); // Expected for strict mode
 
             // Test rapid state changes
             for (let i = 0; i < 5; i++) {

@@ -16,26 +16,47 @@ export type SharePageTokenQueryVariables = Exact<{
 }>
 
 export type SharePageTokenQuery = {
+  __typename: 'Query'
   shareToken: {
+    __typename: 'ShareToken'
     token: string
-    album: { id: string } | null
+    album: { __typename: 'Album'; id: string } | null
     media: {
+      __typename: 'Media'
       id: string
       title: string
       type: Types.MediaType
-      thumbnail: { url: string; width: number; height: number } | null
+      thumbnail: {
+        __typename: 'MediaURL'
+        url: string
+        width: number
+        height: number
+      } | null
       downloads: Array<{
+        __typename: 'MediaDownload'
         title: string
         mediaUrl: {
+          __typename: 'MediaURL'
           url: string
           width: number
           height: number
           fileSize: number
         }
       }>
-      highRes: { url: string; width: number; height: number } | null
-      videoWeb: { url: string; width: number; height: number } | null
+      highRes: {
+        __typename: 'MediaURL'
+        url: string
+        width: number
+        height: number
+      } | null
+      videoWeb: {
+        __typename: 'MediaURL'
+        url: string
+        width: number
+        height: number
+      } | null
       exif: {
+        __typename: 'MediaEXIF'
         id: string
         description: string | null
         camera: string | null
@@ -48,7 +69,11 @@ export type SharePageTokenQuery = {
         focalLength: number | null
         flash: number | null
         exposureProgram: number | null
-        coordinates: { longitude: number; latitude: number } | null
+        coordinates: {
+          __typename: 'Coordinates'
+          longitude: number
+          latitude: number
+        } | null
       } | null
     } | null
   }
@@ -60,5 +85,6 @@ export type ShareTokenValidatePasswordQueryVariables = Exact<{
 }>
 
 export type ShareTokenValidatePasswordQuery = {
+  __typename: 'Query'
   shareTokenValidatePassword: boolean
 }

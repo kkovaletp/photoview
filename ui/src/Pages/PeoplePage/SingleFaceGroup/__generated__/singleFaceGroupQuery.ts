@@ -17,21 +17,36 @@ export type SingleFaceGroupQueryVariables = Exact<{
 }>
 
 export type SingleFaceGroupQuery = {
+  __typename: 'Query'
   faceGroup: {
+    __typename: 'FaceGroup'
     id: string
     label: string | null
     imageFaces: Array<{
+      __typename: 'ImageFace'
       id: string
-      rectangle: { minX: number; maxX: number; minY: number; maxY: number }
+      rectangle: {
+        __typename: 'FaceRectangle'
+        minX: number
+        maxX: number
+        minY: number
+        maxY: number
+      }
       media: {
+        __typename: 'Media'
         title: string
         id: string
         type: Types.MediaType
         blurhash: string | null
         favorite: boolean
-        thumbnail: { url: string; width: number; height: number } | null
-        highRes: { url: string } | null
-        videoWeb: { url: string } | null
+        thumbnail: {
+          __typename: 'MediaURL'
+          url: string
+          width: number
+          height: number
+        } | null
+        highRes: { __typename: 'MediaURL'; url: string } | null
+        videoWeb: { __typename: 'MediaURL'; url: string } | null
       }
     }>
   }

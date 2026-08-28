@@ -13,9 +13,12 @@ export type SidebarGetPhotoSharesQueryVariables = Exact<{
 }>
 
 export type SidebarGetPhotoSharesQuery = {
+  __typename: 'Query'
   media: {
+    __typename: 'Media'
     id: string
     shares: Array<{
+      __typename: 'ShareToken'
       id: string
       token: string
       hasPassword: boolean
@@ -29,9 +32,12 @@ export type SidebarGetAlbumSharesQueryVariables = Exact<{
 }>
 
 export type SidebarGetAlbumSharesQuery = {
+  __typename: 'Query'
   album: {
+    __typename: 'Album'
     id: string
     shares: Array<{
+      __typename: 'ShareToken'
       id: string
       token: string
       hasPassword: boolean
@@ -46,7 +52,10 @@ export type SidebarPhotoAddShareMutationVariables = Exact<{
   expire?: string | null | undefined
 }>
 
-export type SidebarPhotoAddShareMutation = { shareMedia: { token: string } }
+export type SidebarPhotoAddShareMutation = {
+  __typename: 'Mutation'
+  shareMedia: { __typename: 'ShareToken'; token: string }
+}
 
 export type SidebarAlbumAddShareMutationVariables = Exact<{
   id: string | number
@@ -54,7 +63,10 @@ export type SidebarAlbumAddShareMutationVariables = Exact<{
   expire?: string | null | undefined
 }>
 
-export type SidebarAlbumAddShareMutation = { shareAlbum: { token: string } }
+export type SidebarAlbumAddShareMutation = {
+  __typename: 'Mutation'
+  shareAlbum: { __typename: 'ShareToken'; token: string }
+}
 
 export type SidebarProtectShareMutationVariables = Exact<{
   token: string
@@ -62,7 +74,12 @@ export type SidebarProtectShareMutationVariables = Exact<{
 }>
 
 export type SidebarProtectShareMutation = {
-  protectShareToken: { token: string; hasPassword: boolean }
+  __typename: 'Mutation'
+  protectShareToken: {
+    __typename: 'ShareToken'
+    token: string
+    hasPassword: boolean
+  }
 }
 
 export type SidebarSetExpireShareMutationVariables = Exact<{
@@ -71,7 +88,8 @@ export type SidebarSetExpireShareMutationVariables = Exact<{
 }>
 
 export type SidebarSetExpireShareMutation = {
-  setExpireShareToken: { token: string }
+  __typename: 'Mutation'
+  setExpireShareToken: { __typename: 'ShareToken'; token: string }
 }
 
 export type SidebareDeleteShareMutationVariables = Exact<{
@@ -79,5 +97,6 @@ export type SidebareDeleteShareMutationVariables = Exact<{
 }>
 
 export type SidebareDeleteShareMutation = {
-  deleteShareToken: { token: string }
+  __typename: 'Mutation'
+  deleteShareToken: { __typename: 'ShareToken'; token: string }
 }

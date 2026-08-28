@@ -11,5 +11,6 @@ import * as Types from '../../../__generated__/globalTypes'
 export type EarliestMediaQueryVariables = Exact<{ [key: string]: never }>
 
 export type EarliestMediaQuery = {
-  myMedia: Array<{ id: string; date: string }>
+  __typename: 'Query'
+  myMedia: Array<{ __typename: 'Media'; id: string; date: string }>
 }

@@ -15,14 +15,32 @@ export type SidebarMediaQueryQueryVariables = Exact<{
 }>
 
 export type SidebarMediaQueryQuery = {
+  __typename: 'Query'
   media: {
+    __typename: 'Media'
     id: string
     title: string
     type: Types.MediaType
-    highRes: { url: string; width: number; height: number } | null
-    thumbnail: { url: string; width: number; height: number } | null
-    videoWeb: { url: string; width: number; height: number } | null
+    highRes: {
+      __typename: 'MediaURL'
+      url: string
+      width: number
+      height: number
+    } | null
+    thumbnail: {
+      __typename: 'MediaURL'
+      url: string
+      width: number
+      height: number
+    } | null
+    videoWeb: {
+      __typename: 'MediaURL'
+      url: string
+      width: number
+      height: number
+    } | null
     videoMetadata: {
+      __typename: 'VideoMetadata'
       id: string
       width: number
       height: number
@@ -34,6 +52,7 @@ export type SidebarMediaQueryQuery = {
       audio: string | null
     } | null
     exif: {
+      __typename: 'MediaEXIF'
       id: string
       description: string | null
       camera: string | null
@@ -46,21 +65,44 @@ export type SidebarMediaQueryQuery = {
       focalLength: number | null
       flash: number | null
       exposureProgram: number | null
-      coordinates: { latitude: number; longitude: number } | null
+      coordinates: {
+        __typename: 'Coordinates'
+        latitude: number
+        longitude: number
+      } | null
     } | null
     album: {
+      __typename: 'Album'
       id: string
       title: string
-      path: Array<{ id: string; title: string }>
+      path: Array<{ __typename: 'Album'; id: string; title: string }>
     }
     faces: Array<{
+      __typename: 'ImageFace'
       id: string
-      rectangle: { minX: number; maxX: number; minY: number; maxY: number }
-      faceGroup: { id: string; label: string | null; imageFaceCount: number }
+      rectangle: {
+        __typename: 'FaceRectangle'
+        minX: number
+        maxX: number
+        minY: number
+        maxY: number
+      }
+      faceGroup: {
+        __typename: 'FaceGroup'
+        id: string
+        label: string | null
+        imageFaceCount: number
+      }
       media: {
+        __typename: 'Media'
         id: string
         title: string
-        thumbnail: { url: string; width: number; height: number } | null
+        thumbnail: {
+          __typename: 'MediaURL'
+          url: string
+          width: number
+          height: number
+        } | null
       }
     }>
   }

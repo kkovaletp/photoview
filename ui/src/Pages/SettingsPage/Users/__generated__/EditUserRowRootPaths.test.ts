@@ -14,5 +14,6 @@ export type UserRemoveAlbumPathMutationMutationVariables = Exact<{
 }>
 
 export type UserRemoveAlbumPathMutationMutation = {
-  userRemoveRootAlbum: { id: string } | null
+  __typename: 'Mutation'
+  userRemoveRootAlbum: { __typename: 'Album'; id: string } | null
 }

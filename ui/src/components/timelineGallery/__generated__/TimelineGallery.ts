@@ -18,16 +18,28 @@ export type MyTimelineQueryVariables = Exact<{
 }>
 
 export type MyTimelineQuery = {
+  __typename: 'Query'
   myTimeline: Array<{
+    __typename: 'Media'
     id: string
     title: string
     type: Types.MediaType
     blurhash: string | null
     favorite: boolean
     date: string
-    thumbnail: { url: string; width: number; height: number } | null
-    highRes: { url: string; width: number; height: number } | null
-    videoWeb: { url: string } | null
-    album: { id: string; title: string }
+    thumbnail: {
+      __typename: 'MediaURL'
+      url: string
+      width: number
+      height: number
+    } | null
+    highRes: {
+      __typename: 'MediaURL'
+      url: string
+      width: number
+      height: number
+    } | null
+    videoWeb: { __typename: 'MediaURL'; url: string } | null
+    album: { __typename: 'Album'; id: string; title: string }
   }>
 }

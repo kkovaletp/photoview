@@ -286,9 +286,7 @@ async function goToStep2(mocks: any[] = [makeMyFacesMock()]) {
         screen.getByTestId(`image-face-row-${sourceFaceGroup.imageFaces[0].id}`)
     )
     fireEvent.click(screen.getByRole('button', { name: /Next/i }))
-    await waitFor(() =>
-        expect(screen.getByTestId('select-face-group-table')).toBeInTheDocument()
-    )
+    expect(await screen.findByTestId('select-face-group-table')).toBeInTheDocument()
 }
 
 // ─── Tests ────────────────────────────────────────────────────────────────────
@@ -357,9 +355,7 @@ describe('MoveImageFacesModal', () => {
             fireEvent.click(screen.getByTestId(`image-face-row-${faceId}`))
             fireEvent.click(screen.getByRole('button', { name: /Next/i }))
 
-            await waitFor(() =>
-                expect(screen.getByTestId('select-face-group-table')).toBeInTheDocument()
-            )
+            expect(await screen.findByTestId('select-face-group-table')).toBeInTheDocument()
 
             fireEvent.click(screen.getByTestId(`face-group-row-${destGroup1.id}`))
             fireEvent.click(screen.getByRole('button', { name: /Move image faces/i }))
@@ -389,9 +385,7 @@ describe('MoveImageFacesModal', () => {
             fireEvent.click(screen.getByTestId(`image-face-row-${faceId}`))
             fireEvent.click(screen.getByRole('button', { name: /Next/i }))
 
-            await waitFor(() =>
-                expect(screen.getByTestId('select-face-group-table')).toBeInTheDocument()
-            )
+            expect(await screen.findByTestId('select-face-group-table')).toBeInTheDocument()
 
             fireEvent.click(screen.getByTestId(`face-group-row-${destGroup1.id}`))
             fireEvent.click(screen.getByRole('button', { name: /Move image faces/i }))
@@ -469,9 +463,7 @@ describe('MoveImageFacesModal', () => {
             // Immediately after Next, before the query resolves, a loading state appears
             expect(screen.getByText(/Loading\.\.\./i)).toBeInTheDocument()
 
-            await waitFor(() =>
-                expect(screen.getByTestId('select-face-group-table')).toBeInTheDocument()
-            )
+            expect(await screen.findByTestId('select-face-group-table')).toBeInTheDocument()
         })
 
         test('shows an inline error and retries when destination face groups fail to load', async () => {
@@ -497,9 +489,7 @@ describe('MoveImageFacesModal', () => {
 
             fireEvent.click(screen.getByRole('button', { name: /Retry/i }))
 
-            await waitFor(() =>
-                expect(screen.getByTestId('select-face-group-table')).toBeInTheDocument()
-            )
+            expect(await screen.findByTestId('select-face-group-table')).toBeInTheDocument()
         })
 
         test('Move is disabled when no destination face group is selected', async () => {
@@ -533,9 +523,7 @@ describe('MoveImageFacesModal', () => {
             fireEvent.click(screen.getByTestId(`image-face-row-${faceId}`))
             fireEvent.click(screen.getByRole('button', { name: /Next/i }))
 
-            await waitFor(() =>
-                expect(screen.getByTestId('select-face-group-table')).toBeInTheDocument()
-            )
+            expect(await screen.findByTestId('select-face-group-table')).toBeInTheDocument()
 
             // Select destination and move
             fireEvent.click(screen.getByTestId(`face-group-row-${destGroup1.id}`))
@@ -564,9 +552,7 @@ describe('MoveImageFacesModal', () => {
             fireEvent.click(screen.getByTestId(`image-face-row-${faceId2}`))
             fireEvent.click(screen.getByRole('button', { name: /Next/i }))
 
-            await waitFor(() =>
-                expect(screen.getByTestId('select-face-group-table')).toBeInTheDocument()
-            )
+            expect(await screen.findByTestId('select-face-group-table')).toBeInTheDocument()
 
             fireEvent.click(screen.getByTestId(`face-group-row-${destGroup2.id}`))
             fireEvent.click(screen.getByRole('button', { name: /Move image faces/i }))
@@ -599,7 +585,7 @@ describe('MoveImageFacesModal', () => {
             // Step 1 → select image and Next
             fireEvent.click(screen.getByTestId(`image-face-row-${faceId}`))
             fireEvent.click(screen.getByRole('button', { name: /Next/i }))
-            await waitFor(() => expect(screen.getByTestId('select-face-group-table')).toBeInTheDocument())
+            expect(await screen.findByTestId('select-face-group-table')).toBeInTheDocument()
 
             // Step 2 → select destination and Move
             fireEvent.click(screen.getByTestId(`face-group-row-${destGroup1.id}`))
@@ -633,9 +619,7 @@ describe('MoveImageFacesModal', () => {
             fireEvent.click(screen.getByTestId(`image-face-row-${faceId}`))
             fireEvent.click(screen.getByRole('button', { name: /Next/i }))
 
-            await waitFor(() =>
-                expect(screen.getByTestId('select-face-group-table')).toBeInTheDocument()
-            )
+            expect(await screen.findByTestId('select-face-group-table')).toBeInTheDocument()
 
             fireEvent.click(screen.getByTestId(`face-group-row-${destGroup1.id}`))
             fireEvent.click(screen.getByRole('button', { name: /Move image faces/i }))
@@ -660,9 +644,7 @@ describe('MoveImageFacesModal', () => {
             expect(screen.queryByTestId('select-image-faces-table')).not.toBeInTheDocument()
 
             // Step 2 table appears after query resolves
-            await waitFor(() =>
-                expect(screen.getByTestId('select-face-group-table')).toBeInTheDocument()
-            )
+            expect(await screen.findByTestId('select-face-group-table')).toBeInTheDocument()
         })
 
         test('uses the preselected face IDs when executing the mutation', async () => {
@@ -679,9 +661,7 @@ describe('MoveImageFacesModal', () => {
                 makeSingleFaceGroupMock(sourceFaceGroup.id),
             ])
 
-            await waitFor(() =>
-                expect(screen.getByTestId('select-face-group-table')).toBeInTheDocument()
-            )
+            expect(await screen.findByTestId('select-face-group-table')).toBeInTheDocument()
 
             fireEvent.click(screen.getByTestId(`face-group-row-${destGroup1.id}`))
             fireEvent.click(screen.getByRole('button', { name: /Move image faces/i }))

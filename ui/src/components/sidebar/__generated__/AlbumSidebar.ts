@@ -12,4 +12,7 @@ export type GetAlbumSidebarQueryVariables = Exact<{
   id: string | number
 }>
 
-export type GetAlbumSidebarQuery = { album: { id: string; title: string } }
+export type GetAlbumSidebarQuery = {
+  __typename: 'Query'
+  album: { __typename: 'Album'; id: string; title: string }
+}

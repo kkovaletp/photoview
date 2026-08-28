@@ -10,4 +10,7 @@ import * as Types from '../../../__generated__/globalTypes'
 
 export type CheckInitialSetupQueryVariables = Exact<{ [key: string]: never }>
 
-export type CheckInitialSetupQuery = { siteInfo: { initialSetup: boolean } }
+export type CheckInitialSetupQuery = {
+  __typename: 'Query'
+  siteInfo: { __typename: 'SiteInfo'; initialSetup: boolean }
+}

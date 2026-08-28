@@ -13,11 +13,20 @@ export type SidebarDownloadQueryQueryVariables = Exact<{
 }>
 
 export type SidebarDownloadQueryQuery = {
+  __typename: 'Query'
   media: {
+    __typename: 'Media'
     id: string
     downloads: Array<{
+      __typename: 'MediaDownload'
       title: string
-      mediaUrl: { url: string; width: number; height: number; fileSize: number }
+      mediaUrl: {
+        __typename: 'MediaURL'
+        url: string
+        width: number
+        height: number
+        fileSize: number
+      }
     }>
   }
 }

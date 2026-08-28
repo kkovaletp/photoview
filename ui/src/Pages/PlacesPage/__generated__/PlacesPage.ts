@@ -10,4 +10,4 @@ import * as Types from '../../../__generated__/globalTypes'
 
 export type MediaGeoJsonQueryVariables = Exact<{ [key: string]: never }>
 
-export type MediaGeoJsonQuery = { myMediaGeoJson: unknown }
+export type MediaGeoJsonQuery = { __typename: 'Query'; myMediaGeoJson: unknown }

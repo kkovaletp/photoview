@@ -96,6 +96,7 @@ export const TextField = forwardRef(
         >
           {input}
           <button
+            type="submit"
             disabled={disabled}
             aria-label={t('general.action.submit', 'Submit')}
             className={clsx(
@@ -198,6 +199,7 @@ export const Button = ({
   ...props
 }: ButtonProps & ButtonHTMLAttributes<HTMLButtonElement>) => (
   <button
+    type="button"
     className={tailwindClassNames(
       buttonStyles({ variant, background }),
       className

@@ -471,7 +471,7 @@ describe('SubscriptionsHook', () => {
                 vi.advanceTimersByTime(4999)
             })
 
-            expect(setMessages.mock.calls.length).toBe(callCountAfterRender)
+            expect(setMessages.mock.calls).toHaveLength(callCountAfterRender)
         })
 
         it('does not schedule auto-dismiss when timeout is null', () => {
@@ -487,7 +487,7 @@ describe('SubscriptionsHook', () => {
                 vi.advanceTimersByTime(60_000)
             })
 
-            expect(setMessages.mock.calls.length).toBe(callCountAfterRender)
+            expect(setMessages.mock.calls).toHaveLength(callCountAfterRender)
         })
 
         it('clears the previous timer handle when the same key receives a new timeout', () => {
@@ -543,7 +543,7 @@ describe('SubscriptionsHook', () => {
             act(() => {
                 vi.advanceTimersByTime(1500)
             })
-            expect(setMessages.mock.calls.length).toBe(callCountAfterRerender)
+            expect(setMessages.mock.calls).toHaveLength(callCountAfterRerender)
 
             // Advance to the new 5 000 ms boundary — now the dismiss fires
             act(() => {

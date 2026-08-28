@@ -11,7 +11,8 @@ import * as Types from '../../../__generated__/globalTypes'
 export type ScanIntervalQueryQueryVariables = Exact<{ [key: string]: never }>
 
 export type ScanIntervalQueryQuery = {
-  siteInfo: { periodicScanInterval: number }
+  __typename: 'Query'
+  siteInfo: { __typename: 'SiteInfo'; periodicScanInterval: number }
 }
 
 export type ChangeScanIntervalMutationMutationVariables = Exact<{
@@ -19,5 +20,6 @@ export type ChangeScanIntervalMutationMutationVariables = Exact<{
 }>
 
 export type ChangeScanIntervalMutationMutation = {
+  __typename: 'Mutation'
   setPeriodicScanInterval: number
 }

@@ -13,7 +13,8 @@ export type ConcurrentWorkersQueryQueryVariables = Exact<{
 }>
 
 export type ConcurrentWorkersQueryQuery = {
-  siteInfo: { concurrentWorkers: number }
+  __typename: 'Query'
+  siteInfo: { __typename: 'SiteInfo'; concurrentWorkers: number }
 }
 
 export type SetConcurrentWorkersMutationVariables = Exact<{
@@ -21,5 +22,6 @@ export type SetConcurrentWorkersMutationVariables = Exact<{
 }>
 
 export type SetConcurrentWorkersMutation = {
+  __typename: 'Mutation'
   setScannerConcurrentWorkers: number
 }

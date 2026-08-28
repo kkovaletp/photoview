@@ -27,6 +27,7 @@ precacheAndRoute(self.__WB_MANIFEST)
 // Set up App Shell-style routing, so that all navigation requests
 // are fulfilled with your index.html shell. Learn more at
 // https://developers.google.com/web/fundamentals/architecture/app-shell
+//TODO: Simplify this regular expression to reduce its runtime, as it has super-linear performance due to backtracking. But make sure to not break the existing functionality here.
 const fileExtensionRegexp = /\/[^/?]+\.[^/]+$/
 registerRoute(
   // Return false to exempt requests from being fulfilled by index.html.

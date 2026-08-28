@@ -13,9 +13,15 @@ export type SetAlbumCoverMutationVariables = Exact<{
 }>
 
 export type SetAlbumCoverMutation = {
+  __typename: 'Mutation'
   setAlbumCover: {
+    __typename: 'Album'
     id: string
-    thumbnail: { id: string; thumbnail: { url: string } | null } | null
+    thumbnail: {
+      __typename: 'Media'
+      id: string
+      thumbnail: { __typename: 'MediaURL'; url: string } | null
+    } | null
   }
 }
 
@@ -24,8 +30,14 @@ export type ResetAlbumCoverMutationVariables = Exact<{
 }>
 
 export type ResetAlbumCoverMutation = {
+  __typename: 'Mutation'
   resetAlbumCover: {
+    __typename: 'Album'
     id: string
-    thumbnail: { id: string; thumbnail: { url: string } | null } | null
+    thumbnail: {
+      __typename: 'Media'
+      id: string
+      thumbnail: { __typename: 'MediaURL'; url: string } | null
+    } | null
   }
 }

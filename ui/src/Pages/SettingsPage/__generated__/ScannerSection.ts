@@ -11,5 +11,10 @@ import * as Types from '../../../__generated__/globalTypes'
 export type ScanAllMutationMutationVariables = Exact<{ [key: string]: never }>
 
 export type ScanAllMutationMutation = {
-  scanAll: { success: boolean; message: string | null }
+  __typename: 'Mutation'
+  scanAll: {
+    __typename: 'ScannerResult'
+    success: boolean
+    message: string | null
+  }
 }

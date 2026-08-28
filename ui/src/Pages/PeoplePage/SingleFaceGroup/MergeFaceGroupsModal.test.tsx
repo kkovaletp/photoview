@@ -498,9 +498,7 @@ describe('MergeFaceGroupsModal', () => {
                 ]
             )
 
-            await waitFor(() =>
-                expect(screen.getByTestId('facegroup-49')).toBeInTheDocument()
-            )
+            expect(await screen.findByTestId('facegroup-49')).toBeInTheDocument()
 
             triggerIntersection?.()
 
@@ -629,12 +627,10 @@ describe('MergeFaceGroupsModal', () => {
             }
             renderModal({}, [loadErrorMock, makeMyFacesMock()])
 
-            await waitFor(() => expect(screen.getByRole('alert')).toBeInTheDocument())
+            expect(await screen.findByRole('alert')).toBeInTheDocument()
             fireEvent.click(screen.getByRole('button', { name: /Retry/i }))
 
-            await waitFor(() =>
-                expect(screen.getByTestId('facegroup-0')).toBeInTheDocument()
-            )
+            expect(await screen.findByTestId('facegroup-0')).toBeInTheDocument()
         })
 
         test('shows inline alert and keeps modal open on network error', async () => {
@@ -680,7 +676,7 @@ describe('MergeFaceGroupsModal', () => {
         test('clears inline error when closeModal is called after a network error', async () => {
             const mocks = [makeMyFacesMock(), getCombineNetworkErrorMock('0', ['1'])]
             await setupAndTriggerMerge('0', ['1'], mocks)
-            await waitFor(() => expect(screen.getByRole('alert')).toBeInTheDocument())
+            expect(await screen.findByRole('alert')).toBeInTheDocument()
 
             fireEvent.click(screen.getByRole('button', { name: /Cancel/i }))
             await waitFor(() =>

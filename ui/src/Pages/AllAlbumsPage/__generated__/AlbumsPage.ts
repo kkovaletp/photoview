@@ -21,9 +21,15 @@ export type GetMyAlbumsQueryVariables = Exact<{
 }>
 
 export type GetMyAlbumsQuery = {
+  __typename: 'Query'
   myAlbums: Array<{
+    __typename: 'Album'
     id: string
     title: string
-    thumbnail: { id: string; thumbnail: { url: string } | null } | null
+    thumbnail: {
+      __typename: 'Media'
+      id: string
+      thumbnail: { __typename: 'MediaURL'; url: string } | null
+    } | null
   }>
 }

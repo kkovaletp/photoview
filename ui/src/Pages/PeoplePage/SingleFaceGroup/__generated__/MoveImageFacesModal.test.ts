@@ -13,4 +13,7 @@ export type MoveImageFacesMutationVariables = Exact<{
   destFaceGroupID: string | number
 }>
 
-export type MoveImageFacesMutation = { moveImageFaces: { id: string } }
+export type MoveImageFacesMutation = {
+  __typename: 'Mutation'
+  moveImageFaces: { __typename: 'FaceGroup'; id: string }
+}

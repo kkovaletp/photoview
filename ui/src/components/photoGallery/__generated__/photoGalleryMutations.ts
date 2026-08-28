@@ -14,5 +14,6 @@ export type MarkMediaFavoriteMutationVariables = Exact<{
 }>
 
 export type MarkMediaFavoriteMutation = {
-  favoriteMedia: { id: string; favorite: boolean }
+  __typename: 'Mutation'
+  favoriteMedia: { __typename: 'Media'; id: string; favorite: boolean }
 }

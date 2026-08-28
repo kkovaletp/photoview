@@ -34,7 +34,9 @@ export type ChangeUserPreferencesMutationVariables = Exact<{
 }>
 
 export type ChangeUserPreferencesMutation = {
+  __typename: 'Mutation'
   changeUserPreferences: {
+    __typename: 'UserPreferences'
     id: string
     language: Types.LanguageTranslation | null
   }
@@ -43,5 +45,10 @@ export type ChangeUserPreferencesMutation = {
 export type MyUserPreferencesQueryVariables = Exact<{ [key: string]: never }>
 
 export type MyUserPreferencesQuery = {
-  myUserPreferences: { id: string; language: Types.LanguageTranslation | null }
+  __typename: 'Query'
+  myUserPreferences: {
+    __typename: 'UserPreferences'
+    id: string
+    language: Types.LanguageTranslation | null
+  }
 }

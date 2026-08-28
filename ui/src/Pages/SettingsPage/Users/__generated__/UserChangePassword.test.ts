@@ -13,4 +13,7 @@ export type ChangeUserPasswordMutationVariables = Exact<{
   password: string
 }>
 
-export type ChangeUserPasswordMutation = { updateUser: { id: string } }
+export type ChangeUserPasswordMutation = {
+  __typename: 'Mutation'
+  updateUser: { __typename: 'User'; id: string }
+}

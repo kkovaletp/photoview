@@ -204,7 +204,7 @@ export const FaceDetails = ({
         }}
       >
         <FaceImagesCount>{group.imageFaceCount}</FaceImagesCount>
-        <button className="">
+        <button className="" type="button">
           {group.label ?? t('people_page.face_group.unlabeled', 'Unlabeled')}
         </button>
         {/* <EditIcon name="pencil" /> */}

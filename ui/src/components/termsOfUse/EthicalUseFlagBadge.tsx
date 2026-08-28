@@ -52,6 +52,7 @@ const EthicalUseFlagBadge = () => {
     return (
         <>
             <button
+                type="button"
                 ref={buttonRef}
                 onClick={handleToggle}
                 title={t('terms_of_use.badge.button_title', 'Terms of Use (Mandatory)')}
@@ -65,6 +66,7 @@ const EthicalUseFlagBadge = () => {
                 🇺🇦
             </button>
 
+            {/* NOSONAR -- The 'dialog' role is better stylable */}
             {open && createPortal(
                 <div
                     ref={dialogRef}
@@ -82,6 +84,7 @@ const EthicalUseFlagBadge = () => {
                             🇺🇦 {t('terms_of_use.badge.button_title', 'Terms of Use (Mandatory)')}
                         </h3>
                         <button
+                            type="button"
                             onClick={() => setOpen(false)}
                             className="ml-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200
                             leading-none cursor-pointer"

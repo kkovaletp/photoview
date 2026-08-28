@@ -10,4 +10,7 @@ import * as Types from '../../../__generated__/globalTypes'
 
 export type AdminQueryQueryVariables = Exact<{ [key: string]: never }>
 
-export type AdminQueryQuery = { myUser: { admin: boolean } }
+export type AdminQueryQuery = {
+  __typename: 'Query'
+  myUser: { __typename: 'User'; admin: boolean }
+}

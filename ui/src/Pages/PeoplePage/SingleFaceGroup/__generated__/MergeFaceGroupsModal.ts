@@ -13,4 +13,7 @@ export type CombineFacesMutationVariables = Exact<{
   srcIDs: Array<string | number> | string | number
 }>
 
-export type CombineFacesMutation = { combineFaceGroups: { id: string } }
+export type CombineFacesMutation = {
+  __typename: 'Mutation'
+  combineFaceGroups: { __typename: 'FaceGroup'; id: string }
+}

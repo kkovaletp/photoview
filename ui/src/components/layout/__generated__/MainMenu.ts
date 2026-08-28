@@ -10,10 +10,14 @@ import * as Types from '../../../__generated__/globalTypes'
 
 export type MapboxEnabledQueryQueryVariables = Exact<{ [key: string]: never }>
 
-export type MapboxEnabledQueryQuery = { mapboxToken: string | null }
+export type MapboxEnabledQueryQuery = {
+  __typename: 'Query'
+  mapboxToken: string | null
+}
 
 export type FaceDetectionEnabledQueryVariables = Exact<{ [key: string]: never }>
 
 export type FaceDetectionEnabledQuery = {
-  siteInfo: { faceDetectionEnabled: boolean }
+  __typename: 'Query'
+  siteInfo: { __typename: 'SiteInfo'; faceDetectionEnabled: boolean }
 }

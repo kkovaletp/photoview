@@ -106,6 +106,7 @@ const SortingOptions = ({
           items={sortingOptions}
         />
         <button
+          type="button"
           title={t('album_filter.sort_direction', 'Sort direction')}
           aria-label={t('album_filter.sort_direction', 'Sort direction')}
           aria-pressed={ordering?.orderDirection === OrderDirection.Desc}

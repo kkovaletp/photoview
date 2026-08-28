@@ -13,5 +13,10 @@ export type DetachImageFacesMutationVariables = Exact<{
 }>
 
 export type DetachImageFacesMutation = {
-  detachImageFaces: { id: string; label: string | null }
+  __typename: 'Mutation'
+  detachImageFaces: {
+    __typename: 'FaceGroup'
+    id: string
+    label: string | null
+  }
 }

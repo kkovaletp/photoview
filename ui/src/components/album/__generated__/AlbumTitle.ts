@@ -13,5 +13,10 @@ export type AlbumPathQueryQueryVariables = Exact<{
 }>
 
 export type AlbumPathQueryQuery = {
-  album: { id: string; path: Array<{ id: string; title: string }> }
+  __typename: 'Query'
+  album: {
+    __typename: 'Album'
+    id: string
+    path: Array<{ __typename: 'Album'; id: string; title: string }>
+  }
 }

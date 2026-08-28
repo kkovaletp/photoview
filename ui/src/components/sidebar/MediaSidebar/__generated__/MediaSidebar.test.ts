@@ -13,9 +13,12 @@ export type SidebarGetPhotoSharesQueryVariables = Exact<{
 }>
 
 export type SidebarGetPhotoSharesQuery = {
+  __typename: 'Query'
   media: {
+    __typename: 'Media'
     id: string
     shares: Array<{
+      __typename: 'ShareToken'
       id: string
       token: string
       hasPassword: boolean

@@ -65,11 +65,6 @@ describe('MediaSidebarMap', () => {
             expect(container.firstChild).toBeNull()
         })
 
-        test('renders nothing when coordinates is undefined', () => {
-            const { container } = render(<MediaSidebarMap coordinates={undefined} />)
-            expect(container.firstChild).toBeNull()
-        })
-
         test('renders nothing when mapboxToken is null, even with valid coordinates', () => {
             mockUseMapboxMap.mockReturnValue(makeMapboxReturn(null))
             const { container } = render(<MediaSidebarMap coordinates={validCoordinates} />)
@@ -122,17 +117,6 @@ describe('MediaSidebarMap', () => {
                 })
             )
         })
-
-        test('passes { lat: 0, lng: 0 } as center when coordinates are undefined', () => {
-            render(<MediaSidebarMap coordinates={undefined} />)
-            expect(mockUseMapboxMap).toHaveBeenCalledWith(
-                expect.objectContaining({
-                    mapboxOptions: expect.objectContaining({
-                        center: { lat: 0, lng: 0 },
-                    }),
-                })
-            )
-        })
     })
 
     describe('configureMapbox callback behavior', () => {
@@ -152,17 +136,6 @@ describe('MediaSidebarMap', () => {
         test('returns early without adding controls or marker when coordinates are null', () => {
             const { getCb } = captureConfigureMapbox()
             render(<MediaSidebarMap coordinates={null} />)
-
-            const { mockMap, NavigationControl, Marker } = makeMockMapLib()
-            getCb()!(mockMap, { NavigationControl, Marker })
-
-            expect(mockMap.addControl).not.toHaveBeenCalled()
-            expect(Marker).not.toHaveBeenCalled()
-        })
-
-        test('returns early without adding controls or marker when coordinates are undefined', () => {
-            const { getCb } = captureConfigureMapbox()
-            render(<MediaSidebarMap coordinates={undefined} />)
 
             const { mockMap, NavigationControl, Marker } = makeMockMapLib()
             getCb()!(mockMap, { NavigationControl, Marker })

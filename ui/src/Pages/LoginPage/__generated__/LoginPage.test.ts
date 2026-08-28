@@ -14,5 +14,11 @@ export type AuthorizeMutationVariables = Exact<{
 }>
 
 export type AuthorizeMutation = {
-  authorizeUser: { success: boolean; status: string; token: string | null }
+  __typename: 'Mutation'
+  authorizeUser: {
+    __typename: 'AuthorizeResult'
+    success: boolean
+    status: string
+    token: string | null
+  }
 }

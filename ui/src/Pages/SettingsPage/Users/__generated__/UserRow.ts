@@ -15,7 +15,13 @@ export type UpdateUserMutationVariables = Exact<{
 }>
 
 export type UpdateUserMutation = {
-  updateUser: { id: string; username: string; admin: boolean }
+  __typename: 'Mutation'
+  updateUser: {
+    __typename: 'User'
+    id: string
+    username: string
+    admin: boolean
+  }
 }
 
 export type DeleteUserMutationVariables = Exact<{
@@ -23,11 +29,15 @@ export type DeleteUserMutationVariables = Exact<{
 }>
 
 export type DeleteUserMutation = {
-  deleteUser: { id: string; username: string }
+  __typename: 'Mutation'
+  deleteUser: { __typename: 'User'; id: string; username: string }
 }
 
 export type ScanUserMutationVariables = Exact<{
   userId: string | number
 }>
 
-export type ScanUserMutation = { scanUser: { success: boolean } }
+export type ScanUserMutation = {
+  __typename: 'Mutation'
+  scanUser: { __typename: 'ScannerResult'; success: boolean }
+}

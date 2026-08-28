@@ -15,7 +15,9 @@ export type InitialSetupMutationVariables = Exact<{
 }>
 
 export type InitialSetupMutation = {
+  __typename: 'Mutation'
   initialSetupWizard: {
+    __typename: 'AuthorizeResult'
     success: boolean
     status: string
     token: string | null

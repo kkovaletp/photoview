@@ -15,6 +15,7 @@ export type CreateUserMutationVariables = Exact<{
 }>
 
 export type CreateUserMutation = {
+  __typename: 'Mutation'
   createUser: {
     __typename: 'User'
     id: string

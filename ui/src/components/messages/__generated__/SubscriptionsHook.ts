@@ -22,7 +22,9 @@ export type NotificationSubscriptionSubscriptionVariables = Exact<{
 }>
 
 export type NotificationSubscriptionSubscription = {
+  __typename: 'Subscription'
   notification: {
+    __typename: 'Notification'
     key: string
     type: Types.NotificationType
     header: string
