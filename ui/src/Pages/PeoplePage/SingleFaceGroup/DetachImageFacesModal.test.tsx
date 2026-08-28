@@ -90,17 +90,21 @@ const DETACH_IMAGE_FACES_MUTATION = gql`
 
 function makeImageFace(id: string, title: string): SingleFaceGroupQuery['faceGroup']['imageFaces'][0] {
     return {
+        __typename: 'ImageFace',
         id,
         rectangle: {
+            __typename: 'FaceRectangle',
             minX: 0.1, maxX: 0.5, minY: 0.1, maxY: 0.5,
         },
         media: {
+            __typename: 'Media',
             id: `media-${id}`,
             title,
             type: 'Photo' as any,
             blurhash: null,
             favorite: false,
             thumbnail: {
+                __typename: 'MediaURL',
                 url: `/thumb/${id}.jpg`,
                 width: 150,
                 height: 150,
@@ -112,6 +116,7 @@ function makeImageFace(id: string, title: string): SingleFaceGroupQuery['faceGro
 }
 
 const faceGroup: SingleFaceGroupQuery['faceGroup'] = {
+    __typename: 'FaceGroup',
     id: 'group-1',
     label: 'Alice',
     imageFaces: [
@@ -123,6 +128,7 @@ const faceGroup: SingleFaceGroupQuery['faceGroup'] = {
 function makeMyFacesMock() {
     // Used only for refetchQueries after a successful mutation
     const g1: MyFacesQuery['myFaceGroups'][0] = {
+        __typename: 'FaceGroup',
         id: 'group-1',
         label: 'Alice',
         imageFaceCount: 2,

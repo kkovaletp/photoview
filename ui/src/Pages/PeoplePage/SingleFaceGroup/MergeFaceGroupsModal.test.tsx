@@ -119,10 +119,10 @@ afterAll(() => {
 // ─── Fixtures ──────────────────────────────────────────────────────────────────
 
 const mockFaceGroups: MyFacesQuery['myFaceGroups'] = [
-    { id: '0', label: 'Alice', imageFaceCount: 1, imageFaces: [] },
-    { id: '1', label: 'Bob', imageFaceCount: 1, imageFaces: [] },
-    { id: '2', label: 'Charlie', imageFaceCount: 1, imageFaces: [] },
-    { id: '3', label: null, imageFaceCount: 0, imageFaces: [] },
+    { __typename: 'FaceGroup', id: '0', label: 'Alice', imageFaceCount: 1, imageFaces: [] },
+    { __typename: 'FaceGroup', id: '1', label: 'Bob', imageFaceCount: 1, imageFaces: [] },
+    { __typename: 'FaceGroup', id: '2', label: 'Charlie', imageFaceCount: 1, imageFaces: [] },
+    { __typename: 'FaceGroup', id: '3', label: null, imageFaceCount: 0, imageFaces: [] },
 ]
 
 const defaultMyFacesQueryVariables = { limit: 50, offset: 0 }
@@ -476,6 +476,7 @@ describe('MergeFaceGroupsModal', () => {
 
             const secondPageFaceGroups: MyFacesQuery['myFaceGroups'] = [
                 {
+                    __typename: 'FaceGroup',
                     id: '50',
                     label: 'Person 50',
                     imageFaceCount: 1,

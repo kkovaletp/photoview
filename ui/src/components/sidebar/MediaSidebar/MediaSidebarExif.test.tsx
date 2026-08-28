@@ -34,6 +34,7 @@ describe('ExifDetails', () => {
         flash: null,
         exposureProgram: null,
         coordinates: null,
+        __typename: 'MediaEXIF',
       },
       __typename: 'Media',
     }
@@ -73,9 +74,11 @@ describe('ExifDetails', () => {
         flash: 9,
         exposureProgram: 3,
         coordinates: {
+          __typename: 'Coordinates',
           latitude: 41.40338,
           longitude: 2.17403,
         },
+        __typename: 'MediaEXIF',
       },
       __typename: 'Media',
     }
@@ -138,6 +141,7 @@ describe('ExifDetails dateShot formatting', () => {
       flash: null,
       exposureProgram: null,
       coordinates: null,
+      __typename: 'MediaEXIF',
     },
     __typename: 'Media',
   })

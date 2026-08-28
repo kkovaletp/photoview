@@ -6,6 +6,7 @@ import PresentMedia from './PresentMedia'
 
 test('render present image', () => {
   const media: MediaGalleryFieldsFragment = {
+    __typename: 'Media',
     id: '123',
     type: MediaType.Photo,
     highRes: null,
@@ -13,6 +14,7 @@ test('render present image', () => {
     videoWeb: null,
     favorite: false,
     thumbnail: {
+      __typename: 'MediaURL',
       url: '/sample_image.jpg',
       width: 300,
       height: 200,
@@ -32,15 +34,18 @@ test('render present image', () => {
 
 test('render present video', () => {
   const media: MediaGalleryFieldsFragment = {
+    __typename: 'Media',
     id: '123',
     type: MediaType.Video,
     highRes: null,
     blurhash: null,
     favorite: false,
     videoWeb: {
+      __typename: 'MediaURL',
       url: '/sample_video.mp4',
     },
     thumbnail: {
+      __typename: 'MediaURL',
       url: '/sample_video_thumb.jpg',
       width: 300,
       height: 200,

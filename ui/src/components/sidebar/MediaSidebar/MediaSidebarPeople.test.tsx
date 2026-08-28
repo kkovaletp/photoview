@@ -121,6 +121,7 @@ const createMockMedia = (
         height: 2000,
     },
     thumbnail: {
+        __typename: 'MediaURL',
         url: '/photo/thumb.jpg',
         width: 400,
         height: 300,
