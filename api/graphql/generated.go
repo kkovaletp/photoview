@@ -340,7 +340,7 @@ type QueryResolver interface {
 	MyMedia(ctx context.Context, order *models.Ordering, paginate *models.Pagination) ([]*models.Media, error)
 	Media(ctx context.Context, id int, tokenCredentials *models.ShareTokenCredentials) (*models.Media, error)
 	MediaList(ctx context.Context, ids []int) ([]*models.Media, error)
-	MyMediaGeoJSON(ctx context.Context) (any, error)
+	MyMediaGeoJSON(ctx context.Context) (interface{}, error)
 	MapboxToken(ctx context.Context) (*string, error)
 	Search(ctx context.Context, query string, limitMedia *int, limitAlbums *int) (*models.SearchResult, error)
 	ShareToken(ctx context.Context, credentials models.ShareTokenCredentials) (*models.ShareToken, error)
@@ -6604,7 +6604,7 @@ func (ec *executionContext) _Query_myMediaGeoJson(ctx context.Context, field gra
 
 			directive1 := func(ctx context.Context) (any, error) {
 				if ec.Directives.IsAuthorized == nil {
-					var zeroVal any
+					var zeroVal interface{}
 					return zeroVal, errors.New("directive isAuthorized is not implemented")
 				}
 				return ec.Directives.IsAuthorized(ctx, nil, directive0)
