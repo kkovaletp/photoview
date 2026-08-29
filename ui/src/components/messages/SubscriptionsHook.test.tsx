@@ -112,7 +112,9 @@ describe('SubscriptionsHook', () => {
             render(<SubscriptionsHook setMessages={setMessages} />)
 
             const result = applyUpdater(setMessages, 0, [])
-            expect(result[0].key).toMatch(/^download-\d+-[a-z0-9]+$/)
+            expect(result[0].key).toMatch(
+                /^download-[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+            )
         })
 
         it('appends the error message to any existing messages', () => {
