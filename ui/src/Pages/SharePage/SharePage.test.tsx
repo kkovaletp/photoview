@@ -226,7 +226,7 @@ describe('load correct share page, based on graphql query', () => {
     })
 
     expect(screen.getByLabelText('Loading...')).toBeInTheDocument()
-    await waitForElementToBeRemoved(() => screen.getByLabelText('Loading...'))
+    await waitForElementToBeRemoved(() => screen.queryByLabelText('Loading...'))
 
     expect(screen.getByTestId('Layout')).toBeInTheDocument()
     expect(screen.getByTestId('AlbumSharePage')).toBeInTheDocument()
@@ -309,7 +309,7 @@ describe('load correct share page, based on graphql query', () => {
     )
 
     expect(screen.getByLabelText('Loading...')).toBeInTheDocument()
-    await waitForElementToBeRemoved(() => screen.getByLabelText('Loading...'))
+    await waitForElementToBeRemoved(() => screen.queryByLabelText('Loading...'))
 
     expect(screen.getByTestId('Layout')).toBeInTheDocument()
     expect(screen.getByTestId('AlbumSharePage')).toBeInTheDocument()

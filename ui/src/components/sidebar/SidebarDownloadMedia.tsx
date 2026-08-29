@@ -13,6 +13,7 @@ import {
   SidebarDownloadQueryQuery,
   SidebarDownloadQueryQueryVariables,
 } from './__generated__/SidebarDownloadMedia'
+import { createUuid } from '../../helpers/createUuid'
 
 const DOWNLOAD_COMPLETE_NOTIFICATION_DURATION = 2000
 
@@ -105,7 +106,7 @@ const downloadMediaShowProgress =
     add: (message: Message) => void,
     removeKey: (key: string) => void
   ) => async (response: Response) => {
-    const notifyKey = `download-${Date.now()}-${Math.random().toString(36).slice(2, 11)}`
+    const notifyKey = `download-${createUuid()}`
     const totalBytes = Number(response.headers.get('content-length'))
     const reader = response.body?.getReader()
     const data = new Uint8Array(totalBytes)

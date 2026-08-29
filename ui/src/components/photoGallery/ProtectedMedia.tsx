@@ -153,7 +153,7 @@ const FallbackLazyloadedImage = ({
     )
   } else {
     return (
-      <div ref={imgRef} className={clsx(className, 'bg-[#eee]')}>
+      <div ref={imgRef} className={clsx(className, 'bg-dark-text')}>
         {blurhash && (
           <BlurhashCanvas
             className="absolute w-full h-full top-0"

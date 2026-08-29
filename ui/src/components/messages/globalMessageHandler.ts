@@ -1,5 +1,6 @@
 import { Message } from './SubscriptionsHook'
 import { NotificationType } from '../../__generated__/globalTypes'
+import { createUuid } from '../../helpers/createUuid'
 
 type MessageStateUpdater = {
     add: (message: Message) => void
@@ -46,7 +47,7 @@ class GlobalMessageHandler {
     // Helper to create error messages
     addErrorMessage(header: string, content: string) {
         this.add({
-            key: Math.random().toString(26),
+            key: createUuid(),
             type: NotificationType.Message,
             props: {
                 negative: true,

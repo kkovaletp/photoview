@@ -1,42 +1,52 @@
+/** Internal type. DO NOT USE DIRECTLY. */
+type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] }
+/** Internal type. DO NOT USE DIRECTLY. */
+export type Incremental<T> =
+  | T
+  | {
+      [P in keyof T]?: P extends ' $fragmentName' | '__typename' ? T[P] : never
+    }
 import * as Types from '../../../../__generated__/globalTypes'
 
-export type SingleFaceGroupQueryVariables = Types.Exact<{
-  id: Types.Scalars['ID']['input']
-  limit: Types.Scalars['Int']['input']
-  offset: Types.Scalars['Int']['input']
+export type MediaType = 'Photo' | 'Video'
+
+export type SingleFaceGroupQueryVariables = Exact<{
+  id: string | number
+  limit: number
+  offset: number
 }>
 
 export type SingleFaceGroupQuery = {
-  __typename?: 'Query'
+  __typename: 'Query'
   faceGroup: {
-    __typename?: 'FaceGroup'
+    __typename: 'FaceGroup'
     id: string
-    label?: string | null
+    label: string | null
     imageFaces: Array<{
-      __typename?: 'ImageFace'
+      __typename: 'ImageFace'
       id: string
       rectangle: {
-        __typename?: 'FaceRectangle'
+        __typename: 'FaceRectangle'
         minX: number
         maxX: number
         minY: number
         maxY: number
       }
       media: {
-        __typename?: 'Media'
+        __typename: 'Media'
         title: string
         id: string
         type: Types.MediaType
-        blurhash?: string | null
+        blurhash: string | null
         favorite: boolean
-        thumbnail?: {
-          __typename?: 'MediaURL'
+        thumbnail: {
+          __typename: 'MediaURL'
           url: string
           width: number
           height: number
         } | null
-        highRes?: { __typename?: 'MediaURL'; url: string } | null
-        videoWeb?: { __typename?: 'MediaURL'; url: string } | null
+        highRes: { __typename: 'MediaURL'; url: string } | null
+        videoWeb: { __typename: 'MediaURL'; url: string } | null
       }
     }>
   }

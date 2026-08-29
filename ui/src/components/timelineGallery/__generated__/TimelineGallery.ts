@@ -1,35 +1,45 @@
+/** Internal type. DO NOT USE DIRECTLY. */
+type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] }
+/** Internal type. DO NOT USE DIRECTLY. */
+export type Incremental<T> =
+  | T
+  | {
+      [P in keyof T]?: P extends ' $fragmentName' | '__typename' ? T[P] : never
+    }
 import * as Types from '../../../__generated__/globalTypes'
 
-export type MyTimelineQueryVariables = Types.Exact<{
-  onlyFavorites?: Types.InputMaybe<Types.Scalars['Boolean']['input']>
-  limit?: Types.InputMaybe<Types.Scalars['Int']['input']>
-  offset?: Types.InputMaybe<Types.Scalars['Int']['input']>
-  fromDate?: Types.InputMaybe<Types.Scalars['Time']['input']>
+export type MediaType = 'Photo' | 'Video'
+
+export type MyTimelineQueryVariables = Exact<{
+  onlyFavorites?: boolean | null | undefined
+  limit?: number | null | undefined
+  offset?: number | null | undefined
+  fromDate?: string | null | undefined
 }>
 
 export type MyTimelineQuery = {
-  __typename?: 'Query'
+  __typename: 'Query'
   myTimeline: Array<{
-    __typename?: 'Media'
+    __typename: 'Media'
     id: string
     title: string
     type: Types.MediaType
-    blurhash?: string | null
+    blurhash: string | null
     favorite: boolean
     date: string
-    thumbnail?: {
-      __typename?: 'MediaURL'
+    thumbnail: {
+      __typename: 'MediaURL'
       url: string
       width: number
       height: number
     } | null
-    highRes?: {
-      __typename?: 'MediaURL'
+    highRes: {
+      __typename: 'MediaURL'
       url: string
       width: number
       height: number
     } | null
-    videoWeb?: { __typename?: 'MediaURL'; url: string } | null
-    album: { __typename?: 'Album'; id: string; title: string }
+    videoWeb: { __typename: 'MediaURL'; url: string } | null
+    album: { __typename: 'Album'; id: string; title: string }
   }>
 }

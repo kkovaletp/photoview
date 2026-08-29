@@ -1,17 +1,25 @@
+/** Internal type. DO NOT USE DIRECTLY. */
+type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] }
+/** Internal type. DO NOT USE DIRECTLY. */
+export type Incremental<T> =
+  | T
+  | {
+      [P in keyof T]?: P extends ' $fragmentName' | '__typename' ? T[P] : never
+    }
 import * as Types from '../../../__generated__/globalTypes'
 
-export type InitialSetupMutationVariables = Types.Exact<{
-  username: Types.Scalars['String']['input']
-  password: Types.Scalars['String']['input']
-  rootPath: Types.Scalars['String']['input']
+export type InitialSetupMutationVariables = Exact<{
+  username: string
+  password: string
+  rootPath: string
 }>
 
 export type InitialSetupMutation = {
-  __typename?: 'Mutation'
-  initialSetupWizard?: {
-    __typename?: 'AuthorizeResult'
+  __typename: 'Mutation'
+  initialSetupWizard: {
+    __typename: 'AuthorizeResult'
     success: boolean
     status: string
-    token?: string | null
+    token: string | null
   } | null
 }

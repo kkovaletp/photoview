@@ -1,11 +1,19 @@
+/** Internal type. DO NOT USE DIRECTLY. */
+type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] }
+/** Internal type. DO NOT USE DIRECTLY. */
+export type Incremental<T> =
+  | T
+  | {
+      [P in keyof T]?: P extends ' $fragmentName' | '__typename' ? T[P] : never
+    }
 import * as Types from '../../../../__generated__/globalTypes'
 
-export type ChangeUserPasswordMutationVariables = Types.Exact<{
-  userId: Types.Scalars['ID']['input']
-  password: Types.Scalars['String']['input']
+export type ChangeUserPasswordMutationVariables = Exact<{
+  userId: string | number
+  password: string
 }>
 
 export type ChangeUserPasswordMutation = {
-  __typename?: 'Mutation'
-  updateUser: { __typename?: 'User'; id: string }
+  __typename: 'Mutation'
+  updateUser: { __typename: 'User'; id: string }
 }

@@ -84,6 +84,7 @@ export const SidebarPhotoCover = ({ cover_id }: SidebarPhotoCoverProps) => {
             <tr className="text-left border-gray-100 dark:border-dark-border2 border-b border-t">
               <td colSpan={2} className="pl-4 py-2">
                 <button
+                  type="submit"
                   className="disabled:opacity-50 text-green-500 font-bold uppercase text-xs"
                   disabled={buttonDisabled}
                   onClick={() => {
@@ -149,6 +150,7 @@ export const SidebarAlbumCover = ({ id }: SidebarAlbumCoverProps) => {
             <tr className="text-left border-gray-100 dark:border-dark-border2 border-b border-t">
               <td colSpan={2} className="pl-4 py-2">
                 <button
+                  type="reset"
                   className="disabled:opacity-50 text-red-500 font-bold uppercase text-xs"
                   disabled={buttonDisabled}
                   onClick={() => {

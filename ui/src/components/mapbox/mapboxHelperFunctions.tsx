@@ -38,7 +38,7 @@ const makeUpdateMarkers =
   ({ map, mapboxLibrary, dispatchMarkerMedia }: registerMediaMarkersArgs) =>
     () => {
       const newMarkers: typeof markers = {}
-      const features = map.querySourceFeatures('media')
+      const features: mapboxgl.GeoJSONFeature[] = map.querySourceFeatures('media')
 
       // for every media on the screen, create an HTML marker for it (if we didn't yet),
       // and add it to the map if it's not there already

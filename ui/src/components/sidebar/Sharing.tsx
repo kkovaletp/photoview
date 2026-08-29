@@ -550,6 +550,7 @@ const SidebarShare = ({
       </td>
       <td className="pr-6 py-2 whitespace-nowrap text-[#5C6A7F] dark:text-[#7599ca] flex">
         <button
+          type="button"
           className="align-middle p-1 ml-2"
           title={t('sidebar.sharing.copy_link', 'Copy Link')}
           onClick={async () => {
@@ -559,6 +560,7 @@ const SidebarShare = ({
           <CopyIcon />
         </button>
         <button
+          type="submit"
           onClick={() => {
             deleteShare({
               variables: { token: share.token }
