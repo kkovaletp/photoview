@@ -41,6 +41,8 @@ const config: CodegenConfig = {
             config: {
                 // Avoids re-emitting enum/input definitions already in globalTypes.ts
                 onlyOperationTypes: true,
+                // Preserves '__typename' fields in generated types for consistency with Apollo Client's default behavior
+                nonOptionalTypename: true,
                 // Keeps strict nullability (matches current tsconfig strict:true)
                 strictScalars: false,
                 enumsAsTypes: false,

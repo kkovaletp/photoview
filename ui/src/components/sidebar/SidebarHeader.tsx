@@ -18,6 +18,7 @@ const SidebarHeader = ({ title }: SidebarHeaderProps) => {
   return (
     <div className="m-2 flex items-center">
       <button
+        type="button"
         className={`${pinned ? 'lg:hidden' : ''}`}
         title={t('sidebar.action.close', 'Close sidebar')}
         onClick={() => updateSidebar(null)}
@@ -26,6 +27,7 @@ const SidebarHeader = ({ title }: SidebarHeaderProps) => {
       </button>
       <span className="grow -mt-1 ml-2">{title}</span>
       <button
+        type="button"
         className="hidden lg:block"
         title={t('sidebar.action.pin', 'Pin sidebar')}
         onClick={() => setPinned(!pinned)}

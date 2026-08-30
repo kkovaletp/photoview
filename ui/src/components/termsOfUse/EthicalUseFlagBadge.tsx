@@ -52,6 +52,7 @@ const EthicalUseFlagBadge = () => {
     return (
         <>
             <button
+                type="button"
                 ref={buttonRef}
                 onClick={handleToggle}
                 title={t('terms_of_use.badge.button_title', 'Terms of Use (Mandatory)')}
@@ -61,9 +62,11 @@ const EthicalUseFlagBadge = () => {
                 className="text-2xl leading-none cursor-pointer hover:scale-110 active:scale-95 transition-transform
                 focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded"
             >
+                {/* i18next-instrument-ignore-next-line -- The flag must remain unchanged */}
                 🇺🇦
             </button>
 
+            {/* NOSONAR -- The 'dialog' role is better stylable */}
             {open && createPortal(
                 <div
                     ref={dialogRef}
@@ -77,9 +80,11 @@ const EthicalUseFlagBadge = () => {
                 >
                     <div className="flex items-start justify-between mb-2">
                         <h3 className="font-semibold text-gray-900 dark:text-white">
+                            {/* i18next-instrument-ignore-next-line -- The flag must remain unchanged */}
                             🇺🇦 {t('terms_of_use.badge.button_title', 'Terms of Use (Mandatory)')}
                         </h3>
                         <button
+                            type="button"
                             onClick={() => setOpen(false)}
                             className="ml-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200
                             leading-none cursor-pointer"
@@ -105,7 +110,8 @@ const EthicalUseFlagBadge = () => {
                                 ),
                             }}
                         />
-                        {' '}
+                    </p>
+                    <p className="text-gray-600 dark:text-gray-300 mb-3">
                         {t('terms_of_use.badge.key_conditions_suffix', 'Key conditions:')}
                     </p>
                     <ul className="list-disc list-inside text-xs text-gray-600 dark:text-gray-400 space-y-1">

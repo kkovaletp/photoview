@@ -108,6 +108,7 @@ const AlbumTitle = ({ album, disableLink = false }: AlbumTitleProps) => {
       </div>
       {token && (
         <button
+          type="button"
           title={t('sidebar.album.title', 'Album options')}
           aria-label={t('sidebar.album.title', 'Album options')}
           className={tailwindClassNames(buttonStyles({}), 'px-2 py-2 ml-2')}

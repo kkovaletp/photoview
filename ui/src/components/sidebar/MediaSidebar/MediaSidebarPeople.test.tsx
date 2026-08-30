@@ -256,7 +256,7 @@ describe('MediaSidebarPeople', () => {
         const menuButtons = screen.getAllByRole('button')
         await user.click(menuButtons[0])
 
-        await waitFor(() => expect(screen.getByText('Change label')).toBeInTheDocument())
+        expect(await screen.findByText('Change label')).toBeInTheDocument()
         await user.click(screen.getByText('Change label'))
 
         // Should show input field
@@ -273,7 +273,7 @@ describe('MediaSidebarPeople', () => {
         const initialButtonCount = screen.getAllByRole('button').length
 
         await user.click(screen.getAllByRole('button')[0])
-        await waitFor(() => expect(screen.getByText('Change label')).toBeInTheDocument())
+        expect(await screen.findByText('Change label')).toBeInTheDocument()
         await user.click(screen.getByText('Change label'))
 
         await waitFor(() => {
@@ -287,7 +287,7 @@ describe('MediaSidebarPeople', () => {
         renderWithProviders(<MediaSidebarPeople media={media} />)
 
         await user.click(screen.getAllByRole('button')[0])
-        await waitFor(() => expect(screen.getByText('Merge face')).toBeInTheDocument())
+        expect(await screen.findByText('Merge face')).toBeInTheDocument()
         await user.click(screen.getByText('Merge face'))
 
         // Check modal state for the specific face group
@@ -305,7 +305,7 @@ describe('MediaSidebarPeople', () => {
         renderWithProviders(<MediaSidebarPeople media={media} />)
 
         await user.click(screen.getAllByRole('button')[0])
-        await waitFor(() => expect(screen.getByText('Move face')).toBeInTheDocument())
+        expect(await screen.findByText('Move face')).toBeInTheDocument()
         await user.click(screen.getByText('Move face'))
 
         // Check modal is open for the specific face group
@@ -346,7 +346,7 @@ describe('MediaSidebarPeople', () => {
         renderWithProviders(<MediaSidebarPeople media={media} />)
 
         await user.click(screen.getAllByRole('button')[0])
-        await waitFor(() => expect(screen.getByText('Detach image')).toBeInTheDocument())
+        expect(await screen.findByText('Detach image')).toBeInTheDocument()
         await user.click(screen.getByText('Detach image'))
 
         await waitFor(() => {
@@ -368,7 +368,7 @@ describe('MediaSidebarPeople', () => {
         renderWithProviders(<MediaSidebarPeople media={media} />)
 
         await user.click(screen.getAllByRole('button')[0])
-        await waitFor(() => expect(screen.getByText('Detach image')).toBeInTheDocument())
+        expect(await screen.findByText('Detach image')).toBeInTheDocument()
         await user.click(screen.getByText('Detach image'))
 
         await waitFor(() => {
@@ -388,7 +388,7 @@ describe('MediaSidebarPeople', () => {
         renderWithProviders(<MediaSidebarPeople media={media} />)
 
         await user.click(screen.getAllByRole('button')[0])
-        await waitFor(() => expect(screen.getByText('Detach image')).toBeInTheDocument())
+        expect(await screen.findByText('Detach image')).toBeInTheDocument()
         await user.click(screen.getByText('Detach image'))
 
         // Give the promise a tick to resolve
@@ -408,7 +408,7 @@ describe('MediaSidebarPeople', () => {
         renderWithProviders(<MediaSidebarPeople media={media} />)
 
         await user.click(screen.getAllByRole('button')[0])
-        await waitFor(() => expect(screen.getByText('Detach image')).toBeInTheDocument())
+        expect(await screen.findByText('Detach image')).toBeInTheDocument()
         await user.click(screen.getByText('Detach image'))
 
         expect(mockDetachImageFaces).not.toHaveBeenCalled()
@@ -429,7 +429,7 @@ describe('MediaSidebarPeople', () => {
         renderWithProviders(<MediaSidebarPeople media={media} />)
 
         await user.click(screen.getAllByRole('button')[0])
-        await waitFor(() => expect(screen.getByText('Detach image')).toBeInTheDocument())
+        expect(await screen.findByText('Detach image')).toBeInTheDocument()
         await user.click(screen.getByText('Detach image'))
 
         // Click "Detach image"
@@ -454,7 +454,7 @@ describe('MediaSidebarPeople', () => {
         renderWithProviders(<MediaSidebarPeople media={media} />)
 
         await user.click(screen.getAllByRole('button')[0])
-        await waitFor(() => expect(screen.getByText('Detach image')).toBeInTheDocument())
+        expect(await screen.findByText('Detach image')).toBeInTheDocument()
         await user.click(screen.getByText('Detach image'))
 
         await waitFor(() => {
@@ -484,13 +484,13 @@ describe('MediaSidebarPeople', () => {
 
         // First detach attempt – produces an error
         await user.click(screen.getAllByRole('button')[0])
-        await waitFor(() => expect(screen.getByText('Detach image')).toBeInTheDocument())
+        expect(await screen.findByText('Detach image')).toBeInTheDocument()
         await user.click(screen.getByText('Detach image'))
-        await waitFor(() => expect(screen.getByRole('alert')).toBeInTheDocument())
+        expect(await screen.findByRole('alert')).toBeInTheDocument()
 
         // Second detach attempt – error should be cleared immediately
         await user.click(screen.getAllByRole('button')[0])
-        await waitFor(() => expect(screen.getByText('Detach image')).toBeInTheDocument())
+        expect(await screen.findByText('Detach image')).toBeInTheDocument()
         await user.click(screen.getByText('Detach image'))
 
         await waitFor(() => {
@@ -536,7 +536,7 @@ describe('MediaSidebarPeople', () => {
 
         // Open the menu for the first face only, then detach to trigger inlineError on that instance
         await user.click(within(container).getByRole('button'))
-        await waitFor(() => expect(screen.getByText('Detach image')).toBeInTheDocument())
+        expect(await screen.findByText('Detach image')).toBeInTheDocument()
         await user.click(screen.getByText('Detach image'))
 
         // Inline error now takes precedence for this face's alert

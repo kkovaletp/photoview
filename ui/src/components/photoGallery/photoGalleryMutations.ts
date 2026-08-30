@@ -33,6 +33,7 @@ export const toggleFavoriteAction = ({
       favorite: !media.favorite,
     },
     optimisticResponse: {
+      __typename: 'Mutation',
       favoriteMedia: {
         id: media.id,
         favorite: !media.favorite,

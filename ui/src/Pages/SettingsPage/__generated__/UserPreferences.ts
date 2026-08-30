@@ -1,27 +1,54 @@
+/** Internal type. DO NOT USE DIRECTLY. */
+type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] }
+/** Internal type. DO NOT USE DIRECTLY. */
+export type Incremental<T> =
+  | T
+  | {
+      [P in keyof T]?: P extends ' $fragmentName' | '__typename' ? T[P] : never
+    }
 import * as Types from '../../../__generated__/globalTypes'
 
-export type ChangeUserPreferencesMutationVariables = Types.Exact<{
-  language?: Types.InputMaybe<Types.Scalars['String']['input']>
+/** Supported language translations of the user interface */
+export type LanguageTranslation =
+  | 'Basque'
+  | 'Danish'
+  | 'Dutch'
+  | 'English'
+  | 'French'
+  | 'German'
+  | 'Italian'
+  | 'Japanese'
+  | 'Polish'
+  | 'Portuguese'
+  | 'Russian'
+  | 'SimplifiedChinese'
+  | 'Spanish'
+  | 'Swedish'
+  | 'TraditionalChineseHK'
+  | 'TraditionalChineseTW'
+  | 'Turkish'
+  | 'Ukrainian'
+
+export type ChangeUserPreferencesMutationVariables = Exact<{
+  language?: string | null | undefined
 }>
 
 export type ChangeUserPreferencesMutation = {
-  __typename?: 'Mutation'
+  __typename: 'Mutation'
   changeUserPreferences: {
-    __typename?: 'UserPreferences'
+    __typename: 'UserPreferences'
     id: string
-    language?: Types.LanguageTranslation | null
+    language: Types.LanguageTranslation | null
   }
 }
 
-export type MyUserPreferencesQueryVariables = Types.Exact<{
-  [key: string]: never
-}>
+export type MyUserPreferencesQueryVariables = Exact<{ [key: string]: never }>
 
 export type MyUserPreferencesQuery = {
-  __typename?: 'Query'
+  __typename: 'Query'
   myUserPreferences: {
-    __typename?: 'UserPreferences'
+    __typename: 'UserPreferences'
     id: string
-    language?: Types.LanguageTranslation | null
+    language: Types.LanguageTranslation | null
   }
 }

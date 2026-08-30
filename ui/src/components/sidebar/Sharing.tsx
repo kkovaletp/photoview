@@ -22,6 +22,8 @@ import {
   SidebarGetAlbumSharesQueryVariables,
   SidebarProtectShareMutation,
   SidebarProtectShareMutationVariables,
+  SidebarSetShareTokenLabelMutation,
+  SidebarSetShareTokenLabelMutationVariables,
 } from './__generated__/Sharing'
 import { authToken } from '../../helpers/authentication'
 import { SidebarSection, SidebarSectionTitle } from './SidebarComponents'
@@ -34,10 +36,6 @@ import AddIcon from './icons/shareAddIcon.svg?react'
 import Checkbox from '../../primitives/form/Checkbox'
 import { TextField } from '../../primitives/form/Input'
 import styled from 'styled-components'
-import {
-  SidebarSetShareTokenLabelMutation,
-  SidebarSetShareTokenLabelMutationVariables,
-} from './__generated__/Sharing'
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import dayjs from 'dayjs'
@@ -619,7 +617,7 @@ const SidebarShare = ({
           <span className="text-xs font-bold">
             {share.label || (
               <span className="uppercase">
-                {t('sidebar.sharing.public_link', 'Public Link') + ' '}
+                {t('sidebar.sharing.public_link', 'Public Link')}
               </span>
             )}
           </span>
@@ -628,6 +626,7 @@ const SidebarShare = ({
       </td>
       <td className="pr-6 py-2 whitespace-nowrap text-[#5C6A7F] dark:text-[#7599ca] flex">
         <button
+          type="button"
           className="align-middle p-1 ml-2"
           title={t('sidebar.sharing.copy_link', 'Copy Link')}
           onClick={async () => {
@@ -637,6 +636,7 @@ const SidebarShare = ({
           <CopyIcon />
         </button>
         <button
+          type="submit"
           onClick={() => {
             deleteShare({
               variables: { token: share.token }
@@ -685,6 +685,7 @@ const SidebarShare = ({
             <tr className="text-left border-gray-100 dark:border-dark-border2 border-b border-t">
               <td colSpan={2} className="pl-4 py-2">
                 <button
+                  type="button"
                   className="text-green-500 font-bold uppercase text-xs"
                   disabled={loading}
                   onClick={() => {

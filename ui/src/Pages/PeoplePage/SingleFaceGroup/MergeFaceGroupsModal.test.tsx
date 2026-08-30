@@ -41,7 +41,14 @@ vi.mock('../../../primitives/Modal', () => ({
 // Mock useTranslation to prevent i18n issues
 vi.mock('react-i18next', () => ({
     useTranslation: () => ({
-        t: (_key: string, fallback?: string) => fallback ?? _key,
+        t: (
+            key: string,
+            defaultValue?: string,
+            options?: Record<string, unknown>
+        ) =>
+            (defaultValue ?? key).replace(/\{\{(\w+)\}\}/g, (placeholder, name) =>
+                String(options?.[name] ?? placeholder)
+            ),
     }),
 }))
 
@@ -491,9 +498,7 @@ describe('MergeFaceGroupsModal', () => {
                 ]
             )
 
-            await waitFor(() =>
-                expect(screen.getByTestId('facegroup-49')).toBeInTheDocument()
-            )
+            expect(await screen.findByTestId('facegroup-49')).toBeInTheDocument()
 
             triggerIntersection?.()
 
@@ -622,12 +627,10 @@ describe('MergeFaceGroupsModal', () => {
             }
             renderModal({}, [loadErrorMock, makeMyFacesMock()])
 
-            await waitFor(() => expect(screen.getByRole('alert')).toBeInTheDocument())
+            expect(await screen.findByRole('alert')).toBeInTheDocument()
             fireEvent.click(screen.getByRole('button', { name: /Retry/i }))
 
-            await waitFor(() =>
-                expect(screen.getByTestId('facegroup-0')).toBeInTheDocument()
-            )
+            expect(await screen.findByTestId('facegroup-0')).toBeInTheDocument()
         })
 
         test('shows inline alert and keeps modal open on network error', async () => {
@@ -673,7 +676,7 @@ describe('MergeFaceGroupsModal', () => {
         test('clears inline error when closeModal is called after a network error', async () => {
             const mocks = [makeMyFacesMock(), getCombineNetworkErrorMock('0', ['1'])]
             await setupAndTriggerMerge('0', ['1'], mocks)
-            await waitFor(() => expect(screen.getByRole('alert')).toBeInTheDocument())
+            expect(await screen.findByRole('alert')).toBeInTheDocument()
 
             fireEvent.click(screen.getByRole('button', { name: /Cancel/i }))
             await waitFor(() =>

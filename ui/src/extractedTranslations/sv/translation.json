@@ -86,6 +86,7 @@
       "add": "Lägg till",
       "cancel": "Avbryt",
       "close": "",
+      "dismiss_message": "",
       "remove": "Ta bort",
       "retry": "",
       "save": "Spara",
@@ -195,7 +196,7 @@
         "source_role_destination_description": "",
         "sources_description": "Välj en eller flera ansiktsgrupper att slå samman med målgruppen",
         "sources_table": {
-          "title": "Välj minst ett ansikte att slå ihop med:"
+          "title": "Välj minst ett ansikte att slå ihop med: {{destination}}"
         },
         "title": "Slå Ihop Ansiktsgrupper"
       },
@@ -232,7 +233,6 @@
       "create_at": "",
       "description": "",
       "env_var": "",
-      "mapbox_link_label": "",
       "title": ""
     },
     "title": ""

@@ -429,7 +429,7 @@ describe('DetachImageFacesModal', () => {
         // Trigger a network error so both inlineError and Apollo error are set
         fireEvent.click(screen.getByTestId(`image-face-row-${f1.id}`))
         fireEvent.click(screen.getByRole('button', { name: /Detach image faces/i }))
-        await waitFor(() => expect(screen.getByRole('alert')).toBeInTheDocument())
+        expect(await screen.findByRole('alert')).toBeInTheDocument()
 
         // Parent closes the modal
         rerender(

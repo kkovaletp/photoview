@@ -2,6 +2,7 @@ import { NotificationSubscriptionSubscription } from './__generated__/Subscripti
 import { Dispatch, SetStateAction, useEffect } from 'react'
 import { useSubscription, gql } from '@apollo/client'
 import { NotificationType } from '../../__generated__/globalTypes'
+import { createUuid } from '../../helpers/createUuid'
 
 const NOTIFICATION_SUBSCRIPTION = gql`
   subscription notificationSubscription {
@@ -57,7 +58,7 @@ export const SubscriptionsHook = ({
       setMessages(prev => [
         ...prev,
         {
-          key: `download-${Date.now()}-${Math.random().toString(36).slice(2, 11)}`,
+          key: `download-${createUuid()}`,
           type: NotificationType.Message,
           props: {
             header: 'Network error',

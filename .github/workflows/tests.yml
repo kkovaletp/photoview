@@ -260,7 +260,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v7
         with:
-          node-version: "20"
+          node-version: "24"
           check-latest: true
 
       - name: Test code sync
@@ -272,6 +272,8 @@ jobs:
           npm ci --no-audit --no-fund
           echo "Check that the generated translations are in sync with the committed ones..."
           npm run extractTranslations:ci
+          echo "Check for hardcoded strings and unused translation keys in the codebase..."
+          npm run lintTranslations
           echo "----------------------------------------------------------"
 
           echo "Check that the generated GraphQL schema types are in sync with the committed ones..."

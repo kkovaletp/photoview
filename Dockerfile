@@ -1,5 +1,5 @@
 ### Build UI ###
-FROM --platform=${BUILDPLATFORM:-linux/amd64} node:20 AS ui
+FROM --platform=${BUILDPLATFORM:-linux/amd64} node:24 AS ui
 # See for details: https://github.com/hadolint/hadolint/wiki/DL4006
 SHELL ["/bin/bash", "-euo", "pipefail", "-c"]
 
@@ -53,7 +53,7 @@ WORKDIR /dependencies
 RUN tar xfv /artifacts.tar.gz
 
 ### Build API ###
-FROM --platform=${BUILDPLATFORM:-linux/amd64} golang:1.26-trixie AS api
+FROM --platform=${BUILDPLATFORM:-linux/amd64} golang:1.27-trixie AS api
 ARG TARGETPLATFORM
 
 # See for details: https://github.com/hadolint/hadolint/wiki/DL4006
@@ -65,17 +65,21 @@ ENV CGO_ENABLED=1
 
 # Download dependencies
 COPY --chmod=0755 scripts/set_compiler_env.sh /app/scripts/
+# hadolint ignore=SC3046
 RUN DEBIAN_FRONTEND=noninteractive source /app/scripts/set_compiler_env.sh
 
 COPY --chmod=0755 scripts/install_build_dependencies.sh /app/scripts/
+# hadolint ignore=SC3046
 RUN set -a && source /env && set +a \
     && DEBIAN_FRONTEND=noninteractive /app/scripts/install_build_dependencies.sh
 
 COPY --chmod=0755 scripts/install_runtime_dependencies.sh /app/scripts/
+# hadolint ignore=SC3046
 RUN set -a && source /env && set +a \
     && DEBIAN_FRONTEND=noninteractive /app/scripts/install_runtime_dependencies.sh
 
 WORKDIR /dependencies
+# hadolint ignore=SC3046
 RUN --mount=type=bind,from=dependencies,source=/dependencies/,target=/dependencies/ \
     set -a && source /env && set +a \
     && git config --global --add safe.directory /app \
@@ -90,7 +94,7 @@ RUN --mount=type=bind,from=dependencies,source=/dependencies/,target=/dependenci
 WORKDIR /app/api
 COPY api/go.mod api/go.sum /app/api/
 # DL3062 is not right with latest Go in module-aware mode (default mode).
-# hadolint ignore=DL3062
+# hadolint ignore=DL3062,SC3046
 RUN set -a && source /env && set +a \
     && go env \
     && go mod download \
@@ -103,6 +107,7 @@ RUN set -a && source /env && set +a \
         github.com/Kagami/go-face
 
 COPY api /app/api
+# hadolint ignore=SC3046
 RUN set -a && source /env && set +a \
     && go env \
     && go build -v -o photoview .
@@ -121,7 +126,7 @@ RUN groupadd -g 999 photoview \
     && useradd -r -u 999 -g photoview -m photoview
 
 # Install required dependencies
-COPY --chmod=0755 scripts/install_runtime_dependencies.sh /app/scripts/
+COPY --chmod=0755 scripts/install_runtime_dependencies.sh scripts/docker-healthcheck.sh /app/scripts/
 WORKDIR /dependencies
 RUN --mount=type=bind,from=dependencies,source=/dependencies/,target=/dependencies/ \
     # Create log folder
@@ -176,13 +181,11 @@ ENV PHOTOVIEW_MEDIA_CACHE=/home/photoview/media-cache
 EXPOSE ${PHOTOVIEW_LISTEN_PORT}
 
 HEALTHCHECK --interval=60s --timeout=10s --start-period=10s --retries=2 \
-    CMD curl --fail "http://localhost:${PHOTOVIEW_LISTEN_PORT}${PHOTOVIEW_API_ENDPOINT}/graphql" \
-        -X POST -H 'Content-Type: application/json' \
-        --data-raw '{"operationName":"CheckInitialSetup","variables":{},"query":"query CheckInitialSetup { siteInfo { initialSetup }}"}' \
-    || exit 1
+    CMD ["/app/scripts/docker-healthcheck.sh"]
 
 LABEL org.opencontainers.image.source=https://github.com/kkovaletp/photoview/
 LABEL org.opencontainers.image.licenses="AGPL-3.0-only AND LicenseRef-Photoview-Ethical-Use"
+# hadolint ignore=DL3066
 USER photoview
 ENTRYPOINT ["/app/photoview"]
 
@@ -242,8 +245,8 @@ LABEL org.opencontainers.image.source=https://github.com/kkovaletp/photoview/
 LABEL org.opencontainers.image.licenses="AGPL-3.0-only AND LicenseRef-Photoview-Ethical-Use"
 
 HEALTHCHECK --interval=60s --timeout=5s --start-period=10s --retries=2 \
-    CMD curl -kfsS "https://localhost:${HTTPS_PORT}/health-check" \
-    || exit 1
+    CMD ["bash", "-c", "curl -kfsS \"https://localhost:${HTTPS_PORT}/health-check\" || exit 1"]
 
 # Switch to non-root user
+# hadolint ignore=DL3066
 USER caddyuser

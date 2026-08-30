@@ -33,6 +33,7 @@ const PersonMoreMenuItem = ({
     <MenuItem>
       {({ focus }) => (
         <button
+          type="button"
           onClick={onClick}
           className={tailwindClassNames(
             `whitespace-normal w-full block py-1 cursor-pointer ${focus ? 'bg-gray-50 text-black' : 'text-gray-700'

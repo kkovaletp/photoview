@@ -45,6 +45,11 @@ updates:
       graphql-codegen:
         patterns:
           - "@graphql-codegen/*"
+      styled-components:
+        patterns:
+          - "*styled-components"
+          - "@vitejs/plugin-react-swc"
+          - "@swc/*"
 
   # Maintain dependencies for Dockerfiles
   - package-ecosystem: "docker"

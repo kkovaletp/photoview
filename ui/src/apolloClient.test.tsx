@@ -30,7 +30,7 @@ describe('paginateCache', () => {
                 const result = paginateCache(keyArgs)
                 expect(result.keyArgs).toEqual(keyArgs)
                 expect(typeof result.merge).toBe('function')
-                expect(result.merge.length).toBe(3) // existing, incoming, context
+                expect(result.merge).toHaveLength(3) // existing, incoming, context
             })
         })
     })

@@ -2,7 +2,7 @@ import { gql, useQuery } from '@apollo/client'
 import type * as mapboxgl from 'mapbox-gl/esm'
 import { Dispatch, useReducer } from 'react'
 import { Helmet, HelmetProvider } from '@dr.pogodin/react-helmet'
-import { useTranslation } from 'react-i18next'
+import { Trans, useTranslation } from 'react-i18next'
 import styled from 'styled-components'
 import Layout from '../../components/layout/Layout'
 import { registerMediaMarkers } from '../../components/mapbox/mapboxHelperFunctions'
@@ -66,11 +66,15 @@ const MapPage = () => {
         <h1>{t('places_page.mapbox_token_error.title', 'Mapbox token is not set')}</h1>
         <p>
           {t('places_page.mapbox_token_error.description', 'To use map related features a mapbox token is needed.')}
-          <br />{' '}
-          {t('places_page.mapbox_token_error.create_at', 'A mapbox token can be created for free at')}{' '}
-          <a href="https://account.mapbox.com/access-tokens/">
-            {t('places_page.mapbox_token_error.mapbox_link_label', 'mapbox.com')}
-          </a>.
+        </p>
+        <p>
+          <Trans
+            i18nKey="places_page.mapbox_token_error.create_at"
+            defaults="A mapbox token can be created for free at <mapboxLink>mapbox.com</mapboxLink>."
+            components={{
+              mapboxLink: <a href="https://account.mapbox.com/access-tokens/" />,
+            }}
+          />
         </p>
         <p>
           {t('places_page.mapbox_token_error.env_var', 'Make sure the access token is added as the MAPBOX_TOKEN environment variable.')}

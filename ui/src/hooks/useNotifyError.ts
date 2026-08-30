@@ -1,6 +1,7 @@
 import { useCallback } from 'react'
 import { useMessageState } from '../components/messages/MessageState'
 import { NotificationType } from '../__generated__/globalTypes'
+import { createUuid } from '../helpers/createUuid'
 
 /**
  * Returns a stable `notifyError(header, error)` function that logs the error
@@ -12,7 +13,7 @@ export const useNotifyError = () => {
     return useCallback(
         (header: string, error: unknown) => {
             add({
-                key: globalThis.crypto?.randomUUID?.() ?? Math.random().toString(36),
+                key: createUuid(),
                 type: NotificationType.Message,
                 props: {
                     negative: true,

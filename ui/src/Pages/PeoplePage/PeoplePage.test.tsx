@@ -255,7 +255,7 @@ describe('FaceDetails component', () => {
     const btn = screen.getByRole('button')
     expect(btn).toBeInTheDocument()
     expect(screen.queryByRole('textbox')).not.toBeInTheDocument()
-    expect(screen.queryByText('Unlabeled')).toBeInTheDocument()
+    expect(screen.getByText('Unlabeled')).toBeInTheDocument()
 
     fireEvent.click(btn)
 
@@ -266,7 +266,7 @@ describe('FaceDetails component', () => {
     fireEvent.change(input, { target: { value: 'John Doe' } })
     fireEvent.keyDown(input, { key: 'Escape', code: 'Escape' })
 
-    expect(screen.queryByText('Unlabeled')).toBeInTheDocument()
+    expect(screen.getByText('Unlabeled')).toBeInTheDocument()
   })
 })
 

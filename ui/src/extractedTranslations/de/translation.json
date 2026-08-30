@@ -86,6 +86,7 @@
       "add": "Hinzufügen",
       "cancel": "Abbrechen",
       "close": "",
+      "dismiss_message": "",
       "remove": "Entfernen",
       "retry": "",
       "save": "Speichern",
@@ -232,7 +233,6 @@
       "create_at": "",
       "description": "",
       "env_var": "",
-      "mapbox_link_label": "",
       "title": ""
     },
     "title": "Orte"
@@ -526,7 +526,7 @@
     }
   },
   "title": {
-    "login": "Login",
+    "login": "Login - Photoview",
     "people": "Personen",
     "settings": "Einstellungen"
   },

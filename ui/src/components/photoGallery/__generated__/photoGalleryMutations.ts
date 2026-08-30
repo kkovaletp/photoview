@@ -1,11 +1,19 @@
+/** Internal type. DO NOT USE DIRECTLY. */
+type Exact<T extends { [key: string]: unknown }> = { [K in keyof T]: T[K] }
+/** Internal type. DO NOT USE DIRECTLY. */
+export type Incremental<T> =
+  | T
+  | {
+      [P in keyof T]?: P extends ' $fragmentName' | '__typename' ? T[P] : never
+    }
 import * as Types from '../../../__generated__/globalTypes'
 
-export type MarkMediaFavoriteMutationVariables = Types.Exact<{
-  mediaId: Types.Scalars['ID']['input']
-  favorite: Types.Scalars['Boolean']['input']
+export type MarkMediaFavoriteMutationVariables = Exact<{
+  mediaId: string | number
+  favorite: boolean
 }>
 
 export type MarkMediaFavoriteMutation = {
-  __typename?: 'Mutation'
-  favoriteMedia: { __typename?: 'Media'; id: string; favorite: boolean }
+  __typename: 'Mutation'
+  favoriteMedia: { __typename: 'Media'; id: string; favorite: boolean }
 }

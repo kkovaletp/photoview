@@ -86,6 +86,7 @@
       "add": "Gehitu",
       "cancel": "Utzi",
       "close": "",
+      "dismiss_message": "",
       "remove": "Kendu",
       "retry": "",
       "save": "Gorde",
@@ -232,7 +233,6 @@
       "create_at": "",
       "description": "",
       "env_var": "",
-      "mapbox_link_label": "",
       "title": ""
     },
     "title": "Tokiak"
@@ -526,7 +526,7 @@
     }
   },
   "title": {
-    "login": "Saioa",
+    "login": "Saioa - Photoview",
     "people": "Jendea",
     "settings": "Ezarpenak"
   },
