@@ -476,6 +476,9 @@
       "more": "",
       "no_shares_found": "Inga delningar hittades",
       "public_link": "Publika länkar",
+      "share_label": "",
+      "share_label_placeholder": "",
+      "share_label_update_error": "",
       "title": "Delningsinställningar"
     }
   },

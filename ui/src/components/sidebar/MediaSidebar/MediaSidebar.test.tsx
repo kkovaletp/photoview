@@ -21,6 +21,7 @@ const SIDEBAR_GET_PHOTO_SHARES = gql`
       shares {
         id
         token
+        label
         hasPassword
         expire
       }

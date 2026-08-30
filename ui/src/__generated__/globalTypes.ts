@@ -268,6 +268,8 @@ export type Mutation = {
   setPeriodicScanInterval: Scalars['Int']['output']
   /** Set max number of concurrent scanner jobs running at once */
   setScannerConcurrentWorkers: Scalars['Int']['output']
+  /** Set an optional label for a share token */
+  setShareTokenLabel: ShareToken
   /** Generate share token for album */
   shareAlbum: ShareToken
   /** Generate share token for media */
@@ -368,14 +370,21 @@ export type MutationSetScannerConcurrentWorkersArgs = {
   workers: Scalars['Int']['input']
 }
 
+export type MutationSetShareTokenLabelArgs = {
+  label?: InputMaybe<Scalars['String']['input']>
+  token: Scalars['String']['input']
+}
+
 export type MutationShareAlbumArgs = {
   albumId: Scalars['ID']['input']
   expire?: InputMaybe<Scalars['Time']['input']>
+  label?: InputMaybe<Scalars['String']['input']>
   password?: InputMaybe<Scalars['String']['input']>
 }
 
 export type MutationShareMediaArgs = {
   expire?: InputMaybe<Scalars['Time']['input']>
+  label?: InputMaybe<Scalars['String']['input']>
   mediaId: Scalars['ID']['input']
   password?: InputMaybe<Scalars['String']['input']>
 }
@@ -580,6 +589,8 @@ export type ShareToken = {
   /** Whether or not a password is needed to access the share */
   hasPassword: Scalars['Boolean']['output']
   id: Scalars['ID']['output']
+  /** Optional label visible to the owner or an administrator */
+  label?: Maybe<Scalars['String']['output']>
   /** The media this token shares */
   media?: Maybe<Media>
   /** The user who created the token */

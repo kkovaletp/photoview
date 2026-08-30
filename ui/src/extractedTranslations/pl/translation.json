@@ -492,6 +492,9 @@
       "more": "Więcej",
       "no_shares_found": "Nie znaleziono udostępnionych",
       "public_link": "Link publiczny",
+      "share_label": "",
+      "share_label_placeholder": "",
+      "share_label_update_error": "",
       "title": "Opcje udostępniania"
     }
   },

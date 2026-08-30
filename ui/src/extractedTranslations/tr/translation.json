@@ -476,6 +476,9 @@
       "more": "Diğer",
       "no_shares_found": "Paylaşım bulunamadı",
       "public_link": "Genel bağlantı",
+      "share_label": "",
+      "share_label_placeholder": "",
+      "share_label_update_error": "",
       "title": "Paylaşım seçenekleri"
     }
   },

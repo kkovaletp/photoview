@@ -15,7 +15,7 @@ import (
 )
 
 // MyMediaGeoJSON is the resolver for the myMediaGeoJson field.
-func (r *queryResolver) MyMediaGeoJSON(ctx context.Context) (any, error) {
+func (r *queryResolver) MyMediaGeoJSON(ctx context.Context) (interface{}, error) {
 	user := auth.UserFromContext(ctx)
 	if user == nil {
 		return nil, auth.ErrUnauthorized

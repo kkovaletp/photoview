@@ -476,6 +476,9 @@
       "more": "mehr infos",
       "no_shares_found": "Keine Freigaben gefunden",
       "public_link": "Öffentlicher Link",
+      "share_label": "",
+      "share_label_placeholder": "",
+      "share_label_update_error": "",
       "title": "Freigabeoptionen"
     }
   },

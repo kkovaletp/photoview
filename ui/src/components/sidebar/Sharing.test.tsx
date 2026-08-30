@@ -31,6 +31,7 @@ const SHARE_PHOTO_QUERY = gql`
             shares {
                 id
                 token
+                label
                 hasPassword
                 expire
             }
@@ -45,6 +46,7 @@ const SHARE_ALBUM_QUERY = gql`
             shares {
                 id
                 token
+                label
                 hasPassword
                 expire
             }
@@ -93,6 +95,7 @@ const mockPhotoShares = {
             {
                 id: 'share-1',
                 token: 'abc123',
+                label: 'My Photo Share',
                 hasPassword: false,
                 expire: null,
                 __typename: 'ShareToken',
@@ -100,6 +103,7 @@ const mockPhotoShares = {
             {
                 id: 'share-2',
                 token: 'def456',
+                label: 'My Album Share',
                 hasPassword: true,
                 expire: null,
                 __typename: 'ShareToken',
@@ -116,6 +120,7 @@ const mockAlbumShares = {
             {
                 id: 'share-3',
                 token: 'ghi789',
+                label: 'My Album Share',
                 hasPassword: false,
                 expire: null,
                 __typename: 'ShareToken',

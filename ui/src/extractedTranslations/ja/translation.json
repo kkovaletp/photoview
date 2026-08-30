@@ -469,6 +469,9 @@
       "more": "その他",
       "no_shares_found": "共有が見つかりません",
       "public_link": "公開リンク",
+      "share_label": "",
+      "share_label_placeholder": "",
+      "share_label_update_error": "",
       "title": "共有オプション"
     }
   },

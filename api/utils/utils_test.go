@@ -7,10 +7,57 @@ import (
 
 	"github.com/kkovaletp/photoview/api/test_utils"
 	"github.com/kkovaletp/photoview/api/utils"
+	"github.com/stretchr/testify/assert"
 )
 
 func TestMain(m *testing.M) {
 	test_utils.IntegrationTestRun(m)
+}
+
+func TestSanitizeShareLabel(t *testing.T) {
+	tests := []struct {
+		name     string
+		label    *string
+		expected *string
+	}{
+		{
+			name: "nil label",
+		},
+		{
+			name:     "control and format characters",
+			label:    new("Fam\x00ily\r\n\t\u007f\u0085\u200b album"),
+			expected: new("Family album"),
+		},
+		{
+			name:     "surrounding whitespace",
+			label:    new("\u00a0  Family album \t"),
+			expected: new("Family album"),
+		},
+		{
+			name:  "empty label",
+			label: new(""),
+		},
+		{
+			name:  "invisible characters only",
+			label: new("\x00\r\n\t\u007f\u0085\u200b"),
+		},
+		{
+			name:     "ordinary unicode",
+			label:    new("  Семья 日本語  "),
+			expected: new("Семья 日本語"),
+		},
+		{
+			name:     "semantic format characters",
+			label:    new("Family 👩‍💻 می‌روم"),
+			expected: new("Family 👩‍💻 می‌روم"),
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			assert.Equal(t, test.expected, utils.SanitizeShareLabel(test.label))
+		})
+	}
 }
 
 func TestIsDirSymlink(t *testing.T) {

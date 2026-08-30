@@ -13,6 +13,7 @@ export type SidebarGetPhotoSharesQuery = {
       __typename?: 'ShareToken'
       id: string
       token: string
+      label?: string | null
       hasPassword: boolean
       expire?: string | null
     }>
@@ -32,6 +33,7 @@ export type SidebarGetAlbumSharesQuery = {
       __typename?: 'ShareToken'
       id: string
       token: string
+      label?: string | null
       hasPassword: boolean
       expire?: string | null
     }>
@@ -71,6 +73,20 @@ export type SidebarProtectShareMutation = {
     __typename?: 'ShareToken'
     token: string
     hasPassword: boolean
+  }
+}
+
+export type SidebarSetShareTokenLabelMutationVariables = Types.Exact<{
+  token: Types.Scalars['String']['input']
+  label?: Types.InputMaybe<Types.Scalars['String']['input']>
+}>
+
+export type SidebarSetShareTokenLabelMutation = {
+  __typename?: 'Mutation'
+  setShareTokenLabel: {
+    __typename?: 'ShareToken'
+    token: string
+    label?: string | null
   }
 }
 

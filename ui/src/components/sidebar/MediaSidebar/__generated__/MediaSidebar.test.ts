@@ -13,6 +13,7 @@ export type SidebarGetPhotoSharesQuery = {
       __typename?: 'ShareToken'
       id: string
       token: string
+      label?: string | null
       hasPassword: boolean
       expire?: string | null
     }>
