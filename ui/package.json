@@ -79,7 +79,7 @@
     "@graphql-codegen/typescript-operations": "^6.1.6",
     "@graphql-inspector/cli": "^6.0.8",
     "@testing-library/jest-dom": "^6.9.1",
-    "@testing-library/react": "^16.3.2",
+    "@testing-library/react": "^16.3.3",
     "@testing-library/user-event": "^14.6.6",
     "@types/geojson": "^7946.0.16",
     "@types/js-cookie": "^3.0.6",
