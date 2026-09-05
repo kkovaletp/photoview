@@ -55,7 +55,7 @@ jobs:
           delete-branch: true
           labels: "dependencies, javascript"
           body: |
-            This PR updates the transitive dependencies andbrowserslist database to the latest versions.
+            This PR updates the transitive dependencies and browserslist database to the latest versions.
 
             Changes:
             - Updated transitive dependencies in package-lock.json
