@@ -1,9 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { screen, waitFor } from '@testing-library/react'
+import { screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MockedResponse } from '@apollo/client/testing'
 import { GraphQLError } from 'graphql'
 import {
+    SET_SHARE_LABEL_MUTATION,
     SidebarAlbumShare,
     SidebarPhotoShare,
 } from './Sharing'
@@ -31,6 +32,7 @@ const SHARE_PHOTO_QUERY = gql`
             shares {
                 id
                 token
+                label
                 hasPassword
                 expire
             }
@@ -45,6 +47,7 @@ const SHARE_ALBUM_QUERY = gql`
             shares {
                 id
                 token
+                label
                 hasPassword
                 expire
             }
@@ -93,6 +96,7 @@ const mockPhotoShares = {
             {
                 id: 'share-1',
                 token: 'abc123',
+                label: 'My Photo Share',
                 hasPassword: false,
                 expire: null,
                 __typename: 'ShareToken',
@@ -100,6 +104,7 @@ const mockPhotoShares = {
             {
                 id: 'share-2',
                 token: 'def456',
+                label: 'My Album Share',
                 hasPassword: true,
                 expire: null,
                 __typename: 'ShareToken',
@@ -116,6 +121,7 @@ const mockAlbumShares = {
             {
                 id: 'share-3',
                 token: 'ghi789',
+                label: 'My Album Share',
                 hasPassword: false,
                 expire: null,
                 __typename: 'ShareToken',
@@ -146,8 +152,7 @@ describe('Sharing Components', () => {
             renderWithProviders(<SidebarPhotoShare id="photo-1" />, { mocks })
 
             await waitFor(() => {
-                const links = screen.getAllByText(/Public Link/)
-                expect(links.length).toBeGreaterThan(0)
+                expect(screen.getByText('My Photo Share')).toBeInTheDocument()
             })
 
             expect(screen.getByText('abc123')).toBeInTheDocument()
@@ -225,6 +230,7 @@ describe('Sharing Components', () => {
                                     {
                                         id: 'share-new',
                                         token: 'new789',
+                                        label: null,
                                         hasPassword: false,
                                         expire: null,
                                         __typename: 'ShareToken',
@@ -356,6 +362,7 @@ describe('Sharing Components', () => {
                                     {
                                         id: 'share-4',
                                         token: 'newalbum123',
+                                        label: null,
                                         hasPassword: false,
                                         expire: null,
                                         __typename: 'ShareToken',
@@ -501,6 +508,199 @@ describe('Sharing Components', () => {
         })
     })
 
+    describe('Share labels', () => {
+        it('trims and saves a share label', async () => {
+            const user = userEvent.setup()
+
+            const mocks: MockedResponse[] = [
+                {
+                    request: {
+                        query: SHARE_ALBUM_QUERY,
+                        variables: { id: 'album-1' },
+                    },
+                    result: { data: mockAlbumShares },
+                },
+                {
+                    request: {
+                        query: SET_SHARE_LABEL_MUTATION,
+                        variables: {
+                            token: 'ghi789',
+                            label: 'Client album',
+                        },
+                    },
+                    result: {
+                        data: {
+                            setShareTokenLabel: {
+                                token: 'ghi789',
+                                label: 'Client album',
+                                __typename: 'ShareToken',
+                            },
+                        },
+                    },
+                },
+                {
+                    request: {
+                        query: SHARE_ALBUM_QUERY,
+                        variables: { id: 'album-1' },
+                    },
+                    result: {
+                        data: {
+                            album: {
+                                id: 'album-1',
+                                shares: [
+                                    {
+                                        ...mockAlbumShares.album.shares[0],
+                                        label: 'Client album',
+                                    },
+                                ],
+                                __typename: 'Album',
+                            },
+                        },
+                    },
+                },
+            ]
+
+            renderWithProviders(<SidebarAlbumShare id="album-1" />, { mocks })
+
+            await screen.findByText('ghi789')
+            await user.click(screen.getByTitle('More'))
+
+            const labelInput = screen.getByLabelText('Share label')
+            await user.clear(labelInput)
+            await user.type(labelInput, '  Client album  ')
+            await user.click(
+                within(labelInput.parentElement!).getByRole('button', {
+                    name: 'Submit',
+                })
+            )
+
+            await waitFor(() => {
+                expect(screen.getByText('Client album')).toBeInTheDocument()
+            })
+        })
+
+        it('clears a share label when the input contains only whitespace', async () => {
+            const user = userEvent.setup()
+
+            const mocks: MockedResponse[] = [
+                {
+                    request: {
+                        query: SHARE_ALBUM_QUERY,
+                        variables: { id: 'album-1' },
+                    },
+                    result: { data: mockAlbumShares },
+                },
+                {
+                    request: {
+                        query: SET_SHARE_LABEL_MUTATION,
+                        variables: {
+                            token: 'ghi789',
+                            label: null,
+                        },
+                    },
+                    result: {
+                        data: {
+                            setShareTokenLabel: {
+                                token: 'ghi789',
+                                label: null,
+                                __typename: 'ShareToken',
+                            },
+                        },
+                    },
+                },
+                {
+                    request: {
+                        query: SHARE_ALBUM_QUERY,
+                        variables: { id: 'album-1' },
+                    },
+                    result: {
+                        data: {
+                            album: {
+                                id: 'album-1',
+                                shares: [
+                                    {
+                                        ...mockAlbumShares.album.shares[0],
+                                        label: null,
+                                    },
+                                ],
+                                __typename: 'Album',
+                            },
+                        },
+                    },
+                },
+            ]
+
+            renderWithProviders(<SidebarAlbumShare id="album-1" />, { mocks })
+
+            await screen.findByText('ghi789')
+            await user.click(screen.getByTitle('More'))
+
+            const labelInput = screen.getByLabelText('Share label')
+            await user.clear(labelInput)
+            await user.type(labelInput, '   ')
+            await user.click(
+                within(labelInput.parentElement!).getByRole('button', {
+                    name: 'Submit',
+                })
+            )
+
+            await waitFor(() => {
+                expect(screen.getByText('Public Link')).toBeInTheDocument()
+            })
+        })
+
+        it('shows an inline error when a share-label update fails', async () => {
+            const user = userEvent.setup()
+            const consoleError = vi
+                .spyOn(console, 'error')
+                .mockImplementation(() => undefined)
+
+            const mocks: MockedResponse[] = [
+                {
+                    request: {
+                        query: SHARE_ALBUM_QUERY,
+                        variables: { id: 'album-1' },
+                    },
+                    result: { data: mockAlbumShares },
+                },
+                {
+                    request: {
+                        query: SET_SHARE_LABEL_MUTATION,
+                        variables: {
+                            token: 'ghi789',
+                            label: 'Client album',
+                        },
+                    },
+                    error: new Error('Label update failed'),
+                },
+            ]
+
+            renderWithProviders(<SidebarAlbumShare id="album-1" />, { mocks })
+
+            await screen.findByText('ghi789')
+            await user.click(screen.getByTitle('More'))
+
+            const labelInput = screen.getByLabelText('Share label')
+            await user.clear(labelInput)
+            await user.type(labelInput, 'Client album')
+            await user.click(
+                within(labelInput.parentElement!).getByRole('button', {
+                    name: 'Submit',
+                })
+            )
+
+            await waitFor(() => {
+                expect(
+                    screen.getByText('Could not update share label')
+                ).toBeInTheDocument()
+                expect(consoleError).toHaveBeenCalledWith(
+                    'Failed to update share label:',
+                    expect.any(Error)
+                )
+            })
+        })
+    })
+
     describe('Password Protection', () => {
         it('should enable password protection', async () => {
             const user = userEvent.setup()
@@ -581,6 +781,7 @@ describe('Sharing Components', () => {
                                     {
                                         id: 'share-3',
                                         token: 'ghi789',
+                                        label: null,
                                         hasPassword: true,
                                         expire: null,
                                         __typename: 'ShareToken',
@@ -628,6 +829,7 @@ describe('Sharing Components', () => {
                         {
                             id: 'share-3',
                             token: 'ghi789',
+                            label: null,
                             hasPassword: true,
                             expire: null,
                             __typename: 'ShareToken',
@@ -823,6 +1025,7 @@ describe('Sharing Components', () => {
                         {
                             id: 'share-3',
                             token: 'ghi789',
+                            label: null,
                             hasPassword: true,
                             expire: null,
                             __typename: 'ShareToken',
@@ -876,6 +1079,7 @@ describe('Sharing Components', () => {
                         {
                             id: 'share-3',
                             token: 'ghi789',
+                            label: null,
                             hasPassword: true,
                             expire: null,
                             __typename: 'ShareToken',
@@ -969,6 +1173,7 @@ describe('Sharing Components', () => {
                         {
                             id: 'share-3',
                             token: 'ghi789',
+                            label: null,
                             hasPassword: false,
                             expire: futureDate.toISOString(),
                             __typename: 'ShareToken',
@@ -1047,6 +1252,7 @@ describe('Sharing Components', () => {
                             {
                                 id: 'share-3',
                                 token: 'ghi789',
+                                label: null,
                                 hasPassword: false,
                                 expire: futureDate.toISOString(),
                                 __typename: 'ShareToken',
@@ -1126,6 +1332,7 @@ describe('Sharing Components', () => {
                             {
                                 id: 'share-1',
                                 token: 'abc123',
+                                label: null,
                                 hasPassword: false,
                                 expire: futureDate.toISOString(),
                                 __typename: 'ShareToken',

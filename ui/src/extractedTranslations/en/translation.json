@@ -476,6 +476,9 @@
       "more": "More",
       "no_shares_found": "No shares found",
       "public_link": "Public Link",
+      "share_label": "Share label",
+      "share_label_placeholder": "Family, client, website...",
+      "share_label_update_error": "Could not update share label",
       "title": "Sharing options"
     }
   },

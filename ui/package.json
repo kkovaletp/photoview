@@ -11,6 +11,7 @@
   "scripts": {
     "start": "vite --host=0.0.0.0",
     "mon": "nodemon",
+    "upd-trans-deps": "npm update --package-lock-only --allow-remote=all --no-audit --no-fund",
     "build": "vite build",
     "build:dev": "NODE_ENV=development vite build --mode development --sourcemap --minify=false",
     "lint": "eslint ./src --max-warnings 0",
@@ -123,12 +124,11 @@
     ]
   },
   "allowScripts": {
-    "esbuild@0.21.5": true,
-    "esbuild@0.28.0": true,
-    "fsevents@2.3.3": true,
+    "fsevents": true,
     "core-js": false,
     "core-js-pure": false,
     "yarn": false,
-    "@swc/core@1.16.1": true
+    "@swc/core": true,
+    "esbuild": true
   }
 }

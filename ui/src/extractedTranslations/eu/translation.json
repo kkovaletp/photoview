@@ -476,6 +476,9 @@
       "more": "Gehiago",
       "no_shares_found": "Ez da partekatutakorik aurkitu",
       "public_link": "Esteka publikoa",
+      "share_label": "",
+      "share_label_placeholder": "",
+      "share_label_update_error": "",
       "title": "Partekatze-aukerak"
     }
   },

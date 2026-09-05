@@ -476,6 +476,9 @@
       "more": "Meer",
       "no_shares_found": "Geen albums gevonden",
       "public_link": "Publieke link",
+      "share_label": "",
+      "share_label_placeholder": "",
+      "share_label_update_error": "",
       "title": "Deelopties"
     }
   },

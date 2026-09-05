@@ -177,8 +177,8 @@ jobs:
           labels: ${{ steps.docker_meta.outputs.labels }}
           annotations: ${{ steps.docker_meta.outputs.annotations }}
           cache-from: |
-            type=gha,scope=api
             type=gha,scope=ui
+            type=gha,scope=api
           cache-to: type=gha,mode=max,scope=${{ matrix.entry.cache_scope }}
           build-args: |
             NODE_ENV=production

@@ -22,6 +22,8 @@ import {
   SidebarGetAlbumSharesQueryVariables,
   SidebarProtectShareMutation,
   SidebarProtectShareMutationVariables,
+  SidebarSetShareTokenLabelMutation,
+  SidebarSetShareTokenLabelMutationVariables,
 } from './__generated__/Sharing'
 import { authToken } from '../../helpers/authentication'
 import { SidebarSection, SidebarSectionTitle } from './SidebarComponents'
@@ -45,6 +47,7 @@ const SHARE_PHOTO_QUERY = gql`
       shares {
         id
         token
+        label
         hasPassword
         expire
       }
@@ -59,6 +62,7 @@ export const SHARE_ALBUM_QUERY = gql`
       shares {
         id
         token
+        label
         hasPassword
         expire
       }
@@ -91,9 +95,18 @@ const PROTECT_SHARE_MUTATION = gql`
   }
 `
 
+export const SET_SHARE_LABEL_MUTATION = gql`
+  mutation sidebarSetShareTokenLabel($token: String!, $label: String) {
+    setShareTokenLabel(token: $token, label: $label) {
+      token
+      label
+    }
+  }
+`
+
 export const SET_EXPIRE_MUTATION = gql`
-  mutation sidebarSetExpireShare($token: String!, $expire: Time){
-    setExpireShareToken(token: $token, expire: $expire){
+  mutation sidebarSetExpireShare($token: String!, $expire: Time) {
+    setExpireShareToken(token: $token, expire: $expire) {
       token
     }
   }
@@ -150,6 +163,69 @@ type MorePopoverSectionPasswordProps = {
   share: ShareItem
   query: DocumentNode
   id: string
+}
+
+type MorePopoverSectionLabelProps = {
+  share: SidebarGetAlbumSharesQuery['album']['shares'][0]
+  query: DocumentNode
+  id: string
+}
+
+const MorePopoverSectionLabel = ({
+  share,
+  query,
+  id,
+}: MorePopoverSectionLabelProps) => {
+  const { t } = useTranslation()
+  const [label, setLabel] = useState(share.label ?? '')
+
+  useEffect(() => {
+    setLabel(share.label ?? '')
+  }, [share.label])
+
+  const [setShareLabel, { loading, error }] = useMutation<
+    SidebarSetShareTokenLabelMutation,
+    SidebarSetShareTokenLabelMutationVariables
+  >(SET_SHARE_LABEL_MUTATION, {
+    refetchQueries: [{ query, variables: { id } }],
+    errorPolicy: 'all',
+  })
+
+  const submit = () => {
+    setShareLabel({
+      variables: {
+        token: share.token,
+        label: label.trim() || null,
+      },
+    }).catch(error => {
+      console.error('Failed to update share label:', error)
+    })
+  }
+
+  return (
+    <div className="px-4 py-2">
+      <TextField
+        label={t('sidebar.sharing.share_label', 'Share label')}
+        placeholder={t(
+          'sidebar.sharing.share_label_placeholder',
+          'Family, client, website...'
+        )}
+        value={label}
+        error={
+          error
+            ? t(
+              'sidebar.sharing.share_label_update_error',
+              'Could not update share label'
+            )
+            : undefined
+        }
+        fullWidth
+        action={submit}
+        loading={loading}
+        onChange={event => setLabel(event.target.value)}
+      />
+    </div>
+  )
 }
 
 const MorePopoverSectionPassword = ({
@@ -307,7 +383,9 @@ const MorePopoverSectionExpiration = ({
 
   const submit = () => {
     if (!date && enabled) return
-    const formatDate = date ? dayjs(date).endOf('day').format('YYYY-MM-DDTHH:mm:ss') + 'Z' : null
+    const formatDate = date
+      ? dayjs(date).endOf('day').format('YYYY-MM-DDTHH:mm:ss') + 'Z'
+      : null
     //Save the local time while treating it as UTC.
     setExpire({
       variables: {
@@ -362,13 +440,8 @@ const MorePopoverSectionExpiration = ({
             placeholderText={displayDate}
             value={displayDate}
             customInput={
-              <TextField
-                fullWidth
-                action={submit}
-                loading={loading}
-              />
+              <TextField fullWidth action={submit} loading={loading} />
             }
-
           />
         </div>
       )}
@@ -396,6 +469,7 @@ const MorePopover = ({ id, share, query }: MorePopoverProps) => {
 
       <PopoverPanel>
         <ArrowPopoverPanel $width={260}>
+          <MorePopoverSectionLabel id={id} share={share} query={query} />
           <MorePopoverSectionPassword id={id} share={share} query={query} />
           <MorePopoverSectionExpiration id={id} share={share} query={query} />
         </ArrowPopoverPanel>
@@ -540,13 +614,17 @@ const SidebarShare = ({
       className="border-gray-100 dark:border-dark-border2 border-b border-t"
     >
       <td className="pl-4 py-2 w-full">
-        <span className="text-[#585858] dark:text-[#C0C3C4] mr-2">
-          <LinkIcon className="inline-block mr-2" />
-          <span className="text-xs uppercase font-bold">
-            {t('sidebar.sharing.public_link', 'Public Link')}
+        <span className="text-[#585858] dark:text-[#C0C3C4] mr-2 flex items-center">
+          <LinkIcon className="mr-2 shrink-0" />
+          <span className="text-xs font-bold">
+            {share.label || (
+              <span className="uppercase">
+                {t('sidebar.sharing.public_link', 'Public Link')}
+              </span>
+            )}
           </span>
         </span>
-        <span className="text-sm">{share.token}</span>
+        <span className="text-sm break-all block ml-6">{share.token}</span>
       </td>
       <td className="pr-6 py-2 whitespace-nowrap text-[#5C6A7F] dark:text-[#7599ca] flex">
         <button
@@ -609,6 +687,7 @@ const SidebarShare = ({
             <tr className="text-left border-gray-100 dark:border-dark-border2 border-b border-t">
               <td colSpan={2} className="pl-4 py-2">
                 <button
+                  type="button"
                   className="text-green-500 font-bold uppercase text-xs"
                   disabled={loading}
                   onClick={() => {

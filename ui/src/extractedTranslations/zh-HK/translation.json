@@ -469,6 +469,9 @@
       "more": "更多",
       "no_shares_found": "沒有分享",
       "public_link": "公開連結",
+      "share_label": "",
+      "share_label_placeholder": "",
+      "share_label_update_error": "",
       "title": "分享選項"
     }
   },

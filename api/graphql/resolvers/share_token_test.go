@@ -17,6 +17,103 @@ func TestMain(m *testing.M) {
 	test_utils.IntegrationTestRun(m)
 }
 
+func TestShareTokenLabelVisibility(t *testing.T) {
+	label := "Press gallery"
+	share := &models.ShareToken{
+		OwnerID: 42,
+		Label:   &label,
+	}
+	resolver := &shareTokenResolver{}
+
+	tests := []struct {
+		name string
+		user *models.User
+		want *string
+	}{
+		{
+			name: "anonymous",
+			user: nil,
+			want: nil,
+		},
+		{
+			name: "owner",
+			user: &models.User{Model: models.Model{ID: 42}},
+			want: &label,
+		},
+		{
+			name: "unrelated user",
+			user: &models.User{Model: models.Model{ID: 7}},
+			want: nil,
+		},
+		{
+			name: "administrator",
+			user: &models.User{
+				Model: models.Model{ID: 7},
+				Admin: true,
+			},
+			want: &label,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			ctx := context.Background()
+			if tt.user != nil {
+				ctx = auth.AddUserToContext(ctx, tt.user)
+			}
+
+			got, err := resolver.Label(ctx, share)
+			assert.NoError(t, err)
+			assert.Equal(t, tt.want, got)
+		})
+	}
+}
+
+func TestSetShareTokenLabel(t *testing.T) {
+	db := test_utils.DatabaseTest(t)
+	password := "password"
+	owner, err := models.RegisterUser(db, "share-label-owner", &password, false)
+	assert.NoError(t, err)
+
+	share := &models.ShareToken{
+		Value:   "SHARE_LABEL_TOKEN",
+		OwnerID: owner.ID,
+	}
+	assert.NoError(t, db.Create(share).Error)
+
+	resolver := &mutationResolver{Resolver: &Resolver{database: db}}
+	label := " Press gallery "
+
+	t.Run("anonymous", func(t *testing.T) {
+		result, err := resolver.SetShareTokenLabel(context.Background(), share.Value, &label)
+		assert.ErrorIs(t, err, auth.ErrUnauthorized)
+		assert.Nil(t, result)
+	})
+
+	t.Run("unrelated user", func(t *testing.T) {
+		ctx := auth.AddUserToContext(context.Background(), &models.User{Model: models.Model{ID: owner.ID + 1}})
+		result, err := resolver.SetShareTokenLabel(ctx, share.Value, &label)
+		assert.Error(t, err)
+		assert.Nil(t, result)
+	})
+
+	t.Run("owner", func(t *testing.T) {
+		ctx := auth.AddUserToContext(context.Background(), owner)
+		result, err := resolver.SetShareTokenLabel(ctx, share.Value, &label)
+		assert.NoError(t, err)
+		assert.Equal(t, "Press gallery", *result.Label)
+	})
+
+	t.Run("administrator", func(t *testing.T) {
+		admin := &models.User{Model: models.Model{ID: owner.ID + 2}, Admin: true}
+		ctx := auth.AddUserToContext(context.Background(), admin)
+		adminLabel := "Admin label"
+		result, err := resolver.SetShareTokenLabel(ctx, share.Value, &adminLabel)
+		assert.NoError(t, err)
+		assert.Equal(t, adminLabel, *result.Label)
+	})
+}
+
 func TestShareToken(t *testing.T) {
 	test_utils.FilesystemTest(t)
 	db := test_utils.DatabaseTest(t)
@@ -461,7 +558,7 @@ func TestShareAlbum(t *testing.T) {
 					database: db,
 				},
 			}
-			got, err := r.ShareAlbum(tt.ctx, tt.albumID, tt.expire, tt.password)
+			got, err := r.ShareAlbum(tt.ctx, tt.albumID, tt.expire, tt.password, nil)
 			if tt.wantErr {
 				assert.Error(t, err)
 				if tt.wantErrMsg != "" {
@@ -529,7 +626,7 @@ func TestShareMedia(t *testing.T) {
 					database: db,
 				},
 			}
-			got, err := r.ShareMedia(tt.ctx, tt.mediaID, nil, nil)
+			got, err := r.ShareMedia(tt.ctx, tt.mediaID, nil, nil, nil)
 			if tt.wantErr {
 				assert.Error(t, err)
 				if tt.wantErrMsg != "" {

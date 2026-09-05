@@ -484,6 +484,9 @@
       "more": "Altro",
       "no_shares_found": "Nessuna condivisione trovata",
       "public_link": "Link pubblico",
+      "share_label": "",
+      "share_label_placeholder": "",
+      "share_label_update_error": "",
       "title": "Opzioni di condivisione"
     }
   },
