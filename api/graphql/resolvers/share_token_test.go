@@ -114,7 +114,7 @@ func TestSetShareTokenLabel(t *testing.T) {
 	})
 }
 
-func TestShareTokenValidatePassword(t *testing.T) {
+func TestShareToken(t *testing.T) {
 	test_utils.FilesystemTest(t)
 	db := test_utils.DatabaseTest(t)
 	pass := "1234"
@@ -558,7 +558,7 @@ func TestShareAlbum(t *testing.T) {
 					database: db,
 				},
 			}
-			got, err := r.ShareAlbum(tt.ctx, tt.albumID, tt.expire, tt.password)
+			got, err := r.ShareAlbum(tt.ctx, tt.albumID, tt.expire, tt.password, nil)
 			if tt.wantErr {
 				assert.Error(t, err)
 				if tt.wantErrMsg != "" {
@@ -626,7 +626,7 @@ func TestShareMedia(t *testing.T) {
 					database: db,
 				},
 			}
-			got, err := r.ShareMedia(tt.ctx, tt.mediaID, nil, nil)
+			got, err := r.ShareMedia(tt.ctx, tt.mediaID, nil, nil, nil)
 			if tt.wantErr {
 				assert.Error(t, err)
 				if tt.wantErrMsg != "" {
