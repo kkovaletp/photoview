@@ -1,9 +1,10 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { screen, waitFor } from '@testing-library/react'
+import { screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MockedResponse } from '@apollo/client/testing'
 import { GraphQLError } from 'graphql'
 import {
+    SET_SHARE_LABEL_MUTATION,
     SidebarAlbumShare,
     SidebarPhotoShare,
 } from './Sharing'
@@ -503,6 +504,199 @@ describe('Sharing Components', () => {
 
             await waitFor(() => {
                 expect(screen.getByText('No shares found')).toBeInTheDocument()
+            })
+        })
+    })
+
+    describe('Share labels', () => {
+        it('trims and saves a share label', async () => {
+            const user = userEvent.setup()
+
+            const mocks: MockedResponse[] = [
+                {
+                    request: {
+                        query: SHARE_ALBUM_QUERY,
+                        variables: { id: 'album-1' },
+                    },
+                    result: { data: mockAlbumShares },
+                },
+                {
+                    request: {
+                        query: SET_SHARE_LABEL_MUTATION,
+                        variables: {
+                            token: 'ghi789',
+                            label: 'Client album',
+                        },
+                    },
+                    result: {
+                        data: {
+                            setShareTokenLabel: {
+                                token: 'ghi789',
+                                label: 'Client album',
+                                __typename: 'ShareToken',
+                            },
+                        },
+                    },
+                },
+                {
+                    request: {
+                        query: SHARE_ALBUM_QUERY,
+                        variables: { id: 'album-1' },
+                    },
+                    result: {
+                        data: {
+                            album: {
+                                id: 'album-1',
+                                shares: [
+                                    {
+                                        ...mockAlbumShares.album.shares[0],
+                                        label: 'Client album',
+                                    },
+                                ],
+                                __typename: 'Album',
+                            },
+                        },
+                    },
+                },
+            ]
+
+            renderWithProviders(<SidebarAlbumShare id="album-1" />, { mocks })
+
+            await screen.findByText('ghi789')
+            await user.click(screen.getByTitle('More'))
+
+            const labelInput = screen.getByLabelText('Share label')
+            await user.clear(labelInput)
+            await user.type(labelInput, '  Client album  ')
+            await user.click(
+                within(labelInput.parentElement!).getByRole('button', {
+                    name: 'Submit',
+                })
+            )
+
+            await waitFor(() => {
+                expect(screen.getByText('Client album')).toBeInTheDocument()
+            })
+        })
+
+        it('clears a share label when the input contains only whitespace', async () => {
+            const user = userEvent.setup()
+
+            const mocks: MockedResponse[] = [
+                {
+                    request: {
+                        query: SHARE_ALBUM_QUERY,
+                        variables: { id: 'album-1' },
+                    },
+                    result: { data: mockAlbumShares },
+                },
+                {
+                    request: {
+                        query: SET_SHARE_LABEL_MUTATION,
+                        variables: {
+                            token: 'ghi789',
+                            label: null,
+                        },
+                    },
+                    result: {
+                        data: {
+                            setShareTokenLabel: {
+                                token: 'ghi789',
+                                label: null,
+                                __typename: 'ShareToken',
+                            },
+                        },
+                    },
+                },
+                {
+                    request: {
+                        query: SHARE_ALBUM_QUERY,
+                        variables: { id: 'album-1' },
+                    },
+                    result: {
+                        data: {
+                            album: {
+                                id: 'album-1',
+                                shares: [
+                                    {
+                                        ...mockAlbumShares.album.shares[0],
+                                        label: null,
+                                    },
+                                ],
+                                __typename: 'Album',
+                            },
+                        },
+                    },
+                },
+            ]
+
+            renderWithProviders(<SidebarAlbumShare id="album-1" />, { mocks })
+
+            await screen.findByText('ghi789')
+            await user.click(screen.getByTitle('More'))
+
+            const labelInput = screen.getByLabelText('Share label')
+            await user.clear(labelInput)
+            await user.type(labelInput, '   ')
+            await user.click(
+                within(labelInput.parentElement!).getByRole('button', {
+                    name: 'Submit',
+                })
+            )
+
+            await waitFor(() => {
+                expect(screen.getByText('Public Link')).toBeInTheDocument()
+            })
+        })
+
+        it('shows an inline error when a share-label update fails', async () => {
+            const user = userEvent.setup()
+            const consoleError = vi
+                .spyOn(console, 'error')
+                .mockImplementation(() => undefined)
+
+            const mocks: MockedResponse[] = [
+                {
+                    request: {
+                        query: SHARE_ALBUM_QUERY,
+                        variables: { id: 'album-1' },
+                    },
+                    result: { data: mockAlbumShares },
+                },
+                {
+                    request: {
+                        query: SET_SHARE_LABEL_MUTATION,
+                        variables: {
+                            token: 'ghi789',
+                            label: 'Client album',
+                        },
+                    },
+                    error: new Error('Label update failed'),
+                },
+            ]
+
+            renderWithProviders(<SidebarAlbumShare id="album-1" />, { mocks })
+
+            await screen.findByText('ghi789')
+            await user.click(screen.getByTitle('More'))
+
+            const labelInput = screen.getByLabelText('Share label')
+            await user.clear(labelInput)
+            await user.type(labelInput, 'Client album')
+            await user.click(
+                within(labelInput.parentElement!).getByRole('button', {
+                    name: 'Submit',
+                })
+            )
+
+            await waitFor(() => {
+                expect(
+                    screen.getByText('Could not update share label')
+                ).toBeInTheDocument()
+                expect(consoleError).toHaveBeenCalledWith(
+                    'Failed to update share label:',
+                    expect.any(Error)
+                )
             })
         })
     })

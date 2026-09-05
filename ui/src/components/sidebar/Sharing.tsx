@@ -188,7 +188,7 @@ const MorePopoverSectionLabel = ({
     SidebarSetShareTokenLabelMutationVariables
   >(SET_SHARE_LABEL_MUTATION, {
     refetchQueries: [{ query, variables: { id } }],
-    onError: () => undefined,
+    errorPolicy: 'all',
   })
 
   const submit = () => {
@@ -197,6 +197,8 @@ const MorePopoverSectionLabel = ({
         token: share.token,
         label: label.trim() || null,
       },
+    }).catch(error => {
+      console.error('Failed to update share label:', error)
     })
   }
 
