@@ -1,4 +1,4 @@
-name: Update Browserslist Database
+name: Update Transitive dependencies and Browserslist Database
 
 on:
   schedule:
@@ -11,7 +11,7 @@ permissions:
   pull-requests: write
 
 jobs:
-  update-browserslist:
+  update-deps-and-browserslist:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -22,6 +22,10 @@ jobs:
         with:
           node-version: "24"
           check-latest: true
+
+      - name: Update transitive dependencies in the `package-lock.json`
+        working-directory: ./ui
+        run: npm run upd-trans-deps
 
       - name: Install dependencies
         working-directory: ./ui
@@ -45,15 +49,16 @@ jobs:
         uses: peter-evans/create-pull-request@v8
         with:
           token: ${{ secrets.COMMENT_TOKEN }}
-          commit-message: "Bump browserslist database"
-          title: "Bump browserslist database"
-          branch: update-browserslist-db
+          commit-message: "Bump transitive deps and browserslist database"
+          title: "Bump transitive deps and browserslist database"
+          branch: update-deps-and-browserslist-db
           delete-branch: true
           labels: "dependencies, javascript"
           body: |
-            This PR updates the browserslist database to the latest version.
+            This PR updates the transitive dependencies andbrowserslist database to the latest versions.
 
             Changes:
+            - Updated transitive dependencies in package-lock.json
             - Updated caniuse-lite to latest version
             - Refreshed browser compatibility data
 
