@@ -151,8 +151,7 @@ describe('Sharing Components', () => {
             renderWithProviders(<SidebarPhotoShare id="photo-1" />, { mocks })
 
             await waitFor(() => {
-                const links = screen.getAllByText(/Public Link/)
-                expect(links.length).toBeGreaterThan(0)
+                expect(screen.getByText('My Photo Share')).toBeInTheDocument()
             })
 
             expect(screen.getByText('abc123')).toBeInTheDocument()
@@ -230,6 +229,7 @@ describe('Sharing Components', () => {
                                     {
                                         id: 'share-new',
                                         token: 'new789',
+                                        label: null,
                                         hasPassword: false,
                                         expire: null,
                                         __typename: 'ShareToken',
@@ -361,6 +361,7 @@ describe('Sharing Components', () => {
                                     {
                                         id: 'share-4',
                                         token: 'newalbum123',
+                                        label: null,
                                         hasPassword: false,
                                         expire: null,
                                         __typename: 'ShareToken',
@@ -586,6 +587,7 @@ describe('Sharing Components', () => {
                                     {
                                         id: 'share-3',
                                         token: 'ghi789',
+                                        label: null,
                                         hasPassword: true,
                                         expire: null,
                                         __typename: 'ShareToken',
@@ -633,6 +635,7 @@ describe('Sharing Components', () => {
                         {
                             id: 'share-3',
                             token: 'ghi789',
+                            label: null,
                             hasPassword: true,
                             expire: null,
                             __typename: 'ShareToken',
@@ -828,6 +831,7 @@ describe('Sharing Components', () => {
                         {
                             id: 'share-3',
                             token: 'ghi789',
+                            label: null,
                             hasPassword: true,
                             expire: null,
                             __typename: 'ShareToken',
@@ -881,6 +885,7 @@ describe('Sharing Components', () => {
                         {
                             id: 'share-3',
                             token: 'ghi789',
+                            label: null,
                             hasPassword: true,
                             expire: null,
                             __typename: 'ShareToken',
@@ -974,6 +979,7 @@ describe('Sharing Components', () => {
                         {
                             id: 'share-3',
                             token: 'ghi789',
+                            label: null,
                             hasPassword: false,
                             expire: futureDate.toISOString(),
                             __typename: 'ShareToken',
@@ -1052,6 +1058,7 @@ describe('Sharing Components', () => {
                             {
                                 id: 'share-3',
                                 token: 'ghi789',
+                                label: null,
                                 hasPassword: false,
                                 expire: futureDate.toISOString(),
                                 __typename: 'ShareToken',
@@ -1131,6 +1138,7 @@ describe('Sharing Components', () => {
                             {
                                 id: 'share-1',
                                 token: 'abc123',
+                                label: null,
                                 hasPassword: false,
                                 expire: futureDate.toISOString(),
                                 __typename: 'ShareToken',
