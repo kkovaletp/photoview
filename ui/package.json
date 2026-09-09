@@ -44,7 +44,7 @@
     "dayjs": "^1.11.23",
     "dompurify": "^3.4.14",
     "graphql-ws": "^6.2.1",
-    "i18next": "26.4.1",
+    "i18next": "26.4.2",
     "js-cookie": "^3.0.8",
     "luxon": "^3.7.2",
     "mapbox-gl": "~3.29.0",
