@@ -6,8 +6,8 @@
 [![Docker builds](https://github.com/kkovaletp/photoview/actions/workflows/build.yml/badge.svg?branch=master)](https://github.com/kkovaletp/photoview/actions/workflows/build.yml)
 [![codecov](https://codecov.io/gh/kkovaletp/photoview/branch/master/graph/badge.svg?token=ENP02P5NYS)](https://codecov.io/gh/kkovaletp/photoview)
 <a href="https://scan.coverity.com/projects/kkovaletp-photoview">
-  <img alt="Coverity Scan Build Status"
-       src="https://scan.coverity.com/projects/30259/badge.svg"/>
+    <img alt="Coverity Scan Build Status"
+        src="https://scan.coverity.com/projects/30259/badge.svg"/>
 </a>
 
 [![SonarCloud](https://sonarcloud.io/images/project_badges/sonarcloud-white.svg)](https://sonarcloud.io/summary/new_code?id=kkovaletp_photoview)
