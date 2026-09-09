@@ -3,7 +3,7 @@ module github.com/kkovaletp/photoview/api
 go 1.27.0
 
 require (
-	github.com/99designs/gqlgen v0.17.94
+	github.com/99designs/gqlgen v0.17.95
 	github.com/Kagami/go-face v0.0.0-20210630145111-0c14797b4d0e
 	github.com/buckket/go-blurhash v1.1.0
 	github.com/coder/websocket v1.8.15
@@ -46,7 +46,7 @@ require (
 	github.com/otiai10/mint v1.6.3 // indirect
 	github.com/sosodev/duration v1.4.0 // indirect
 	github.com/stretchr/objx v0.5.3 // indirect
-	github.com/urfave/cli/v3 v3.10.1 // indirect
+	github.com/urfave/cli/v3 v3.11.0 // indirect
 	go.yaml.in/yaml/v3 v3.0.5 // indirect
 	golang.org/x/mod v0.40.0 // indirect
 	golang.org/x/sync v0.22.0 // indirect

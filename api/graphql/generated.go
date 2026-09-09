@@ -343,7 +343,7 @@ type QueryResolver interface {
 	MyMedia(ctx context.Context, order *models.Ordering, paginate *models.Pagination) ([]*models.Media, error)
 	Media(ctx context.Context, id int, tokenCredentials *models.ShareTokenCredentials) (*models.Media, error)
 	MediaList(ctx context.Context, ids []int) ([]*models.Media, error)
-	MyMediaGeoJSON(ctx context.Context) (interface{}, error)
+	MyMediaGeoJSON(ctx context.Context) (any, error)
 	MapboxToken(ctx context.Context) (*string, error)
 	Search(ctx context.Context, query string, limitMedia *int, limitAlbums *int) (*models.SearchResult, error)
 	ShareToken(ctx context.Context, credentials models.ShareTokenCredentials) (*models.ShareToken, error)
@@ -6723,7 +6723,7 @@ func (ec *executionContext) _Query_myMediaGeoJson(ctx context.Context, field gra
 
 			directive1 := func(ctx context.Context) (any, error) {
 				if ec.Directives.IsAuthorized == nil {
-					var zeroVal interface{}
+					var zeroVal any
 					return zeroVal, errors.New("directive isAuthorized is not implemented")
 				}
 				return ec.Directives.IsAuthorized(ctx, nil, directive0)
@@ -12553,10 +12553,6 @@ func (ec *executionContext) ___Type(ctx context.Context, sel ast.SelectionSet, o
 
 // region    ***************************** type.gotpl *****************************
 
-func (ec *executionContext) marshalNAlbum2githubᚗcomᚋkkovaletpᚋphotoviewᚋapiᚋgraphqlᚋmodelsᚐAlbum(ctx context.Context, sel ast.SelectionSet, v models.Album) graphql.Marshaler {
-	return ec._Album(ctx, sel, &v)
-}
-
 func (ec *executionContext) marshalNAlbum2ᚕᚖgithubᚗcomᚋkkovaletpᚋphotoviewᚋapiᚋgraphqlᚋmodelsᚐAlbumᚄ(ctx context.Context, sel ast.SelectionSet, v []*models.Album) graphql.Marshaler {
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)
@@ -12605,10 +12601,6 @@ func (ec *executionContext) marshalNAny2interface(ctx context.Context, sel ast.S
 	return res
 }
 
-func (ec *executionContext) marshalNAuthorizeResult2githubᚗcomᚋkkovaletpᚋphotoviewᚋapiᚋgraphqlᚋmodelsᚐAuthorizeResult(ctx context.Context, sel ast.SelectionSet, v models.AuthorizeResult) graphql.Marshaler {
-	return ec._AuthorizeResult(ctx, sel, &v)
-}
-
 func (ec *executionContext) marshalNAuthorizeResult2ᚖgithubᚗcomᚋkkovaletpᚋphotoviewᚋapiᚋgraphqlᚋmodelsᚐAuthorizeResult(ctx context.Context, sel ast.SelectionSet, v *models.AuthorizeResult) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
@@ -12633,10 +12625,6 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 		}
 	}
 	return res
-}
-
-func (ec *executionContext) marshalNFaceGroup2githubᚗcomᚋkkovaletpᚋphotoviewᚋapiᚋgraphqlᚋmodelsᚐFaceGroup(ctx context.Context, sel ast.SelectionSet, v models.FaceGroup) graphql.Marshaler {
-	return ec._FaceGroup(ctx, sel, &v)
 }
 
 func (ec *executionContext) marshalNFaceGroup2ᚕᚖgithubᚗcomᚋkkovaletpᚋphotoviewᚋapiᚋgraphqlᚋmodelsᚐFaceGroupᚄ(ctx context.Context, sel ast.SelectionSet, v []*models.FaceGroup) graphql.Marshaler {
@@ -12788,10 +12776,6 @@ func (ec *executionContext) marshalNInt2int64(ctx context.Context, sel ast.Selec
 	return res
 }
 
-func (ec *executionContext) marshalNMedia2githubᚗcomᚋkkovaletpᚋphotoviewᚋapiᚋgraphqlᚋmodelsᚐMedia(ctx context.Context, sel ast.SelectionSet, v models.Media) graphql.Marshaler {
-	return ec._Media(ctx, sel, &v)
-}
-
 func (ec *executionContext) marshalNMedia2ᚕᚖgithubᚗcomᚋkkovaletpᚋphotoviewᚋapiᚋgraphqlᚋmodelsᚐMediaᚄ(ctx context.Context, sel ast.SelectionSet, v []*models.Media) graphql.Marshaler {
 	ret := graphql.MarshalSliceConcurrently(ctx, len(v), 0, false, func(ctx context.Context, i int) graphql.Marshaler {
 		fc := graphql.GetFieldContext(ctx)
@@ -12871,10 +12855,6 @@ func (ec *executionContext) marshalNMediaURL2ᚖgithubᚗcomᚋkkovaletpᚋphoto
 	return ec._MediaURL(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNNotification2githubᚗcomᚋkkovaletpᚋphotoviewᚋapiᚋgraphqlᚋmodelsᚐNotification(ctx context.Context, sel ast.SelectionSet, v models.Notification) graphql.Marshaler {
-	return ec._Notification(ctx, sel, &v)
-}
-
 func (ec *executionContext) marshalNNotification2ᚖgithubᚗcomᚋkkovaletpᚋphotoviewᚋapiᚋgraphqlᚋmodelsᚐNotification(ctx context.Context, sel ast.SelectionSet, v *models.Notification) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
@@ -12895,10 +12875,6 @@ func (ec *executionContext) marshalNNotificationType2githubᚗcomᚋkkovaletpᚋ
 	return v
 }
 
-func (ec *executionContext) marshalNScannerResult2githubᚗcomᚋkkovaletpᚋphotoviewᚋapiᚋgraphqlᚋmodelsᚐScannerResult(ctx context.Context, sel ast.SelectionSet, v models.ScannerResult) graphql.Marshaler {
-	return ec._ScannerResult(ctx, sel, &v)
-}
-
 func (ec *executionContext) marshalNScannerResult2ᚖgithubᚗcomᚋkkovaletpᚋphotoviewᚋapiᚋgraphqlᚋmodelsᚐScannerResult(ctx context.Context, sel ast.SelectionSet, v *models.ScannerResult) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
@@ -12909,10 +12885,6 @@ func (ec *executionContext) marshalNScannerResult2ᚖgithubᚗcomᚋkkovaletpᚋ
 	return ec._ScannerResult(ctx, sel, v)
 }
 
-func (ec *executionContext) marshalNSearchResult2githubᚗcomᚋkkovaletpᚋphotoviewᚋapiᚋgraphqlᚋmodelsᚐSearchResult(ctx context.Context, sel ast.SelectionSet, v models.SearchResult) graphql.Marshaler {
-	return ec._SearchResult(ctx, sel, &v)
-}
-
 func (ec *executionContext) marshalNSearchResult2ᚖgithubᚗcomᚋkkovaletpᚋphotoviewᚋapiᚋgraphqlᚋmodelsᚐSearchResult(ctx context.Context, sel ast.SelectionSet, v *models.SearchResult) graphql.Marshaler {
 	if v == nil {
 		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
@@ -12921,10 +12893,6 @@ func (ec *executionContext) marshalNSearchResult2ᚖgithubᚗcomᚋkkovaletpᚋp
 		return graphql.Null
 	}
 	return ec._SearchResult(ctx, sel, v)
-}
-
-func (ec *executionContext) marshalNShareToken2githubᚗcomᚋkkovaletpᚋphotoviewᚋapiᚋgraphqlᚋmodelsᚐShareToken(ctx context.Context, sel ast.SelectionSet, v models.ShareToken) graphql.Marshaler {
-	return ec._ShareToken(ctx, sel, &v)
 }
 
 func (ec *executionContext) marshalNShareToken2ᚕᚖgithubᚗcomᚋkkovaletpᚋphotoviewᚋapiᚋgraphqlᚋmodelsᚐShareTokenᚄ(ctx context.Context, sel ast.SelectionSet, v []*models.ShareToken) graphql.Marshaler {
@@ -12956,10 +12924,6 @@ func (ec *executionContext) marshalNShareToken2ᚖgithubᚗcomᚋkkovaletpᚋpho
 func (ec *executionContext) unmarshalNShareTokenCredentials2githubᚗcomᚋkkovaletpᚋphotoviewᚋapiᚋgraphqlᚋmodelsᚐShareTokenCredentials(ctx context.Context, v any) (models.ShareTokenCredentials, error) {
 	res, err := ec.unmarshalInputShareTokenCredentials(ctx, v)
 	return res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) marshalNSiteInfo2githubᚗcomᚋkkovaletpᚋphotoviewᚋapiᚋgraphqlᚋmodelsᚐSiteInfo(ctx context.Context, sel ast.SelectionSet, v models.SiteInfo) graphql.Marshaler {
-	return ec._SiteInfo(ctx, sel, &v)
 }
 
 func (ec *executionContext) marshalNSiteInfo2ᚖgithubᚗcomᚋkkovaletpᚋphotoviewᚋapiᚋgraphqlᚋmodelsᚐSiteInfo(ctx context.Context, sel ast.SelectionSet, v *models.SiteInfo) graphql.Marshaler {
@@ -13032,10 +12996,6 @@ func (ec *executionContext) marshalNUser2ᚖgithubᚗcomᚋkkovaletpᚋphotoview
 		return graphql.Null
 	}
 	return ec._User(ctx, sel, v)
-}
-
-func (ec *executionContext) marshalNUserPreferences2githubᚗcomᚋkkovaletpᚋphotoviewᚋapiᚋgraphqlᚋmodelsᚐUserPreferences(ctx context.Context, sel ast.SelectionSet, v models.UserPreferences) graphql.Marshaler {
-	return ec._UserPreferences(ctx, sel, &v)
 }
 
 func (ec *executionContext) marshalNUserPreferences2ᚖgithubᚗcomᚋkkovaletpᚋphotoviewᚋapiᚋgraphqlᚋmodelsᚐUserPreferences(ctx context.Context, sel ast.SelectionSet, v *models.UserPreferences) graphql.Marshaler {
