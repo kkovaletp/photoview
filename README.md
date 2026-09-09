@@ -38,6 +38,7 @@
 ![screenshot](./screenshots/timeline.png)
 
 **This is a forked repository from the [photoview/photoview](https://github.com/photoview/photoview).**
+
 My vision of the product development strategy is different from the Photoview owner and the maintainer of the upstream repo, so I decided to fork and go my way.
 
 **Photoview** is a simple and user-friendly photo gallery that's made for photographers and aims to provide an easy and fast way to navigate directories, with thousands of high-resolution photos.
