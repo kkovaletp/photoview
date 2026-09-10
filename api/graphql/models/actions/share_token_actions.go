@@ -134,8 +134,12 @@ func ProtectShareToken(db *gorm.DB, user *models.User, tokenValue string, passwo
 
 	token.Password = hashedPassword
 
-	if err := db.Model(token).Update("password", token.Password).Error; err != nil {
-		return nil, errors.Wrap(err, "failed to update password for share token")
+	result := db.Model(token).Update("password", token.Password)
+	if result.Error != nil {
+		return nil, errors.Wrap(result.Error, "failed to update password for share token")
+	}
+	if result.RowsAffected == 0 {
+		return nil, nil
 	}
 
 	return token, nil
@@ -149,8 +153,12 @@ func SetExpireShareToken(db *gorm.DB, user *models.User, tokenValue string, expi
 
 	token.Expire = expire
 
-	if err := db.Model(token).Update("expire", token.Expire).Error; err != nil {
-		return nil, errors.Wrap(err, "failed to update the expiration date for share token")
+	result := db.Model(token).Update("expire", token.Expire)
+	if result.Error != nil {
+		return nil, errors.Wrap(result.Error, "failed to update the expiration date for share token")
+	}
+	if result.RowsAffected == 0 {
+		return nil, nil
 	}
 
 	return token, nil
@@ -164,8 +172,12 @@ func SetShareTokenLabel(db *gorm.DB, user *models.User, tokenValue string, label
 
 	token.Label = utils.SanitizeShareLabel(label)
 
-	if err := db.Model(token).Update("label", token.Label).Error; err != nil {
-		return nil, errors.Wrap(err, "failed to update label for share token")
+	result := db.Model(token).Update("label", token.Label)
+	if result.Error != nil {
+		return nil, errors.Wrap(result.Error, "failed to update label for share token")
+	}
+	if result.RowsAffected == 0 {
+		return nil, nil
 	}
 
 	return token, nil
