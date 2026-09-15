@@ -1,20 +1,35 @@
-import { createContext, useContext, useEffect, useState, ReactNode, useMemo, useCallback } from 'react'
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  ReactNode,
+  useMemo,
+  useCallback,
+} from 'react'
 
-export type UpdateSidebarFn = (content: ReactNode) => void
+export type SidebarOwner = symbol
+
+export type UpdateSidebarFn = (
+  content: ReactNode | null,
+  owner?: SidebarOwner
+) => void
 export type SidebarPinnedFn = (pin: boolean) => void
 
 interface SidebarContextType {
   updateSidebar: UpdateSidebarFn
   setPinned: SidebarPinnedFn
-  content: ReactNode
+  content: ReactNode | null
+  owner: SidebarOwner | null
   pinned: boolean
 }
 
 export const SidebarContext = createContext<SidebarContextType>({
-  updateSidebar: content => {
+  updateSidebar: (content, owner) => {
     console.warn(
       'SidebarContext: updateSidebar was called before initialized',
-      content
+      content,
+      owner
     )
   },
   setPinned: content => {
@@ -24,6 +39,7 @@ export const SidebarContext = createContext<SidebarContextType>({
     )
   },
   content: null,
+  owner: null,
   pinned: false,
 })
 SidebarContext.displayName = 'SidebarContext'
@@ -35,19 +51,34 @@ type SidebarProviderProps = {
 export const SidebarProvider = ({ children }: SidebarProviderProps) => {
   const [state, setState] = useState<{
     content: ReactNode | null
+    owner: SidebarOwner | null
     pinned: boolean
   }>({
     content: null,
+    owner: null,
     pinned: false,
   })
 
-  const updateSidebar = useCallback((content: ReactNode | null) => {
-    if (content === null) {
-      setState(state => ({ ...state, content: null, pinned: false }))
-    } else {
-      setState(state => ({ ...state, content }))
-    }
-  }, [])
+  const updateSidebar = useCallback(
+    (content: ReactNode | null, owner?: SidebarOwner) => {
+      setState(state => {
+        if (content === null) {
+          if (owner !== undefined && state.owner !== owner) {
+            return state
+          }
+
+          return { content: null, owner: null, pinned: false }
+        }
+
+        return {
+          ...state,
+          content,
+          owner: owner ?? null,
+        }
+      })
+    },
+    []
+  )
 
   const setPinned = useCallback((pinned: boolean) => {
     setState(state => ({ ...state, pinned }))
@@ -58,9 +89,10 @@ export const SidebarProvider = ({ children }: SidebarProviderProps) => {
       updateSidebar,
       setPinned,
       content: state.content,
+      owner: state.owner,
       pinned: state.pinned,
     }),
-    [updateSidebar, setPinned, state.content, state.pinned]
+    [updateSidebar, setPinned, state.content, state.owner, state.pinned]
   )
 
   return (

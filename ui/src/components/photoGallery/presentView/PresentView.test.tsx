@@ -23,9 +23,24 @@ const makeMedia = (id: string): MediaGalleryFieldsFragment => ({
 
 /** Renders PresentView with a stand-in sidebar whose content the test owns. */
 const renderWithSidebar = (media: MediaGalleryFieldsFragment) => {
-  const updateSidebar = vi.fn()
-  const setPinned = vi.fn()
   let content: React.ReactNode = null
+  let owner: symbol | null = null
+
+  const updateSidebar = vi.fn(
+    (nextContent: React.ReactNode | null, nextOwner?: symbol) => {
+      if (
+        nextContent === null &&
+        nextOwner !== undefined &&
+        owner !== nextOwner
+      ) {
+        return
+      }
+
+      content = nextContent
+      owner = nextContent === null ? null : (nextOwner ?? null)
+    }
+  )
+  const setPinned = vi.fn()
 
   const view = render(
     <SidebarContext.Provider
@@ -33,6 +48,7 @@ const renderWithSidebar = (media: MediaGalleryFieldsFragment) => {
         updateSidebar,
         setPinned,
         content,
+        owner,
         pinned: false,
       }}
     >
@@ -40,18 +56,29 @@ const renderWithSidebar = (media: MediaGalleryFieldsFragment) => {
     </SidebarContext.Provider>
   )
 
-  const rerender = (next: MediaGalleryFieldsFragment, nextContent: React.ReactNode) => {
+  const rerender = (
+    next: MediaGalleryFieldsFragment,
+    nextContent: React.ReactNode = content,
+    nextOwner: symbol | null = nextContent === null ? null : owner
+  ) => {
     content = nextContent
+    owner = nextOwner
     view.rerender(
       <SidebarContext.Provider
-        value={{ updateSidebar, setPinned, content, pinned: false }}
+        value={{ updateSidebar, setPinned, content, owner, pinned: false }}
       >
         <PresentView activeMedia={next} dispatchMedia={vi.fn()} />
       </SidebarContext.Provider>
     )
   }
 
-  return { updateSidebar, setPinned, rerender, unmount: view.unmount }
+  return {
+    updateSidebar,
+    setPinned,
+    rerender,
+    unmount: view.unmount,
+    getContent: () => content,
+  }
 }
 
 test('the info panel follows the image the viewer is on', async () => {
@@ -107,6 +134,7 @@ test('arrow keys navigate and escape leaves the viewer', () => {
         updateSidebar: vi.fn(),
         setPinned: vi.fn(),
         content: null,
+        owner: null,
         pinned: false,
       }}
     >
@@ -139,6 +167,7 @@ test('escape without the history flag steps back instead', () => {
         updateSidebar: vi.fn(),
         setPinned: vi.fn(),
         content: null,
+        owner: null,
         pinned: false,
       }}
     >
@@ -166,19 +195,36 @@ test('closing the viewer closes an info panel it opened', async () => {
   // last presented photo.
   unmount()
 
-  expect(updateSidebar).toHaveBeenLastCalledWith(null)
+  expect(updateSidebar).toHaveBeenLastCalledWith(null, expect.any(Symbol))
+})
+
+test('closing the viewer leaves a sidebar opened by another component alone', async () => {
+  const media = makeMedia('1')
+  const { updateSidebar, rerender, unmount, getContent } =
+    renderWithSidebar(media)
+
+  fireEvent.click(screen.getByTestId('present-overlay'))
+  await userEvent.click(screen.getByLabelText('Show media info'))
+
+  rerender(media, <div>sidebar opened by another component</div>, null)
+  unmount()
+
+  expect(getContent()).not.toBeNull()
+  expect(updateSidebar).toHaveBeenLastCalledWith(null, expect.any(Symbol))
 })
 
 test('closing the viewer leaves a sidebar the user opened beforehand alone', () => {
   const media = makeMedia('1')
-  const { updateSidebar, rerender, unmount } = renderWithSidebar(media)
+  const { updateSidebar, rerender, unmount, getContent } =
+    renderWithSidebar(media)
 
   // A sidebar that was already open when presenting started is not the
   // viewer's to close.
   rerender(media, <div>sidebar opened from the gallery</div>)
   unmount()
 
-  expect(updateSidebar).not.toHaveBeenCalled()
+  expect(getContent()).not.toBeNull()
+  expect(updateSidebar).toHaveBeenLastCalledWith(null, expect.any(Symbol))
 })
 
 test('the exit button steps back in history when the caller did not opt out', async () => {
