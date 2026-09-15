@@ -44,6 +44,9 @@ export default defineConfig(async ({ command, mode }) => {
         manifest: false,
         injectRegister: null,
         injectManifest: {
+          // Keep the application shell available offline. Workbox defaults to
+          // 2 MiB, but the current production entry asset is a bit larger.
+          maximumFileSizeToCacheInBytes: 3 * 1024 * 1024,
           // mapbox-gl is intentionally excluded from the SW precache:
           // it is too large (>2 MiB) and requires live network access for
           // map tiles anyway. This pattern covers any future hash-renamed variant.
