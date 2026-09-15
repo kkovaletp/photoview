@@ -199,7 +199,7 @@ export const TextField = forwardRef(
                   disabled={disabled}
                   aria-label={t('general.action.submit', 'Submit')}
                   className={clsx(
-                    'absolute top-1/2 right-0 -translate-y-1/2 p-2 text-gray-600 disabled:text-gray-400 disabled:cursor-default'
+                    'p-2 text-gray-600 disabled:text-gray-400 disabled:cursor-default'
                   )}
                   onClick={e => {
                     e.preventDefault()

@@ -81,6 +81,10 @@ const PresentView = ({
       // sidebar the user opened before presenting is theirs and stays open.
       if (infoOpenRef.current) {
         updateSidebar(null)
+        // The panel was pinned here so a wide screen could lay it out beside
+        // the photo. Unpin it on exit so the gallery/timeline sidebar isn't
+        // left pinned afterwards.
+        setPinned(false)
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps

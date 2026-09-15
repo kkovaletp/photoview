@@ -87,9 +87,12 @@
       "cancel": "Avbryt",
       "close": "",
       "dismiss_message": "",
+      "hide_pass": "",
+      "loading": "",
       "remove": "Ta bort",
       "retry": "",
       "save": "Spara",
+      "show_pass": "",
       "submit": ""
     },
     "error": {

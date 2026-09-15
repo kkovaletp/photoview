@@ -87,9 +87,12 @@
       "cancel": "Utzi",
       "close": "",
       "dismiss_message": "",
+      "hide_pass": "",
+      "loading": "",
       "remove": "Kendu",
       "retry": "",
       "save": "Gorde",
+      "show_pass": "",
       "submit": ""
     },
     "error": {

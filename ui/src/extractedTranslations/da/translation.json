@@ -87,9 +87,12 @@
       "cancel": "Annuller",
       "close": "",
       "dismiss_message": "",
+      "hide_pass": "",
+      "loading": "",
       "remove": "Fjern",
       "retry": "",
       "save": "Gem",
+      "show_pass": "",
       "submit": ""
     },
     "error": {

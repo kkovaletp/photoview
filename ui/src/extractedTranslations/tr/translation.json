@@ -87,9 +87,12 @@
       "cancel": "İptal",
       "close": "",
       "dismiss_message": "",
+      "hide_pass": "",
+      "loading": "",
       "remove": "Kaldır",
       "retry": "",
       "save": "Kaydet",
+      "show_pass": "",
       "submit": ""
     },
     "error": {

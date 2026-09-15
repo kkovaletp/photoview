@@ -93,9 +93,12 @@
       "cancel": "Anuluj",
       "close": "",
       "dismiss_message": "",
+      "hide_pass": "",
+      "loading": "",
       "remove": "Usuń",
       "retry": "",
       "save": "Zapisz",
+      "show_pass": "",
       "submit": ""
     },
     "error": {

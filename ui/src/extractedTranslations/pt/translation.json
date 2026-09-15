@@ -90,9 +90,12 @@
       "cancel": "Cancelar",
       "close": "",
       "dismiss_message": "",
+      "hide_pass": "",
+      "loading": "",
       "remove": "Remover",
       "retry": "",
       "save": "Guardar",
+      "show_pass": "",
       "submit": ""
     },
     "error": {
