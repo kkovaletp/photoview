@@ -1,4 +1,4 @@
-import { Dispatch, useContext, useEffect, useRef } from 'react'
+import { Dispatch, useContext, useEffect, useRef, useState } from 'react'
 import styled, { createGlobalStyle } from 'styled-components'
 import PresentNavigationOverlay from './PresentNavigationOverlay'
 import PresentMedia from './PresentMedia'
@@ -67,16 +67,20 @@ const PresentView = ({
   } = useContext(SidebarContext)
   // PresentView owns the sidebar only after the user opens this info panel.
   // A sidebar opened before presentation mode remains owned by its caller.
+  // State controls rendering. The ref provides the latest ownership value to
+  // the unmount cleanup without making the cleanup effect depend on state.
+  const [ownsInfoPanel, setOwnsInfoPanel] = useState(false)
   const ownsInfoPanelRef = useRef(false)
 
   // Do not mirror SidebarContext.content in local state. The presentation
   // panel is open only when this view owns it and the sidebar has content.
-  const infoOpen = ownsInfoPanelRef.current && sidebarContent !== null
+  const infoOpen = ownsInfoPanel && sidebarContent !== null
 
   useEffect(() => {
     // The sidebar was closed elsewhere. Remove ownership so a later sidebar
     // opened by another page component is not treated as this info panel.
     if (sidebarContent === null) {
+      setOwnsInfoPanel(false)
       ownsInfoPanelRef.current = false
     }
   }, [sidebarContent])
@@ -144,6 +148,7 @@ const PresentView = ({
         disableSaveCloseInHistory={disableSaveCloseInHistory}
         onInfoClick={() => {
           ownsInfoPanelRef.current = true
+          setOwnsInfoPanel(true)
           updateSidebar(<MediaSidebar media={activeMedia} />)
           // Pinned, so a wide screen lays the panel out beside the photo.
           // Unpinning it drops back to the panel overlaying the photo, and on
