@@ -1,4 +1,4 @@
-import { Dispatch, useContext, useEffect, useRef, useState } from 'react'
+import { Dispatch, useContext, useEffect, useRef } from 'react'
 import styled, { createGlobalStyle } from 'styled-components'
 import PresentNavigationOverlay from './PresentNavigationOverlay'
 import PresentMedia from './PresentMedia'
@@ -65,39 +65,33 @@ const PresentView = ({
     pinned,
     content: sidebarContent,
   } = useContext(SidebarContext)
-  const [infoOpen, setInfoOpen] = useState(false)
+  // PresentView owns the sidebar only after the user opens this info panel.
+  // A sidebar opened before presentation mode remains owned by its caller.
+  const ownsInfoPanelRef = useRef(false)
 
-  // Read by the unmount cleanup below, which would otherwise only ever see the
-  // value infoOpen had on the first render.
-  const infoOpenRef = useRef(false)
+  // Do not mirror SidebarContext.content in local state. The presentation
+  // panel is open only when this view owns it and the sidebar has content.
+  const infoOpen = ownsInfoPanelRef.current && sidebarContent !== null
+
   useEffect(() => {
-    infoOpenRef.current = infoOpen
-  }, [infoOpen])
+    // The sidebar was closed elsewhere. Remove ownership so a later sidebar
+    // opened by another page component is not treated as this info panel.
+    if (sidebarContent === null) {
+      ownsInfoPanelRef.current = false
+    }
+  }, [sidebarContent])
 
   useEffect(
     () => () => {
-      // Leaving the viewer with the info panel open would otherwise leave it
-      // behind over the gallery, still describing the last presented photo. A
-      // sidebar the user opened before presenting is theirs and stays open.
-      if (infoOpenRef.current) {
+      // Clear only the sidebar that PresentView opened. updateSidebar(null)
+      // also resets the pinned state in SidebarProvider.
+      if (ownsInfoPanelRef.current) {
         updateSidebar(null)
-        // The panel was pinned here so a wide screen could lay it out beside
-        // the photo. Unpin it on exit so the gallery/timeline sidebar isn't
-        // left pinned afterwards.
-        setPinned(false)
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   )
-
-  useEffect(() => {
-    // The sidebar was closed some other way (e.g. its own close button),
-    // so navigating to another image shouldn't reopen it.
-    if (sidebarContent === null) {
-      setInfoOpen(false)
-    }
-  }, [sidebarContent])
 
   useEffect(() => {
     // Keep an already-open info panel in sync with the active image - it
@@ -149,7 +143,7 @@ const PresentView = ({
         dispatchMedia={dispatchMedia}
         disableSaveCloseInHistory={disableSaveCloseInHistory}
         onInfoClick={() => {
-          setInfoOpen(true)
+          ownsInfoPanelRef.current = true
           updateSidebar(<MediaSidebar media={activeMedia} />)
           // Pinned, so a wide screen lays the panel out beside the photo.
           // Unpinning it drops back to the panel overlaying the photo, and on
