@@ -140,6 +140,7 @@ const InitialSetupPage = () => {
           <TextField
             wrapperClassName="my-4"
             fullWidth
+            type="password"
             {...register('password', { required: true })}
             label={t('login_page.field.password', 'Password')}
             error={

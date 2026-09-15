@@ -89,9 +89,12 @@ export const Sidebar = () => {
 
   return (
     <div
-      className={`fixed top-18 bg-white dark:bg-dark-bg2 dark:border-dark-border2 bottom-0 w-full overflow-y-auto transform transition-transform motion-reduce:transition-none ${content == null && !pinned ? 'translate-x-full' : 'translate-x-0'
-        } ${pinned ? 'lg:border-l' : 'lg:shadow-separator'
-        } lg:w-105 lg:right-0 lg:top-0 lg:z-40`}
+      data-sidebar
+      className={`fixed top-18 bg-white dark:bg-dark-bg2 dark:border-dark-border2 bottom-0 w-full overflow-y-auto transform transition-transform motion-reduce:transition-none ${
+        content == null && !pinned ? 'translate-x-full' : 'translate-x-0'
+      } ${
+        pinned ? 'lg:border-l' : 'lg:shadow-separator'
+      } lg:w-105 lg:right-0 lg:top-0 lg:z-40`}
     >
       {content}
       <div className="h-24"></div>
