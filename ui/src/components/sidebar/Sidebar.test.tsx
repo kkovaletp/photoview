@@ -49,7 +49,8 @@ describe('SidebarContext defaults', () => {
 
         expect(warnSpy).toHaveBeenCalledWith(
             'SidebarContext: updateSidebar was called before initialized',
-            null
+            null,
+            undefined
         )
         warnSpy.mockRestore()
     })

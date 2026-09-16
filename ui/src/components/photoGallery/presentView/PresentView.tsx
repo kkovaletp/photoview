@@ -1,4 +1,4 @@
-import { Dispatch, useContext, useEffect, useRef, useState } from 'react'
+import { Dispatch, useContext, useEffect, useState } from 'react'
 import styled, { createGlobalStyle } from 'styled-components'
 import PresentNavigationOverlay from './PresentNavigationOverlay'
 import PresentMedia from './PresentMedia'
@@ -64,37 +64,25 @@ const PresentView = ({
     setPinned,
     pinned,
     content: sidebarContent,
+    owner: sidebarOwner,
   } = useContext(SidebarContext)
   // PresentView owns the sidebar only after the user opens this info panel.
   // A sidebar opened before presentation mode remains owned by its caller.
   // State controls rendering. The ref provides the latest ownership value to
   // the unmount cleanup without making the cleanup effect depend on state.
-  const [ownsInfoPanel, setOwnsInfoPanel] = useState(false)
-  const ownsInfoPanelRef = useRef(false)
+  const [infoPanelOwner] = useState(() => Symbol('PresentViewInfoPanel'))
 
   // Do not mirror SidebarContext.content in local state. The presentation
   // panel is open only when this view owns it and the sidebar has content.
-  const infoOpen = ownsInfoPanel && sidebarContent !== null
-
-  useEffect(() => {
-    // The sidebar was closed elsewhere. Remove ownership so a later sidebar
-    // opened by another page component is not treated as this info panel.
-    if (sidebarContent === null) {
-      setOwnsInfoPanel(false)
-      ownsInfoPanelRef.current = false
-    }
-  }, [sidebarContent])
+  const infoOpen = sidebarContent !== null && sidebarOwner === infoPanelOwner
 
   useEffect(
     () => () => {
       // Clear only the sidebar that PresentView opened. updateSidebar(null)
       // also resets the pinned state in SidebarProvider.
-      if (ownsInfoPanelRef.current) {
-        updateSidebar(null)
-      }
+      updateSidebar(null, infoPanelOwner)
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
+    [infoPanelOwner, updateSidebar]
   )
 
   useEffect(() => {
@@ -102,10 +90,9 @@ const PresentView = ({
     // was built from activeMedia at the moment the panel was opened, and
     // otherwise keeps showing that same image after navigating away.
     if (infoOpen) {
-      updateSidebar(<MediaSidebar media={activeMedia} />)
+      updateSidebar(<MediaSidebar media={activeMedia} />, infoPanelOwner)
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeMedia])
+  }, [activeMedia, infoOpen, infoPanelOwner, updateSidebar])
 
   useEffect(() => {
     const keyDownEvent = (e: KeyboardEvent) => {
@@ -147,9 +134,7 @@ const PresentView = ({
         dispatchMedia={dispatchMedia}
         disableSaveCloseInHistory={disableSaveCloseInHistory}
         onInfoClick={() => {
-          ownsInfoPanelRef.current = true
-          setOwnsInfoPanel(true)
-          updateSidebar(<MediaSidebar media={activeMedia} />)
+          updateSidebar(<MediaSidebar media={activeMedia} />, infoPanelOwner)
           // Pinned, so a wide screen lays the panel out beside the photo.
           // Unpinning it drops back to the panel overlaying the photo, and on
           // a phone, where pinning has no layout of its own, it overlays
