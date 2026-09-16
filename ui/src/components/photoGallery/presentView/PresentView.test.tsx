@@ -123,6 +123,7 @@ test('an info panel closed elsewhere stays closed while navigating', async () =>
   rerender(second, null)
 
   expect(updateSidebar).toHaveBeenCalledTimes(2)
+
 })
 
 test('arrow keys navigate and escape leaves the viewer', () => {
