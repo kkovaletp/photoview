@@ -8,11 +8,9 @@ import {
   useCallback,
 } from 'react'
 
-export type SidebarOwner = symbol
-
 export type UpdateSidebarFn = (
   content: ReactNode | null,
-  owner?: SidebarOwner
+  owner?: symbol
 ) => void
 export type SidebarPinnedFn = (pin: boolean) => void
 
@@ -20,7 +18,7 @@ interface SidebarContextType {
   updateSidebar: UpdateSidebarFn
   setPinned: SidebarPinnedFn
   content: ReactNode | null
-  owner: SidebarOwner | null
+  owner: symbol | null
   pinned: boolean
 }
 
@@ -51,7 +49,7 @@ type SidebarProviderProps = {
 export const SidebarProvider = ({ children }: SidebarProviderProps) => {
   const [state, setState] = useState<{
     content: ReactNode | null
-    owner: SidebarOwner | null
+    owner: symbol | null
     pinned: boolean
   }>({
     content: null,
@@ -60,7 +58,7 @@ export const SidebarProvider = ({ children }: SidebarProviderProps) => {
   })
 
   const updateSidebar = useCallback(
-    (content: ReactNode | null, owner?: SidebarOwner) => {
+    (content: ReactNode | null, owner?: symbol) => {
       setState(state => {
         if (content === null) {
           if (owner !== undefined && state.owner !== owner) {
@@ -122,11 +120,9 @@ export const Sidebar = () => {
   return (
     <div
       data-sidebar
-      className={`fixed top-18 bg-white dark:bg-dark-bg2 dark:border-dark-border2 bottom-0 w-full overflow-y-auto transform transition-transform motion-reduce:transition-none ${
-        content == null && !pinned ? 'translate-x-full' : 'translate-x-0'
-      } ${
-        pinned ? 'lg:border-l' : 'lg:shadow-separator'
-      } lg:w-105 lg:right-0 lg:top-0 lg:z-40`}
+      className={`fixed top-18 bg-white dark:bg-dark-bg2 dark:border-dark-border2 bottom-0 w-full overflow-y-auto transform transition-transform motion-reduce:transition-none ${content == null && !pinned ? 'translate-x-full' : 'translate-x-0'
+        } ${pinned ? 'lg:border-l' : 'lg:shadow-separator'
+        } lg:w-105 lg:right-0 lg:top-0 lg:z-40`}
     >
       {content}
       <div className="h-24"></div>
