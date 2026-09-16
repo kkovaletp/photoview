@@ -68,8 +68,9 @@ const PresentView = ({
   } = useContext(SidebarContext)
   // PresentView owns the sidebar only after the user opens this info panel.
   // A sidebar opened before presentation mode remains owned by its caller.
-  // State controls rendering. The ref provides the latest ownership value to
-  // the unmount cleanup without making the cleanup effect depend on state.
+  // The symbol is created once and kept in state so it stays stable across
+  // renders, giving the unmount cleanup below a stable identity to compare
+  // against without needing to depend on any other state.
   const [infoPanelOwner] = useState(() => Symbol('PresentViewInfoPanel'))
 
   // Do not mirror SidebarContext.content in local state. The presentation
