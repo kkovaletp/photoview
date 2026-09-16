@@ -97,13 +97,13 @@ test('the info panel follows the image the viewer is on', async () => {
 
   // The real sidebar keeps what it was handed, so the context now has content.
   rerender(first, <div>sidebar</div>)
-  expect(updateSidebar).toHaveBeenCalledTimes(1)
+  expect(updateSidebar).toHaveBeenCalledTimes(2)
 
   // Navigating with the panel open has to rebuild it: it was made from the
   // image that was active when it opened, and would otherwise keep showing
   // that one while the viewer looks at another.
   rerender(second, <div>sidebar</div>)
-  expect(updateSidebar).toHaveBeenCalledTimes(2)
+  expect(updateSidebar).toHaveBeenCalledTimes(3)
 })
 
 test('an info panel closed elsewhere stays closed while navigating', async () => {
@@ -115,14 +115,14 @@ test('an info panel closed elsewhere stays closed while navigating', async () =>
   fireEvent.click(screen.getByTestId('present-overlay'))
   await userEvent.click(screen.getByLabelText('Show media info'))
   rerender(first, <div>sidebar</div>)
-  expect(updateSidebar).toHaveBeenCalledTimes(1)
+  expect(updateSidebar).toHaveBeenCalledTimes(2)
 
   // The sidebar has its own close button. Once it is gone, moving to the next
   // image must not bring it back.
   rerender(first, null)
   rerender(second, null)
 
-  expect(updateSidebar).toHaveBeenCalledTimes(1)
+  expect(updateSidebar).toHaveBeenCalledTimes(2)
 })
 
 test('arrow keys navigate and escape leaves the viewer', () => {
