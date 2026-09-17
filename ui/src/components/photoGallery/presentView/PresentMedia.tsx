@@ -4,12 +4,15 @@ import { exhaustiveCheck } from '../../../helpers/utils'
 import { ProtectedImage, ProtectedVideo } from '../ProtectedMedia'
 import { MediaGalleryFieldsFragment } from '../__generated__/fragments'
 
+// Sized to the presentation frame rather than the viewport: the frame is the
+// full viewport until the info panel is pinned beside it, and then the photo
+// has to fit the space that is left instead of running underneath the panel.
 const StyledPhoto = styled(ProtectedImage)`
   position: absolute;
   top: 0;
   left: 0;
-  width: 100vw;
-  height: 100vh;
+  width: 100%;
+  height: 100%;
   object-fit: contain;
   object-position: center;
 `
@@ -18,8 +21,10 @@ const StyledVideo = styled(ProtectedVideo)`
   position: absolute;
   top: 0;
   left: 0;
-  width: 100vw;
-  height: 100vh;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
 `
 
 type PresentMediaProps = {

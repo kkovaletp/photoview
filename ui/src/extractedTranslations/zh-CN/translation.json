@@ -84,9 +84,12 @@
       "cancel": "取消",
       "close": "",
       "dismiss_message": "",
+      "hide_pass": "",
+      "loading": "",
       "remove": "删除",
       "retry": "",
       "save": "储存",
+      "show_pass": "",
       "submit": ""
     },
     "error": {

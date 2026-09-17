@@ -84,9 +84,12 @@
       "cancel": "キャンセル",
       "close": "",
       "dismiss_message": "",
+      "hide_pass": "",
+      "loading": "",
       "remove": "削除",
       "retry": "",
       "save": "保存",
+      "show_pass": "",
       "submit": ""
     },
     "error": {

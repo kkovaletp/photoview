@@ -32,6 +32,36 @@ function ContextConsumer() {
     )
 }
 
+function OwnedSidebarConsumer() {
+    const { updateSidebar, setPinned, content, pinned } = useContext(SidebarContext)
+    const owner = Symbol('owner')
+    const otherOwner = Symbol('other-owner')
+
+    return (
+        <div>
+            <span data-testid="owned-content-state">
+                {content === null ? 'no-content' : 'has-content'}
+            </span>
+            <span data-testid="owned-pinned-state">{String(pinned)}</span>
+            <button
+                aria-label="Set Owned Content"
+                onClick={() => updateSidebar(<span>owned sidebar content</span>, owner)}
+            >
+                Set Owned Content
+            </button>
+            <button aria-label="Pin Owned Content" onClick={() => setPinned(true)}>
+                Pin Owned Content
+            </button>
+            <button
+                aria-label="Clear With Other Owner"
+                onClick={() => updateSidebar(null, otherOwner)}
+            >
+                Clear With Other Owner
+            </button>
+        </div>
+    )
+}
+
 // ─── SidebarContext defaults ──────────────────────────────────────────────────
 
 describe('SidebarContext defaults', () => {
@@ -49,7 +79,8 @@ describe('SidebarContext defaults', () => {
 
         expect(warnSpy).toHaveBeenCalledWith(
             'SidebarContext: updateSidebar was called before initialized',
-            null
+            null,
+            undefined
         )
         warnSpy.mockRestore()
     })
@@ -128,6 +159,37 @@ describe('SidebarProvider', () => {
 
         expect(screen.getByTestId('content-state')).toHaveTextContent('no-content')
         expect(screen.getByTestId('pinned-state')).toHaveTextContent('false')
+    })
+
+    it('does not clear content owned by a different owner', async () => {
+        const user = userEvent.setup()
+
+        render(
+            <SidebarProvider>
+                <OwnedSidebarConsumer />
+            </SidebarProvider>
+        )
+
+        await user.click(
+            screen.getByRole('button', { name: 'Set Owned Content' })
+        )
+        await user.click(
+            screen.getByRole('button', { name: 'Pin Owned Content' })
+        )
+
+        expect(screen.getByTestId('owned-content-state')).toHaveTextContent(
+            'has-content'
+        )
+        expect(screen.getByTestId('owned-pinned-state')).toHaveTextContent('true')
+
+        await user.click(
+            screen.getByRole('button', { name: 'Clear With Other Owner' })
+        )
+
+        expect(screen.getByTestId('owned-content-state')).toHaveTextContent(
+            'has-content'
+        )
+        expect(screen.getByTestId('owned-pinned-state')).toHaveTextContent('true')
     })
 
     it('setPinned(true) sets pinned to true in context', async () => {

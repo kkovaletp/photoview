@@ -87,9 +87,12 @@
       "cancel": "Annuleren",
       "close": "",
       "dismiss_message": "",
+      "hide_pass": "",
+      "loading": "",
       "remove": "Verwijderen",
       "retry": "Opnieuw proberen",
       "save": "Opslaan",
+      "show_pass": "",
       "submit": ""
     },
     "error": {

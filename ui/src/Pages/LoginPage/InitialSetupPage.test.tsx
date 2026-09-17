@@ -1,6 +1,8 @@
 import { describe, test, expect, vi, beforeEach, afterEach } from 'vitest'
-import { screen, waitFor } from '@testing-library/react'
+import { MockedProvider } from '@apollo/client/testing'
+import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { MemoryRouter } from 'react-router-dom'
 import InitialSetupPage from './InitialSetupPage'
 import * as authentication from '../../helpers/authentication'
 import * as loginUtilities from './loginUtilities'
@@ -417,5 +419,45 @@ describe('InitialSetupPage - Terms of Use', () => {
 
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
     expect(screen.getByLabelText('Username')).toBeInTheDocument()
+  })
+
+  const renderSetupForm = () => {
+    authToken.mockImplementation(() => undefined)
+
+    render(
+      <MockedProvider mocks={[mockInitialSetupGraphql(true)]}>
+        <MemoryRouter initialEntries={['/initialSetup']}>
+          <InitialSetupPage />
+        </MemoryRouter>
+      </MockedProvider>
+    )
+  }
+
+  test('the admin password is masked and can be revealed', async () => {
+    renderSetupForm()
+
+    // It used to be a plain text field, so a typo could not lock the new
+    // admin out. The reveal button covers that now without showing the
+    // password to anyone looking at the screen.
+    const password = screen.getByLabelText('Password')
+    expect(password).toHaveAttribute('type', 'password')
+
+    await userEvent.click(screen.getByRole('button', { name: 'Show password' }))
+    expect(password).toHaveAttribute('type', 'text')
+  })
+
+  test('each empty required field reports its own error', async () => {
+    renderSetupForm()
+
+    await userEvent.type(screen.getByLabelText('Username'), 'admin')
+    await userEvent.type(screen.getByLabelText('Password'), 'secret')
+    await userEvent.click(screen.getByDisplayValue('Setup Photoview'))
+
+    // Only the photo path is missing, and that is the error that has to show
+    // - it used to be read from the password field's state instead.
+    expect(
+      await screen.findByText('Please enter a photo path')
+    ).toBeInTheDocument()
+    expect(screen.queryByText('Please enter a password')).toBeNull()
   })
 })

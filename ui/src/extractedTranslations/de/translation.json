@@ -87,9 +87,12 @@
       "cancel": "Abbrechen",
       "close": "",
       "dismiss_message": "",
+      "hide_pass": "",
+      "loading": "",
       "remove": "Entfernen",
       "retry": "",
       "save": "Speichern",
+      "show_pass": "",
       "submit": ""
     },
     "error": {

@@ -89,9 +89,12 @@ export default interface Resources {
         "cancel": "Cancel",
         "close": "Close",
         "dismiss_message": "Dismiss message",
+        "hide_pass": "Hide password",
+        "loading": "Loading",
         "remove": "Remove",
         "retry": "Retry",
         "save": "Save",
+        "show_pass": "Show password",
         "submit": "Submit"
       },
       "error": {
