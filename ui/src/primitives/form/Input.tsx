@@ -49,19 +49,25 @@ export const TextField = forwardRef(
     const { t } = useTranslation()
 
     const isPassword = type === 'password'
-    const [revealed, setRevealed] = useState(false)
-    const effectiveType = isPassword && revealed ? 'text' : type
-
+    const [previousIsPassword, setPreviousIsPassword] = useState(isPassword)
     // `revealed` only has an effect while the field is a password field: it is
     // what turns the password's type into text. Once the field stops being a
     // password field it has nothing to reveal, so the flag is cleared then -
     // otherwise a field that later becomes a password field again would
     // arrive already revealed, showing the secret without anyone asking.
-    useEffect(() => {
+    const [revealed, setRevealed] = useState(false)
+    const effectiveType = isPassword && revealed ? 'text' : type
+
+    // Reset the reveal state during the render that observes a password-to-
+    // non-password transition. The guard makes this run only once per type
+    // change. React restarts this component before it renders its children.
+    if (isPassword !== previousIsPassword) {
+      setPreviousIsPassword(isPassword)
+
       if (!isPassword) {
         setRevealed(false)
       }
-    }, [isPassword])
+    }
 
     // The input's own ref, alongside the one a caller may have forwarded, so
     // the submit handler below can reach the element and its form.
