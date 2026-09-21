@@ -88,7 +88,7 @@
     "@types/react-dom": "19.3.0",
     "@typescript-eslint/eslint-plugin": "8.70.0",
     "@typescript-eslint/parser": "8.70.0",
-    "@vitest/coverage-v8": "^3.2.7",
+    "@vitest/coverage-v8": "^5.0.1",
     "@vitest/ui": "^3.2.6",
     "eslint": "^9.39.5",
     "eslint-config-prettier": "^10.1.8",
@@ -101,7 +101,7 @@
     "prettier": "^3.9.6",
     "tsx": "^4.23.13",
     "typescript": "^6.0.3",
-    "vitest": "^3.2.6"
+    "vitest": "^5.0.1"
   },
   "prettier": {
     "trailingComma": "es5",
