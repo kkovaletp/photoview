@@ -192,12 +192,15 @@ export const ProtectedVideo = ({ media, ...props }: ProtectedVideoProps) => {
     <video
       {...props}
       controls
-      key={media.id}
       crossOrigin="use-credentials"
       poster={getProtectedUrl(media.thumbnail?.url)}
     >
-      <source src={getProtectedUrl(media.videoWeb.url)} type="video/mp4" />
-      <track kind="captions" />
+      <source
+        key={`${media.id}-source`}
+        src={getProtectedUrl(media.videoWeb.url)}
+        type="video/mp4"
+      />
+      <track key={`${media.id}-captions`} kind="captions" />
     </video>
   )
 }

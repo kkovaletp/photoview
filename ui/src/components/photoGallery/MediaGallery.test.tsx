@@ -1,5 +1,5 @@
 import { screen } from '@testing-library/react'
-
+import { SidebarProvider } from '../sidebar/Sidebar'
 import { MediaType } from '../../__generated__/globalTypes'
 import MediaGallery from './MediaGallery'
 import { MediaGalleryState } from './mediaGalleryReducer'
@@ -55,11 +55,13 @@ test('photo gallery with media', () => {
   }
 
   renderWithProviders(
-    <MediaGallery
-      dispatchMedia={dispatchMedia}
-      mediaState={mediaState}
-      loading={false}
-    />,
+    <SidebarProvider>
+      <MediaGallery
+        dispatchMedia={dispatchMedia}
+        mediaState={mediaState}
+        loading={false}
+      />
+    </SidebarProvider>,
     { mocks: [] }
   )
 
@@ -94,11 +96,13 @@ test('keeps existing thumbnails when loading is true (no flicker)', () => {
   }
 
   renderWithProviders(
-    <MediaGallery
-      dispatchMedia={dispatchMedia}
-      mediaState={mediaState}
-      loading={true}   // background refetch in progress — thumbnail must still show
-    />,
+    <SidebarProvider>
+      <MediaGallery
+        dispatchMedia={dispatchMedia}
+        mediaState={mediaState}
+        loading={true}   // background refetch in progress — thumbnail must still show
+      />
+    </SidebarProvider>,
     { mocks: [] }
   )
 
@@ -119,11 +123,13 @@ describe('photo gallery presenting', () => {
     }
 
     renderWithProviders(
-      <MediaGallery
-        dispatchMedia={dispatchMedia}
-        loading={false}
-        mediaState={mediaStateNoPresent}
-      />,
+      <SidebarProvider>
+        <MediaGallery
+          dispatchMedia={dispatchMedia}
+          loading={false}
+          mediaState={mediaStateNoPresent}
+        />
+      </SidebarProvider>,
       { mocks: [] }
     )
 
@@ -154,11 +160,13 @@ describe('photo gallery presenting', () => {
     }
 
     renderWithProviders(
-      <MediaGallery
-        dispatchMedia={dispatchMedia}
-        loading={false}
-        mediaState={mediaStatePresent}
-      />,
+      <SidebarProvider>
+        <MediaGallery
+          dispatchMedia={dispatchMedia}
+          loading={false}
+          mediaState={mediaStatePresent}
+        />
+      </SidebarProvider>,
       { mocks: [] }
     )
 
