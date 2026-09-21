@@ -505,13 +505,10 @@ describe('MergeFaceGroupsModal', () => {
                 throw new Error('Expected the pagination IntersectionObserver to be initialized')
             }
 
-            await act(async () => {
-                intersection()
-                await screen.findByTestId('facegroup-50')
-            })
+            act(() => { intersection() })
 
+            expect(await screen.findByTestId('facegroup-50')).toBeInTheDocument()
             expect(secondPageLoaded).toHaveBeenCalledTimes(1)
-            expect(screen.getByTestId('facegroup-50')).toBeInTheDocument()
         })
     })
 
