@@ -59,15 +59,17 @@ describe('mapboxHelperFunctions', () => {
         test('registers event handlers on the map', () => {
             // Create simplified mock that doesn't actually use document.createElement
             const mockMapboxgl = {
-                Marker: vi.fn(() => ({
-                    setLngLat: vi.fn().mockReturnThis(),
-                    addTo: vi.fn().mockReturnThis(),
-                    remove: vi.fn(),
-                    getElement: vi.fn(() => ({
-                        // No need to be a real DOM element for this test
-                        _root: { unmount: vi.fn() }
-                    })),
-                })),
+                Marker: vi.fn(function () {
+                    return {
+                        setLngLat: vi.fn().mockReturnThis(),
+                        addTo: vi.fn().mockReturnThis(),
+                        remove: vi.fn(),
+                        getElement: vi.fn(() => ({
+                            // No need to be a real DOM element for this test
+                            _root: { unmount: vi.fn() }
+                        })),
+                    }
+                }),
             };
 
             registerMediaMarkers({
@@ -109,7 +111,9 @@ describe('mapboxHelperFunctions', () => {
 
             // Create mapboxgl mock
             const mockMapboxgl = {
-                Marker: vi.fn(() => mockMarker),
+                Marker: vi.fn(function () {
+                    return mockMarker
+                }),
             };
 
             // FIXED: Use a mocked object directly instead of calling createElement

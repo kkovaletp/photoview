@@ -1,5 +1,5 @@
 import { vi, describe, test, beforeAll, afterAll, beforeEach, expect } from 'vitest'
-import { render, fireEvent, screen, waitFor } from '@testing-library/react'
+import { act, render, fireEvent, screen, waitFor } from '@testing-library/react'
 import { InMemoryCache } from '@apollo/client'
 import { MockedProvider } from '@apollo/client/testing'
 import MergeFaceGroupsModal, {
@@ -363,7 +363,7 @@ describe('MergeFaceGroupsModal', () => {
             expect(screen.getByTestId('modal')).toBeInTheDocument()
         })
 
-        test('renders nothing when state is Closed', () => {
+        test('renders nothing when state is Closed (2nd test)', () => {
             renderModal({ state: MergeFaceGroupsModalState.Closed })
             expect(screen.queryByTestId('modal')).not.toBeInTheDocument()
         })
@@ -500,10 +500,15 @@ describe('MergeFaceGroupsModal', () => {
 
             expect(await screen.findByTestId('facegroup-49')).toBeInTheDocument()
 
-            triggerIntersection?.()
+            const intersection = triggerIntersection
+            if (intersection === undefined) {
+                throw new Error('Expected the pagination IntersectionObserver to be initialized')
+            }
 
-            await waitFor(() => expect(secondPageLoaded).toHaveBeenCalled())
+            act(() => { intersection() })
+
             expect(await screen.findByTestId('facegroup-50')).toBeInTheDocument()
+            expect(secondPageLoaded).toHaveBeenCalledTimes(1)
         })
     })
 

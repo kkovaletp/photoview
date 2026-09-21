@@ -2,19 +2,21 @@ import { screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MockedResponse } from '@apollo/client/testing'
 import { describe, test, expect, vi, beforeEach } from 'vitest'
+import type { Mock } from 'vitest'
 import { GraphQLError } from 'graphql'
+import type { Dispatch, SetStateAction } from 'react'
 import AddUserRow, {
   CREATE_USER_MUTATION,
 } from './AddUserRow'
 import { renderWithProviders } from '../../../helpers/testUtils'
 
 describe('AddUserRow', () => {
-  let onUserAddedMock: ReturnType<typeof vi.fn>
-  let setShowMock: ReturnType<typeof vi.fn>
+  let onUserAddedMock: Mock<() => void>
+  let setShowMock: Mock<Dispatch<SetStateAction<boolean>>>
 
   beforeEach(() => {
-    onUserAddedMock = vi.fn()
-    setShowMock = vi.fn()
+    onUserAddedMock = vi.fn<() => void>()
+    setShowMock = vi.fn<Dispatch<SetStateAction<boolean>>>()
   })
 
   const renderComponent = (mocks: MockedResponse[]) => {

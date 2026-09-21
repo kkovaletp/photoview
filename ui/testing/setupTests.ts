@@ -7,6 +7,12 @@ import '@testing-library/user-event'
 
 import { setupLocalization } from '../src/localization'
 
+// React requires this flag when tests use act() in a non-browser environment.
+// It enables React act() checks for the Vitest jsdom environment.
+Object.assign(globalThis, {
+    IS_REACT_ACT_ENVIRONMENT: true,
+})
+
 // setup localization to make it easier to select elements by text
 setupLocalization()
 

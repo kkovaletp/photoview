@@ -28,6 +28,7 @@
   "include": [
     "src",
     "vite.config.mjs",
+    "testing/setupTests.ts",
     "eslint.config.js",
     "codegen.ts",
     "i18next.config.ts"

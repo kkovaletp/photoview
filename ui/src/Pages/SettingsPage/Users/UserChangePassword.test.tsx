@@ -1,4 +1,5 @@
 import { describe, test, expect, vi, beforeEach } from 'vitest'
+import type { Mock } from 'vitest'
 import { screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { gql } from '@apollo/client'
@@ -25,11 +26,11 @@ const mockUser: SettingsUsersQueryQuery['user'][0] = {
 }
 
 describe('ChangePasswordModal', () => {
-  let mockOnClose: ReturnType<typeof vi.fn>
+  let mockOnClose: Mock<() => void>
   let consoleErrorSpy: ReturnType<typeof vi.spyOn>
 
   beforeEach(() => {
-    mockOnClose = vi.fn()
+    mockOnClose = vi.fn<() => void>()
     consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => { })
   })
 

@@ -2,6 +2,7 @@ import { screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MockedResponse } from '@apollo/client/testing'
 import { describe, test, expect, vi, beforeEach, afterEach } from 'vitest'
+import type { Mock } from 'vitest'
 import { GraphQLError } from 'graphql'
 import { gql } from '@apollo/client'
 import UserRow from './UserRow'
@@ -50,11 +51,11 @@ describe('UserRow', () => {
         ],
     }
 
-    let mockRefetchUsers: ReturnType<typeof vi.fn>
+    let mockRefetchUsers: Mock<() => void>
     let consoleErrorSpy: ReturnType<typeof vi.spyOn>
 
     beforeEach(() => {
-        mockRefetchUsers = vi.fn()
+        mockRefetchUsers = vi.fn<() => void>()
         consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => { })
     })
 

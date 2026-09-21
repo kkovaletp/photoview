@@ -1,4 +1,5 @@
 import { describe, test, expect, vi, beforeEach, afterEach } from 'vitest'
+import type { Mock } from 'vitest'
 import { renderWithProviders } from '../../helpers/testUtils'
 import { fireEvent, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
@@ -188,7 +189,7 @@ describe('ScannerConcurrentWorkers', () => {
     })
 
     test('should trigger mutation on blur with different value', async () => {
-      const mutationSpy = vi.fn()
+      const mutationSpy = vi.fn<() => void>()
       const mocks: MockedResponse[] = [
         {
           request: {
@@ -231,7 +232,7 @@ describe('ScannerConcurrentWorkers', () => {
     })
 
     test('should trigger mutation on Enter key press', async () => {
-      const mutationSpy = vi.fn()
+      const mutationSpy = vi.fn<() => void>()
       const mocks: MockedResponse[] = [
         {
           request: {
@@ -407,7 +408,7 @@ describe('ScannerConcurrentWorkers', () => {
     })
 
     test('should successfully execute mutation with correct variables', async () => {
-      const mutationSpy = vi.fn()
+      const mutationSpy = vi.fn<() => void>()
       const mocks: MockedResponse[] = [
         {
           request: {
@@ -1123,7 +1124,7 @@ describe('ScannerConcurrentWorkers', () => {
 
     const mutationMock = (
       to: number,
-      spy: ReturnType<typeof vi.fn>
+      spy: Mock<() => void>
     ): MockedResponse => ({
       request: { query: SET_CONCURRENT_WORKERS_MUTATION, variables: { workers: to } },
       result: () => {
@@ -1149,7 +1150,7 @@ describe('ScannerConcurrentWorkers', () => {
     }
 
     test('should trigger mutation after debounce delay when value changes without blur', async () => {
-      const mutationSpy = vi.fn()
+      const mutationSpy = vi.fn<() => void>()
       const mocks = [baseQueryMock(4), mutationMock(5, mutationSpy)]
       const input = await getLoadedInput(4, mocks)
 
@@ -1166,7 +1167,7 @@ describe('ScannerConcurrentWorkers', () => {
     })
 
     test('should debounce multiple rapid arrow clicks and only send the final value', async () => {
-      const mutationSpy = vi.fn()
+      const mutationSpy = vi.fn<() => void>()
       // Only the final value (7) should be sent; 5 and 6 must not reach the server.
       const mocks = [baseQueryMock(4), mutationMock(7, mutationSpy)]
       const input = await getLoadedInput(4, mocks)
@@ -1187,7 +1188,7 @@ describe('ScannerConcurrentWorkers', () => {
     })
 
     test('should cancel debounce and commit immediately when onBlur fires', async () => {
-      const mutationSpy = vi.fn()
+      const mutationSpy = vi.fn<() => void>()
       const mocks = [baseQueryMock(4), mutationMock(7, mutationSpy)]
       const input = await getLoadedInput(4, mocks)
 
@@ -1204,7 +1205,7 @@ describe('ScannerConcurrentWorkers', () => {
     })
 
     test('should cancel debounce and commit immediately when Enter key is pressed', async () => {
-      const mutationSpy = vi.fn()
+      const mutationSpy = vi.fn<() => void>()
       const mocks = [baseQueryMock(4), mutationMock(7, mutationSpy)]
       const input = await getLoadedInput(4, mocks)
 
@@ -1221,7 +1222,7 @@ describe('ScannerConcurrentWorkers', () => {
     })
 
     test('should not send mutation when debounce fires but value equals server value', async () => {
-      const mutationSpy = vi.fn()
+      const mutationSpy = vi.fn<() => void>()
       const mocks = [baseQueryMock(4), mutationMock(4, mutationSpy)]
       const input = await getLoadedInput(4, mocks)
 
