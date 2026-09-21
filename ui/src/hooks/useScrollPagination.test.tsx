@@ -26,7 +26,7 @@ beforeEach(() => {
     mockDisconnect = vi.fn()
 
     globalThis.IntersectionObserver = vi.fn(
-        (callback: IntersectionObserverCallback) => {
+        function (callback: IntersectionObserverCallback) {
             capturedCallback = callback
             return {
                 observe: mockObserve,

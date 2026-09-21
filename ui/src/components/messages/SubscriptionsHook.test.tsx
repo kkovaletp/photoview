@@ -1,6 +1,8 @@
 import { render, act } from '@testing-library/react'
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest'
+import type { Mock } from 'vitest'
 import { ApolloError } from '@apollo/client'
+import type { Dispatch, SetStateAction } from 'react'
 import { SubscriptionsHook, Message } from './SubscriptionsHook'
 import { NotificationType } from '../../__generated__/globalTypes'
 
@@ -44,7 +46,7 @@ const makeNotification = (key: string, overrides: Record<string, unknown> = {}) 
  * call index against the provided previous state.
  */
 const applyUpdater = (
-    mockFn: ReturnType<typeof vi.fn>,
+    mockFn: Mock<Dispatch<SetStateAction<Message[]>>>,
     callIndex: number,
     prev: Message[]
 ): Message[] => {
@@ -56,10 +58,10 @@ const applyUpdater = (
 // ── Tests ────────────────────────────────────────────────────────────────────
 
 describe('SubscriptionsHook', () => {
-    let setMessages: ReturnType<typeof vi.fn>
+    let setMessages: Mock<Dispatch<SetStateAction<Message[]>>>
 
     beforeEach(() => {
-        setMessages = vi.fn()
+        setMessages = vi.fn<Dispatch<SetStateAction<Message[]>>>()
         // Default: subscription is idle (no data, no error)
         mockUseSubscription.mockReturnValue({ data: undefined, error: undefined, loading: false })
         vi.useFakeTimers()
@@ -449,13 +451,13 @@ describe('SubscriptionsHook', () => {
 
             expect(setMessages.mock.calls.length).toBeGreaterThan(callCountAfterRender)
 
-            // The dismiss updater filters out only the timed-out message
-            const dismissUpdater = setMessages.mock.calls.at(-1)?.[0]
+            // The dismiss updater filters out only the timed-out message.
             const msgs: Message[] = [
                 { key, type: NotificationType.Message, props: { header: 'H', content: 'C' } },
                 { key: uniqueKey(), type: NotificationType.Message, props: { header: 'Other', content: 'O' } },
             ]
-            const result = typeof dismissUpdater === 'function' ? dismissUpdater(msgs) : dismissUpdater
+            const result = applyUpdater(setMessages, setMessages.mock.calls.length - 1, msgs)
+
             expect(result).toHaveLength(1)
             expect(result[0].key).not.toBe(key)
         })

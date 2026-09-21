@@ -47,8 +47,12 @@ function makeMockMapLib() {
         addTo: vi.fn().mockReturnThis(),
     }
     const mockMap = { addControl: vi.fn() }
-    const NavigationControl = vi.fn(() => mockNavControl)
-    const Marker = vi.fn(() => mockMarkerInstance)
+    const NavigationControl = vi.fn(function () {
+        return mockNavControl
+    })
+    const Marker = vi.fn(function () {
+        return mockMarkerInstance
+    })
     return { mockMap, NavigationControl, Marker, mockMarkerInstance, mockNavControl }
 }
 

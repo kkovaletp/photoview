@@ -1,4 +1,6 @@
 import { screen } from '@testing-library/react'
+import * as Apollo from '@apollo/client'
+import type { QueryResult } from '@apollo/client'
 import MediaSidebar, {
   MediaSidebarMedia,
   SIDEBAR_MEDIA_QUERY
@@ -6,15 +8,18 @@ import MediaSidebar, {
 import { SIDEBAR_DOWNLOAD_QUERY } from '../SidebarDownloadMedia'
 import { MediaType } from '../../../__generated__/globalTypes'
 import { renderWithProviders } from '../../../helpers/testUtils'
-import { gql } from '@apollo/client'
 import * as authentication from '../../../helpers/authentication'
 
 vi.mock('../../../helpers/authentication.ts')
 
 const authToken = vi.mocked(authentication.authToken)
 
+const makeLazyQueryResult = (
+  result: Pick<QueryResult, 'data' | 'error' | 'loading'>
+): QueryResult => result as QueryResult
+
 // Define the photo shares query directly in the test file
-const SIDEBAR_GET_PHOTO_SHARES = gql`
+const SIDEBAR_GET_PHOTO_SHARES = Apollo.gql`
   query sidebarGetPhotoShares($id: ID!) {
     media(id: $id) {
       id
@@ -195,10 +200,15 @@ describe('MediaSidebar', () => {
     authToken.mockImplementation(() => 'token-here')
 
     // Mock loadMedia to show loading state
-    const loadMediaMock = vi.fn()
-    vi.spyOn(require('@apollo/client'), 'useLazyQuery').mockReturnValue([
+    const loadMediaMock = vi.fn<ReturnType<typeof Apollo.useLazyQuery>[0]>()
+
+    vi.spyOn(Apollo, 'useLazyQuery').mockReturnValue([
       loadMediaMock,
-      { loading: true, error: undefined, data: null }
+      makeLazyQueryResult({
+        loading: true,
+        error: undefined,
+        data: undefined,
+      }),
     ])
 
     renderWithProviders(<MediaSidebar media={media} />)
@@ -212,9 +222,17 @@ describe('MediaSidebar', () => {
     authToken.mockImplementation(() => 'token-here')
 
     // Mock a GraphQL error
-    vi.spyOn(require('@apollo/client'), 'useLazyQuery').mockReturnValue([
-      vi.fn(),
-      { loading: false, error: new Error('Failed to load media'), data: null }
+    const loadMediaMock = vi.fn<ReturnType<typeof Apollo.useLazyQuery>[0]>()
+
+    vi.spyOn(Apollo, 'useLazyQuery').mockReturnValue([
+      loadMediaMock,
+      makeLazyQueryResult({
+        loading: false,
+        error: new Apollo.ApolloError({
+          errorMessage: 'Failed to load media',
+        }),
+        data: undefined,
+      }),
     ])
 
     renderWithProviders(<MediaSidebar media={media} />)

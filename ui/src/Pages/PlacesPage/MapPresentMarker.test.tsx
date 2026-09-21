@@ -31,8 +31,10 @@ vi.mock('../../components/photoGallery/presentView/PresentView', () => ({
 // ─── Imports ──────────────────────────────────────────────────────────────────
 
 import { render, screen, waitFor } from '@testing-library/react'
+import type { Dispatch } from 'react'
+import type { Mock } from 'vitest'
 import MapPresentMarker from './MapPresentMarker'
-import type { PlacesState } from './placesReducer'
+import type { PlacesAction, PlacesState } from './placesReducer'
 
 // ─── Fixtures ─────────────────────────────────────────────────────────────────
 
@@ -105,12 +107,12 @@ function makeSingleMap(
 // ─── Tests ────────────────────────────────────────────────────────────────────
 
 describe('MapPresentMarker', () => {
-    let dispatchMarkerMedia: ReturnType<typeof vi.fn>
+    let dispatchMarkerMedia: Mock<Dispatch<PlacesAction>>
 
     beforeEach(() => {
         vi.clearAllMocks()
         mockApollo.data = undefined
-        dispatchMarkerMedia = vi.fn()
+        dispatchMarkerMedia = vi.fn<Dispatch<PlacesAction>>()
     })
 
     function renderComponent(state: PlacesState, map: unknown = null) {
