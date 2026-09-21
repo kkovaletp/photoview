@@ -72,8 +72,14 @@ export default defineConfig(async ({ command, mode }) => {
       target: 'es2020', // Ensure compatibility with browsers, not older than from 2021
       logOverride: { 'this-is-undefined-in-esm': 'silent' },
     },
+    build: {
+      target: 'es2020',
+    },
     optimizeDeps: {
       exclude: ['mapbox-gl'],
+    },
+    worker: {
+      format: 'es',
     },
     test: {
       globals: true,
