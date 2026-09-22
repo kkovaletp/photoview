@@ -1,4 +1,4 @@
-import { type RefetchQueryDescriptor, gql } from '@apollo/client'
+import { type ApolloClient, gql } from '@apollo/client'
 import { useMutation } from '@apollo/client/react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -25,7 +25,7 @@ const DETACH_IMAGE_FACES_MUTATION = gql`
 
 type DetachImageFacesOptions = {
   sourceFaceGroupID?: string
-  additionalRefetchQueries?: RefetchQueryDescriptor[]
+  additionalRefetchQueries?: ApolloClient.QueryOptions[]
 }
 
 export const useDetachImageFaces = () => {
@@ -150,10 +150,8 @@ const DetachImageFacesModalContent = ({
 
     detachImageFaces(selectedImageFaces, {
       sourceFaceGroupID: faceGroup.id,
-      //TODO: How to fix the following type mismatch:
-      // Property 'errors' does not exist on type 'MutateResult<DetachImageFacesMutation, undefined>'.
-    }).then(({ data, errors }) => {
-      if (!data?.detachImageFaces || (errors?.length ?? 0) > 0) return
+    }).then(({ data, error }) => {
+      if (!data?.detachImageFaces || error) return
       setOpen(false)
       navigate(`/people/${data.detachImageFaces.id}`)
     }).catch((e: unknown) => {

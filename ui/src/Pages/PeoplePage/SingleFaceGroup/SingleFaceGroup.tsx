@@ -44,16 +44,6 @@ const SingleFaceGroup = ({ faceGroupID }: SingleFaceGroupProps) => {
   const { containerElem, loadingMore } =
     useScrollPagination<SingleFaceGroupQuery>({
       loading,
-      //TODO: How to fix this type mismatch:
-      /*
-Type 'FetchMoreFunction<SingleFaceGroupQuery, Exact<{ id: string | number; limit: number; offset: number; }>>' is not assignable to type '(args: { variables: { offset: number; }; }) => Promise<Result<SingleFaceGroupQuery, "complete" | "empty" | "partial" | "streaming">>'.
-  Type 'Promise<{ data: SingleFaceGroupQuery; error?: undefined; }>' is not assignable to type 'Promise<Result<SingleFaceGroupQuery, "complete" | "empty" | "partial" | "streaming">>'.
-    Type '{ data: SingleFaceGroupQuery; error?: undefined; }' is not assignable to type 'Result<SingleFaceGroupQuery, "complete" | "empty" | "partial" | "streaming">'.
-      Type '{ data: SingleFaceGroupQuery; error?: undefined; }' is not assignable to type '({ error?: ErrorLike | undefined; loading: boolean; networkStatus: NetworkStatus; partial: boolean; } & { data: SingleFaceGroupQuery; dataState: "complete"; }) | ({ ...; } & { ...; }) | ({ ...; } & { ...; })'.
-        Type '{ data: SingleFaceGroupQuery; error?: undefined; }' is not assignable to type '{ error?: ErrorLike | undefined; loading: boolean; networkStatus: NetworkStatus; partial: boolean; } & { data: DeepPartialObject<SingleFaceGroupQuery>; dataState: "partial"; }'.
-          Type '{ data: SingleFaceGroupQuery; error?: undefined; }' is missing the following properties from type '{ error?: ErrorLike | undefined; loading: boolean; networkStatus: NetworkStatus; partial: boolean; }': loading, networkStatus, partial
-useScrollPagination.ts(7, 3): The expected type comes from property 'fetchMore' which is declared here on type 'ScrollPaginationArgs<SingleFaceGroupQuery>'
-      */
       fetchMore,
       data,
       getItems: data => data.faceGroup?.imageFaces ?? [],

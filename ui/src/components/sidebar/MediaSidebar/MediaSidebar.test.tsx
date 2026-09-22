@@ -10,25 +10,23 @@ import { SIDEBAR_DOWNLOAD_QUERY } from '../SidebarDownloadMedia'
 import { MediaType } from '../../../__generated__/globalTypes'
 import { renderWithProviders } from '../../../helpers/testUtils'
 import * as authentication from '../../../helpers/authentication'
+import type {
+  SidebarMediaQueryQuery,
+  SidebarMediaQueryQueryVariables,
+} from './__generated__/MediaSidebar'
 
 vi.mock('../../../helpers/authentication.ts')
 
 const authToken = vi.mocked(authentication.authToken)
 
-//TODO: How to fix the following errors:
-// Generic type 'Result' requires between 2 and 4 type arguments.
-// type useLazyQuery.Result<TData, TVariables extends OperationVariables, TStates extends DataState<TData>["dataState"] = "complete" | "empty" | "partial" | "streaming", TErrorPolicy extends ErrorPolicy | undefined = undefined> = ApolloReact.useLazyQuery.Base.Result<TData, TVariables, TErrorPolicy> & ({
-// called: false;
-// variables: Partial<TVariables>;
-// data: undefined;
-// dataState: "empty";
-// } | ({
-//   called: true;
-//  variables: TVariables;
-// } & GetDataState<TData, TStates>))
+type SidebarLazyQueryResult = useLazyQuery.Result<
+  SidebarMediaQueryQuery,
+  SidebarMediaQueryQueryVariables
+>
+
 const makeLazyQueryResult = (
-  result: Pick<useLazyQuery.Result, 'data' | 'error' | 'loading'>
-): useLazyQuery.Result => result as useLazyQuery.Result
+  result: Pick<SidebarLazyQueryResult, 'data' | 'error' | 'loading'>
+): SidebarLazyQueryResult => result as SidebarLazyQueryResult
 
 // Define the photo shares query directly in the test file
 const SIDEBAR_GET_PHOTO_SHARES = gql`
@@ -214,6 +212,21 @@ describe('MediaSidebar', () => {
     // Mock loadMedia to show loading state
     const loadMediaMock = vi.fn<ReturnType<typeof useLazyQuery>[0]>()
 
+    //TODO: How to fix this type mismatch:
+    /*
+Type 'SidebarLazyQueryResult' is not assignable to type 'Result<unknown, OperationVariables, "complete" | "empty" | "streaming", undefined>'.
+  Type 'Result<SidebarMediaQueryQuery, Exact<{ id: string | number; }>, undefined> & { called: false; variables: Partial<Exact<{ id: string | number; }>>; data: undefined; dataState: "empty"; }' is not assignable to type 'Result<unknown, OperationVariables, "complete" | "empty" | "streaming", undefined>'.
+    Type 'Result<SidebarMediaQueryQuery, Exact<{ id: string | number; }>, undefined> & { called: false; variables: Partial<Exact<{ id: string | number; }>>; data: undefined; dataState: "empty"; }' is not assignable to type 'Result<unknown, OperationVariables, undefined> & { called: false; variables: Partial<OperationVariables>; data: undefined; dataState: "empty"; }'.
+      Type 'Result<SidebarMediaQueryQuery, Exact<{ id: string | number; }>, undefined> & { called: false; variables: Partial<Exact<{ id: string | number; }>>; data: undefined; dataState: "empty"; }' is not assignable to type 'Result<unknown, OperationVariables, undefined>'.
+        Types of property 'subscribeToMore' are incompatible.
+          Type 'SubscribeToMoreFunction<SidebarMediaQueryQuery, Exact<{ id: string | number; }>>' is not assignable to type 'SubscribeToMoreFunction<unknown, OperationVariables>'.
+            Types of parameters 'options' and 'options' are incompatible.
+              Type 'SubscribeToMoreOptions<unknown, any, any, OperationVariables>' is not assignable to type 'SubscribeToMoreOptions<SidebarMediaQueryQuery, any, any, Exact<{ id: string | number; }>>'.
+                Types of property 'updateQuery' are incompatible.
+                  Type 'SubscribeToMoreUpdateQueryFn<unknown, OperationVariables, any> | undefined' is not assignable to type 'SubscribeToMoreUpdateQueryFn<SidebarMediaQueryQuery, Exact<{ id: string | number; }>, any> | undefined'.
+                    Type 'SubscribeToMoreUpdateQueryFn<unknown, OperationVariables, any>' is not assignable to type 'SubscribeToMoreUpdateQueryFn<SidebarMediaQueryQuery, Exact<{ id: string | number; }>, any>'.
+                      Type 'unknown' is not assignable to type 'void | SidebarMediaQueryQuery'.
+    */
     vi.spyOn(ApolloReact, 'useLazyQuery').mockReturnValue([
       loadMediaMock,
       makeLazyQueryResult({
@@ -236,6 +249,21 @@ describe('MediaSidebar', () => {
     // Mock a GraphQL error
     const loadMediaMock = vi.fn<ReturnType<typeof useLazyQuery>[0]>()
 
+    //TODO: How to fix this type mismatch:
+    /*
+Type 'SidebarLazyQueryResult' is not assignable to type 'Result<unknown, OperationVariables, "complete" | "empty" | "streaming", undefined>'.
+  Type 'Result<SidebarMediaQueryQuery, Exact<{ id: string | number; }>, undefined> & { called: false; variables: Partial<Exact<{ id: string | number; }>>; data: undefined; dataState: "empty"; }' is not assignable to type 'Result<unknown, OperationVariables, "complete" | "empty" | "streaming", undefined>'.
+    Type 'Result<SidebarMediaQueryQuery, Exact<{ id: string | number; }>, undefined> & { called: false; variables: Partial<Exact<{ id: string | number; }>>; data: undefined; dataState: "empty"; }' is not assignable to type 'Result<unknown, OperationVariables, undefined> & { called: false; variables: Partial<OperationVariables>; data: undefined; dataState: "empty"; }'.
+      Type 'Result<SidebarMediaQueryQuery, Exact<{ id: string | number; }>, undefined> & { called: false; variables: Partial<Exact<{ id: string | number; }>>; data: undefined; dataState: "empty"; }' is not assignable to type 'Result<unknown, OperationVariables, undefined>'.
+        Types of property 'subscribeToMore' are incompatible.
+          Type 'SubscribeToMoreFunction<SidebarMediaQueryQuery, Exact<{ id: string | number; }>>' is not assignable to type 'SubscribeToMoreFunction<unknown, OperationVariables>'.
+            Types of parameters 'options' and 'options' are incompatible.
+              Type 'SubscribeToMoreOptions<unknown, any, any, OperationVariables>' is not assignable to type 'SubscribeToMoreOptions<SidebarMediaQueryQuery, any, any, Exact<{ id: string | number; }>>'.
+                Types of property 'updateQuery' are incompatible.
+                  Type 'SubscribeToMoreUpdateQueryFn<unknown, OperationVariables, any> | undefined' is not assignable to type 'SubscribeToMoreUpdateQueryFn<SidebarMediaQueryQuery, Exact<{ id: string | number; }>, any> | undefined'.
+                    Type 'SubscribeToMoreUpdateQueryFn<unknown, OperationVariables, any>' is not assignable to type 'SubscribeToMoreUpdateQueryFn<SidebarMediaQueryQuery, Exact<{ id: string | number; }>, any>'.
+                      Type 'unknown' is not assignable to type 'void | SidebarMediaQueryQuery'.
+    */
     vi.spyOn(ApolloReact, 'useLazyQuery').mockReturnValue([
       loadMediaMock,
       makeLazyQueryResult({

@@ -1,5 +1,6 @@
 import { useState, Dispatch, SetStateAction } from 'react'
 import { ApolloLink, gql } from '@apollo/client'
+import type { OperationVariables } from '@apollo/client'
 import { useMutation } from '@apollo/client/react'
 import EditUserRow from './EditUserRow'
 import ViewUserRow from './ViewUserRow'
@@ -45,11 +46,13 @@ interface UserRowState extends UserBase {
   oldState?: Omit<UserRowState, 'oldState'>
 }
 
-//TODO: How to fix this:
-// Type 'VariablesType' does not satisfy the constraint 'OperationVariables'.
-// UserRow.tsx(50, 37): This type parameter might need an `extends OperationVariables` constraint.
-type ApolloMutationFn<MutationType, VariablesType> = (
-  options?: useMutation.MutationFunctionOptions<MutationType, VariablesType>
+type ApolloMutationFn<
+  MutationType,
+  VariablesType extends OperationVariables,
+> = (
+  options: useMutation.MutationFunctionOptions<MutationType, VariablesType> & {
+    variables: VariablesType
+  }
 ) => Promise<ApolloLink.Result<MutationType>>
 
 export type UserRowChildProps = {
@@ -113,12 +116,6 @@ const UserRow = ({ user, refetchUsers }: UserRowProps) => {
     options
   ) => {
     try {
-      //TODO: How to fix this type mismatch:
-      /*
-Argument of type 'MutationFunctionOptions<UpdateUserMutation, Exact<{ id: string | number; username?: string | null | undefined; admin?: boolean | null | undefined; }>, ApolloCache> | undefined' is not assignable to parameter of type 'Options<UpdateUserMutation, { id: string | number; username?: string | null | undefined; admin?: boolean | null | undefined; }, ApolloCache, Partial<{ ...; }>> & { ...; } & { ...; }'.
-  Type 'undefined' is not assignable to type 'Options<UpdateUserMutation, { id: string | number; username?: string | null | undefined; admin?: boolean | null | undefined; }, ApolloCache, Partial<{ ...; }>> & { ...; } & { ...; }'.
-    Type 'undefined' is not assignable to type 'Options<UpdateUserMutation, { id: string | number; username?: string | null | undefined; admin?: boolean | null | undefined; }, ApolloCache, Partial<{ id: string | number; username?: string | ... 1 more ... | undefined; admin?: boolean | ... 1 more ... | undefined; }>>'.
-      */
       const result = await updateUserMutationFn(options)
       const updatedUser = result.data?.updateUser
       if (updatedUser) {
@@ -141,12 +138,6 @@ Argument of type 'MutationFunctionOptions<UpdateUserMutation, Exact<{ id: string
     options
   ) => {
     try {
-      //TODO: How to fix this type mismatch:
-      /*
-Argument of type 'MutationFunctionOptions<UpdateUserMutation, Exact<{ id: string | number; username?: string | null | undefined; admin?: boolean | null | undefined; }>, ApolloCache> | undefined' is not assignable to parameter of type 'Options<UpdateUserMutation, { id: string | number; username?: string | null | undefined; admin?: boolean | null | undefined; }, ApolloCache, Partial<{ ...; }>> & { ...; } & { ...; }'.
-  Type 'undefined' is not assignable to type 'Options<UpdateUserMutation, { id: string | number; username?: string | null | undefined; admin?: boolean | null | undefined; }, ApolloCache, Partial<{ ...; }>> & { ...; } & { ...; }'.
-    Type 'undefined' is not assignable to type 'Options<UpdateUserMutation, { id: string | number; username?: string | null | undefined; admin?: boolean | null | undefined; }, ApolloCache, Partial<{ id: string | number; username?: string | ... 1 more ... | undefined; admin?: boolean | ... 1 more ... | undefined; }>>'.
-      */
       const result = await deleteUserMutationFn(options)
       const deletedUser = result.data?.deleteUser
       if (deletedUser) {
@@ -164,12 +155,6 @@ Argument of type 'MutationFunctionOptions<UpdateUserMutation, Exact<{ id: string
     options
   ) => {
     try {
-      //TODO: How to fix this type mismatch:
-      /*
-Argument of type 'MutationFunctionOptions<UpdateUserMutation, Exact<{ id: string | number; username?: string | null | undefined; admin?: boolean | null | undefined; }>, ApolloCache> | undefined' is not assignable to parameter of type 'Options<UpdateUserMutation, { id: string | number; username?: string | null | undefined; admin?: boolean | null | undefined; }, ApolloCache, Partial<{ ...; }>> & { ...; } & { ...; }'.
-  Type 'undefined' is not assignable to type 'Options<UpdateUserMutation, { id: string | number; username?: string | null | undefined; admin?: boolean | null | undefined; }, ApolloCache, Partial<{ ...; }>> & { ...; } & { ...; }'.
-    Type 'undefined' is not assignable to type 'Options<UpdateUserMutation, { id: string | number; username?: string | null | undefined; admin?: boolean | null | undefined; }, ApolloCache, Partial<{ id: string | number; username?: string | ... 1 more ... | undefined; admin?: boolean | ... 1 more ... | undefined; }>>'.
-      */
       const result = await scanUserMutationFn(options)
       const scanResult = result.data?.scanUser
       if (scanResult) {

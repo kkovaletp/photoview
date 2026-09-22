@@ -313,16 +313,6 @@ export const PeoplePage = () => {
 
   const { containerElem, loadingMore } = useScrollPagination<MyFacesQuery>({
     loading,
-    //TODO: How to fix this type mismatch:
-    /*
-Type 'FetchMoreFunction<MyFacesQuery, Exact<{ limit?: number | null | undefined; offset?: number | null | undefined; }>>' is not assignable to type '(args: { variables: { offset: number; }; }) => Promise<Result<MyFacesQuery, "complete" | "empty" | "partial" | "streaming">>'.
-  Type 'Promise<{ data: MyFacesQuery; error?: undefined; }>' is not assignable to type 'Promise<Result<MyFacesQuery, "complete" | "empty" | "partial" | "streaming">>'.
-    Type '{ data: MyFacesQuery; error?: undefined; }' is not assignable to type 'Result<MyFacesQuery, "complete" | "empty" | "partial" | "streaming">'.
-      Type '{ data: MyFacesQuery; error?: undefined; }' is not assignable to type '({ error?: ErrorLike | undefined; loading: boolean; networkStatus: NetworkStatus; partial: boolean; } & { data: MyFacesQuery; dataState: "complete"; }) | ({ ...; } & { ...; }) | ({ ...; } & { ...; })'.
-        Type '{ data: MyFacesQuery; error?: undefined; }' is not assignable to type '{ error?: ErrorLike | undefined; loading: boolean; networkStatus: NetworkStatus; partial: boolean; } & { data: DeepPartialObject<MyFacesQuery>; dataState: "partial"; }'.
-          Type '{ data: MyFacesQuery; error?: undefined; }' is missing the following properties from type '{ error?: ErrorLike | undefined; loading: boolean; networkStatus: NetworkStatus; partial: boolean; }': loading, networkStatus, partial
-useScrollPagination.ts(7, 3): The expected type comes from property 'fetchMore' which is declared here on type 'ScrollPaginationArgs<MyFacesQuery>'
-    */
     fetchMore,
     data,
     getItems: data => data.myFaceGroups,
@@ -347,8 +337,6 @@ useScrollPagination.ts(7, 3): The expected type comes from property 'fetchMore' 
       setState={setMergeModalState}
       refetchQueries={[
         {
-          //TODO: How to fix this:
-          // Object literal may only specify known properties, and 'query' does not exist in type 'DocumentNode'.
           query: MY_FACES_QUERY,
           variables: {
             limit: 50,

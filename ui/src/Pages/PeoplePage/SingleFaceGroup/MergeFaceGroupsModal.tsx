@@ -1,4 +1,4 @@
-import { type RefetchQueryDescriptor, gql } from '@apollo/client'
+import { type ApolloClient, gql } from '@apollo/client'
 import { useMutation, useQuery } from '@apollo/client/react'
 import { useCallback, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -46,7 +46,7 @@ type MergeFaceGroupsModalProps = {
   state: MergeFaceGroupsModalState
   setState(state: MergeFaceGroupsModalState): void
   preselectedFaceGroup?: FaceGroupSelection
-  refetchQueries: RefetchQueryDescriptor[]
+  refetchQueries: ApolloClient.QueryOptions[]
 }
 
 type StateContent = {
@@ -142,16 +142,6 @@ const MergeFaceGroupsModalContent = ({
     loadingMore: loadingMoreFaceGroups,
   } = useScrollPagination<MyFacesQuery>({
     loading: faceGroupsLoading,
-    //TODO: How to fix this type mismatch:
-    /*
-Type 'FetchMoreFunction<MyFacesQuery, Exact<{ limit?: number | null | undefined; offset?: number | null | undefined; }>>' is not assignable to type '(args: { variables: { offset: number; }; }) => Promise<Result<MyFacesQuery, "complete" | "empty" | "partial" | "streaming">>'.
-  Type 'Promise<{ data: MyFacesQuery; error?: undefined; }>' is not assignable to type 'Promise<Result<MyFacesQuery, "complete" | "empty" | "partial" | "streaming">>'.
-    Type '{ data: MyFacesQuery; error?: undefined; }' is not assignable to type 'Result<MyFacesQuery, "complete" | "empty" | "partial" | "streaming">'.
-      Type '{ data: MyFacesQuery; error?: undefined; }' is not assignable to type '({ error?: ErrorLike | undefined; loading: boolean; networkStatus: NetworkStatus; partial: boolean; } & { data: MyFacesQuery; dataState: "complete"; }) | ({ ...; } & { ...; }) | ({ ...; } & { ...; })'.
-        Type '{ data: MyFacesQuery; error?: undefined; }' is not assignable to type '{ error?: ErrorLike | undefined; loading: boolean; networkStatus: NetworkStatus; partial: boolean; } & { data: DeepPartialObject<MyFacesQuery>; dataState: "partial"; }'.
-          Type '{ data: MyFacesQuery; error?: undefined; }' is missing the following properties from type '{ error?: ErrorLike | undefined; loading: boolean; networkStatus: NetworkStatus; partial: boolean; }': loading, networkStatus, partial
-useScrollPagination.ts(7, 3): The expected type comes from property 'fetchMore' which is declared here on type 'ScrollPaginationArgs<MyFacesQuery>'
-    */
     fetchMore,
     data,
     getItems: data => data.myFaceGroups,
@@ -298,10 +288,8 @@ useScrollPagination.ts(7, 3): The expected type comes from property 'fetchMore' 
           ]
           : [],
       awaitRefetchQueries: true,
-      //TODO: How to fix this:
-      // Property 'errors' does not exist on type 'MutateResult<CombineFacesMutation, undefined>'.
-    }).then(({ data, errors }) => {
-      if (!data?.combineFaceGroups || (errors?.length ?? 0) > 0) return
+    }).then(({ data, error }) => {
+      if (!data?.combineFaceGroups || error) return
 
       resetModalState()
       setState(MergeFaceGroupsModalState.Closed)

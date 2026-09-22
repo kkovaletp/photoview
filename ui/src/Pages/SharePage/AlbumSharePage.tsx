@@ -65,16 +65,6 @@ const AlbumSharePage = ({ albumID, token, password }: AlbumSharePageProps) => {
   const { containerElem, loadingMore } =
     useScrollPagination<ShareAlbumQueryQuery>({
       loading,
-      // TODO: How to fix this type mismatch:
-      /*
-Type 'FetchMoreFunction<ShareAlbumQueryQuery, OperationVariables>' is not assignable to type '(args: { variables: { offset: number; }; }) => Promise<Result<ShareAlbumQueryQuery, "complete" | "empty" | "partial" | "streaming">>'.
-  Type 'Promise<{ data: ShareAlbumQueryQuery; error?: undefined; }>' is not assignable to type 'Promise<Result<ShareAlbumQueryQuery, "complete" | "empty" | "partial" | "streaming">>'.
-    Type '{ data: ShareAlbumQueryQuery; error?: undefined; }' is not assignable to type 'Result<ShareAlbumQueryQuery, "complete" | "empty" | "partial" | "streaming">'.
-      Type '{ data: ShareAlbumQueryQuery; error?: undefined; }' is not assignable to type '({ error?: ErrorLike | undefined; loading: boolean; networkStatus: NetworkStatus; partial: boolean; } & { data: ShareAlbumQueryQuery; dataState: "complete"; }) | ({ ...; } & { ...; }) | ({ ...; } & { ...; })'.
-        Type '{ data: ShareAlbumQueryQuery; error?: undefined; }' is not assignable to type '{ error?: ErrorLike | undefined; loading: boolean; networkStatus: NetworkStatus; partial: boolean; } & { data: DeepPartialObject<ShareAlbumQueryQuery>; dataState: "partial"; }'.
-          Type '{ data: ShareAlbumQueryQuery; error?: undefined; }' is missing the following properties from type '{ error?: ErrorLike | undefined; loading: boolean; networkStatus: NetworkStatus; partial: boolean; }': loading, networkStatus, partial
-useScrollPagination.ts(7, 3): The expected type comes from property 'fetchMore' which is declared here on type 'ScrollPaginationArgs<ShareAlbumQueryQuery>'
-      */
       fetchMore,
       data,
       getItems: data => data.album.media,

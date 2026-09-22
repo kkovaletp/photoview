@@ -1,6 +1,5 @@
 import { vi, describe, test, expect, beforeEach, afterEach, beforeAll, afterAll } from 'vitest'
 import { renderHook, act, waitFor } from '@testing-library/react'
-import { ObservableQuery } from '@apollo/client'
 import useScrollPagination from './useScrollPagination'
 
 // ─── IntersectionObserver mock ────────────────────────────────────────────────
@@ -50,18 +49,8 @@ afterEach(() => {
 type SimpleData = { items: string[] }
 const getItems = (data: SimpleData) => data.items
 
-//TODO: How to fix the following type mismatch:
-/*
-Type '{ data: { items: string[]; }; loading: false; networkStatus: 7; }' is not assignable to type 'Result<SimpleData, "complete" | "empty" | "partial" | "streaming">'.
-  Type '{ data: { items: string[]; }; loading: false; networkStatus: 7; }' is not assignable to type '({ error?: ErrorLike | undefined; loading: boolean; networkStatus: NetworkStatus; partial: boolean; } & { data: SimpleData; dataState: "complete"; }) | ({ ...; } & { ...; }) | ({ ...; } & { ...; })'.
-    Type '{ data: { items: string[]; }; loading: false; networkStatus: 7; }' is not assignable to type '{ error?: ErrorLike | undefined; loading: boolean; networkStatus: NetworkStatus; partial: boolean; } & { data: DeepPartialObject<SimpleData>; dataState: "partial"; }'.
-      Property 'partial' is missing in type '{ data: { items: string[]; }; loading: false; networkStatus: 7; }' but required in type '{ error?: ErrorLike | undefined; loading: boolean; networkStatus: NetworkStatus; partial: boolean; }'.
-ObservableQuery.d.ts(226, 9): 'partial' is declared here.
-*/
-const makeResult = (items: string[]): ObservableQuery.Result<SimpleData> => ({
+const makeResult = (items: string[]) => ({
     data: { items },
-    loading: false,
-    networkStatus: 7,
 })
 
 /**
@@ -355,11 +344,11 @@ describe('useScrollPagination', () => {
         })
 
         test('sets loadingMore while fetchMore is in progress', async () => {
-            let resolveFetchMore: (value: ObservableQuery.Result<SimpleData>) => void
+            let resolveFetchMore: (value: ReturnType<typeof makeResult>) => void
 
             const fetchMore = vi.fn(
                 () =>
-                    new Promise<ObservableQuery.Result<SimpleData>>(resolve => {
+                    new Promise<ReturnType<typeof makeResult>>(resolve => {
                         resolveFetchMore = resolve
                     }),
             )

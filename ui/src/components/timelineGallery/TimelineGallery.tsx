@@ -105,16 +105,6 @@ const TimelineGallery = () => {
     },
   })
 
-  //TODO: How to fix the following type mismatch:
-  /*
-Type 'FetchMoreFunction<MyTimelineQuery, Exact<{ onlyFavorites?: boolean | null | undefined; limit?: number | null | undefined; offset?: number | null | undefined; fromDate?: string | null | undefined; }>>' is not assignable to type '(args: { variables: { offset: number; }; }) => Promise<Result<MyTimelineQuery, "complete" | "empty" | "partial" | "streaming">>'.
-  Type 'Promise<{ data: MyTimelineQuery; error?: undefined; }>' is not assignable to type 'Promise<Result<MyTimelineQuery, "complete" | "empty" | "partial" | "streaming">>'.
-    Type '{ data: MyTimelineQuery; error?: undefined; }' is not assignable to type 'Result<MyTimelineQuery, "complete" | "empty" | "partial" | "streaming">'.
-      Type '{ data: MyTimelineQuery; error?: undefined; }' is not assignable to type '({ error?: ErrorLike | undefined; loading: boolean; networkStatus: NetworkStatus; partial: boolean; } & { data: MyTimelineQuery; dataState: "complete"; }) | ({ ...; } & { ...; }) | ({ ...; } & { ...; })'.
-        Type '{ data: MyTimelineQuery; error?: undefined; }' is not assignable to type '{ error?: ErrorLike | undefined; loading: boolean; networkStatus: NetworkStatus; partial: boolean; } & { data: DeepPartialObject<MyTimelineQuery>; dataState: "partial"; }'.
-          Type '{ data: MyTimelineQuery; error?: undefined; }' is missing the following properties from type '{ error?: ErrorLike | undefined; loading: boolean; networkStatus: NetworkStatus; partial: boolean; }': loading, networkStatus, partial
-useScrollPagination.ts(7, 3): The expected type comes from property 'fetchMore' which is declared here on type 'ScrollPaginationArgs<MyTimelineQuery>'
-  */
   const { containerElem, loadingMore } =
     useScrollPagination<MyTimelineQuery>({
       loading,

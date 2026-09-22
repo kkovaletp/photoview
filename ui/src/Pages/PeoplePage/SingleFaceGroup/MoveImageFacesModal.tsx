@@ -155,10 +155,8 @@ const MoveImageFacesModal = ({
         ]
       },
       awaitRefetchQueries: true,
-      //TODO: How to fix this:
-      // Property 'errors' does not exist on type 'MutateResult<MoveImageFacesMutation, undefined>'.
-    }).then(({ data, errors }) => {
-      if (!data?.moveImageFaces || (errors?.length ?? 0) > 0) return
+    }).then(({ data, error }) => {
+      if (!data?.moveImageFaces || error) return
       setOpen(false)
       navigate(`/people/${destinationFaceGroupId}`)
     }).catch((e) => {

@@ -421,18 +421,7 @@ describe('ChangePasswordModal', () => {
               password: 'testPassword',
             },
           },
-          //TODO: How to fix:
-          // Object literal may only specify known properties, and 'newData' does not exist in type 'MockedResponse<Record<string, any>, Record<string, any>>'.
-          /*
-          (property) newData: () => {
-            data: {
-            updateUser: {
-            id: string;
-            };
-            };
-            }
-          */
-          newData: () => {
+          result: () => {
             mutationAttempted = true
             return {
               data: {

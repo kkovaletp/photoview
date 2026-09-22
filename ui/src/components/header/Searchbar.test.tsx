@@ -2,7 +2,7 @@ import { vi, describe, test, expect, beforeEach, afterEach } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router'
-import * as Apollo from '@apollo/client'
+import * as ApolloReact from '@apollo/client/react'
 import SearchBar, { AlbumRow, PhotoRow, searchHighlighted } from './Searchbar'
 import * as utils from '../../helpers/utils'
 import { SearchQueryQuery } from './__generated__/Searchbar'
@@ -90,13 +90,7 @@ describe('SearchBar Component', () => {
         mockLoading = false;
 
         // Mock useLazyQuery to return our controlled variables
-        //TODO: How to fix the following issue:
-        // No overload matches this call.
-        //  Overload 1 of 4, '(object: typeof import("photoview/ui/node_modules/@apollo/client/core/index"), key: "ApolloClient" | "ApolloLink" | "CombinedGraphQLErrors" | "CombinedProtocolErrors" | ... 37 more ... | "windowFocusSource"): Mock<...>', gave the following error.
-        //    Argument of type '"useLazyQuery"' is not assignable to parameter of type '"ApolloClient" | "ApolloLink" | "CombinedGraphQLErrors" | "CombinedProtocolErrors" | "DocumentTransform" | "HttpLink" | "InMemoryCache" | "LocalStateError" | "MissingFieldError" | ... 32 more ... | "windowFocusSource"'.
-        //            Overload 2 of 4, '(object: typeof import("photoview/ui/node_modules/@apollo/client/core/index"), key: never): never', gave the following error.
-        //    Argument of type '"useLazyQuery"' is not assignable to parameter of type 'never'.
-        vi.spyOn(Apollo, 'useLazyQuery').mockImplementation(() => {
+        vi.spyOn(ApolloReact, 'useLazyQuery').mockImplementation(() => {
             return [
                 fetchSearchMock,
                 { loading: mockLoading, data: mockSearchData }

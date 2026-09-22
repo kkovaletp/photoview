@@ -129,8 +129,6 @@ const FaceGroupTitle = ({ faceGroup }: FaceGroupTitleProps) => {
           preselectedFaceGroup={faceGroup}
           refetchQueries={[
             {
-              //TODO: How to fix this:
-              // Object literal may only specify known properties, and 'query' does not exist in type 'DocumentNode'.
               query: MY_FACES_QUERY,
               variables: {
                 limit: 50,

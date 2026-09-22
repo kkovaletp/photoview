@@ -9,6 +9,7 @@ import {
     isLegitimateClose
 } from './apolloClient'
 
+//TODO: Update ui/src/apolloClient.test.tsx to construct a real ServerError. The current Object.assign(new Error(), { result }) fixture tests an Apollo Client 3-only property.
 describe('paginateCache', () => {
     let paginateFn: ReturnType<typeof paginateCache>
 
