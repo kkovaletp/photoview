@@ -13,7 +13,7 @@ import (
 func RunScannerOnUser(t *testing.T, db *gorm.DB, user *models.User) {
 	start := time.Now()
 	defer func() {
-		dur := time.Now().Sub(start)
+		dur := time.Since(start)
 		t.Logf("RunScannerOnUser(user(id:%d)) took %s.", user.ID, dur)
 	}()
 
@@ -32,7 +32,7 @@ func RunScannerOnUser(t *testing.T, db *gorm.DB, user *models.User) {
 func RunScannerAll(t *testing.T, db *gorm.DB) {
 	start := time.Now()
 	defer func() {
-		dur := time.Now().Sub(start)
+		dur := time.Since(start)
 		t.Logf("RunScannerAll() took %s.", dur)
 	}()
 
