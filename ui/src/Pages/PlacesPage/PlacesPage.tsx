@@ -1,4 +1,5 @@
-import { gql, useQuery } from '@apollo/client'
+import { gql } from '@apollo/client'
+import { useQuery } from '@apollo/client/react'
 import type * as mapboxgl from 'mapbox-gl/esm'
 import { Dispatch, useReducer } from 'react'
 import { Helmet, HelmetProvider } from '@dr.pogodin/react-helmet'
@@ -31,6 +32,11 @@ export type PresentMarker = {
 const MapPage = () => {
   const { t } = useTranslation()
 
+  //TODO: Replace deprecated `useQuery`:
+  /*
+              * @deprecated Avoid manually specifying generics on `useQuery`.
+              * Instead, rely on TypeScript's type inference along with a correctly typed `TypedDocumentNode` to get accurate types for your query results.
+              */
   const { data: mapboxData } = useQuery<MediaGeoJsonQuery>(MAPBOX_DATA_QUERY, {
     fetchPolicy: 'cache-first',
   })

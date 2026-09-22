@@ -1,4 +1,5 @@
-import { useQuery, gql } from '@apollo/client'
+import { gql } from '@apollo/client'
+import { useQuery } from '@apollo/client/react'
 import { Route, Routes, useParams } from 'react-router'
 import styled from 'styled-components'
 import {
@@ -102,6 +103,11 @@ const AuthorizedTokenRoute = () => {
   const token = useTokenFromParams()
   const password = getSharePassword(token) ?? null
 
+  //TODO: Replace deprecated `useQuery`:
+  /*
+              * @deprecated Avoid manually specifying generics on `useQuery`.
+              * Instead, rely on TypeScript's type inference along with a correctly typed `TypedDocumentNode` to get accurate types for your query results.
+              */
   const { loading, error, data } = useQuery<
     SharePageTokenQuery,
     SharePageTokenQueryVariables
@@ -153,6 +159,11 @@ export const TokenRoute = () => {
   const { t } = useTranslation()
   const token = useTokenFromParams()
 
+  //TODO: Replace deprecated `useQuery`:
+  /*
+              * @deprecated Avoid manually specifying generics on `useQuery`.
+              * Instead, rely on TypeScript's type inference along with a correctly typed `TypedDocumentNode` to get accurate types for your query results.
+              */
   const { loading, error, data, refetch } = useQuery<
     ShareTokenValidatePasswordQuery,
     ShareTokenValidatePasswordQueryVariables

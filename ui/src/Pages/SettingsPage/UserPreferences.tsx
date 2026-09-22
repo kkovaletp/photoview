@@ -1,5 +1,5 @@
-import { useMutation, useQuery } from '@apollo/client'
-import gql from 'graphql-tag'
+import { useMutation, useQuery } from '@apollo/client/react'
+import { gql } from '@apollo/client'
 import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import styled from 'styled-components'
@@ -95,8 +95,18 @@ const UserPreferences = () => {
     setTheme(value)
   }
 
+  //TODO: Replace deprecated `useQuery`:
+  /*
+              * @deprecated Avoid manually specifying generics on `useQuery`.
+              * Instead, rely on TypeScript's type inference along with a correctly typed `TypedDocumentNode` to get accurate types for your query results.
+              */
   const { data } = useQuery<MyUserPreferencesQuery>(MY_USER_PREFERENCES)
 
+  //TODO: Replace deprecated `useMutation`:
+  /*
+              * @deprecated Avoid manually specifying generics on `useMutation`.
+              * Instead, rely on TypeScript's type inference along with a correctly typed `TypedDocumentNode` to get accurate types for your mutation results.
+              */
   const [changePrefs, { loading: loadingPrefs, error }] = useMutation<
     ChangeUserPreferencesMutation,
     ChangeUserPreferencesMutationVariables

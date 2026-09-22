@@ -1,5 +1,6 @@
 import { useCallback } from 'react'
-import { useQuery, gql } from '@apollo/client'
+import { gql } from '@apollo/client'
+import { useQuery } from '@apollo/client/react'
 import AlbumGallery, {
   ALBUM_GALLERY_FRAGMENT,
 } from '../../components/albumGallery/AlbumGallery'
@@ -70,6 +71,16 @@ function AlbumPage() {
     },
   })
 
+  //TODO: How to fix the following type mismatch:
+  /*
+Type 'FetchMoreFunction<AlbumQueryQuery, Exact<{ id: string | number; onlyFavorites?: boolean | null | undefined; mediaOrderBy?: string | null | undefined; orderDirection?: OrderDirection | null | undefined; limit?: number | ... 1 more ... | undefined; offset?: number | ... 1 more ... | undefined; }>>' is not assignable to type '(args: { variables: { offset: number; }; }) => Promise<Result<AlbumQueryQuery, "complete" | "empty" | "partial" | "streaming">>'.
+  Type 'Promise<{ data: AlbumQueryQuery; error?: undefined; }>' is not assignable to type 'Promise<Result<AlbumQueryQuery, "complete" | "empty" | "partial" | "streaming">>'.
+    Type '{ data: AlbumQueryQuery; error?: undefined; }' is not assignable to type 'Result<AlbumQueryQuery, "complete" | "empty" | "partial" | "streaming">'.
+      Type '{ data: AlbumQueryQuery; error?: undefined; }' is not assignable to type '({ error?: ErrorLike | undefined; loading: boolean; networkStatus: NetworkStatus; partial: boolean; } & { data: AlbumQueryQuery; dataState: "complete"; }) | ({ ...; } & { ...; }) | ({ ...; } & { ...; })'.
+        Type '{ data: AlbumQueryQuery; error?: undefined; }' is not assignable to type '{ error?: ErrorLike | undefined; loading: boolean; networkStatus: NetworkStatus; partial: boolean; } & { data: DeepPartialObject<AlbumQueryQuery>; dataState: "partial"; }'.
+          Type '{ data: AlbumQueryQuery; error?: undefined; }' is missing the following properties from type '{ error?: ErrorLike | undefined; loading: boolean; networkStatus: NetworkStatus; partial: boolean; }': loading, networkStatus, partial
+useScrollPagination.ts(7, 3): The expected type comes from property 'fetchMore' which is declared here on type 'ScrollPaginationArgs<AlbumQueryQuery>'
+  */
   const { containerElem, loadingMore } =
     useScrollPagination<AlbumQueryQuery>({
       loading,

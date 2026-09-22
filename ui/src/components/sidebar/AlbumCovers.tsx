@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
-import { useMutation, gql } from '@apollo/client'
+import { gql } from '@apollo/client'
+import { useMutation } from '@apollo/client/react'
 import { useTranslation } from 'react-i18next'
 
 import { SidebarSection, SidebarSectionTitle } from './SidebarComponents'
@@ -117,6 +118,11 @@ type SidebarAlbumCoverProps = {
 export const SidebarAlbumCover = ({ id }: SidebarAlbumCoverProps) => {
   const { t } = useTranslation()
 
+  //TODO: Replace deprecated `useMutation`:
+  /*
+              * @deprecated Avoid manually specifying generics on `useMutation`.
+              * Instead, rely on TypeScript's type inference along with a correctly typed `TypedDocumentNode` to get accurate types for your mutation results.
+              */
   const [resetAlbumCover] = useMutation<
     ResetAlbumCoverMutation,
     ResetAlbumCoverMutationVariables

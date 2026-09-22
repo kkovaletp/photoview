@@ -1,4 +1,5 @@
-import { useQuery, gql } from '@apollo/client'
+import { gql } from '@apollo/client'
+import { useQuery } from '@apollo/client/react'
 import { SidebarAlbumShare } from './Sharing'
 import { useTranslation } from 'react-i18next'
 import SidebarHeader from './SidebarHeader'
@@ -24,6 +25,11 @@ type AlbumSidebarProps = {
 
 const AlbumSidebar = ({ albumId }: AlbumSidebarProps) => {
   const { t } = useTranslation()
+  //TODO: Replace deprecated `useQuery`:
+  /*
+              * @deprecated Avoid manually specifying generics on `useQuery`.
+              * Instead, rely on TypeScript's type inference along with a correctly typed `TypedDocumentNode` to get accurate types for your query results.
+              */
   const { loading, error, data } = useQuery<
     GetAlbumSidebarQuery,
     GetAlbumSidebarQueryVariables

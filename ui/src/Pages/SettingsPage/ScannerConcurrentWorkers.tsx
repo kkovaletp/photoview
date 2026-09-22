@@ -1,5 +1,6 @@
 import { useRef, useState, useEffect, ChangeEvent, KeyboardEvent } from 'react'
-import { useQuery, useMutation, gql } from '@apollo/client'
+import { gql } from '@apollo/client'
+import { useQuery, useMutation } from '@apollo/client/react'
 import { InputLabelTitle, InputLabelDescription } from './SettingsPage'
 import { useTranslation } from 'react-i18next'
 import {
@@ -84,6 +85,9 @@ export const ScannerConcurrentWorkers = () => {
     setWorkersMutation({
       variables: { workers: next },
     }).then(res => {
+      //TODO: How to fix this:
+      // Property 'errors' does not exist on type 'MutateResult<SetConcurrentWorkersMutation, undefined>'. Did you mean 'error'?
+      // ApolloClient.d.ts(371, 13): 'error' is declared here.
       if (!res.data || (Array.isArray(res.errors) && res.errors.length > 0)) {
         throw new Error('GraphQL error while updating concurrent workers')
       }

@@ -1,4 +1,5 @@
-import { gql, useLazyQuery } from '@apollo/client'
+import { gql } from '@apollo/client'
+import { useLazyQuery } from '@apollo/client/react'
 import { Dispatch, useEffect } from 'react'
 import PresentView from '../../components/photoGallery/presentView/PresentView'
 import type * as mapboxgl from 'mapbox-gl/esm'
@@ -76,6 +77,11 @@ const MapPresentMarker = ({
   markerMediaState,
   dispatchMarkerMedia,
 }: MapPresetMarkerProps) => {
+  //TODO: Replace deprecated `useLazyQuery`:
+  /*
+              * @deprecated Avoid manually specifying generics on `useLazyQuery`.
+              * Instead, rely on TypeScript's type inference along with a correctly typed `TypedDocumentNode` to get accurate types for your query results.
+              */
   const [loadMedia, { data: loadedMedia }] = useLazyQuery<
     PlacePageQueryMediaQuery,
     PlacePageQueryMediaQueryVariables

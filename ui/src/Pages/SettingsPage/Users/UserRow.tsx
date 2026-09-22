@@ -1,10 +1,6 @@
 import { useState, Dispatch, SetStateAction } from 'react'
-import {
-  FetchResult,
-  gql,
-  MutationFunctionOptions,
-  useMutation,
-} from '@apollo/client'
+import { ApolloLink, gql } from '@apollo/client'
+import { useMutation } from '@apollo/client/react'
 import EditUserRow from './EditUserRow'
 import ViewUserRow from './ViewUserRow'
 import { SettingsUsersQueryQuery } from './__generated__/UsersTable'
@@ -49,10 +45,12 @@ interface UserRowState extends UserBase {
   oldState?: Omit<UserRowState, 'oldState'>
 }
 
+//TODO: How to fix this:
+// Type 'VariablesType' does not satisfy the constraint 'OperationVariables'.
+// UserRow.tsx(50, 37): This type parameter might need an `extends OperationVariables` constraint.
 type ApolloMutationFn<MutationType, VariablesType> = (
-  options?: MutationFunctionOptions<MutationType, VariablesType>
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-) => Promise<FetchResult<MutationType, any, any>>
+  options?: useMutation.MutationFunctionOptions<MutationType, VariablesType>
+) => Promise<ApolloLink.Result<MutationType>>
 
 export type UserRowChildProps = {
   user: SettingsUsersQueryQuery['user'][0]
@@ -84,13 +82,28 @@ const UserRow = ({ user, refetchUsers }: UserRowProps) => {
 
   const [showConfirmDelete, setShowConfirmDelete] = useState(false)
   const [showChangePassword, setShowChangePassword] = useState(false)
+  //TODO: Replace deprecated `useMutation`:
+  /*
+              * @deprecated Avoid manually specifying generics on `useMutation`.
+              * Instead, rely on TypeScript's type inference along with a correctly typed `TypedDocumentNode` to get accurate types for your mutation results.
+              */
   const [updateUserMutationFn, { loading: updateUserLoading }] = useMutation<
     UpdateUserMutation,
     UpdateUserMutationVariables
   >(updateUserMutation)
 
+  //TODO: Replace deprecated `useMutation`:
+  /*
+              * @deprecated Avoid manually specifying generics on `useMutation`.
+              * Instead, rely on TypeScript's type inference along with a correctly typed `TypedDocumentNode` to get accurate types for your mutation results.
+              */
   const [deleteUserMutationFn] = useMutation<DeleteUserMutation, DeleteUserMutationVariables>(deleteUserMutation)
 
+  //TODO: Replace deprecated `useMutation`:
+  /*
+              * @deprecated Avoid manually specifying generics on `useMutation`.
+              * Instead, rely on TypeScript's type inference along with a correctly typed `TypedDocumentNode` to get accurate types for your mutation results.
+              */
   const [scanUserMutationFn, { called: scanUserCalled }] = useMutation<
     ScanUserMutation,
     ScanUserMutationVariables
@@ -100,6 +113,12 @@ const UserRow = ({ user, refetchUsers }: UserRowProps) => {
     options
   ) => {
     try {
+      //TODO: How to fix this type mismatch:
+      /*
+Argument of type 'MutationFunctionOptions<UpdateUserMutation, Exact<{ id: string | number; username?: string | null | undefined; admin?: boolean | null | undefined; }>, ApolloCache> | undefined' is not assignable to parameter of type 'Options<UpdateUserMutation, { id: string | number; username?: string | null | undefined; admin?: boolean | null | undefined; }, ApolloCache, Partial<{ ...; }>> & { ...; } & { ...; }'.
+  Type 'undefined' is not assignable to type 'Options<UpdateUserMutation, { id: string | number; username?: string | null | undefined; admin?: boolean | null | undefined; }, ApolloCache, Partial<{ ...; }>> & { ...; } & { ...; }'.
+    Type 'undefined' is not assignable to type 'Options<UpdateUserMutation, { id: string | number; username?: string | null | undefined; admin?: boolean | null | undefined; }, ApolloCache, Partial<{ id: string | number; username?: string | ... 1 more ... | undefined; admin?: boolean | ... 1 more ... | undefined; }>>'.
+      */
       const result = await updateUserMutationFn(options)
       const updatedUser = result.data?.updateUser
       if (updatedUser) {
@@ -114,7 +133,7 @@ const UserRow = ({ user, refetchUsers }: UserRowProps) => {
     } catch (error) {
       console.error('Failed to update user: ', error)
       notifyError('Failed to update user', error)
-      return { data: undefined, errors: undefined } as FetchResult<UpdateUserMutation>
+      return { data: undefined, errors: undefined } as ApolloLink.Result<UpdateUserMutation>
     }
   }
 
@@ -122,6 +141,12 @@ const UserRow = ({ user, refetchUsers }: UserRowProps) => {
     options
   ) => {
     try {
+      //TODO: How to fix this type mismatch:
+      /*
+Argument of type 'MutationFunctionOptions<UpdateUserMutation, Exact<{ id: string | number; username?: string | null | undefined; admin?: boolean | null | undefined; }>, ApolloCache> | undefined' is not assignable to parameter of type 'Options<UpdateUserMutation, { id: string | number; username?: string | null | undefined; admin?: boolean | null | undefined; }, ApolloCache, Partial<{ ...; }>> & { ...; } & { ...; }'.
+  Type 'undefined' is not assignable to type 'Options<UpdateUserMutation, { id: string | number; username?: string | null | undefined; admin?: boolean | null | undefined; }, ApolloCache, Partial<{ ...; }>> & { ...; } & { ...; }'.
+    Type 'undefined' is not assignable to type 'Options<UpdateUserMutation, { id: string | number; username?: string | null | undefined; admin?: boolean | null | undefined; }, ApolloCache, Partial<{ id: string | number; username?: string | ... 1 more ... | undefined; admin?: boolean | ... 1 more ... | undefined; }>>'.
+      */
       const result = await deleteUserMutationFn(options)
       const deletedUser = result.data?.deleteUser
       if (deletedUser) {
@@ -131,7 +156,7 @@ const UserRow = ({ user, refetchUsers }: UserRowProps) => {
     } catch (error) {
       console.error('Failed to delete user: ', error)
       notifyError('Failed to delete user', error)
-      return { data: undefined, errors: undefined } as FetchResult<DeleteUserMutation>
+      return { data: undefined, errors: undefined } as ApolloLink.Result<DeleteUserMutation>
     }
   }
 
@@ -139,6 +164,12 @@ const UserRow = ({ user, refetchUsers }: UserRowProps) => {
     options
   ) => {
     try {
+      //TODO: How to fix this type mismatch:
+      /*
+Argument of type 'MutationFunctionOptions<UpdateUserMutation, Exact<{ id: string | number; username?: string | null | undefined; admin?: boolean | null | undefined; }>, ApolloCache> | undefined' is not assignable to parameter of type 'Options<UpdateUserMutation, { id: string | number; username?: string | null | undefined; admin?: boolean | null | undefined; }, ApolloCache, Partial<{ ...; }>> & { ...; } & { ...; }'.
+  Type 'undefined' is not assignable to type 'Options<UpdateUserMutation, { id: string | number; username?: string | null | undefined; admin?: boolean | null | undefined; }, ApolloCache, Partial<{ ...; }>> & { ...; } & { ...; }'.
+    Type 'undefined' is not assignable to type 'Options<UpdateUserMutation, { id: string | number; username?: string | null | undefined; admin?: boolean | null | undefined; }, ApolloCache, Partial<{ id: string | number; username?: string | ... 1 more ... | undefined; admin?: boolean | ... 1 more ... | undefined; }>>'.
+      */
       const result = await scanUserMutationFn(options)
       const scanResult = result.data?.scanUser
       if (scanResult) {
@@ -148,7 +179,7 @@ const UserRow = ({ user, refetchUsers }: UserRowProps) => {
     } catch (error) {
       console.error('Failed to scan user: ', error)
       notifyError('Failed to scan user', error)
-      return { data: undefined, errors: undefined } as FetchResult<ScanUserMutation>
+      return { data: undefined, errors: undefined } as ApolloLink.Result<ScanUserMutation>
     }
   }
 

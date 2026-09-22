@@ -1,4 +1,5 @@
-import { useMutation, gql } from '@apollo/client'
+import { gql } from '@apollo/client'
+import { useMutation } from '@apollo/client/react'
 import PeriodicScanner from './PeriodicScanner'
 import { ScannerConcurrentWorkers } from './ScannerConcurrentWorkers'
 import { SectionTitle, InputLabelDescription } from './SettingsPage'
@@ -26,6 +27,11 @@ const SCANNER_MSG_STALE_AFTER_MS = 2 * 60 * 1000 // 2 minutes
 
 const ScannerSection = () => {
   const { t } = useTranslation()
+  //TODO: Replace deprecated `useMutation`:
+  /*
+              * @deprecated Avoid manually specifying generics on `useMutation`.
+              * Instead, rely on TypeScript's type inference along with a correctly typed `TypedDocumentNode` to get accurate types for your mutation results.
+              */
   const [startScanner, { loading }] = useMutation<ScanAllMutationMutation>(SCAN_MUTATION)
   const { messages } = useMessageState()
   const [scannerRunning, setScannerRunning] = useState(false)

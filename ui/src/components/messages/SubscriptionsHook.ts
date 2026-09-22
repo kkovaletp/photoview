@@ -1,6 +1,7 @@
 import { NotificationSubscriptionSubscription } from './__generated__/SubscriptionsHook'
 import { Dispatch, SetStateAction, useEffect } from 'react'
-import { useSubscription, gql } from '@apollo/client'
+import { gql } from '@apollo/client'
+import { useSubscription } from '@apollo/client/react'
 import { NotificationType } from '../../__generated__/globalTypes'
 import { createUuid } from '../../helpers/createUuid'
 

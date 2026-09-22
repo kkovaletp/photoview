@@ -1,6 +1,6 @@
 import { screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { MockedResponse } from '@apollo/client/testing'
+import { MockLink } from '@apollo/client/testing'
 import { describe, test, expect, vi, beforeEach } from 'vitest'
 import type { Mock } from 'vitest'
 import { GraphQLError } from 'graphql'
@@ -19,7 +19,7 @@ describe('AddUserRow', () => {
     setShowMock = vi.fn<Dispatch<SetStateAction<boolean>>>()
   })
 
-  const renderComponent = (mocks: MockedResponse[]) => {
+  const renderComponent = (mocks: MockLink.MockedResponse[]) => {
     return renderWithProviders(
       <table>
         <tbody>
@@ -343,7 +343,7 @@ describe('AddUserRow', () => {
       const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => { })
 
       try {
-        const mocks: MockedResponse[] = [
+        const mocks: MockLink.MockedResponse[] = [
           {
             // First attempt: path is invalid → entire operation rolled back, no user in DB
             request: {
@@ -479,7 +479,7 @@ describe('AddUserRow', () => {
   describe('User Interactions', () => {
     test('cancel button hides the form', async () => {
       const user = userEvent.setup()
-      const mocks: MockedResponse[] = []
+      const mocks: MockLink.MockedResponse[] = []
 
       renderComponent(mocks)
 
@@ -492,7 +492,7 @@ describe('AddUserRow', () => {
 
     test('updates username input correctly', async () => {
       const user = userEvent.setup()
-      const mocks: MockedResponse[] = []
+      const mocks: MockLink.MockedResponse[] = []
 
       renderComponent(mocks)
 
@@ -505,7 +505,7 @@ describe('AddUserRow', () => {
 
     test('updates root path input correctly', async () => {
       const user = userEvent.setup()
-      const mocks: MockedResponse[] = []
+      const mocks: MockLink.MockedResponse[] = []
 
       renderComponent(mocks)
 
@@ -518,7 +518,7 @@ describe('AddUserRow', () => {
 
     test('updates admin checkbox correctly', async () => {
       const user = userEvent.setup()
-      const mocks: MockedResponse[] = []
+      const mocks: MockLink.MockedResponse[] = []
 
       renderComponent(mocks)
 

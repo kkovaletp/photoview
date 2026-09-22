@@ -1,4 +1,4 @@
-import { useQuery } from '@apollo/client'
+import { useQuery } from '@apollo/client/react'
 import gql from 'graphql-tag'
 import { useTranslation } from 'react-i18next'
 import Dropdown, { DropdownItem } from '../../primitives/form/Dropdown'
@@ -27,6 +27,11 @@ type DateSelectorProps = {
 const DateSelector = ({ filterDate, setFilterDate }: DateSelectorProps) => {
   const { t } = useTranslation()
 
+  //TODO: Replace deprecated `useQuery`:
+  /*
+              * @deprecated Avoid manually specifying generics on `useQuery`.
+              * Instead, rely on TypeScript's type inference along with a correctly typed `TypedDocumentNode` to get accurate types for your query results.
+              */
   const { data, loading } = useQuery<EarliestMediaQuery>(EARLIEST_MEDIA_QUERY)
 
   let items: DropdownItem[] = [

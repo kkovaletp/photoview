@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
-import { gql, useQuery, useMutation } from '@apollo/client'
+import { gql } from '@apollo/client'
+import { useQuery, useMutation } from '@apollo/client/react'
 import { useNavigate } from 'react-router'
 import TermsOfUseModal, { useTermsAccepted } from '../../components/termsOfUse/TermsOfUseModal'
 import AccessDeniedScreen from '../../components/termsOfUse/AccessDeniedScreen'
@@ -55,6 +56,11 @@ const InitialSetupPage = () => {
     if (token) navigate('/')
   }, [token, navigate])
 
+  //TODO: Replace deprecated `useQuery`:
+  /*
+              * @deprecated Avoid manually specifying generics on `useQuery`.
+              * Instead, rely on TypeScript's type inference along with a correctly typed `TypedDocumentNode` to get accurate types for your query results.
+              */
   const { data: initialSetupData } =
     useQuery<CheckInitialSetupQuery>(INITIAL_SETUP_QUERY)
 
@@ -66,6 +72,11 @@ const InitialSetupPage = () => {
 
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
+  //TODO: Replace deprecated `useMutation`:
+  /*
+              * @deprecated Avoid manually specifying generics on `useMutation`.
+              * Instead, rely on TypeScript's type inference along with a correctly typed `TypedDocumentNode` to get accurate types for your mutation results.
+              */
   const [authorize, { loading: authorizeLoading }] =
     useMutation<InitialSetupMutation, InitialSetupMutationVariables>(initialSetupMutation)
 

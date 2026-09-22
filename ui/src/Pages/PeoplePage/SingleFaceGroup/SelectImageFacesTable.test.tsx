@@ -1,5 +1,5 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
-import { MockedProvider } from '@apollo/client/testing'
+import { MockedProvider } from '@apollo/client/testing/react'
 import SelectImageFacesTable from './SelectImageFacesTable'
 import { MyFacesQuery } from '../__generated__/PeoplePage'
 import { SingleFaceGroupQuery } from './__generated__/singleFaceGroupQuery'

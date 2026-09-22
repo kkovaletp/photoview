@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
-import { gql, useMutation, useQuery } from '@apollo/client'
+import { gql } from '@apollo/client'
+import { useMutation, useQuery } from '@apollo/client/react'
 import { InputLabelDescription, InputLabelTitle } from './SettingsPage'
 import { useTranslation } from 'react-i18next'
 import {

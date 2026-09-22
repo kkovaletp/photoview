@@ -4,7 +4,8 @@ import { Link } from 'react-router'
 import styled from 'styled-components'
 import { SidebarContext } from '../sidebar/Sidebar'
 import AlbumSidebar from '../sidebar/AlbumSidebar'
-import { useLazyQuery, gql } from '@apollo/client'
+import { gql } from '@apollo/client'
+import { useLazyQuery } from '@apollo/client/react'
 import { authToken } from '../../helpers/authentication'
 import { AlbumPathQueryQuery } from './__generated__/AlbumTitle'
 import useDelay from '../../hooks/useDelay'
@@ -48,6 +49,9 @@ type AlbumTitleProps = {
 }
 
 const AlbumTitle = ({ album, disableLink = false }: AlbumTitleProps) => {
+  //TODO: Replace deprecated `useLazyQuery`
+  // @deprecated Avoid manually specifying generics on`useLazyQuery`.
+  // * Instead, rely on TypeScript's type inference along with a correctly typed `TypedDocumentNode` to get accurate types for your query results.
   const [fetchPath, { data: pathData }] =
     useLazyQuery<AlbumPathQueryQuery>(ALBUM_PATH_QUERY)
   const { t } = useTranslation()

@@ -1,4 +1,5 @@
-import { gql, useLazyQuery } from '@apollo/client'
+import { gql } from '@apollo/client'
+import { useLazyQuery } from '@apollo/client/react'
 import { useTranslation } from 'react-i18next'
 import { NotificationType } from '../../__generated__/globalTypes'
 import { authToken } from '../../helpers/authentication'

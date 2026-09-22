@@ -10,7 +10,8 @@ import {
   useCallback,
   useRef,
 } from 'react'
-import { gql, useMutation, useQuery } from '@apollo/client'
+import { gql } from '@apollo/client'
+import { useMutation, useQuery } from '@apollo/client/react'
 import Layout from '../../components/layout/Layout'
 import styled from 'styled-components'
 import { Link, useParams } from 'react-router'
@@ -134,6 +135,11 @@ export const FaceDetails = ({
   const [inputValue, setInputValue] = useState(group.label ?? '')
   const inputRef = useRef<HTMLInputElement>(null)
 
+  //TODO: Replace deprecated `useMutation`:
+  /*
+              * @deprecated Avoid manually specifying generics on `useMutation`.
+              * Instead, rely on TypeScript's type inference along with a correctly typed `TypedDocumentNode` to get accurate types for your mutation results.
+              */
   const [setGroupLabel, { loading, error: mutationError }] = useMutation<
     SetGroupLabelMutation,
     SetGroupLabelMutationVariables
@@ -255,6 +261,11 @@ const FaceGroupsWrapper = styled.div`
  */
 export const PeoplePage = () => {
   const { t } = useTranslation()
+  //TODO: Replace deprecated `useQuery`:
+  /*
+              * @deprecated Avoid manually specifying generics on `useQuery`.
+              * Instead, rely on TypeScript's type inference along with a correctly typed `TypedDocumentNode` to get accurate types for your query results.
+              */
   const { data, error, loading, fetchMore } = useQuery<
     MyFacesQuery,
     MyFacesQueryVariables
@@ -269,6 +280,11 @@ export const PeoplePage = () => {
     MergeFaceGroupsModalState.Closed
   )
 
+  //TODO: Replace deprecated `useMutation`:
+  /*
+              * @deprecated Avoid manually specifying generics on `useMutation`.
+              * Instead, rely on TypeScript's type inference along with a correctly typed `TypedDocumentNode` to get accurate types for your mutation results.
+              */
   const [
     recognizeUnlabeled,
     {
@@ -297,6 +313,16 @@ export const PeoplePage = () => {
 
   const { containerElem, loadingMore } = useScrollPagination<MyFacesQuery>({
     loading,
+    //TODO: How to fix this type mismatch:
+    /*
+Type 'FetchMoreFunction<MyFacesQuery, Exact<{ limit?: number | null | undefined; offset?: number | null | undefined; }>>' is not assignable to type '(args: { variables: { offset: number; }; }) => Promise<Result<MyFacesQuery, "complete" | "empty" | "partial" | "streaming">>'.
+  Type 'Promise<{ data: MyFacesQuery; error?: undefined; }>' is not assignable to type 'Promise<Result<MyFacesQuery, "complete" | "empty" | "partial" | "streaming">>'.
+    Type '{ data: MyFacesQuery; error?: undefined; }' is not assignable to type 'Result<MyFacesQuery, "complete" | "empty" | "partial" | "streaming">'.
+      Type '{ data: MyFacesQuery; error?: undefined; }' is not assignable to type '({ error?: ErrorLike | undefined; loading: boolean; networkStatus: NetworkStatus; partial: boolean; } & { data: MyFacesQuery; dataState: "complete"; }) | ({ ...; } & { ...; }) | ({ ...; } & { ...; })'.
+        Type '{ data: MyFacesQuery; error?: undefined; }' is not assignable to type '{ error?: ErrorLike | undefined; loading: boolean; networkStatus: NetworkStatus; partial: boolean; } & { data: DeepPartialObject<MyFacesQuery>; dataState: "partial"; }'.
+          Type '{ data: MyFacesQuery; error?: undefined; }' is missing the following properties from type '{ error?: ErrorLike | undefined; loading: boolean; networkStatus: NetworkStatus; partial: boolean; }': loading, networkStatus, partial
+useScrollPagination.ts(7, 3): The expected type comes from property 'fetchMore' which is declared here on type 'ScrollPaginationArgs<MyFacesQuery>'
+    */
     fetchMore,
     data,
     getItems: data => data.myFaceGroups,
@@ -321,6 +347,8 @@ export const PeoplePage = () => {
       setState={setMergeModalState}
       refetchQueries={[
         {
+          //TODO: How to fix this:
+          // Object literal may only specify known properties, and 'query' does not exist in type 'DocumentNode'.
           query: MY_FACES_QUERY,
           variables: {
             limit: 50,

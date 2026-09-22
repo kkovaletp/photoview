@@ -1,4 +1,5 @@
-import { gql, PureQueryOptions, useMutation, useQuery } from '@apollo/client'
+import { type RefetchQueryDescriptor, gql } from '@apollo/client'
+import { useMutation, useQuery } from '@apollo/client/react'
 import { useCallback, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router'
@@ -45,7 +46,7 @@ type MergeFaceGroupsModalProps = {
   state: MergeFaceGroupsModalState
   setState(state: MergeFaceGroupsModalState): void
   preselectedFaceGroup?: FaceGroupSelection
-  refetchQueries: PureQueryOptions[]
+  refetchQueries: RefetchQueryDescriptor[]
 }
 
 type StateContent = {
@@ -95,6 +96,11 @@ const MergeFaceGroupsModalContent = ({
     error: faceGroupsError,
     refetch: refetchFaceGroups,
     fetchMore,
+    //TODO: Replace deprecated `useQuery`:
+    /*
+                * @deprecated Avoid manually specifying generics on `useQuery`.
+                * Instead, rely on TypeScript's type inference along with a correctly typed `TypedDocumentNode` to get accurate types for your query results.
+                */
   } = useQuery<MyFacesQuery, MyFacesQueryVariables>(MY_FACES_QUERY, {
     variables: {
       limit: FACE_GROUP_PAGE_SIZE,
@@ -106,6 +112,11 @@ const MergeFaceGroupsModalContent = ({
     fetchPolicy: 'network-only',
   })
 
+  //TODO: Replace deprecated `useMutation`:
+  /*
+              * @deprecated Avoid manually specifying generics on `useMutation`.
+              * Instead, rely on TypeScript's type inference along with a correctly typed `TypedDocumentNode` to get accurate types for your mutation results.
+              */
   const [combineFacesMutation, { error: combineError, reset: resetCombine }] = useMutation<
     CombineFacesMutation,
     CombineFacesMutationVariables
@@ -131,6 +142,16 @@ const MergeFaceGroupsModalContent = ({
     loadingMore: loadingMoreFaceGroups,
   } = useScrollPagination<MyFacesQuery>({
     loading: faceGroupsLoading,
+    //TODO: How to fix this type mismatch:
+    /*
+Type 'FetchMoreFunction<MyFacesQuery, Exact<{ limit?: number | null | undefined; offset?: number | null | undefined; }>>' is not assignable to type '(args: { variables: { offset: number; }; }) => Promise<Result<MyFacesQuery, "complete" | "empty" | "partial" | "streaming">>'.
+  Type 'Promise<{ data: MyFacesQuery; error?: undefined; }>' is not assignable to type 'Promise<Result<MyFacesQuery, "complete" | "empty" | "partial" | "streaming">>'.
+    Type '{ data: MyFacesQuery; error?: undefined; }' is not assignable to type 'Result<MyFacesQuery, "complete" | "empty" | "partial" | "streaming">'.
+      Type '{ data: MyFacesQuery; error?: undefined; }' is not assignable to type '({ error?: ErrorLike | undefined; loading: boolean; networkStatus: NetworkStatus; partial: boolean; } & { data: MyFacesQuery; dataState: "complete"; }) | ({ ...; } & { ...; }) | ({ ...; } & { ...; })'.
+        Type '{ data: MyFacesQuery; error?: undefined; }' is not assignable to type '{ error?: ErrorLike | undefined; loading: boolean; networkStatus: NetworkStatus; partial: boolean; } & { data: DeepPartialObject<MyFacesQuery>; dataState: "partial"; }'.
+          Type '{ data: MyFacesQuery; error?: undefined; }' is missing the following properties from type '{ error?: ErrorLike | undefined; loading: boolean; networkStatus: NetworkStatus; partial: boolean; }': loading, networkStatus, partial
+useScrollPagination.ts(7, 3): The expected type comes from property 'fetchMore' which is declared here on type 'ScrollPaginationArgs<MyFacesQuery>'
+    */
     fetchMore,
     data,
     getItems: data => data.myFaceGroups,
@@ -277,6 +298,8 @@ const MergeFaceGroupsModalContent = ({
           ]
           : [],
       awaitRefetchQueries: true,
+      //TODO: How to fix this:
+      // Property 'errors' does not exist on type 'MutateResult<CombineFacesMutation, undefined>'.
     }).then(({ data, errors }) => {
       if (!data?.combineFaceGroups || (errors?.length ?? 0) > 0) return
 

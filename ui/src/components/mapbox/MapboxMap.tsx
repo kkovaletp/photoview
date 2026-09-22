@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect, forwardRef, HTMLProps } from 'react'
-import { gql, useQuery } from '@apollo/client'
+import { gql } from '@apollo/client'
+import { useQuery } from '@apollo/client/react'
 import type * as mapboxgl from 'mapbox-gl/esm'
 import MapboxWorkerUrl from 'mapbox-gl/dist/mapbox-gl-csp-worker?url'
 import styled from 'styled-components'

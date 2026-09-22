@@ -1,5 +1,6 @@
 import { useState, ChangeEvent } from 'react'
-import { gql, useMutation } from '@apollo/client'
+import { gql } from '@apollo/client'
+import { useMutation } from '@apollo/client/react'
 import { USERS_QUERY } from './UsersTable'
 import { useTranslation } from 'react-i18next'
 import {
@@ -37,6 +38,11 @@ type EditRootPathProps = {
 const EditRootPath = ({ album, user }: EditRootPathProps) => {
   const { t } = useTranslation()
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  //TODO: Replace deprecated `useMutation`:
+  /*
+              * @deprecated Avoid manually specifying generics on `useMutation`.
+              * Instead, rely on TypeScript's type inference along with a correctly typed `TypedDocumentNode` to get accurate types for your mutation results.
+              */
   const [removeAlbumPath, { loading }] = useMutation<
     UserRemoveAlbumPathMutationMutation,
     UserRemoveAlbumPathMutationMutationVariables
@@ -93,6 +99,11 @@ const EditNewRootPath = ({ userID }: EditNewRootPathProps) => {
   const { t } = useTranslation()
   const [value, setValue] = useState('')
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
+  //TODO: Replace deprecated `useMutation`:
+  /*
+              * @deprecated Avoid manually specifying generics on `useMutation`.
+              * Instead, rely on TypeScript's type inference along with a correctly typed `TypedDocumentNode` to get accurate types for your mutation results.
+              */
   const [addRootPath, { loading }] = useMutation<
     UserAddRootPathMutation,
     UserAddRootPathMutationVariables

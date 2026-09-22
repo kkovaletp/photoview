@@ -1,4 +1,4 @@
-import { useLazyQuery } from '@apollo/client'
+import { useLazyQuery } from '@apollo/client/react'
 import { useEffect, JSX, ReactNode } from 'react'
 import { Navigate } from 'react-router'
 import { authToken } from '../../helpers/authentication'
@@ -6,6 +6,9 @@ import { AdminQueryQuery } from '../layout/__generated__/Layout'
 import { ADMIN_QUERY } from '../layout/Layout'
 
 export const useIsAdmin = () => {
+  //TODO: Replace deprecated `useLazyQuery`
+  // @deprecated Avoid manually specifying generics on `useLazyQuery`.
+  // * Instead, rely on TypeScript's type inference along with a correctly typed `TypedDocumentNode` to get accurate types for your query results.
   const [fetchAdminQuery, { data, called }] =
     useLazyQuery<AdminQueryQuery>(ADMIN_QUERY)
   const token = authToken()

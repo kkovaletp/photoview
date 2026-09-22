@@ -1,7 +1,7 @@
 import { vi, describe, test, beforeAll, afterAll, beforeEach, expect } from 'vitest'
 import { act, render, fireEvent, screen, waitFor } from '@testing-library/react'
 import { InMemoryCache } from '@apollo/client'
-import { MockedProvider } from '@apollo/client/testing'
+import { MockedProvider } from '@apollo/client/testing/react'
 import MergeFaceGroupsModal, {
     MergeFaceGroupsModalState,
     COMBINE_FACES_MUTATION,

@@ -1,4 +1,5 @@
-import { gql, useLazyQuery } from '@apollo/client'
+import { gql } from '@apollo/client'
+import { useLazyQuery } from '@apollo/client/react'
 import { useEffect, useContext } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
@@ -272,6 +273,9 @@ type MediaSidebarType = {
 const MediaSidebar = ({ media, hidePreview }: MediaSidebarType) => {
   const { t } = useTranslation()
   const token = authToken()
+  //TODO: Replace deprecated `useLazyQuery`
+  // @deprecated Avoid manually specifying generics on `useLazyQuery`.
+  // * Instead, rely on TypeScript's type inference along with a correctly typed `TypedDocumentNode` to get accurate types for your query results.
   const [loadMedia, { loading, error, data }] = useLazyQuery<
     SidebarMediaQueryQuery,
     SidebarMediaQueryQueryVariables

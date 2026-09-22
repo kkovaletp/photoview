@@ -1,7 +1,6 @@
 import { render, act } from '@testing-library/react'
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest'
 import type { Mock } from 'vitest'
-import { ApolloError } from '@apollo/client'
 import type { Dispatch, SetStateAction } from 'react'
 import { SubscriptionsHook, Message } from './SubscriptionsHook'
 import { NotificationType } from '../../__generated__/globalTypes'
@@ -89,7 +88,7 @@ describe('SubscriptionsHook', () => {
 
     describe('when the subscription reports an error', () => {
         it('calls setMessages exactly once with a negative "Network error" message', () => {
-            const error = new ApolloError({ errorMessage: 'WebSocket disconnected' })
+            const error = new Error('WebSocket disconnected')
             mockUseSubscription.mockReturnValue({ data: undefined, error, loading: false })
 
             render(<SubscriptionsHook setMessages={setMessages} />)
@@ -108,7 +107,7 @@ describe('SubscriptionsHook', () => {
         })
 
         it('generates a unique key starting with "download-"', () => {
-            const error = new ApolloError({ errorMessage: 'Oops' })
+            const error = new Error('Oops')
             mockUseSubscription.mockReturnValue({ data: undefined, error, loading: false })
 
             render(<SubscriptionsHook setMessages={setMessages} />)
@@ -125,7 +124,7 @@ describe('SubscriptionsHook', () => {
                 type: NotificationType.Message,
                 props: { header: 'Existing', content: 'Already there' },
             }
-            const error = new ApolloError({ errorMessage: 'New error' })
+            const error = new Error('New error')
             mockUseSubscription.mockReturnValue({ data: undefined, error, loading: false })
 
             render(<SubscriptionsHook setMessages={setMessages} />)
@@ -138,7 +137,7 @@ describe('SubscriptionsHook', () => {
 
         it('processes data as well when both error and data arrive together', () => {
             const key = uniqueKey()
-            const error = new ApolloError({ errorMessage: 'Partial failure' })
+            const error = new Error('Partial failure')
             const notification = makeNotification(key, { header: 'Data Header' })
             mockUseSubscription.mockReturnValue({ data: { notification }, error, loading: false })
 

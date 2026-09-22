@@ -1,4 +1,5 @@
-import { gql, useLazyQuery, useMutation } from '@apollo/client'
+import { gql } from '@apollo/client'
+import { useLazyQuery, useMutation } from '@apollo/client/react'
 import { useEffect, useState, Dispatch, SetStateAction } from 'react'
 import { useNavigate } from 'react-router'
 import SelectFaceGroupTable from './SelectFaceGroupTable'
@@ -64,6 +65,11 @@ const MoveImageFacesModal = ({
   const [imagesSelected, setImagesSelected] = useState(false)
   const navigate = useNavigate()
 
+  //TODO: Replace deprecated `useMutation`:
+  /*
+              * @deprecated Avoid manually specifying generics on `useMutation`.
+              * Instead, rely on TypeScript's type inference along with a correctly typed `TypedDocumentNode` to get accurate types for your mutation results.
+              */
   const [moveImageFacesMutation, { error: moveError, reset: resetMoveImageFaces }] = useMutation<
     MoveImageFacesMutation,
     MoveImageFacesMutationVariables
@@ -71,6 +77,11 @@ const MoveImageFacesModal = ({
     errorPolicy: 'all',
   })
 
+  //TODO: Replace deprecated `useLazyQuery`:
+  /*
+              * @deprecated Avoid manually specifying generics on `useLazyQuery`.
+              * Instead, rely on TypeScript's type inference along with a correctly typed `TypedDocumentNode` to get accurate types for your query results.
+              */
   const [loadFaceGroups, { data: faceGroupsData, error: loadError }] = useLazyQuery<
     MyFacesQuery,
     MyFacesQueryVariables
@@ -144,6 +155,8 @@ const MoveImageFacesModal = ({
         ]
       },
       awaitRefetchQueries: true,
+      //TODO: How to fix this:
+      // Property 'errors' does not exist on type 'MutateResult<MoveImageFacesMutation, undefined>'.
     }).then(({ data, errors }) => {
       if (!data?.moveImageFaces || (errors?.length ?? 0) > 0) return
       setOpen(false)

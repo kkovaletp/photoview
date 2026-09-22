@@ -1,7 +1,6 @@
 import {
   InMemoryCache,
   ApolloClient,
-  split,
   ApolloLink,
   HttpLink,
   ServerError,
@@ -9,12 +8,12 @@ import {
   Reference,
 } from '@apollo/client'
 import { getMainDefinition } from '@apollo/client/utilities'
-import { onError } from '@apollo/client/link/error'
+import { ErrorLink } from '@apollo/client/link/error'
+import { CombinedGraphQLErrors } from '@apollo/client/errors'
 import i18n from 'i18next'
 import urlJoin from 'url-join'
 import { authToken, clearTokenCookie } from './helpers/authentication'
 import { globalMessageHandler } from './components/messages/globalMessageHandler'
-import { Message } from './components/messages/SubscriptionsHook'
 import { NotificationType } from './__generated__/globalTypes'
 import { GraphQLWsLink } from '@apollo/client/link/subscriptions'
 import { createClient } from 'graphql-ws'
@@ -258,7 +257,7 @@ if (globalThis.window !== undefined) {
 
 const wsLink = new GraphQLWsLink(wsClient)
 
-const link = split(
+const link = ApolloLink.split(
   // split based on the operation type
   ({ query }) => {
     const definition = getMainDefinition(query)
@@ -281,7 +280,13 @@ export function getServerErrorMessages(networkError: Error | undefined): Error[]
   if (!networkError) return [];
   if (!('result' in networkError)) return [];
 
+  //TODO: How to fix this:
+  // Conversion of type 'Error & Record<"result", unknown>' to type 'ServerError' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  // Type 'Error & Record<"result", unknown>' is missing the following properties from type 'ServerError': response, statusCode, bodyText
   const serverError = networkError as ServerError;
+  //TODO: How to fix this:
+  // Property 'result' does not exist on type 'ServerError'.
+  // 'result' is deprecated.
   if (!serverError.result) return [];
 
   if (typeof serverError.result === 'object' && 'errors' in serverError.result) {
@@ -382,17 +387,19 @@ export function getNetworkErrorNotification(
   }
 }
 
-const linkError = onError(({ graphQLErrors, networkError }) => {
+const linkError = new ErrorLink(({ error }) => {
   const errorMessages: { key: string; header: string; content: string }[] = []
 
-  if (graphQLErrors) {
-    graphQLErrors.map(({ message, locations, path }) =>
+  if (CombinedGraphQLErrors.is(error)) {
+    const graphQLErrors = error.errors
+
+    graphQLErrors.forEach(({ message, locations, path }) => {
       console.error(
         `[GraphQL error]: Message: ${message}, Location: ${JSON.stringify(
           locations
         )} Path: ${formatPath(path)}`
       )
-    )
+    })
 
     if (graphQLErrors.length === 1) {
       errorMessages.push({
@@ -430,17 +437,17 @@ const linkError = onError(({ graphQLErrors, networkError }) => {
       clearTokenCookie()
       // location.reload()
     }
-  }
 
-  if (networkError) {
-    console.error(`[Network error]: ${JSON.stringify(networkError)}`)
-    const isAuthError = isAuthNetworkError(networkError)
+  } else {
+    console.error(`[Network error]: ${JSON.stringify(error)}`)
+
+    const isAuthError = isAuthNetworkError(error)
     if (isAuthError) {
       console.error('[Authentication failure (401/403)] Clearing token cookie')
       clearTokenCookie()
     }
 
-    const errors = getServerErrorMessages(networkError);
+    const errors = getServerErrorMessages(error);
     let variant: NetworkErrorVariant
     if (errors.length === 1) {
       variant = 'single'
@@ -457,18 +464,17 @@ const linkError = onError(({ graphQLErrors, networkError }) => {
   }
 
   if (errorMessages.length > 0) {
-    const newMessages: Message[] = errorMessages.map(({ key, header, content }) => ({
-      key,
-      type: NotificationType.Message,
-      props: {
-        negative: true,
-        header,
-        content,
-      },
-    }))
-
-    // Use the global handler instead of useMessageState
-    newMessages.forEach(message => globalMessageHandler.add(message))
+    errorMessages.forEach(({ key, header, content }) =>
+      globalMessageHandler.add({
+        key,
+        type: NotificationType.Message,
+        props: {
+          negative: true,
+          header,
+          content,
+        },
+      })
+    )
   }
 })
 

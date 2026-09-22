@@ -4,7 +4,7 @@ import { renderWithProviders } from '../../helpers/testUtils'
 import { fireEvent, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { GraphQLError } from 'graphql'
-import type { MockedResponse } from '@apollo/client/testing'
+import type { MockLink } from '@apollo/client/testing'
 
 import {
   CONCURRENT_WORKERS_QUERY,
@@ -23,7 +23,7 @@ describe('ScannerConcurrentWorkers', () => {
 
   describe('Query Loading', () => {
     test('should load data and enable input with correct value', async () => {
-      const mocks: MockedResponse[] = [
+      const mocks: MockLink.MockedResponse[] = [
         {
           request: {
             query: CONCURRENT_WORKERS_QUERY,
@@ -53,7 +53,7 @@ describe('ScannerConcurrentWorkers', () => {
 
   describe('Error Handling', () => {
     test('should display error message when query fails with GraphQL error', async () => {
-      const mocks: MockedResponse[] = [
+      const mocks: MockLink.MockedResponse[] = [
         {
           request: {
             query: CONCURRENT_WORKERS_QUERY,
@@ -77,7 +77,7 @@ describe('ScannerConcurrentWorkers', () => {
     })
 
     test('should display error message when query fails with network error', async () => {
-      const mocks: MockedResponse[] = [
+      const mocks: MockLink.MockedResponse[] = [
         {
           request: {
             query: CONCURRENT_WORKERS_QUERY,
@@ -97,7 +97,7 @@ describe('ScannerConcurrentWorkers', () => {
     })
 
     test('should log error to console when query fails', async () => {
-      const mocks: MockedResponse[] = [
+      const mocks: MockLink.MockedResponse[] = [
         {
           request: {
             query: CONCURRENT_WORKERS_QUERY,
@@ -119,7 +119,7 @@ describe('ScannerConcurrentWorkers', () => {
     })
 
     test('should hide input field when error occurs', async () => {
-      const mocks: MockedResponse[] = [
+      const mocks: MockLink.MockedResponse[] = [
         {
           request: {
             query: CONCURRENT_WORKERS_QUERY,
@@ -138,7 +138,7 @@ describe('ScannerConcurrentWorkers', () => {
     })
 
     test('should still display title when error occurs', async () => {
-      const mocks: MockedResponse[] = [
+      const mocks: MockLink.MockedResponse[] = [
         {
           request: {
             query: CONCURRENT_WORKERS_QUERY,
@@ -161,7 +161,7 @@ describe('ScannerConcurrentWorkers', () => {
 
   describe('User Interactions', () => {
     test('should update input value when user types', async () => {
-      const mocks: MockedResponse[] = [
+      const mocks: MockLink.MockedResponse[] = [
         {
           request: {
             query: CONCURRENT_WORKERS_QUERY,
@@ -190,7 +190,7 @@ describe('ScannerConcurrentWorkers', () => {
 
     test('should trigger mutation on blur with different value', async () => {
       const mutationSpy = vi.fn<() => void>()
-      const mocks: MockedResponse[] = [
+      const mocks: MockLink.MockedResponse[] = [
         {
           request: {
             query: CONCURRENT_WORKERS_QUERY,
@@ -233,7 +233,7 @@ describe('ScannerConcurrentWorkers', () => {
 
     test('should trigger mutation on Enter key press', async () => {
       const mutationSpy = vi.fn<() => void>()
-      const mocks: MockedResponse[] = [
+      const mocks: MockLink.MockedResponse[] = [
         {
           request: {
             query: CONCURRENT_WORKERS_QUERY,
@@ -275,7 +275,7 @@ describe('ScannerConcurrentWorkers', () => {
     })
 
     test('should respect min and max constraints', async () => {
-      const mocks: MockedResponse[] = [
+      const mocks: MockLink.MockedResponse[] = [
         {
           request: {
             query: CONCURRENT_WORKERS_QUERY,
@@ -307,7 +307,7 @@ describe('ScannerConcurrentWorkers', () => {
       const user = userEvent.setup()
       const mutationMock = vi.fn()
 
-      const mocks: MockedResponse[] = [
+      const mocks: MockLink.MockedResponse[] = [
         {
           request: {
             query: CONCURRENT_WORKERS_QUERY,
@@ -359,7 +359,7 @@ describe('ScannerConcurrentWorkers', () => {
       const user = userEvent.setup()
       const mutationMock = vi.fn()
 
-      const mocks: MockedResponse[] = [
+      const mocks: MockLink.MockedResponse[] = [
         {
           request: {
             query: CONCURRENT_WORKERS_QUERY,
@@ -409,7 +409,7 @@ describe('ScannerConcurrentWorkers', () => {
 
     test('should successfully execute mutation with correct variables', async () => {
       const mutationSpy = vi.fn<() => void>()
-      const mocks: MockedResponse[] = [
+      const mocks: MockLink.MockedResponse[] = [
         {
           request: {
             query: CONCURRENT_WORKERS_QUERY,
@@ -454,7 +454,7 @@ describe('ScannerConcurrentWorkers', () => {
       const user = userEvent.setup()
       const mutationMock = vi.fn()
 
-      const mocks: MockedResponse[] = [
+      const mocks: MockLink.MockedResponse[] = [
         {
           request: {
             query: CONCURRENT_WORKERS_QUERY,
@@ -510,7 +510,7 @@ describe('ScannerConcurrentWorkers', () => {
 
     test.each([1, 12, 24])('should handle mutation with worker count %i', async (count) => {
 
-      const mocks: MockedResponse[] = [
+      const mocks: MockLink.MockedResponse[] = [
         {
           request: {
             query: CONCURRENT_WORKERS_QUERY,
@@ -554,7 +554,7 @@ describe('ScannerConcurrentWorkers', () => {
     })
 
     test('should handle mutation GraphQL error and re-enable input', async () => {
-      const mocks: MockedResponse[] = [
+      const mocks: MockLink.MockedResponse[] = [
         {
           request: {
             query: CONCURRENT_WORKERS_QUERY,
@@ -600,7 +600,7 @@ describe('ScannerConcurrentWorkers', () => {
     })
 
     test('should handle mutation network error and re-enable input', async () => {
-      const mocks: MockedResponse[] = [
+      const mocks: MockLink.MockedResponse[] = [
         {
           request: {
             query: CONCURRENT_WORKERS_QUERY,
@@ -658,7 +658,7 @@ describe('ScannerConcurrentWorkers', () => {
     })
 
     test('should handle non-numeric input by falling back to current value', async () => {
-      const mocks: MockedResponse[] = [
+      const mocks: MockLink.MockedResponse[] = [
         {
           request: {
             query: CONCURRENT_WORKERS_QUERY,
@@ -714,7 +714,7 @@ describe('ScannerConcurrentWorkers', () => {
     })
 
     test('should handle server returning different value than requested', async () => {
-      const mocks: MockedResponse[] = [
+      const mocks: MockLink.MockedResponse[] = [
         {
           request: {
             query: CONCURRENT_WORKERS_QUERY,
@@ -763,7 +763,7 @@ describe('ScannerConcurrentWorkers', () => {
 
   describe('Loading States', () => {
     test('should disable input during query loading', () => {
-      const mocks: MockedResponse[] = [
+      const mocks: MockLink.MockedResponse[] = [
         {
           request: {
             query: CONCURRENT_WORKERS_QUERY,
@@ -787,7 +787,7 @@ describe('ScannerConcurrentWorkers', () => {
     })
 
     test('should disable input during mutation loading', async () => {
-      const mocks: MockedResponse[] = [
+      const mocks: MockLink.MockedResponse[] = [
         {
           request: {
             query: CONCURRENT_WORKERS_QUERY,
@@ -836,7 +836,7 @@ describe('ScannerConcurrentWorkers', () => {
     })
 
     test('should handle combined loading states (query + mutation)', async () => {
-      const mocks: MockedResponse[] = [
+      const mocks: MockLink.MockedResponse[] = [
         {
           request: {
             query: CONCURRENT_WORKERS_QUERY,
@@ -896,7 +896,7 @@ describe('ScannerConcurrentWorkers', () => {
 
   describe('Component Rendering', () => {
     test('should render title and description', async () => {
-      const mocks: MockedResponse[] = [
+      const mocks: MockLink.MockedResponse[] = [
         {
           request: {
             query: CONCURRENT_WORKERS_QUERY,
@@ -928,7 +928,7 @@ describe('ScannerConcurrentWorkers', () => {
     })
 
     test('should render input with correct type', async () => {
-      const mocks: MockedResponse[] = [
+      const mocks: MockLink.MockedResponse[] = [
         {
           request: {
             query: CONCURRENT_WORKERS_QUERY,
@@ -1113,7 +1113,7 @@ describe('ScannerConcurrentWorkers', () => {
   })
 
   describe('Debounced spinner-arrow behavior', () => {
-    const baseQueryMock = (workers: number): MockedResponse => ({
+    const baseQueryMock = (workers: number): MockLink.MockedResponse => ({
       request: { query: CONCURRENT_WORKERS_QUERY },
       result: {
         data: {
@@ -1125,7 +1125,7 @@ describe('ScannerConcurrentWorkers', () => {
     const mutationMock = (
       to: number,
       spy: Mock<() => void>
-    ): MockedResponse => ({
+    ): MockLink.MockedResponse => ({
       request: { query: SET_CONCURRENT_WORKERS_MUTATION, variables: { workers: to } },
       result: () => {
         spy()
@@ -1136,7 +1136,7 @@ describe('ScannerConcurrentWorkers', () => {
     /** Render the component and wait until the input is loaded and enabled. */
     const getLoadedInput = async (
       initialWorkers: number,
-      mocks: MockedResponse[]
+      mocks: MockLink.MockedResponse[]
     ) => {
       renderWithProviders(<ScannerConcurrentWorkers />, { mocks })
       const input = (await screen.findByRole('spinbutton', {

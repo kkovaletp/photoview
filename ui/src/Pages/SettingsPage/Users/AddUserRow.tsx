@@ -1,4 +1,5 @@
-import { gql, useMutation } from '@apollo/client'
+import { gql } from '@apollo/client'
+import { useMutation } from '@apollo/client/react'
 import { useState, ChangeEvent, Dispatch, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
 import Checkbox from '../../../primitives/form/Checkbox'
@@ -45,6 +46,11 @@ const AddUserRow = ({ setShow, show, onUserAdded }: AddUserRowProps) => {
     onUserAdded()
   }
 
+  //TODO: Replace deprecated `useMutation`:
+  /*
+              * @deprecated Avoid manually specifying generics on `useMutation`.
+              * Instead, rely on TypeScript's type inference along with a correctly typed `TypedDocumentNode` to get accurate types for your mutation results.
+              */
   const [createUser, { loading }] = useMutation<
     CreateUserMutation,
     CreateUserMutationVariables

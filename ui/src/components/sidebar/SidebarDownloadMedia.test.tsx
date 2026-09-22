@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { MockedResponse } from '@apollo/client/testing'
+import { MockLink } from '@apollo/client/testing'
 import { GraphQLError } from 'graphql'
 import SidebarMediaDownload, { SIDEBAR_DOWNLOAD_QUERY } from './SidebarDownloadMedia'
 import { MediaSidebarMedia } from './MediaSidebar/MediaSidebar'
@@ -104,7 +104,7 @@ describe('SidebarMediaDownload', () => {
         })
 
         it('should trigger query when media has no downloads', async () => {
-            const mocks: MockedResponse[] = [
+            const mocks: MockLink.MockedResponse[] = [
                 {
                     request: {
                         query: SIDEBAR_DOWNLOAD_QUERY,
@@ -134,7 +134,7 @@ describe('SidebarMediaDownload', () => {
         })
 
         it('should display error when query fails', async () => {
-            const mocks: MockedResponse[] = [
+            const mocks: MockLink.MockedResponse[] = [
                 {
                     request: {
                         query: SIDEBAR_DOWNLOAD_QUERY,
@@ -177,7 +177,7 @@ describe('SidebarMediaDownload', () => {
 
     describe('Download Table Rendering', () => {
         it('should display download options with correct formatting', async () => {
-            const mocks: MockedResponse[] = [
+            const mocks: MockLink.MockedResponse[] = [
                 {
                     request: {
                         query: SIDEBAR_DOWNLOAD_QUERY,

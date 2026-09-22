@@ -1,6 +1,7 @@
 import { ReactNode } from 'react'
 import { NavLink } from 'react-router'
-import { useQuery, gql } from '@apollo/client'
+import { gql } from '@apollo/client'
+import { useQuery } from '@apollo/client/react'
 import { authToken } from '../../helpers/authentication'
 import { useTranslation } from 'react-i18next'
 import { MapboxEnabledQueryQuery, FaceDetectionEnabledQuery } from './__generated__/MainMenu'
@@ -74,6 +75,9 @@ export const MainMenu = () => {
   const { t } = useTranslation()
   const token = authToken();
 
+  //TODO: Replace deprecated `useQuery`
+  // @deprecated Avoid manually specifying generics on `useQuery`.
+  // * Instead, rely on TypeScript's type inference along with a correctly typed `TypedDocumentNode` to get accurate types for your query results.
   const mapboxQuery = useQuery<MapboxEnabledQueryQuery>(
     MAPBOX_QUERY,
     { skip: !token }

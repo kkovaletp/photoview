@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
-import { useQuery, gql, useMutation } from '@apollo/client'
+import { gql } from '@apollo/client'
+import { useQuery, useMutation } from '@apollo/client/react'
 import { useForm } from 'react-hook-form'
 import { INITIAL_SETUP_QUERY, login } from './loginUtilities'
 import { authToken } from '../../helpers/authentication'
@@ -51,6 +52,11 @@ const LoginForm = () => {
 
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
+  //TODO: Replace deprecated `useMutation`:
+  /*
+              * @deprecated Avoid manually specifying generics on `useMutation`.
+              * Instead, rely on TypeScript's type inference along with a correctly typed `TypedDocumentNode` to get accurate types for your mutation results.
+              */
   const [authorize, { loading }] = useMutation<AuthorizeMutation, AuthorizeMutationVariables>(authorizeMutation)
 
   const onSubmit = handleSubmit(async (data) => {

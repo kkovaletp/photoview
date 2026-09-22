@@ -1,6 +1,6 @@
 import { vi } from 'vitest'
 import { render, fireEvent, screen, waitFor } from '@testing-library/react'
-import { MockedProvider } from '@apollo/client/testing'
+import { MockedProvider } from '@apollo/client/testing/react'
 import FaceGroupTitle from './FaceGroupTitle'
 import { SET_GROUP_LABEL_MUTATION } from '../PeoplePage'
 import { SingleFaceGroupQuery } from './__generated__/singleFaceGroupQuery'

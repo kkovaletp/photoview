@@ -1,4 +1,4 @@
-import { ApolloQueryResult } from '@apollo/client'
+import { ObservableQuery } from '@apollo/client'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
 interface ScrollPaginationArgs<D> {
@@ -6,7 +6,7 @@ interface ScrollPaginationArgs<D> {
   data: D | undefined
   fetchMore: (args: {
     variables: { offset: number }
-  }) => Promise<ApolloQueryResult<D>>
+  }) => Promise<ObservableQuery.Result<D>>
   getItems: (data: D) => unknown[]
   pageSize?: number
   rootMargin?: string
@@ -70,6 +70,11 @@ const useScrollPagination = <D>({
           offset: itemCount,
         },
       }).then(result => {
+        //TODO: How to fix the following type mismatch:
+        /*
+Argument of type 'D | DeepPartial<D> | undefined' is not assignable to parameter of type 'D'.
+  'D' could be instantiated with an arbitrary type which could be unrelated to 'D | DeepPartial<D> | undefined'.
+        */
         const newItemCount = getItems(result.data).length
 
         if (

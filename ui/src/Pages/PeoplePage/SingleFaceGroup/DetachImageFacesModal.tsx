@@ -1,4 +1,5 @@
-import { gql, PureQueryOptions, useMutation } from '@apollo/client'
+import { type RefetchQueryDescriptor, gql } from '@apollo/client'
+import { useMutation } from '@apollo/client/react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router'
@@ -24,10 +25,15 @@ const DETACH_IMAGE_FACES_MUTATION = gql`
 
 type DetachImageFacesOptions = {
   sourceFaceGroupID?: string
-  additionalRefetchQueries?: PureQueryOptions[]
+  additionalRefetchQueries?: RefetchQueryDescriptor[]
 }
 
 export const useDetachImageFaces = () => {
+  //TODO: Replace deprecated `useMutation`:
+  /*
+              * @deprecated Avoid manually specifying generics on `useMutation`.
+              * Instead, rely on TypeScript's type inference along with a correctly typed `TypedDocumentNode` to get accurate types for your mutation results.
+              */
   const [detachImageFacesMutation, { error: detachError, reset: resetDetach }] = useMutation<
     DetachImageFacesMutation,
     DetachImageFacesMutationVariables
@@ -144,6 +150,8 @@ const DetachImageFacesModalContent = ({
 
     detachImageFaces(selectedImageFaces, {
       sourceFaceGroupID: faceGroup.id,
+      //TODO: How to fix the following type mismatch:
+      // Property 'errors' does not exist on type 'MutateResult<DetachImageFacesMutation, undefined>'.
     }).then(({ data, errors }) => {
       if (!data?.detachImageFaces || (errors?.length ?? 0) > 0) return
       setOpen(false)

@@ -81,6 +81,10 @@ const PersonMoreMenu = ({
   const navigate = useNavigate()
   const { detachImageFaces, error: detachError } = useDetachImageFaces()
 
+  //TODO: How to fix the following type mismatch:
+  // Type '{ query: DocumentNode; variables: { id: string; }; }[]' is not assignable to type 'RefetchQueryDescriptor[]'.
+  // Type '{ query: DocumentNode; variables: { id: string; }; }' is not assignable to type 'RefetchQueryDescriptor'.
+  // MergeFaceGroupsModal.tsx(49, 3): The expected type comes from property 'refetchQueries' which is declared here on type 'IntrinsicAttributes & MergeFaceGroupsModalProps'
   const modals = (
     <>
       <MergeFaceGroupsModal
@@ -109,6 +113,9 @@ const PersonMoreMenu = ({
     )
       return
     setInlineError(null)
+    //TODO: How to fix the following errors:
+    // Object literal may only specify known properties, and 'query' does not exist in type 'DocumentNode'.
+    // Property 'errors' does not exist on type 'MutateResult<DetachImageFacesMutation, undefined>'.
     detachImageFaces([face], {
       sourceFaceGroupID: face.faceGroup.id,
       additionalRefetchQueries: [

@@ -1,6 +1,7 @@
 import { screen } from '@testing-library/react'
-import * as Apollo from '@apollo/client'
-import type { QueryResult } from '@apollo/client'
+import { gql } from '@apollo/client'
+import * as ApolloReact from '@apollo/client/react'
+import type { useLazyQuery } from '@apollo/client/react'
 import MediaSidebar, {
   MediaSidebarMedia,
   SIDEBAR_MEDIA_QUERY
@@ -14,12 +15,23 @@ vi.mock('../../../helpers/authentication.ts')
 
 const authToken = vi.mocked(authentication.authToken)
 
+//TODO: How to fix the following errors:
+// Generic type 'Result' requires between 2 and 4 type arguments.
+// type useLazyQuery.Result<TData, TVariables extends OperationVariables, TStates extends DataState<TData>["dataState"] = "complete" | "empty" | "partial" | "streaming", TErrorPolicy extends ErrorPolicy | undefined = undefined> = ApolloReact.useLazyQuery.Base.Result<TData, TVariables, TErrorPolicy> & ({
+// called: false;
+// variables: Partial<TVariables>;
+// data: undefined;
+// dataState: "empty";
+// } | ({
+//   called: true;
+//  variables: TVariables;
+// } & GetDataState<TData, TStates>))
 const makeLazyQueryResult = (
-  result: Pick<QueryResult, 'data' | 'error' | 'loading'>
-): QueryResult => result as QueryResult
+  result: Pick<useLazyQuery.Result, 'data' | 'error' | 'loading'>
+): useLazyQuery.Result => result as useLazyQuery.Result
 
 // Define the photo shares query directly in the test file
-const SIDEBAR_GET_PHOTO_SHARES = Apollo.gql`
+const SIDEBAR_GET_PHOTO_SHARES = gql`
   query sidebarGetPhotoShares($id: ID!) {
     media(id: $id) {
       id
@@ -200,9 +212,9 @@ describe('MediaSidebar', () => {
     authToken.mockImplementation(() => 'token-here')
 
     // Mock loadMedia to show loading state
-    const loadMediaMock = vi.fn<ReturnType<typeof Apollo.useLazyQuery>[0]>()
+    const loadMediaMock = vi.fn<ReturnType<typeof useLazyQuery>[0]>()
 
-    vi.spyOn(Apollo, 'useLazyQuery').mockReturnValue([
+    vi.spyOn(ApolloReact, 'useLazyQuery').mockReturnValue([
       loadMediaMock,
       makeLazyQueryResult({
         loading: true,
@@ -222,15 +234,13 @@ describe('MediaSidebar', () => {
     authToken.mockImplementation(() => 'token-here')
 
     // Mock a GraphQL error
-    const loadMediaMock = vi.fn<ReturnType<typeof Apollo.useLazyQuery>[0]>()
+    const loadMediaMock = vi.fn<ReturnType<typeof useLazyQuery>[0]>()
 
-    vi.spyOn(Apollo, 'useLazyQuery').mockReturnValue([
+    vi.spyOn(ApolloReact, 'useLazyQuery').mockReturnValue([
       loadMediaMock,
       makeLazyQueryResult({
         loading: false,
-        error: new Apollo.ApolloError({
-          errorMessage: 'Failed to load media',
-        }),
+        error: new Error('Failed to load media'),
         data: undefined,
       }),
     ])

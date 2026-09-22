@@ -1,5 +1,6 @@
 import styled from 'styled-components'
 
+//TODO: Why are there 2 backticks after each const? Are they meaningful or just a typo?
 const Table = styled.table.attrs({ className: 'table-fixed w-full' })``
 
 const Head = styled.thead.attrs({

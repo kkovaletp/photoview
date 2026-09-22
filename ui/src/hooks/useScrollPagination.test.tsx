@@ -1,6 +1,6 @@
 import { vi, describe, test, expect, beforeEach, afterEach, beforeAll, afterAll } from 'vitest'
 import { renderHook, act, waitFor } from '@testing-library/react'
-import { ApolloQueryResult } from '@apollo/client'
+import { ObservableQuery } from '@apollo/client'
 import useScrollPagination from './useScrollPagination'
 
 // ─── IntersectionObserver mock ────────────────────────────────────────────────
@@ -50,7 +50,15 @@ afterEach(() => {
 type SimpleData = { items: string[] }
 const getItems = (data: SimpleData) => data.items
 
-const makeResult = (items: string[]): ApolloQueryResult<SimpleData> => ({
+//TODO: How to fix the following type mismatch:
+/*
+Type '{ data: { items: string[]; }; loading: false; networkStatus: 7; }' is not assignable to type 'Result<SimpleData, "complete" | "empty" | "partial" | "streaming">'.
+  Type '{ data: { items: string[]; }; loading: false; networkStatus: 7; }' is not assignable to type '({ error?: ErrorLike | undefined; loading: boolean; networkStatus: NetworkStatus; partial: boolean; } & { data: SimpleData; dataState: "complete"; }) | ({ ...; } & { ...; }) | ({ ...; } & { ...; })'.
+    Type '{ data: { items: string[]; }; loading: false; networkStatus: 7; }' is not assignable to type '{ error?: ErrorLike | undefined; loading: boolean; networkStatus: NetworkStatus; partial: boolean; } & { data: DeepPartialObject<SimpleData>; dataState: "partial"; }'.
+      Property 'partial' is missing in type '{ data: { items: string[]; }; loading: false; networkStatus: 7; }' but required in type '{ error?: ErrorLike | undefined; loading: boolean; networkStatus: NetworkStatus; partial: boolean; }'.
+ObservableQuery.d.ts(226, 9): 'partial' is declared here.
+*/
+const makeResult = (items: string[]): ObservableQuery.Result<SimpleData> => ({
     data: { items },
     loading: false,
     networkStatus: 7,
@@ -240,7 +248,7 @@ describe('useScrollPagination', () => {
 
     // ── intersection callback behaviour ─────────────────────────────────────────
 
-    describe('IntersectionObserver callback – fetchMore triggering', () => {
+    describe('IntersectionObserver callback - fetchMore triggering', () => {
         test('calls fetchMore with offset equal to data item count when an entry is intersecting', async () => {
             const fetchMore = vi.fn().mockResolvedValue(makeResult(['d']))
             const { result } = renderHook(() =>
@@ -347,11 +355,11 @@ describe('useScrollPagination', () => {
         })
 
         test('sets loadingMore while fetchMore is in progress', async () => {
-            let resolveFetchMore: (value: ApolloQueryResult<SimpleData>) => void
+            let resolveFetchMore: (value: ObservableQuery.Result<SimpleData>) => void
 
             const fetchMore = vi.fn(
                 () =>
-                    new Promise<ApolloQueryResult<SimpleData>>(resolve => {
+                    new Promise<ObservableQuery.Result<SimpleData>>(resolve => {
                         resolveFetchMore = resolve
                     }),
             )
