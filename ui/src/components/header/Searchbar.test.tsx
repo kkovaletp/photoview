@@ -13,7 +13,7 @@ vi.mock('@apollo/client/react', async importOriginal => {
         ...actual,
         useLazyQuery: vi.fn(),
     }
-})
+});
 
 // Mock the debounce function with a direct implementation
 vi.mock('../../helpers/utils', () => ({

@@ -10,7 +10,7 @@ const mockApollo = vi.hoisted(() => ({
 
 // ─── Module mocks ─────────────────────────────────────────────────────────────
 
-vi.mock('`@apollo/client/react`', async importOriginal => {
+vi.mock('@apollo/client/react', async importOriginal => {
     const actual = await importOriginal<typeof import('@apollo/client/react')>()
     return {
         ...actual,
