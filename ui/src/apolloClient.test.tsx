@@ -1,4 +1,5 @@
 import { describe, it, expect, beforeEach } from 'vitest'
+import { ServerError } from '@apollo/client'
 import {
     calculateRetryDelay,
     formatPath,
@@ -9,7 +10,6 @@ import {
     isLegitimateClose
 } from './apolloClient'
 
-//TODO: Update ui/src/apolloClient.test.tsx to construct a real ServerError. The current Object.assign(new Error(), { result }) fixture tests an Apollo Client 3-only property.
 describe('paginateCache', () => {
     let paginateFn: ReturnType<typeof paginateCache>
 
@@ -390,105 +390,107 @@ describe('Pure Helper Functions', () => {
         })
     })
 
-    describe('getServerErrorMessages', () => {
-        it('should extract errors from ServerError result', () => {
-            const networkError = Object.assign(
-                new Error('Server error'),
-                {
-                    result: {
-                        errors: [{ message: 'Error 1' }]
-                    }
-                }
-            )
-
-            const errors = getServerErrorMessages(networkError)
-            expect(errors).toHaveLength(1)
-            expect(errors[0]).toEqual({ message: 'Error 1' })
+    const makeServerError = (status: number, bodyText: string): ServerError =>
+        new ServerError('Server error', {
+            response: new Response(bodyText, { status }),
+            bodyText,
         })
 
-        it('should return empty array for undefined', () => {
+    describe('getServerErrorMessages', () => {
+        it('extracts one error from a ServerError response body', () => {
+            const error = makeServerError(
+                500,
+                JSON.stringify({ errors: [{ message: 'Error 1' }] })
+            )
+
+            expect(getServerErrorMessages(error)).toEqual([{ message: 'Error 1' }])
+        })
+
+        it('extracts multiple errors in their original order', () => {
+            const error = makeServerError(
+                500,
+                JSON.stringify({
+                    errors: [
+                        { message: 'Error 1' },
+                        { message: 'Error 2' },
+                        { message: 'Error 3' },
+                    ],
+                })
+            )
+
+            expect(getServerErrorMessages(error)).toEqual([
+                { message: 'Error 1' },
+                { message: 'Error 2' },
+                { message: 'Error 3' },
+            ])
+        })
+
+        it('returns an empty array for undefined', () => {
             expect(getServerErrorMessages(undefined)).toEqual([])
         })
 
-        it('should return empty array when no result property', () => {
-            const networkError = new Error('Network error')
-
-            const errors = getServerErrorMessages(networkError)
-            expect(errors).toEqual([])
+        it('returns an empty array for a plain network error', () => {
+            expect(getServerErrorMessages(new Error('Network error'))).toEqual([])
         })
 
-        it('should return empty array when result is null', () => {
-            const networkError = Object.assign(
-                new Error('Server error'),
-                { result: null }
-            )
+        it('returns an empty array for a JSON body without errors', () => {
+            const error = makeServerError(500, JSON.stringify({ data: null }))
 
-            const errors = getServerErrorMessages(networkError)
-            expect(errors).toEqual([])
+            expect(getServerErrorMessages(error)).toEqual([])
         })
 
-        it('should return empty array when no errors in result', () => {
-            const networkError = Object.assign(
-                new Error('Server error'),
-                {
-                    result: { data: null }
-                }
+        it('returns an empty array when errors is not an array', () => {
+            const error = makeServerError(
+                500,
+                JSON.stringify({ errors: { message: 'Error 1' } })
             )
 
-            const errors = getServerErrorMessages(networkError)
-            expect(errors).toEqual([])
+            expect(getServerErrorMessages(error)).toEqual([])
         })
 
-        it('should handle multiple errors', () => {
-            const networkError = Object.assign(
-                new Error('Server error'),
-                {
-                    result: {
-                        errors: [
-                            { message: 'Error 1' },
-                            { message: 'Error 2' },
-                            { message: 'Error 3' }
-                        ]
-                    }
-                }
-            )
+        it('returns an empty array for an invalid JSON body', () => {
+            const error = makeServerError(500, 'Internal Server Error')
 
-            const errors = getServerErrorMessages(networkError)
-            expect(errors).toHaveLength(3)
-            expect(errors[0]).toEqual({ message: 'Error 1' })
-            expect(errors[1]).toEqual({ message: 'Error 2' })
-            expect(errors[2]).toEqual({ message: 'Error 3' })
+            expect(getServerErrorMessages(error)).toEqual([])
         })
     })
 
     describe('isAuthNetworkError', () => {
-        it('should return false for undefined', () => {
+        it('returns false for undefined', () => {
             expect(isAuthNetworkError(undefined)).toBe(false)
         })
 
-        it('should return false for a plain error without statusCode', () => {
-            const networkError = new Error('Network error')
-            expect(isAuthNetworkError(networkError)).toBe(false)
+        it('returns false for a plain network error', () => {
+            expect(isAuthNetworkError(new Error('Network error'))).toBe(false)
         })
 
-        it('should return true for a 401 status code', () => {
-            const networkError = Object.assign(new Error('Unauthorized'), { statusCode: 401 })
-            expect(isAuthNetworkError(networkError)).toBe(true)
+        it.each([401, 403])(
+            'returns true for a ServerError with status %i',
+            status => {
+                expect(isAuthNetworkError(makeServerError(status, 'Unauthorized'))).toBe(
+                    true
+                )
+            }
+        )
+
+        it('returns false for a ServerError with status 500', () => {
+            expect(isAuthNetworkError(makeServerError(500, 'Server error'))).toBe(false)
         })
 
-        it('should return true for a 403 status code', () => {
-            const networkError = Object.assign(new Error('Forbidden'), { statusCode: 403 })
-            expect(isAuthNetworkError(networkError)).toBe(true)
+        it('returns false for a plain Error with a statusCode property', () => {
+            const error = Object.assign(new Error('Unauthorized'), {
+                statusCode: 401,
+            })
+
+            expect(isAuthNetworkError(error)).toBe(false)
         })
 
-        it('should return false for a 500 status code', () => {
-            const networkError = Object.assign(new Error('Server error'), { statusCode: 500 })
-            expect(isAuthNetworkError(networkError)).toBe(false)
-        })
+        it('returns false for a network-unreachable error with statusCode 0', () => {
+            const error = Object.assign(new Error('Failed to fetch'), {
+                statusCode: 0,
+            })
 
-        it('should return false for a 0 status code (network unreachable)', () => {
-            const networkError = Object.assign(new Error('Failed to fetch'), { statusCode: 0 })
-            expect(isAuthNetworkError(networkError)).toBe(false)
+            expect(isAuthNetworkError(error)).toBe(false)
         })
     })
 
