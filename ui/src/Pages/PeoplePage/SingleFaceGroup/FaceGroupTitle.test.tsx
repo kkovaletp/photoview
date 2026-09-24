@@ -75,7 +75,7 @@ function makeSetLabelMock(groupID: string, label: string | null) {
             query: SET_GROUP_LABEL_MUTATION,
             variables: { groupID, label },
         },
-        newData: vi.fn(() => ({
+        result: vi.fn(() => ({
             data: {
                 setFaceGroupLabel: {
                     __typename: 'FaceGroup' as const,
@@ -208,7 +208,7 @@ describe('FaceGroupTitle', () => {
             fireEvent.keyUp(input, { key: 'Enter', code: 'Enter' })
 
             await waitFor(() => {
-                expect(mock.newData).toHaveBeenCalled()
+                expect(mock.result).toHaveBeenCalled()
             })
             await waitFor(() => {
                 expect(screen.queryByRole('textbox')).not.toBeInTheDocument()
@@ -226,7 +226,7 @@ describe('FaceGroupTitle', () => {
             fireEvent.keyUp(input, { key: 'Enter', code: 'Enter' })
 
             await waitFor(() => {
-                expect(mock.newData).toHaveBeenCalled()
+                expect(mock.result).toHaveBeenCalled()
             })
         })
 
@@ -241,7 +241,7 @@ describe('FaceGroupTitle', () => {
             fireEvent.keyUp(input, { key: 'Enter', code: 'Enter' })
 
             await waitFor(() => {
-                expect(mock.newData).toHaveBeenCalled()
+                expect(mock.result).toHaveBeenCalled()
             })
         })
 

@@ -7,6 +7,14 @@ import SearchBar, { AlbumRow, PhotoRow, searchHighlighted } from './Searchbar'
 import * as utils from '../../helpers/utils'
 import { SearchQueryQuery } from './__generated__/Searchbar'
 
+vi.mock('@apollo/client/react', async importOriginal => {
+    const actual = await importOriginal<typeof import('@apollo/client/react')>()
+    return {
+        ...actual,
+        useLazyQuery: vi.fn(),
+    }
+})
+
 // Mock the debounce function with a direct implementation
 vi.mock('../../helpers/utils', () => ({
     debounce: vi.fn((fn) => {
@@ -90,12 +98,18 @@ describe('SearchBar Component', () => {
         mockLoading = false;
 
         // Mock useLazyQuery to return our controlled variables
-        vi.spyOn(ApolloReact, 'useLazyQuery').mockImplementation(() => {
-            return [
-                fetchSearchMock,
-                { loading: mockLoading, data: mockSearchData }
-            ] as any;
-        });
+        //TODO: How to fix the following type mismatch?
+        /*
+Conversion of type '[Mock<Constructable | Procedure>, { loading: boolean; data: any; }]' to type 'ResultTuple<unknown, OperationVariables, "complete" | "empty" | "streaming", undefined>' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Type at position 1 in source is not compatible with type at position 1 in target.
+    Type '{ loading: boolean; data: any; }' is not comparable to type 'Result<unknown, OperationVariables, "complete" | "empty" | "streaming", undefined>'.
+      Type '{ loading: boolean; data: any; }' is not comparable to type 'Result<unknown, OperationVariables, undefined> & { called: true; variables: OperationVariables; } & { data: undefined; dataState: "empty"; }'.
+        Type '{ loading: boolean; data: any; }' is missing the following properties from type 'Result<unknown, OperationVariables, undefined>': startPolling, stopPolling, subscribeToMore, updateQuery, and 5 more.
+        */
+        vi.mocked(ApolloReact.useLazyQuery).mockImplementation(() => [
+            fetchSearchMock,
+            { loading: mockLoading, data: mockSearchData },
+        ] as ReturnType<typeof ApolloReact.useLazyQuery>)
 
         // Reset all mocks
         vi.clearAllMocks();
@@ -167,16 +181,13 @@ describe('SearchBar Component', () => {
     });
 
     test('shows no results message when search is empty', async () => {
-        // Set up mock to return empty results
-        fetchSearchMock = vi.fn().mockImplementation(() => {
-            mockSearchData = {
-                search: {
-                    query: 'empty',
-                    albums: [],
-                    media: []
-                }
-            };
-        });
+        mockSearchData = {
+            search: {
+                query: 'empty',
+                albums: [],
+                media: [],
+            },
+        }
 
         render(
             <MemoryRouter>

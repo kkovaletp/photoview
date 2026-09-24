@@ -342,10 +342,10 @@ describe('load correct share page, based on graphql query', () => {
       route: <TokenRoute />,
     })
 
-    // The actual error message being rendered is "Error message not found"
-    await waitFor(() => {
-      expect(screen.getByText('Error message not found.')).toBeInTheDocument()
-    })
+    // Apollo Client normalizes an Error without a message.
+    expect(
+      await screen.findByText('An error of unexpected shape occurred.')
+    ).toBeInTheDocument()
   })
 
   test('handles null shareToken response', async () => {

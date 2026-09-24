@@ -224,6 +224,11 @@ describe('ScannerConcurrentWorkers', () => {
 
       const input = await screen.findByRole('spinbutton', { name: /scanner concurrent workers/i })
 
+      await waitFor(() => {
+        expect(input).toHaveValue(4)
+        expect(input).not.toBeDisabled()
+      })
+
       fireEvent.change(input, { target: { value: '10' } })
       fireEvent.blur(input)
 
@@ -266,6 +271,11 @@ describe('ScannerConcurrentWorkers', () => {
       renderWithProviders(<ScannerConcurrentWorkers />, { mocks })
 
       const input = await screen.findByRole('spinbutton', { name: /scanner concurrent workers/i })
+
+      await waitFor(() => {
+        expect(input).toHaveValue(4)
+        expect(input).not.toBeDisabled()
+      })
 
       fireEvent.change(input, { target: { value: '6' } })
       fireEvent.keyDown(input, { key: 'Enter' })
@@ -443,6 +453,11 @@ describe('ScannerConcurrentWorkers', () => {
 
       const input = await screen.findByRole('spinbutton', { name: /scanner concurrent workers/i })
 
+      await waitFor(() => {
+        expect(input).toHaveValue(2)
+        expect(input).not.toBeDisabled()
+      })
+
       fireEvent.change(input, { target: { value: '16' } })
       fireEvent.blur(input)
 
@@ -490,12 +505,18 @@ describe('ScannerConcurrentWorkers', () => {
 
       const input = await screen.findByRole('spinbutton', { name: /scanner concurrent workers/i })
 
+      await waitFor(() => {
+        expect(input).toHaveValue(3)
+        expect(input).not.toBeDisabled()
+      })
+
       // Change to 9 and blur
       fireEvent.change(input, { target: { value: '9' } })
       fireEvent.blur(input)
 
       await waitFor(() => {
         expect(mutationMock).toHaveBeenCalledTimes(1)
+        expect(input).toHaveValue(9)
       })
 
       // Try to trigger again with same value
@@ -748,6 +769,11 @@ describe('ScannerConcurrentWorkers', () => {
 
       const input = await screen.findByRole('spinbutton', {
         name: /scanner concurrent workers/i,
+      })
+
+      await waitFor(() => {
+        expect(input).toHaveValue(4)
+        expect(input).not.toBeDisabled()
       })
 
       // Change to 10

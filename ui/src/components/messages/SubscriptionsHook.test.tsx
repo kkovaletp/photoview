@@ -11,8 +11,8 @@ const { mockUseSubscription } = vi.hoisted(() => ({
     mockUseSubscription: vi.fn(),
 }))
 
-vi.mock('@apollo/client', async importOriginal => {
-    const actual = await importOriginal<typeof import('@apollo/client')>() as object
+vi.mock('@apollo/client/react', async importOriginal => {
+    const actual = await importOriginal<typeof import('@apollo/client/react')>()
     return {
         ...actual,
         useSubscription: mockUseSubscription,

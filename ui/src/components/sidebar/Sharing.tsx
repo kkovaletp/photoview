@@ -192,6 +192,10 @@ const MorePopoverSectionLabel = ({
         token: share.token,
         label: label.trim() || null,
       },
+    }).then(result => {
+      if (result.error) {
+        console.error('Failed to update share label:', result.error)
+      }
     }).catch(error => {
       console.error('Failed to update share label:', error)
     })
