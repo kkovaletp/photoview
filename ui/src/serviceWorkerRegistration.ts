@@ -33,9 +33,6 @@ type Config = {
 export function register(config?: Config) {
   if (import.meta.env.PROD && 'serviceWorker' in navigator) {
     // The URL constructor is available in all browsers that support SW.
-    //TODO: How to fix the following type mismatch:
-    // Argument of type 'string | undefined' is not assignable to parameter of type 'string | URL'.
-    // Type 'undefined' is not assignable to type 'string | URL'.
     const publicUrl = new URL(import.meta.env.BASE_URL, globalThis.location.href)
     if (publicUrl.origin !== globalThis.location.origin) {
       // Our service worker won't work if PUBLIC_URL is on a different origin
