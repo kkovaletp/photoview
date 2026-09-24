@@ -20,7 +20,7 @@ type MockLazyQuery = () => [
     MockLazyQueryResult,
 ]
 
-const mockUseLazyQuery = vi.hoisted(() => vi.fn<MockLazyQuery>())
+const mockUseLazyQuery = vi.hoisted(() => vi.fn<MockLazyQuery>());
 
 vi.mock('@apollo/client/react', async importOriginal => {
     const actual = await importOriginal<typeof import('@apollo/client/react')>()
@@ -104,7 +104,7 @@ const sampleMedia = [
 describe('SearchBar Component', () => {
     // For each test, set up a new mock implementation of useLazyQuery
     let fetchSearchMock: ReturnType<typeof vi.fn>;
-    let mockSearchData: MockSearchData | null
+    let mockSearchData: MockSearchData | null;
     let mockLoading: boolean;
 
     beforeEach(() => {
