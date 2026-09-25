@@ -1,15 +1,21 @@
-import { gql } from '@apollo/client'
+import { gql, type TypedDocumentNode } from '@apollo/client'
 import { useMutation } from '@apollo/client/react'
 import PeriodicScanner from './PeriodicScanner'
 import { ScannerConcurrentWorkers } from './ScannerConcurrentWorkers'
 import { SectionTitle, InputLabelDescription } from './SettingsPage'
 import { useTranslation } from 'react-i18next'
-import { ScanAllMutationMutation } from './__generated__/ScannerSection'
+import {
+  ScanAllMutationMutation,
+  ScanAllMutationMutationVariables,
+} from './__generated__/ScannerSection'
 import { Button } from '../../primitives/form/Input'
 import { useMessageState } from '../../components/messages/MessageState'
 import { useState, useEffect } from 'react'
 
-const SCAN_MUTATION = gql`
+const SCAN_MUTATION: TypedDocumentNode<
+  ScanAllMutationMutation,
+  ScanAllMutationMutationVariables
+> = gql`
   mutation scanAllMutation {
     scanAll {
       success
@@ -27,12 +33,7 @@ const SCANNER_MSG_STALE_AFTER_MS = 2 * 60 * 1000 // 2 minutes
 
 const ScannerSection = () => {
   const { t } = useTranslation()
-  //TODO: Replace deprecated `useMutation`:
-  /*
-              * @deprecated Avoid manually specifying generics on `useMutation`.
-              * Instead, rely on TypeScript's type inference along with a correctly typed `TypedDocumentNode` to get accurate types for your mutation results.
-              */
-  const [startScanner, { loading }] = useMutation<ScanAllMutationMutation>(SCAN_MUTATION)
+  const [startScanner, { loading }] = useMutation(SCAN_MUTATION)
   const { messages } = useMessageState()
   const [scannerRunning, setScannerRunning] = useState(false)
 
