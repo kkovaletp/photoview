@@ -48,7 +48,7 @@
     "js-cookie": "^3.0.8",
     "luxon": "^3.7.2",
     "mapbox-gl": "~3.31.0",
-    "marked": "^18.0.11",
+    "marked": "^18.0.14",
     "react": "19.3.0",
     "react-blurhash": "^0.3.0",
     "react-datepicker": "^9.0.0",
