@@ -8,6 +8,7 @@ import type { Dispatch, SetStateAction } from 'react'
 import AddUserRow, {
   CREATE_USER_MUTATION,
 } from './AddUserRow'
+import UsersTable, { USERS_QUERY } from './UsersTable'
 import { renderWithProviders } from '../../../helpers/testUtils'
 
 describe('AddUserRow', () => {
@@ -35,6 +36,54 @@ describe('AddUserRow', () => {
   }
 
   describe('User Creation', () => {
+    test('refreshes the user list after adding a user', async () => {
+      const user = userEvent.setup()
+      const refetchedUsers = vi.fn(() => ({
+        data: {
+          user: [
+            {
+              __typename: 'User' as const,
+              id: '123',
+              username: 'testuser',
+              admin: false,
+              rootAlbums: [],
+            },
+          ],
+        },
+      }))
+
+      renderWithProviders(<UsersTable />, {
+        mocks: [
+          { request: { query: USERS_QUERY }, result: { data: { user: [] } } },
+          {
+            request: {
+              query: CREATE_USER_MUTATION,
+              variables: { username: 'testuser', admin: false, rootPath: undefined },
+            },
+            result: {
+              data: {
+                createUser: {
+                  __typename: 'User',
+                  id: '123',
+                  username: 'testuser',
+                  admin: false,
+                },
+              },
+            },
+          },
+          { request: { query: USERS_QUERY }, result: refetchedUsers },
+        ],
+      })
+
+      expect(screen.queryByText('testuser')).not.toBeInTheDocument()
+      await user.click(screen.getByRole('button', { name: 'New user' }))
+      await user.type(screen.getByPlaceholderText('Username'), 'testuser')
+      await user.click(screen.getByRole('button', { name: 'Add user' }))
+
+      expect(await screen.findByText('testuser')).toBeInTheDocument()
+      expect(refetchedUsers).toHaveBeenCalledOnce()
+    })
+
     test('creates user successfully with username and root path', async () => {
       const user = userEvent.setup()
       const mocks = [
