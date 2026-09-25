@@ -13,6 +13,11 @@ vi.mock('../../../helpers/authentication.ts')
 
 const authToken = vi.mocked(authentication.authToken)
 
+beforeEach(() => {
+  authToken.mockReset()
+  authToken.mockReturnValue(undefined)
+})
+
 // Define the photo shares query directly in the test file
 const SIDEBAR_GET_PHOTO_SHARES = gql`
   query sidebarGetPhotoShares($id: ID!) {
@@ -221,14 +226,16 @@ describe('MediaSidebar', () => {
           },
           error: new Error('Failed to load media'),
         },
+        ...mocks.slice(0, 2),
       ],
     })
 
     expect(await screen.findByText(/Failed to load media/)).toBeInTheDocument()
   })
 
-  test('renders video content correctly', () => {
-    // Create a video variant of the media object
+  test('renders video content correctly', async () => {
+    authToken.mockReturnValue(undefined)
+
     const videoMedia: MediaSidebarMedia = {
       ...media,
       type: MediaType.Video,
@@ -236,14 +243,17 @@ describe('MediaSidebar', () => {
         __typename: 'MediaURL',
         url: '/video/web.mp4',
         width: 1280,
-        height: 720
-      }
+        height: 720,
+      },
     }
 
-    renderWithProviders(<MediaSidebar media={videoMedia} />)
+    renderWithProviders(<MediaSidebar media={videoMedia} />, {
+      mocks: [mocks[0]],
+    })
 
-    // Should render video element instead of image
     expect(screen.queryByRole('img')).not.toBeInTheDocument()
-    // Video testing would depend on how your ProtectedVideo component renders
+
+    // Wait for the download request that SidebarContent starts.
+    await screen.findByText('Original')
   })
 })

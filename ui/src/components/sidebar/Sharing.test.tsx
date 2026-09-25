@@ -961,6 +961,7 @@ describe('Sharing Components', () => {
                         {
                             id: 'share-3',
                             token: 'ghi789',
+                            label: null,
                             hasPassword: true,
                             expire: null,
                             __typename: 'ShareToken',

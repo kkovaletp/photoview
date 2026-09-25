@@ -609,7 +609,11 @@ describe('MergeFaceGroupsModal', () => {
                 request: { query: COMBINE_FACES_MUTATION, variables: { destID: '0', srcIDs: ['1'] } },
                 result: () => {
                     onNoDataResult()
-                    return { data: null }
+                    return {
+                        data: {
+                            combineFaceGroups: null,
+                        },
+                    }
                 },
             }
             const setState = await doMerge('0', ['1'], [makeMyFacesMock(), noDataMock])
