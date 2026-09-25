@@ -1,5 +1,5 @@
 import { useMutation, useQuery } from '@apollo/client/react'
-import { gql } from '@apollo/client'
+import { gql, type TypedDocumentNode } from '@apollo/client'
 import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import styled from 'styled-components'
@@ -17,6 +17,7 @@ import {
 } from '../../helpers/localeDisplayNames'
 import {
   MyUserPreferencesQuery,
+  MyUserPreferencesQueryVariables,
   ChangeUserPreferencesMutation,
   ChangeUserPreferencesMutationVariables,
 } from './__generated__/UserPreferences'
@@ -49,7 +50,10 @@ const themePreferences = (t: TranslationFn) => [
   },
 ]
 
-const CHANGE_USER_PREFERENCES = gql`
+const CHANGE_USER_PREFERENCES: TypedDocumentNode<
+  ChangeUserPreferencesMutation,
+  ChangeUserPreferencesMutationVariables
+> = gql`
   mutation changeUserPreferences($language: String) {
     changeUserPreferences(language: $language) {
       id
@@ -58,7 +62,10 @@ const CHANGE_USER_PREFERENCES = gql`
   }
 `
 
-const MY_USER_PREFERENCES = gql`
+const MY_USER_PREFERENCES: TypedDocumentNode<
+  MyUserPreferencesQuery,
+  MyUserPreferencesQueryVariables
+> = gql`
   query myUserPreferences {
     myUserPreferences {
       id
@@ -95,22 +102,12 @@ const UserPreferences = () => {
     setTheme(value)
   }
 
-  //TODO: Replace deprecated `useQuery`:
-  /*
-              * @deprecated Avoid manually specifying generics on `useQuery`.
-              * Instead, rely on TypeScript's type inference along with a correctly typed `TypedDocumentNode` to get accurate types for your query results.
-              */
-  const { data } = useQuery<MyUserPreferencesQuery>(MY_USER_PREFERENCES)
+  const { data } = useQuery(MY_USER_PREFERENCES)
 
-  //TODO: Replace deprecated `useMutation`:
-  /*
-              * @deprecated Avoid manually specifying generics on `useMutation`.
-              * Instead, rely on TypeScript's type inference along with a correctly typed `TypedDocumentNode` to get accurate types for your mutation results.
-              */
-  const [changePrefs, { loading: loadingPrefs, error }] = useMutation<
-    ChangeUserPreferencesMutation,
-    ChangeUserPreferencesMutationVariables
-  >(CHANGE_USER_PREFERENCES, { errorPolicy: 'all' })
+  const [changePrefs, { loading: loadingPrefs, error }] = useMutation(
+    CHANGE_USER_PREFERENCES,
+    { errorPolicy: 'all' }
+  )
 
   const sortedLanguagePrefs = useMemo(
     () => [...languagePreferences].sort((a, b) => a.label.localeCompare(b.label)),
