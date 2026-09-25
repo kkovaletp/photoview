@@ -55,8 +55,7 @@ type AlbumTitleProps = {
 }
 
 const AlbumTitle = ({ album, disableLink = false }: AlbumTitleProps) => {
-  const [fetchPath, { data: pathData }] =
-    useLazyQuery(ALBUM_PATH_QUERY)
+  const [fetchPath, { data: pathData }] = useLazyQuery(ALBUM_PATH_QUERY)
   const { t } = useTranslation()
   const { updateSidebar } = useContext(SidebarContext)
   const token = authToken()

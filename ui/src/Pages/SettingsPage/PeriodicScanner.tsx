@@ -144,8 +144,7 @@ const PeriodicScanner = () => {
     }
   }, [data, error])
 
-  const [setScanIntervalMutation, { loading: scanIntervalMutationLoading }] =
-    useMutation(SCAN_INTERVAL_MUTATION)
+  const [setScanIntervalMutation, { loading: scanIntervalMutationLoading }] = useMutation(SCAN_INTERVAL_MUTATION)
 
   const onScanIntervalCheckboxChange = (checked: boolean) => {
     setEnablePeriodicScanner(checked)
