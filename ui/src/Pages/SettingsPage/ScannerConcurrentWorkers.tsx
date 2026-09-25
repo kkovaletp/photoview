@@ -1,16 +1,20 @@
 import { useRef, useState, useEffect, ChangeEvent, KeyboardEvent } from 'react'
-import { gql } from '@apollo/client'
+import { gql, type TypedDocumentNode } from '@apollo/client'
 import { useQuery, useMutation } from '@apollo/client/react'
 import { InputLabelTitle, InputLabelDescription } from './SettingsPage'
 import { useTranslation } from 'react-i18next'
 import {
   ConcurrentWorkersQueryQuery,
+  ConcurrentWorkersQueryQueryVariables,
   SetConcurrentWorkersMutation,
   SetConcurrentWorkersMutationVariables,
 } from './__generated__/ScannerConcurrentWorkers'
 import { TextField } from '../../primitives/form/Input'
 
-export const CONCURRENT_WORKERS_QUERY = gql`
+export const CONCURRENT_WORKERS_QUERY: TypedDocumentNode<
+  ConcurrentWorkersQueryQuery,
+  ConcurrentWorkersQueryQueryVariables
+> = gql`
   query concurrentWorkersQuery {
     siteInfo {
       concurrentWorkers
@@ -18,7 +22,10 @@ export const CONCURRENT_WORKERS_QUERY = gql`
   }
 `
 
-export const SET_CONCURRENT_WORKERS_MUTATION = gql`
+export const SET_CONCURRENT_WORKERS_MUTATION: TypedDocumentNode<
+  SetConcurrentWorkersMutation,
+  SetConcurrentWorkersMutationVariables
+> = gql`
   mutation setConcurrentWorkers($workers: Int!) {
     setScannerConcurrentWorkers(workers: $workers)
   }
@@ -38,7 +45,7 @@ export const ScannerConcurrentWorkers = () => {
   const [workerAmount, setWorkerAmount] = useState(0)
   const [inputValue, setInputValue] = useState('')
 
-  const workerAmountQuery = useQuery<ConcurrentWorkersQueryQuery>(CONCURRENT_WORKERS_QUERY)
+  const workerAmountQuery = useQuery(CONCURRENT_WORKERS_QUERY)
 
   useEffect(() => {
     if (workerAmountQuery.error) {
@@ -71,10 +78,10 @@ export const ScannerConcurrentWorkers = () => {
     }
   }, [])
 
-  const [setWorkersMutation, workersMutationData] = useMutation<
-    SetConcurrentWorkersMutation,
-    SetConcurrentWorkersMutationVariables
-  >(SET_CONCURRENT_WORKERS_MUTATION, { errorPolicy: 'all' })
+  const [setWorkersMutation, workersMutationData] = useMutation(
+    SET_CONCURRENT_WORKERS_MUTATION,
+    { errorPolicy: 'all' }
+  )
 
   const updateWorkerAmount = (next: number) => {
     const prev = workerAmountServerValue.current
