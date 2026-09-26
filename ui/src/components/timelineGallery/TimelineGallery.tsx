@@ -1,5 +1,5 @@
 import { useEffect, useReducer } from 'react'
-import { gql } from '@apollo/client'
+import { gql, type TypedDocumentNode } from '@apollo/client'
 import { useQuery } from '@apollo/client/react'
 import TimelineGroupDate from './TimelineGroupDate'
 import PresentView from '../photoGallery/presentView/PresentView'
@@ -19,7 +19,10 @@ import {
 import { useUrlPresentModeSetup } from '../photoGallery/mediaGalleryReducer'
 import TimelineFilters from './TimelineFilters'
 
-export const MY_TIMELINE_QUERY = gql`
+export const MY_TIMELINE_QUERY: TypedDocumentNode<
+  MyTimelineQuery,
+  MyTimelineQueryVariables
+> = gql`
   query myTimeline(
     $onlyFavorites: Boolean
     $limit: Int
@@ -91,10 +94,7 @@ const TimelineGallery = () => {
     },
   })
 
-  const { data, error, loading, fetchMore } = useQuery<
-    MyTimelineQuery,
-    MyTimelineQueryVariables
-  >(MY_TIMELINE_QUERY, {
+  const { data, error, loading, fetchMore } = useQuery(MY_TIMELINE_QUERY, {
     variables: {
       onlyFavorites,
       fromDate: filterDate
@@ -105,14 +105,13 @@ const TimelineGallery = () => {
     },
   })
 
-  const { containerElem, loadingMore } =
-    useScrollPagination<MyTimelineQuery>({
-      loading,
-      fetchMore,
-      data,
-      getItems: data => data.myTimeline,
-      pageSize: 200,
-    })
+  const { containerElem, loadingMore } = useScrollPagination<MyTimelineQuery>({
+    loading,
+    fetchMore,
+    data,
+    getItems: data => data.myTimeline,
+    pageSize: 200,
+  })
 
   useEffect(() => {
     dispatchMedia({
@@ -123,7 +122,7 @@ const TimelineGallery = () => {
 
   useUrlPresentModeSetup({
     dispatchMedia,
-    openPresentMode: (_event) => {
+    openPresentMode: _event => {
       dispatchMedia({
         type: 'openPresentMode',
         activeIndex: mediaState.activeIndex as unknown as TimelineMediaIndex,

@@ -1,13 +1,19 @@
 import { useQuery } from '@apollo/client/react'
-import { gql } from '@apollo/client'
+import { gql, type TypedDocumentNode } from '@apollo/client'
 import { useTranslation } from 'react-i18next'
 import Dropdown, { DropdownItem } from '../../primitives/form/Dropdown'
 import { FavoriteCheckboxProps, FavoritesCheckbox } from '../album/AlbumFilter'
 
 import DateIcon from './icons/date.svg?react'
-import { EarliestMediaQuery } from './__generated__/TimelineFilters'
+import {
+  EarliestMediaQuery,
+  EarliestMediaQueryVariables,
+} from './__generated__/TimelineFilters'
 
-const EARLIEST_MEDIA_QUERY = gql`
+const EARLIEST_MEDIA_QUERY: TypedDocumentNode<
+  EarliestMediaQuery,
+  EarliestMediaQueryVariables
+> = gql`
   query earliestMedia {
     myMedia(
       order: { order_by: "date_shot", order_direction: ASC }
@@ -27,12 +33,7 @@ type DateSelectorProps = {
 const DateSelector = ({ filterDate, setFilterDate }: DateSelectorProps) => {
   const { t } = useTranslation()
 
-  //TODO: Replace deprecated `useQuery`:
-  /*
-              * @deprecated Avoid manually specifying generics on `useQuery`.
-              * Instead, rely on TypeScript's type inference along with a correctly typed `TypedDocumentNode` to get accurate types for your query results.
-              */
-  const { data, loading } = useQuery<EarliestMediaQuery>(EARLIEST_MEDIA_QUERY)
+  const { data, loading } = useQuery(EARLIEST_MEDIA_QUERY)
 
   let items: DropdownItem[] = [
     {
