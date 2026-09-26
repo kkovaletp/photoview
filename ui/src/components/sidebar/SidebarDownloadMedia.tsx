@@ -1,4 +1,4 @@
-import { gql } from '@apollo/client'
+import { gql, type TypedDocumentNode } from '@apollo/client'
 import { useLazyQuery } from '@apollo/client/react'
 import { useTranslation } from 'react-i18next'
 import { NotificationType } from '../../__generated__/globalTypes'
@@ -18,7 +18,10 @@ import { createUuid } from '../../helpers/createUuid'
 
 const DOWNLOAD_COMPLETE_NOTIFICATION_DURATION = 2000
 
-export const SIDEBAR_DOWNLOAD_QUERY = gql`
+export const SIDEBAR_DOWNLOAD_QUERY: TypedDocumentNode<
+  SidebarDownloadQueryQuery,
+  SidebarDownloadQueryQueryVariables
+> = gql`
   query sidebarDownloadQuery($mediaId: ID!) {
     media(id: $mediaId) {
       id
@@ -307,10 +310,10 @@ const SidebarMediaDownload = ({ media }: SidebarMediaDownladProps) => {
   const { t } = useTranslation()
   const { add, removeKey } = useMessageState()
 
-  const [loadPhotoDownloads, { loading, data, error }] = useLazyQuery<
-    SidebarDownloadQueryQuery,
-    SidebarDownloadQueryQueryVariables
-  >(SIDEBAR_DOWNLOAD_QUERY, {})
+  const [loadPhotoDownloads, { loading, data, error }] = useLazyQuery(
+    SIDEBAR_DOWNLOAD_QUERY,
+    {}
+  )
 
   useEffect(() => {
     if (media?.id && !media.downloads && !loading && !error && data?.media?.id !== media.id) {
