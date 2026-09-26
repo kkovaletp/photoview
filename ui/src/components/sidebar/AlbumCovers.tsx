@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { gql } from '@apollo/client'
+import { gql, type TypedDocumentNode } from '@apollo/client'
 import { useMutation } from '@apollo/client/react'
 import { useTranslation } from 'react-i18next'
 
@@ -13,7 +13,10 @@ import {
 } from './__generated__/AlbumCovers'
 import { authToken } from '../../helpers/authentication'
 
-const RESET_ALBUM_COVER_MUTATION = gql`
+const RESET_ALBUM_COVER_MUTATION: TypedDocumentNode<
+  ResetAlbumCoverMutation,
+  ResetAlbumCoverMutationVariables
+> = gql`
   mutation resetAlbumCover($albumID: ID!) {
     resetAlbumCover(albumID: $albumID) {
       id
@@ -26,7 +29,10 @@ const RESET_ALBUM_COVER_MUTATION = gql`
     }
   }
 `
-const SET_ALBUM_COVER_MUTATION = gql`
+const SET_ALBUM_COVER_MUTATION: TypedDocumentNode<
+  SetAlbumCoverMutation,
+  SetAlbumCoverMutationVariables
+> = gql`
   mutation setAlbumCover($coverID: ID!) {
     setAlbumCover(coverID: $coverID) {
       id
@@ -47,14 +53,11 @@ type SidebarPhotoCoverProps = {
 export const SidebarPhotoCover = ({ cover_id }: SidebarPhotoCoverProps) => {
   const { t } = useTranslation()
 
-  const [setAlbumCover] = useMutation<SetAlbumCoverMutation, SetAlbumCoverMutationVariables>(
-    SET_ALBUM_COVER_MUTATION,
-    {
-      variables: {
-        coverID: cover_id,
-      },
-    }
-  )
+  const [setAlbumCover] = useMutation(SET_ALBUM_COVER_MUTATION, {
+    variables: {
+      coverID: cover_id,
+    },
+  })
 
   const [buttonDisabled, setButtonDisabled] = useState(false)
 
@@ -118,15 +121,7 @@ type SidebarAlbumCoverProps = {
 export const SidebarAlbumCover = ({ id }: SidebarAlbumCoverProps) => {
   const { t } = useTranslation()
 
-  //TODO: Replace deprecated `useMutation`:
-  /*
-              * @deprecated Avoid manually specifying generics on `useMutation`.
-              * Instead, rely on TypeScript's type inference along with a correctly typed `TypedDocumentNode` to get accurate types for your mutation results.
-              */
-  const [resetAlbumCover] = useMutation<
-    ResetAlbumCoverMutation,
-    ResetAlbumCoverMutationVariables
-  >(RESET_ALBUM_COVER_MUTATION, {
+  const [resetAlbumCover] = useMutation(RESET_ALBUM_COVER_MUTATION, {
     variables: {
       albumID: id,
     },
