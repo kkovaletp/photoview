@@ -1,6 +1,5 @@
 import { useState, Dispatch, SetStateAction } from 'react'
-import { ApolloLink, gql, type TypedDocumentNode } from '@apollo/client'
-import type { OperationVariables } from '@apollo/client'
+import { ApolloLink, gql, type TypedDocumentNode, type OperationVariables } from '@apollo/client'
 import { useMutation } from '@apollo/client/react'
 import EditUserRow from './EditUserRow'
 import ViewUserRow from './ViewUserRow'
@@ -94,10 +93,9 @@ const UserRow = ({ user, refetchUsers }: UserRowProps) => {
 
   const [showConfirmDelete, setShowConfirmDelete] = useState(false)
   const [showChangePassword, setShowChangePassword] = useState(false)
+
   const [updateUserMutationFn, { loading: updateUserLoading }] = useMutation(updateUserMutation)
-
   const [deleteUserMutationFn] = useMutation(deleteUserMutation)
-
   const [scanUserMutationFn, { called: scanUserCalled }] = useMutation(scanUserMutation)
 
   const updateUser: ApolloMutationFn<UpdateUserMutation, UpdateUserMutationVariables> = async (
