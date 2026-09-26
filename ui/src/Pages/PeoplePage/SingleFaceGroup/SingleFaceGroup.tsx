@@ -7,10 +7,7 @@ import { mediaGalleryReducer } from '../../../components/photoGallery/mediaGalle
 import useScrollPagination from '../../../hooks/useScrollPagination'
 import FaceGroupTitle from './FaceGroupTitle'
 import { SINGLE_FACE_GROUP } from './singleFaceGroupQuery'
-import {
-  SingleFaceGroupQuery,
-  SingleFaceGroupQueryVariables,
-} from './__generated__/singleFaceGroupQuery'
+import { SingleFaceGroupQuery } from './__generated__/singleFaceGroupQuery'
 
 type SingleFaceGroupProps = {
   faceGroupID: string
@@ -19,15 +16,7 @@ type SingleFaceGroupProps = {
 const SingleFaceGroup = ({ faceGroupID }: SingleFaceGroupProps) => {
   const { t } = useTranslation()
 
-  //TODO: Replace deprecated `useQuery`:
-  /*
-              * @deprecated Avoid manually specifying generics on `useQuery`.
-              * Instead, rely on TypeScript's type inference along with a correctly typed `TypedDocumentNode` to get accurate types for your query results.
-              */
-  const { data, error, loading, fetchMore } = useQuery<
-    SingleFaceGroupQuery,
-    SingleFaceGroupQueryVariables
-  >(SINGLE_FACE_GROUP, {
+  const { data, error, loading, fetchMore } = useQuery(SINGLE_FACE_GROUP, {
     variables: {
       limit: 200,
       offset: 0,
