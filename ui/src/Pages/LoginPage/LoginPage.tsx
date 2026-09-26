@@ -1,21 +1,28 @@
 import { useEffect, useState } from 'react'
-import { gql } from '@apollo/client'
+import { gql, type TypedDocumentNode } from '@apollo/client'
 import { useQuery, useMutation } from '@apollo/client/react'
 import { useForm } from 'react-hook-form'
 import { INITIAL_SETUP_QUERY, login } from './loginUtilities'
 import { authToken } from '../../helpers/authentication'
 import { normalizeUsername } from '../../helpers/normalize'
-import TermsOfUseModal, { useTermsAccepted } from '../../components/termsOfUse/TermsOfUseModal'
+import TermsOfUseModal, {
+  useTermsAccepted,
+} from '../../components/termsOfUse/TermsOfUseModal'
 import AccessDeniedScreen from '../../components/termsOfUse/AccessDeniedScreen'
 import { useTranslation } from 'react-i18next'
 import { Helmet, HelmetProvider } from '@dr.pogodin/react-helmet'
 import { useNavigate } from 'react-router'
 import { TextField } from '../../primitives/form/Input'
 import MessageBox from '../../primitives/form/MessageBox'
-import { CheckInitialSetupQuery } from './__generated__/loginUtilities'
-import { AuthorizeMutation, AuthorizeMutationVariables } from './__generated__/LoginPage'
+import {
+  AuthorizeMutation,
+  AuthorizeMutationVariables,
+} from './__generated__/LoginPage'
 
-const authorizeMutation = gql`
+const authorizeMutation: TypedDocumentNode<
+  AuthorizeMutation,
+  AuthorizeMutationVariables
+> = gql`
   mutation Authorize($username: String!, $password: String!) {
     authorizeUser(username: $username, password: $password) {
       success
@@ -52,14 +59,9 @@ const LoginForm = () => {
 
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
-  //TODO: Replace deprecated `useMutation`:
-  /*
-              * @deprecated Avoid manually specifying generics on `useMutation`.
-              * Instead, rely on TypeScript's type inference along with a correctly typed `TypedDocumentNode` to get accurate types for your mutation results.
-              */
-  const [authorize, { loading }] = useMutation<AuthorizeMutation, AuthorizeMutationVariables>(authorizeMutation)
+  const [authorize, { loading }] = useMutation(authorizeMutation)
 
-  const onSubmit = handleSubmit(async (data) => {
+  const onSubmit = handleSubmit(async data => {
     try {
       setErrorMessage(null)
 
@@ -83,10 +85,7 @@ const LoginForm = () => {
   })
 
   return (
-    <form
-      className="mx-auto max-w-125 px-4"
-      onSubmit={onSubmit}
-    >
+    <form className="mx-auto max-w-125 px-4" onSubmit={onSubmit}>
       <TextField
         sizeVariant="big"
         wrapperClassName="my-6"
@@ -135,10 +134,9 @@ const LoginPage = () => {
   const navigate = useNavigate()
   const token = authToken()
 
-  const { data: initialSetupData } = useQuery<CheckInitialSetupQuery>(
-    INITIAL_SETUP_QUERY,
-    { variables: {} }
-  )
+  const { data: initialSetupData } = useQuery(INITIAL_SETUP_QUERY, {
+    variables: {},
+  })
 
   useEffect(() => {
     if (token) navigate('/')
