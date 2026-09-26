@@ -1,4 +1,4 @@
-import { gql } from '@apollo/client'
+import { gql, type TypedDocumentNode } from '@apollo/client'
 import { useMutation } from '@apollo/client/react'
 import { useState, ChangeEvent, Dispatch, SetStateAction } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -12,7 +12,10 @@ import {
   CreateUserMutationVariables,
 } from './__generated__/AddUserRow'
 
-export const CREATE_USER_MUTATION = gql`
+export const CREATE_USER_MUTATION: TypedDocumentNode<
+  CreateUserMutation,
+  CreateUserMutationVariables
+> = gql`
   mutation createUser($username: String!, $admin: Boolean!, $rootPath: String) {
     createUser(username: $username, admin: $admin, rootPath: $rootPath) {
       id
@@ -46,15 +49,7 @@ const AddUserRow = ({ setShow, show, onUserAdded }: AddUserRowProps) => {
     onUserAdded()
   }
 
-  //TODO: Replace deprecated `useMutation`:
-  /*
-              * @deprecated Avoid manually specifying generics on `useMutation`.
-              * Instead, rely on TypeScript's type inference along with a correctly typed `TypedDocumentNode` to get accurate types for your mutation results.
-              */
-  const [createUser, { loading }] = useMutation<
-    CreateUserMutation,
-    CreateUserMutationVariables
-  >(CREATE_USER_MUTATION)
+  const [createUser, { loading }] = useMutation(CREATE_USER_MUTATION)
 
   const handleAddUser = async () => {
     setErrorMessage(null)
