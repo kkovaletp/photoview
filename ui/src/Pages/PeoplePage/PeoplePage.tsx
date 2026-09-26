@@ -145,15 +145,12 @@ export const FaceDetails = ({
   const [inputValue, setInputValue] = useState(group.label ?? '')
   const inputRef = useRef<HTMLInputElement>(null)
 
-  const [setGroupLabel, { loading, error: mutationError }] = useMutation(
-    SET_GROUP_LABEL_MUTATION,
-    {
-      variables: {
-        groupID: group.id,
-      },
-      onCompleted: () => setEditLabel(false),
-    }
-  )
+  const [setGroupLabel, { loading, error: mutationError }] = useMutation(SET_GROUP_LABEL_MUTATION, {
+    variables: {
+      groupID: group.id,
+    },
+    onCompleted: () => setEditLabel(false),
+  })
 
   const resetLabel = useCallback(() => {
     setInputValue(group.label ?? '')
@@ -278,30 +275,26 @@ export const PeoplePage = () => {
   )
 
   const [
-    recognizeUnlabeled,
-    {
+    recognizeUnlabeled, {
       loading: recognizeUnlabeledLoading,
       error: recognizeUnlabeledError,
     },
-  ] = useMutation(
-    RECOGNIZE_UNLABELED_FACES_MUTATION,
-    {
-      errorPolicy: 'all',
-      refetchQueries: ({ data, errors }) =>
-        data?.recognizeUnlabeledFaces && (errors?.length ?? 0) === 0
-          ? [
-            {
-              query: MY_FACES_QUERY,
-              variables: {
-                limit: 50,
-                offset: 0,
-              },
+  ] = useMutation(RECOGNIZE_UNLABELED_FACES_MUTATION, {
+    errorPolicy: 'all',
+    refetchQueries: ({ data, errors }) =>
+      data?.recognizeUnlabeledFaces && (errors?.length ?? 0) === 0
+        ? [
+          {
+            query: MY_FACES_QUERY,
+            variables: {
+              limit: 50,
+              offset: 0,
             },
-          ]
-          : [],
-      awaitRefetchQueries: true,
-    }
-  )
+          },
+        ]
+        : [],
+    awaitRefetchQueries: true,
+  })
 
   const { containerElem, loadingMore } = useScrollPagination<MyFacesQuery>({
     loading,
