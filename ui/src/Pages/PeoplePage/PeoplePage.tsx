@@ -138,15 +138,12 @@ export const FaceDetails = ({
   const [inputValue, setInputValue] = useState(group.label ?? '')
   const inputRef = useRef<HTMLInputElement>(null)
 
-  const [setGroupLabel, { loading, error: mutationError }] = useMutation(
-    SET_GROUP_LABEL_MUTATION,
-    {
-      variables: {
-        groupID: group.id,
-      },
-      onCompleted: () => setEditLabel(false),
-    }
-  )
+  const [setGroupLabel, { loading, error: mutationError }] = useMutation(SET_GROUP_LABEL_MUTATION, {
+    variables: {
+      groupID: group.id,
+    },
+    onCompleted: () => setEditLabel(false),
+  })
 
   const resetLabel = useCallback(() => {
     setInputValue(group.label ?? '')

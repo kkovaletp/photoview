@@ -9,25 +9,25 @@ export const SINGLE_FACE_GROUP: TypedDocumentNode<
   SingleFaceGroupQuery,
   SingleFaceGroupQueryVariables
 > = gql`
-    ${MEDIA_GALLERY_FRAGMENT}
+  ${MEDIA_GALLERY_FRAGMENT}
 
-    query singleFaceGroup($id: ID!, $limit: Int!, $offset: Int!) {
-        faceGroup(id: $id) {
-            id
-            label
-            imageFaces(paginate: { limit: $limit, offset: $offset }) {
-                id
-                rectangle {
-                    minX
-                    maxX
-                    minY
-                    maxY
-                }
-                media {
-                    ...MediaGalleryFields
-                    title
-                }
-            }
+  query singleFaceGroup($id: ID!, $limit: Int!, $offset: Int!) {
+    faceGroup(id: $id) {
+      id
+      label
+      imageFaces(paginate: { limit: $limit, offset: $offset }) {
+        id
+        rectangle {
+          minX
+          maxX
+          minY
+          maxY
         }
+        media {
+          ...MediaGalleryFields
+          title
+        }
+      }
     }
+  }
 `
