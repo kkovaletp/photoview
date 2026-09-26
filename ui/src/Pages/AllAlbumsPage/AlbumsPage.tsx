@@ -2,14 +2,17 @@ import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import AlbumBoxes from '../../components/albumGallery/AlbumBoxes'
 import Layout from '../../components/layout/Layout'
-import { gql } from '@apollo/client'
+import { gql, type TypedDocumentNode } from '@apollo/client'
 import { useQuery } from '@apollo/client/react'
 import { GetMyAlbumsQuery, GetMyAlbumsQueryVariables } from './__generated__/AlbumsPage'
 import useURLParameters from '../../hooks/useURLParameters'
 import useOrderingParams from '../../hooks/useOrderingParams'
 import AlbumFilter from '../../components/album/AlbumFilter'
 
-const getAlbumsQuery = gql`
+const getAlbumsQuery: TypedDocumentNode<
+  GetMyAlbumsQuery,
+  GetMyAlbumsQueryVariables
+> = gql`
   query getMyAlbums($orderBy: String, $orderDirection: OrderDirection) {
     myAlbums(
       order: { order_by: $orderBy, order_direction: $orderDirection }
@@ -34,20 +37,12 @@ const AlbumsPage = () => {
   const urlParams = useURLParameters()
   const orderParams = useOrderingParams(urlParams, 'updated_at')
 
-  //TODO: Replace deprecated `useQuery`:
-  /*
-              * @deprecated Avoid manually specifying generics on `useQuery`.
-              * Instead, rely on TypeScript's type inference along with a correctly typed `TypedDocumentNode` to get accurate types for your query results.
-              */
-  const { error, data } = useQuery<GetMyAlbumsQuery, GetMyAlbumsQueryVariables>(
-    getAlbumsQuery,
-    {
-      variables: {
-        orderBy: orderParams.orderBy,
-        orderDirection: orderParams.orderDirection,
-      },
-    }
-  )
+  const { error, data } = useQuery(getAlbumsQuery, {
+    variables: {
+      orderBy: orderParams.orderBy,
+      orderDirection: orderParams.orderDirection,
+    },
+  })
 
   const sortingOptions = useMemo(
     () => [
