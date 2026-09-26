@@ -1,4 +1,4 @@
-import { gql } from '@apollo/client'
+import { gql, type TypedDocumentNode } from '@apollo/client'
 import { useQuery } from '@apollo/client/react'
 import type * as mapboxgl from 'mapbox-gl/esm'
 import { Dispatch, useReducer } from 'react'
@@ -11,14 +11,20 @@ import useMapboxMap from '../../components/mapbox/MapboxMap'
 import { useUrlPresentModeSetup } from '../../components/photoGallery/mediaGalleryReducer'
 import MapPresentMarker from './MapPresentMarker'
 import { PlacesAction, placesReducer } from './placesReducer'
-import { MediaGeoJsonQuery } from './__generated__/PlacesPage'
+import {
+  MediaGeoJsonQuery,
+  MediaGeoJsonQueryVariables,
+} from './__generated__/PlacesPage'
 
 const MapWrapper = styled.div`
   width: 100%;
   height: calc(100vh - 120px);
 `
 
-const MAPBOX_DATA_QUERY = gql`
+const MAPBOX_DATA_QUERY: TypedDocumentNode<
+  MediaGeoJsonQuery,
+  MediaGeoJsonQueryVariables
+> = gql`
   query mediaGeoJson {
     myMediaGeoJson
   }
@@ -32,12 +38,7 @@ export type PresentMarker = {
 const MapPage = () => {
   const { t } = useTranslation()
 
-  //TODO: Replace deprecated `useQuery`:
-  /*
-              * @deprecated Avoid manually specifying generics on `useQuery`.
-              * Instead, rely on TypeScript's type inference along with a correctly typed `TypedDocumentNode` to get accurate types for your query results.
-              */
-  const { data: mapboxData } = useQuery<MediaGeoJsonQuery>(MAPBOX_DATA_QUERY, {
+  const { data: mapboxData } = useQuery(MAPBOX_DATA_QUERY, {
     fetchPolicy: 'cache-first',
   })
 

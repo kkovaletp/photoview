@@ -1,4 +1,4 @@
-import { gql } from '@apollo/client'
+import { gql, type TypedDocumentNode } from '@apollo/client'
 import { useLazyQuery } from '@apollo/client/react'
 import { Dispatch, useEffect } from 'react'
 import PresentView from '../../components/photoGallery/presentView/PresentView'
@@ -11,7 +11,10 @@ import {
 import { MEDIA_GALLERY_FRAGMENT } from '../../components/photoGallery/fragments'
 import { PlacesAction, PlacesState } from './placesReducer'
 
-const QUERY_MEDIA = gql`
+const QUERY_MEDIA: TypedDocumentNode<
+  PlacePageQueryMediaQuery,
+  PlacePageQueryMediaQueryVariables
+> = gql`
   query placePageQueryMedia($mediaIDs: [ID!]!) {
     mediaList(ids: $mediaIDs) {
       ...MediaGalleryFields
@@ -77,15 +80,7 @@ const MapPresentMarker = ({
   markerMediaState,
   dispatchMarkerMedia,
 }: MapPresetMarkerProps) => {
-  //TODO: Replace deprecated `useLazyQuery`:
-  /*
-              * @deprecated Avoid manually specifying generics on `useLazyQuery`.
-              * Instead, rely on TypeScript's type inference along with a correctly typed `TypedDocumentNode` to get accurate types for your query results.
-              */
-  const [loadMedia, { data: loadedMedia }] = useLazyQuery<
-    PlacePageQueryMediaQuery,
-    PlacePageQueryMediaQueryVariables
-  >(QUERY_MEDIA)
+  const [loadMedia, { data: loadedMedia }] = useLazyQuery(QUERY_MEDIA)
 
   useEffect(() => {
     const presentMarker = markerMediaState.presentMarker
