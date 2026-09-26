@@ -1,19 +1,30 @@
 import { ReactNode } from 'react'
 import { NavLink } from 'react-router'
-import { gql } from '@apollo/client'
+import { gql, type TypedDocumentNode } from '@apollo/client'
 import { useQuery } from '@apollo/client/react'
 import { authToken } from '../../helpers/authentication'
 import { useTranslation } from 'react-i18next'
-import { MapboxEnabledQueryQuery, FaceDetectionEnabledQuery } from './__generated__/MainMenu'
+import {
+  MapboxEnabledQueryQuery,
+  MapboxEnabledQueryQueryVariables,
+  FaceDetectionEnabledQuery,
+  FaceDetectionEnabledQueryVariables,
+} from './__generated__/MainMenu'
 import { tailwindClassNames } from '../../helpers/utils'
 
-export const MAPBOX_QUERY = gql`
+export const MAPBOX_QUERY: TypedDocumentNode<
+  MapboxEnabledQueryQuery,
+  MapboxEnabledQueryQueryVariables
+> = gql`
   query mapboxEnabledQuery {
     mapboxToken
   }
 `
 
-export const FACE_DETECTION_ENABLED_QUERY = gql`
+export const FACE_DETECTION_ENABLED_QUERY: TypedDocumentNode<
+  FaceDetectionEnabledQuery,
+  FaceDetectionEnabledQueryVariables
+> = gql`
   query faceDetectionEnabled {
     siteInfo {
       faceDetectionEnabled
@@ -73,30 +84,27 @@ const MenuSeparator = () => (
 
 export const MainMenu = () => {
   const { t } = useTranslation()
-  const token = authToken();
+  const token = authToken()
 
-  //TODO: Replace deprecated `useQuery`
-  // @deprecated Avoid manually specifying generics on `useQuery`.
-  // * Instead, rely on TypeScript's type inference along with a correctly typed `TypedDocumentNode` to get accurate types for your query results.
-  const mapboxQuery = useQuery<MapboxEnabledQueryQuery>(
-    MAPBOX_QUERY,
-    { skip: !token }
-  );
-  const faceDetectionEnabledQuery = useQuery<FaceDetectionEnabledQuery>(
-    FACE_DETECTION_ENABLED_QUERY,
-    { skip: !token }
-  );
+  const mapboxQuery = useQuery(MAPBOX_QUERY, { skip: !token })
+  const faceDetectionEnabledQuery = useQuery(FACE_DETECTION_ENABLED_QUERY, {
+    skip: !token,
+  })
 
-  const mapboxEnabled =
-    !!mapboxQuery?.data?.mapboxToken &&
-    !mapboxQuery?.error
+  const mapboxEnabled = !!mapboxQuery?.data?.mapboxToken && !mapboxQuery?.error
   const faceDetectionEnabled =
     !!faceDetectionEnabledQuery?.data?.siteInfo?.faceDetectionEnabled &&
     !faceDetectionEnabledQuery?.error
 
   return (
-    <div className="fixed w-full bottom-0 lg:bottom-auto lg:top-21 z-30 bg-white dark:bg-dark-bg shadow-separator lg:shadow-none lg:w-60 lg:ml-8 lg:mr-5 shrink-0" data-testid="main-menu">
-      <ul className="flex justify-around py-2 px-2 max-w-lg mx-auto lg:flex-col lg:p-0" data-testid="menu-items">
+    <div
+      className="fixed w-full bottom-0 lg:bottom-auto lg:top-21 z-30 bg-white dark:bg-dark-bg shadow-separator lg:shadow-none lg:w-60 lg:ml-8 lg:mr-5 shrink-0"
+      data-testid="main-menu"
+    >
+      <ul
+        className="flex justify-around py-2 px-2 max-w-lg mx-auto lg:flex-col lg:p-0"
+        data-testid="menu-items"
+      >
         <MenuButton
           data-testid="menu-timeline"
           to="/timeline"
