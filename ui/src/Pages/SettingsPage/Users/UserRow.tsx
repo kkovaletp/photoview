@@ -1,5 +1,5 @@
 import { useState, Dispatch, SetStateAction } from 'react'
-import { ApolloLink, gql } from '@apollo/client'
+import { ApolloLink, gql, type TypedDocumentNode } from '@apollo/client'
 import type { OperationVariables } from '@apollo/client'
 import { useMutation } from '@apollo/client/react'
 import EditUserRow from './EditUserRow'
@@ -12,7 +12,10 @@ import {
 } from './__generated__/UserRow'
 import { useNotifyError } from '../../../hooks/useNotifyError'
 
-const updateUserMutation = gql`
+const updateUserMutation: TypedDocumentNode<
+  UpdateUserMutation,
+  UpdateUserMutationVariables
+> = gql`
   mutation updateUser($id: ID!, $username: String, $admin: Boolean) {
     updateUser(id: $id, username: $username, admin: $admin) {
       id
@@ -22,7 +25,10 @@ const updateUserMutation = gql`
   }
 `
 
-const deleteUserMutation = gql`
+const deleteUserMutation: TypedDocumentNode<
+  DeleteUserMutation,
+  DeleteUserMutationVariables
+> = gql`
   mutation deleteUser($id: ID!) {
     deleteUser(id: $id) {
       id
@@ -31,7 +37,10 @@ const deleteUserMutation = gql`
   }
 `
 
-const scanUserMutation = gql`
+const scanUserMutation: TypedDocumentNode<
+  ScanUserMutation,
+  ScanUserMutationVariables
+> = gql`
   mutation scanUser($userId: ID!) {
     scanUser(userId: $userId) {
       success
@@ -85,32 +94,11 @@ const UserRow = ({ user, refetchUsers }: UserRowProps) => {
 
   const [showConfirmDelete, setShowConfirmDelete] = useState(false)
   const [showChangePassword, setShowChangePassword] = useState(false)
-  //TODO: Replace deprecated `useMutation`:
-  /*
-              * @deprecated Avoid manually specifying generics on `useMutation`.
-              * Instead, rely on TypeScript's type inference along with a correctly typed `TypedDocumentNode` to get accurate types for your mutation results.
-              */
-  const [updateUserMutationFn, { loading: updateUserLoading }] = useMutation<
-    UpdateUserMutation,
-    UpdateUserMutationVariables
-  >(updateUserMutation)
+  const [updateUserMutationFn, { loading: updateUserLoading }] = useMutation(updateUserMutation)
 
-  //TODO: Replace deprecated `useMutation`:
-  /*
-              * @deprecated Avoid manually specifying generics on `useMutation`.
-              * Instead, rely on TypeScript's type inference along with a correctly typed `TypedDocumentNode` to get accurate types for your mutation results.
-              */
-  const [deleteUserMutationFn] = useMutation<DeleteUserMutation, DeleteUserMutationVariables>(deleteUserMutation)
+  const [deleteUserMutationFn] = useMutation(deleteUserMutation)
 
-  //TODO: Replace deprecated `useMutation`:
-  /*
-              * @deprecated Avoid manually specifying generics on `useMutation`.
-              * Instead, rely on TypeScript's type inference along with a correctly typed `TypedDocumentNode` to get accurate types for your mutation results.
-              */
-  const [scanUserMutationFn, { called: scanUserCalled }] = useMutation<
-    ScanUserMutation,
-    ScanUserMutationVariables
-  >(scanUserMutation)
+  const [scanUserMutationFn, { called: scanUserCalled }] = useMutation(scanUserMutation)
 
   const updateUser: ApolloMutationFn<UpdateUserMutation, UpdateUserMutationVariables> = async (
     options
