@@ -5,9 +5,7 @@ import { useForm } from 'react-hook-form'
 import { INITIAL_SETUP_QUERY, login } from './loginUtilities'
 import { authToken } from '../../helpers/authentication'
 import { normalizeUsername } from '../../helpers/normalize'
-import TermsOfUseModal, {
-  useTermsAccepted,
-} from '../../components/termsOfUse/TermsOfUseModal'
+import TermsOfUseModal, { useTermsAccepted } from '../../components/termsOfUse/TermsOfUseModal'
 import AccessDeniedScreen from '../../components/termsOfUse/AccessDeniedScreen'
 import { useTranslation } from 'react-i18next'
 import { Helmet, HelmetProvider } from '@dr.pogodin/react-helmet'

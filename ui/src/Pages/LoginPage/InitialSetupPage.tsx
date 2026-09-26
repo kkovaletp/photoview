@@ -2,9 +2,7 @@ import { useEffect, useState } from 'react'
 import { gql, type TypedDocumentNode } from '@apollo/client'
 import { useQuery, useMutation } from '@apollo/client/react'
 import { useNavigate } from 'react-router'
-import TermsOfUseModal, {
-  useTermsAccepted,
-} from '../../components/termsOfUse/TermsOfUseModal'
+import TermsOfUseModal, { useTermsAccepted } from '../../components/termsOfUse/TermsOfUseModal'
 import AccessDeniedScreen from '../../components/termsOfUse/AccessDeniedScreen'
 import { Container, INITIAL_SETUP_QUERY, login } from './loginUtilities'
 import { authToken } from '../../helpers/authentication'
@@ -73,8 +71,7 @@ const InitialSetupPage = () => {
 
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
-  const [authorize, { loading: authorizeLoading }] =
-    useMutation(initialSetupMutation)
+  const [authorize, { loading: authorizeLoading }] = useMutation(initialSetupMutation)
 
   const signIn = handleSubmit(async data => {
     try {
