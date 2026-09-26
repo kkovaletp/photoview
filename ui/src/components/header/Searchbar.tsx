@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect, ReactNode, ChangeEvent, Dispatch, SetStateAction } from 'react'
 import styled from 'styled-components'
-import { useLazyQuery, gql } from '@apollo/client'
+import { gql } from '@apollo/client'
+import { useLazyQuery } from '@apollo/client/react'
 import { debounce, DebouncedFn } from '../../helpers/utils'
 import { ProtectedImage } from '../photoGallery/ProtectedMedia'
 import { NavLink, useNavigate, useLocation } from 'react-router'
@@ -41,6 +42,9 @@ const SearchWrapper = styled.div.attrs({
 
 const SearchBar = () => {
   const { t } = useTranslation()
+  //TODO: Replace deprecated `useLazyQuery`
+  // @deprecated Avoid manually specifying generics on`useLazyQuery`.
+  // * Instead, rely on TypeScript's type inference along with a correctly typed `TypedDocumentNode` to get accurate types for your query results.
   const [fetchSearches, fetchResult] = useLazyQuery<SearchQueryQuery>(SEARCH_QUERY)
   const [query, setQuery] = useState('')
   const [fetched, setFetched] = useState(false)

@@ -1,4 +1,4 @@
-import { useMutation } from '@apollo/client'
+import { useMutation } from '@apollo/client/react'
 import {
   useState,
   useEffect,
@@ -11,10 +11,6 @@ import { isNil } from '../../../helpers/utils'
 import { normalizeLabel } from '../../../helpers/normalize'
 import { Button, TextField } from '../../../primitives/form/Input'
 import { MY_FACES_QUERY, SET_GROUP_LABEL_MUTATION } from '../PeoplePage'
-import {
-  SetGroupLabelMutation,
-  SetGroupLabelMutationVariables,
-} from '../__generated__/PeoplePage'
 import DetachImageFacesModal from './DetachImageFacesModal'
 import MergeFaceGroupsModal, {
   MergeFaceGroupsModalState,
@@ -44,13 +40,11 @@ const FaceGroupTitle = ({ faceGroup }: FaceGroupTitleProps) => {
       loading: setLabelLoading,
       error: labelSaveError,
       reset: resetSetGroupLabel,
-    }] = useMutation<
-      SetGroupLabelMutation,
-      SetGroupLabelMutationVariables
-    >(SET_GROUP_LABEL_MUTATION, {
-      errorPolicy: 'all',
-      onCompleted: () => setEditLabel(false),
-    })
+    },
+  ] = useMutation(SET_GROUP_LABEL_MUTATION, {
+    errorPolicy: 'all',
+    onCompleted: () => setEditLabel(false),
+  })
 
   const resetLabel = useCallback(() => {
     resetSetGroupLabel()

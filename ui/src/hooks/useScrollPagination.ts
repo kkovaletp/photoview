@@ -1,4 +1,3 @@
-import { ApolloQueryResult } from '@apollo/client'
 import { useCallback, useEffect, useRef, useState } from 'react'
 
 interface ScrollPaginationArgs<D> {
@@ -6,7 +5,7 @@ interface ScrollPaginationArgs<D> {
   data: D | undefined
   fetchMore: (args: {
     variables: { offset: number }
-  }) => Promise<ApolloQueryResult<D>>
+  }) => Promise<{ data: D }>
   getItems: (data: D) => unknown[]
   pageSize?: number
   rootMargin?: string

@@ -1,4 +1,5 @@
-import { gql, PureQueryOptions, useMutation } from '@apollo/client'
+import { gql, type ApolloClient, type TypedDocumentNode } from '@apollo/client'
+import { useMutation } from '@apollo/client/react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router'
@@ -13,7 +14,10 @@ import {
 } from './__generated__/DetachImageFacesModal'
 import { SingleFaceGroupQuery } from './__generated__/singleFaceGroupQuery'
 
-const DETACH_IMAGE_FACES_MUTATION = gql`
+const DETACH_IMAGE_FACES_MUTATION: TypedDocumentNode<
+  DetachImageFacesMutation,
+  DetachImageFacesMutationVariables
+> = gql`
   mutation detachImageFaces($faceIDs: [ID!]!) {
     detachImageFaces(imageFaceIDs: $faceIDs) {
       id
@@ -24,16 +28,14 @@ const DETACH_IMAGE_FACES_MUTATION = gql`
 
 type DetachImageFacesOptions = {
   sourceFaceGroupID?: string
-  additionalRefetchQueries?: PureQueryOptions[]
+  additionalRefetchQueries?: ApolloClient.QueryOptions[]
 }
 
 export const useDetachImageFaces = () => {
-  const [detachImageFacesMutation, { error: detachError, reset: resetDetach }] = useMutation<
-    DetachImageFacesMutation,
-    DetachImageFacesMutationVariables
-  >(DETACH_IMAGE_FACES_MUTATION, {
-    errorPolicy: 'all',
-  })
+  const [detachImageFacesMutation, { error: detachError, reset: resetDetach }] =
+    useMutation(DETACH_IMAGE_FACES_MUTATION, {
+      errorPolicy: 'all',
+    })
 
   const detachImageFaces = async (
     selectedImageFaces: Array<
@@ -144,8 +146,8 @@ const DetachImageFacesModalContent = ({
 
     detachImageFaces(selectedImageFaces, {
       sourceFaceGroupID: faceGroup.id,
-    }).then(({ data, errors }) => {
-      if (!data?.detachImageFaces || (errors?.length ?? 0) > 0) return
+    }).then(({ data, error }) => {
+      if (!data?.detachImageFaces || error) return
       setOpen(false)
       navigate(`/people/${data.detachImageFaces.id}`)
     }).catch((e: unknown) => {

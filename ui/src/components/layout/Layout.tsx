@@ -1,12 +1,19 @@
-import { gql } from '@apollo/client'
+import { gql, type TypedDocumentNode } from '@apollo/client'
 import { ReactNode, useContext } from 'react'
 import { Helmet, HelmetProvider } from '@dr.pogodin/react-helmet'
 import Header from '../header/Header'
 import { Authorized } from '../routes/AuthorizedRoute'
 import { Sidebar, SidebarContext } from '../sidebar/Sidebar'
 import MainMenu from './MainMenu'
+import {
+  AdminQueryQuery,
+  AdminQueryQueryVariables,
+} from './__generated__/Layout'
 
-export const ADMIN_QUERY = gql`
+export const ADMIN_QUERY: TypedDocumentNode<
+  AdminQueryQuery,
+  AdminQueryQueryVariables
+> = gql`
   query adminQuery {
     myUser {
       admin

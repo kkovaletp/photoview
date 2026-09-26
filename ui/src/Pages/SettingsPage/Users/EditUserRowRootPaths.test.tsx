@@ -2,7 +2,7 @@ import { describe, test, expect, vi, beforeEach, afterEach } from 'vitest'
 import { screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { gql } from '@apollo/client'
-import { MockedResponse } from '@apollo/client/testing'
+import { MockLink } from '@apollo/client/testing'
 import { GraphQLError } from 'graphql'
 import { renderWithProviders } from '../../../helpers/testUtils'
 import { EditRootPaths, USER_ADD_ROOT_PATH_MUTATION } from './EditUserRowRootPaths'
@@ -29,7 +29,7 @@ const baseUser: SettingsUsersQueryQuery['user'][0] = {
     ],
 }
 
-const usersQueryMock: MockedResponse = {
+const usersQueryMock: MockLink.MockedResponse = {
     request: { query: USERS_QUERY },
     result: {
         data: {
@@ -46,7 +46,7 @@ const usersQueryMock: MockedResponse = {
     },
 }
 
-const renderComponent = (mocks: MockedResponse[] = [], user = baseUser) =>
+const renderComponent = (mocks: MockLink.MockedResponse[] = [], user = baseUser) =>
     renderWithProviders(<EditRootPaths user={user} />, { mocks })
 
 describe('EditUserRowRootPaths', () => {
@@ -73,7 +73,7 @@ describe('EditUserRowRootPaths', () => {
     test('removes a root path: sends correct variables and disables button while loading', async () => {
         const user = userEvent.setup()
 
-        const mocks: MockedResponse[] = [
+        const mocks: MockLink.MockedResponse[] = [
             {
                 request: {
                     query: USER_REMOVE_ALBUM_PATH_MUTATION,
@@ -107,7 +107,7 @@ describe('EditUserRowRootPaths', () => {
     test('shows inline error and re-enables the button on network remove failure', async () => {
         const user = userEvent.setup()
 
-        const mocks: MockedResponse[] = [
+        const mocks: MockLink.MockedResponse[] = [
             {
                 request: {
                     query: USER_REMOVE_ALBUM_PATH_MUTATION,
@@ -141,7 +141,7 @@ describe('EditUserRowRootPaths', () => {
     test('shows inline error on GraphQL remove failure', async () => {
         const user = userEvent.setup()
 
-        const mocks: MockedResponse[] = [
+        const mocks: MockLink.MockedResponse[] = [
             {
                 request: {
                     query: USER_REMOVE_ALBUM_PATH_MUTATION,
@@ -170,7 +170,7 @@ describe('EditUserRowRootPaths', () => {
     test('clears inline remove error and succeeds on retry', async () => {
         const user = userEvent.setup()
 
-        const mocks: MockedResponse[] = [
+        const mocks: MockLink.MockedResponse[] = [
             {
                 request: {
                     query: USER_REMOVE_ALBUM_PATH_MUTATION,
@@ -210,7 +210,7 @@ describe('EditUserRowRootPaths', () => {
     test('adds a root path: trims whitespace, sends correct variables, disables button while loading, and clears input on success', async () => {
         const user = userEvent.setup()
 
-        const mocks: MockedResponse[] = [
+        const mocks: MockLink.MockedResponse[] = [
             {
                 request: {
                     query: USER_ADD_ROOT_PATH_MUTATION,
@@ -263,7 +263,7 @@ describe('EditUserRowRootPaths', () => {
     test('shows inline error and keeps input value on network add failure', async () => {
         const user = userEvent.setup()
 
-        const mocks: MockedResponse[] = [
+        const mocks: MockLink.MockedResponse[] = [
             {
                 request: {
                     query: USER_ADD_ROOT_PATH_MUTATION,
@@ -300,7 +300,7 @@ describe('EditUserRowRootPaths', () => {
     test('shows inline error on GraphQL add failure', async () => {
         const user = userEvent.setup()
 
-        const mocks: MockedResponse[] = [
+        const mocks: MockLink.MockedResponse[] = [
             {
                 request: {
                     query: USER_ADD_ROOT_PATH_MUTATION,
@@ -332,7 +332,7 @@ describe('EditUserRowRootPaths', () => {
     test('clears inline add error and succeeds on retry', async () => {
         const user = userEvent.setup()
 
-        const mocks: MockedResponse[] = [
+        const mocks: MockLink.MockedResponse[] = [
             {
                 request: {
                     query: USER_ADD_ROOT_PATH_MUTATION,

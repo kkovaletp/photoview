@@ -8,16 +8,23 @@ import {
   TableFooter,
   TableScrollWrapper,
 } from '../../../primitives/Table'
-import { useQuery, gql } from '@apollo/client'
+import { gql, type TypedDocumentNode } from '@apollo/client'
+import { useQuery } from '@apollo/client/react'
 import UserRow from './UserRow'
 import AddUserRow from './AddUserRow'
 import { SectionTitle } from '../SettingsPage'
 import { useTranslation } from 'react-i18next'
-import { SettingsUsersQueryQuery } from './__generated__/UsersTable'
+import {
+  SettingsUsersQueryQuery,
+  SettingsUsersQueryQueryVariables,
+} from './__generated__/UsersTable'
 import { Button } from '../../../primitives/form/Input'
 import Loader from '../../../primitives/Loader'
 
-export const USERS_QUERY = gql`
+export const USERS_QUERY: TypedDocumentNode<
+  SettingsUsersQueryQuery,
+  SettingsUsersQueryQueryVariables
+> = gql`
   query settingsUsersQuery {
     user {
       id
@@ -35,8 +42,7 @@ const UsersTable = () => {
   const { t } = useTranslation()
   const [showAddUser, setShowAddUser] = useState(false)
 
-  const { loading, error, data, refetch } =
-    useQuery<SettingsUsersQueryQuery>(USERS_QUERY)
+  const { loading, error, data, refetch } = useQuery(USERS_QUERY)
 
   if (error) {
     return <div>{`Users table error: ${error.message}`}</div>

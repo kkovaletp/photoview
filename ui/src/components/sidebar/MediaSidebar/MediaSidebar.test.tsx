@@ -1,6 +1,5 @@
 import { screen } from '@testing-library/react'
-import * as Apollo from '@apollo/client'
-import type { QueryResult } from '@apollo/client'
+import { gql } from '@apollo/client'
 import MediaSidebar, {
   MediaSidebarMedia,
   SIDEBAR_MEDIA_QUERY
@@ -14,12 +13,13 @@ vi.mock('../../../helpers/authentication.ts')
 
 const authToken = vi.mocked(authentication.authToken)
 
-const makeLazyQueryResult = (
-  result: Pick<QueryResult, 'data' | 'error' | 'loading'>
-): QueryResult => result as QueryResult
+beforeEach(() => {
+  authToken.mockReset()
+  authToken.mockReturnValue(undefined)
+})
 
 // Define the photo shares query directly in the test file
-const SIDEBAR_GET_PHOTO_SHARES = Apollo.gql`
+const SIDEBAR_GET_PHOTO_SHARES = gql`
   query sidebarGetPhotoShares($id: ID!) {
     media(id: $id) {
       id
@@ -196,53 +196,46 @@ describe('MediaSidebar', () => {
   })
 
   test('displays loading state correctly', () => {
-    // Use the media object already defined in the describe block
     authToken.mockImplementation(() => 'token-here')
 
-    // Mock loadMedia to show loading state
-    const loadMediaMock = vi.fn<ReturnType<typeof Apollo.useLazyQuery>[0]>()
+    renderWithProviders(<MediaSidebar media={media} />, {
+      mocks: [
+        {
+          request: {
+            query: SIDEBAR_MEDIA_QUERY,
+            variables: { id: media.id },
+          },
+          delay: Infinity,
+        },
+        ...mocks.slice(0, 2),
+      ],
+    })
 
-    vi.spyOn(Apollo, 'useLazyQuery').mockReturnValue([
-      loadMediaMock,
-      makeLazyQueryResult({
-        loading: true,
-        error: undefined,
-        data: undefined,
-      }),
-    ])
-
-    renderWithProviders(<MediaSidebar media={media} />)
-
-    // Should show the media from props while loading
     expect(screen.getByText('122A6069.jpg')).toBeInTheDocument()
   })
 
-  test('displays error state correctly', () => {
-    // Use the media object already defined in the describe block
+  test('displays error state correctly', async () => {
     authToken.mockImplementation(() => 'token-here')
 
-    // Mock a GraphQL error
-    const loadMediaMock = vi.fn<ReturnType<typeof Apollo.useLazyQuery>[0]>()
+    renderWithProviders(<MediaSidebar media={media} />, {
+      mocks: [
+        {
+          request: {
+            query: SIDEBAR_MEDIA_QUERY,
+            variables: { id: media.id },
+          },
+          error: new Error('Failed to load media'),
+        },
+        ...mocks.slice(0, 2),
+      ],
+    })
 
-    vi.spyOn(Apollo, 'useLazyQuery').mockReturnValue([
-      loadMediaMock,
-      makeLazyQueryResult({
-        loading: false,
-        error: new Apollo.ApolloError({
-          errorMessage: 'Failed to load media',
-        }),
-        data: undefined,
-      }),
-    ])
-
-    renderWithProviders(<MediaSidebar media={media} />)
-
-    // Should show the error message
-    expect(screen.getByText(/Failed to load media/)).toBeInTheDocument()
+    expect(await screen.findByText(/Failed to load media/)).toBeInTheDocument()
   })
 
-  test('renders video content correctly', () => {
-    // Create a video variant of the media object
+  test('renders video content correctly', async () => {
+    authToken.mockReturnValue(undefined)
+
     const videoMedia: MediaSidebarMedia = {
       ...media,
       type: MediaType.Video,
@@ -250,14 +243,17 @@ describe('MediaSidebar', () => {
         __typename: 'MediaURL',
         url: '/video/web.mp4',
         width: 1280,
-        height: 720
-      }
+        height: 720,
+      },
     }
 
-    renderWithProviders(<MediaSidebar media={videoMedia} />)
+    renderWithProviders(<MediaSidebar media={videoMedia} />, {
+      mocks: [mocks[0]],
+    })
 
-    // Should render video element instead of image
     expect(screen.queryByRole('img')).not.toBeInTheDocument()
-    // Video testing would depend on how your ProtectedVideo component renders
+
+    // Wait for the download request that SidebarContent starts.
+    await screen.findByText('Original')
   })
 })

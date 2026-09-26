@@ -1,4 +1,5 @@
-import { gql, PureQueryOptions, useMutation, useQuery } from '@apollo/client'
+import { gql, type ApolloClient, type TypedDocumentNode } from '@apollo/client'
+import { useMutation, useQuery } from '@apollo/client/react'
 import { useCallback, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router'
@@ -6,10 +7,7 @@ import { isNil } from '../../../helpers/utils'
 import Modal, { ModalAction, ModalProps } from '../../../primitives/Modal'
 import useScrollPagination from '../../../hooks/useScrollPagination'
 import { MY_FACES_QUERY } from '../PeoplePage'
-import {
-  MyFacesQuery,
-  MyFacesQueryVariables
-} from '../__generated__/PeoplePage'
+import { MyFacesQuery } from '../__generated__/PeoplePage'
 import SelectFaceGroupTable from './SelectFaceGroupTable'
 import {
   CombineFacesMutation,
@@ -17,7 +15,10 @@ import {
 } from './__generated__/MergeFaceGroupsModal'
 import { SINGLE_FACE_GROUP } from './singleFaceGroupQuery'
 
-export const COMBINE_FACES_MUTATION = gql`
+export const COMBINE_FACES_MUTATION: TypedDocumentNode<
+  CombineFacesMutation,
+  CombineFacesMutationVariables
+> = gql`
   mutation combineFaces($destID: ID!, $srcIDs: [ID!]!) {
     combineFaceGroups(
       destinationFaceGroupID: $destID
@@ -45,7 +46,7 @@ type MergeFaceGroupsModalProps = {
   state: MergeFaceGroupsModalState
   setState(state: MergeFaceGroupsModalState): void
   preselectedFaceGroup?: FaceGroupSelection
-  refetchQueries: PureQueryOptions[]
+  refetchQueries: ApolloClient.QueryOptions[]
 }
 
 type StateContent = {
@@ -95,7 +96,7 @@ const MergeFaceGroupsModalContent = ({
     error: faceGroupsError,
     refetch: refetchFaceGroups,
     fetchMore,
-  } = useQuery<MyFacesQuery, MyFacesQueryVariables>(MY_FACES_QUERY, {
+  } = useQuery(MY_FACES_QUERY, {
     variables: {
       limit: FACE_GROUP_PAGE_SIZE,
       offset: 0,
@@ -106,12 +107,10 @@ const MergeFaceGroupsModalContent = ({
     fetchPolicy: 'network-only',
   })
 
-  const [combineFacesMutation, { error: combineError, reset: resetCombine }] = useMutation<
-    CombineFacesMutation,
-    CombineFacesMutationVariables
-  >(COMBINE_FACES_MUTATION, {
-    errorPolicy: 'all',
-  })
+  const [combineFacesMutation, { error: combineError, reset: resetCombine }] =
+    useMutation(COMBINE_FACES_MUTATION, {
+      errorPolicy: 'all',
+    })
 
   const [preselectedRole, setPreselectedRole] =
     useState<PreselectedFaceGroupRole>(null)
@@ -277,8 +276,8 @@ const MergeFaceGroupsModalContent = ({
           ]
           : [],
       awaitRefetchQueries: true,
-    }).then(({ data, errors }) => {
-      if (!data?.combineFaceGroups || (errors?.length ?? 0) > 0) return
+    }).then(({ data, error }) => {
+      if (!data?.combineFaceGroups || error) return
 
       resetModalState()
       setState(MergeFaceGroupsModalState.Closed)

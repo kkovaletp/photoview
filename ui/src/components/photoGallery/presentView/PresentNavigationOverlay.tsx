@@ -43,9 +43,9 @@ const OverlayButton = styled.button`
   }
 
   /* outline: none above hides the ring for pointer users; keyboard focus
-     still needs to be visible, all the more so now that a key press reveals
-     the controls and the first stop is a button on top of a photo. The thin
-     dark edge keeps the white ring legible over a bright one. */
+    still needs to be visible, all the more so now that a key press reveals
+    the controls and the first stop is a button on top of a photo. The thin
+    dark edge keeps the white ring legible over a bright one. */
   &:focus-visible {
     outline: 3px solid rgba(255, 255, 255, 0.95);
     outline-offset: -6px;
@@ -63,13 +63,13 @@ const OverlayButton = styled.button`
   }
 
   /* An invisible button must not stay usable: on touch devices the first tap
-     is meant to reveal the controls via the container's click handler, not to
-     fire whatever button happens to sit under the finger - and a keyboard
-     user must not be able to tab to a control they cannot see, which
-     pointer-events alone would still allow. visibility also takes them out
-     of the accessibility tree. The delay lets the stroke finish fading out
-     first; revealing them again is instant, since no transition applies in
-     that direction. */
+    is meant to reveal the controls via the container's click handler, not to
+    fire whatever button happens to sit under the finger - and a keyboard
+    user must not be able to tab to a control they cannot see, which
+    pointer-events alone would still allow. visibility also takes them out
+    of the accessibility tree. The delay lets the stroke finish fading out
+    first; revealing them again is instant, since no transition applies in
+    that direction. */
   &.hide {
     pointer-events: none;
     visibility: hidden;

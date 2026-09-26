@@ -1,6 +1,6 @@
 import { screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { MockedResponse } from '@apollo/client/testing'
+import { MockLink } from '@apollo/client/testing'
 import { describe, test, expect, vi, beforeEach } from 'vitest'
 import type { Mock } from 'vitest'
 import { GraphQLError } from 'graphql'
@@ -8,6 +8,7 @@ import type { Dispatch, SetStateAction } from 'react'
 import AddUserRow, {
   CREATE_USER_MUTATION,
 } from './AddUserRow'
+import UsersTable, { USERS_QUERY } from './UsersTable'
 import { renderWithProviders } from '../../../helpers/testUtils'
 
 describe('AddUserRow', () => {
@@ -19,7 +20,7 @@ describe('AddUserRow', () => {
     setShowMock = vi.fn<Dispatch<SetStateAction<boolean>>>()
   })
 
-  const renderComponent = (mocks: MockedResponse[]) => {
+  const renderComponent = (mocks: MockLink.MockedResponse[]) => {
     return renderWithProviders(
       <table>
         <tbody>
@@ -35,6 +36,54 @@ describe('AddUserRow', () => {
   }
 
   describe('User Creation', () => {
+    test('refreshes the user list after adding a user', async () => {
+      const user = userEvent.setup()
+      const refetchedUsers = vi.fn(() => ({
+        data: {
+          user: [
+            {
+              __typename: 'User' as const,
+              id: '123',
+              username: 'testuser',
+              admin: false,
+              rootAlbums: [],
+            },
+          ],
+        },
+      }))
+
+      renderWithProviders(<UsersTable />, {
+        mocks: [
+          { request: { query: USERS_QUERY }, result: { data: { user: [] } } },
+          {
+            request: {
+              query: CREATE_USER_MUTATION,
+              variables: { username: 'testuser', admin: false, rootPath: undefined },
+            },
+            result: {
+              data: {
+                createUser: {
+                  __typename: 'User',
+                  id: '123',
+                  username: 'testuser',
+                  admin: false,
+                },
+              },
+            },
+          },
+          { request: { query: USERS_QUERY }, result: refetchedUsers },
+        ],
+      })
+
+      expect(screen.queryByText('testuser')).not.toBeInTheDocument()
+      await user.click(screen.getByRole('button', { name: 'New user' }))
+      await user.type(screen.getByPlaceholderText('Username'), 'testuser')
+      await user.click(screen.getByRole('button', { name: 'Add user' }))
+
+      expect(await screen.findByText('testuser')).toBeInTheDocument()
+      expect(refetchedUsers).toHaveBeenCalledOnce()
+    })
+
     test('creates user successfully with username and root path', async () => {
       const user = userEvent.setup()
       const mocks = [
@@ -343,7 +392,7 @@ describe('AddUserRow', () => {
       const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => { })
 
       try {
-        const mocks: MockedResponse[] = [
+        const mocks: MockLink.MockedResponse[] = [
           {
             // First attempt: path is invalid → entire operation rolled back, no user in DB
             request: {
@@ -479,7 +528,7 @@ describe('AddUserRow', () => {
   describe('User Interactions', () => {
     test('cancel button hides the form', async () => {
       const user = userEvent.setup()
-      const mocks: MockedResponse[] = []
+      const mocks: MockLink.MockedResponse[] = []
 
       renderComponent(mocks)
 
@@ -492,7 +541,7 @@ describe('AddUserRow', () => {
 
     test('updates username input correctly', async () => {
       const user = userEvent.setup()
-      const mocks: MockedResponse[] = []
+      const mocks: MockLink.MockedResponse[] = []
 
       renderComponent(mocks)
 
@@ -505,7 +554,7 @@ describe('AddUserRow', () => {
 
     test('updates root path input correctly', async () => {
       const user = userEvent.setup()
-      const mocks: MockedResponse[] = []
+      const mocks: MockLink.MockedResponse[] = []
 
       renderComponent(mocks)
 
@@ -518,7 +567,7 @@ describe('AddUserRow', () => {
 
     test('updates admin checkbox correctly', async () => {
       const user = userEvent.setup()
-      const mocks: MockedResponse[] = []
+      const mocks: MockLink.MockedResponse[] = []
 
       renderComponent(mocks)
 

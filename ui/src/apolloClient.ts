@@ -1,20 +1,20 @@
 import {
   InMemoryCache,
   ApolloClient,
-  split,
   ApolloLink,
   HttpLink,
   ServerError,
   FieldMergeFunction,
   Reference,
 } from '@apollo/client'
+import type { GraphQLError } from 'graphql'
 import { getMainDefinition } from '@apollo/client/utilities'
-import { onError } from '@apollo/client/link/error'
+import { ErrorLink } from '@apollo/client/link/error'
+import { CombinedGraphQLErrors } from '@apollo/client/errors'
 import i18n from 'i18next'
 import urlJoin from 'url-join'
 import { authToken, clearTokenCookie } from './helpers/authentication'
 import { globalMessageHandler } from './components/messages/globalMessageHandler'
-import { Message } from './components/messages/SubscriptionsHook'
 import { NotificationType } from './__generated__/globalTypes'
 import { GraphQLWsLink } from '@apollo/client/link/subscriptions'
 import { createClient } from 'graphql-ws'
@@ -258,7 +258,7 @@ if (globalThis.window !== undefined) {
 
 const wsLink = new GraphQLWsLink(wsClient)
 
-const link = split(
+const link = ApolloLink.split(
   // split based on the operation type
   ({ query }) => {
     const definition = getMainDefinition(query)
@@ -277,18 +277,27 @@ const link = split(
  * @param networkError - The network error potentially containing server error details.
  * @returns An array of error objects from the server, or an empty array if none are found.
  */
-export function getServerErrorMessages(networkError: Error | undefined): Error[] {
-  if (!networkError) return [];
-  if (!('result' in networkError)) return [];
+export function getServerErrorMessages(
+  networkError: Error | undefined
+): GraphQLError[] {
+  if (!ServerError.is(networkError)) return []
 
-  const serverError = networkError as ServerError;
-  if (!serverError.result) return [];
+  try {
+    const body: unknown = JSON.parse(networkError.bodyText)
 
-  if (typeof serverError.result === 'object' && 'errors' in serverError.result) {
-    return serverError.result.errors as Error[];
+    if (
+      typeof body === 'object' &&
+      body !== null &&
+      'errors' in body &&
+      Array.isArray(body.errors)
+    ) {
+      return body.errors as GraphQLError[]
+    }
+  } catch {
+    // The HTTP response body is not GraphQL JSON.
   }
 
-  return [];
+  return []
 }
 
 /**
@@ -303,12 +312,10 @@ export const formatPath = (path: readonly (string | number)[] | undefined): stri
  * such as the backend restarting during a deployment.
  */
 export function isAuthNetworkError(networkError: Error | undefined): boolean {
-  if (!networkError) return false
-  if ('statusCode' in networkError) {
-    const statusCode = (networkError as ServerError).statusCode
-    return statusCode === 401 || statusCode === 403
-  }
-  return false
+  return (
+    ServerError.is(networkError) &&
+    (networkError.statusCode === 401 || networkError.statusCode === 403)
+  )
 }
 
 /**
@@ -382,17 +389,19 @@ export function getNetworkErrorNotification(
   }
 }
 
-const linkError = onError(({ graphQLErrors, networkError }) => {
+const linkError = new ErrorLink(({ error }) => {
   const errorMessages: { key: string; header: string; content: string }[] = []
 
-  if (graphQLErrors) {
-    graphQLErrors.map(({ message, locations, path }) =>
+  if (CombinedGraphQLErrors.is(error)) {
+    const graphQLErrors = error.errors
+
+    graphQLErrors.forEach(({ message, locations, path }) => {
       console.error(
         `[GraphQL error]: Message: ${message}, Location: ${JSON.stringify(
           locations
         )} Path: ${formatPath(path)}`
       )
-    )
+    })
 
     if (graphQLErrors.length === 1) {
       errorMessages.push({
@@ -430,17 +439,17 @@ const linkError = onError(({ graphQLErrors, networkError }) => {
       clearTokenCookie()
       // location.reload()
     }
-  }
 
-  if (networkError) {
-    console.error(`[Network error]: ${JSON.stringify(networkError)}`)
-    const isAuthError = isAuthNetworkError(networkError)
+  } else {
+    console.error(`[Network error]: ${JSON.stringify(error)}`)
+
+    const isAuthError = isAuthNetworkError(error)
     if (isAuthError) {
       console.error('[Authentication failure (401/403)] Clearing token cookie')
       clearTokenCookie()
     }
 
-    const errors = getServerErrorMessages(networkError);
+    const errors = getServerErrorMessages(error);
     let variant: NetworkErrorVariant
     if (errors.length === 1) {
       variant = 'single'
@@ -457,18 +466,17 @@ const linkError = onError(({ graphQLErrors, networkError }) => {
   }
 
   if (errorMessages.length > 0) {
-    const newMessages: Message[] = errorMessages.map(({ key, header, content }) => ({
-      key,
-      type: NotificationType.Message,
-      props: {
-        negative: true,
-        header,
-        content,
-      },
-    }))
-
-    // Use the global handler instead of useMessageState
-    newMessages.forEach(message => globalMessageHandler.add(message))
+    errorMessages.forEach(({ key, header, content }) =>
+      globalMessageHandler.add({
+        key,
+        type: NotificationType.Message,
+        props: {
+          negative: true,
+          header,
+          content,
+        },
+      })
+    )
   }
 })
 

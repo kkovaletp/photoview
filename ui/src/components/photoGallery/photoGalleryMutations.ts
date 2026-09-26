@@ -1,5 +1,6 @@
 import { MediaGalleryFieldsFragment } from './__generated__/fragments'
-import { gql, MutationFunction, useMutation } from '@apollo/client'
+import { gql } from '@apollo/client'
+import { useMutation } from '@apollo/client/react'
 import {
   MarkMediaFavoriteMutation,
   MarkMediaFavoriteMutationVariables,
@@ -15,6 +16,9 @@ const markFavoriteMutation = gql`
 `
 
 export const useMarkFavoriteMutation = () => {
+  //TODO: Replace deprecated `useMutation`
+  // @deprecated Avoid manually specifying generics on `useMutation`.
+  // * Instead, rely on TypeScript's type inference along with a correctly typed `TypedDocumentNode` to get accurate types for your query results.
   return useMutation<MarkMediaFavoriteMutation, MarkMediaFavoriteMutationVariables>(
     markFavoriteMutation
   )
@@ -25,7 +29,7 @@ export const toggleFavoriteAction = ({
   markFavorite,
 }: {
   media: MediaGalleryFieldsFragment
-  markFavorite: MutationFunction<MarkMediaFavoriteMutation, MarkMediaFavoriteMutationVariables>
+  markFavorite: useMutation.MutationFunction<MarkMediaFavoriteMutation, MarkMediaFavoriteMutationVariables>
 }) => {
   return markFavorite({
     variables: {

@@ -10,7 +10,8 @@ import {
   useCallback,
   useRef,
 } from 'react'
-import { gql, useMutation, useQuery } from '@apollo/client'
+import { gql, type TypedDocumentNode } from '@apollo/client'
+import { useMutation, useQuery } from '@apollo/client/react'
 import Layout from '../../components/layout/Layout'
 import styled from 'styled-components'
 import { Link, useParams } from 'react-router'
@@ -25,7 +26,8 @@ import {
   SetGroupLabelMutationVariables,
   MyFacesQuery,
   MyFacesQueryVariables,
-  RecognizeUnlabeledFacesMutation
+  RecognizeUnlabeledFacesMutation,
+  RecognizeUnlabeledFacesMutationVariables,
 } from './__generated__/PeoplePage'
 import { isNil, tailwindClassNames } from '../../helpers/utils'
 import { normalizeLabel } from '../../helpers/normalize'
@@ -34,7 +36,10 @@ import MergeFaceGroupsModal, {
   MergeFaceGroupsModalState,
 } from './SingleFaceGroup/MergeFaceGroupsModal'
 
-export const MY_FACES_QUERY = gql`
+export const MY_FACES_QUERY: TypedDocumentNode<
+  MyFacesQuery,
+  MyFacesQueryVariables
+> = gql`
   query myFaces($limit: Int, $offset: Int) {
     myFaceGroups(paginate: { limit: $limit, offset: $offset }) {
       id
@@ -62,7 +67,10 @@ export const MY_FACES_QUERY = gql`
   }
 `
 
-export const SET_GROUP_LABEL_MUTATION = gql`
+export const SET_GROUP_LABEL_MUTATION: TypedDocumentNode<
+  SetGroupLabelMutation,
+  SetGroupLabelMutationVariables
+> = gql`
   mutation setGroupLabel($groupID: ID!, $label: String) {
     setFaceGroupLabel(faceGroupID: $groupID, label: $label) {
       id
@@ -71,7 +79,10 @@ export const SET_GROUP_LABEL_MUTATION = gql`
   }
 `
 
-export const RECOGNIZE_UNLABELED_FACES_MUTATION = gql`
+export const RECOGNIZE_UNLABELED_FACES_MUTATION: TypedDocumentNode<
+  RecognizeUnlabeledFacesMutation,
+  RecognizeUnlabeledFacesMutationVariables
+> = gql`
   mutation recognizeUnlabeledFaces {
     recognizeUnlabeledFaces {
       id
@@ -134,10 +145,7 @@ export const FaceDetails = ({
   const [inputValue, setInputValue] = useState(group.label ?? '')
   const inputRef = useRef<HTMLInputElement>(null)
 
-  const [setGroupLabel, { loading, error: mutationError }] = useMutation<
-    SetGroupLabelMutation,
-    SetGroupLabelMutationVariables
-  >(SET_GROUP_LABEL_MUTATION, {
+  const [setGroupLabel, { loading, error: mutationError }] = useMutation(SET_GROUP_LABEL_MUTATION, {
     variables: {
       groupID: group.id,
     },
@@ -255,10 +263,7 @@ const FaceGroupsWrapper = styled.div`
  */
 export const PeoplePage = () => {
   const { t } = useTranslation()
-  const { data, error, loading, fetchMore } = useQuery<
-    MyFacesQuery,
-    MyFacesQueryVariables
-  >(MY_FACES_QUERY, {
+  const { data, error, loading, fetchMore } = useQuery(MY_FACES_QUERY, {
     variables: {
       limit: 50,
       offset: 0,
@@ -270,30 +275,26 @@ export const PeoplePage = () => {
   )
 
   const [
-    recognizeUnlabeled,
-    {
+    recognizeUnlabeled, {
       loading: recognizeUnlabeledLoading,
       error: recognizeUnlabeledError,
     },
-  ] = useMutation<RecognizeUnlabeledFacesMutation>(
-    RECOGNIZE_UNLABELED_FACES_MUTATION,
-    {
-      errorPolicy: 'all',
-      refetchQueries: ({ data, errors }) =>
-        data?.recognizeUnlabeledFaces && (errors?.length ?? 0) === 0
-          ? [
-            {
-              query: MY_FACES_QUERY,
-              variables: {
-                limit: 50,
-                offset: 0,
-              },
+  ] = useMutation(RECOGNIZE_UNLABELED_FACES_MUTATION, {
+    errorPolicy: 'all',
+    refetchQueries: ({ data, errors }) =>
+      data?.recognizeUnlabeledFaces && (errors?.length ?? 0) === 0
+        ? [
+          {
+            query: MY_FACES_QUERY,
+            variables: {
+              limit: 50,
+              offset: 0,
             },
-          ]
-          : [],
-      awaitRefetchQueries: true,
-    }
-  )
+          },
+        ]
+        : [],
+    awaitRefetchQueries: true,
+  })
 
   const { containerElem, loadingMore } = useScrollPagination<MyFacesQuery>({
     loading,

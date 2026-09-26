@@ -1,11 +1,6 @@
 import { useEffect, useState } from 'react'
-import {
-  useMutation,
-  useQuery,
-  gql,
-  useLazyQuery,
-  DocumentNode,
-} from '@apollo/client'
+import { gql, DocumentNode } from '@apollo/client'
+import { useMutation, useQuery, useLazyQuery } from '@apollo/client/react'
 import copy from 'copy-to-clipboard'
 import { useTranslation } from 'react-i18next'
 import { Popover, PopoverButton, PopoverPanel } from '@headlessui/react'
@@ -197,6 +192,10 @@ const MorePopoverSectionLabel = ({
         token: share.token,
         label: label.trim() || null,
       },
+    }).then(result => {
+      if (result.error) {
+        console.error('Failed to update share label:', result.error)
+      }
     }).catch(error => {
       console.error('Failed to update share label:', error)
     })
@@ -494,6 +493,11 @@ export const SidebarAlbumShare = ({ id }: SidebarShareAlbumProps) => {
     { variables: { id } }
   )
 
+  //TODO: Replace deprecated `useMutation`:
+  /*
+              * @deprecated Avoid manually specifying generics on `useMutation`.
+              * Instead, rely on TypeScript's type inference along with a correctly typed `TypedDocumentNode` to get accurate types for your mutation results.
+              */
   const [shareAlbum, { loading: mutationLoading }] = useMutation<
     SidebarAlbumAddShareMutation,
     SidebarAlbumAddShareMutationVariables
@@ -537,6 +541,11 @@ export const SidebarPhotoShare = ({ id }: SidebarSharePhotoProps) => {
     SHARE_PHOTO_QUERY
   )
 
+  //TODO: Replace deprecated `useMutation`:
+  /*
+              * @deprecated Avoid manually specifying generics on `useMutation`.
+              * Instead, rely on TypeScript's type inference along with a correctly typed `TypedDocumentNode` to get accurate types for your mutation results.
+              */
   const [sharePhoto, { loading: mutationLoading }] = useMutation<
     SidebarPhotoAddShareMutation,
     SidebarPhotoAddShareMutationVariables

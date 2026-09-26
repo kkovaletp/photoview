@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
-import { gql, useQuery, useMutation } from '@apollo/client'
+import { gql, type TypedDocumentNode } from '@apollo/client'
+import { useQuery, useMutation } from '@apollo/client/react'
 import { useNavigate } from 'react-router'
 import TermsOfUseModal, { useTermsAccepted } from '../../components/termsOfUse/TermsOfUseModal'
 import AccessDeniedScreen from '../../components/termsOfUse/AccessDeniedScreen'
@@ -7,13 +8,18 @@ import { Container, INITIAL_SETUP_QUERY, login } from './loginUtilities'
 import { authToken } from '../../helpers/authentication'
 import { normalizePath, normalizeUsername } from '../../helpers/normalize'
 import { useTranslation } from 'react-i18next'
-import { CheckInitialSetupQuery } from './__generated__/loginUtilities'
-import { InitialSetupMutation, InitialSetupMutationVariables } from './__generated__/InitialSetupPage'
+import {
+  InitialSetupMutation,
+  InitialSetupMutationVariables,
+} from './__generated__/InitialSetupPage'
 import { useForm } from 'react-hook-form'
 import { Submit, TextField } from '../../primitives/form/Input'
 import MessageBox from '../../primitives/form/MessageBox'
 
-const initialSetupMutation = gql`
+const initialSetupMutation: TypedDocumentNode<
+  InitialSetupMutation,
+  InitialSetupMutationVariables
+> = gql`
   mutation InitialSetup(
     $username: String!
     $password: String!
@@ -55,8 +61,7 @@ const InitialSetupPage = () => {
     if (token) navigate('/')
   }, [token, navigate])
 
-  const { data: initialSetupData } =
-    useQuery<CheckInitialSetupQuery>(INITIAL_SETUP_QUERY)
+  const { data: initialSetupData } = useQuery(INITIAL_SETUP_QUERY)
 
   const notInitialSetup = initialSetupData?.siteInfo?.initialSetup === false
 
@@ -66,10 +71,9 @@ const InitialSetupPage = () => {
 
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
 
-  const [authorize, { loading: authorizeLoading }] =
-    useMutation<InitialSetupMutation, InitialSetupMutationVariables>(initialSetupMutation)
+  const [authorize, { loading: authorizeLoading }] = useMutation(initialSetupMutation)
 
-  const signIn = handleSubmit(async (data) => {
+  const signIn = handleSubmit(async data => {
     try {
       setErrorMessage(null)
       clearErrors(['username', 'rootPath'])

@@ -1,4 +1,5 @@
-import { useQuery, gql } from '@apollo/client'
+import { gql, type TypedDocumentNode } from '@apollo/client'
+import { useQuery } from '@apollo/client/react'
 import { SidebarAlbumShare } from './Sharing'
 import { useTranslation } from 'react-i18next'
 import SidebarHeader from './SidebarHeader'
@@ -9,7 +10,10 @@ import {
 import { SidebarAlbumCover } from './AlbumCovers'
 import SidebarAlbumDownload from './SidebarDownloadAlbum'
 
-const albumQuery = gql`
+const albumQuery: TypedDocumentNode<
+  GetAlbumSidebarQuery,
+  GetAlbumSidebarQueryVariables
+> = gql`
   query getAlbumSidebar($id: ID!) {
     album(id: $id) {
       id
@@ -24,10 +28,7 @@ type AlbumSidebarProps = {
 
 const AlbumSidebar = ({ albumId }: AlbumSidebarProps) => {
   const { t } = useTranslation()
-  const { loading, error, data } = useQuery<
-    GetAlbumSidebarQuery,
-    GetAlbumSidebarQueryVariables
-  >(albumQuery, {
+  const { loading, error, data } = useQuery(albumQuery, {
     variables: { id: albumId },
   })
 

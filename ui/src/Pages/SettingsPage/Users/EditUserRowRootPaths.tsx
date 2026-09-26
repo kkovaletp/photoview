@@ -1,5 +1,6 @@
 import { useState, ChangeEvent } from 'react'
-import { gql, useMutation } from '@apollo/client'
+import { gql, type TypedDocumentNode } from '@apollo/client'
+import { useMutation } from '@apollo/client/react'
 import { USERS_QUERY } from './UsersTable'
 import { useTranslation } from 'react-i18next'
 import {
@@ -13,7 +14,10 @@ import { Button, TextField } from '../../../primitives/form/Input'
 import MessageBox from '../../../primitives/form/MessageBox'
 import { normalizePath } from '../../../helpers/normalize'
 
-const USER_REMOVE_ALBUM_PATH_MUTATION = gql`
+const USER_REMOVE_ALBUM_PATH_MUTATION: TypedDocumentNode<
+  UserRemoveAlbumPathMutationMutation,
+  UserRemoveAlbumPathMutationMutationVariables
+> = gql`
   mutation userRemoveAlbumPathMutation($userId: ID!, $albumId: ID!) {
     userRemoveRootAlbum(userId: $userId, albumId: $albumId) {
       id
@@ -21,7 +25,10 @@ const USER_REMOVE_ALBUM_PATH_MUTATION = gql`
   }
 `
 
-export const USER_ADD_ROOT_PATH_MUTATION = gql`
+export const USER_ADD_ROOT_PATH_MUTATION: TypedDocumentNode<
+  UserAddRootPathMutation,
+  UserAddRootPathMutationVariables
+> = gql`
   mutation userAddRootPath($id: ID!, $rootPath: String!) {
     userAddRootPath(id: $id, rootPath: $rootPath) {
       id
@@ -37,10 +44,7 @@ type EditRootPathProps = {
 const EditRootPath = ({ album, user }: EditRootPathProps) => {
   const { t } = useTranslation()
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
-  const [removeAlbumPath, { loading }] = useMutation<
-    UserRemoveAlbumPathMutationMutation,
-    UserRemoveAlbumPathMutationMutationVariables
-  >(USER_REMOVE_ALBUM_PATH_MUTATION, {
+  const [removeAlbumPath, { loading }] = useMutation(USER_REMOVE_ALBUM_PATH_MUTATION, {
     refetchQueries: [
       {
         query: USERS_QUERY,
@@ -93,10 +97,7 @@ const EditNewRootPath = ({ userID }: EditNewRootPathProps) => {
   const { t } = useTranslation()
   const [value, setValue] = useState('')
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
-  const [addRootPath, { loading }] = useMutation<
-    UserAddRootPathMutation,
-    UserAddRootPathMutationVariables
-  >(USER_ADD_ROOT_PATH_MUTATION, {
+  const [addRootPath, { loading }] = useMutation(USER_ADD_ROOT_PATH_MUTATION, {
     refetchQueries: [
       {
         query: USERS_QUERY,

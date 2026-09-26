@@ -1,4 +1,5 @@
-import { gql, useLazyQuery } from '@apollo/client'
+import { gql, type TypedDocumentNode } from '@apollo/client'
+import { useLazyQuery } from '@apollo/client/react'
 import { useEffect, useContext } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
@@ -23,11 +24,14 @@ import MediaSidebarPeople from './MediaSidebarPeople'
 import MediaSidebarMap from './MediaSidebarMap'
 import {
   SidebarMediaQueryQuery,
-  SidebarMediaQueryQueryVariables
+  SidebarMediaQueryQueryVariables,
 } from './__generated__/MediaSidebar'
 import { BreadcrumbList } from '../../album/AlbumTitle'
 
-export const SIDEBAR_MEDIA_QUERY = gql`
+export const SIDEBAR_MEDIA_QUERY: TypedDocumentNode<
+  SidebarMediaQueryQuery,
+  SidebarMediaQueryQueryVariables
+> = gql`
   query sidebarMediaQuery($id: ID!) {
     media(id: $id) {
       id
@@ -272,10 +276,7 @@ type MediaSidebarType = {
 const MediaSidebar = ({ media, hidePreview }: MediaSidebarType) => {
   const { t } = useTranslation()
   const token = authToken()
-  const [loadMedia, { loading, error, data }] = useLazyQuery<
-    SidebarMediaQueryQuery,
-    SidebarMediaQueryQueryVariables
-  >(SIDEBAR_MEDIA_QUERY)
+  const [loadMedia, { loading, error, data }] = useLazyQuery(SIDEBAR_MEDIA_QUERY)
 
   useEffect(() => {
     if (media != null && token) {

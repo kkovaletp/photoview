@@ -1,5 +1,6 @@
 import { useCallback } from 'react'
-import { useQuery, gql } from '@apollo/client'
+import { gql, type TypedDocumentNode } from '@apollo/client'
+import { useQuery } from '@apollo/client/react'
 import AlbumGallery, {
   ALBUM_GALLERY_FRAGMENT,
 } from '../../components/albumGallery/AlbumGallery'
@@ -13,7 +14,10 @@ import useOrderingParams from '../../hooks/useOrderingParams'
 import { useParams } from 'react-router'
 import { isNil } from '../../helpers/utils'
 
-const ALBUM_QUERY = gql`
+const ALBUM_QUERY: TypedDocumentNode<
+  AlbumQueryQuery,
+  AlbumQueryQueryVariables
+> = gql`
   ${ALBUM_GALLERY_FRAGMENT}
 
   query albumQuery(
@@ -56,10 +60,7 @@ function AlbumPage() {
     [urlParams]
   )
 
-  const { loading, error, data, refetch, fetchMore } = useQuery<
-    AlbumQueryQuery,
-    AlbumQueryQueryVariables
-  >(ALBUM_QUERY, {
+  const { loading, error, data, refetch, fetchMore } = useQuery(ALBUM_QUERY, {
     variables: {
       id: albumId,
       onlyFavorites,

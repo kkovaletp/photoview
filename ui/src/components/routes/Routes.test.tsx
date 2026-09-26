@@ -1,8 +1,5 @@
 import Routes from './Routes'
-import {
-  render,
-  screen,
-} from '@testing-library/react'
+import { render, screen } from '@testing-library/react'
 import { MemoryRouter } from 'react-router'
 
 vi.mock('../../Pages/LoginPage/LoginPage.tsx', () => () => (

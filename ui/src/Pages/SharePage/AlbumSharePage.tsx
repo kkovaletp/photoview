@@ -1,16 +1,23 @@
 import Layout from '../../components/layout/Layout'
 import styled from 'styled-components'
-import { gql, useQuery } from '@apollo/client'
+import { gql, type TypedDocumentNode } from '@apollo/client'
+import { useQuery } from '@apollo/client/react'
 import { useTranslation } from 'react-i18next'
 import useURLParameters from '../../hooks/useURLParameters'
 import useOrderingParams from '../../hooks/useOrderingParams'
-import { ShareAlbumQueryQuery } from './__generated__/AlbumSharePage'
+import {
+  ShareAlbumQueryQuery,
+  ShareAlbumQueryQueryVariables,
+} from './__generated__/AlbumSharePage'
 import AlbumGallery, { ALBUM_GALLERY_FRAGMENT } from '../../components/albumGallery/AlbumGallery'
 import { MEDIA_GALLERY_FRAGMENT } from '../../components/photoGallery/fragments'
 import useScrollPagination from '../../hooks/useScrollPagination'
 import PaginateLoader from '../../components/PaginateLoader'
 
-export const SHARE_ALBUM_QUERY = gql`
+export const SHARE_ALBUM_QUERY: TypedDocumentNode<
+  ShareAlbumQueryQuery,
+  ShareAlbumQueryQueryVariables
+> = gql`
   ${MEDIA_GALLERY_FRAGMENT}
   ${ALBUM_GALLERY_FRAGMENT}
   query shareAlbumQuery(
@@ -45,30 +52,26 @@ const AlbumSharePage = ({ albumID, token, password }: AlbumSharePageProps) => {
   const urlParams = useURLParameters()
   const orderParams = useOrderingParams(urlParams)
 
-  const { data, error, loading, fetchMore } = useQuery<ShareAlbumQueryQuery>(
-    SHARE_ALBUM_QUERY,
-    {
-      variables: {
-        id: albumID,
-        token,
-        password,
-        limit: 200,
-        offset: 0,
-        mediaOrderBy: orderParams.orderBy,
-        orderDirection: orderParams.orderDirection,
-        onlyFavorites: false,
-      },
-    }
-  )
+  const { data, error, loading, fetchMore } = useQuery(SHARE_ALBUM_QUERY, {
+    variables: {
+      id: albumID,
+      token,
+      password,
+      limit: 200,
+      offset: 0,
+      mediaOrderBy: orderParams.orderBy,
+      orderDirection: orderParams.orderDirection,
+      onlyFavorites: false,
+    },
+  })
 
-  const { containerElem, loadingMore } =
-    useScrollPagination<ShareAlbumQueryQuery>({
-      loading,
-      fetchMore,
-      data,
-      getItems: data => data.album.media,
-      pageSize: 200,
-    })
+  const { containerElem, loadingMore } = useScrollPagination<ShareAlbumQueryQuery>({
+    loading,
+    fetchMore,
+    data,
+    getItems: data => data.album.media,
+    pageSize: 200,
+  })
 
   if (error) {
     return <div>{error.message}</div>

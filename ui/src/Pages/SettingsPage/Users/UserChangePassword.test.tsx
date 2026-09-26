@@ -4,7 +4,7 @@ import { screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { gql } from '@apollo/client'
 import { GraphQLError } from 'graphql'
-import { MockedResponse } from '@apollo/client/testing'
+import { MockLink } from '@apollo/client/testing'
 import ChangePasswordModal from './UserChangePassword'
 import { renderWithProviders } from '../../../helpers/testUtils'
 import { SettingsUsersQueryQuery } from './__generated__/UsersTable'
@@ -38,7 +38,7 @@ describe('ChangePasswordModal', () => {
     vi.restoreAllMocks()
   })
 
-  const renderComponent = (mocks: MockedResponse[] = []) => {
+  const renderComponent = (mocks: MockLink.MockedResponse[] = []) => {
     return renderWithProviders(
       <ChangePasswordModal
         open={true}
@@ -89,7 +89,7 @@ describe('ChangePasswordModal', () => {
   describe('Form Submission', () => {
     test('successfully changes password with valid input', async () => {
       const user = userEvent.setup()
-      const mocks: MockedResponse[] = [
+      const mocks: MockLink.MockedResponse[] = [
         {
           request: {
             query: changeUserPasswordMutation,
@@ -125,7 +125,7 @@ describe('ChangePasswordModal', () => {
 
     test('submits mutation with correct variables', async () => {
       const user = userEvent.setup()
-      const mocks: MockedResponse[] = [
+      const mocks: MockLink.MockedResponse[] = [
         {
           request: {
             query: changeUserPasswordMutation,
@@ -159,7 +159,7 @@ describe('ChangePasswordModal', () => {
 
     test('closes modal after successful submission', async () => {
       const user = userEvent.setup()
-      const mocks: MockedResponse[] = [
+      const mocks: MockLink.MockedResponse[] = [
         {
           request: {
             query: changeUserPasswordMutation,
@@ -194,7 +194,7 @@ describe('ChangePasswordModal', () => {
 
     test('does not display error message on success', async () => {
       const user = userEvent.setup()
-      const mocks: MockedResponse[] = [
+      const mocks: MockLink.MockedResponse[] = [
         {
           request: {
             query: changeUserPasswordMutation,
@@ -232,7 +232,7 @@ describe('ChangePasswordModal', () => {
   describe('Error Handling', () => {
     test('displays error message on GraphQL error', async () => {
       const user = userEvent.setup()
-      const mocks: MockedResponse[] = [
+      const mocks: MockLink.MockedResponse[] = [
         {
           request: {
             query: changeUserPasswordMutation,
@@ -262,7 +262,7 @@ describe('ChangePasswordModal', () => {
 
     test('displays error message on network error', async () => {
       const user = userEvent.setup()
-      const mocks: MockedResponse[] = [
+      const mocks: MockLink.MockedResponse[] = [
         {
           request: {
             query: changeUserPasswordMutation,
@@ -290,7 +290,7 @@ describe('ChangePasswordModal', () => {
 
     test('logs error to console on failure', async () => {
       const user = userEvent.setup()
-      const mocks: MockedResponse[] = [
+      const mocks: MockLink.MockedResponse[] = [
         {
           request: {
             query: changeUserPasswordMutation,
@@ -321,7 +321,7 @@ describe('ChangePasswordModal', () => {
 
     test('modal remains open on error', async () => {
       const user = userEvent.setup()
-      const mocks: MockedResponse[] = [
+      const mocks: MockLink.MockedResponse[] = [
         {
           request: {
             query: changeUserPasswordMutation,
@@ -353,7 +353,7 @@ describe('ChangePasswordModal', () => {
   describe('Loading States', () => {
     test('handles loading state during mutation', async () => {
       const user = userEvent.setup()
-      const mocks: MockedResponse[] = [
+      const mocks: MockLink.MockedResponse[] = [
         {
           request: {
             query: changeUserPasswordMutation,
@@ -412,7 +412,7 @@ describe('ChangePasswordModal', () => {
     test('does not submit mutation when Cancel is clicked', async () => {
       const user = userEvent.setup()
       let mutationAttempted = false
-      const mocks: MockedResponse[] = [
+      const mocks: MockLink.MockedResponse[] = [
         {
           request: {
             query: changeUserPasswordMutation,
@@ -421,7 +421,7 @@ describe('ChangePasswordModal', () => {
               password: 'testPassword',
             },
           },
-          newData: () => {
+          result: () => {
             mutationAttempted = true
             return {
               data: {
@@ -458,7 +458,7 @@ describe('ChangePasswordModal', () => {
 
     test('displays MessageBox with negative type on error', async () => {
       const user = userEvent.setup()
-      const mocks: MockedResponse[] = [
+      const mocks: MockLink.MockedResponse[] = [
         {
           request: {
             query: changeUserPasswordMutation,
@@ -487,7 +487,7 @@ describe('ChangePasswordModal', () => {
 
     test('displays correct error message text', async () => {
       const user = userEvent.setup()
-      const mocks: MockedResponse[] = [
+      const mocks: MockLink.MockedResponse[] = [
         {
           request: {
             query: changeUserPasswordMutation,
@@ -519,7 +519,7 @@ describe('ChangePasswordModal', () => {
       const user = userEvent.setup()
 
       // First attempt fails
-      const failedMock: MockedResponse = {
+      const failedMock: MockLink.MockedResponse = {
         request: {
           query: changeUserPasswordMutation,
           variables: {
@@ -531,7 +531,7 @@ describe('ChangePasswordModal', () => {
       }
 
       // Second attempt succeeds
-      const successMock: MockedResponse = {
+      const successMock: MockLink.MockedResponse = {
         request: {
           query: changeUserPasswordMutation,
           variables: {
@@ -576,7 +576,7 @@ describe('ChangePasswordModal', () => {
     test('successful retry after failure completes as expected', async () => {
       const user = userEvent.setup()
 
-      const failedMock: MockedResponse = {
+      const failedMock: MockLink.MockedResponse = {
         request: {
           query: changeUserPasswordMutation,
           variables: {
@@ -587,7 +587,7 @@ describe('ChangePasswordModal', () => {
         error: new Error('First attempt failed'),
       }
 
-      const successMock: MockedResponse = {
+      const successMock: MockLink.MockedResponse = {
         request: {
           query: changeUserPasswordMutation,
           variables: {
