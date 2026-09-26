@@ -1,4 +1,4 @@
-import { type ApolloClient, gql, type TypedDocumentNode } from '@apollo/client'
+import { gql, type ApolloClient, type TypedDocumentNode } from '@apollo/client'
 import { useMutation } from '@apollo/client/react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
