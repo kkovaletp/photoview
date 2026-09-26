@@ -1,4 +1,4 @@
-import { gql } from '@apollo/client'
+import { gql, type TypedDocumentNode } from '@apollo/client'
 import { useQuery } from '@apollo/client/react'
 import { Route, Routes, useParams } from 'react-router'
 import styled from 'styled-components'
@@ -18,7 +18,10 @@ import {
   ShareTokenValidatePasswordQueryVariables,
 } from './__generated__/SharePage'
 
-export const SHARE_TOKEN_QUERY = gql`
+export const SHARE_TOKEN_QUERY: TypedDocumentNode<
+  SharePageTokenQuery,
+  SharePageTokenQueryVariables
+> = gql`
   query SharePageToken($token: String!, $password: String) {
     shareToken(credentials: { token: $token, password: $password }) {
       token
@@ -76,7 +79,10 @@ export const SHARE_TOKEN_QUERY = gql`
   }
 `
 
-export const VALIDATE_TOKEN_PASSWORD_QUERY = gql`
+export const VALIDATE_TOKEN_PASSWORD_QUERY: TypedDocumentNode<
+  ShareTokenValidatePasswordQuery,
+  ShareTokenValidatePasswordQueryVariables
+> = gql`
   query ShareTokenValidatePassword($token: String!, $password: String) {
     shareTokenValidatePassword(
       credentials: { token: $token, password: $password }
@@ -103,15 +109,7 @@ const AuthorizedTokenRoute = () => {
   const token = useTokenFromParams()
   const password = getSharePassword(token) ?? null
 
-  //TODO: Replace deprecated `useQuery`:
-  /*
-              * @deprecated Avoid manually specifying generics on `useQuery`.
-              * Instead, rely on TypeScript's type inference along with a correctly typed `TypedDocumentNode` to get accurate types for your query results.
-              */
-  const { loading, error, data } = useQuery<
-    SharePageTokenQuery,
-    SharePageTokenQueryVariables
-  >(SHARE_TOKEN_QUERY, {
+  const { loading, error, data } = useQuery(SHARE_TOKEN_QUERY, {
     variables: {
       token,
       password,
@@ -159,15 +157,7 @@ export const TokenRoute = () => {
   const { t } = useTranslation()
   const token = useTokenFromParams()
 
-  //TODO: Replace deprecated `useQuery`:
-  /*
-              * @deprecated Avoid manually specifying generics on `useQuery`.
-              * Instead, rely on TypeScript's type inference along with a correctly typed `TypedDocumentNode` to get accurate types for your query results.
-              */
-  const { loading, error, data, refetch } = useQuery<
-    ShareTokenValidatePasswordQuery,
-    ShareTokenValidatePasswordQueryVariables
-  >(VALIDATE_TOKEN_PASSWORD_QUERY, {
+  const { loading, error, data, refetch } = useQuery(VALIDATE_TOKEN_PASSWORD_QUERY, {
     notifyOnNetworkStatusChange: true,
     variables: {
       token: token,
