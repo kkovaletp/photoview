@@ -1,4 +1,4 @@
-import { type ApolloClient, gql } from '@apollo/client'
+import { type ApolloClient, gql, type TypedDocumentNode } from '@apollo/client'
 import { useMutation } from '@apollo/client/react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -14,7 +14,10 @@ import {
 } from './__generated__/DetachImageFacesModal'
 import { SingleFaceGroupQuery } from './__generated__/singleFaceGroupQuery'
 
-const DETACH_IMAGE_FACES_MUTATION = gql`
+const DETACH_IMAGE_FACES_MUTATION: TypedDocumentNode<
+  DetachImageFacesMutation,
+  DetachImageFacesMutationVariables
+> = gql`
   mutation detachImageFaces($faceIDs: [ID!]!) {
     detachImageFaces(imageFaceIDs: $faceIDs) {
       id
@@ -29,17 +32,10 @@ type DetachImageFacesOptions = {
 }
 
 export const useDetachImageFaces = () => {
-  //TODO: Replace deprecated `useMutation`:
-  /*
-              * @deprecated Avoid manually specifying generics on `useMutation`.
-              * Instead, rely on TypeScript's type inference along with a correctly typed `TypedDocumentNode` to get accurate types for your mutation results.
-              */
-  const [detachImageFacesMutation, { error: detachError, reset: resetDetach }] = useMutation<
-    DetachImageFacesMutation,
-    DetachImageFacesMutationVariables
-  >(DETACH_IMAGE_FACES_MUTATION, {
-    errorPolicy: 'all',
-  })
+  const [detachImageFacesMutation, { error: detachError, reset: resetDetach }] =
+    useMutation(DETACH_IMAGE_FACES_MUTATION, {
+      errorPolicy: 'all',
+    })
 
   const detachImageFaces = async (
     selectedImageFaces: Array<
