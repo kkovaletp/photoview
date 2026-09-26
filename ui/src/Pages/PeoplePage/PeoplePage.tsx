@@ -10,7 +10,7 @@ import {
   useCallback,
   useRef,
 } from 'react'
-import { gql } from '@apollo/client'
+import { gql, type TypedDocumentNode } from '@apollo/client'
 import { useMutation, useQuery } from '@apollo/client/react'
 import Layout from '../../components/layout/Layout'
 import styled from 'styled-components'
@@ -63,7 +63,10 @@ export const MY_FACES_QUERY = gql`
   }
 `
 
-export const SET_GROUP_LABEL_MUTATION = gql`
+export const SET_GROUP_LABEL_MUTATION: TypedDocumentNode<
+  SetGroupLabelMutation,
+  SetGroupLabelMutationVariables
+> = gql`
   mutation setGroupLabel($groupID: ID!, $label: String) {
     setFaceGroupLabel(faceGroupID: $groupID, label: $label) {
       id
@@ -135,20 +138,15 @@ export const FaceDetails = ({
   const [inputValue, setInputValue] = useState(group.label ?? '')
   const inputRef = useRef<HTMLInputElement>(null)
 
-  //TODO: Replace deprecated `useMutation`:
-  /*
-              * @deprecated Avoid manually specifying generics on `useMutation`.
-              * Instead, rely on TypeScript's type inference along with a correctly typed `TypedDocumentNode` to get accurate types for your mutation results.
-              */
-  const [setGroupLabel, { loading, error: mutationError }] = useMutation<
-    SetGroupLabelMutation,
-    SetGroupLabelMutationVariables
-  >(SET_GROUP_LABEL_MUTATION, {
-    variables: {
-      groupID: group.id,
-    },
-    onCompleted: () => setEditLabel(false),
-  })
+  const [setGroupLabel, { loading, error: mutationError }] = useMutation(
+    SET_GROUP_LABEL_MUTATION,
+    {
+      variables: {
+        groupID: group.id,
+      },
+      onCompleted: () => setEditLabel(false),
+    }
+  )
 
   const resetLabel = useCallback(() => {
     setInputValue(group.label ?? '')

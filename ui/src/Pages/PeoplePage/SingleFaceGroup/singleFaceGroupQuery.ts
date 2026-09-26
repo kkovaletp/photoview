@@ -1,7 +1,14 @@
-import { gql } from '@apollo/client'
+import { gql, type TypedDocumentNode } from '@apollo/client'
 import { MEDIA_GALLERY_FRAGMENT } from '../../../components/photoGallery/fragments'
+import {
+  SingleFaceGroupQuery,
+  SingleFaceGroupQueryVariables,
+} from './__generated__/singleFaceGroupQuery'
 
-export const SINGLE_FACE_GROUP = gql`
+export const SINGLE_FACE_GROUP: TypedDocumentNode<
+  SingleFaceGroupQuery,
+  SingleFaceGroupQueryVariables
+> = gql`
     ${MEDIA_GALLERY_FRAGMENT}
 
     query singleFaceGroup($id: ID!, $limit: Int!, $offset: Int!) {
