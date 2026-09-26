@@ -26,7 +26,8 @@ import {
   SetGroupLabelMutationVariables,
   MyFacesQuery,
   MyFacesQueryVariables,
-  RecognizeUnlabeledFacesMutation
+  RecognizeUnlabeledFacesMutation,
+  RecognizeUnlabeledFacesMutationVariables,
 } from './__generated__/PeoplePage'
 import { isNil, tailwindClassNames } from '../../helpers/utils'
 import { normalizeLabel } from '../../helpers/normalize'
@@ -35,7 +36,10 @@ import MergeFaceGroupsModal, {
   MergeFaceGroupsModalState,
 } from './SingleFaceGroup/MergeFaceGroupsModal'
 
-export const MY_FACES_QUERY = gql`
+export const MY_FACES_QUERY: TypedDocumentNode<
+  MyFacesQuery,
+  MyFacesQueryVariables
+> = gql`
   query myFaces($limit: Int, $offset: Int) {
     myFaceGroups(paginate: { limit: $limit, offset: $offset }) {
       id
@@ -75,7 +79,10 @@ export const SET_GROUP_LABEL_MUTATION: TypedDocumentNode<
   }
 `
 
-export const RECOGNIZE_UNLABELED_FACES_MUTATION = gql`
+export const RECOGNIZE_UNLABELED_FACES_MUTATION: TypedDocumentNode<
+  RecognizeUnlabeledFacesMutation,
+  RecognizeUnlabeledFacesMutationVariables
+> = gql`
   mutation recognizeUnlabeledFaces {
     recognizeUnlabeledFaces {
       id
@@ -138,12 +145,15 @@ export const FaceDetails = ({
   const [inputValue, setInputValue] = useState(group.label ?? '')
   const inputRef = useRef<HTMLInputElement>(null)
 
-  const [setGroupLabel, { loading, error: mutationError }] = useMutation(SET_GROUP_LABEL_MUTATION, {
-    variables: {
-      groupID: group.id,
-    },
-    onCompleted: () => setEditLabel(false),
-  })
+  const [setGroupLabel, { loading, error: mutationError }] = useMutation(
+    SET_GROUP_LABEL_MUTATION,
+    {
+      variables: {
+        groupID: group.id,
+      },
+      onCompleted: () => setEditLabel(false),
+    }
+  )
 
   const resetLabel = useCallback(() => {
     setInputValue(group.label ?? '')
@@ -256,15 +266,7 @@ const FaceGroupsWrapper = styled.div`
  */
 export const PeoplePage = () => {
   const { t } = useTranslation()
-  //TODO: Replace deprecated `useQuery`:
-  /*
-              * @deprecated Avoid manually specifying generics on `useQuery`.
-              * Instead, rely on TypeScript's type inference along with a correctly typed `TypedDocumentNode` to get accurate types for your query results.
-              */
-  const { data, error, loading, fetchMore } = useQuery<
-    MyFacesQuery,
-    MyFacesQueryVariables
-  >(MY_FACES_QUERY, {
+  const { data, error, loading, fetchMore } = useQuery(MY_FACES_QUERY, {
     variables: {
       limit: 50,
       offset: 0,
@@ -275,18 +277,13 @@ export const PeoplePage = () => {
     MergeFaceGroupsModalState.Closed
   )
 
-  //TODO: Replace deprecated `useMutation`:
-  /*
-              * @deprecated Avoid manually specifying generics on `useMutation`.
-              * Instead, rely on TypeScript's type inference along with a correctly typed `TypedDocumentNode` to get accurate types for your mutation results.
-              */
   const [
     recognizeUnlabeled,
     {
       loading: recognizeUnlabeledLoading,
       error: recognizeUnlabeledError,
     },
-  ] = useMutation<RecognizeUnlabeledFacesMutation>(
+  ] = useMutation(
     RECOGNIZE_UNLABELED_FACES_MUTATION,
     {
       errorPolicy: 'all',
