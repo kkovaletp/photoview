@@ -87,9 +87,7 @@ export const MainMenu = () => {
   const token = authToken()
 
   const mapboxQuery = useQuery(MAPBOX_QUERY, { skip: !token })
-  const faceDetectionEnabledQuery = useQuery(FACE_DETECTION_ENABLED_QUERY, {
-    skip: !token,
-  })
+  const faceDetectionEnabledQuery = useQuery(FACE_DETECTION_ENABLED_QUERY, { skip: !token })
 
   const mapboxEnabled = !!mapboxQuery?.data?.mapboxToken && !mapboxQuery?.error
   const faceDetectionEnabled =
