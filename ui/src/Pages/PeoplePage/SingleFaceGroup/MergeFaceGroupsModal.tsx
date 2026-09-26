@@ -1,4 +1,4 @@
-import { type ApolloClient, gql } from '@apollo/client'
+import { type ApolloClient, gql, type TypedDocumentNode } from '@apollo/client'
 import { useMutation, useQuery } from '@apollo/client/react'
 import { useCallback, useState } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -7,10 +7,7 @@ import { isNil } from '../../../helpers/utils'
 import Modal, { ModalAction, ModalProps } from '../../../primitives/Modal'
 import useScrollPagination from '../../../hooks/useScrollPagination'
 import { MY_FACES_QUERY } from '../PeoplePage'
-import {
-  MyFacesQuery,
-  MyFacesQueryVariables
-} from '../__generated__/PeoplePage'
+import { MyFacesQuery } from '../__generated__/PeoplePage'
 import SelectFaceGroupTable from './SelectFaceGroupTable'
 import {
   CombineFacesMutation,
@@ -18,7 +15,10 @@ import {
 } from './__generated__/MergeFaceGroupsModal'
 import { SINGLE_FACE_GROUP } from './singleFaceGroupQuery'
 
-export const COMBINE_FACES_MUTATION = gql`
+export const COMBINE_FACES_MUTATION: TypedDocumentNode<
+  CombineFacesMutation,
+  CombineFacesMutationVariables
+> = gql`
   mutation combineFaces($destID: ID!, $srcIDs: [ID!]!) {
     combineFaceGroups(
       destinationFaceGroupID: $destID
@@ -96,12 +96,7 @@ const MergeFaceGroupsModalContent = ({
     error: faceGroupsError,
     refetch: refetchFaceGroups,
     fetchMore,
-    //TODO: Replace deprecated `useQuery`:
-    /*
-                * @deprecated Avoid manually specifying generics on `useQuery`.
-                * Instead, rely on TypeScript's type inference along with a correctly typed `TypedDocumentNode` to get accurate types for your query results.
-                */
-  } = useQuery<MyFacesQuery, MyFacesQueryVariables>(MY_FACES_QUERY, {
+  } = useQuery(MY_FACES_QUERY, {
     variables: {
       limit: FACE_GROUP_PAGE_SIZE,
       offset: 0,
@@ -112,17 +107,10 @@ const MergeFaceGroupsModalContent = ({
     fetchPolicy: 'network-only',
   })
 
-  //TODO: Replace deprecated `useMutation`:
-  /*
-              * @deprecated Avoid manually specifying generics on `useMutation`.
-              * Instead, rely on TypeScript's type inference along with a correctly typed `TypedDocumentNode` to get accurate types for your mutation results.
-              */
-  const [combineFacesMutation, { error: combineError, reset: resetCombine }] = useMutation<
-    CombineFacesMutation,
-    CombineFacesMutationVariables
-  >(COMBINE_FACES_MUTATION, {
-    errorPolicy: 'all',
-  })
+  const [combineFacesMutation, { error: combineError, reset: resetCombine }] =
+    useMutation(COMBINE_FACES_MUTATION, {
+      errorPolicy: 'all',
+    })
 
   const [preselectedRole, setPreselectedRole] =
     useState<PreselectedFaceGroupRole>(null)
