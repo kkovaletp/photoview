@@ -1,4 +1,4 @@
-import { gql } from '@apollo/client'
+import { gql, type TypedDocumentNode } from '@apollo/client'
 import { useLazyQuery, useMutation } from '@apollo/client/react'
 import { useEffect, useState, Dispatch, SetStateAction } from 'react'
 import { useNavigate } from 'react-router'
@@ -6,10 +6,7 @@ import SelectFaceGroupTable from './SelectFaceGroupTable'
 import SelectImageFacesTable from './SelectImageFacesTable'
 import { MY_FACES_QUERY } from '../PeoplePage'
 import { SINGLE_FACE_GROUP } from './singleFaceGroupQuery'
-import {
-  MyFacesQuery,
-  MyFacesQueryVariables
-} from '../__generated__/PeoplePage'
+import { MyFacesQuery } from '../__generated__/PeoplePage'
 import { isNil } from '../../../helpers/utils'
 import {
   MoveImageFacesMutation,
@@ -19,7 +16,10 @@ import { useTranslation } from 'react-i18next'
 import Modal, { ModalAction } from '../../../primitives/Modal'
 import { SingleFaceGroupQuery } from './__generated__/singleFaceGroupQuery'
 
-const MOVE_IMAGE_FACES_MUTATION = gql`
+const MOVE_IMAGE_FACES_MUTATION: TypedDocumentNode<
+  MoveImageFacesMutation,
+  MoveImageFacesMutationVariables
+> = gql`
   mutation moveImageFaces($faceIDs: [ID!]!, $destFaceGroupID: ID!) {
     moveImageFaces(
       imageFaceIDs: $faceIDs
@@ -65,27 +65,15 @@ const MoveImageFacesModal = ({
   const [imagesSelected, setImagesSelected] = useState(false)
   const navigate = useNavigate()
 
-  //TODO: Replace deprecated `useMutation`:
-  /*
-              * @deprecated Avoid manually specifying generics on `useMutation`.
-              * Instead, rely on TypeScript's type inference along with a correctly typed `TypedDocumentNode` to get accurate types for your mutation results.
-              */
-  const [moveImageFacesMutation, { error: moveError, reset: resetMoveImageFaces }] = useMutation<
-    MoveImageFacesMutation,
-    MoveImageFacesMutationVariables
-  >(MOVE_IMAGE_FACES_MUTATION, {
+  const [
+    moveImageFacesMutation,
+    { error: moveError, reset: resetMoveImageFaces },
+  ] = useMutation(MOVE_IMAGE_FACES_MUTATION, {
     errorPolicy: 'all',
   })
 
-  //TODO: Replace deprecated `useLazyQuery`:
-  /*
-              * @deprecated Avoid manually specifying generics on `useLazyQuery`.
-              * Instead, rely on TypeScript's type inference along with a correctly typed `TypedDocumentNode` to get accurate types for your query results.
-              */
-  const [loadFaceGroups, { data: faceGroupsData, error: loadError }] = useLazyQuery<
-    MyFacesQuery,
-    MyFacesQueryVariables
-  >(MY_FACES_QUERY)
+  const [loadFaceGroups, { data: faceGroupsData, error: loadError }] =
+    useLazyQuery(MY_FACES_QUERY)
 
   useEffect(() => {
     if (!open || isNil(preselectedImageFaces) || preselectedImageFaces.length === 0) return
