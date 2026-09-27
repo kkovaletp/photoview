@@ -199,13 +199,10 @@ const MorePopoverSectionLabel = ({
     setLabel(share.label ?? '')
   }, [share.label])
 
-  const [setShareLabel, { loading, error }] = useMutation(
-    SET_SHARE_LABEL_MUTATION,
-    {
-      refetchQueries: [{ query, variables: { id } }],
-      errorPolicy: 'all',
-    }
-  )
+  const [setShareLabel, { loading, error }] = useMutation(SET_SHARE_LABEL_MUTATION, {
+    refetchQueries: [{ query, variables: { id } }],
+    errorPolicy: 'all',
+  })
 
   const submit = () => {
     setShareLabel({
@@ -262,13 +259,10 @@ const MorePopoverSectionPassword = ({
   )
   const [passwordHidden, setPasswordHidden] = useState(share.hasPassword)
 
-  const [setPassword, { loading: setPasswordLoading }] = useMutation(
-    PROTECT_SHARE_MUTATION,
-    {
-      refetchQueries: [{ query: query, variables: { id } }],
-      awaitRefetchQueries: true,
-    }
-  )
+  const [setPassword, { loading: setPasswordLoading }] = useMutation(PROTECT_SHARE_MUTATION, {
+    refetchQueries: [{ query: query, variables: { id } }],
+    awaitRefetchQueries: true,
+  })
 
   const hidePassword = (hide: boolean) => {
     if (hide) {
