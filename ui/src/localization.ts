@@ -1,6 +1,9 @@
 import { useEffect } from 'react'
-import { SiteTranslationQuery } from './__generated__/localization'
-import { gql } from '@apollo/client'
+import {
+  SiteTranslationQuery,
+  SiteTranslationQueryVariables,
+} from './__generated__/localization'
+import { gql, type TypedDocumentNode } from '@apollo/client'
 import { useLazyQuery } from '@apollo/client/react'
 import i18n from 'i18next'
 import { initReactI18next } from 'react-i18next'
@@ -44,7 +47,10 @@ export function setupLocalization(): void {
     .catch(err => console.error('Failed to setup localization', err))
 }
 
-const SITE_TRANSLATION = gql`
+const SITE_TRANSLATION: TypedDocumentNode<
+  SiteTranslationQuery,
+  SiteTranslationQueryVariables
+> = gql`
   query siteTranslation {
     myUserPreferences {
       id
@@ -54,12 +60,7 @@ const SITE_TRANSLATION = gql`
 `
 let map_language: LanguageTranslation | null
 export const useLoadTranslations = () => {
-  //TODO: Replace deprecated `useLazyQuery`:
-  /*
-              * @deprecated Avoid manually specifying generics on `useLazyQuery`.
-              * Instead, rely on TypeScript's type inference along with a correctly typed `TypedDocumentNode` to get accurate types for your query results.
-              */
-  const [loadLang, { data }] = useLazyQuery<SiteTranslationQuery>(SITE_TRANSLATION)
+  const [loadLang, { data }] = useLazyQuery(SITE_TRANSLATION)
   const token = authToken()
 
   useEffect(() => {
