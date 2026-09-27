@@ -1,5 +1,5 @@
 import { vi, describe, test, expect, beforeEach, afterEach } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router'
 import SearchBar, { AlbumRow, PhotoRow, searchHighlighted } from './Searchbar'
@@ -123,6 +123,7 @@ describe('SearchBar Component', () => {
     });
 
     afterEach(() => {
+        vi.useRealTimers();
         vi.restoreAllMocks();
     });
 
@@ -151,6 +152,30 @@ describe('SearchBar Component', () => {
 
         expect(searchInput).toHaveValue('test');
         expect(fetchSearchMock).toHaveBeenCalledWith({ variables: { query: 'test' } });
+    });
+
+    test('sends the trimmed query after 250 ms and displays returned results', async () => {
+        const actualUtils = await vi.importActual<typeof import('../../helpers/utils')>('../../helpers/utils');
+        vi.mocked(utils.debounce).mockImplementationOnce(actualUtils.debounce);
+        vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
+
+        fetchSearchMock.mockImplementation(({ variables }: { variables: { query: string } }) => {
+            mockSearchData = {
+                search: { query: variables.query, albums: sampleAlbums, media: sampleMedia },
+            };
+        });
+
+        render(<MemoryRouter><SearchBar /></MemoryRouter>);
+        fireEvent.change(screen.getByRole('combobox'), { target: { value: '  beach  ' } });
+
+        act(() => { vi.advanceTimersByTime(249); });
+        expect(fetchSearchMock).not.toHaveBeenCalled();
+        expect(screen.queryByText('Vacation Photos')).not.toBeInTheDocument();
+
+        act(() => { vi.advanceTimersByTime(1); });
+        expect(fetchSearchMock).toHaveBeenCalledExactlyOnceWith({ variables: { query: 'beach' } });
+        expect(screen.getByText('Vacation Photos')).toBeInTheDocument();
+        expect(screen.getByText('Mountain View')).toBeInTheDocument();
     });
 
     test('calls fetch function with correct parameters when typing', async () => {
