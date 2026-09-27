@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { gql, DocumentNode } from '@apollo/client'
+import { gql, DocumentNode, type TypedDocumentNode } from '@apollo/client'
 import { useMutation, useQuery, useLazyQuery } from '@apollo/client/react'
 import copy from 'copy-to-clipboard'
 import { useTranslation } from 'react-i18next'
@@ -35,7 +35,10 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import dayjs from 'dayjs'
 
-const SHARE_PHOTO_QUERY = gql`
+const SHARE_PHOTO_QUERY: TypedDocumentNode<
+  SidebarGetPhotoSharesQuery,
+  SidebarGetPhotoSharesQueryVariables
+> = gql`
   query sidebarGetPhotoShares($id: ID!) {
     media(id: $id) {
       id
@@ -50,7 +53,10 @@ const SHARE_PHOTO_QUERY = gql`
   }
 `
 
-export const SHARE_ALBUM_QUERY = gql`
+export const SHARE_ALBUM_QUERY: TypedDocumentNode<
+  SidebarGetAlbumSharesQuery,
+  SidebarGetAlbumSharesQueryVariables
+> = gql`
   query sidebarGetAlbumShares($id: ID!) {
     album(id: $id) {
       id
@@ -65,7 +71,10 @@ export const SHARE_ALBUM_QUERY = gql`
   }
 `
 
-const ADD_MEDIA_SHARE_MUTATION = gql`
+const ADD_MEDIA_SHARE_MUTATION: TypedDocumentNode<
+  SidebarPhotoAddShareMutation,
+  SidebarPhotoAddShareMutationVariables
+> = gql`
   mutation sidebarPhotoAddShare($id: ID!, $password: String, $expire: Time) {
     shareMedia(mediaId: $id, password: $password, expire: $expire) {
       token
@@ -73,7 +82,10 @@ const ADD_MEDIA_SHARE_MUTATION = gql`
   }
 `
 
-const ADD_ALBUM_SHARE_MUTATION = gql`
+const ADD_ALBUM_SHARE_MUTATION: TypedDocumentNode<
+  SidebarAlbumAddShareMutation,
+  SidebarAlbumAddShareMutationVariables
+> = gql`
   mutation sidebarAlbumAddShare($id: ID!, $password: String, $expire: Time) {
     shareAlbum(albumId: $id, password: $password, expire: $expire) {
       token
@@ -488,20 +500,9 @@ export const SidebarAlbumShare = ({ id }: SidebarShareAlbumProps) => {
     loading: queryLoading,
     error: sharesError,
     data: sharesData,
-  } = useQuery<SidebarGetAlbumSharesQuery, SidebarGetAlbumSharesQueryVariables>(
-    SHARE_ALBUM_QUERY,
-    { variables: { id } }
-  )
+  } = useQuery(SHARE_ALBUM_QUERY, { variables: { id } })
 
-  //TODO: Replace deprecated `useMutation`:
-  /*
-              * @deprecated Avoid manually specifying generics on `useMutation`.
-              * Instead, rely on TypeScript's type inference along with a correctly typed `TypedDocumentNode` to get accurate types for your mutation results.
-              */
-  const [shareAlbum, { loading: mutationLoading }] = useMutation<
-    SidebarAlbumAddShareMutation,
-    SidebarAlbumAddShareMutationVariables
-  >(ADD_ALBUM_SHARE_MUTATION, {
+  const [shareAlbum, { loading: mutationLoading }] = useMutation(ADD_ALBUM_SHARE_MUTATION, {
     refetchQueries: [{ query: SHARE_ALBUM_QUERY, variables: { id } }],
     awaitRefetchQueries: true,
   })
@@ -537,19 +538,9 @@ export const SidebarPhotoShare = ({ id }: SidebarSharePhotoProps) => {
   const [
     loadShares,
     { loading: queryLoading, error: sharesError, data: sharesData },
-  ] = useLazyQuery<SidebarGetPhotoSharesQuery, SidebarGetPhotoSharesQueryVariables>(
-    SHARE_PHOTO_QUERY
-  )
+  ] = useLazyQuery(SHARE_PHOTO_QUERY)
 
-  //TODO: Replace deprecated `useMutation`:
-  /*
-              * @deprecated Avoid manually specifying generics on `useMutation`.
-              * Instead, rely on TypeScript's type inference along with a correctly typed `TypedDocumentNode` to get accurate types for your mutation results.
-              */
-  const [sharePhoto, { loading: mutationLoading }] = useMutation<
-    SidebarPhotoAddShareMutation,
-    SidebarPhotoAddShareMutationVariables
-  >(ADD_MEDIA_SHARE_MUTATION, {
+  const [sharePhoto, { loading: mutationLoading }] = useMutation(ADD_MEDIA_SHARE_MUTATION, {
     refetchQueries: [{ query: SHARE_PHOTO_QUERY, variables: { id } }],
     awaitRefetchQueries: true,
   })
