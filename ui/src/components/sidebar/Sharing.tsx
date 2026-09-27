@@ -93,7 +93,10 @@ const ADD_ALBUM_SHARE_MUTATION: TypedDocumentNode<
   }
 `
 
-const PROTECT_SHARE_MUTATION = gql`
+const PROTECT_SHARE_MUTATION: TypedDocumentNode<
+  SidebarProtectShareMutation,
+  SidebarProtectShareMutationVariables
+> = gql`
   mutation sidebarProtectShare($token: String!, $password: String) {
     protectShareToken(token: $token, password: $password) {
       token
@@ -102,7 +105,10 @@ const PROTECT_SHARE_MUTATION = gql`
   }
 `
 
-export const SET_SHARE_LABEL_MUTATION = gql`
+export const SET_SHARE_LABEL_MUTATION: TypedDocumentNode<
+  SidebarSetShareTokenLabelMutation,
+  SidebarSetShareTokenLabelMutationVariables
+> = gql`
   mutation sidebarSetShareTokenLabel($token: String!, $label: String) {
     setShareTokenLabel(token: $token, label: $label) {
       token
@@ -119,7 +125,10 @@ export const SET_EXPIRE_MUTATION = gql`
   }
 `
 
-const DELETE_SHARE_MUTATION = gql`
+const DELETE_SHARE_MUTATION: TypedDocumentNode<
+  SidebareDeleteShareMutation,
+  SidebareDeleteShareMutationVariables
+> = gql`
   mutation sidebareDeleteShare($token: String!) {
     deleteShareToken(token: $token) {
       token
@@ -190,13 +199,13 @@ const MorePopoverSectionLabel = ({
     setLabel(share.label ?? '')
   }, [share.label])
 
-  const [setShareLabel, { loading, error }] = useMutation<
-    SidebarSetShareTokenLabelMutation,
-    SidebarSetShareTokenLabelMutationVariables
-  >(SET_SHARE_LABEL_MUTATION, {
-    refetchQueries: [{ query, variables: { id } }],
-    errorPolicy: 'all',
-  })
+  const [setShareLabel, { loading, error }] = useMutation(
+    SET_SHARE_LABEL_MUTATION,
+    {
+      refetchQueries: [{ query, variables: { id } }],
+      errorPolicy: 'all',
+    }
+  )
 
   const submit = () => {
     setShareLabel({
@@ -253,13 +262,13 @@ const MorePopoverSectionPassword = ({
   )
   const [passwordHidden, setPasswordHidden] = useState(share.hasPassword)
 
-  const [setPassword, { loading: setPasswordLoading }] = useMutation<
-    SidebarProtectShareMutation,
-    SidebarProtectShareMutationVariables
-  >(PROTECT_SHARE_MUTATION, {
-    refetchQueries: [{ query: query, variables: { id } }],
-    awaitRefetchQueries: true,
-  })
+  const [setPassword, { loading: setPasswordLoading }] = useMutation(
+    PROTECT_SHARE_MUTATION,
+    {
+      refetchQueries: [{ query: query, variables: { id } }],
+      awaitRefetchQueries: true,
+    }
+  )
 
   const hidePassword = (hide: boolean) => {
     if (hide) {
@@ -596,10 +605,7 @@ const SidebarShare = ({
 
   const query = isPhoto ? SHARE_PHOTO_QUERY : SHARE_ALBUM_QUERY
 
-  const [deleteShare] = useMutation<
-    SidebareDeleteShareMutation,
-    SidebareDeleteShareMutationVariables
-  >(DELETE_SHARE_MUTATION, {
+  const [deleteShare] = useMutation(DELETE_SHARE_MUTATION, {
     refetchQueries: [{ query: query, variables: { id } }],
     awaitRefetchQueries: true,
   })
