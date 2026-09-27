@@ -88,7 +88,7 @@ export const SubscriptionsHook = ({ setMessages }: SubscriptionHookProps) => {
       const timeoutHandle = setTimeout(() => {
         messageTimeoutHandles.delete(msg.key)
         setMessages(prev => prev.filter(m => m.key !== msg.key))
-      }, msg.timeout)
+      }, msg.timeout) as unknown as number
       messageTimeoutHandles.set(msg.key, timeoutHandle)
     }
     setMessages(prev => {
