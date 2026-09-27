@@ -311,8 +311,7 @@ const SidebarMediaDownload = ({ media }: SidebarMediaDownladProps) => {
   const { add, removeKey } = useMessageState()
 
   const [loadPhotoDownloads, { loading, data, error }] = useLazyQuery(
-    SIDEBAR_DOWNLOAD_QUERY,
-    {}
+    SIDEBAR_DOWNLOAD_QUERY, {}
   )
 
   useEffect(() => {
