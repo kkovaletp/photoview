@@ -1,11 +1,17 @@
-import { NotificationSubscriptionSubscription } from './__generated__/SubscriptionsHook'
+import {
+  NotificationSubscriptionSubscription,
+  NotificationSubscriptionSubscriptionVariables,
+} from './__generated__/SubscriptionsHook'
 import { Dispatch, SetStateAction, useEffect } from 'react'
-import { gql } from '@apollo/client'
+import { gql, type TypedDocumentNode } from '@apollo/client'
 import { useSubscription } from '@apollo/client/react'
 import { NotificationType } from '../../__generated__/globalTypes'
 import { createUuid } from '../../helpers/createUuid'
 
-const NOTIFICATION_SUBSCRIPTION = gql`
+const NOTIFICATION_SUBSCRIPTION: TypedDocumentNode<
+  NotificationSubscriptionSubscription,
+  NotificationSubscriptionSubscriptionVariables
+> = gql`
   subscription notificationSubscription {
     notification {
       key
@@ -47,12 +53,8 @@ type SubscriptionHookProps = {
   setMessages: Dispatch<SetStateAction<Message[]>>
 }
 
-export const SubscriptionsHook = ({
-  setMessages,
-}: SubscriptionHookProps) => {
-  const { data, error } = useSubscription<NotificationSubscriptionSubscription>(
-    NOTIFICATION_SUBSCRIPTION
-  )
+export const SubscriptionsHook = ({ setMessages }: SubscriptionHookProps) => {
+  const { data, error } = useSubscription(NOTIFICATION_SUBSCRIPTION)
 
   useEffect(() => {
     if (error) {
@@ -86,7 +88,7 @@ export const SubscriptionsHook = ({
       const timeoutHandle = setTimeout(() => {
         messageTimeoutHandles.delete(msg.key)
         setMessages(prev => prev.filter(m => m.key !== msg.key))
-      }, msg.timeout) as unknown as number
+      }, msg.timeout)
       messageTimeoutHandles.set(msg.key, timeoutHandle)
     }
     setMessages(prev => {
