@@ -27,10 +27,7 @@ export const toggleFavoriteAction = ({
   markFavorite,
 }: {
   media: MediaGalleryFieldsFragment
-  markFavorite: useMutation.MutationFunction<
-    MarkMediaFavoriteMutation,
-    MarkMediaFavoriteMutationVariables
-  >
+  markFavorite: useMutation.MutationFunction<MarkMediaFavoriteMutation, MarkMediaFavoriteMutationVariables>
 }) => {
   return markFavorite({
     variables: {
