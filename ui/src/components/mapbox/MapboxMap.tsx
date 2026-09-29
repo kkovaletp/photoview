@@ -50,6 +50,8 @@ const useMapboxMap = ({
   })
 
   useEffect(() => {
+    let cancelled = false
+
     async function loadMapboxLibrary() {
       const mapbox = await import('mapbox-gl/esm')
       // Inject the CSP worker so Vite doesn't mangle the internal worker URL.
@@ -57,9 +59,18 @@ const useMapboxMap = ({
       // the worker script and refuses to execute it (MIME "text/html").
       mapbox.setWorkerUrl(MapboxWorkerUrl)
 
-      setMapboxLibrary(mapbox)
+      if (!cancelled) {
+        setMapboxLibrary(mapbox)
+      }
     }
-    loadMapboxLibrary()
+
+    void loadMapboxLibrary().catch(error => {
+      console.error('Failed to load Mapbox library', error)
+    })
+
+    return () => {
+      cancelled = true
+    }
   }, [])
 
   useEffect(() => {

@@ -9,6 +9,7 @@ import { MediaType } from '../../__generated__/globalTypes'
 import { renderWithProviders } from '../../helpers/testUtils'
 import * as authentication from '../../helpers/authentication'
 import { SidebarDownloadQueryQuery } from './__generated__/SidebarDownloadMedia'
+import { useMessageState } from '../messages/MessageState'
 
 // Mock dependencies
 vi.mock('../../helpers/authentication')
@@ -313,6 +314,46 @@ describe('SidebarMediaDownload', () => {
                 expect(globalThis.URL.createObjectURL).toHaveBeenCalled()
             })
             expect(globalThis.URL.revokeObjectURL).toHaveBeenCalled()
+        })
+
+        it('shows an error when the download request rejects', async () => {
+            const user = userEvent.setup()
+            const consoleError = vi.spyOn(console, 'error').mockImplementation(() => { })
+            mockFetch.mockRejectedValueOnce(new Error('Network unavailable'))
+
+            const DownloadErrorMessage = () => {
+                const { messages } = useMessageState()
+                return (
+                    <>
+                        {messages.map(message => (
+                            <p key={message.key}>{message.props.content}</p>
+                        ))}
+                    </>
+                )
+            }
+
+            try {
+                renderWithProviders(
+                    <>
+                        <SidebarMediaDownload
+                            media={{ ...mockMedia, downloads: [mockDownloads[0]] }}
+                        />
+                        <DownloadErrorMessage />
+                    </>,
+                    { mocks: [] }
+                )
+
+                await user.click(screen.getByText('Original').closest('tr')!)
+
+                expect(
+                    await screen.findByText(
+                        'The media download task failed with the error: Network unavailable'
+                    )
+                ).toBeInTheDocument()
+                expect(globalThis.URL.createObjectURL).not.toHaveBeenCalled()
+            } finally {
+                consoleError.mockRestore()
+            }
         })
     })
 

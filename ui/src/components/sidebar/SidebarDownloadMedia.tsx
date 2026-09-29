@@ -122,7 +122,9 @@ const downloadMediaShowProgress =
     let canceled = false
     const onDismiss = () => {
       canceled = true
-      reader.cancel('Download canceled by user')
+      void reader.cancel('Download canceled by user').catch((cancelError: unknown) => {
+        console.error('Failed to cancel media download:', cancelError)
+      })
     }
 
     if (totalBytes === 0) {
@@ -271,7 +273,23 @@ const SidebarDownloadTable = ({ rows, add, removeKey }: SidebarDownloadTableProp
   const download = downloadMedia(t, add, removeKey)
   const bytes = formatBytes(t)
   const downloadRows = rows.map(x => (
-    <SidebarTable.Row key={x.url} onClick={() => download(x.url)} tabIndex={0}>
+    <SidebarTable.Row key={x.url} onClick={() => {
+      void download(x.url).catch((downloadError: unknown) => {
+        console.error('Failed to download media:', downloadError)
+        add({
+          key: `download-${createUuid()}`,
+          type: NotificationType.Message,
+          props: {
+            negative: true,
+            header: 'Downloading media failed',
+            content: `The media download task failed with the error: ${downloadError instanceof Error
+              ? downloadError.message
+              : 'Unknown error occurred'
+              }`,
+          },
+        })
+      })
+    }} tabIndex={0}>
       <td className="pl-4 py-2">{`${x.title}`}</td>
       <td className="py-2">{`${x.width} x ${x.height}`}</td>
       <td className="py-2">{`${bytes(x.fileSize)}`}</td>
@@ -316,8 +334,12 @@ const SidebarMediaDownload = ({ media }: SidebarMediaDownladProps) => {
 
   useEffect(() => {
     if (media?.id && !media.downloads && !loading && !error && data?.media?.id !== media.id) {
-      loadPhotoDownloads({
-        variables: { mediaId: media.id }
+      void loadPhotoDownloads({
+        variables: { mediaId: media.id },
+      }).catch((queryError: unknown) => {
+        // Apollo aborts an in-flight query when the component unmounts.
+        if (queryError instanceof Error) return
+        console.error('Failed to load download options:', queryError)
       })
     }
   }, [media?.id, media?.downloads, loading, error, data?.media?.id, loadPhotoDownloads])
@@ -325,7 +347,6 @@ const SidebarMediaDownload = ({ media }: SidebarMediaDownladProps) => {
   if (!media?.id) return null
 
   if (error && !loading) {
-    console.error('Failed to load download options: ', error)
     return (
       <SidebarSection>
         <SidebarSectionTitle>
