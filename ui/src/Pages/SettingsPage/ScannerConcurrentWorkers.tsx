@@ -93,7 +93,10 @@ export const ScannerConcurrentWorkers = () => {
       variables: { workers: next },
     }).then(res => {
       if (!res.data || res.error) {
-        throw res.error ?? new Error('GraphQL error while updating concurrent workers')
+        throw new Error(
+          res.error?.message ?? 'GraphQL error while updating concurrent workers',
+          { cause: res.error }
+        )
       }
       const newValue = res.data.setScannerConcurrentWorkers
       workerAmountServerValue.current = newValue

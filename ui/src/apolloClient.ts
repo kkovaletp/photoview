@@ -277,9 +277,7 @@ const link = ApolloLink.split(
  * @param networkError - The network error potentially containing server error details.
  * @returns An array of error objects from the server, or an empty array if none are found.
  */
-export function getServerErrorMessages(
-  networkError: Error | undefined
-): GraphQLError[] {
+export function getServerErrorMessages(networkError: Error | undefined): GraphQLError[] {
   if (!ServerError.is(networkError)) return []
 
   try {

@@ -104,8 +104,7 @@ const UserPreferences = () => {
 
   const { data } = useQuery(MY_USER_PREFERENCES)
 
-  const [changePrefs, { loading: loadingPrefs, error }] = useMutation(
-    CHANGE_USER_PREFERENCES,
+  const [changePrefs, { loading: loadingPrefs, error }] = useMutation(CHANGE_USER_PREFERENCES,
     { errorPolicy: 'all' }
   )
 
