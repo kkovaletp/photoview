@@ -138,7 +138,8 @@ const downloadMediaShowProgress =
           means that there is an unknown lower-level error.`,
         },
       });
-      throw new Error('Content length of the downloaded media is 0.')
+      console.error('Content length of the downloaded media is 0.')
+      return
     }
 
     add({
@@ -338,7 +339,7 @@ const SidebarMediaDownload = ({ media }: SidebarMediaDownladProps) => {
         variables: { mediaId: media.id },
       }).catch((queryError: unknown) => {
         // Apollo aborts an in-flight query when the component unmounts.
-        if (queryError instanceof Error) return
+        if (queryError instanceof Error && queryError.name === 'AbortError') return
         console.error('Failed to load download options:', queryError)
       })
     }
