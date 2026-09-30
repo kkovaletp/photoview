@@ -1,14 +1,21 @@
 import { useState, useRef, useEffect, ReactNode, ChangeEvent, Dispatch, SetStateAction } from 'react'
 import styled from 'styled-components'
-import { useLazyQuery, gql } from '@apollo/client'
+import { gql, type TypedDocumentNode } from '@apollo/client'
+import { useLazyQuery } from '@apollo/client/react'
 import { debounce, DebouncedFn } from '../../helpers/utils'
 import { ProtectedImage } from '../photoGallery/ProtectedMedia'
 import { NavLink, useNavigate, useLocation } from 'react-router'
 import { useTranslation } from 'react-i18next'
-import { SearchQueryQuery } from './__generated__/Searchbar'
+import {
+  SearchQueryQuery,
+  SearchQueryQueryVariables,
+} from './__generated__/Searchbar'
 import { clsx } from 'clsx'
 
-const SEARCH_QUERY = gql`
+const SEARCH_QUERY: TypedDocumentNode<
+  SearchQueryQuery,
+  SearchQueryQueryVariables
+> = gql`
   query searchQuery($query: String!) {
     search(query: $query) {
       query
@@ -41,7 +48,7 @@ const SearchWrapper = styled.div.attrs({
 
 const SearchBar = () => {
   const { t } = useTranslation()
-  const [fetchSearches, fetchResult] = useLazyQuery<SearchQueryQuery>(SEARCH_QUERY)
+  const [fetchSearches, fetchResult] = useLazyQuery(SEARCH_QUERY)
   const [query, setQuery] = useState('')
   const [fetched, setFetched] = useState(false)
   const [expanded, setExpanded] = useState(false)

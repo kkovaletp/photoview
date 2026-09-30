@@ -4,9 +4,13 @@ import { Link } from 'react-router'
 import styled from 'styled-components'
 import { SidebarContext } from '../sidebar/Sidebar'
 import AlbumSidebar from '../sidebar/AlbumSidebar'
-import { useLazyQuery, gql } from '@apollo/client'
+import { gql, type TypedDocumentNode } from '@apollo/client'
+import { useLazyQuery } from '@apollo/client/react'
 import { authToken } from '../../helpers/authentication'
-import { AlbumPathQueryQuery } from './__generated__/AlbumTitle'
+import {
+  AlbumPathQueryQuery,
+  AlbumPathQueryQueryVariables,
+} from './__generated__/AlbumTitle'
 import useDelay from '../../hooks/useDelay'
 
 import GearIcon from './icons/gear.svg?react'
@@ -27,7 +31,10 @@ export const BreadcrumbList = styled.ol<{ $hideLastArrow?: boolean }>`
   }
 `
 
-const ALBUM_PATH_QUERY = gql`
+const ALBUM_PATH_QUERY: TypedDocumentNode<
+  AlbumPathQueryQuery,
+  AlbumPathQueryQueryVariables
+> = gql`
   query albumPathQuery($id: ID!) {
     album(id: $id) {
       id
@@ -48,8 +55,7 @@ type AlbumTitleProps = {
 }
 
 const AlbumTitle = ({ album, disableLink = false }: AlbumTitleProps) => {
-  const [fetchPath, { data: pathData }] =
-    useLazyQuery<AlbumPathQueryQuery>(ALBUM_PATH_QUERY)
+  const [fetchPath, { data: pathData }] = useLazyQuery(ALBUM_PATH_QUERY)
   const { t } = useTranslation()
   const { updateSidebar } = useContext(SidebarContext)
   const token = authToken()

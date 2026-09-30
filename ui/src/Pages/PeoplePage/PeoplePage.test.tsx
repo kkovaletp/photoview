@@ -214,7 +214,7 @@ describe('FaceDetails component', () => {
             label: 'John Doe',
           },
         },
-        newData: vi.fn(() => ({
+        result: vi.fn(() => ({
           data: {
             setFaceGroupLabel: {
               __typename: 'FaceGroup' as const,
@@ -243,7 +243,7 @@ describe('FaceDetails component', () => {
     fireEvent.keyUp(input, { key: 'Enter', code: 'Enter' })
 
     await waitFor(() => {
-      expect(graphqlMocks[0].newData).toHaveBeenCalled()
+      expect(graphqlMocks[0].result).toHaveBeenCalled()
     })
   })
 
@@ -387,7 +387,7 @@ describe('PeoplePage - recognize unlabeled faces button', () => {
           query: MY_FACES_QUERY,
           variables: { limit: 50, offset: 0 },
         },
-        newData: refetchSpy,
+        result: refetchSpy,
       },
     ]
 

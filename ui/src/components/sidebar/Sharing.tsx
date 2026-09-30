@@ -1,11 +1,6 @@
 import { useEffect, useState } from 'react'
-import {
-  useMutation,
-  useQuery,
-  gql,
-  useLazyQuery,
-  DocumentNode,
-} from '@apollo/client'
+import { gql, DocumentNode, type TypedDocumentNode } from '@apollo/client'
+import { useMutation, useQuery, useLazyQuery } from '@apollo/client/react'
 import copy from 'copy-to-clipboard'
 import { useTranslation } from 'react-i18next'
 import { Popover, PopoverButton, PopoverPanel } from '@headlessui/react'
@@ -40,7 +35,10 @@ import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import dayjs from 'dayjs'
 
-const SHARE_PHOTO_QUERY = gql`
+const SHARE_PHOTO_QUERY: TypedDocumentNode<
+  SidebarGetPhotoSharesQuery,
+  SidebarGetPhotoSharesQueryVariables
+> = gql`
   query sidebarGetPhotoShares($id: ID!) {
     media(id: $id) {
       id
@@ -55,7 +53,10 @@ const SHARE_PHOTO_QUERY = gql`
   }
 `
 
-export const SHARE_ALBUM_QUERY = gql`
+export const SHARE_ALBUM_QUERY: TypedDocumentNode<
+  SidebarGetAlbumSharesQuery,
+  SidebarGetAlbumSharesQueryVariables
+> = gql`
   query sidebarGetAlbumShares($id: ID!) {
     album(id: $id) {
       id
@@ -70,7 +71,10 @@ export const SHARE_ALBUM_QUERY = gql`
   }
 `
 
-const ADD_MEDIA_SHARE_MUTATION = gql`
+const ADD_MEDIA_SHARE_MUTATION: TypedDocumentNode<
+  SidebarPhotoAddShareMutation,
+  SidebarPhotoAddShareMutationVariables
+> = gql`
   mutation sidebarPhotoAddShare($id: ID!, $password: String, $expire: Time) {
     shareMedia(mediaId: $id, password: $password, expire: $expire) {
       token
@@ -78,7 +82,10 @@ const ADD_MEDIA_SHARE_MUTATION = gql`
   }
 `
 
-const ADD_ALBUM_SHARE_MUTATION = gql`
+const ADD_ALBUM_SHARE_MUTATION: TypedDocumentNode<
+  SidebarAlbumAddShareMutation,
+  SidebarAlbumAddShareMutationVariables
+> = gql`
   mutation sidebarAlbumAddShare($id: ID!, $password: String, $expire: Time) {
     shareAlbum(albumId: $id, password: $password, expire: $expire) {
       token
@@ -86,7 +93,10 @@ const ADD_ALBUM_SHARE_MUTATION = gql`
   }
 `
 
-const PROTECT_SHARE_MUTATION = gql`
+const PROTECT_SHARE_MUTATION: TypedDocumentNode<
+  SidebarProtectShareMutation,
+  SidebarProtectShareMutationVariables
+> = gql`
   mutation sidebarProtectShare($token: String!, $password: String) {
     protectShareToken(token: $token, password: $password) {
       token
@@ -95,7 +105,10 @@ const PROTECT_SHARE_MUTATION = gql`
   }
 `
 
-export const SET_SHARE_LABEL_MUTATION = gql`
+export const SET_SHARE_LABEL_MUTATION: TypedDocumentNode<
+  SidebarSetShareTokenLabelMutation,
+  SidebarSetShareTokenLabelMutationVariables
+> = gql`
   mutation sidebarSetShareTokenLabel($token: String!, $label: String) {
     setShareTokenLabel(token: $token, label: $label) {
       token
@@ -112,7 +125,10 @@ export const SET_EXPIRE_MUTATION = gql`
   }
 `
 
-const DELETE_SHARE_MUTATION = gql`
+const DELETE_SHARE_MUTATION: TypedDocumentNode<
+  SidebareDeleteShareMutation,
+  SidebareDeleteShareMutationVariables
+> = gql`
   mutation sidebareDeleteShare($token: String!) {
     deleteShareToken(token: $token) {
       token
@@ -183,10 +199,7 @@ const MorePopoverSectionLabel = ({
     setLabel(share.label ?? '')
   }, [share.label])
 
-  const [setShareLabel, { loading, error }] = useMutation<
-    SidebarSetShareTokenLabelMutation,
-    SidebarSetShareTokenLabelMutationVariables
-  >(SET_SHARE_LABEL_MUTATION, {
+  const [setShareLabel, { loading, error }] = useMutation(SET_SHARE_LABEL_MUTATION, {
     refetchQueries: [{ query, variables: { id } }],
     errorPolicy: 'all',
   })
@@ -197,6 +210,10 @@ const MorePopoverSectionLabel = ({
         token: share.token,
         label: label.trim() || null,
       },
+    }).then(result => {
+      if (result.error) {
+        console.error('Failed to update share label:', result.error)
+      }
     }).catch(error => {
       console.error('Failed to update share label:', error)
     })
@@ -242,10 +259,7 @@ const MorePopoverSectionPassword = ({
   )
   const [passwordHidden, setPasswordHidden] = useState(share.hasPassword)
 
-  const [setPassword, { loading: setPasswordLoading }] = useMutation<
-    SidebarProtectShareMutation,
-    SidebarProtectShareMutationVariables
-  >(PROTECT_SHARE_MUTATION, {
+  const [setPassword, { loading: setPasswordLoading }] = useMutation(PROTECT_SHARE_MUTATION, {
     refetchQueries: [{ query: query, variables: { id } }],
     awaitRefetchQueries: true,
   })
@@ -489,15 +503,9 @@ export const SidebarAlbumShare = ({ id }: SidebarShareAlbumProps) => {
     loading: queryLoading,
     error: sharesError,
     data: sharesData,
-  } = useQuery<SidebarGetAlbumSharesQuery, SidebarGetAlbumSharesQueryVariables>(
-    SHARE_ALBUM_QUERY,
-    { variables: { id } }
-  )
+  } = useQuery(SHARE_ALBUM_QUERY, { variables: { id } })
 
-  const [shareAlbum, { loading: mutationLoading }] = useMutation<
-    SidebarAlbumAddShareMutation,
-    SidebarAlbumAddShareMutationVariables
-  >(ADD_ALBUM_SHARE_MUTATION, {
+  const [shareAlbum, { loading: mutationLoading }] = useMutation(ADD_ALBUM_SHARE_MUTATION, {
     refetchQueries: [{ query: SHARE_ALBUM_QUERY, variables: { id } }],
     awaitRefetchQueries: true,
   })
@@ -533,14 +541,9 @@ export const SidebarPhotoShare = ({ id }: SidebarSharePhotoProps) => {
   const [
     loadShares,
     { loading: queryLoading, error: sharesError, data: sharesData },
-  ] = useLazyQuery<SidebarGetPhotoSharesQuery, SidebarGetPhotoSharesQueryVariables>(
-    SHARE_PHOTO_QUERY
-  )
+  ] = useLazyQuery(SHARE_PHOTO_QUERY)
 
-  const [sharePhoto, { loading: mutationLoading }] = useMutation<
-    SidebarPhotoAddShareMutation,
-    SidebarPhotoAddShareMutationVariables
-  >(ADD_MEDIA_SHARE_MUTATION, {
+  const [sharePhoto, { loading: mutationLoading }] = useMutation(ADD_MEDIA_SHARE_MUTATION, {
     refetchQueries: [{ query: SHARE_PHOTO_QUERY, variables: { id } }],
     awaitRefetchQueries: true,
   })
@@ -596,10 +599,7 @@ const SidebarShare = ({
 
   const query = isPhoto ? SHARE_PHOTO_QUERY : SHARE_ALBUM_QUERY
 
-  const [deleteShare] = useMutation<
-    SidebareDeleteShareMutation,
-    SidebareDeleteShareMutationVariables
-  >(DELETE_SHARE_MUTATION, {
+  const [deleteShare] = useMutation(DELETE_SHARE_MUTATION, {
     refetchQueries: [{ query: query, variables: { id } }],
     awaitRefetchQueries: true,
   })

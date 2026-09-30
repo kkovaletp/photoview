@@ -1,11 +1,34 @@
 import { vi, describe, test, expect, beforeEach, afterEach } from 'vitest'
-import { render, screen, waitFor } from '@testing-library/react'
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router'
-import * as Apollo from '@apollo/client'
 import SearchBar, { AlbumRow, PhotoRow, searchHighlighted } from './Searchbar'
 import * as utils from '../../helpers/utils'
 import { SearchQueryQuery } from './__generated__/Searchbar'
+
+type MockSearchData = {
+    search: Pick<SearchQueryQuery['search'], 'query' | 'albums' | 'media'>
+}
+
+type MockLazyQueryResult = {
+    loading: boolean
+    data: MockSearchData | null
+}
+
+type MockLazyQuery = () => [
+    ReturnType<typeof vi.fn>,
+    MockLazyQueryResult,
+]
+
+const mockUseLazyQuery = vi.hoisted(() => vi.fn<MockLazyQuery>());
+
+vi.mock('@apollo/client/react', async importOriginal => {
+    const actual = await importOriginal<typeof import('@apollo/client/react')>()
+    return {
+        ...actual,
+        useLazyQuery: mockUseLazyQuery,
+    }
+});
 
 // Mock the debounce function with a direct implementation
 vi.mock('../../helpers/utils', () => ({
@@ -81,7 +104,7 @@ const sampleMedia = [
 describe('SearchBar Component', () => {
     // For each test, set up a new mock implementation of useLazyQuery
     let fetchSearchMock: ReturnType<typeof vi.fn>;
-    let mockSearchData: any;
+    let mockSearchData: MockSearchData | null;
     let mockLoading: boolean;
 
     beforeEach(() => {
@@ -90,18 +113,17 @@ describe('SearchBar Component', () => {
         mockLoading = false;
 
         // Mock useLazyQuery to return our controlled variables
-        vi.spyOn(Apollo, 'useLazyQuery').mockImplementation(() => {
-            return [
-                fetchSearchMock,
-                { loading: mockLoading, data: mockSearchData }
-            ] as any;
-        });
+        mockUseLazyQuery.mockImplementation(() => [
+            fetchSearchMock,
+            { loading: mockLoading, data: mockSearchData },
+        ])
 
         // Reset all mocks
         vi.clearAllMocks();
     });
 
     afterEach(() => {
+        vi.useRealTimers();
         vi.restoreAllMocks();
     });
 
@@ -130,6 +152,30 @@ describe('SearchBar Component', () => {
 
         expect(searchInput).toHaveValue('test');
         expect(fetchSearchMock).toHaveBeenCalledWith({ variables: { query: 'test' } });
+    });
+
+    test('sends the trimmed query after 250 ms and displays returned results', async () => {
+        const actualUtils = await vi.importActual<typeof import('../../helpers/utils')>('../../helpers/utils');
+        vi.mocked(utils.debounce).mockImplementationOnce(actualUtils.debounce);
+        vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
+
+        fetchSearchMock.mockImplementation(({ variables }: { variables: { query: string } }) => {
+            mockSearchData = {
+                search: { query: variables.query, albums: sampleAlbums, media: sampleMedia },
+            };
+        });
+
+        render(<MemoryRouter><SearchBar /></MemoryRouter>);
+        fireEvent.change(screen.getByRole('combobox'), { target: { value: '  beach  ' } });
+
+        act(() => { vi.advanceTimersByTime(249); });
+        expect(fetchSearchMock).not.toHaveBeenCalled();
+        expect(screen.queryByText('Vacation Photos')).not.toBeInTheDocument();
+
+        act(() => { vi.advanceTimersByTime(1); });
+        expect(fetchSearchMock).toHaveBeenCalledExactlyOnceWith({ variables: { query: 'beach' } });
+        expect(screen.getByText('Vacation Photos')).toBeInTheDocument();
+        expect(screen.getByText('Mountain View')).toBeInTheDocument();
     });
 
     test('calls fetch function with correct parameters when typing', async () => {
@@ -167,16 +213,13 @@ describe('SearchBar Component', () => {
     });
 
     test('shows no results message when search is empty', async () => {
-        // Set up mock to return empty results
-        fetchSearchMock = vi.fn().mockImplementation(() => {
-            mockSearchData = {
-                search: {
-                    query: 'empty',
-                    albums: [],
-                    media: []
-                }
-            };
-        });
+        mockSearchData = {
+            search: {
+                query: 'empty',
+                albums: [],
+                media: [],
+            },
+        }
 
         render(
             <MemoryRouter>

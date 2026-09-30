@@ -117,8 +117,8 @@ const PersonMoreMenu = ({
           variables: { id: face.media.id },
         },
       ],
-    }).then(({ data, errors }) => {
-      if ((errors?.length ?? 0) > 0) return
+    }).then(({ data, error }) => {
+      if (error) return
       if (!data?.detachImageFaces) {
         console.error('Detach image face returned no destination group', {
           faceId: face.id,

@@ -1,9 +1,11 @@
 import { useEffect, useRef, useState } from 'react'
-import { gql, useMutation, useQuery } from '@apollo/client'
+import { gql, type TypedDocumentNode } from '@apollo/client'
+import { useMutation, useQuery } from '@apollo/client/react'
 import { InputLabelDescription, InputLabelTitle } from './SettingsPage'
 import { useTranslation } from 'react-i18next'
 import {
   ScanIntervalQueryQuery,
+  ScanIntervalQueryQueryVariables,
   ChangeScanIntervalMutationMutation,
   ChangeScanIntervalMutationMutationVariables,
 } from './__generated__/PeriodicScanner'
@@ -12,7 +14,10 @@ import { TextField } from '../../primitives/form/Input'
 import Dropdown, { DropdownItem } from '../../primitives/form/Dropdown'
 import Loader from '../../primitives/Loader'
 
-export const SCAN_INTERVAL_QUERY = gql`
+export const SCAN_INTERVAL_QUERY: TypedDocumentNode<
+  ScanIntervalQueryQuery,
+  ScanIntervalQueryQueryVariables
+> = gql`
   query scanIntervalQuery {
     siteInfo {
       periodicScanInterval
@@ -20,7 +25,10 @@ export const SCAN_INTERVAL_QUERY = gql`
   }
 `
 
-export const SCAN_INTERVAL_MUTATION = gql`
+export const SCAN_INTERVAL_MUTATION: TypedDocumentNode<
+  ChangeScanIntervalMutationMutation,
+  ChangeScanIntervalMutationMutationVariables
+> = gql`
   mutation changeScanIntervalMutation($interval: Int!) {
     setPeriodicScanInterval(interval: $interval)
   }
@@ -105,7 +113,7 @@ const PeriodicScanner = () => {
 
   const scanIntervalServerValue = useRef<number | null>(null)
   const hasInitialized = useRef(false)
-  const { data, loading, error } = useQuery<ScanIntervalQueryQuery>(SCAN_INTERVAL_QUERY)
+  const { data, loading, error } = useQuery(SCAN_INTERVAL_QUERY)
 
   useEffect(() => {
     if (error) {
@@ -136,11 +144,7 @@ const PeriodicScanner = () => {
     }
   }, [data, error])
 
-  const [setScanIntervalMutation, { loading: scanIntervalMutationLoading }] =
-    useMutation<
-      ChangeScanIntervalMutationMutation,
-      ChangeScanIntervalMutationMutationVariables
-    >(SCAN_INTERVAL_MUTATION)
+  const [setScanIntervalMutation, { loading: scanIntervalMutationLoading }] = useMutation(SCAN_INTERVAL_MUTATION)
 
   const onScanIntervalCheckboxChange = (checked: boolean) => {
     setEnablePeriodicScanner(checked)

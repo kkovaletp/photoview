@@ -1,4 +1,4 @@
-import { MockedProvider } from '@apollo/client/testing'
+import { MockedProvider } from '@apollo/client/testing/react'
 import { render } from '@testing-library/react'
 import { MessageProvider } from '../components/messages/MessageState'
 import { MemoryRouter, Route, Routes, Location } from 'react-router'

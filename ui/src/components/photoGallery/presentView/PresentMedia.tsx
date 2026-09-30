@@ -61,9 +61,10 @@ const PresentMedia = ({
       )
     case MediaType.Video:
       return <StyledVideo media={media} data-testid="present-video" />
-  }
 
-  exhaustiveCheck(media.type)
+    default:
+      exhaustiveCheck(media.type)
+  }
 }
 
 export default PresentMedia

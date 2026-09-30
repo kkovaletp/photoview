@@ -1,7 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { ApolloError } from '@apollo/client'
 import MediaSidebarPeople from './MediaSidebarPeople'
 import { renderWithProviders } from '../../../helpers/testUtils'
 import { MediaType } from '../../../__generated__/globalTypes'
@@ -13,7 +12,7 @@ import { MediaSidebarMedia } from './MediaSidebar'
 const { mockDetachImageFaces, mockDetachHookState } = vi.hoisted(() => ({
     mockDetachImageFaces: vi.fn(),
     mockDetachHookState: {
-        error: undefined as ApolloError | undefined,
+        error: undefined as Error | undefined,
     },
 }))
 
@@ -504,9 +503,7 @@ describe('MediaSidebarPeople', () => {
     // ── detachError from the hook ──────────────────────────────────────────────
 
     it('should show the hook-level detachError in the alert when there is no inlineError', async () => {
-        mockDetachHookState.error = new ApolloError({
-            errorMessage: 'Hook-level network error',
-        })
+        mockDetachHookState.error = new Error('Hook-level network error',)
 
         const media = createMockMedia(threeDefaultFaces)
         renderWithProviders(<MediaSidebarPeople media={media} />)
@@ -518,9 +515,7 @@ describe('MediaSidebarPeople', () => {
 
     it('should prefer inlineError over the hook-level detachError when both are present', async () => {
         mockDetachImageFaces.mockRejectedValue(new Error('Inline error wins'))
-        mockDetachHookState.error = new ApolloError({
-            errorMessage: 'Hook error should be shadowed',
-        })
+        mockDetachHookState.error = new Error('Hook error should be shadowed')
 
         const media = createMockMedia(threeDefaultFaces)
         const user = userEvent.setup()

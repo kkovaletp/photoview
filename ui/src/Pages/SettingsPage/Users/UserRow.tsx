@@ -1,10 +1,6 @@
 import { useState, Dispatch, SetStateAction } from 'react'
-import {
-  FetchResult,
-  gql,
-  MutationFunctionOptions,
-  useMutation,
-} from '@apollo/client'
+import { ApolloLink, gql, type TypedDocumentNode, type OperationVariables } from '@apollo/client'
+import { useMutation } from '@apollo/client/react'
 import EditUserRow from './EditUserRow'
 import ViewUserRow from './ViewUserRow'
 import { SettingsUsersQueryQuery } from './__generated__/UsersTable'
@@ -15,7 +11,10 @@ import {
 } from './__generated__/UserRow'
 import { useNotifyError } from '../../../hooks/useNotifyError'
 
-const updateUserMutation = gql`
+const updateUserMutation: TypedDocumentNode<
+  UpdateUserMutation,
+  UpdateUserMutationVariables
+> = gql`
   mutation updateUser($id: ID!, $username: String, $admin: Boolean) {
     updateUser(id: $id, username: $username, admin: $admin) {
       id
@@ -25,7 +24,10 @@ const updateUserMutation = gql`
   }
 `
 
-const deleteUserMutation = gql`
+const deleteUserMutation: TypedDocumentNode<
+  DeleteUserMutation,
+  DeleteUserMutationVariables
+> = gql`
   mutation deleteUser($id: ID!) {
     deleteUser(id: $id) {
       id
@@ -34,7 +36,10 @@ const deleteUserMutation = gql`
   }
 `
 
-const scanUserMutation = gql`
+const scanUserMutation: TypedDocumentNode<
+  ScanUserMutation,
+  ScanUserMutationVariables
+> = gql`
   mutation scanUser($userId: ID!) {
     scanUser(userId: $userId) {
       success
@@ -49,10 +54,14 @@ interface UserRowState extends UserBase {
   oldState?: Omit<UserRowState, 'oldState'>
 }
 
-type ApolloMutationFn<MutationType, VariablesType> = (
-  options?: MutationFunctionOptions<MutationType, VariablesType>
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-) => Promise<FetchResult<MutationType, any, any>>
+type ApolloMutationFn<
+  MutationType,
+  VariablesType extends OperationVariables,
+> = (
+  options: useMutation.MutationFunctionOptions<MutationType, VariablesType> & {
+    variables: VariablesType
+  }
+) => Promise<ApolloLink.Result<MutationType>>
 
 export type UserRowChildProps = {
   user: SettingsUsersQueryQuery['user'][0]
@@ -84,17 +93,10 @@ const UserRow = ({ user, refetchUsers }: UserRowProps) => {
 
   const [showConfirmDelete, setShowConfirmDelete] = useState(false)
   const [showChangePassword, setShowChangePassword] = useState(false)
-  const [updateUserMutationFn, { loading: updateUserLoading }] = useMutation<
-    UpdateUserMutation,
-    UpdateUserMutationVariables
-  >(updateUserMutation)
 
-  const [deleteUserMutationFn] = useMutation<DeleteUserMutation, DeleteUserMutationVariables>(deleteUserMutation)
-
-  const [scanUserMutationFn, { called: scanUserCalled }] = useMutation<
-    ScanUserMutation,
-    ScanUserMutationVariables
-  >(scanUserMutation)
+  const [updateUserMutationFn, { loading: updateUserLoading }] = useMutation(updateUserMutation)
+  const [deleteUserMutationFn] = useMutation(deleteUserMutation)
+  const [scanUserMutationFn, { called: scanUserCalled }] = useMutation(scanUserMutation)
 
   const updateUser: ApolloMutationFn<UpdateUserMutation, UpdateUserMutationVariables> = async (
     options
@@ -114,7 +116,7 @@ const UserRow = ({ user, refetchUsers }: UserRowProps) => {
     } catch (error) {
       console.error('Failed to update user: ', error)
       notifyError('Failed to update user', error)
-      return { data: undefined, errors: undefined } as FetchResult<UpdateUserMutation>
+      return { data: undefined, errors: undefined } as ApolloLink.Result<UpdateUserMutation>
     }
   }
 
@@ -131,7 +133,7 @@ const UserRow = ({ user, refetchUsers }: UserRowProps) => {
     } catch (error) {
       console.error('Failed to delete user: ', error)
       notifyError('Failed to delete user', error)
-      return { data: undefined, errors: undefined } as FetchResult<DeleteUserMutation>
+      return { data: undefined, errors: undefined } as ApolloLink.Result<DeleteUserMutation>
     }
   }
 
@@ -148,7 +150,7 @@ const UserRow = ({ user, refetchUsers }: UserRowProps) => {
     } catch (error) {
       console.error('Failed to scan user: ', error)
       notifyError('Failed to scan user', error)
-      return { data: undefined, errors: undefined } as FetchResult<ScanUserMutation>
+      return { data: undefined, errors: undefined } as ApolloLink.Result<ScanUserMutation>
     }
   }
 

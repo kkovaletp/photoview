@@ -1,14 +1,12 @@
-import { gql, useLazyQuery, useMutation } from '@apollo/client'
+import { gql, type TypedDocumentNode } from '@apollo/client'
+import { useLazyQuery, useMutation } from '@apollo/client/react'
 import { useEffect, useState, Dispatch, SetStateAction } from 'react'
 import { useNavigate } from 'react-router'
 import SelectFaceGroupTable from './SelectFaceGroupTable'
 import SelectImageFacesTable from './SelectImageFacesTable'
 import { MY_FACES_QUERY } from '../PeoplePage'
 import { SINGLE_FACE_GROUP } from './singleFaceGroupQuery'
-import {
-  MyFacesQuery,
-  MyFacesQueryVariables
-} from '../__generated__/PeoplePage'
+import { MyFacesQuery } from '../__generated__/PeoplePage'
 import { isNil } from '../../../helpers/utils'
 import {
   MoveImageFacesMutation,
@@ -18,7 +16,10 @@ import { useTranslation } from 'react-i18next'
 import Modal, { ModalAction } from '../../../primitives/Modal'
 import { SingleFaceGroupQuery } from './__generated__/singleFaceGroupQuery'
 
-const MOVE_IMAGE_FACES_MUTATION = gql`
+const MOVE_IMAGE_FACES_MUTATION: TypedDocumentNode<
+  MoveImageFacesMutation,
+  MoveImageFacesMutationVariables
+> = gql`
   mutation moveImageFaces($faceIDs: [ID!]!, $destFaceGroupID: ID!) {
     moveImageFaces(
       imageFaceIDs: $faceIDs
@@ -64,17 +65,15 @@ const MoveImageFacesModal = ({
   const [imagesSelected, setImagesSelected] = useState(false)
   const navigate = useNavigate()
 
-  const [moveImageFacesMutation, { error: moveError, reset: resetMoveImageFaces }] = useMutation<
-    MoveImageFacesMutation,
-    MoveImageFacesMutationVariables
-  >(MOVE_IMAGE_FACES_MUTATION, {
+  const [
+    moveImageFacesMutation,
+    { error: moveError, reset: resetMoveImageFaces },
+  ] = useMutation(MOVE_IMAGE_FACES_MUTATION, {
     errorPolicy: 'all',
   })
 
-  const [loadFaceGroups, { data: faceGroupsData, error: loadError }] = useLazyQuery<
-    MyFacesQuery,
-    MyFacesQueryVariables
-  >(MY_FACES_QUERY)
+  const [loadFaceGroups, { data: faceGroupsData, error: loadError }] =
+    useLazyQuery(MY_FACES_QUERY)
 
   useEffect(() => {
     if (!open || isNil(preselectedImageFaces) || preselectedImageFaces.length === 0) return
@@ -144,8 +143,8 @@ const MoveImageFacesModal = ({
         ]
       },
       awaitRefetchQueries: true,
-    }).then(({ data, errors }) => {
-      if (!data?.moveImageFaces || (errors?.length ?? 0) > 0) return
+    }).then(({ data, error }) => {
+      if (!data?.moveImageFaces || error) return
       setOpen(false)
       navigate(`/people/${destinationFaceGroupId}`)
     }).catch((e) => {

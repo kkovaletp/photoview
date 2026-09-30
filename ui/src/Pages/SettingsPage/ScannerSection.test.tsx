@@ -2,7 +2,7 @@ import { describe, test, expect, vi, beforeEach, afterEach } from 'vitest'
 import { screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { gql } from '@apollo/client'
-import type { MockedResponse } from '@apollo/client/testing'
+import type { MockLink } from '@apollo/client/testing'
 
 import { renderWithProviders } from '../../helpers/testUtils'
 import ScannerSection from './ScannerSection'
@@ -126,7 +126,7 @@ describe('ScannerSection', () => {
         const user = userEvent.setup()
         let called = 0
 
-        const mocks: MockedResponse[] = [
+        const mocks: MockLink.MockedResponse[] = [
             {
                 request: { query: SCAN_MUTATION },
                 result: () => {
@@ -165,7 +165,7 @@ describe('ScannerSection', () => {
         const user = userEvent.setup()
         const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => { })
 
-        const mocks: MockedResponse[] = [
+        const mocks: MockLink.MockedResponse[] = [
             {
                 request: { query: SCAN_MUTATION },
                 // GraphQL error causes the mutation promise to reject by default

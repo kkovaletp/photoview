@@ -1,15 +1,22 @@
 import { useState, useRef, useEffect, forwardRef, HTMLProps } from 'react'
-import { gql, useQuery } from '@apollo/client'
+import { gql, type TypedDocumentNode } from '@apollo/client'
+import { useQuery } from '@apollo/client/react'
 import type * as mapboxgl from 'mapbox-gl/esm'
 import MapboxWorkerUrl from 'mapbox-gl/dist/mapbox-gl-csp-worker?url'
 import styled from 'styled-components'
 
 import 'mapbox-gl/dist/mapbox-gl.css'
-import { MapboxTokenQuery } from './__generated__/MapboxMap'
+import {
+  MapboxTokenQuery,
+  MapboxTokenQueryVariables,
+} from './__generated__/MapboxMap'
 import { isDarkMode } from '../../theme'
 import { SetMapLanguages } from '../../localization'
 
-const MAPBOX_TOKEN_QUERY = gql`
+const MAPBOX_TOKEN_QUERY: TypedDocumentNode<
+  MapboxTokenQuery,
+  MapboxTokenQueryVariables
+> = gql`
   query mapboxToken {
     mapboxToken
     myMediaGeoJson
@@ -38,11 +45,13 @@ const useMapboxMap = ({
   const mapContainer = useRef<HTMLDivElement | null>(null)
   const map = useRef<mapboxgl.Map | null>(null)
 
-  const { data: mapboxData } = useQuery<MapboxTokenQuery>(MAPBOX_TOKEN_QUERY, {
+  const { data: mapboxData } = useQuery(MAPBOX_TOKEN_QUERY, {
     fetchPolicy: 'cache-first',
   })
 
   useEffect(() => {
+    let cancelled = false
+
     async function loadMapboxLibrary() {
       const mapbox = await import('mapbox-gl/esm')
       // Inject the CSP worker so Vite doesn't mangle the internal worker URL.
@@ -50,9 +59,18 @@ const useMapboxMap = ({
       // the worker script and refuses to execute it (MIME "text/html").
       mapbox.setWorkerUrl(MapboxWorkerUrl)
 
-      setMapboxLibrary(mapbox)
+      if (!cancelled) {
+        setMapboxLibrary(mapbox)
+      }
     }
-    loadMapboxLibrary()
+
+    void loadMapboxLibrary().catch(error => {
+      console.error('Failed to load Mapbox library', error)
+    })
+
+    return () => {
+      cancelled = true
+    }
   }, [])
 
   useEffect(() => {

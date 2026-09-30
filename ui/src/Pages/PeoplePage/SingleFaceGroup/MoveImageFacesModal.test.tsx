@@ -1,6 +1,6 @@
 import { vi, describe, test, beforeAll, afterAll, beforeEach, expect } from 'vitest'
 import { render, fireEvent, screen, waitFor } from '@testing-library/react'
-import { MockedProvider } from '@apollo/client/testing'
+import { MockedProvider } from '@apollo/client/testing/react'
 import { gql } from '@apollo/client'
 import { GraphQLError } from 'graphql'
 import MoveImageFacesModal from './MoveImageFacesModal'

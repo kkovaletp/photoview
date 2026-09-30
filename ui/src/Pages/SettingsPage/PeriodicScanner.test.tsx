@@ -1,7 +1,7 @@
 import { describe, test, expect, vi, beforeEach, afterEach } from 'vitest'
 import { screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { MockedResponse } from '@apollo/client/testing'
+import { MockLink } from '@apollo/client/testing'
 import { GraphQLError } from 'graphql'
 import PeriodicScanner, {
   SCAN_INTERVAL_MUTATION,
@@ -22,7 +22,7 @@ describe('PeriodicScanner', () => {
 
   describe('Query Loading', () => {
     test('displays loading state initially', () => {
-      const mocks: MockedResponse[] = [
+      const mocks: MockLink.MockedResponse[] = [
         {
           request: {
             query: SCAN_INTERVAL_QUERY,
@@ -43,7 +43,7 @@ describe('PeriodicScanner', () => {
     })
 
     test('loads and displays disabled scanner when interval is zero', async () => {
-      const mocks: MockedResponse[] = [
+      const mocks: MockLink.MockedResponse[] = [
         {
           request: {
             query: SCAN_INTERVAL_QUERY,
@@ -70,7 +70,7 @@ describe('PeriodicScanner', () => {
     })
 
     test('loads and displays enabled scanner with interval', async () => {
-      const mocks: MockedResponse[] = [
+      const mocks: MockLink.MockedResponse[] = [
         {
           request: {
             query: SCAN_INTERVAL_QUERY,
@@ -101,7 +101,7 @@ describe('PeriodicScanner', () => {
 
   describe('Error Handling', () => {
     test('displays error message when query fails', async () => {
-      const mocks: MockedResponse[] = [
+      const mocks: MockLink.MockedResponse[] = [
         {
           request: {
             query: SCAN_INTERVAL_QUERY,
@@ -125,7 +125,7 @@ describe('PeriodicScanner', () => {
     })
 
     test('logs error to console when query fails', async () => {
-      const mocks: MockedResponse[] = [
+      const mocks: MockLink.MockedResponse[] = [
         {
           request: {
             query: SCAN_INTERVAL_QUERY,
@@ -147,7 +147,7 @@ describe('PeriodicScanner', () => {
     })
 
     test('shows component title even when error occurs', async () => {
-      const mocks: MockedResponse[] = [
+      const mocks: MockLink.MockedResponse[] = [
         {
           request: {
             query: SCAN_INTERVAL_QUERY,
@@ -166,7 +166,7 @@ describe('PeriodicScanner', () => {
     })
 
     test('does not show form controls when error state is active', async () => {
-      const mocks: MockedResponse[] = [
+      const mocks: MockLink.MockedResponse[] = [
         {
           request: {
             query: SCAN_INTERVAL_QUERY,
@@ -189,7 +189,7 @@ describe('PeriodicScanner', () => {
     })
 
     test('handles network error correctly', async () => {
-      const mocks: MockedResponse[] = [
+      const mocks: MockLink.MockedResponse[] = [
         {
           request: {
             query: SCAN_INTERVAL_QUERY,
@@ -208,7 +208,7 @@ describe('PeriodicScanner', () => {
 
   describe('Time Unit Conversion', () => {
     test('converts seconds to minutes correctly', async () => {
-      const mocks: MockedResponse[] = [
+      const mocks: MockLink.MockedResponse[] = [
         {
           request: {
             query: SCAN_INTERVAL_QUERY,
@@ -233,7 +233,7 @@ describe('PeriodicScanner', () => {
     })
 
     test('converts to hours for hour-based intervals', async () => {
-      const mocks: MockedResponse[] = [
+      const mocks: MockLink.MockedResponse[] = [
         {
           request: {
             query: SCAN_INTERVAL_QUERY,
@@ -258,7 +258,7 @@ describe('PeriodicScanner', () => {
     })
 
     test('converts to days for day-based intervals', async () => {
-      const mocks: MockedResponse[] = [
+      const mocks: MockLink.MockedResponse[] = [
         {
           request: {
             query: SCAN_INTERVAL_QUERY,
@@ -286,7 +286,7 @@ describe('PeriodicScanner', () => {
     })
 
     test('converts to months for month-based intervals', async () => {
-      const mocks: MockedResponse[] = [
+      const mocks: MockLink.MockedResponse[] = [
         {
           request: {
             query: SCAN_INTERVAL_QUERY,
@@ -314,7 +314,7 @@ describe('PeriodicScanner', () => {
     })
 
     test('keeps seconds for intervals that do not divide evenly', async () => {
-      const mocks: MockedResponse[] = [
+      const mocks: MockLink.MockedResponse[] = [
         {
           request: {
             query: SCAN_INTERVAL_QUERY,
@@ -342,7 +342,7 @@ describe('PeriodicScanner', () => {
   describe('Enable/Disable Functionality', () => {
     test('enables input fields when checkbox is checked', async () => {
       const user = userEvent.setup()
-      const mocks: MockedResponse[] = [
+      const mocks: MockLink.MockedResponse[] = [
         {
           request: {
             query: SCAN_INTERVAL_QUERY,
@@ -388,7 +388,7 @@ describe('PeriodicScanner', () => {
 
     test('disables input fields when checkbox is unchecked', async () => {
       const user = userEvent.setup()
-      const mocks: MockedResponse[] = [
+      const mocks: MockLink.MockedResponse[] = [
         {
           request: {
             query: SCAN_INTERVAL_QUERY,
@@ -434,7 +434,7 @@ describe('PeriodicScanner', () => {
 
     test('triggers mutation with zero interval when disabled', async () => {
       const user = userEvent.setup()
-      const mocks: MockedResponse[] = [
+      const mocks: MockLink.MockedResponse[] = [
         {
           request: {
             query: SCAN_INTERVAL_QUERY,
@@ -478,7 +478,7 @@ describe('PeriodicScanner', () => {
   describe('Mutation Handling', () => {
     test('triggers mutation when Enter is pressed in input field', async () => {
       const user = userEvent.setup()
-      const mocks: MockedResponse[] = [
+      const mocks: MockLink.MockedResponse[] = [
         {
           request: {
             query: SCAN_INTERVAL_QUERY,
@@ -522,7 +522,7 @@ describe('PeriodicScanner', () => {
 
     test('triggers mutation when unit is changed', async () => {
       const user = userEvent.setup()
-      const mocks: MockedResponse[] = [
+      const mocks: MockLink.MockedResponse[] = [
         {
           request: {
             query: SCAN_INTERVAL_QUERY,
@@ -566,7 +566,7 @@ describe('PeriodicScanner', () => {
 
     test('shows loading indicator during mutation', async () => {
       const user = userEvent.setup()
-      const mocks: MockedResponse[] = [
+      const mocks: MockLink.MockedResponse[] = [
         {
           request: {
             query: SCAN_INTERVAL_QUERY,
@@ -612,7 +612,7 @@ describe('PeriodicScanner', () => {
       const user = userEvent.setup()
       let mutationCount = 0
 
-      const mocks: MockedResponse[] = [
+      const mocks: MockLink.MockedResponse[] = [
         {
           request: {
             query: SCAN_INTERVAL_QUERY,
@@ -669,7 +669,7 @@ describe('PeriodicScanner', () => {
   describe('User Interactions', () => {
     test('updates value when user types in input field', async () => {
       const user = userEvent.setup()
-      const mocks: MockedResponse[] = [
+      const mocks: MockLink.MockedResponse[] = [
         {
           request: {
             query: SCAN_INTERVAL_QUERY,
@@ -698,7 +698,7 @@ describe('PeriodicScanner', () => {
 
     test('changes unit via dropdown', async () => {
       const user = userEvent.setup()
-      const mocks: MockedResponse[] = [
+      const mocks: MockLink.MockedResponse[] = [
         {
           request: {
             query: SCAN_INTERVAL_QUERY,
@@ -737,7 +737,7 @@ describe('PeriodicScanner', () => {
 
     test('combined value and unit change triggers correct mutation', async () => {
       const user = userEvent.setup()
-      const mocks: MockedResponse[] = [
+      const mocks: MockLink.MockedResponse[] = [
         {
           request: {
             query: SCAN_INTERVAL_QUERY,
@@ -801,7 +801,7 @@ describe('PeriodicScanner', () => {
 
   describe('Loading States', () => {
     test('checkbox is disabled during query loading', () => {
-      const mocks: MockedResponse[] = [
+      const mocks: MockLink.MockedResponse[] = [
         {
           request: {
             query: SCAN_INTERVAL_QUERY,
@@ -822,7 +822,7 @@ describe('PeriodicScanner', () => {
     })
 
     test('loader shows during query', async () => {
-      const mocks: MockedResponse[] = [
+      const mocks: MockLink.MockedResponse[] = [
         {
           request: {
             query: SCAN_INTERVAL_QUERY,
@@ -850,7 +850,7 @@ describe('PeriodicScanner', () => {
 
     test('loader shows for combined query and mutation loading', async () => {
       const user = userEvent.setup()
-      const mocks: MockedResponse[] = [
+      const mocks: MockLink.MockedResponse[] = [
         {
           request: {
             query: SCAN_INTERVAL_QUERY,

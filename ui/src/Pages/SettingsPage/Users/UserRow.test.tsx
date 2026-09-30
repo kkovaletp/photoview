@@ -1,6 +1,6 @@
 import { screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { MockedResponse } from '@apollo/client/testing'
+import { MockLink } from '@apollo/client/testing'
 import { describe, test, expect, vi, beforeEach, afterEach } from 'vitest'
 import type { Mock } from 'vitest'
 import { GraphQLError } from 'graphql'
@@ -63,7 +63,7 @@ describe('UserRow', () => {
         consoleErrorSpy.mockRestore()
     })
 
-    const renderComponent = (mocks: MockedResponse[] = []) => {
+    const renderComponent = (mocks: MockLink.MockedResponse[] = []) => {
         return renderWithProviders(
             <table>
                 <tbody>
@@ -173,7 +173,7 @@ describe('UserRow', () => {
     describe('Update User Mutation', () => {
         test('successfully updates user and exits edit mode', async () => {
             const user = userEvent.setup()
-            const mocks: MockedResponse[] = [
+            const mocks: MockLink.MockedResponse[] = [
                 {
                     request: {
                         query: updateUserMutation,
@@ -228,7 +228,7 @@ describe('UserRow', () => {
 
         test('handles GraphQL error on update', async () => {
             const user = userEvent.setup()
-            const mocks: MockedResponse[] = [
+            const mocks: MockLink.MockedResponse[] = [
                 {
                     request: {
                         query: updateUserMutation,
@@ -268,7 +268,7 @@ describe('UserRow', () => {
 
         test('handles network error on update', async () => {
             const user = userEvent.setup()
-            const mocks: MockedResponse[] = [
+            const mocks: MockLink.MockedResponse[] = [
                 {
                     request: {
                         query: updateUserMutation,
@@ -302,7 +302,7 @@ describe('UserRow', () => {
 
         test('disables save button during update mutation', async () => {
             const user = userEvent.setup()
-            const mocks: MockedResponse[] = [
+            const mocks: MockLink.MockedResponse[] = [
                 {
                     request: {
                         query: updateUserMutation,
@@ -351,7 +351,7 @@ describe('UserRow', () => {
     describe('Delete User Mutation', () => {
         test('successfully deletes user', async () => {
             const user = userEvent.setup()
-            const mocks: MockedResponse[] = [
+            const mocks: MockLink.MockedResponse[] = [
                 {
                     request: {
                         query: deleteUserMutation,
@@ -391,7 +391,7 @@ describe('UserRow', () => {
 
         test('handles GraphQL error on delete', async () => {
             const user = userEvent.setup()
-            const mocks: MockedResponse[] = [
+            const mocks: MockLink.MockedResponse[] = [
                 {
                     request: {
                         query: deleteUserMutation,
@@ -427,7 +427,7 @@ describe('UserRow', () => {
 
         test('handles network error on delete', async () => {
             const user = userEvent.setup()
-            const mocks: MockedResponse[] = [
+            const mocks: MockLink.MockedResponse[] = [
                 {
                     request: {
                         query: deleteUserMutation,
@@ -487,7 +487,7 @@ describe('UserRow', () => {
     describe('Scan User Mutation', () => {
         test('successfully scans user', async () => {
             const user = userEvent.setup()
-            const mocks: MockedResponse[] = [
+            const mocks: MockLink.MockedResponse[] = [
                 {
                     request: {
                         query: scanUserMutation,
@@ -518,7 +518,7 @@ describe('UserRow', () => {
 
         test('handles GraphQL error on scan', async () => {
             const user = userEvent.setup()
-            const mocks: MockedResponse[] = [
+            const mocks: MockLink.MockedResponse[] = [
                 {
                     request: {
                         query: scanUserMutation,
@@ -549,7 +549,7 @@ describe('UserRow', () => {
 
         test('handles network error on scan', async () => {
             const user = userEvent.setup()
-            const mocks: MockedResponse[] = [
+            const mocks: MockLink.MockedResponse[] = [
                 {
                     request: {
                         query: scanUserMutation,
@@ -578,7 +578,7 @@ describe('UserRow', () => {
 
         test('disables scan button after being clicked', async () => {
             const user = userEvent.setup()
-            const mocks: MockedResponse[] = [
+            const mocks: MockLink.MockedResponse[] = [
                 {
                     request: {
                         query: scanUserMutation,
@@ -704,7 +704,7 @@ describe('UserRow', () => {
     describe('Retry After Failure', () => {
         test('allows retry after update failure', async () => {
             const user = userEvent.setup()
-            const mocks: MockedResponse[] = [
+            const mocks: MockLink.MockedResponse[] = [
                 {
                     request: {
                         query: updateUserMutation,

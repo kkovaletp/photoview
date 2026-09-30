@@ -32,7 +32,7 @@ vi.mock('../../Pages/SharePage/MediaSharePage', () => {
 })
 
 import { MemoryRouter, Routes, Route } from 'react-router'
-import { MockedProvider } from '@apollo/client/testing'
+import { MockedProvider } from '@apollo/client/testing/react'
 import { renderWithProviders } from '../../helpers/testUtils'
 
 import {
@@ -342,10 +342,10 @@ describe('load correct share page, based on graphql query', () => {
       route: <TokenRoute />,
     })
 
-    // The actual error message being rendered is "Error message not found"
-    await waitFor(() => {
-      expect(screen.getByText('Error message not found.')).toBeInTheDocument()
-    })
+    // Apollo Client normalizes an Error without a message.
+    expect(
+      await screen.findByText('An error of unexpected shape occurred.')
+    ).toBeInTheDocument()
   })
 
   test('handles null shareToken response', async () => {

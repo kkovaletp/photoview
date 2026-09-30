@@ -1,7 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { MockedProvider, MockedResponse } from '@apollo/client/testing'
+import { MockLink } from '@apollo/client/testing'
+import { MockedProvider } from '@apollo/client/testing/react'
 import { gql } from '@apollo/client'
 import { MemoryRouter } from 'react-router'
 import { SidebarPhotoCover, SidebarAlbumCover } from './AlbumCovers'
@@ -79,7 +80,7 @@ const resetAlbumCoverResult = {
 }
 
 // ─── Local wrapper for prop-change (rerender) tests ──────────────────────────
-function makeWrapper(mocks: MockedResponse[]) {
+function makeWrapper(mocks: MockLink.MockedResponse[]) {
     return function Wrapper({ children }: { children: ReactNode }) {
         return (
             <MockedProvider mocks={mocks}>
@@ -136,7 +137,7 @@ describe('SidebarPhotoCover', () => {
 
     it('disables the button immediately after click', async () => {
         const user = userEvent.setup()
-        const mocks: MockedResponse[] = [
+        const mocks: MockLink.MockedResponse[] = [
             {
                 request: {
                     query: SET_ALBUM_COVER_MUTATION,
@@ -156,7 +157,7 @@ describe('SidebarPhotoCover', () => {
 
     it('fires the setAlbumCover mutation with correct variables on click', async () => {
         const user = userEvent.setup()
-        const mocks: MockedResponse[] = [
+        const mocks: MockLink.MockedResponse[] = [
             {
                 request: {
                     query: SET_ALBUM_COVER_MUTATION,
@@ -183,7 +184,7 @@ describe('SidebarPhotoCover', () => {
 
     it('re-enables the button when cover_id prop changes', async () => {
         const user = userEvent.setup()
-        const mocks: MockedResponse[] = [
+        const mocks: MockLink.MockedResponse[] = [
             {
                 request: {
                     query: SET_ALBUM_COVER_MUTATION,
@@ -263,7 +264,7 @@ describe('SidebarAlbumCover', () => {
 
     it('disables the button immediately after click', async () => {
         const user = userEvent.setup()
-        const mocks: MockedResponse[] = [
+        const mocks: MockLink.MockedResponse[] = [
             {
                 request: {
                     query: RESET_ALBUM_COVER_MUTATION,
@@ -283,7 +284,7 @@ describe('SidebarAlbumCover', () => {
 
     it('fires the resetAlbumCover mutation with correct variables on click', async () => {
         const user = userEvent.setup()
-        const mocks: MockedResponse[] = [
+        const mocks: MockLink.MockedResponse[] = [
             {
                 request: {
                     query: RESET_ALBUM_COVER_MUTATION,
@@ -308,7 +309,7 @@ describe('SidebarAlbumCover', () => {
 
     it('re-enables the button when id prop changes', async () => {
         const user = userEvent.setup()
-        const mocks: MockedResponse[] = [
+        const mocks: MockLink.MockedResponse[] = [
             {
                 request: {
                     query: RESET_ALBUM_COVER_MUTATION,

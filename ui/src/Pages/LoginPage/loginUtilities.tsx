@@ -1,8 +1,15 @@
-import { gql } from '@apollo/client'
+import { gql, type TypedDocumentNode } from '@apollo/client'
 import { saveTokenCookie } from '../../helpers/authentication'
 import styled from 'styled-components'
+import {
+  CheckInitialSetupQuery,
+  CheckInitialSetupQueryVariables,
+} from './__generated__/loginUtilities'
 
-export const INITIAL_SETUP_QUERY = gql`
+export const INITIAL_SETUP_QUERY: TypedDocumentNode<
+  CheckInitialSetupQuery,
+  CheckInitialSetupQueryVariables
+> = gql`
   query CheckInitialSetup {
     siteInfo {
       initialSetup

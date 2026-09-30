@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { MockedResponse } from '@apollo/client/testing'
+import { MockLink } from '@apollo/client/testing'
 import { GraphQLError } from 'graphql'
 import SidebarMediaDownload, { SIDEBAR_DOWNLOAD_QUERY } from './SidebarDownloadMedia'
 import { MediaSidebarMedia } from './MediaSidebar/MediaSidebar'
@@ -9,6 +9,7 @@ import { MediaType } from '../../__generated__/globalTypes'
 import { renderWithProviders } from '../../helpers/testUtils'
 import * as authentication from '../../helpers/authentication'
 import { SidebarDownloadQueryQuery } from './__generated__/SidebarDownloadMedia'
+import { useMessageState } from '../messages/MessageState'
 
 // Mock dependencies
 vi.mock('../../helpers/authentication')
@@ -22,8 +23,11 @@ globalThis.fetch = mockFetch
 // Mock URL methods for download blob handling
 const originalCreateObjectURL = globalThis.URL.createObjectURL
 const originalRevokeObjectURL = globalThis.URL.revokeObjectURL
-globalThis.URL.createObjectURL = vi.fn(() => 'blob:mock-url')
-globalThis.URL.revokeObjectURL = vi.fn()
+const mockCreateObjectURL = vi.fn(() => 'blob:mock-url')
+const mockRevokeObjectURL = vi.fn()
+
+globalThis.URL.createObjectURL = mockCreateObjectURL
+globalThis.URL.revokeObjectURL = mockRevokeObjectURL
 const originalCreateElement = document.createElement.bind(document)
 const mockCreateElement = vi.fn((tagName: string) => {
     if (tagName === 'a') {
@@ -104,7 +108,7 @@ describe('SidebarMediaDownload', () => {
         })
 
         it('should trigger query when media has no downloads', async () => {
-            const mocks: MockedResponse[] = [
+            const mocks: MockLink.MockedResponse[] = [
                 {
                     request: {
                         query: SIDEBAR_DOWNLOAD_QUERY,
@@ -134,7 +138,7 @@ describe('SidebarMediaDownload', () => {
         })
 
         it('should display error when query fails', async () => {
-            const mocks: MockedResponse[] = [
+            const mocks: MockLink.MockedResponse[] = [
                 {
                     request: {
                         query: SIDEBAR_DOWNLOAD_QUERY,
@@ -177,7 +181,7 @@ describe('SidebarMediaDownload', () => {
 
     describe('Download Table Rendering', () => {
         it('should display download options with correct formatting', async () => {
-            const mocks: MockedResponse[] = [
+            const mocks: MockLink.MockedResponse[] = [
                 {
                     request: {
                         query: SIDEBAR_DOWNLOAD_QUERY,
@@ -310,9 +314,49 @@ describe('SidebarMediaDownload', () => {
 
             // Verify blob URL created and revoked
             await waitFor(() => {
-                expect(globalThis.URL.createObjectURL).toHaveBeenCalled()
+                expect(mockCreateObjectURL).toHaveBeenCalled()
             })
-            expect(globalThis.URL.revokeObjectURL).toHaveBeenCalled()
+            expect(mockRevokeObjectURL).toHaveBeenCalled()
+        })
+
+        it('shows an error when the download request rejects', async () => {
+            const user = userEvent.setup()
+            const consoleError = vi.spyOn(console, 'error').mockImplementation(() => { })
+            mockFetch.mockRejectedValueOnce(new Error('Network unavailable'))
+
+            const DownloadErrorMessage = () => {
+                const { messages } = useMessageState()
+                return (
+                    <>
+                        {messages.map(message => (
+                            <p key={message.key}>{message.props.content}</p>
+                        ))}
+                    </>
+                )
+            }
+
+            try {
+                renderWithProviders(
+                    <>
+                        <SidebarMediaDownload
+                            media={{ ...mockMedia, downloads: [mockDownloads[0]] }}
+                        />
+                        <DownloadErrorMessage />
+                    </>,
+                    { mocks: [] }
+                )
+
+                await user.click(screen.getByText('Original').closest('tr')!)
+
+                expect(
+                    await screen.findByText(
+                        'The media download task failed with the error: Network unavailable'
+                    )
+                ).toBeInTheDocument()
+                expect(mockCreateObjectURL).not.toHaveBeenCalled()
+            } finally {
+                consoleError.mockRestore()
+            }
         })
     })
 

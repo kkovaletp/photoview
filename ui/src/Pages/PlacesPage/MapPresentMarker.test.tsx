@@ -10,11 +10,14 @@ const mockApollo = vi.hoisted(() => ({
 
 // ─── Module mocks ─────────────────────────────────────────────────────────────
 
-vi.mock('@apollo/client', async () => {
-    const actual = await vi.importActual('@apollo/client')
+vi.mock('@apollo/client/react', async importOriginal => {
+    const actual = await importOriginal<typeof import('@apollo/client/react')>()
     return {
         ...actual,
-        useLazyQuery: vi.fn(() => [mockApollo.loadMedia, { data: mockApollo.data }]),
+        useLazyQuery: vi.fn(() => [
+            mockApollo.loadMedia,
+            { data: mockApollo.data },
+        ]),
     }
 })
 

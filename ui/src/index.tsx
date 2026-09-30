@@ -1,7 +1,7 @@
 import { createRoot } from 'react-dom/client'
 import App from './App'
 import client from './apolloClient'
-import { ApolloProvider } from '@apollo/client'
+import { ApolloProvider } from '@apollo/client/react'
 import { BrowserRouter as Router } from 'react-router'
 import { setupLocalization } from './localization'
 import { updateTheme } from './theme'

@@ -1,4 +1,5 @@
-import { gql, useLazyQuery } from '@apollo/client'
+import { gql, type TypedDocumentNode } from '@apollo/client'
+import { useLazyQuery } from '@apollo/client/react'
 import { useTranslation } from 'react-i18next'
 import { NotificationType } from '../../__generated__/globalTypes'
 import { authToken } from '../../helpers/authentication'
@@ -17,7 +18,10 @@ import { createUuid } from '../../helpers/createUuid'
 
 const DOWNLOAD_COMPLETE_NOTIFICATION_DURATION = 2000
 
-export const SIDEBAR_DOWNLOAD_QUERY = gql`
+export const SIDEBAR_DOWNLOAD_QUERY: TypedDocumentNode<
+  SidebarDownloadQueryQuery,
+  SidebarDownloadQueryQueryVariables
+> = gql`
   query sidebarDownloadQuery($mediaId: ID!) {
     media(id: $mediaId) {
       id
@@ -118,7 +122,9 @@ const downloadMediaShowProgress =
     let canceled = false
     const onDismiss = () => {
       canceled = true
-      reader.cancel('Download canceled by user')
+      void reader.cancel('Download canceled by user').catch((cancelError: unknown) => {
+        console.error('Failed to cancel media download:', cancelError)
+      })
     }
 
     if (totalBytes === 0) {
@@ -132,7 +138,8 @@ const downloadMediaShowProgress =
           means that there is an unknown lower-level error.`,
         },
       });
-      throw new Error('Content length of the downloaded media is 0.')
+      console.error('Content length of the downloaded media is 0.')
+      return
     }
 
     add({
@@ -267,7 +274,23 @@ const SidebarDownloadTable = ({ rows, add, removeKey }: SidebarDownloadTableProp
   const download = downloadMedia(t, add, removeKey)
   const bytes = formatBytes(t)
   const downloadRows = rows.map(x => (
-    <SidebarTable.Row key={x.url} onClick={() => download(x.url)} tabIndex={0}>
+    <SidebarTable.Row key={x.url} onClick={() => {
+      void download(x.url).catch((downloadError: unknown) => {
+        console.error('Failed to download media:', downloadError)
+        add({
+          key: `download-${createUuid()}`,
+          type: NotificationType.Message,
+          props: {
+            negative: true,
+            header: 'Downloading media failed',
+            content: `The media download task failed with the error: ${downloadError instanceof Error
+              ? downloadError.message
+              : 'Unknown error occurred'
+              }`,
+          },
+        })
+      })
+    }} tabIndex={0}>
       <td className="pl-4 py-2">{`${x.title}`}</td>
       <td className="py-2">{`${x.width} x ${x.height}`}</td>
       <td className="py-2">{`${bytes(x.fileSize)}`}</td>
@@ -306,15 +329,18 @@ const SidebarMediaDownload = ({ media }: SidebarMediaDownladProps) => {
   const { t } = useTranslation()
   const { add, removeKey } = useMessageState()
 
-  const [loadPhotoDownloads, { loading, data, error }] = useLazyQuery<
-    SidebarDownloadQueryQuery,
-    SidebarDownloadQueryQueryVariables
-  >(SIDEBAR_DOWNLOAD_QUERY, {})
+  const [loadPhotoDownloads, { loading, data, error }] = useLazyQuery(
+    SIDEBAR_DOWNLOAD_QUERY, {}
+  )
 
   useEffect(() => {
     if (media?.id && !media.downloads && !loading && !error && data?.media?.id !== media.id) {
-      loadPhotoDownloads({
-        variables: { mediaId: media.id }
+      void loadPhotoDownloads({
+        variables: { mediaId: media.id },
+      }).catch((queryError: unknown) => {
+        // Apollo aborts an in-flight query when the component unmounts.
+        if (queryError instanceof Error && queryError.name === 'AbortError') return
+        console.error('Failed to load download options:', queryError)
       })
     }
   }, [media?.id, media?.downloads, loading, error, data?.media?.id, loadPhotoDownloads])
@@ -322,7 +348,6 @@ const SidebarMediaDownload = ({ media }: SidebarMediaDownladProps) => {
   if (!media?.id) return null
 
   if (error && !loading) {
-    console.error('Failed to load download options: ', error)
     return (
       <SidebarSection>
         <SidebarSectionTitle>
