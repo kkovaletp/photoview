@@ -23,8 +23,11 @@ globalThis.fetch = mockFetch
 // Mock URL methods for download blob handling
 const originalCreateObjectURL = globalThis.URL.createObjectURL
 const originalRevokeObjectURL = globalThis.URL.revokeObjectURL
-globalThis.URL.createObjectURL = vi.fn(() => 'blob:mock-url')
-globalThis.URL.revokeObjectURL = vi.fn()
+const mockCreateObjectURL = vi.fn(() => 'blob:mock-url')
+const mockRevokeObjectURL = vi.fn()
+
+globalThis.URL.createObjectURL = mockCreateObjectURL
+globalThis.URL.revokeObjectURL = mockRevokeObjectURL
 const originalCreateElement = document.createElement.bind(document)
 const mockCreateElement = vi.fn((tagName: string) => {
     if (tagName === 'a') {
@@ -311,9 +314,9 @@ describe('SidebarMediaDownload', () => {
 
             // Verify blob URL created and revoked
             await waitFor(() => {
-                expect(globalThis.URL.createObjectURL).toHaveBeenCalled()
+                expect(mockCreateObjectURL).toHaveBeenCalled()
             })
-            expect(globalThis.URL.revokeObjectURL).toHaveBeenCalled()
+            expect(mockRevokeObjectURL).toHaveBeenCalled()
         })
 
         it('shows an error when the download request rejects', async () => {
@@ -350,7 +353,7 @@ describe('SidebarMediaDownload', () => {
                         'The media download task failed with the error: Network unavailable'
                     )
                 ).toBeInTheDocument()
-                expect(globalThis.URL.createObjectURL).not.toHaveBeenCalled()
+                expect(mockCreateObjectURL).not.toHaveBeenCalled()
             } finally {
                 consoleError.mockRestore()
             }
