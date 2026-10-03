@@ -83,7 +83,15 @@ const LoginForm = () => {
   })
 
   return (
-    <form className="mx-auto max-w-125 px-4" onSubmit={onSubmit}>
+    <form
+      className="mx-auto max-w-125 px-4"
+      onSubmit={event => {
+        void onSubmit(event).catch((error: unknown) => {
+          console.error('Unexpected login form submission failure', error)
+          setErrorMessage('An unexpected error occurred during login')
+        })
+      }}
+    >
       <TextField
         sizeVariant="big"
         wrapperClassName="my-6"
@@ -137,11 +145,11 @@ const LoginPage = () => {
   })
 
   useEffect(() => {
-    if (token) navigate('/')
+    if (token) void navigate('/')
   }, [token, navigate])
 
   useEffect(() => {
-    if (initialSetupData?.siteInfo?.initialSetup) navigate('/initialSetup')
+    if (initialSetupData?.siteInfo?.initialSetup) void navigate('/initialSetup')
   }, [initialSetupData?.siteInfo?.initialSetup, navigate])
 
   if (token || initialSetupData?.siteInfo?.initialSetup) {

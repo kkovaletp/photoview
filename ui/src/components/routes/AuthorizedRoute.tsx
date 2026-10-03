@@ -10,7 +10,10 @@ export const useIsAdmin = () => {
 
   useEffect(() => {
     if (token && !called) {
-      fetchAdminQuery()
+      void fetchAdminQuery().catch((error: unknown) => {
+        if (error instanceof Error && error.name === 'AbortError') return
+        console.error('Failed to load administrator status', error)
+      })
     }
   }, [token, called, fetchAdminQuery])
 

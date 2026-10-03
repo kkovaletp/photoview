@@ -280,10 +280,13 @@ const MediaSidebar = ({ media, hidePreview }: MediaSidebarType) => {
 
   useEffect(() => {
     if (media != null && token) {
-      loadMedia({
+      void loadMedia({
         variables: {
           id: media.id,
         },
+      }).catch((error: unknown) => {
+        if (error instanceof Error && error.name === 'AbortError') return
+        console.error('Failed to load media details', error)
       })
     }
   }, [media, media?.id, token, loadMedia])

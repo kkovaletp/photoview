@@ -13,7 +13,7 @@ import { ErrorLink } from '@apollo/client/link/error'
 import { CombinedGraphQLErrors } from '@apollo/client/errors'
 import i18n from 'i18next'
 import urlJoin from 'url-join'
-import { authToken, clearTokenCookie } from './helpers/authentication'
+import { authToken, clearTokenCookie, getLogoutState } from './helpers/authentication'
 import { globalMessageHandler } from './components/messages/globalMessageHandler'
 import { NotificationType } from './__generated__/globalTypes'
 import { GraphQLWsLink } from '@apollo/client/link/subscriptions'
@@ -250,7 +250,14 @@ if (globalThis.window !== undefined) {
   const teardownWsClient = () => {
     if (isPageUnloading) return
     isPageUnloading = true
-    wsClient.dispose()
+
+    try {
+      void Promise.resolve(wsClient.dispose()).catch((error: unknown) => {
+        console.error('[WebSocket] Failed to dispose client', error)
+      })
+    } catch (error) {
+      console.error('[WebSocket] Failed to dispose client', error)
+    }
   }
   globalThis.window.addEventListener('beforeunload', teardownWsClient, { once: true })
   globalThis.window.addEventListener('pagehide', teardownWsClient, { once: true })
@@ -387,11 +394,18 @@ export function getNetworkErrorNotification(
   }
 }
 
-const linkError = new ErrorLink(({ error }) => {
+const linkError = new ErrorLink(({ error, operation }) => {
+  const suppressAuthErrors =
+    operation.getContext().intentionalLogoutState?.active === true
+
   const errorMessages: { key: string; header: string; content: string }[] = []
 
   if (CombinedGraphQLErrors.is(error)) {
-    const graphQLErrors = error.errors
+    // Filter individual errors so an unrelated error in the same response
+    // remains visible.
+    const graphQLErrors = error.errors.filter(
+      error => !suppressAuthErrors || error.message !== 'unauthorized'
+    )
 
     graphQLErrors.forEach(({ message, locations, path }) => {
       console.error(
@@ -426,28 +440,27 @@ const linkError = new ErrorLink(({ error }) => {
         ),
         content: i18n.t(
           'apollo_client.notification.graphql.multiple.content',
-          'Received {{count}} errors from the server. See the browser\'s dev tools console for more information',
+          "Received {{count}} errors from the server. See the browser's dev tools console for more information",
           { count: graphQLErrors.length }
         ),
       })
     }
 
-    if (graphQLErrors.some(x => x.message === 'unauthorized')) {
+    if (graphQLErrors.some(error => error.message === 'unauthorized')) {
       console.error('Unauthorized, clearing token cookie')
       clearTokenCookie()
-      // location.reload()
     }
-
   } else {
+    const isAuthError = isAuthNetworkError(error)
+    if (isAuthError && suppressAuthErrors) { return }
     console.error(`[Network error]: ${JSON.stringify(error)}`)
 
-    const isAuthError = isAuthNetworkError(error)
     if (isAuthError) {
       console.error('[Authentication failure (401/403)] Clearing token cookie')
       clearTokenCookie()
     }
 
-    const errors = getServerErrorMessages(error);
+    const errors = getServerErrorMessages(error)
     let variant: NetworkErrorVariant
     if (errors.length === 1) {
       variant = 'single'
@@ -456,27 +469,44 @@ const linkError = new ErrorLink(({ error }) => {
     } else {
       variant = 'generic'
     }
-    const { header, content } = getNetworkErrorNotification(isAuthError, variant, {
-      message: errors[0]?.message,
-      count: errors.length,
-    })
+
+    const { header, content } = getNetworkErrorNotification(
+      isAuthError,
+      variant,
+      {
+        message: errors[0]?.message,
+        count: errors.length,
+      }
+    )
+
     errorMessages.push({ key: NETWORK_ERROR_KEY, header, content })
   }
 
-  if (errorMessages.length > 0) {
-    errorMessages.forEach(({ key, header, content }) =>
-      globalMessageHandler.add({
-        key,
-        type: NotificationType.Message,
-        props: {
-          negative: true,
-          header,
-          content,
-        },
-      })
-    )
-  }
+  errorMessages.forEach(({ key, header, content }) =>
+    globalMessageHandler.add({
+      key,
+      type: NotificationType.Message,
+      props: {
+        negative: true,
+        header,
+        content,
+      },
+    })
+  )
 })
+
+const logoutContextLink = new ApolloLink((operation, forward) => {
+  operation.setContext({
+    intentionalLogoutState: getLogoutState(),
+  })
+  return forward(operation)
+})
+
+// Export the production notification chain so tests exercise the same links.
+export const notificationLink = ApolloLink.from([
+  logoutContextLink,
+  linkError,
+])
 
 // Mirrors Apollo Client's internal KeySpecifier type (not publicly exported in v3)
 type KeySpecifier = ReadonlyArray<string | KeySpecifier>
@@ -567,8 +597,7 @@ const memoryCache = new InMemoryCache({
 })
 
 const client = new ApolloClient({
-  // link: ApolloLink.from([linkError, authLink.concat(link)]),
-  link: ApolloLink.from([linkError, link]),
+  link: ApolloLink.from([notificationLink, link]),
   cache: memoryCache,
 })
 

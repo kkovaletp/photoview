@@ -86,14 +86,18 @@ function AlbumPage() {
         (refetchNeededAll && !onlyFavorites) ||
         (refetchNeededFavorites && onlyFavorites)
       ) {
-        refetch({ id: albumId, onlyFavorites: onlyFavorites }).then(() => {
-          if (onlyFavorites) {
-            refetchNeededFavorites = false
-          } else {
-            refetchNeededAll = false
-          }
-          setOnlyFavorites(onlyFavorites)
-        })
+        void refetch({ id: albumId, onlyFavorites })
+          .then(() => {
+            if (onlyFavorites) {
+              refetchNeededFavorites = false
+            } else {
+              refetchNeededAll = false
+            }
+            setOnlyFavorites(onlyFavorites)
+          })
+          .catch((error: unknown) => {
+            console.error('Failed to refresh album favorites', error)
+          })
       } else {
         setOnlyFavorites(onlyFavorites)
       }
