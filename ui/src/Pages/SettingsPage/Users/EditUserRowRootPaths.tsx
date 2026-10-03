@@ -59,16 +59,14 @@ const EditRootPath = ({ album, user }: EditRootPathProps) => {
         <Button
           variant="negative"
           disabled={loading}
-          onClick={async () => {
+          onClick={() => {
             setErrorMessage(null)
-            try {
-              await removeAlbumPath({
-                variables: {
-                  userId: user.id,
-                  albumId: album.id,
-                },
-              })
-            } catch (error) {
+            void removeAlbumPath({
+              variables: {
+                userId: user.id,
+                albumId: album.id,
+              },
+            }).catch((error: unknown) => {
               console.error('Failed to remove root path: ', error)
               setErrorMessage(
                 error instanceof Error
@@ -78,7 +76,7 @@ const EditRootPath = ({ album, user }: EditRootPathProps) => {
                     'Failed to remove path. Please try again.'
                   )
               )
-            }
+            })
           }}
         >
           {t('general.action.remove', 'Remove')}
@@ -118,19 +116,18 @@ const EditNewRootPath = ({ userID }: EditNewRootPathProps) => {
         <Button
           variant="positive"
           disabled={loading}
-          onClick={async () => {
+          onClick={() => {
             const rootPath = normalizePath(value)
             if (rootPath === '') return
             setErrorMessage(null)
-            try {
-              await addRootPath({
-                variables: {
-                  id: userID,
-                  rootPath,
-                },
-              })
+            void addRootPath({
+              variables: {
+                id: userID,
+                rootPath,
+              },
+            }).then(() => {
               setValue('')
-            } catch (error) {
+            }).catch((error: unknown) => {
               console.error('Failed to add root path: ', error)
               setErrorMessage(
                 error instanceof Error
@@ -140,7 +137,7 @@ const EditNewRootPath = ({ userID }: EditNewRootPathProps) => {
                     'Failed to add path. Please try again.'
                   )
               )
-            }
+            })
           }}
         >
           {t('general.action.add', 'Add')}

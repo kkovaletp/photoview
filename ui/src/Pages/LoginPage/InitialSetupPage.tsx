@@ -58,7 +58,7 @@ const InitialSetupPage = () => {
   } = useForm<InitialSetupFormData>()
 
   useEffect(() => {
-    if (token) navigate('/')
+    if (token) void navigate('/')
   }, [token, navigate])
 
   const { data: initialSetupData } = useQuery(INITIAL_SETUP_QUERY)
@@ -66,7 +66,7 @@ const InitialSetupPage = () => {
   const notInitialSetup = initialSetupData?.siteInfo?.initialSetup === false
 
   useEffect(() => {
-    if (notInitialSetup) navigate('/')
+    if (notInitialSetup) void navigate('/')
   }, [notInitialSetup])
 
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
@@ -129,7 +129,15 @@ const InitialSetupPage = () => {
         <h1 className="text-center text-xl">
           {t('login_page.initial_setup.title', 'Initial Setup')}
         </h1>
-        <form onSubmit={signIn} className="max-w-125 mx-auto">
+        <form
+          className="max-w-125 mx-auto"
+          onSubmit={event => {
+            void signIn(event).catch((error: unknown) => {
+              console.error('Unexpected initial setup form submission failure', error)
+              setErrorMessage('An unexpected error occurred during setup')
+            })
+          }}
+        >
           <TextField
             wrapperClassName="my-4"
             fullWidth

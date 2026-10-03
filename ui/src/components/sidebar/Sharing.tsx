@@ -319,7 +319,11 @@ const MorePopoverSectionPassword = ({
       <Checkbox
         label="Password protected"
         checked={activated}
-        onChange={checkboxChange}
+        onChange={() => {
+          void checkboxChange().catch((error: unknown) => {
+            console.error('Unexpected failure in share password toggle', error)
+          })
+        }}
       />
       <TextField
         data-testid="share-password-input"
@@ -346,7 +350,11 @@ const MorePopoverSectionPassword = ({
         onChange={event => {
           setPasswordInputValue(event.target.value)
         }}
-        action={updatePasswordAction}
+        action={() => {
+          void updatePasswordAction().catch((error: unknown) => {
+            console.error('Unexpected failure in share password update', error)
+          })
+        }}
         loading={setPasswordLoading}
       />
     </div>
@@ -419,29 +427,26 @@ const MorePopoverSectionExpiration = ({
       <Checkbox
         label={t('sidebar.sharing.expiration_date', 'Expiration date')}
         checked={enabled}
-        onChange={async () => {
+        onChange={() => {
           const next = !enabled
-          if (!next) {
-            const previousDate = date
-            setEnabled(false)
-            // If the checkbox is unchecked,set the expiration time to null.
-            setDate(null)
-            try {
-              await setExpire({
-                variables: {
-                  token: share.token,
-                  expire: null,
-                },
-              })
-            } catch (error) {
-              setEnabled(true)
-              setDate(previousDate)
-              notifyError('Failed to clear expiration', error)
-              console.error('Failed to clear expiration', error)
-            }
+          if (next) {
+            setEnabled(true)
             return
           }
-          setEnabled(true)
+          const previousDate = date
+          setEnabled(false)
+          setDate(null)
+          void setExpire({
+            variables: {
+              token: share.token,
+              expire: null,
+            },
+          }).catch((error: unknown) => {
+            setEnabled(true)
+            setDate(previousDate)
+            notifyError('Failed to clear expiration', error)
+            console.error('Failed to clear expiration', error)
+          })
         }}
       />
 
@@ -635,11 +640,15 @@ const SidebarShare = ({
           className="align-middle p-1 ml-2"
           title={t('sidebar.sharing.copy_link', 'Copy Link')}
           onClick={() => {
-            const copied = copy(`${location.origin}/share/${share.token}`)
-            //TODO: Fix the "Expected non-Promise value in a boolean conditional" warn.
-            if (!copied) {
-              console.error('Failed to copy share link')
-            }
+            void copy(`${location.origin}/share/${share.token}`)
+              .then(copied => {
+                if (!copied) {
+                  console.error('Failed to copy share link')
+                }
+              })
+              .catch((error: unknown) => {
+                console.error('Failed to copy share link', error)
+              })
           }}
         >
           <CopyIcon />

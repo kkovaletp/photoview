@@ -151,7 +151,7 @@ const MoveImageFacesModal = ({
     }).then(({ data, error }) => {
       if (!data?.moveImageFaces || error) return
       setOpen(false)
-      navigate(`/people/${destinationFaceGroupId}`)
+      void navigate(`/people/${destinationFaceGroupId}`)
     }).catch((e) => {
       setErrMessage(
         e instanceof Error && e.message.trim().length > 0

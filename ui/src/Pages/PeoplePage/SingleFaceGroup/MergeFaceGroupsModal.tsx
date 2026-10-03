@@ -281,7 +281,7 @@ const MergeFaceGroupsModalContent = ({
 
       resetModalState()
       setState(MergeFaceGroupsModalState.Closed)
-      navigate(`/people/${effectiveDestinationFaceGroup.id}`)
+      void navigate(`/people/${effectiveDestinationFaceGroup.id}`)
     }).catch((e: unknown) => {
       const message =
         e instanceof Error && e.message.trim().length > 0

@@ -305,7 +305,7 @@ const SearchRow = ({
 
   useEffect(() => {
     const keydownEvent = (event: KeyboardEvent) => {
-      if (event.key === 'Enter' && selected) navigate(link)
+      if (event.key === 'Enter' && selected) void navigate(link)
     }
 
     document.addEventListener('keydown', keydownEvent)

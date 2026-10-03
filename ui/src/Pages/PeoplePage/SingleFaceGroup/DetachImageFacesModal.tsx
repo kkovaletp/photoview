@@ -149,7 +149,7 @@ const DetachImageFacesModalContent = ({
     }).then(({ data, error }) => {
       if (!data?.detachImageFaces || error) return
       setOpen(false)
-      navigate(`/people/${data.detachImageFaces.id}`)
+      void navigate(`/people/${data.detachImageFaces.id}`)
     }).catch((e: unknown) => {
       const message =
         e instanceof Error && e.message.trim().length > 0
