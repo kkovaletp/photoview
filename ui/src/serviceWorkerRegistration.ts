@@ -124,11 +124,17 @@ function checkValidServiceWorker(swUrl: string, config?: Config) {
         (contentType?.indexOf('javascript') === -1)
       ) {
         // No service worker found. Probably a different app. Reload the page.
-        navigator.serviceWorker.ready.then(registration => {
-          registration.unregister().then(() => {
+        return navigator.serviceWorker.ready
+          .then(registration => registration.unregister())
+          .then(() => {
             globalThis.location.reload()
           })
-        })
+          .catch((error: unknown) => {
+            console.error(
+              '[Service Worker] Failed to unregister an invalid service worker',
+              error
+            )
+          })
       } else {
         // Service worker found. Proceed as normal.
         registerValidSW(swUrl, config)
@@ -143,12 +149,10 @@ function checkValidServiceWorker(swUrl: string, config?: Config) {
 
 export function unregister() {
   if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.ready
-      .then(registration => {
-        registration.unregister()
-      })
-      .catch((error: Error) => {
-        console.error(error.message)
+    void navigator.serviceWorker.ready
+      .then(registration => registration.unregister())
+      .catch((error: unknown) => {
+        console.error('[Service Worker] Failed to unregister', error)
       })
   }
 }

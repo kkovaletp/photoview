@@ -83,7 +83,12 @@ const MoveImageFacesModal = ({
 
   useEffect(() => {
     if (open && imagesSelected) {
-      loadFaceGroups({ variables: FACE_GROUP_LIST_VARIABLES })
+      void loadFaceGroups({
+        variables: FACE_GROUP_LIST_VARIABLES,
+      }).catch((error: unknown) => {
+        if (error instanceof Error && error.name === 'AbortError') return
+        console.error('Failed to load face groups', error)
+      })
     }
   }, [open, imagesSelected, loadFaceGroups])
 
@@ -192,7 +197,14 @@ const MoveImageFacesModal = ({
               <button
                 type="button"
                 className="underline"
-                onClick={() => loadFaceGroups({ variables: FACE_GROUP_LIST_VARIABLES })}
+                onClick={() => {
+                  void loadFaceGroups({
+                    variables: FACE_GROUP_LIST_VARIABLES,
+                  }).catch((error: unknown) => {
+                    if (error instanceof Error && error.name === 'AbortError') return
+                    console.error('Failed to load face groups', error)
+                  })
+                }}
               >
                 {t('general.action.retry', 'Retry')}
               </button>

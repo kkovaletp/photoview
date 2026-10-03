@@ -550,10 +550,13 @@ export const SidebarPhotoShare = ({ id }: SidebarSharePhotoProps) => {
 
   useEffect(() => {
     if (token) {
-      loadShares({
+      void loadShares({
         variables: {
           id,
         },
+      }).catch((error: unknown) => {
+        if (error instanceof Error && error.name === 'AbortError') return
+        console.error('Failed to load media shares', error)
       })
     }
   }, [loadShares, id, token])
@@ -631,8 +634,12 @@ const SidebarShare = ({
           type="button"
           className="align-middle p-1 ml-2"
           title={t('sidebar.sharing.copy_link', 'Copy Link')}
-          onClick={async () => {
-            await copy(`${location.origin}/share/${share.token}`)
+          onClick={() => {
+            const copied = copy(`${location.origin}/share/${share.token}`)
+            //TODO: Fix the "Expected non-Promise value in a boolean conditional" warn.
+            if (!copied) {
+              console.error('Failed to copy share link')
+            }
           }}
         >
           <CopyIcon />

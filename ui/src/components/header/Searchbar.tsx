@@ -61,7 +61,10 @@ const SearchBar = () => {
     debouncedFetch.current = debounce((...args: unknown[]) => {
       const query = args[0]
       if (typeof query !== 'string') return
-      fetchSearches({ variables: { query } })
+      void fetchSearches({ variables: { query } }).catch((error: unknown) => {
+        if (error instanceof Error && error.name === 'AbortError') return
+        console.error('Failed to load search results', error)
+      })
       setFetched(true)
       setExpanded(true)
     }, 250)

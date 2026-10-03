@@ -250,8 +250,14 @@ if (globalThis.window !== undefined) {
   const teardownWsClient = () => {
     if (isPageUnloading) return
     isPageUnloading = true
-    //TODO: Ho to fix "Promises must be awaited, end with a call to .catch, end with a call to .then with a rejection handler or be explicitly marked as ignored with the `void` operator" warning here?
-    wsClient.dispose()
+
+    try {
+      void Promise.resolve(wsClient.dispose()).catch((error: unknown) => {
+        console.error('[WebSocket] Failed to dispose client', error)
+      })
+    } catch (error) {
+      console.error('[WebSocket] Failed to dispose client', error)
+    }
   }
   globalThis.window.addEventListener('beforeunload', teardownWsClient, { once: true })
   globalThis.window.addEventListener('pagehide', teardownWsClient, { once: true })

@@ -67,7 +67,9 @@ export const useLoadTranslations = (enabled = true) => {
     // Recheck the cookie because another effect can remove it after render.
     if (!token || !authToken()) {
       map_language = null
-      void i18n.changeLanguage('en')
+      void i18n.changeLanguage('en').catch((error: unknown) => {
+        console.error('Failed to switch application language to English', error)
+      })
       return
     }
     loadLang().catch(err => console.error('Failed to load user language', err))
@@ -79,7 +81,9 @@ export const useLoadTranslations = (enabled = true) => {
     const language = data?.myUserPreferences.language
     if (isNil(language)) {
       map_language = null
-      void i18n.changeLanguage('en')
+      void i18n.changeLanguage('en').catch((error: unknown) => {
+        console.error('Failed to switch application language to English', error)
+      })
       return
     }
 
