@@ -160,8 +160,7 @@ const LogoutPage = () => {
 
   useEffect(() => {
     clearTokenCookie()
-    //TODO: How to fix the "Promises must be awaited, end with a call to .catch, end with a call to .then with a rejection handler or be explicitly marked as ignored with the `void` operator" warning?
-    navigate('/login', { replace: true })
+    void navigate('/login', { replace: true })
   }, [navigate])
 
   return null
