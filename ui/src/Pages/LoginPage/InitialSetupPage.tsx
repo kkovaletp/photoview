@@ -67,7 +67,7 @@ const InitialSetupPage = () => {
 
   useEffect(() => {
     if (notInitialSetup) void navigate('/')
-  }, [notInitialSetup])
+  }, [notInitialSetup, navigate])
 
   const [errorMessage, setErrorMessage] = useState<string | null>(null)
 

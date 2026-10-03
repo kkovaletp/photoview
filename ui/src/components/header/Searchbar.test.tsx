@@ -108,7 +108,7 @@ describe('SearchBar Component', () => {
     let mockLoading: boolean;
 
     beforeEach(() => {
-        fetchSearchMock = vi.fn();
+        fetchSearchMock = vi.fn().mockResolvedValue({ data: null });
         mockSearchData = null;
         mockLoading = false;
 
@@ -159,11 +159,19 @@ describe('SearchBar Component', () => {
         vi.mocked(utils.debounce).mockImplementationOnce(actualUtils.debounce);
         vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
 
-        fetchSearchMock.mockImplementation(({ variables }: { variables: { query: string } }) => {
-            mockSearchData = {
-                search: { query: variables.query, albums: sampleAlbums, media: sampleMedia },
-            };
-        });
+        fetchSearchMock.mockImplementation(
+            ({ variables }: { variables: { query: string } }) => {
+                mockSearchData = {
+                    search: {
+                        query: variables.query,
+                        albums: sampleAlbums,
+                        media: sampleMedia,
+                    },
+                }
+
+                return Promise.resolve({ data: mockSearchData })
+            }
+        );
 
         render(<MemoryRouter><SearchBar /></MemoryRouter>);
         fireEvent.change(screen.getByRole('combobox'), { target: { value: '  beach  ' } });
@@ -179,37 +187,18 @@ describe('SearchBar Component', () => {
     });
 
     test('calls fetch function with correct parameters when typing', async () => {
-        // Set up our mocks to control the loading state
-        fetchSearchMock = vi.fn().mockImplementation(() => {
-            mockLoading = true;
-            // Simulate the state change after a small delay
-            setTimeout(() => {
-                mockLoading = false;
-                mockSearchData = {
-                    search: {
-                        query: 'test',
-                        albums: [],
-                        media: []
-                    }
-                };
-            }, 100);
-        });
-
         render(
             <MemoryRouter>
                 <SearchBar />
             </MemoryRouter>
-        );
+        )
 
-        const searchInput = screen.getByPlaceholderText('Search');
-        await userEvent.type(searchInput, 'test');
+        const searchInput = screen.getByPlaceholderText('Search')
+        await userEvent.type(searchInput, 'test')
 
-        // Since we're directly controlling mockLoading, we don't need to wait
-        // The component should render based on our controlled state
-        expect(fetchSearchMock).toHaveBeenCalled();
-
-        // For this test, check if fetchSearches was called with correct params
-        expect(fetchSearchMock).toHaveBeenCalledWith({ variables: { query: 'test' } });
+        expect(fetchSearchMock).toHaveBeenCalledWith({
+            variables: { query: 'test' },
+        })
     });
 
     test('shows no results message when search is empty', async () => {
@@ -270,6 +259,54 @@ describe('SearchBar Component', () => {
         // Test with valid string
         debounced('valid query');
         expect(fetchSearches).toHaveBeenCalledWith({ variables: { query: 'valid query' } });
+    });
+
+    test('logs a rejected search request', async () => {
+        const error = new Error('Search request failed')
+        const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => { })
+        fetchSearchMock.mockRejectedValue(error)
+
+        render(
+            <MemoryRouter>
+                <SearchBar />
+            </MemoryRouter>
+        )
+
+        fireEvent.change(screen.getByRole('combobox'), {
+            target: { value: 'test' },
+        })
+
+        await waitFor(() => {
+            expect(errorSpy).toHaveBeenCalledExactlyOnceWith(
+                'Failed to load search results',
+                error
+            )
+        })
+    });
+
+    test('does not log an expected search cancellation', async () => {
+        const error = new Error('Search cancelled')
+        error.name = 'AbortError'
+
+        const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => { })
+        fetchSearchMock.mockRejectedValue(error)
+
+        render(
+            <MemoryRouter>
+                <SearchBar />
+            </MemoryRouter>
+        )
+
+        await act(async () => {
+            fireEvent.change(screen.getByRole('combobox'), {
+                target: { value: 'test' },
+            })
+        })
+
+        expect(fetchSearchMock).toHaveBeenCalledExactlyOnceWith({
+            variables: { query: 'test' },
+        })
+        expect(errorSpy).not.toHaveBeenCalled()
     });
 });
 
