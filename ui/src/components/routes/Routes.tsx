@@ -1,8 +1,7 @@
-import { ReactNode, lazy, Suspense } from 'react'
+import { ReactNode, lazy, Suspense, useEffect } from 'react'
 import {
   Navigate,
   useNavigate,
-  NavigateFunction,
   Outlet,
   useRoutes,
 } from 'react-router'
@@ -56,7 +55,6 @@ const PersonPage = lazy(() =>
 
 const Routes = () => {
   const { t } = useTranslation()
-  const navigate = useNavigate()
 
   const authorized = (element: ReactNode) => (
     <AuthorizedRoute>{element}</AuthorizedRoute>
@@ -73,7 +71,7 @@ const Routes = () => {
     },
     {
       path: '/logout',
-      element: <LogoutPage navigate={navigate} />,
+      element: <LogoutPage />,
     },
     {
       path: '/initialSetup',
@@ -157,9 +155,15 @@ export const NotFoundPage = ({ t }: { t: TFunction }) => {
   return <div>{t('routes.page_not_found', 'Page not found')}</div>
 }
 
-const LogoutPage = ({ navigate }: { navigate: NavigateFunction }) => {
-  clearTokenCookie()
-  navigate('/')
+const LogoutPage = () => {
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    clearTokenCookie()
+    //TODO: How to fix the "Promises must be awaited, end with a call to .catch, end with a call to .then with a rejection handler or be explicitly marked as ignored with the `void` operator" warning?
+    navigate('/login', { replace: true })
+  }, [navigate])
+
   return null
 }
 

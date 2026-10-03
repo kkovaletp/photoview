@@ -30,12 +30,12 @@ module.exports = [
                 ecmaFeatures: {
                     jsx: true,
                 },
-                ecmaVersion: 2020,
+                ecmaVersion: 2022,
                 sourceType: 'module',
             },
             globals: {
                 ...globals.browser,
-                ...globals.es2020,
+                ...globals.es2022,
                 Atomics: 'readonly',
                 SharedArrayBuffer: 'readonly',
                 process: 'readonly',
