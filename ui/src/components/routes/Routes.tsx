@@ -1,15 +1,19 @@
 import { ReactNode, lazy, Suspense, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
+import type { TFunction } from 'i18next'
 import {
   Navigate,
   useNavigate,
   Outlet,
   useRoutes,
 } from 'react-router'
-
+import {
+  authToken,
+  beginIntentionalLogout,
+  clearTokenCookie,
+  endIntentionalLogout,
+} from '../../helpers/authentication'
 import Layout from '../layout/Layout'
-import { authToken, clearTokenCookie } from '../../helpers/authentication'
-import { useTranslation } from 'react-i18next'
-import type { TFunction } from 'i18next'
 import Loader from '../../primitives/Loader'
 import AuthorizedRoute from './AuthorizedRoute'
 
@@ -159,8 +163,13 @@ const LogoutPage = () => {
   const navigate = useNavigate()
 
   useEffect(() => {
+    beginIntentionalLogout()
     clearTokenCookie()
     void navigate('/login', { replace: true })
+
+    return () => {
+      endIntentionalLogout()
+    }
   }, [navigate])
 
   return null

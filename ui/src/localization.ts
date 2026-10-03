@@ -59,39 +59,55 @@ const SITE_TRANSLATION: TypedDocumentNode<
   }
 `
 let map_language: LanguageTranslation | null
-export const useLoadTranslations = () => {
+export const useLoadTranslations = (enabled = true) => {
   const [loadLang, { data }] = useLazyQuery(SITE_TRANSLATION)
-  const token = authToken()
+  const token = enabled ? authToken() : undefined
 
   useEffect(() => {
-    if (!token) {
+    // Recheck the cookie because another effect can remove it after render.
+    if (!token || !authToken()) {
       map_language = null
-      i18n.changeLanguage('en')
+      void i18n.changeLanguage('en')
       return
     }
     loadLang().catch(err => console.error('Failed to load user language', err))
   }, [token, loadLang])
 
   useEffect(() => {
-    if (!token) return
+    if (!token || !authToken()) return
 
     const language = data?.myUserPreferences.language
     if (isNil(language)) {
       map_language = null
-      i18n.changeLanguage('en')
+      void i18n.changeLanguage('en')
       return
     }
 
+    let cancelled = false
     map_language = language
 
     const locale = LANGUAGE_TRANSLATION_TO_LOCALE[language] ?? 'en'
-    const loader = translationModules[`./extractedTranslations/${locale}/translation.json`]
-      ; (loader ?? translationModules['./extractedTranslations/en/translation.json'])()
-        .then(mod => {
-          i18n.addResourceBundle(locale, 'translation', mod.default)
-          i18n.changeLanguage(locale)
-        })
-        .catch(err => console.error('Failed to load translation bundle', locale, err))
+    const loader =
+      translationModules[`./extractedTranslations/${locale}/translation.json`] ??
+      translationModules['./extractedTranslations/en/translation.json']
+
+    loader()
+      .then(mod => {
+        // Do not apply a bundle from a previous route or authenticated user.
+        if (cancelled || authToken() !== token) return
+
+        i18n.addResourceBundle(locale, 'translation', mod.default)
+        return i18n.changeLanguage(locale)
+      })
+      .catch(err => {
+        if (!cancelled) {
+          console.error('Failed to load translation bundle', locale, err)
+        }
+      })
+
+    return () => {
+      cancelled = true
+    }
   }, [token, data?.myUserPreferences.language])
 }
 
