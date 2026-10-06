@@ -279,9 +279,19 @@ const MergeFaceGroupsModalContent = ({
     }).then(({ data, error }) => {
       if (!data?.combineFaceGroups || error) return
 
+      const destinationPath = `/people/${effectiveDestinationFaceGroup.id}`
+
       resetModalState()
       setState(MergeFaceGroupsModalState.Closed)
-      void navigate(`/people/${effectiveDestinationFaceGroup.id}`)
+
+      return Promise.resolve()
+        .then(() => navigate(destinationPath))
+        .catch((navigationError: unknown) => {
+          console.error(
+            'Face groups merged, but navigation to the destination failed',
+            navigationError
+          )
+        })
     }).catch((e: unknown) => {
       const message =
         e instanceof Error && e.message.trim().length > 0

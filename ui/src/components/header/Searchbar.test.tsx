@@ -1,4 +1,4 @@
-import { vi, describe, test, expect, beforeEach, afterEach } from 'vitest'
+import { vi, describe, test, expect, beforeEach, afterEach, type Mock } from 'vitest'
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MemoryRouter } from 'react-router'
@@ -15,8 +15,16 @@ type MockLazyQueryResult = {
     data: MockSearchData | null
 }
 
+type MockFetchSearchResult = {
+    data: MockSearchData | null
+}
+
+type MockFetchSearch = (
+    options: { variables: { query: string } }
+) => Promise<MockFetchSearchResult>
+
 type MockLazyQuery = () => [
-    ReturnType<typeof vi.fn>,
+    Mock<MockFetchSearch>,
     MockLazyQueryResult,
 ]
 
@@ -103,12 +111,12 @@ const sampleMedia = [
 
 describe('SearchBar Component', () => {
     // For each test, set up a new mock implementation of useLazyQuery
-    let fetchSearchMock: ReturnType<typeof vi.fn>;
+    let fetchSearchMock: Mock<MockFetchSearch>;
     let mockSearchData: MockSearchData | null;
     let mockLoading: boolean;
 
     beforeEach(() => {
-        fetchSearchMock = vi.fn().mockResolvedValue({ data: null });
+        fetchSearchMock = vi.fn<MockFetchSearch>().mockResolvedValue({ data: null });
         mockSearchData = null;
         mockLoading = false;
 
@@ -160,7 +168,7 @@ describe('SearchBar Component', () => {
         vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });
 
         fetchSearchMock.mockImplementation(
-            ({ variables }: { variables: { query: string } }) => {
+            ({ variables }): Promise<MockFetchSearchResult> => {
                 mockSearchData = {
                     search: {
                         query: variables.query,
@@ -262,6 +270,7 @@ describe('SearchBar Component', () => {
     });
 
     test('logs a rejected search request', async () => {
+        const user = userEvent.setup()
         const error = new Error('Search request failed')
         const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => { })
         fetchSearchMock.mockRejectedValue(error)
@@ -272,8 +281,11 @@ describe('SearchBar Component', () => {
             </MemoryRouter>
         )
 
-        fireEvent.change(screen.getByRole('combobox'), {
-            target: { value: 'test' },
+        await user.click(screen.getByRole('combobox'))
+        await user.paste('test')
+
+        expect(fetchSearchMock).toHaveBeenCalledExactlyOnceWith({
+            variables: { query: 'test' },
         })
 
         await waitFor(() => {
@@ -285,6 +297,7 @@ describe('SearchBar Component', () => {
     });
 
     test('does not log an expected search cancellation', async () => {
+        const user = userEvent.setup()
         const error = new Error('Search cancelled')
         error.name = 'AbortError'
 
@@ -297,11 +310,8 @@ describe('SearchBar Component', () => {
             </MemoryRouter>
         )
 
-        await act(async () => {
-            fireEvent.change(screen.getByRole('combobox'), {
-                target: { value: 'test' },
-            })
-        })
+        await user.click(screen.getByRole('combobox'))
+        await user.paste('test')
 
         expect(fetchSearchMock).toHaveBeenCalledExactlyOnceWith({
             variables: { query: 'test' },

@@ -22,6 +22,7 @@ import {
   expect,
   test,
   vi,
+  type MockInstance,
 } from 'vitest'
 import App from './App'
 import { notificationLink } from './apolloClient'
@@ -135,11 +136,15 @@ function completeLogout() {
   endIntentionalLogout()
 }
 
+let addMessageSpy: MockInstance<typeof globalMessageHandler.add>
+
 beforeEach(() => {
   endIntentionalLogout()
   clearTokenCookie()
 
-  vi.spyOn(globalMessageHandler, 'add').mockImplementation(() => { })
+  addMessageSpy = vi
+    .spyOn(globalMessageHandler, 'add')
+    .mockImplementation(() => { })
   vi.spyOn(console, 'error').mockImplementation(() => { })
   vi.spyOn(window, 'scrollTo').mockImplementation(() => { })
 })
@@ -157,7 +162,9 @@ describe('intentional logout', () => {
     async basename => {
       saveTokenCookie('old-token')
 
-      const fetchMock = vi.fn(async () => jsonResponse(preferencesData))
+      const fetchMock = vi.fn<typeof fetch>(() =>
+        Promise.resolve(jsonResponse(preferencesData))
+      )
       const client = makeClient(fetchMock)
       const prefix = basename === '/' ? '' : basename
 
@@ -180,13 +187,15 @@ describe('intentional logout', () => {
 
       expect(authToken()).toBeUndefined()
       expect(fetchMock).not.toHaveBeenCalled()
-      expect(globalMessageHandler.add).not.toHaveBeenCalled()
+      expect(addMessageSpy).not.toHaveBeenCalled()
       expect(getLogoutState().active).toBe(false)
     }
   )
 
   test('signed-out translation loading does not send a request', () => {
-    const fetchMock = vi.fn(async () => jsonResponse(preferencesData))
+    const fetchMock = vi.fn<typeof fetch>(() =>
+      Promise.resolve(jsonResponse(preferencesData))
+    )
     const client = makeClient(fetchMock)
 
     renderHook(() => useLoadTranslations(), {
@@ -201,7 +210,9 @@ describe('intentional logout', () => {
   test('signed-in translation loading still sends a request', async () => {
     saveTokenCookie('valid-token')
 
-    const fetchMock = vi.fn(async () => jsonResponse(preferencesData))
+    const fetchMock = vi.fn<typeof fetch>(() =>
+      Promise.resolve(jsonResponse(preferencesData))
+    )
     const client = makeClient(fetchMock)
 
     renderHook(() => useLoadTranslations(), {
@@ -246,7 +257,7 @@ describe('intentional logout', () => {
     const result = await request.pending
 
     expect(result.error).toBeDefined()
-    expect(globalMessageHandler.add).not.toHaveBeenCalled()
+    expect(addMessageSpy).not.toHaveBeenCalled()
     expect(authToken()).toBe('new-token')
   })
 
@@ -263,7 +274,7 @@ describe('intentional logout', () => {
       const result = await request.pending
 
       expect(result.error).toBeDefined()
-      expect(globalMessageHandler.add).not.toHaveBeenCalled()
+      expect(addMessageSpy).not.toHaveBeenCalled()
       expect(authToken()).toBe('new-token')
     }
   )
@@ -286,8 +297,8 @@ describe('intentional logout', () => {
     })
     await request.pending
 
-    expect(globalMessageHandler.add).toHaveBeenCalledOnce()
-    expect(globalMessageHandler.add).toHaveBeenCalledWith(
+    expect(addMessageSpy).toHaveBeenCalledOnce()
+    expect(addMessageSpy).toHaveBeenCalledWith(
       expect.objectContaining({
         props: expect.objectContaining({
           content: expect.stringContaining('database unavailable'),
@@ -308,7 +319,7 @@ describe('intentional logout', () => {
     )
     await request.pending
 
-    expect(globalMessageHandler.add).toHaveBeenCalledOnce()
+    expect(addMessageSpy).toHaveBeenCalledOnce()
   })
 
   test('a connection failure remains visible after intentional logout', async () => {
@@ -320,7 +331,7 @@ describe('intentional logout', () => {
     request.reject(new Error('Failed to fetch'))
     await request.pending
 
-    expect(globalMessageHandler.add).toHaveBeenCalledOnce()
+    expect(addMessageSpy).toHaveBeenCalledOnce()
   })
 
   test('a missing token alone does not suppress unexpected authentication errors', async () => {
@@ -333,7 +344,7 @@ describe('intentional logout', () => {
     request.respond({ data: null, errors: [unauthorized] })
     await request.pending
 
-    expect(globalMessageHandler.add).toHaveBeenCalledOnce()
+    expect(addMessageSpy).toHaveBeenCalledOnce()
   })
 
   test('new operations after another sign-in report authentication failures', async () => {
@@ -345,7 +356,7 @@ describe('intentional logout', () => {
     request.respond({ data: null, errors: [unauthorized] })
     await request.pending
 
-    expect(globalMessageHandler.add).toHaveBeenCalledOnce()
+    expect(addMessageSpy).toHaveBeenCalledOnce()
     expect(authToken()).toBeUndefined()
   })
 
@@ -358,7 +369,7 @@ describe('intentional logout', () => {
       request.respond({ errors: [unauthorized] }, status)
       await request.pending
 
-      expect(globalMessageHandler.add).toHaveBeenCalledOnce()
+      expect(addMessageSpy).toHaveBeenCalledOnce()
       expect(authToken()).toBeUndefined()
     }
   )
