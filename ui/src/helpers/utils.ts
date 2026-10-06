@@ -59,3 +59,15 @@ export function exhaustiveCheck(value: never): never {
 export function tailwindClassNames(...args: ClassValue[]) {
   return twMerge(clsx(...args))
 }
+
+/**
+ * Recognizes cancellation errors without relying on their constructor.
+ */
+export function isAbortError(error: unknown): boolean {
+  return (
+    typeof error === 'object' &&
+    error !== null &&
+    'name' in error &&
+    error.name === 'AbortError'
+  )
+}

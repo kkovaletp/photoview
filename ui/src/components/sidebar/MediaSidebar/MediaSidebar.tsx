@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
 import styled from 'styled-components'
 import { authToken } from '../../../helpers/authentication'
-import { isNil } from '../../../helpers/utils'
+import { isAbortError, isNil } from '../../../helpers/utils'
 import { MediaType } from '../../../__generated__/globalTypes'
 import { SidebarFacesOverlay } from '../../facesOverlay/FacesOverlay'
 import { SidebarContext } from '../Sidebar'
@@ -285,7 +285,7 @@ const MediaSidebar = ({ media, hidePreview }: MediaSidebarType) => {
           id: media.id,
         },
       }).catch((error: unknown) => {
-        if (error instanceof Error && error.name === 'AbortError') return
+        if (isAbortError(error)) return
         console.error('Failed to load media details', error)
       })
     }

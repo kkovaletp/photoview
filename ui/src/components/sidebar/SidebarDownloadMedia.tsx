@@ -15,6 +15,7 @@ import {
   SidebarDownloadQueryQueryVariables,
 } from './__generated__/SidebarDownloadMedia'
 import { createUuid } from '../../helpers/createUuid'
+import { isAbortError } from '../../helpers/utils'
 
 const DOWNLOAD_COMPLETE_NOTIFICATION_DURATION = 2000
 
@@ -338,8 +339,7 @@ const SidebarMediaDownload = ({ media }: SidebarMediaDownladProps) => {
       void loadPhotoDownloads({
         variables: { mediaId: media.id },
       }).catch((queryError: unknown) => {
-        // Apollo aborts an in-flight query when the component unmounts.
-        if (queryError instanceof Error && queryError.name === 'AbortError') return
+        if (isAbortError(queryError)) return
         console.error('Failed to load download options:', queryError)
       })
     }

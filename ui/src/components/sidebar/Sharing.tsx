@@ -34,6 +34,7 @@ import styled from 'styled-components'
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import dayjs from 'dayjs'
+import { isAbortError } from '../../helpers/utils'
 
 const SHARE_PHOTO_QUERY: TypedDocumentNode<
   SidebarGetPhotoSharesQuery,
@@ -560,7 +561,7 @@ export const SidebarPhotoShare = ({ id }: SidebarSharePhotoProps) => {
           id,
         },
       }).catch((error: unknown) => {
-        if (error instanceof Error && error.name === 'AbortError') return
+        if (isAbortError(error)) return
         console.error('Failed to load media shares', error)
       })
     }
