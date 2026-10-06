@@ -395,8 +395,14 @@ export function getNetworkErrorNotification(
 }
 
 const linkError = new ErrorLink(({ error, operation }) => {
+  const intentionalLogoutState: unknown =
+    operation.getContext().intentionalLogoutState
+
   const suppressAuthErrors =
-    operation.getContext().intentionalLogoutState?.active === true
+    typeof intentionalLogoutState === 'object' &&
+    intentionalLogoutState !== null &&
+    'active' in intentionalLogoutState &&
+    intentionalLogoutState.active === true
 
   const errorMessages: { key: string; header: string; content: string }[] = []
 

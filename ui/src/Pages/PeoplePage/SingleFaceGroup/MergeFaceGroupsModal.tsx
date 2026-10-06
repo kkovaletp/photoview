@@ -276,7 +276,7 @@ const MergeFaceGroupsModalContent = ({
           ]
           : [],
       awaitRefetchQueries: true,
-    }).then(({ data, error }) => {
+    }).then(async ({ data, error }) => {
       if (!data?.combineFaceGroups || error) return
 
       const destinationPath = `/people/${effectiveDestinationFaceGroup.id}`
@@ -284,14 +284,14 @@ const MergeFaceGroupsModalContent = ({
       resetModalState()
       setState(MergeFaceGroupsModalState.Closed)
 
-      return Promise.resolve()
-        .then(() => navigate(destinationPath))
-        .catch((navigationError: unknown) => {
-          console.error(
-            'Face groups merged, but navigation to the destination failed',
-            navigationError
-          )
-        })
+      try {
+        await navigate(destinationPath)
+      } catch (navigationError: unknown) {
+        console.error(
+          'Face groups merged, but navigation to the destination failed',
+          navigationError
+        )
+      }
     }).catch((e: unknown) => {
       const message =
         e instanceof Error && e.message.trim().length > 0
@@ -478,7 +478,14 @@ const MergeFaceGroupsModalContent = ({
             <button
               type="button"
               className="underline"
-              onClick={() => refetchFaceGroups().catch(() => undefined)}
+              onClick={() => {
+                void refetchFaceGroups().catch((refetchError: unknown) => {
+                  console.error(
+                    'Failed to reload face groups after clicking Retry',
+                    refetchError
+                  )
+                })
+              }}
             >
               {t('general.action.retry', 'Retry')}
             </button>

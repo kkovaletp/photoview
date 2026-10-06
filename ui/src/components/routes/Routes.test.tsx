@@ -51,10 +51,10 @@ const RouterProbe = () => {
     <>
       <output data-testid="pathname">{location.pathname}</output>
       <output data-testid="navigation-type">{navigationType}</output>
-      <button type="button" onClick={() => navigate(-1)}>
+      <button type="button" onClick={() => void navigate(-1)}>
         Back
       </button>
-      <button type="button" onClick={() => navigate(1)}>
+      <button type="button" onClick={() => void navigate(1)}>
         Forward
       </button>
     </>
