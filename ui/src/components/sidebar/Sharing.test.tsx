@@ -175,6 +175,52 @@ async function openAlbumShareOptions(user: ReturnType<typeof userEvent.setup>) {
     await user.click(screen.getByRole('button', { name: 'More' }))
 }
 
+function formatExpirationDate(date: Date) {
+    return new Intl.DateTimeFormat('en', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+    }).format(date)
+}
+
+async function selectNextMonthExpiration(
+    user: ReturnType<typeof userEvent.setup>,
+    input: HTMLElement,
+    currentDate: Date
+) {
+    // The 15th of the next month is unambiguous and remains selectable.
+    const selectedDate = new Date(
+        currentDate.getFullYear(),
+        currentDate.getMonth() + 1,
+        15,
+        12
+    )
+    const month = new Intl.DateTimeFormat('en-US', {
+        month: 'long',
+    }).format(selectedDate)
+
+    await user.click(input)
+    await user.click(
+        screen.getByRole('button', { name: 'Next Month' })
+    )
+    await user.click(
+        screen.getByRole('gridcell', {
+            name: new RegExp(
+                `^Choose .*${month} 15th, ${selectedDate.getFullYear()}$`
+            ),
+        })
+    )
+
+    // Construct the expected API value without calling production's dayjs code.
+    const year = selectedDate.getFullYear()
+    const monthNumber = String(selectedDate.getMonth() + 1).padStart(2, '0')
+
+    return {
+        displayValue: formatExpirationDate(selectedDate),
+        expire: `${year}-${monthNumber}-15T23:59:59Z`,
+    }
+}
+
 describe('Sharing Components', () => {
     beforeEach(() => {
         vi.clearAllMocks()
@@ -601,6 +647,94 @@ describe('Sharing Components', () => {
                     `${location.origin}/share/ghi789`
                 )
                 expect(screen.getByText('ghi789')).toBeInTheDocument()
+            }
+        )
+
+        it.each([
+            { operation: 'add', failureType: 'network' },
+            { operation: 'add', failureType: 'GraphQL' },
+            { operation: 'delete', failureType: 'network' },
+            { operation: 'delete', failureType: 'GraphQL' },
+        ] as const)(
+            'reports a $failureType share $operation failure without changing the shares',
+            async ({ operation, failureType }) => {
+                const user = userEvent.setup()
+                const consoleError = vi
+                    .spyOn(console, 'error')
+                    .mockImplementation(() => undefined)
+                const adding = operation === 'add'
+                const message = `Share ${operation} failed`
+                const notificationHeader = adding
+                    ? 'Failed to add share'
+                    : 'Failed to delete share'
+
+                const mutationRequest = adding
+                    ? {
+                        query: ADD_ALBUM_SHARE_MUTATION,
+                        variables: { id: 'album-1' },
+                    }
+                    : {
+                        query: DELETE_SHARE_MUTATION,
+                        variables: { token: 'ghi789' },
+                    }
+
+                const mocks: MockLink.MockedResponse[] = [
+                    {
+                        request: albumQueryRequest,
+                        result: { data: mockAlbumShares },
+                    },
+                    {
+                        request: mutationRequest,
+                        ...(failureType === 'network'
+                            ? { error: new Error(message) }
+                            : {
+                                result: {
+                                    errors: [new GraphQLError(message)],
+                                },
+                            }),
+                    },
+                ]
+
+                renderWithProviders(
+                    <>
+                        <SidebarAlbumShare id="album-1" />
+                        <SharingNotifications />
+                    </>,
+                    { mocks }
+                )
+
+                await screen.findByText('ghi789')
+                await user.click(
+                    screen.getByRole('button', {
+                        name: adding ? 'Add shares' : 'Delete',
+                    })
+                )
+
+                // This proves that the configured operation failure was delivered.
+                expect(
+                    await screen.findByText(notificationHeader)
+                ).toBeInTheDocument()
+                expect(screen.getByRole('alert')).toHaveTextContent(message)
+                expect(consoleError).toHaveBeenCalledWith(
+                    notificationHeader,
+                    expect.any(Error)
+                )
+
+                // Query the current DOM because add-share loading can remount it.
+                expect(await screen.findByText('ghi789')).toBeInTheDocument()
+                expect(screen.getByText('My Album Share')).toBeInTheDocument()
+                expect(
+                    screen.queryByText('No shares found')
+                ).not.toBeInTheDocument()
+                expect(
+                    screen.getAllByRole('button', { name: 'Copy Link' })
+                ).toHaveLength(1)
+                expect(
+                    screen.getByRole('button', { name: 'Add shares' })
+                ).toBeEnabled()
+                expect(
+                    screen.getByRole('button', { name: 'Delete' })
+                ).toBeEnabled()
             }
         )
     })
@@ -1463,6 +1597,218 @@ describe('Sharing Components', () => {
                         'Failed to clear expiration',
                         expect.any(Error)
                     )
+                }
+            )
+
+            it('saves an expiration date and retains it after reopening the options', async () => {
+                const user = userEvent.setup()
+                const savedExpire = '2099-07-15T23:59:59Z'
+                const savedData = {
+                    album: {
+                        ...mockAlbumShares.album,
+                        shares: [
+                            {
+                                ...mockAlbumShares.album.shares[0],
+                                expire: savedExpire,
+                            },
+                        ],
+                    },
+                }
+                const mutationResult = vi.fn(() => ({
+                    data: {
+                        setExpireShareToken: {
+                            token: 'ghi789',
+                            __typename: 'ShareToken',
+                        },
+                    },
+                }))
+                const refetchResult = vi.fn(() => ({
+                    data: savedData,
+                }))
+
+                const mocks: MockLink.MockedResponse[] = [
+                    {
+                        request: albumQueryRequest,
+                        result: { data: mockAlbumWithExpiration },
+                    },
+                    {
+                        request: {
+                            query: SET_EXPIRE_MUTATION,
+                            variables: {
+                                token: 'ghi789',
+                                expire: savedExpire,
+                            },
+                        },
+                        result: mutationResult,
+                    },
+                    {
+                        request: albumQueryRequest,
+                        result: refetchResult,
+                    },
+                ]
+
+                renderWithProviders(
+                    <>
+                        <SidebarAlbumShare id="album-1" />
+                        <SharingNotifications />
+                    </>,
+                    { mocks }
+                )
+                await openAlbumShareOptions(user)
+
+                const input = screen.getByPlaceholderText(/2099/)
+                const selected = await selectNextMonthExpiration(
+                    user,
+                    input,
+                    new Date(mockAlbumWithExpiration.album.shares[0].expire)
+                )
+
+                expect(selected.expire).toBe(savedExpire)
+                expect(input).toHaveValue(selected.displayValue)
+
+                await user.click(
+                    within(input.parentElement!).getByRole('button', {
+                        name: 'Submit',
+                    })
+                )
+
+                await waitFor(() => {
+                    expect(mutationResult).toHaveBeenCalledOnce()
+                    expect(refetchResult).toHaveBeenCalledOnce()
+                })
+                await screen.findByText('ghi789')
+
+                // Refetching can remount the sidebar. Close any remaining open panel
+                // before reopening it and checking the saved backend value.
+                await user.keyboard('{Escape}')
+                await user.click(
+                    screen.getByRole('button', { name: 'More' })
+                )
+
+                expect(
+                    await screen.findByPlaceholderText(selected.displayValue)
+                ).toHaveValue(selected.displayValue)
+                expect(
+                    screen.getByRole('checkbox', { name: 'Expiration date' })
+                ).toBeChecked()
+                expect(screen.queryByRole('alert')).not.toBeInTheDocument()
+            })
+
+            it.each([
+                { previousExpiration: 'existing', failureType: 'network' },
+                { previousExpiration: 'existing', failureType: 'GraphQL' },
+                { previousExpiration: 'empty', failureType: 'network' },
+                { previousExpiration: 'empty', failureType: 'GraphQL' },
+            ] as const)(
+                'restores an $previousExpiration expiration after a $failureType save failure',
+                async ({ previousExpiration, failureType }) => {
+                    const user = userEvent.setup()
+                    const consoleError = vi
+                        .spyOn(console, 'error')
+                        .mockImplementation(() => undefined)
+                    const hasPreviousExpiration = previousExpiration === 'existing'
+                    const initialData = hasPreviousExpiration
+                        ? mockAlbumWithExpiration
+                        : mockAlbumShares
+                    const calendarDate = hasPreviousExpiration
+                        ? new Date(mockAlbumWithExpiration.album.shares[0].expire)
+                        : new Date()
+                    const selectedDate = new Date(
+                        calendarDate.getFullYear(),
+                        calendarDate.getMonth() + 1,
+                        15,
+                        12
+                    )
+                    const year = selectedDate.getFullYear()
+                    const month = String(selectedDate.getMonth() + 1).padStart(2, '0')
+                    const expire = `${year}-${month}-15T23:59:59Z`
+                    const message = 'Expiration save failed'
+
+                    const mocks: MockLink.MockedResponse[] = [
+                        {
+                            request: albumQueryRequest,
+                            result: { data: initialData },
+                        },
+                        {
+                            request: {
+                                query: SET_EXPIRE_MUTATION,
+                                variables: {
+                                    token: 'ghi789',
+                                    expire,
+                                },
+                            },
+                            ...(failureType === 'network'
+                                ? { error: new Error(message) }
+                                : {
+                                    result: {
+                                        errors: [new GraphQLError(message)],
+                                    },
+                                }),
+                        },
+                    ]
+
+                    renderWithProviders(
+                        <>
+                            <SidebarAlbumShare id="album-1" />
+                            <SharingNotifications />
+                        </>,
+                        { mocks }
+                    )
+                    await openAlbumShareOptions(user)
+
+                    const checkbox = screen.getByRole('checkbox', {
+                        name: 'Expiration date',
+                    })
+
+                    if (!hasPreviousExpiration) {
+                        await user.click(checkbox)
+                    }
+
+                    const input = hasPreviousExpiration
+                        ? screen.getByPlaceholderText<HTMLInputElement>(/2099/)
+                        : screen.getByPlaceholderText<HTMLInputElement>('')
+                    const previousValue = input.value
+                    const selected = await selectNextMonthExpiration(
+                        user,
+                        input,
+                        calendarDate
+                    )
+
+                    expect(selected.expire).toBe(expire)
+                    expect(input).toHaveValue(selected.displayValue)
+                    expect(input.value).not.toBe(previousValue)
+
+                    await user.click(
+                        within(input.parentElement!).getByRole('button', {
+                            name: 'Submit',
+                        })
+                    )
+
+                    // Wait for the actual failure before checking restored state.
+                    expect(
+                        await screen.findByText('Failed to update expiration')
+                    ).toBeInTheDocument()
+                    expect(screen.getByRole('alert')).toHaveTextContent(message)
+
+                    const restoredInput = hasPreviousExpiration
+                        ? screen.getByPlaceholderText(/2099/)
+                        : screen.getByPlaceholderText('')
+
+                    expect(restoredInput).toHaveValue(previousValue)
+                    expect(
+                        screen.getByRole('checkbox', { name: 'Expiration date' })
+                    ).toBeChecked()
+                    expect(consoleError).toHaveBeenCalledWith(
+                        'Failed to update expiration',
+                        expect.any(Error)
+                    )
+
+                    // The action becomes available again after the failed save.
+                    expect(
+                        within(restoredInput.parentElement!).getByRole('button', {
+                            name: 'Submit',
+                        })
+                    ).toBeEnabled()
                 }
             )
         })
