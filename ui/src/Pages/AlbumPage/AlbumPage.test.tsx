@@ -1,133 +1,277 @@
-import { screen, waitFor } from '@testing-library/react'
+import type { ComponentProps } from 'react'
+import { gql } from '@apollo/client'
+import type { MockLink } from '@apollo/client/testing'
+import { cleanup, screen, waitFor } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
+import { afterEach, beforeEach, expect, test, vi } from 'vitest'
 import AlbumPage from './AlbumPage'
 import { renderWithProviders } from '../../helpers/testUtils'
-import { gql } from '@apollo/client'
 import { OrderDirection } from '../../__generated__/globalTypes'
 import { ALBUM_GALLERY_FRAGMENT } from '../../components/albumGallery/AlbumGallery'
-import { MEDIA_GALLERY_FRAGMENT } from '../../components/photoGallery/fragments'
 
-vi.mock('../../hooks/useScrollPagination', () => {
-  return {
-    default: () => ({
-      containerElem: vi.fn(),
-      finished: true,
-    }),
+vi.mock('../../hooks/useScrollPagination', () => ({
+  default: () => ({
+    containerElem: null,
+    loadingMore: false,
+  }),
+}))
+
+// Isolate page behavior while preserving the real query fragment.
+vi.mock(
+  '../../components/albumGallery/AlbumGallery',
+  async importOriginal => {
+    const actual =
+      await importOriginal<
+        typeof import('../../components/albumGallery/AlbumGallery')
+      >()
+    const { forwardRef } = await import('react')
+
+    const Gallery = forwardRef<
+      HTMLDivElement,
+      ComponentProps<typeof actual.default>
+    >(function Gallery(
+      { album, loading, onlyFavorites, setOnlyFavorites },
+      ref
+    ) {
+      return (
+        <div ref={ref}>
+          {loading && <p role="status">Loading gallery</p>}
+          {album && <h1>{album.title}</h1>}
+          <label>
+            Show only favorites
+            <input
+              type="checkbox"
+              checked={onlyFavorites ?? false}
+              onChange={event =>
+                setOnlyFavorites?.(event.target.checked)
+              }
+            />
+          </label>
+        </div>
+      )
+    })
+
+    return {
+      ...actual,
+      default: Gallery,
+    }
   }
-})
+)
 
-// Define the album query based on the actual implementation
 const ALBUM_QUERY = gql`
-  ${MEDIA_GALLERY_FRAGMENT}
   ${ALBUM_GALLERY_FRAGMENT}
 
-  query albumQuery($id: ID!, $onlyFavorites: Boolean, $mediaOrderBy: String, $orderDirection: OrderDirection, $limit: Int, $offset: Int) {
+  query albumQuery(
+    $id: ID!
+    $onlyFavorites: Boolean
+    $mediaOrderBy: String
+    $orderDirection: OrderDirection
+    $limit: Int
+    $offset: Int
+  ) {
     album(id: $id) {
       ...AlbumGalleryFields
     }
   }
-`;
+`
 
-test('AlbumPage renders', async () => {
-  // Create a mock with the expected structure
-  const mockAlbumQuery = {
+const queryVariables = (onlyFavorites = false) => ({
+  id: '1',
+  onlyFavorites,
+  mediaOrderBy: 'date_shot',
+  orderDirection: OrderDirection.Asc,
+  offset: 0,
+  limit: 200,
+})
+
+const albumData = (title = 'Test Album') => ({
+  album: {
+    __typename: 'Album' as const,
+    id: '1',
+    title,
+    subAlbums: [],
+    media: [],
+  },
+})
+
+function albumMock(onlyFavorites = false) {
+  return {
     request: {
       query: ALBUM_QUERY,
-      variables: {
-        id: "1",
-        onlyFavorites: false,
-        mediaOrderBy: "date_shot",
-        orderDirection: OrderDirection.Asc,
-        offset: 0,
-        limit: 200
-      }
+      variables: queryVariables(onlyFavorites),
     },
+    delay: 0,
     result: {
-      data: {
-        album: {
-          id: "1",
-          title: "Test Album",
-          subAlbums: [],
-          media: []
-        }
-      }
-    }
-  };
+      data: albumData(),
+    },
+  }
+}
 
-  renderWithProviders(<AlbumPage />, {
-    mocks: [mockAlbumQuery],
+function renderAlbum(mocks: MockLink.MockedResponse[]) {
+  return renderWithProviders(<AlbumPage />, {
+    mocks,
     initialEntries: ['/album/1'],
-    path: "/album/:id",
-    route: <AlbumPage />
+    path: '/album/:id',
+    route: <AlbumPage />,
   })
+}
+
+let previousUrl: string
+let previousTitle: string
+
+beforeEach(() => {
+  previousUrl = window.location.href
+  previousTitle = document.title
+  window.history.replaceState(null, '', '/album/1')
+})
+
+afterEach(() => {
+  cleanup()
+  window.history.replaceState(null, '', previousUrl)
+  document.title = previousTitle
+  vi.restoreAllMocks()
+})
+
+test('renders the returned album and updates the page title', async () => {
+  renderAlbum([albumMock()])
+
+  expect(
+    await screen.findByRole('heading', { name: 'Test Album' })
+  ).toBeInTheDocument()
 
   await waitFor(() => {
-    expect(screen.getByText('Sort')).toBeInTheDocument()
-    expect(screen.getByLabelText('Sort direction')).toBeInTheDocument()
+    expect(document.title).toContain('Test Album')
   })
 })
 
-test('AlbumPage shows loading state', async () => {
-  // Create a loading mock with delay
-  const loadingMock = {
-    request: {
-      query: ALBUM_QUERY,
-      variables: {
-        id: "1",
-        onlyFavorites: false,
-        mediaOrderBy: "date_shot",
-        orderDirection: OrderDirection.Asc,
-        offset: 0,
-        limit: 200
-      }
+test('shows loading while the album request is pending', async () => {
+  renderAlbum([
+    {
+      request: {
+        query: ALBUM_QUERY,
+        variables: queryVariables(),
+      },
+      delay: Infinity,
+      result: {
+        data: albumData(),
+      },
     },
-    delay: Infinity // Add a delay to ensure component shows loading state
-  };
+  ])
 
-  renderWithProviders(<AlbumPage />, {
-    mocks: [loadingMock],
-    initialEntries: ['/album/1'],
-    path: "/album/:id",
-    route: <AlbumPage />
-  })
+  expect(screen.getByRole('status')).toHaveTextContent('Loading gallery')
 
   await waitFor(() => {
     expect(document.title).toContain('Loading album')
   })
 
-  expect(screen.getByTestId('Layout')).toBeInTheDocument()
-  expect(screen.queryByLabelText('Loading more media')).not.toBeInTheDocument()
+  expect(screen.queryByRole('heading')).not.toBeInTheDocument()
 })
 
-test('AlbumPage shows not found state', async () => {
-  const notFoundMock = {
-    request: {
-      query: ALBUM_QUERY,
-      variables: {
-        id: "1",
-        onlyFavorites: false,
-        mediaOrderBy: "date_shot",
-        orderDirection: OrderDirection.Asc,
-        offset: 0,
-        limit: 200
-      }
+test('shows the not-found title when the album is null', async () => {
+  renderAlbum([
+    {
+      request: {
+        query: ALBUM_QUERY,
+        variables: queryVariables(),
+      },
+      delay: 0,
+      result: {
+        data: { album: null },
+      },
     },
-    result: {
-      data: {
-        album: null
-      }
-    }
-  };
-
-  renderWithProviders(<AlbumPage />, {
-    mocks: [notFoundMock],
-    initialEntries: ['/album/1'],
-    path: "/album/:id",
-    route: <AlbumPage />
-  })
+  ])
 
   await waitFor(() => {
     expect(document.title).toContain('Album not found')
-    const layout = screen.getByTestId('Layout');
-    expect(layout).toBeInTheDocument();
+    expect(screen.queryByRole('status')).not.toBeInTheDocument()
   })
+
+  expect(screen.queryByRole('heading')).not.toBeInTheDocument()
+})
+
+test('shows the album query error', async () => {
+  renderAlbum([
+    {
+      request: {
+        query: ALBUM_QUERY,
+        variables: queryVariables(),
+      },
+      delay: 0,
+      error: new Error('Album request failed'),
+    },
+  ])
+
+  expect(
+    await screen.findByText('Error loading album: Album request failed')
+  ).toBeInTheDocument()
+
+  expect(
+    screen.queryByRole('checkbox', { name: 'Show only favorites' })
+  ).not.toBeInTheDocument()
+})
+
+test.each([false, true])(
+  'changes the favorites filter from %s and requests matching data',
+  async initialFavorites => {
+    const user = userEvent.setup()
+
+    window.history.replaceState(
+      null,
+      '',
+      `/album/1?favorites=${initialFavorites ? '1' : '0'}`
+    )
+
+    const updatedResult = vi.fn(() => ({
+      data: albumData('Updated Album'),
+    }))
+
+    renderAlbum([
+      albumMock(initialFavorites),
+      {
+        request: {
+          query: ALBUM_QUERY,
+          variables: queryVariables(!initialFavorites),
+        },
+        delay: 0,
+        result: updatedResult,
+      },
+    ])
+
+    await screen.findByRole('heading', { name: 'Test Album' })
+
+    const checkbox = screen.getByRole('checkbox', {
+      name: 'Show only favorites',
+    })
+
+    if (initialFavorites) {
+      expect(checkbox).toBeChecked()
+    } else {
+      expect(checkbox).not.toBeChecked()
+    }
+
+    await user.click(checkbox)
+
+    expect(
+      new URLSearchParams(window.location.search).get('favorites')
+    ).toBe(initialFavorites ? '0' : '1')
+
+    await screen.findByRole('heading', { name: 'Updated Album' })
+
+    expect(updatedResult).toHaveBeenCalledOnce()
+
+    if (initialFavorites) {
+      expect(checkbox).not.toBeChecked()
+    } else {
+      expect(checkbox).toBeChecked()
+    }
+  }
+)
+
+test('rejects a missing album ID', () => {
+  // React can report the expected render failure to the console.
+  vi.spyOn(console, 'error').mockImplementation(() => { })
+
+  expect(() => renderWithProviders(<AlbumPage />)).toThrow(
+    'Expected parameter `id` to be defined for AlbumPage'
+  )
 })
