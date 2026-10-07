@@ -34,9 +34,6 @@ const ALBUM_QUERY: TypedDocumentNode<
   }
 `
 
-let refetchNeededAll = false
-let refetchNeededFavorites = false
-
 /**
  * Displays an album page with a media gallery, supporting filtering, ordering, and infinite scroll pagination.
  *
@@ -60,7 +57,7 @@ function AlbumPage() {
     [urlParams]
   )
 
-  const { loading, error, data, refetch, fetchMore } = useQuery(ALBUM_QUERY, {
+  const { loading, error, data, fetchMore } = useQuery(ALBUM_QUERY, {
     variables: {
       id: albumId,
       onlyFavorites,
@@ -80,30 +77,6 @@ function AlbumPage() {
       pageSize: 200,
     })
 
-  const toggleFavorites = useCallback(
-    (onlyFavorites: boolean) => {
-      if (
-        (refetchNeededAll && !onlyFavorites) ||
-        (refetchNeededFavorites && onlyFavorites)
-      ) {
-        void refetch({ id: albumId, onlyFavorites })
-          .then(() => {
-            if (onlyFavorites) {
-              refetchNeededFavorites = false
-            } else {
-              refetchNeededAll = false
-            }
-            setOnlyFavorites(onlyFavorites)
-          })
-          .catch((error: unknown) => {
-            console.error('Failed to refresh album favorites', error)
-          })
-      } else {
-        setOnlyFavorites(onlyFavorites)
-      }
-    }, [setOnlyFavorites, refetch, albumId]
-  )
-
   if (error) return <div>{t('album_page.load_error', 'Error loading album: {{message}}', { message: error.message })}</div>
 
   let pageTitle: string
@@ -121,7 +94,7 @@ function AlbumPage() {
         ref={containerElem}
         album={data?.album}
         loading={loading}
-        setOnlyFavorites={toggleFavorites}
+        setOnlyFavorites={setOnlyFavorites}
         onlyFavorites={onlyFavorites}
         showFilter
         setOrdering={orderParams.setOrdering}

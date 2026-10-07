@@ -1,7 +1,7 @@
 import type { ComponentProps } from 'react'
 import { gql } from '@apollo/client'
 import type { MockLink } from '@apollo/client/testing'
-import { cleanup, screen, waitFor } from '@testing-library/react'
+import { cleanup, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, expect, test, vi } from 'vitest'
 import AlbumPage from './AlbumPage'
@@ -34,7 +34,7 @@ vi.mock(
       ref
     ) {
       return (
-        <div ref={ref}>
+        <div ref={ref} role="region" aria-label="Album gallery">
           {loading && <p role="status">Loading gallery</p>}
           {album && <h1>{album.title}</h1>}
           <label>
@@ -164,7 +164,11 @@ test('shows loading while the album request is pending', async () => {
     expect(document.title).toContain('Loading album')
   })
 
-  expect(screen.queryByRole('heading')).not.toBeInTheDocument()
+  expect(
+    within(
+      screen.getByRole('region', { name: 'Album gallery' })
+    ).queryByRole('heading')
+  ).not.toBeInTheDocument()
 })
 
 test('shows the not-found title when the album is null', async () => {
@@ -186,7 +190,11 @@ test('shows the not-found title when the album is null', async () => {
     expect(screen.queryByRole('status')).not.toBeInTheDocument()
   })
 
-  expect(screen.queryByRole('heading')).not.toBeInTheDocument()
+  expect(
+    within(
+      screen.getByRole('region', { name: 'Album gallery' })
+    ).queryByRole('heading')
+  ).not.toBeInTheDocument()
 })
 
 test('shows the album query error', async () => {
@@ -275,3 +283,44 @@ test('rejects a missing album ID', () => {
     'Expected parameter `id` to be defined for AlbumPage'
   )
 })
+
+test.each([false, true])(
+  'shows a query error when changing favorites from %s fails',
+  async initialFavorites => {
+    const user = userEvent.setup()
+
+    window.history.replaceState(
+      null,
+      '',
+      `/album/1?favorites=${initialFavorites ? '1' : '0'}`
+    )
+
+    renderAlbum([
+      albumMock(initialFavorites),
+      {
+        request: {
+          query: ALBUM_QUERY,
+          variables: queryVariables(!initialFavorites),
+        },
+        delay: 0,
+        error: new Error('Favorites request failed'),
+      },
+    ])
+
+    await screen.findByRole('heading', { name: 'Test Album' })
+
+    await user.click(
+      screen.getByRole('checkbox', { name: 'Show only favorites' })
+    )
+
+    expect(
+      new URLSearchParams(window.location.search).get('favorites')
+    ).toBe(initialFavorites ? '0' : '1')
+
+    expect(
+      await screen.findByText(
+        'Error loading album: Favorites request failed'
+      )
+    ).toBeInTheDocument()
+  }
+)

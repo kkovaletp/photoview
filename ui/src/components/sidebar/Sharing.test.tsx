@@ -1676,18 +1676,45 @@ describe('Sharing Components', () => {
                     expect(mutationResult).toHaveBeenCalledOnce()
                     expect(refetchResult).toHaveBeenCalledOnce()
                 })
+
                 await screen.findByText('ghi789')
 
-                // Refetching can remount the sidebar. Close any remaining open panel
-                // before reopening it and checking the saved backend value.
-                await user.keyboard('{Escape}')
+                // Read the current button because refetching can remount the controls.
+                const moreButton = await screen.findByRole('button', {
+                    name: 'More',
+                })
+
+                // Close the options explicitly if they remained open after refetching.
+                // Escape is not reliable when keyboard focus is outside the popover.
+                if (moreButton.getAttribute('aria-expanded') === 'true') {
+                    await user.click(moreButton)
+                }
+
+                await waitFor(() => {
+                    expect(
+                        screen.getByRole('button', { name: 'More' })
+                    ).toHaveAttribute('aria-expanded', 'false')
+                })
+
+                // Reopen from a confirmed closed state.
                 await user.click(
                     screen.getByRole('button', { name: 'More' })
                 )
 
+                await waitFor(() => {
+                    expect(
+                        screen.getByRole('button', { name: 'More' })
+                    ).toHaveAttribute('aria-expanded', 'true')
+                })
+
+                // Check the value returned by the backend, not the unsaved selection.
+                const savedDisplayValue = formatExpirationDate(
+                    new Date(savedExpire)
+                )
+
                 expect(
-                    await screen.findByPlaceholderText(selected.displayValue)
-                ).toHaveValue(selected.displayValue)
+                    await screen.findByPlaceholderText(savedDisplayValue)
+                ).toHaveValue(savedDisplayValue)
                 expect(
                     screen.getByRole('checkbox', { name: 'Expiration date' })
                 ).toBeChecked()
