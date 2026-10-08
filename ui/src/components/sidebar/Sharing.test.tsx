@@ -1577,9 +1577,8 @@ describe('Sharing Components', () => {
                     const checkbox = screen.getByRole('checkbox', {
                         name: 'Expiration date',
                     })
-                    const previousDateValue = (
-                        screen.getByPlaceholderText(/2099/) as HTMLInputElement
-                    ).value
+                    const previousDateValue =
+                        screen.getByPlaceholderText<HTMLInputElement>(/2099/).value
 
                     await user.click(checkbox)
 
