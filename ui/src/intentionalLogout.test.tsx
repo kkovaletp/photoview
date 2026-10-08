@@ -302,13 +302,9 @@ describe('intentional logout', () => {
     await request.pending
 
     expect(addMessageSpy).toHaveBeenCalledOnce()
-    expect(addMessageSpy).toHaveBeenCalledWith(
-      expect.objectContaining({
-        props: expect.objectContaining({
-          content: expect.stringContaining('database unavailable'),
-        }),
-      })
-    )
+
+    const message = addMessageSpy.mock.calls[0]?.[0]
+    expect(message?.props.content).toContain('database unavailable')
   })
 
   test('HTTP 500 remains visible after intentional logout', async () => {
