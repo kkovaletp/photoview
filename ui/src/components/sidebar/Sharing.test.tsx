@@ -513,39 +513,80 @@ describe('Sharing Components', () => {
     })
 
     describe('Share Management', () => {
-        it('should copy share link to clipboard', async () => {
-            const user = userEvent.setup()
-
-            const mocks: MockLink.MockedResponse[] = [
+        it.each(
+            [
                 {
-                    request: {
-                        query: SHARE_ALBUM_QUERY,
-                        variables: { id: 'album-1' },
-                    },
-                    result: { data: mockAlbumShares },
+                    basename: '/',
+                    initialEntry: '/album/album-1?sort=date#details',
+                    sharePath: '/share',
                 },
                 {
-                    request: {
-                        query: SHARE_ALBUM_QUERY,
-                        variables: { id: 'album-1' },
-                    },
-                    result: { data: mockAlbumShares },
+                    basename: '/photoview',
+                    initialEntry: '/photoview/album/album-1?sort=date#details',
+                    sharePath: '/photoview/share',
                 },
-            ]
+                {
+                    basename: '/photoview/',
+                    initialEntry: '/photoview/album/album-1?sort=date#details',
+                    sharePath: '/photoview/share',
+                },
+                {
+                    basename: '/photos/library/',
+                    initialEntry: '/photos/library/album/album-1',
+                    sharePath: '/photos/library/share',
+                },
+            ].flatMap(deployment => [
+                { ...deployment, kind: 'album' as const },
+                { ...deployment, kind: 'media' as const },
+            ])
+        )(
+            'copies a $kind share under $basename',
+            async ({ basename, initialEntry, sharePath, kind }) => {
+                const user = userEvent.setup()
+                const isAlbum = kind === 'album'
+                const token = isAlbum ? 'ghi789' : 'abc123'
 
-            renderWithProviders(<SidebarAlbumShare id="album-1" />, { mocks })
+                const mocks: MockLink.MockedResponse[] = [
+                    {
+                        request: {
+                            query: isAlbum
+                                ? SHARE_ALBUM_QUERY
+                                : SHARE_PHOTO_QUERY,
+                            variables: {
+                                id: isAlbum ? 'album-1' : 'photo-1',
+                            },
+                        },
+                        result: {
+                            data: isAlbum
+                                ? mockAlbumShares
+                                : mockPhotoShares,
+                        },
+                    },
+                ]
 
-            await waitFor(() => {
-                expect(screen.getByText('ghi789')).toBeInTheDocument()
-            })
+                renderWithProviders(
+                    isAlbum
+                        ? <SidebarAlbumShare id="album-1" />
+                        : <SidebarPhotoShare id="photo-1" />,
+                    {
+                        mocks,
+                        basename,
+                        initialEntries: [initialEntry],
+                    }
+                )
 
-            const copyButton = screen.getByTitle('Copy Link')
-            await user.click(copyButton)
+                const tokenElement = await screen.findByText(token)
+                const row = tokenElement.closest('tr')!
 
-            expect(copy).toHaveBeenCalledWith(
-                `${location.origin}/share/ghi789`
-            )
-        })
+                await user.click(
+                    within(row).getByRole('button', { name: 'Copy Link' })
+                )
+
+                expect(copy).toHaveBeenCalledExactlyOnceWith(
+                    `${location.origin}${sharePath}/${token}`
+                )
+            }
+        )
 
         it('should delete a share', async () => {
             const user = userEvent.setup()
@@ -603,9 +644,22 @@ describe('Sharing Components', () => {
             })
         })
 
-        it.each(['resolved false', 'rejection'] as const)(
-            'logs a clipboard failure for %s without removing the share',
-            async outcome => {
+        it.each([
+            { outcome: 'resolved false', basename: '/', prefix: '' },
+            { outcome: 'rejection', basename: '/', prefix: '' },
+            {
+                outcome: 'resolved false',
+                basename: '/photoview/',
+                prefix: '/photoview',
+            },
+            {
+                outcome: 'rejection',
+                basename: '/photoview/',
+                prefix: '/photoview',
+            },
+        ] as const)(
+            'logs $outcome under $basename without removing the share',
+            async ({ outcome, basename, prefix }) => {
                 const user = userEvent.setup()
                 const consoleError = vi
                     .spyOn(console, 'error')
@@ -625,7 +679,11 @@ describe('Sharing Components', () => {
                     },
                 ]
 
-                renderWithProviders(<SidebarAlbumShare id="album-1" />, { mocks })
+                renderWithProviders(<SidebarAlbumShare id="album-1" />, {
+                    mocks,
+                    basename,
+                    initialEntries: [`${prefix}/album/album-1`],
+                })
 
                 await screen.findByText('ghi789')
                 await user.click(screen.getByRole('button', { name: 'Copy Link' }))
@@ -644,7 +702,7 @@ describe('Sharing Components', () => {
                 })
 
                 expect(copy).toHaveBeenCalledExactlyOnceWith(
-                    `${location.origin}/share/ghi789`
+                    `${location.origin}${prefix}/share/ghi789`
                 )
                 expect(screen.getByText('ghi789')).toBeInTheDocument()
             }

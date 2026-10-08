@@ -1,7 +1,12 @@
-import { useEffect, useState } from 'react'
 import { gql, DocumentNode, type TypedDocumentNode } from '@apollo/client'
-import { useMutation, useQuery, useLazyQuery } from '@apollo/client/react'
+import styled from 'styled-components'
 import copy from 'copy-to-clipboard'
+import dayjs from 'dayjs'
+import { useEffect, useState } from 'react'
+import DatePicker from "react-datepicker";
+import { useHref } from 'react-router'
+import "react-datepicker/dist/react-datepicker.css";
+import { useMutation, useQuery, useLazyQuery } from '@apollo/client/react'
 import { useTranslation } from 'react-i18next'
 import { Popover, PopoverButton, PopoverPanel } from '@headlessui/react'
 import {
@@ -30,10 +35,6 @@ import MoreIcon from './icons/shareMoreIcon.svg?react'
 import AddIcon from './icons/shareAddIcon.svg?react'
 import Checkbox from '../../primitives/form/Checkbox'
 import { TextField } from '../../primitives/form/Input'
-import styled from 'styled-components'
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
-import dayjs from 'dayjs'
 import { isAbortError } from '../../helpers/utils'
 
 const SHARE_PHOTO_QUERY: TypedDocumentNode<
@@ -605,6 +606,7 @@ const SidebarShare = ({
 }: SidebarShareProps) => {
   const { t } = useTranslation()
   const notifyError = useNotifyError()
+  const sharePath = useHref('/share')
 
   const query = isPhoto ? SHARE_PHOTO_QUERY : SHARE_ALBUM_QUERY
 
@@ -641,7 +643,7 @@ const SidebarShare = ({
           className="align-middle p-1 ml-2"
           title={t('sidebar.sharing.copy_link', 'Copy Link')}
           onClick={() => {
-            void copy(`${location.origin}/share/${share.token}`)
+            void copy(new URL(`${sharePath}/${share.token}`, location.origin).href)
               .then(copied => {
                 if (!copied) {
                   console.error('Failed to copy share link')

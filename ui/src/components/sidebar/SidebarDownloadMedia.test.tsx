@@ -358,6 +358,90 @@ describe('SidebarMediaDownload', () => {
                 consoleError.mockRestore()
             }
         })
+
+        it.each([
+            {
+                basename: '/',
+                entry: '/share/abc123',
+                accountToken: undefined,
+                expectedToken: 'abc123',
+            },
+            {
+                basename: '/photoview',
+                entry: '/photoview/share/abc123',
+                accountToken: undefined,
+                expectedToken: 'abc123',
+            },
+            {
+                basename: '/photoview/',
+                entry: '/photoview/share/abc123/subalbum-1',
+                accountToken: undefined,
+                expectedToken: 'abc123',
+            },
+            {
+                basename: '/photoview',
+                entry: '/photoview/album/album-1',
+                accountToken: undefined,
+                expectedToken: null,
+            },
+            {
+                basename: '/photoview',
+                entry: '/photoview/share/abc123',
+                accountToken: 'test-token',
+                expectedToken: null,
+            },
+        ])(
+            'uses the expected download token at $entry with account token $accountToken',
+            async ({
+                basename,
+                entry,
+                accountToken,
+                expectedToken,
+            }) => {
+                const user = userEvent.setup()
+                authToken.mockReturnValue(accountToken)
+
+                mockFetch.mockResolvedValueOnce({
+                    ok: true,
+                    headers: new Headers([
+                        ['content-type', 'image/jpeg'],
+                    ]),
+                    blob: async () =>
+                        new Blob(['test'], { type: 'image/jpeg' }),
+                })
+
+                renderWithProviders(
+                    <SidebarMediaDownload
+                        media={{
+                            ...mockMedia,
+                            downloads: [mockDownloads[0]],
+                        }}
+                    />,
+                    {
+                        mocks: [],
+                        basename,
+                        initialEntries: [entry],
+                    }
+                )
+
+                await user.click(
+                    screen.getByText('Original').closest('tr')!
+                )
+
+                await waitFor(() => {
+                    expect(mockCreateObjectURL).toHaveBeenCalled()
+                })
+
+                expect(mockFetch).toHaveBeenCalledTimes(1)
+
+                const [requestUrl, options] = mockFetch.mock.calls[0]
+                const url = new URL(requestUrl)
+
+                expect(url.pathname).toMatch(/\/photo\/original\.jpg$/)
+                expect(url.searchParams.get('token')).toBe(expectedToken)
+                expect(options).toEqual({ credentials: 'include' })
+            }
+        )
     })
 
     describe('Byte Formatting', () => {
