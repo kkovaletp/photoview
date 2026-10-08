@@ -1,20 +1,19 @@
 import { clsx } from 'clsx'
 import { DetailedHTMLProps, ImgHTMLAttributes, useRef, useState, useEffect } from 'react'
 import { BlurhashCanvas } from 'react-blurhash'
+import { useMatch } from 'react-router'
 import { isNil } from '../../helpers/utils'
 
 const isNativeLazyLoadSupported = 'loading' in document.createElement('img')
 const placeholder =
   'data:image/gif;base64,R0lGODlhAQABAPAAAAAAAAAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw=='
 
-const getProtectedUrl = (url?: string) => {
+const getProtectedUrl = (url?: string, token?: string) => {
   if (url == undefined) return undefined
 
   const imgUrl = new URL(url, location.origin)
 
-  const tokenRegex = /^\/share\/(\w+)/.exec(location.pathname)
-  if (tokenRegex) {
-    const token = tokenRegex[1]
+  if (token !== undefined) {
     imgUrl.searchParams.set('token', token)
   }
 
@@ -44,9 +43,10 @@ export const ProtectedImage = ({
   blurhash,
   ...props
 }: ProtectedImageProps) => {
+  const token = useMatch('/share/:token/*')?.params.token
   const [loaded, setLoaded] = useState(false)
 
-  const url = getProtectedUrl(src) || placeholder
+  const url = getProtectedUrl(src, token) || placeholder
 
   const didLoad = () => setLoaded(true)
 
@@ -183,8 +183,9 @@ export interface ProtectedVideoProps {
 }
 
 export const ProtectedVideo = ({ media, ...props }: ProtectedVideoProps) => {
+  const token = useMatch('/share/:token/*')?.params.token
   if (isNil(media.videoWeb)) {
-    console.error('ProetctedVideo called with media.videoWeb = null')
+    console.error('ProtectedVideo called with media.videoWeb = null')
     return null
   }
 
@@ -193,11 +194,11 @@ export const ProtectedVideo = ({ media, ...props }: ProtectedVideoProps) => {
       {...props}
       controls
       crossOrigin="use-credentials"
-      poster={getProtectedUrl(media.thumbnail?.url)}
+      poster={getProtectedUrl(media.thumbnail?.url, token)}
     >
       <source
         key={`${media.id}-source`}
-        src={getProtectedUrl(media.videoWeb.url)}
+        src={getProtectedUrl(media.videoWeb.url, token)}
         type="video/mp4"
       />
       <track key={`${media.id}-captions`} kind="captions" />

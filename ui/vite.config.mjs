@@ -69,11 +69,11 @@ export default defineConfig(async ({ command, mode }) => {
       port: 1234,
     },
     esbuild: {
-      target: 'es2020', // Ensure compatibility with browsers, not older than from 2021
+      target: 'es2022', // Ensure compatibility with browsers, not older than from 2023
       logOverride: { 'this-is-undefined-in-esm': 'silent' },
     },
     build: {
-      target: 'es2020',
+      target: 'es2022',
     },
     optimizeDeps: {
       exclude: ['mapbox-gl'],

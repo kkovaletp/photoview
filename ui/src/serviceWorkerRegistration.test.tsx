@@ -711,7 +711,11 @@ describe('serviceWorkerRegistration', () => {
             // Reject after calling unregister() so .catch(...) is already attached.
             d.reject(err)
 
-            await vi.waitFor(() => expect(errorSpy).toHaveBeenCalledWith(err.message))
+            await vi.waitFor(() => {
+                expect(errorSpy).toHaveBeenCalledExactlyOnceWith(
+                    '[Service Worker] Failed to unregister', err
+                )
+            })
         })
 
         test('does not throw when serviceWorker is not in navigator', async () => {
@@ -727,6 +731,39 @@ describe('serviceWorkerRegistration', () => {
 
             const { unregister } = await import('./serviceWorkerRegistration')
             expect(() => unregister()).not.toThrow()
+        })
+
+        test('logs an error when registration.unregister() rejects', async () => {
+            const errorSpy = vi.spyOn(console, 'error').mockImplementation(() => { })
+            const err = new Error('SW unregister rejected')
+            const d = deferred<boolean>()
+            const mockUnregister = vi.fn(() => d.promise)
+
+            mockNavigatorSW({
+                register: vi.fn().mockResolvedValue({
+                    installing: null,
+                    onupdatefound: null,
+                }),
+                ready: Promise.resolve({ unregister: mockUnregister }),
+                controller: null,
+            })
+
+            const { unregister } = await import('./serviceWorkerRegistration')
+            unregister()
+
+            await vi.waitFor(() => {
+                expect(mockUnregister).toHaveBeenCalledOnce()
+            })
+
+            // Reject after the production chain has started unregistering.
+            d.reject(err)
+
+            await vi.waitFor(() => {
+                expect(errorSpy).toHaveBeenCalledExactlyOnceWith(
+                    '[Service Worker] Failed to unregister',
+                    err
+                )
+            })
         })
     })
 })

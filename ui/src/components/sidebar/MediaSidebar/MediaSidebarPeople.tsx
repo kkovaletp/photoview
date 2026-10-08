@@ -132,7 +132,7 @@ const PersonMoreMenu = ({
         )
         return
       }
-      navigate(`/people/${data.detachImageFaces.id}`)
+      void navigate(`/people/${data.detachImageFaces.id}`)
     }).catch((e: unknown) => {
       console.error('Failed to detach image face', e)
       setInlineError(

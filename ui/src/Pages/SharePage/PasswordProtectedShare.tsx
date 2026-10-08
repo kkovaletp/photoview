@@ -29,6 +29,8 @@ const PasswordProtectedShare = ({
     setInvalidPassword(true)
   }
 
+  const submitPassword = handleSubmit(onSubmit)
+
   let errorMessage = undefined
   if (invalidPassword && !loading) {
     errorMessage = t(
@@ -59,7 +61,11 @@ const PasswordProtectedShare = ({
         type="password"
         loading={loading}
         disabled={loading}
-        action={handleSubmit(onSubmit)}
+        action={() => {
+          void submitPassword().catch((error: unknown) => {
+            console.error('Unexpected share password submission failure', error)
+          })
+        }}
         error={errorMessage}
         fullWidth={true}
         sizeVariant="big"

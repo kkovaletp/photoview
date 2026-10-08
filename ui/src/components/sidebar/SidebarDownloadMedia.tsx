@@ -1,4 +1,6 @@
 import { gql, type TypedDocumentNode } from '@apollo/client'
+import { useEffect } from 'react'
+import { useMatch } from 'react-router'
 import { useLazyQuery } from '@apollo/client/react'
 import { useTranslation } from 'react-i18next'
 import { NotificationType } from '../../__generated__/globalTypes'
@@ -7,7 +9,6 @@ import { TranslationFn } from '../../localization'
 import { useMessageState } from '../messages/MessageState'
 import { Message } from '../messages/SubscriptionsHook'
 import { MediaSidebarMedia } from './MediaSidebar/MediaSidebar'
-import { useEffect } from 'react'
 import { SidebarSection, SidebarSectionTitle } from './SidebarComponents'
 import SidebarTable from './SidebarTable'
 import {
@@ -15,6 +16,7 @@ import {
   SidebarDownloadQueryQueryVariables,
 } from './__generated__/SidebarDownloadMedia'
 import { createUuid } from '../../helpers/createUuid'
+import { isAbortError } from '../../helpers/utils'
 
 const DOWNLOAD_COMPLETE_NOTIFICATION_DURATION = 2000
 
@@ -65,19 +67,16 @@ const formatBytes = (t: TranslationFn) => (bytes: number) => {
 const downloadMedia = (
   t: TranslationFn,
   add: (message: Message) => void,
-  removeKey: (key: string) => void
+  removeKey: (key: string) => void,
+  shareToken?: string
 ) => async (url: string) => {
   const imgUrl = new URL(
     `${import.meta.env.BASE_URL}${url}`.replaceAll('//', '/'),
     location.origin
   )
 
-  if (authToken() == null) {
-    // Get share token if not authorized
-    const token = /^\/share\/(\w+)/.exec(location.pathname)
-    if (token) {
-      imgUrl.searchParams.set('token', token[1])
-    }
+  if (authToken() == null && shareToken !== undefined) {
+    imgUrl.searchParams.set('token', shareToken)
   }
 
   const response = await fetch(imgUrl.href, {
@@ -263,6 +262,7 @@ type SidebarDownloadTableProps = {
 
 const SidebarDownloadTable = ({ rows, add, removeKey }: SidebarDownloadTableProps) => {
   const { t } = useTranslation()
+  const shareToken = useMatch('/share/:token/*')?.params.token
 
   const extractExtension = (url: string) => {
     const urlMatch = url.split(/[#?]/)
@@ -271,7 +271,7 @@ const SidebarDownloadTable = ({ rows, add, removeKey }: SidebarDownloadTableProp
     return urlMatch[0].split('.').pop()?.trim().toLowerCase()
   }
 
-  const download = downloadMedia(t, add, removeKey)
+  const download = downloadMedia(t, add, removeKey, shareToken)
   const bytes = formatBytes(t)
   const downloadRows = rows.map(x => (
     <SidebarTable.Row key={x.url} onClick={() => {
@@ -338,8 +338,7 @@ const SidebarMediaDownload = ({ media }: SidebarMediaDownladProps) => {
       void loadPhotoDownloads({
         variables: { mediaId: media.id },
       }).catch((queryError: unknown) => {
-        // Apollo aborts an in-flight query when the component unmounts.
-        if (queryError instanceof Error && queryError.name === 'AbortError') return
+        if (isAbortError(queryError)) return
         console.error('Failed to load download options:', queryError)
       })
     }

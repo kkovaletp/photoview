@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react'
-
+import { MemoryRouter } from 'react-router'
 import { MediaType } from '../../../__generated__/globalTypes'
 import { MediaGalleryFieldsFragment } from '../__generated__/fragments'
 import PresentMedia from './PresentMedia'
@@ -21,7 +21,11 @@ test('render present image', () => {
     },
   }
 
-  render(<PresentMedia media={media} />)
+  render(
+    <MemoryRouter>
+      <PresentMedia media={media} />
+    </MemoryRouter>
+  )
 
   expect(screen.getByTestId('present-img-thumbnail')).toHaveAttribute(
     'src',
@@ -52,7 +56,11 @@ test('render present video', () => {
     },
   }
 
-  render(<PresentMedia media={media} />)
+  render(
+    <MemoryRouter>
+      <PresentMedia media={media} />
+    </MemoryRouter>
+  )
 
   expect(screen.getByTestId('present-video')).toHaveAttribute(
     'poster',

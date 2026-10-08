@@ -10,6 +10,8 @@ import { ReactElement, ReactNode } from 'react'
 interface RenderWithProvidersOptions {
     /** Apollo GraphQL mocks */
     mocks?: any[]
+    /** Router deployment prefix */
+    basename?: string
     /** Initial router entries for MemoryRouter */
     initialEntries?: (string | Partial<Location>)[]
     /** Route element to render */
@@ -37,6 +39,7 @@ export function renderWithProviders(
     ui: ReactNode,
     {
         mocks = [],
+        basename = '/',
         initialEntries = ['/'],
         route,
         path,
@@ -51,7 +54,7 @@ export function renderWithProviders(
             mocks={mocks}
             defaultOptions={apolloOptions.defaultOptions}
         >
-            <MemoryRouter initialEntries={initialEntries}>
+            <MemoryRouter basename={basename} initialEntries={initialEntries}>
                 <MessageProvider>{children}</MessageProvider>
             </MemoryRouter>
         </MockedProvider>
