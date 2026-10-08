@@ -185,10 +185,14 @@ describe('intentional logout', () => {
         await screen.findByText('mocked login page')
       ).toBeInTheDocument()
 
+      // The login page can appear before logout Effect cleanup finishes.
+      await waitFor(() => {
+        expect(getLogoutState().active).toBe(false)
+      })
+
       expect(authToken()).toBeUndefined()
       expect(fetchMock).not.toHaveBeenCalled()
       expect(addMessageSpy).not.toHaveBeenCalled()
-      expect(getLogoutState().active).toBe(false)
     }
   )
 
