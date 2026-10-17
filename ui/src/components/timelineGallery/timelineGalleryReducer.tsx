@@ -230,7 +230,17 @@ function convertMediaToTimelineGroups(
     })
     .map(([date, albums]) => ({
       date,
-      albums: Array.from(albums.values()),
+      albums: Array.from(albums.values()).sort((left, right) => {
+        if (left.title < right.title) {
+          return -1
+        }
+
+        if (left.title > right.title) {
+          return 1
+        }
+
+        return 0
+      }),
     }))
 }
 

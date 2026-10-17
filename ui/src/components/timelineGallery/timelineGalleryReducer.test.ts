@@ -610,4 +610,130 @@ describe('timeline gallery reducer', () => {
       }).timelineGroups
     ).toEqual([])
   })
+
+  test.each([
+    {
+      zone: 'America/New_York',
+      day: '2022-07-09T00:00:00',
+      dates: [
+        '2022-07-10T02:00:00Z',
+        '2022-07-09T20:00:00Z',
+        '2022-07-09T19:00:00Z',
+      ],
+    },
+    {
+      zone: 'Asia/Tokyo',
+      day: '2022-07-10T00:00:00',
+      dates: [
+        '2022-07-10T14:00:00Z',
+        '2022-07-09T23:00:00Z',
+        '2022-07-09T22:00:00Z',
+      ],
+    },
+  ])(
+    'sorts albums by title across UTC days in $zone',
+    ({ zone, day, dates }) => {
+      Settings.defaultZone = zone
+
+      const photo = (
+        id: string,
+        albumId: string,
+        albumTitle: string,
+        date: string
+      ): MyTimelineQuery['myTimeline'][0] => ({
+        __typename: 'Media',
+        id,
+        title: id,
+        type: MediaType.Photo,
+        blurhash: null,
+        thumbnail: null,
+        highRes: null,
+        videoWeb: null,
+        favorite: false,
+        album: {
+          __typename: 'Album',
+          id: albumId,
+          title: albumTitle,
+        },
+        date,
+      })
+
+      // API order: UTC day DESC, album title ASC, media time DESC.
+      // Album A has no photo in the newer UTC day.
+      const timeline = [
+        photo('b-new', 'b', 'B', dates[0]),
+        photo('a', 'a', 'A', dates[1]),
+        photo('b-old', 'b', 'B', dates[2]),
+      ]
+
+      const { timelineGroups } = timelineGalleryReducer(defaultEmptyState, {
+        type: 'replaceTimelineGroups',
+        timeline,
+      })
+
+      expect(
+        timelineGroups.map(group => ({
+          date: group.date,
+          albums: group.albums.map(album => ({
+            id: album.id,
+            title: album.title,
+            mediaIds: album.media.map(media => media.id),
+          })),
+        }))
+      ).toEqual([
+        {
+          date: day,
+          albums: [
+            { id: 'a', title: 'A', mediaIds: ['a'] },
+            { id: 'b', title: 'B', mediaIds: ['b-new', 'b-old'] },
+          ],
+        },
+      ])
+    }
+  )
+
+  test('preserves first-seen order for distinct albums with equal titles', () => {
+    Settings.defaultZone = 'UTC'
+
+    const photo = (
+      id: string,
+      albumId: string
+    ): MyTimelineQuery['myTimeline'][0] => ({
+      __typename: 'Media',
+      id,
+      title: id,
+      type: MediaType.Photo,
+      blurhash: null,
+      thumbnail: null,
+      highRes: null,
+      videoWeb: null,
+      favorite: false,
+      album: {
+        __typename: 'Album',
+        id: albumId,
+        title: 'Same title',
+      },
+      date: '2022-07-09T20:00:00Z',
+    })
+
+    const { timelineGroups } = timelineGalleryReducer(defaultEmptyState, {
+      type: 'replaceTimelineGroups',
+      timeline: [
+        photo('first', 'z'),
+        photo('second', 'a'),
+        photo('third', 'z'),
+      ],
+    })
+
+    expect(timelineGroups).toHaveLength(1)
+    expect(
+      timelineGroups[0].albums.map(album => ({
+        id: album.id,
+        mediaIds: album.media.map(media => media.id),
+      }))
+    ).toEqual([
+      { id: 'z', mediaIds: ['first', 'third'] },
+      { id: 'a', mediaIds: ['second'] },
+    ])
+  })
 })
