@@ -1,5 +1,6 @@
-import { fireEvent, render, screen } from '@testing-library/react'
+import { fireEvent, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import { renderWithRouter } from '../../../helpers/testUtils'
 import { MediaType } from '../../../__generated__/globalTypes'
 import { MediaGalleryFieldsFragment } from '../__generated__/fragments'
 import { SidebarContext } from '../../sidebar/Sidebar'
@@ -42,7 +43,7 @@ const renderWithSidebar = (media: MediaGalleryFieldsFragment) => {
   )
   const setPinned = vi.fn()
 
-  const view = render(
+  const view = renderWithRouter(
     <SidebarContext.Provider
       value={{
         updateSidebar,
@@ -128,7 +129,7 @@ test('an info panel closed elsewhere stays closed while navigating', async () =>
 test('arrow keys navigate and escape leaves the viewer', () => {
   const dispatchMedia = vi.fn()
 
-  render(
+  renderWithRouter(
     <SidebarContext.Provider
       value={{
         updateSidebar: vi.fn(),
@@ -161,7 +162,7 @@ test('escape without the history flag steps back instead', () => {
     .spyOn(window.history, 'back')
     .mockImplementation(() => undefined)
 
-  render(
+  renderWithRouter(
     <SidebarContext.Provider
       value={{
         updateSidebar: vi.fn(),
