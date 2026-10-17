@@ -38,18 +38,13 @@ const ChangePasswordModal = ({
       onClose={onClose}
       title={t('settings.users.password_reset.title', 'Change password')}
       description={
-        <Trans t={t}
+        <Trans
+          t={t}
           i18nKey="settings.users.password_reset.description"
+          defaults="Change password for <bold>{{username}}</bold>"
           values={{ username: user.username }}
           components={{ bold: <b /> }}
-        >
-          {/* TODO: How to fix the following error here?
-          Error: <Trans> child {user.username} at src/Pages/SettingsPage/Users/UserChangePassword.tsx:46:33 won't match at runtime: react-i18next inlines the value, but extraction produces an empty "<1></1>" placeholder. Use {{username: user.username}} (double braces) for interpolation.
-          If I replace the `{user.username}` with `{{ username: user.username }}`, VS Code returns the following error:
-          Object literal may only specify known properties, and 'username' does not exist in type 'Iterable<ReactNode> | Iterable<ReactI18NextChildren> | Promise<AwaitedReactNode> | ReactElement<...> | ReactPortal'.
-          index.d.ts(185, 5): The expected type comes from property 'children' which is declared here on type 'DetailedHTMLProps<HTMLAttributes<HTMLElement>, HTMLElement>' */}
-          Change password for <b>{user.username}</b>
-        </Trans>
+        />
       }
       actions={[
         {

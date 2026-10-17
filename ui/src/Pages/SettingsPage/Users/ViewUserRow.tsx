@@ -48,7 +48,7 @@ const ViewUserRow = ({
           </Button>
           <Button
             disabled={scanUserCalled}
-            onClick={() => scanUser({ variables: { userId: user.id } })}
+            onClick={() => void scanUser({ variables: { userId: user.id } })}
           >
             {t('settings.users.table.row.action.scan', 'Scan')}
           </Button>
@@ -90,7 +90,7 @@ const ViewUserRow = ({
                 ),
                 onClick: () => {
                   setConfirmDelete(false)
-                  deleteUser({
+                  void deleteUser({
                     variables: {
                       id: user.id,
                     },
@@ -103,20 +103,13 @@ const ViewUserRow = ({
               <Trans
                 t={t}
                 i18nKey="settings.users.confirm_delete_user.description"
+                defaults="<line>Are you sure, you want to delete <bold>{{username}}</bold>?</line><line>This action cannot be undone</line>"
                 values={{ username: user.username }}
-                components={{ line: <span className="block" />, bold: <b /> }}
-              >
-                <span className="block">
-                  {`Are you sure, you want to delete `}
-                  {/* TODO: How to fix the following error here?
-                  Error: <Trans> child {user.username} at src/Pages/SettingsPage/Users/UserChangePassword.tsx:46:33 won't match at runtime: react-i18next inlines the value, but extraction produces an empty "<1></1>" placeholder. Use {{username: user.username}} (double braces) for interpolation.
-                  If I replace the `{user.username}` with `{{ username: user.username }}`, VS Code returns the following error:
-                  Object literal may only specify known properties, and 'username' does not exist in type 'Iterable<ReactNode> | Iterable<ReactI18NextChildren> | Promise<AwaitedReactNode> | ReactElement<...> | ReactPortal'.
-                  index.d.ts(185, 5): The expected type comes from property 'children' which is declared here on type 'DetailedHTMLProps<HTMLAttributes<HTMLElement>, HTMLElement>' */}
-                  <b>{user.username}</b>?
-                </span>
-                <span className="block">{`This action cannot be undone`}</span>
-              </Trans>
+                components={{
+                  line: <span className="block" />,
+                  bold: <b />,
+                }}
+              />
             }
           />
         </div>
