@@ -16,9 +16,9 @@ require (
 	github.com/pkg/errors v0.9.1
 	github.com/sabhiram/go-gitignore v0.0.0-20210923224102-525f6e181f06
 	github.com/stretchr/testify v1.12.1
-	github.com/vektah/gqlparser/v2 v2.5.59
-	golang.org/x/crypto v0.57.0
-	golang.org/x/text v0.42.0
+	github.com/vektah/gqlparser/v2 v2.5.62
+	golang.org/x/crypto v0.58.0
+	golang.org/x/text v0.43.0
 	gopkg.in/gographics/imagick.v3 v3.7.3
 	gopkg.in/natefinch/lumberjack.v2 v2.2.1
 	gopkg.in/vansante/go-ffprobe.v2 v2.3.1
@@ -49,9 +49,9 @@ require (
 	github.com/urfave/cli/v3 v3.11.0 // indirect
 	go.yaml.in/yaml/v3 v3.0.5 // indirect
 	golang.org/x/mod v0.41.0 // indirect
-	golang.org/x/sync v0.23.0 // indirect
-	golang.org/x/sys v0.48.0 // indirect
-	golang.org/x/tools v0.49.0 // indirect
+	golang.org/x/sync v0.24.0 // indirect
+	golang.org/x/sys v0.49.0 // indirect
+	golang.org/x/tools v0.51.0 // indirect
 )
 
 tool github.com/99designs/gqlgen
