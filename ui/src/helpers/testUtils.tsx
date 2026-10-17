@@ -71,3 +71,26 @@ export function renderWithProviders(
         </Wrapper>
     )
 }
+
+/**
+ * Renders a component with router context.
+ * The wrapper remains mounted when rerender updates the component.
+ */
+export function renderWithRouter(
+    ui: ReactElement,
+    {
+        basename = '/',
+        initialEntries = ['/'],
+    }: Pick<
+        RenderWithProvidersOptions,
+        'basename' | 'initialEntries'
+    > = {}
+) {
+    const Wrapper = ({ children }: { children: ReactNode }) => (
+        <MemoryRouter basename={basename} initialEntries={initialEntries}>
+            {children}
+        </MemoryRouter>
+    )
+
+    return render(ui, { wrapper: Wrapper })
+}

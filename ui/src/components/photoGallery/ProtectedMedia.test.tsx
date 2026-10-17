@@ -438,7 +438,7 @@ describe('ProtectedMedia loading and missing-data behavior', () => {
 
       expect(container).toBeEmptyDOMElement()
       expect(consoleError).toHaveBeenCalledExactlyOnceWith(
-        'ProetctedVideo called with media.videoWeb = null'
+        'ProtectedVideo called with media.videoWeb = null'
       )
     }
   )
