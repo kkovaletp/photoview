@@ -3,7 +3,6 @@ import { DateTime } from 'luxon'
 import { MyTimelineQuery } from './__generated__/TimelineGallery'
 import { TimelineGroup, TimelineGroupAlbum } from './TimelineGallery'
 import { GalleryAction } from '../photoGallery/mediaGalleryReducer'
-import { isNil } from '../../helpers/utils'
 
 export interface TimelineMediaIndex {
   date: number
@@ -194,65 +193,45 @@ export const getActiveTimelineImage = ({
 function convertMediaToTimelineGroups(
   timelineMedia: MyTimelineQuery['myTimeline']
 ): TimelineGroup[] {
-  const timelineGroups: TimelineGroup[] = []
-  let albums: TimelineGroupAlbum[] = []
-  let nextAlbum: TimelineGroupAlbum | null = null
-
-  const localDay = (date: string) =>
-    DateTime.fromISO(date).startOf('day').toFormat("yyyy-MM-dd'T'HH:mm:ss")
+  const days = new Map<string, Map<string, TimelineGroupAlbum>>()
 
   for (const media of timelineMedia) {
-    if (nextAlbum == null) {
-      nextAlbum = {
+    const day = DateTime.fromISO(media.date).startOf('day').toFormat("yyyy-MM-dd'T'HH:mm:ss")
+
+    let albums = days.get(day)
+    if (albums === undefined) {
+      albums = new Map<string, TimelineGroupAlbum>()
+      days.set(day, albums)
+    }
+
+    const album = albums.get(media.album.id)
+    if (album === undefined) {
+      albums.set(media.album.id, {
         id: media.album.id,
         title: media.album.title,
         media: [media],
-      }
-      continue
-    }
-
-    // if date changes
-    if (localDay(nextAlbum.media[0].date) !== localDay(media.date)) {
-      albums.push(nextAlbum)
-
-      timelineGroups.push({
-        date: localDay(albums[0].media[0].date),
-        albums: albums,
       })
-      albums = []
-      nextAlbum = {
-        id: media.album.id,
-        title: media.album.title,
-        media: [media],
-      }
-      continue
+    } else {
+      album.media.push(media)
     }
-
-    // if album changes
-    if (nextAlbum.id !== media.album.id) {
-      albums.push(nextAlbum)
-      nextAlbum = {
-        id: media.album.id,
-        title: media.album.title,
-        media: [media],
-      }
-      continue
-    }
-
-    // same album and date
-    nextAlbum.media.push(media)
   }
 
-  if (!isNil(nextAlbum)) {
-    albums.push(nextAlbum)
+  return Array.from(days.entries())
+    .sort(([left], [right]) => {
+      if (left > right) {
+        return -1
+      }
 
-    timelineGroups.push({
-      date: localDay(albums[0].media[0].date),
-      albums: albums,
+      if (left < right) {
+        return 1
+      }
+
+      return 0
     })
-  }
-
-  return timelineGroups
+    .map(([date, albums]) => ({
+      date,
+      albums: Array.from(albums.values()),
+    }))
 }
 
 export const openTimelinePresentMode = ({

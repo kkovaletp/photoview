@@ -259,8 +259,8 @@ describe('timeline gallery reducer', () => {
       photo('f', '2022-07-10T04:00:00.1Z'),
     ])
     expect(acrossMidnight.map(group => group.date)).toEqual([
-      '2022-07-09T00:00:00',
       '2022-07-10T00:00:00',
+      '2022-07-09T00:00:00',
     ])
   })
 
@@ -494,5 +494,120 @@ describe('timeline gallery reducer', () => {
       ...defaultState,
       presenting: false,
     })
+  })
+
+  test.each([
+    {
+      zone: 'America/New_York',
+      dates: [
+        '2022-07-10T03:00:00Z',
+        '2022-07-10T20:00:00Z',
+        '2022-07-10T02:00:00Z',
+        '2022-07-09T23:00:00Z',
+      ],
+    },
+    {
+      zone: 'Asia/Tokyo',
+      dates: [
+        '2022-07-10T14:00:00Z',
+        '2022-07-10T20:00:00Z',
+        '2022-07-10T13:00:00Z',
+        '2022-07-09T14:00:00Z',
+      ],
+    },
+  ])('groups non-adjacent local days in $zone', ({ zone, dates }) => {
+    Settings.defaultZone = zone
+
+    const photo = (
+      id: string,
+      albumId: string,
+      date: string
+    ): MyTimelineQuery['myTimeline'][0] => ({
+      __typename: 'Media',
+      id,
+      title: id,
+      type: MediaType.Photo,
+      blurhash: null,
+      thumbnail: null,
+      highRes: null,
+      videoWeb: null,
+      favorite: false,
+      album: {
+        __typename: 'Album',
+        id: albumId,
+        title: albumId,
+      },
+      date,
+    })
+
+    // Database order: UTC day DESC, album title ASC, time DESC.
+    const timeline = [
+      photo('a', 'A', dates[0]),
+      photo('b', 'B', dates[1]),
+      photo('c', 'B', dates[2]),
+      photo('d', 'A', dates[3]),
+    ]
+
+    const { timelineGroups } = timelineGalleryReducer(defaultEmptyState, {
+      type: 'replaceTimelineGroups',
+      timeline,
+    })
+
+    // Check exact group counts, album order, and media membership.
+    expect(
+      timelineGroups.map(group => ({
+        date: group.date,
+        albums: group.albums.map(album => ({
+          id: album.id,
+          media: album.media.map(media => media.id),
+        })),
+      }))
+    ).toEqual([
+      {
+        date:
+          zone === 'Asia/Tokyo'
+            ? '2022-07-11T00:00:00'
+            : '2022-07-10T00:00:00',
+        albums: [{ id: 'B', media: ['b'] }],
+      },
+      {
+        date:
+          zone === 'Asia/Tokyo'
+            ? '2022-07-10T00:00:00'
+            : '2022-07-09T00:00:00',
+        albums: [
+          { id: 'A', media: ['a'] },
+          { id: 'B', media: ['c'] },
+        ],
+      },
+      ...(zone === 'Asia/Tokyo'
+        ? [
+          {
+            date: '2022-07-09T00:00:00',
+            albums: [{ id: 'A', media: ['d'] }],
+          },
+        ]
+        : []),
+    ].map(group =>
+      zone === 'America/New_York' &&
+        group.date === '2022-07-09T00:00:00'
+        ? {
+          ...group,
+          albums: [
+            { id: 'A', media: ['a', 'd'] },
+            { id: 'B', media: ['c'] },
+          ],
+        }
+        : group
+    ))
+  })
+
+  test('returns no groups for an empty timeline', () => {
+    expect(
+      timelineGalleryReducer(defaultEmptyState, {
+        type: 'replaceTimelineGroups',
+        timeline: [],
+      }).timelineGroups
+    ).toEqual([])
   })
 })
