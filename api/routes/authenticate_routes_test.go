@@ -13,6 +13,8 @@ import (
 	"github.com/kkovaletp/photoview/api/graphql/models/actions"
 	"github.com/kkovaletp/photoview/api/test_utils"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+	"golang.org/x/crypto/bcrypt"
 )
 
 func TestAuthenticateRoute(t *testing.T) {
@@ -273,4 +275,272 @@ func TestAuthenticateRoute(t *testing.T) {
 			assert.Equal(t, http.StatusForbidden, responseStatus)
 		})
 	})
+}
+
+func TestExplicitShareTokenTakesPriorityOverSession(t *testing.T) {
+	db := test_utils.DatabaseTest(t)
+
+	owner, err := models.RegisterUser(
+		db, "share-precedence-owner", nil, false,
+	)
+	require.NoError(t, err)
+
+	other, err := models.RegisterUser(
+		db, "share-precedence-other", nil, false,
+	)
+	require.NoError(t, err)
+
+	root := models.Album{
+		Title: "Shared root",
+		Path:  "/share-precedence/root",
+	}
+	require.NoError(t, db.Create(&root).Error)
+	require.NoError(
+		t, db.Model(&root).Association("Owners").Append(owner),
+	)
+
+	child := models.Album{
+		Title:         "Shared child",
+		Path:          "/share-precedence/root/child",
+		ParentAlbumID: &root.ID,
+	}
+	require.NoError(t, db.Create(&child).Error)
+	require.NoError(
+		t, db.Model(&child).Association("Owners").Append(owner),
+	)
+
+	unrelated := models.Album{
+		Title: "Unrelated",
+		Path:  "/share-precedence/unrelated",
+	}
+	require.NoError(t, db.Create(&unrelated).Error)
+	require.NoError(
+		t, db.Model(&unrelated).Association("Owners").Append(owner),
+	)
+
+	rootMedia := models.Media{
+		Title:    "root.jpg",
+		Path:     "/share-precedence/root/root.jpg",
+		AlbumID:  root.ID,
+		Type:     models.MediaTypePhoto,
+		DateShot: time.Now().UTC(),
+	}
+	require.NoError(t, db.Create(&rootMedia).Error)
+
+	childMedia := models.Media{
+		Title:    "child.jpg",
+		Path:     "/share-precedence/root/child/child.jpg",
+		AlbumID:  child.ID,
+		Type:     models.MediaTypePhoto,
+		DateShot: time.Now().UTC(),
+	}
+	require.NoError(t, db.Create(&childMedia).Error)
+
+	const password = "share-password"
+
+	hash, err := bcrypt.GenerateFromPassword(
+		[]byte(password), bcrypt.MinCost,
+	)
+	require.NoError(t, err)
+	hashedPassword := string(hash)
+
+	expiredAt := time.Now().UTC().Add(-time.Hour)
+
+	tokens := []models.ShareToken{
+		{
+			Value:   "precedence-public",
+			OwnerID: owner.ID,
+			AlbumID: &root.ID,
+		},
+		{
+			Value:    "precedence-protected",
+			OwnerID:  owner.ID,
+			AlbumID:  &root.ID,
+			Password: &hashedPassword,
+		},
+		{
+			Value:   "precedence-expired",
+			OwnerID: owner.ID,
+			AlbumID: &root.ID,
+			Expire:  &expiredAt,
+		},
+		{
+			Value:   "precedence-unrelated",
+			OwnerID: owner.ID,
+			AlbumID: &unrelated.ID,
+		},
+		{
+			Value:   "precedence-media-only",
+			OwnerID: owner.ID,
+			MediaID: &rootMedia.ID,
+		},
+	}
+
+	for i := range tokens {
+		require.NoError(t, db.Create(&tokens[i]).Error)
+	}
+
+	type authorizeFunc func(*http.Request) (bool, string, int, error)
+
+	endpoints := []struct {
+		name            string
+		authorize       authorizeFunc
+		allowsMediaOnly bool
+	}{
+		{
+			name: "root media",
+			authorize: func(r *http.Request) (bool, string, int, error) {
+				return authenticateMedia(&rootMedia, db, r)
+			},
+			allowsMediaOnly: true,
+		},
+		{
+			name: "child media",
+			authorize: func(r *http.Request) (bool, string, int, error) {
+				return authenticateMedia(&childMedia, db, r)
+			},
+		},
+		{
+			name: "root album",
+			authorize: func(r *http.Request) (bool, string, int, error) {
+				return authenticateAlbum(&root, db, r)
+			},
+		},
+		{
+			name: "child album",
+			authorize: func(r *http.Request) (bool, string, int, error) {
+				return authenticateAlbum(&child, db, r)
+			},
+		},
+	}
+
+	sessions := []struct {
+		name string
+		user *models.User
+	}{
+		{name: "signed out"},
+		{name: "owner", user: owner},
+		{name: "unrelated user", user: other},
+	}
+
+	cases := []struct {
+		name      string
+		query     string
+		cookie    string
+		hasCookie bool
+		allowed   bool
+		noToken   bool
+		mediaOnly bool
+	}{
+		{
+			name:    "valid unprotected share",
+			query:   "?token=precedence-public",
+			allowed: true,
+		},
+		{
+			name:      "valid protected share",
+			query:     "?token=precedence-protected",
+			cookie:    password,
+			hasCookie: true,
+			allowed:   true,
+		},
+		{
+			name:  "protected share without password",
+			query: "?token=precedence-protected",
+		},
+		{
+			name:      "protected share with wrong password",
+			query:     "?token=precedence-protected",
+			cookie:    "wrong-password",
+			hasCookie: true,
+		},
+		{
+			name:  "expired share",
+			query: "?token=precedence-expired",
+		},
+		{
+			name:  "invalid share",
+			query: "?token=does-not-exist",
+		},
+		{
+			name:  "share for unrelated album",
+			query: "?token=precedence-unrelated",
+		},
+		{
+			name:      "media-only share",
+			query:     "?token=precedence-media-only",
+			mediaOnly: true,
+		},
+		{
+			name:  "empty explicit token",
+			query: "?token=",
+		},
+		{
+			name:    "no explicit token",
+			noToken: true,
+		},
+	}
+
+	for _, endpoint := range endpoints {
+		t.Run(endpoint.name, func(t *testing.T) {
+			for _, session := range sessions {
+				t.Run(session.name, func(t *testing.T) {
+					for _, tc := range cases {
+						t.Run(tc.name, func(t *testing.T) {
+							req := httptest.NewRequest(
+								http.MethodGet, "/resource"+tc.query, nil,
+							)
+
+							if session.user != nil {
+								req = req.WithContext(
+									auth.AddUserToContext(
+										req.Context(), session.user,
+									),
+								)
+							}
+
+							if tc.hasCookie {
+								req.AddCookie(&http.Cookie{
+									Name: "share-token-pw-" +
+										req.URL.Query().Get("token"),
+									Value: tc.cookie,
+								})
+							}
+
+							expected := tc.allowed
+							if tc.mediaOnly {
+								expected = endpoint.allowsMediaOnly
+							}
+							if tc.noToken {
+								expected = session.user == owner
+							}
+
+							ok, message, status, authErr :=
+								endpoint.authorize(req)
+
+							require.Equal(t, expected, ok)
+
+							if expected {
+								require.NoError(t, authErr)
+								assert.Equal(t, "success", message)
+								assert.Equal(
+									t, http.StatusAccepted, status,
+								)
+								return
+							}
+
+							assert.Equal(
+								t, http.StatusForbidden, status,
+							)
+
+							if !tc.noToken {
+								assert.Error(t, authErr)
+								assert.Equal(t, "unauthorized", message)
+							}
+						})
+					}
+				})
+			}
+		})
+	}
 }

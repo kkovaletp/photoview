@@ -4,7 +4,6 @@ import { useMatch } from 'react-router'
 import { useLazyQuery } from '@apollo/client/react'
 import { useTranslation } from 'react-i18next'
 import { NotificationType } from '../../__generated__/globalTypes'
-import { authToken } from '../../helpers/authentication'
 import { TranslationFn } from '../../localization'
 import { useMessageState } from '../messages/MessageState'
 import { Message } from '../messages/SubscriptionsHook'
@@ -70,12 +69,9 @@ const downloadMedia = (
   removeKey: (key: string) => void,
   shareToken?: string
 ) => async (url: string) => {
-  const imgUrl = new URL(
-    `${import.meta.env.BASE_URL}${url}`.replaceAll('//', '/'),
-    location.origin
-  )
+  const imgUrl = new URL(url, location.origin)
 
-  if (authToken() == null && shareToken !== undefined) {
+  if (shareToken !== undefined) {
     imgUrl.searchParams.set('token', shareToken)
   }
 
@@ -83,23 +79,27 @@ const downloadMedia = (
     credentials: 'include',
   })
 
-  let blob = null
-  if (response.headers.has('content-length')) {
-    blob = await downloadMediaShowProgress(t, add, removeKey)(response)
-  } else {
-    blob = await response.blob()
+  if (!response.ok) {
+    throw new Error(`Media download failed with HTTP ${response.status}`)
   }
+
+  const blob = response.headers.has('content-length')
+    ? await downloadMediaShowProgress(t, add, removeKey)(response)
+    : await response.blob()
 
   if (blob == null) {
     return
   }
 
-  const lastSlashIndex = url.lastIndexOf('/')
-  const filename = url.slice(lastSlashIndex + 1)
+  const filename = imgUrl.pathname.slice(
+    imgUrl.pathname.lastIndexOf('/') + 1
+  )
+
   if (!filename) {
     console.error('Could not extract filename', url)
     return
   }
+
   downloadBlob(blob, filename)
 }
 

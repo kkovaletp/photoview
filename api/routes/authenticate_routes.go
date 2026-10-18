@@ -8,7 +8,6 @@ import (
 	"github.com/kkovaletp/photoview/api/graphql/auth"
 	"github.com/kkovaletp/photoview/api/graphql/models"
 
-	// "github.com/kkovaletp/photoview/api/log"
 	"github.com/pkg/errors"
 	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
@@ -17,6 +16,17 @@ import (
 const internalServerError = "internal server error"
 
 func authenticateMedia(media *models.Media, db *gorm.DB, r *http.Request) (success bool, responseMessage string, responseStatus int, errorMessage error) {
+	if r.URL.Query().Has("token") {
+		success, message, status, err := shareTokenFromRequest(
+			db, r, &media.ID, &media.AlbumID,
+		)
+		if !success {
+			return success, message, status, err
+		}
+
+		return true, "success", http.StatusAccepted, nil
+	}
+
 	user := auth.UserFromContext(r.Context())
 
 	if user != nil {
@@ -46,6 +56,17 @@ func authenticateMedia(media *models.Media, db *gorm.DB, r *http.Request) (succe
 }
 
 func authenticateAlbum(album *models.Album, db *gorm.DB, r *http.Request) (success bool, responseMessage string, responseStatus int, errorMessage error) {
+	if r.URL.Query().Has("token") {
+		success, message, status, err := shareTokenFromRequest(
+			db, r, nil, &album.ID,
+		)
+		if !success {
+			return success, message, status, err
+		}
+
+		return true, "success", http.StatusAccepted, nil
+	}
+
 	user := auth.UserFromContext(r.Context())
 
 	if user != nil {
