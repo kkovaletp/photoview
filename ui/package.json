@@ -30,7 +30,7 @@
     "node": "^24.0.0"
   },
   "dependencies": {
-    "@apollo/client": "^4.3.1",
+    "@apollo/client": "^4.3.5",
     "@dr.pogodin/react-helmet": "^3.3.1",
     "@headlessui/react": "^2.2.10",
     "@swc/plugin-styled-components": "^17.0.0",
