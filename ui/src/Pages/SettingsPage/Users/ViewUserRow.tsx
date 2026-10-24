@@ -100,15 +100,11 @@ const ViewUserRow = ({
               },
             ]}
             description={
-              <Trans
-                t={t}
+              <Trans t={t}
                 i18nKey="settings.users.confirm_delete_user.description"
                 defaults="<line>Are you sure, you want to delete <bold>{{username}}</bold>?</line><line>This action cannot be undone</line>"
                 values={{ username: user.username }}
-                components={{
-                  line: <span className="block" />,
-                  bold: <b />,
-                }}
+                components={{ line: <span className="block" />, bold: <b /> }}
               />
             }
           />
