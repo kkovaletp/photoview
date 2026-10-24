@@ -20,6 +20,10 @@ updates:
       interval: "weekly"
     open-pull-requests-limit: 999
     groups:
+      eslint:
+        patterns:
+          - "eslint"
+          - "@eslint/js"
       typescript-eslint:
         patterns:
           - "@typescript-eslint/*"

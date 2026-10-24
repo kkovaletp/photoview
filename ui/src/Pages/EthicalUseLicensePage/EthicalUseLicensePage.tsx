@@ -46,7 +46,7 @@ async function loadBundle(locale: string): Promise<void> {
 async function fetchManifest(signal: AbortSignal): Promise<Manifest> {
     try {
         const res = await fetch(`${BASE}assets/lic-locales/manifest.json`, { signal })
-        if (res.ok) return res.json() as Promise<Manifest>
+        if (res.ok) return (await res.json()) as Manifest
     } catch (err) {
         // Re-throw aborts so the caller can detect cancellation; swallow other errors.
         if (err instanceof DOMException && err.name === 'AbortError') throw err
@@ -146,9 +146,17 @@ const EthicalUseLicensePage = () => {
     // Load translation bundle when the selected locale changes.
     useEffect(() => {
         let cancelled = false
-        loadBundle(selectedLang).then(() => {
-            if (!cancelled) setBundleReadyLocale(selectedLang)
-        })
+
+        void loadBundle(selectedLang)
+            .then(() => {
+                if (!cancelled) setBundleReadyLocale(selectedLang)
+            })
+            .catch((error: unknown) => {
+                if (cancelled) return
+                console.error('Failed to prepare license translations', error)
+                setBundleReadyLocale(selectedLang)
+            })
+
         return () => {
             cancelled = true
         }

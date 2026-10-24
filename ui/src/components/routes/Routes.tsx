@@ -1,16 +1,19 @@
-import { ReactNode, lazy, Suspense } from 'react'
+import { ReactNode, lazy, Suspense, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
+import type { TFunction } from 'i18next'
 import {
   Navigate,
   useNavigate,
-  NavigateFunction,
   Outlet,
   useRoutes,
 } from 'react-router'
-
+import {
+  authToken,
+  beginIntentionalLogout,
+  clearTokenCookie,
+  endIntentionalLogout,
+} from '../../helpers/authentication'
 import Layout from '../layout/Layout'
-import { authToken, clearTokenCookie } from '../../helpers/authentication'
-import { useTranslation } from 'react-i18next'
-import type { TFunction } from 'i18next'
 import Loader from '../../primitives/Loader'
 import AuthorizedRoute from './AuthorizedRoute'
 
@@ -56,7 +59,6 @@ const PersonPage = lazy(() =>
 
 const Routes = () => {
   const { t } = useTranslation()
-  const navigate = useNavigate()
 
   const authorized = (element: ReactNode) => (
     <AuthorizedRoute>{element}</AuthorizedRoute>
@@ -73,7 +75,7 @@ const Routes = () => {
     },
     {
       path: '/logout',
-      element: <LogoutPage navigate={navigate} />,
+      element: <LogoutPage />,
     },
     {
       path: '/initialSetup',
@@ -157,9 +159,19 @@ export const NotFoundPage = ({ t }: { t: TFunction }) => {
   return <div>{t('routes.page_not_found', 'Page not found')}</div>
 }
 
-const LogoutPage = ({ navigate }: { navigate: NavigateFunction }) => {
-  clearTokenCookie()
-  navigate('/')
+const LogoutPage = () => {
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    beginIntentionalLogout()
+    clearTokenCookie()
+    void navigate('/login', { replace: true })
+
+    return () => {
+      endIntentionalLogout()
+    }
+  }, [navigate])
+
   return null
 }
 

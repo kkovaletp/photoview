@@ -182,14 +182,16 @@ export const FaceDetails = ({
           placeholder={t('people_page.face_group.label_placeholder', 'Label')}
           // icon="arrow right"
           value={inputValue}
-          action={() =>
-            setGroupLabel({
+          action={() => {
+            void setGroupLabel({
               variables: {
                 groupID: group.id,
                 label: normalizeLabel(inputValue),
               },
+            }).catch((error: unknown) => {
+              console.error('Failed to update face group label', error)
             })
-          }
+          }}
           onKeyDown={onKeyDown}
           onChange={e => setInputValue(e.target.value)}
           onBlur={() => {

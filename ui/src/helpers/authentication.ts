@@ -52,6 +52,22 @@ const AUTH_TOKEN_COOKIE_NAME = 'auth-token'
 const SHARE_TOKEN_COOKIE_NAME = (shareToken: string) =>
   `share-token-pw-${shareToken}`
 
+// Each operation retains the state object that existed when it started.
+// Ending logout replaces the object instead of changing the old one.
+let logoutState = { active: false }
+
+export function getLogoutState() {
+  return logoutState
+}
+
+export function beginIntentionalLogout() {
+  logoutState.active = true
+}
+
+export function endIntentionalLogout() {
+  logoutState = { active: false }
+}
+
 export function saveTokenCookie(token: string) {
   const options = {
     ...COOKIE_DEFAULT_OPTIONS,
@@ -59,6 +75,7 @@ export function saveTokenCookie(token: string) {
   }
 
   Cookies.set(AUTH_TOKEN_COOKIE_NAME, token, options)
+  endIntentionalLogout()
 }
 
 export function clearTokenCookie() {

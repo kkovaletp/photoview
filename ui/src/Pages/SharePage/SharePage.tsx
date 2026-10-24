@@ -194,7 +194,9 @@ export const TokenRoute = () => {
       <PasswordProtectedShare
         refetchWithPassword={password => {
           saveSharePassword(token, password)
-          refetch({ token, password })
+          void refetch({ token, password }).catch((error: unknown) => {
+            console.error('Failed to validate share password', error)
+          })
         }}
         loading={loading}
       />

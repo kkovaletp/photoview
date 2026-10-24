@@ -8,7 +8,6 @@ import { UserRowChildProps } from './UserRow'
 
 const ViewUserRow = ({
   user,
-  // state,
   setState,
   scanUser,
   deleteUser,
@@ -49,7 +48,7 @@ const ViewUserRow = ({
           </Button>
           <Button
             disabled={scanUserCalled}
-            onClick={() => scanUser({ variables: { userId: user.id } })}
+            onClick={() => void scanUser({ variables: { userId: user.id } })}
           >
             {t('settings.users.table.row.action.scan', 'Scan')}
           </Button>
@@ -91,7 +90,7 @@ const ViewUserRow = ({
                 ),
                 onClick: () => {
                   setConfirmDelete(false)
-                  deleteUser({
+                  void deleteUser({
                     variables: {
                       id: user.id,
                     },

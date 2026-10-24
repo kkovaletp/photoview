@@ -65,10 +65,13 @@ const AlbumTitle = ({ album, disableLink = false }: AlbumTitleProps) => {
     if (!albumId) return
     if (!token || !disableLink) return
 
-    fetchPath({
+    void fetchPath({
       variables: {
         id: albumId,
       },
+    }).catch((error: unknown) => {
+      if (error instanceof Error && error.name === 'AbortError') return
+      console.error('Failed to load album path', error)
     })
 
   }, [albumId, token, disableLink, fetchPath])

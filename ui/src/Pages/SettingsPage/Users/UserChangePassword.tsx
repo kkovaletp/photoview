@@ -38,7 +38,8 @@ const ChangePasswordModal = ({
       onClose={onClose}
       title={t('settings.users.password_reset.title', 'Change password')}
       description={
-        <Trans t={t}
+        <Trans
+          t={t}
           i18nKey="settings.users.password_reset.description"
           defaults="Change password for <bold>{{username}}</bold>"
           values={{ username: user.username }}
@@ -60,26 +61,36 @@ const ChangePasswordModal = ({
           ),
           variant: 'positive',
           disabled: isChanging,
-          onClick: () => void (async () => {
-            if (isChanging) return
-            setIsChanging(true)
-            try {
-              setErrorMessage(null)
-              await changePassword({
-                variables: {
-                  userId: user.id,
-                  password: passwordInput,
-                },
-              })
-              onClose?.()
-              setPasswordInput('')
-            } catch (error) {
-              console.error('Failed to change password: ', error)
-              setErrorMessage(t('settings.users.password_reset.error', 'Failed to change password'))
-            } finally {
-              setIsChanging(false)
-            }
-          })()
+          onClick: () => {
+            void (async () => {
+              if (isChanging) return
+              setIsChanging(true)
+
+              try {
+                setErrorMessage(null)
+                await changePassword({
+                  variables: {
+                    userId: user.id,
+                    password: passwordInput,
+                  },
+                })
+                onClose?.()
+                setPasswordInput('')
+              } catch (error) {
+                console.error('Failed to change password: ', error)
+                setErrorMessage(
+                  t(
+                    'settings.users.password_reset.error',
+                    'Failed to change password'
+                  )
+                )
+              } finally {
+                setIsChanging(false)
+              }
+            })().catch((error: unknown) => {
+              console.error('Unexpected failure in change-password handler', error)
+            })
+          },
         },
       ]}
     >

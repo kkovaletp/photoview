@@ -1,16 +1,17 @@
 import { useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
+import { useLocation, useMatch } from 'react-router'
 import { HelmetProvider, Helmet } from '@dr.pogodin/react-helmet'
 import Routes from './components/routes/Routes'
 import Messages from './components/messages/Messages'
-import { useTranslation } from 'react-i18next'
 import { useLoadTranslations } from './localization'
-import { useLocation } from 'react-router'
 
 const App = () => {
   const { t } = useTranslation()
   const { pathname } = useLocation()
 
-  useLoadTranslations()
+  const isLogoutRoute = useMatch('/logout') !== null
+  useLoadTranslations(!isLogoutRoute)
 
   useEffect(() => {
     window.scrollTo(0, 0)

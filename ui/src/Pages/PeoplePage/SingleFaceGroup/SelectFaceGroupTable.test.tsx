@@ -1,5 +1,6 @@
-import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { screen, fireEvent, waitFor } from '@testing-library/react'
 import { vi, describe, it, expect, beforeEach, afterEach } from 'vitest'
+import { renderWithRouter as render } from '../../../helpers/testUtils'
 import SelectFaceGroupTable from './SelectFaceGroupTable'
 import { MyFacesQuery } from '../__generated__/PeoplePage'
 import { SingleFaceGroupQuery } from './__generated__/singleFaceGroupQuery'
@@ -191,6 +192,24 @@ describe('SelectFaceGroupTable', () => {
             }
             rerender(<SelectFaceGroupTable {...defaultProps} faceGroups={[faceGroupWithoutImages]} />)
             expect(screen.getByText('No Images')).toBeInTheDocument()
+        })
+
+        it('keeps router context when face images appear after rerender', () => {
+            const { rerender } = render(
+                <SelectFaceGroupTable {...defaultProps} faceGroups={[]} />
+            )
+
+            expect(screen.queryAllByRole('presentation')).toHaveLength(0)
+
+            rerender(<SelectFaceGroupTable {...defaultProps} />)
+
+            const images = screen.getAllByRole('presentation')
+
+            expect(images).toHaveLength(3)
+            expect(images[0]).toHaveAttribute(
+                'src',
+                'http://test.com/thumb1.jpg'
+            )
         })
     })
 
