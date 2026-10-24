@@ -40,11 +40,10 @@ const ChangePasswordModal = ({
       description={
         <Trans t={t}
           i18nKey="settings.users.password_reset.description"
+          defaults="Change password for <bold>{{username}}</bold>"
           values={{ username: user.username }}
           components={{ bold: <b /> }}
-        >
-          Change password for <b>{user.username}</b>
-        </Trans>
+        />
       }
       actions={[
         {
