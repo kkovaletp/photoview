@@ -7,7 +7,10 @@ import { MockLink } from '@apollo/client/testing'
 import SidebarAlbumDownload from './SidebarDownloadAlbum'
 import AlbumTitle from '../album/AlbumTitle'
 import { Sidebar, SidebarProvider } from './Sidebar'
-import { renderWithRouter } from '../../helpers/testUtils'
+import {
+  renderWithProviders,
+  renderWithRouter,
+} from '../../helpers/testUtils'
 import {
   clearTokenCookie,
   saveTokenCookie,
@@ -193,14 +196,18 @@ it('retains the account-management entry point outside share routes', async () =
   saveTokenCookie('valid-session')
   const user = userEvent.setup()
 
-  renderWithRouter(
+  renderWithProviders(
     <SidebarProvider>
       <AlbumTitle
         album={{ id: '42', title: 'Account album' }}
         disableLink={false}
       />
       <Sidebar />
-    </SidebarProvider>
+    </SidebarProvider>,
+    {
+      mocks: [],
+      initialEntries: ['/album/42'],
+    }
   )
 
   await user.click(
@@ -208,6 +215,7 @@ it('retains the account-management entry point outside share routes', async () =
   )
 
   expect(screen.getByTestId('account-sidebar')).toBeInTheDocument()
-  expect(screen.queryByRole('button', { name: 'Download' }))
-    .not.toBeInTheDocument()
+  expect(
+    screen.queryByRole('button', { name: 'Download' })
+  ).not.toBeInTheDocument()
 })

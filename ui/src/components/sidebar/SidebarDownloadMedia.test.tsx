@@ -7,7 +7,7 @@ import {
   it,
   vi,
 } from 'vitest'
-import { screen, waitFor } from '@testing-library/react'
+import { act, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { MockLink } from '@apollo/client/testing'
 import { GraphQLError } from 'graphql'
@@ -31,7 +31,9 @@ globalThis.fetch = mockFetch
 // Mock URL methods for download blob handling
 const originalCreateObjectURL = globalThis.URL.createObjectURL
 const originalRevokeObjectURL = globalThis.URL.revokeObjectURL
-const mockCreateObjectURL = vi.fn(() => 'blob:mock-url')
+const mockCreateObjectURL = vi.fn(
+  (_blob: Blob | MediaSource) => 'blob:mock-url'
+)
 const mockRevokeObjectURL = vi.fn()
 
 globalThis.URL.createObjectURL = mockCreateObjectURL
@@ -614,6 +616,210 @@ describe('SidebarMediaDownload', () => {
         )
       }
     )
+
+    describe('stream integrity', () => {
+      const DownloadMessages = () => {
+        const { messages } = useMessageState()
+
+        return (
+          <>
+            {messages.map(message => (
+              <section key={message.key}>
+                <h2>{message.props.header}</h2>
+                <p>{message.props.content}</p>
+                {message.onDismiss && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      message.onDismiss?.()
+                    }}
+                  >
+                    Cancel download
+                  </button>
+                )}
+              </section>
+            ))}
+          </>
+        )
+      }
+
+      const renderDownload = () =>
+        renderWithProviders(
+          <>
+            <SidebarMediaDownload
+              media={{
+                ...mockMedia,
+                downloads: [mockDownloads[0]],
+              }}
+            />
+            <DownloadMessages />
+          </>,
+          { mocks: [] }
+        )
+
+      it.each([5, 10, 15])(
+        'validates %s received bytes against content-length 10',
+        async receivedBytes => {
+          const user = userEvent.setup()
+          const read = vi
+            .fn()
+            .mockResolvedValueOnce({
+              done: false,
+              value: new Uint8Array(receivedBytes).fill(7),
+            })
+            .mockResolvedValueOnce({
+              done: true,
+              value: undefined,
+            })
+
+          mockFetch.mockResolvedValueOnce({
+            ok: true,
+            status: 200,
+            headers: new Headers({
+              'content-length': '10',
+              'content-type': 'image/jpeg',
+            }),
+            body: {
+              getReader: () => ({
+                read,
+                cancel: vi.fn().mockResolvedValue(undefined),
+              }),
+            },
+          })
+
+          renderDownload()
+
+          await user.click(
+            screen.getByText('Original').closest('tr')!
+          )
+
+          if (receivedBytes === 10) {
+            await waitFor(() => {
+              expect(mockRevokeObjectURL)
+                .toHaveBeenCalledExactlyOnceWith('blob:mock-url')
+            })
+
+            expect(read).toHaveBeenCalledTimes(2)
+            expect(
+              screen.getByRole('heading', {
+                name: 'Downloading media completed',
+              })
+            ).toBeInTheDocument()
+            expect(
+              screen.queryByRole('heading', {
+                name: 'Downloading media failed',
+              })
+            ).not.toBeInTheDocument()
+
+            expect(mockCreateObjectURL).toHaveBeenCalledTimes(1)
+
+            const savedBlob = mockCreateObjectURL.mock.calls[0]?.[0]
+            expect(savedBlob).toBeInstanceOf(Blob)
+
+            if (!(savedBlob instanceof Blob)) {
+              throw new Error('Expected the saved download to be a Blob')
+            }
+
+            expect(savedBlob.size).toBe(10)
+            expect(savedBlob.type).toBe('image/jpeg')
+          } else {
+            const errorMessage =
+              receivedBytes < 10
+                ? 'Incomplete media download: expected 10 bytes, received 5'
+                : 'Received more data than expected'
+
+            expect(
+              await screen.findByText(
+                `The media download task failed with the error: ${errorMessage}`
+              )
+            ).toBeInTheDocument()
+
+            expect(read).toHaveBeenCalledTimes(
+              receivedBytes < 10 ? 2 : 1
+            )
+            expect(
+              screen.getByRole('heading', {
+                name: 'Downloading media failed',
+              })
+            ).toBeInTheDocument()
+            expect(
+              screen.queryByRole('heading', {
+                name: 'Downloading media completed',
+              })
+            ).not.toBeInTheDocument()
+
+            expect(mockCreateObjectURL).not.toHaveBeenCalled()
+            expect(mockRevokeObjectURL).not.toHaveBeenCalled()
+          }
+        }
+      )
+
+      it('does not save or report failure for a canceled stream', async () => {
+        const user = userEvent.setup()
+
+        let finishRead!: (
+          result: ReadableStreamReadResult<Uint8Array>
+        ) => void
+
+        const pendingRead =
+          new Promise<ReadableStreamReadResult<Uint8Array>>(resolve => {
+            finishRead = resolve
+          })
+
+        const read = vi.fn(() => pendingRead)
+        const cancel = vi.fn(() => {
+          finishRead({ done: true, value: undefined })
+          return Promise.resolve()
+        })
+
+        mockFetch.mockResolvedValueOnce({
+          ok: true,
+          status: 200,
+          headers: new Headers({
+            'content-length': '10',
+            'content-type': 'image/jpeg',
+          }),
+          body: {
+            getReader: () => ({ read, cancel }),
+          },
+        })
+
+        renderDownload()
+
+        await user.click(
+          screen.getByText('Original').closest('tr')!
+        )
+
+        await waitFor(() => {
+          expect(read).toHaveBeenCalledTimes(1)
+        })
+
+        await act(async () => {
+          await user.click(
+            screen.getByRole('button', {
+              name: 'Cancel download',
+            })
+          )
+          await pendingRead
+        })
+
+        expect(cancel).toHaveBeenCalledExactlyOnceWith(
+          'Download canceled by user'
+        )
+        expect(mockCreateObjectURL).not.toHaveBeenCalled()
+        expect(mockRevokeObjectURL).not.toHaveBeenCalled()
+        expect(
+          screen.queryByRole('heading', {
+            name: 'Downloading media completed',
+          })
+        ).not.toBeInTheDocument()
+        expect(
+          screen.queryByRole('heading', {
+            name: 'Downloading media failed',
+          })
+        ).not.toBeInTheDocument()
+      })
+    })
   })
 
   describe('Byte Formatting', () => {
