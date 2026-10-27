@@ -30,12 +30,12 @@ module.exports = [
                 ecmaFeatures: {
                     jsx: true,
                 },
-                ecmaVersion: 2020,
+                ecmaVersion: 2022,
                 sourceType: 'module',
             },
             globals: {
                 ...globals.browser,
-                ...globals.es2020,
+                ...globals.es2022,
                 Atomics: 'readonly',
                 SharedArrayBuffer: 'readonly',
                 process: 'readonly',
@@ -74,8 +74,8 @@ module.exports = [
             '@typescript-eslint/no-non-null-assertion': 'off',
             '@typescript-eslint/no-explicit-any': 'warn',
             '@typescript-eslint/ban-ts-comment': 'warn',
-            '@typescript-eslint/no-floating-promises': 'off',
-            '@typescript-eslint/no-misused-promises': 'off',
+            '@typescript-eslint/no-floating-promises': 'warn',
+            '@typescript-eslint/no-misused-promises': 'warn',
         },
         settings: {
             react: {

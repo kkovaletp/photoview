@@ -1,4 +1,5 @@
-import { render, screen } from '@testing-library/react'
+import { screen } from '@testing-library/react'
+import { renderWithRouter as render } from '../../helpers/testUtils'
 import FaceCircleImage from './FaceCircleImage'
 import { MyFacesQuery } from './__generated__/PeoplePage'
 

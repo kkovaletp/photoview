@@ -41,8 +41,12 @@ export const USERS_QUERY: TypedDocumentNode<
 const UsersTable = () => {
   const { t } = useTranslation()
   const [showAddUser, setShowAddUser] = useState(false)
-
   const { loading, error, data, refetch } = useQuery(USERS_QUERY)
+  const refreshUsers = () => {
+    void refetch().catch((error: unknown) => {
+      console.error('Failed to refresh users', error)
+    })
+  }
 
   if (error) {
     return <div>{`Users table error: ${error.message}`}</div>
@@ -51,7 +55,7 @@ const UsersTable = () => {
   let userRows: JSX.Element[] = []
   if (data?.user) {
     userRows = data.user.map(user => (
-      <UserRow user={user} refetchUsers={refetch} key={user.id} />
+      <UserRow user={user} refetchUsers={refreshUsers} key={user.id} />
     ))
   }
 
@@ -91,7 +95,7 @@ const UsersTable = () => {
               setShow={setShowAddUser}
               onUserAdded={() => {
                 setShowAddUser(false)
-                refetch()
+                refreshUsers()
               }}
             />
           </TableBody>

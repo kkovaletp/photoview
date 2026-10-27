@@ -1,9 +1,10 @@
 import { useEffect, useContext } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Link } from 'react-router'
+import { Link, useMatch } from 'react-router'
 import styled from 'styled-components'
 import { SidebarContext } from '../sidebar/Sidebar'
 import AlbumSidebar from '../sidebar/AlbumSidebar'
+import SidebarAlbumDownload from '../sidebar/SidebarDownloadAlbum'
 import { gql, type TypedDocumentNode } from '@apollo/client'
 import { useLazyQuery } from '@apollo/client/react'
 import { authToken } from '../../helpers/authentication'
@@ -59,19 +60,22 @@ const AlbumTitle = ({ album, disableLink = false }: AlbumTitleProps) => {
   const { t } = useTranslation()
   const { updateSidebar } = useContext(SidebarContext)
   const token = authToken()
+  const shareToken = useMatch('/share/:token/*')?.params.token
+  const isShareRoute = shareToken !== undefined
   const albumId = album?.id
 
   useEffect(() => {
-    if (!albumId) return
-    if (!token || !disableLink) return
+    if (!albumId || isShareRoute || !token || !disableLink) return
 
-    fetchPath({
+    void fetchPath({
       variables: {
         id: albumId,
       },
+    }).catch((error: unknown) => {
+      if (error instanceof Error && error.name === 'AbortError') return
+      console.error('Failed to load album path', error)
     })
-
-  }, [albumId, token, disableLink, fetchPath])
+  }, [albumId, isShareRoute, token, disableLink, fetchPath])
 
   const delay = useDelay(200, [album])
 
@@ -89,7 +93,7 @@ const AlbumTitle = ({ album, disableLink = false }: AlbumTitleProps) => {
 
   let title = <span>{album.title}</span>
 
-  const path = pathData?.album.path || []
+  const path = isShareRoute ? [] : pathData?.album.path || []
 
   const breadcrumbSections = path
     .slice()
@@ -112,14 +116,26 @@ const AlbumTitle = ({ album, disableLink = false }: AlbumTitleProps) => {
         </nav>
         <h1 className="text-2xl truncate min-w-0">{title}</h1>
       </div>
-      {token && (
+      {(token || isShareRoute) && (
         <button
           type="button"
-          title={t('sidebar.album.title', 'Album options')}
-          aria-label={t('sidebar.album.title', 'Album options')}
+          title={
+            isShareRoute
+              ? t('sidebar.download.title', 'Download')
+              : t('sidebar.album.title', 'Album options')
+          }
+          aria-label={
+            isShareRoute
+              ? t('sidebar.download.title', 'Download')
+              : t('sidebar.album.title', 'Album options')
+          }
           className={tailwindClassNames(buttonStyles({}), 'px-2 py-2 ml-2')}
           onClick={() => {
-            updateSidebar(<AlbumSidebar albumId={album.id} />)
+            updateSidebar(
+              isShareRoute
+                ? <SidebarAlbumDownload albumID={album.id} />
+                : <AlbumSidebar albumId={album.id} />
+            )
           }}
         >
           <GearIcon />

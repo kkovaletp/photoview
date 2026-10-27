@@ -18,7 +18,7 @@
     }
   },
   "album_page": {
-    "load_error": "Kan album niet laden",
+    "load_error": "Kan album niet laden: {{message}}",
     "loading": "Album laden...",
     "not_found": "Album niet gevonden"
   },

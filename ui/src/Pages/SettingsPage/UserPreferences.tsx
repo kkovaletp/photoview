@@ -1,11 +1,13 @@
 import { useMutation, useQuery } from '@apollo/client/react'
 import { gql, type TypedDocumentNode } from '@apollo/client'
 import { useMemo, useState } from 'react'
+import { Link } from 'react-router'
+import clsx from 'clsx'
 import { useTranslation } from 'react-i18next'
 import styled from 'styled-components'
 import { LanguageTranslation } from '../../__generated__/globalTypes'
 import Dropdown from '../../primitives/form/Dropdown'
-import { Button } from '../../primitives/form/Input'
+import { buttonStyles } from '../../primitives/form/Input'
 import {
   InputLabelDescription,
   InputLabelTitle,
@@ -78,14 +80,13 @@ const LogoutButton = () => {
   const { t } = useTranslation()
 
   return (
-    <Button
-      className="mb-4"
-      onClick={() => {
-        location.href = '/logout'
-      }}
+    <Link
+      to="/logout"
+      reloadDocument
+      className={clsx(buttonStyles({}), 'mb-4 inline-block')}
     >
       {t('settings.logout', 'Log out')}
-    </Button>
+    </Link>
   )
 }
 

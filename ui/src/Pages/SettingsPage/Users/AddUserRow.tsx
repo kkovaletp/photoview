@@ -142,7 +142,11 @@ const AddUserRow = ({ setShow, show, onUserAdded }: AddUserRowProps) => {
             type="submit"
             disabled={loading}
             variant="positive"
-            onClick={handleAddUser}
+            onClick={() => {
+              void handleAddUser().catch((error: unknown) => {
+                console.error('Unexpected failure in add-user handler', error)
+              })
+            }}
           >
             {t('settings.users.add_user.submit', 'Add user')}
           </Button>

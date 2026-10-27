@@ -1,7 +1,12 @@
-import { useEffect, useState } from 'react'
 import { gql, DocumentNode, type TypedDocumentNode } from '@apollo/client'
-import { useMutation, useQuery, useLazyQuery } from '@apollo/client/react'
+import styled from 'styled-components'
 import copy from 'copy-to-clipboard'
+import dayjs from 'dayjs'
+import { useEffect, useState } from 'react'
+import DatePicker from "react-datepicker";
+import { useHref } from 'react-router'
+import "react-datepicker/dist/react-datepicker.css";
+import { useMutation, useQuery, useLazyQuery } from '@apollo/client/react'
 import { useTranslation } from 'react-i18next'
 import { Popover, PopoverButton, PopoverPanel } from '@headlessui/react'
 import {
@@ -30,10 +35,7 @@ import MoreIcon from './icons/shareMoreIcon.svg?react'
 import AddIcon from './icons/shareAddIcon.svg?react'
 import Checkbox from '../../primitives/form/Checkbox'
 import { TextField } from '../../primitives/form/Input'
-import styled from 'styled-components'
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
-import dayjs from 'dayjs'
+import { isAbortError } from '../../helpers/utils'
 
 const SHARE_PHOTO_QUERY: TypedDocumentNode<
   SidebarGetPhotoSharesQuery,
@@ -319,7 +321,11 @@ const MorePopoverSectionPassword = ({
       <Checkbox
         label="Password protected"
         checked={activated}
-        onChange={checkboxChange}
+        onChange={() => {
+          void checkboxChange().catch((error: unknown) => {
+            console.error('Unexpected failure in share password toggle', error)
+          })
+        }}
       />
       <TextField
         data-testid="share-password-input"
@@ -346,7 +352,11 @@ const MorePopoverSectionPassword = ({
         onChange={event => {
           setPasswordInputValue(event.target.value)
         }}
-        action={updatePasswordAction}
+        action={() => {
+          void updatePasswordAction().catch((error: unknown) => {
+            console.error('Unexpected failure in share password update', error)
+          })
+        }}
         loading={setPasswordLoading}
       />
     </div>
@@ -419,29 +429,26 @@ const MorePopoverSectionExpiration = ({
       <Checkbox
         label={t('sidebar.sharing.expiration_date', 'Expiration date')}
         checked={enabled}
-        onChange={async () => {
+        onChange={() => {
           const next = !enabled
-          if (!next) {
-            const previousDate = date
-            setEnabled(false)
-            // If the checkbox is unchecked,set the expiration time to null.
-            setDate(null)
-            try {
-              await setExpire({
-                variables: {
-                  token: share.token,
-                  expire: null,
-                },
-              })
-            } catch (error) {
-              setEnabled(true)
-              setDate(previousDate)
-              notifyError('Failed to clear expiration', error)
-              console.error('Failed to clear expiration', error)
-            }
+          if (next) {
+            setEnabled(true)
             return
           }
-          setEnabled(true)
+          const previousDate = date
+          setEnabled(false)
+          setDate(null)
+          void setExpire({
+            variables: {
+              token: share.token,
+              expire: null,
+            },
+          }).catch((error: unknown) => {
+            setEnabled(true)
+            setDate(previousDate)
+            notifyError('Failed to clear expiration', error)
+            console.error('Failed to clear expiration', error)
+          })
         }}
       />
 
@@ -550,10 +557,13 @@ export const SidebarPhotoShare = ({ id }: SidebarSharePhotoProps) => {
 
   useEffect(() => {
     if (token) {
-      loadShares({
+      void loadShares({
         variables: {
           id,
         },
+      }).catch((error: unknown) => {
+        if (isAbortError(error)) return
+        console.error('Failed to load media shares', error)
       })
     }
   }, [loadShares, id, token])
@@ -596,6 +606,7 @@ const SidebarShare = ({
 }: SidebarShareProps) => {
   const { t } = useTranslation()
   const notifyError = useNotifyError()
+  const sharePath = useHref('/share')
 
   const query = isPhoto ? SHARE_PHOTO_QUERY : SHARE_ALBUM_QUERY
 
@@ -631,8 +642,16 @@ const SidebarShare = ({
           type="button"
           className="align-middle p-1 ml-2"
           title={t('sidebar.sharing.copy_link', 'Copy Link')}
-          onClick={async () => {
-            await copy(`${location.origin}/share/${share.token}`)
+          onClick={() => {
+            void copy(new URL(`${sharePath}/${share.token}`, location.origin).href)
+              .then(copied => {
+                if (!copied) {
+                  console.error('Failed to copy share link')
+                }
+              })
+              .catch((error: unknown) => {
+                console.error('Failed to copy share link', error)
+              })
           }}
         >
           <CopyIcon />

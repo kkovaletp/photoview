@@ -1,5 +1,7 @@
 import { gql } from '@apollo/client'
-import { screen, waitFor } from '@testing-library/react'
+import { MockedProvider } from '@apollo/client/testing/react'
+import { MemoryRouter } from 'react-router'
+import { render, screen, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { expect, test, vi } from 'vitest'
 import { LanguageTranslation } from '../../__generated__/globalTypes'
@@ -72,3 +74,69 @@ test('updates the selected language with the requested mutation variables', asyn
     expect(languageSelect).toHaveValue(LanguageTranslation.French)
   })
 })
+
+test.each([
+  { basename: '/', href: '/logout' },
+  { basename: '/photoview', href: '/photoview/logout' },
+])(
+  'logout uses document navigation to $href',
+  async ({ basename, href }) => {
+    const user = userEvent.setup()
+    const prefix = basename === '/' ? '' : basename
+
+    render(
+      <MockedProvider
+        mocks={[
+          {
+            request: { query: MY_USER_PREFERENCES },
+            result: {
+              data: {
+                myUserPreferences: {
+                  __typename: 'UserPreferences',
+                  id: '1',
+                  language: LanguageTranslation.English,
+                },
+              },
+            },
+          },
+        ]}
+      >
+        <MemoryRouter
+          basename={basename}
+          initialEntries={[`${prefix}/settings`]}
+        >
+          <UserPreferences />
+        </MemoryRouter>
+      </MockedProvider>
+    )
+
+    await waitFor(() => {
+      expect(
+        screen.getByRole('combobox', { name: /Website language/i })
+      ).toHaveValue(LanguageTranslation.English)
+    })
+
+    const link = screen.getByRole('link', { name: 'Log out' })
+    expect(link).toHaveAttribute('href', href)
+
+    let routerPreventedNavigation: boolean | undefined
+
+    // React's click handler runs before this document listener.
+    // Cancel browser navigation here because jsdom cannot load documents.
+    const stopDocumentNavigation = (event: MouseEvent) => {
+      routerPreventedNavigation = event.defaultPrevented
+      event.preventDefault()
+    }
+
+    document.addEventListener('click', stopDocumentNavigation, {
+      once: true,
+    })
+
+    try {
+      await user.click(link)
+      expect(routerPreventedNavigation).toBe(false)
+    } finally {
+      document.removeEventListener('click', stopDocumentNavigation)
+    }
+  }
+)

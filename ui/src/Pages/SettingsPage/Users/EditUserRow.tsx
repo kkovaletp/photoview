@@ -68,9 +68,8 @@ const EditUserRow = ({
             disabled={updateUserLoading}
             variant="positive"
             onClick={() => {
-              const username =
-                normalizeUsername(state.username)
-              updateUser({
+              const username = normalizeUsername(state.username)
+              void updateUser({
                 variables: {
                   id: user.id,
                   username,
