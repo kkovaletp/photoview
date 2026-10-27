@@ -187,6 +187,12 @@ const downloadMediaShowProgress =
           lastUpdate = now;
         }
       } while (!result.done)
+
+      if (!canceled && receivedBytes !== totalBytes) {
+        throw new Error(
+          `Incomplete media download: expected ${totalBytes} bytes, received ${receivedBytes}`
+        )
+      }
     } catch (error) {
       add({
         key: notifyKey,
