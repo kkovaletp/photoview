@@ -74,6 +74,36 @@ describe.each([
     accountQuery: '?trace=1&token=old',
     shareQuery: '?trace=1&token=abc123',
   },
+  {
+    endpoint: '/',
+    prefix: location.origin,
+    accountQuery: '',
+    shareQuery: '?token=abc123',
+  },
+  {
+    endpoint: '/api///',
+    prefix: `${location.origin}/api`,
+    accountQuery: '',
+    shareQuery: '?token=abc123',
+  },
+  {
+    endpoint: `/api/${'/'.repeat(10_000)}segment`,
+    prefix: `${location.origin}/api/${'/'.repeat(10_000)}segment`,
+    accountQuery: '',
+    shareQuery: '?token=abc123',
+  },
+  {
+    endpoint: `/api${'/'.repeat(10_000)}`,
+    prefix: `${location.origin}/api`,
+    accountQuery: '',
+    shareQuery: '?token=abc123',
+  },
+  {
+    endpoint: 'https://api.example.test/custom/api///?trace=1#section',
+    prefix: 'https://api.example.test/custom/api',
+    accountQuery: '?trace=1',
+    shareQuery: '?trace=1&token=abc123',
+  },
 ])('archive links for $endpoint', endpointCase => {
   it.each([
     { base: '/', route: '/album/42', shared: false },

@@ -53,8 +53,15 @@ const SidebarAlbumDownload = ({ albumID }: SidebarAlbumDownladProps) => {
   const downloadRows = downloads.map(x => {
     const url = new URL(API_ENDPOINT, location.origin)
 
+    const pathname = url.pathname
+    let pathEnd = pathname.length
+
+    while (pathEnd > 0 && pathname[pathEnd - 1] === '/') {
+      pathEnd -= 1
+    }
+
     url.pathname =
-      `${url.pathname.replace(/\/+$/, '')}` +
+      `${pathname.slice(0, pathEnd)}` +
       `/download/album/${encodeURIComponent(albumID)}/${x.purpose}`
     url.hash = ''
 

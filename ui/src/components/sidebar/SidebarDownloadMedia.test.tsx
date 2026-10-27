@@ -39,10 +39,19 @@ const mockRevokeObjectURL = vi.fn()
 globalThis.URL.createObjectURL = mockCreateObjectURL
 globalThis.URL.revokeObjectURL = mockRevokeObjectURL
 const originalCreateElement = document.createElement.bind(document)
+const anchorClickMocks = new WeakMap<
+  HTMLAnchorElement,
+  ReturnType<typeof vi.fn>
+>()
+
 const mockCreateElement = vi.fn((tagName: string) => {
   if (tagName === 'a') {
-    const anchor = originalCreateElement('a') as HTMLAnchorElement
-    anchor.click = vi.fn() // Mock click to prevent jsdom navigation
+    const anchor = originalCreateElement('a')
+    const clickMock = vi.fn()
+
+    anchor.click = clickMock
+    anchorClickMocks.set(anchor, clickMock)
+
     return anchor
   }
   return originalCreateElement(tagName)
@@ -503,8 +512,10 @@ describe('SidebarMediaDownload', () => {
                 expect(downloadAnchors).toHaveLength(1)
                 expect(downloadAnchors[0].download)
                   .toBe('original.jpg')
-                expect(downloadAnchors[0].click)
-                  .toHaveBeenCalledTimes(1)
+
+                const clickMock = anchorClickMocks.get(downloadAnchors[0])
+                expect(clickMock).toBeDefined()
+                expect(clickMock).toHaveBeenCalledTimes(1)
               }
             )
           }
