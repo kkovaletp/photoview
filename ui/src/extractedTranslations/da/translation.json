@@ -302,7 +302,7 @@
         "submit": "Tilføj bruger"
       },
       "confirm_delete_user": {
-        "action": "Slet {user}",
+        "action": "Slet {{user}}",
         "description": "<line>Er du sikker på at du vil slette <bold>{{username}}</bold>?</line><line>Denne handling kan ikke fortrydes</line>",
         "title": "Slet bruger"
       },
