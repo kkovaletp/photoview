@@ -81,6 +81,8 @@ const VersionInfo = () => {
             <a
               href={`https://github.com/kkovaletp/photoview/commit/${commitSha}`}
               title={commitSha}
+              target="_blank"
+              rel="noopener noreferrer"
             >
               {commitSha.substring(0, 8)}
             </a>

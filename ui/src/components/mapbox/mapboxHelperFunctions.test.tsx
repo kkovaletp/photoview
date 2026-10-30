@@ -113,7 +113,7 @@ function makeMap(initialFeatures: TestFeature[] = []) {
 }
 
 afterEach(async () => {
-    await act(async () => {
+    await act(() => {
         for (const dispose of disposers.splice(0)) {
             dispose()
         }

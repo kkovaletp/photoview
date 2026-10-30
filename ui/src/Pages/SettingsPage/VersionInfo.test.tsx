@@ -38,11 +38,10 @@ function deferred<T>() {
 
 async function renderSettled() {
   let view!: ReturnType<typeof render>
-
-  await act(async () => {
+  await act(() => {
     view = render(<VersionInfo />)
+    return Promise.resolve()
   })
-
   return view
 }
 
@@ -129,6 +128,7 @@ describe('VersionInfo', () => {
 
     await act(async () => {
       pending.resolve(jsonResponse({ commitSha: 'abcdef1234567890' }))
+      await pending.promise
     })
 
     expect(
@@ -199,6 +199,7 @@ describe('VersionInfo', () => {
 
     await act(async () => {
       pending.reject(new DOMException('Aborted', 'AbortError'))
+      await expect(pending.promise).rejects.toMatchObject({ name: 'AbortError' })
     })
   })
 
@@ -217,9 +218,8 @@ describe('VersionInfo', () => {
     await renderSettled()
 
     await act(async () => {
-      first.resolve(
-        jsonResponse({ commitSha: 'aaaaaaaa12345678' })
-      )
+      first.resolve(jsonResponse({ commitSha: 'aaaaaaaa12345678' }))
+      await first.promise
     })
 
     expect(previousSignal?.aborted).toBe(true)
