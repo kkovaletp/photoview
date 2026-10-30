@@ -82,7 +82,6 @@ export default defineConfig(async ({ command, mode }) => {
     test: {
       globals: true,
       environment: 'jsdom',
-      pool: 'vmThreads',
       setupFiles: './testing/setupTests.ts',
       exclude: ['**/node_modules/**', '**/dist/**', '**/__generated__/**'],
       reporters: ['verbose', 'junit'],
