@@ -5,7 +5,7 @@ import svgr from 'vite-plugin-svgr'
 import react from '@vitejs/plugin-react-swc'
 import { VitePWA } from 'vite-plugin-pwa'
 import tailwindcss from '@tailwindcss/vite'
-import { ethicalLicensePlugin } from './vite-plugins/ethicalLicensePlugin'
+import { ethicalLicensePlugin } from './vite-plugins/ethicalLicensePlugin.mts'
 
 export default defineConfig(async ({ command, mode }) => {
   const isProductionBuild = command === 'build' && mode === 'production'
@@ -82,6 +82,7 @@ export default defineConfig(async ({ command, mode }) => {
     test: {
       globals: true,
       environment: 'jsdom',
+      pool: 'vmThreads',
       setupFiles: './testing/setupTests.ts',
       exclude: ['**/node_modules/**', '**/dist/**', '**/__generated__/**'],
       reporters: ['verbose', 'junit'],

@@ -207,7 +207,9 @@ describe('registerMediaMarkers', () => {
 
         fixture.emit('remove')
 
-        await act(async () => { })
+        await act(async () => {
+            await Promise.resolve()
+        })
 
         expect(fixture.host).toBeEmptyDOMElement()
         expect(markerElement).toBeEmptyDOMElement()

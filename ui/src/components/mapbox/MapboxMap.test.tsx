@@ -89,7 +89,9 @@ describe('useMapboxMap lifecycle', () => {
 
     view.unmount()
 
-    await act(async () => { })
+    await act(async () => {
+      await Promise.resolve()
+    })
 
     expect(mapboxLibrary.Map).not.toHaveBeenCalled()
     expect(configureMapbox).not.toHaveBeenCalled()
