@@ -39,7 +39,7 @@ ARG TARGETARCH
 ENV TARGETARCH=${TARGETARCH}
 
 RUN REACT_APP_BUILD_DATE="$(date -u +'%Y-%m-%dT%H:%M:%S+00:00(UTC)')" \
-    REACT_APP_BUILD_COMMIT_SHA="-=<GitHub-CI-commit-sha-placeholder>=-" \
+    REACT_APP_BUILD_COMMIT_SHA="" \
     REACT_APP_BUILD_VERSION="kkovaletp-2-${VERSION}-${TARGETARCH}" \
     REACT_APP_API_ENDPOINT="${REACT_APP_API_ENDPOINT}" \
     npm run build"$( [ "$NODE_ENV" != "production" ] && echo :dev )" -- --base="${UI_PUBLIC_URL}"
@@ -148,14 +148,8 @@ RUN --mount=type=bind,from=dependencies,source=/dependencies/,target=/dependenci
 COPY api/data /app/data
 COPY --from=ui /app/ui/dist "${PHOTOVIEW_UI_PATH}"
 
-# This is a w/a for letting the UI build stage to be cached
-# and not rebuilt every new commit because of the build_arg value change.
-ARG COMMIT_SHA=NoCommit
-RUN find "${PHOTOVIEW_UI_PATH}/assets" -type f \( -name "*.js" -o -name "*.mjs" \) \
-        -exec grep -qF -- '"-=<GitHub-CI-commit-sha-placeholder>=-"' {} \; \
-        -exec sed -i 's/"-=<GitHub-CI-commit-sha-placeholder>=-"/"'"${COMMIT_SHA}"'"/g' {} \; \
-    # Archive static files for better performance
-    && find /app/ui -type f \( \
+# Archive static files for better performance
+RUN find /app/ui -type f \( \
         -name "*.js" -o -name "*.mjs" -o -name "*.json" \
         -o -name "*.css" -o -name "*.html" -o -name "*.svg" -o -name "*.md" \
         -o -name "*.txt" -o -name "*.xml" -o -name "*.wasm" -o -name "*.map" \
@@ -167,6 +161,14 @@ RUN find "${PHOTOVIEW_UI_PATH}/assets" -type f \( -name "*.js" -o -name "*.mjs" 
     done' sh {} +
 
 COPY --from=api /app/api/photoview /app/photoview
+
+# Keep commit-specific metadata after the expensive, reusable layers.
+ARG COMMIT_SHA=NoCommit
+RUN if [ "${COMMIT_SHA}" = "NoCommit" ]; then \
+        printf '{"commitSha":null}\n'; \
+    else \
+        printf '{"commitSha":"%s"}\n' "${COMMIT_SHA}"; \
+    fi > "${PHOTOVIEW_UI_PATH}/build-info.json"
 
 WORKDIR /home/photoview
 
@@ -212,16 +214,10 @@ COPY --from=cady /usr/bin/caddy /usr/bin/caddy
 COPY --from=ui /app/ui/dist /srv
 COPY --chown=9999:9999 ui/Caddyfile /etc/caddy/Caddyfile
 
-# This is a w/a for letting the UI build stage to be cached
-# and not rebuilt every new commit because of the build_arg value change.
-ARG COMMIT_SHA=NoCommit
+# Archive static files for better performance
 # hadolint ignore=DL3018
 RUN apk add --no-cache curl bash \
     && apk add --no-cache --virtual .build-compress gzip brotli zstd \
-    && find /srv/assets -type f \( -name "*.js" -o -name "*.mjs" \) \
-        -exec grep -qF -- '"-=<GitHub-CI-commit-sha-placeholder>=-"' {} \; \
-        -exec sed -i 's/"-=<GitHub-CI-commit-sha-placeholder>=-"/"'"${COMMIT_SHA}"'"/g' {} \; \
-    # Archive static files for better performance
     && find /srv -type f \( \
         -name "*.js" -o -name "*.mjs" -o -name "*.json" \
         -o -name "*.css" -o -name "*.html" -o -name "*.svg" -o -name "*.md" \
@@ -236,6 +232,14 @@ RUN apk add --no-cache curl bash \
     # Set correct ownership for Caddy's runtime dirs
     && mkdir -p /data /config /var/log/caddy \
     && chown -R 9999:9999 /data /config /etc/caddy /var/log/caddy
+
+# Keep commit-specific metadata after the expensive, reusable layers.
+ARG COMMIT_SHA=NoCommit
+RUN if [ "${COMMIT_SHA}" = "NoCommit" ]; then \
+    printf '{"commitSha":null}\n'; \
+    else \
+    printf '{"commitSha":"%s"}\n' "${COMMIT_SHA}"; \
+    fi > /srv/build-info.json
 
 ENV HTTPS_PORT=8443
 # Expose unprivileged ports

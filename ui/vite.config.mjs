@@ -22,6 +22,7 @@ export default defineConfig(async ({ command, mode }) => {
   return {
     plugins: [
       react({
+        devTarget: 'es2022',
         plugins: [
           ['@swc/plugin-styled-components',
             {
@@ -50,7 +51,8 @@ export default defineConfig(async ({ command, mode }) => {
           // mapbox-gl is intentionally excluded from the SW precache:
           // it is too large (>2 MiB) and requires live network access for
           // map tiles anyway. This pattern covers any future hash-renamed variant.
-          globIgnores: ['**/mapbox-gl*.js'],
+          // build-info.json is also excluded because it contains commit hash that is not needed to be cached.
+          globIgnores: ['**/mapbox-gl*.js', '**/build-info.json'],
         },
       }),
       ethicalLicensePlugin(),
@@ -67,10 +69,6 @@ export default defineConfig(async ({ command, mode }) => {
     envPrefix: ['VITE_', 'REACT_APP_'],
     server: {
       port: 1234,
-    },
-    esbuild: {
-      target: 'es2022', // Ensure compatibility with browsers, not older than from 2023
-      logOverride: { 'this-is-undefined-in-esm': 'silent' },
     },
     build: {
       target: 'es2022',

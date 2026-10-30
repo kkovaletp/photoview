@@ -100,7 +100,10 @@
         Access-Control-Allow-Origin *
         match status 2xx
     }
-    # Handle non-fingerprinted static files with revalidation
+    # Build metadata must come from the current deployment.
+    @buildInfo path /build-info.json
+    header @buildInfo Cache-Control "no-store"
+    # Handle other non-fingerprinted static files with revalidation
 	@revalidate {
         file
         not path /assets/*
