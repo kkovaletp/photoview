@@ -154,7 +154,7 @@ RUN find /app/ui -type f \( \
         -o -name "*.css" -o -name "*.html" -o -name "*.svg" -o -name "*.md" \
         -o -name "*.txt" -o -name "*.xml" -o -name "*.wasm" -o -name "*.map" \
         \) ! -name "*.gz" ! -name "*.br" ! -name "*.zst" \
-    -exec sh -c 'for file; do \
+    -exec sh -ec 'for file; do \
         gzip -k -f -9 "$file"; \
         brotli -k -f -q 11 -s "$file"; \
         zstd -k -f -19 -T0 --no-progress "$file"; \
@@ -223,7 +223,7 @@ RUN apk add --no-cache curl bash \
         -o -name "*.css" -o -name "*.html" -o -name "*.svg" -o -name "*.md" \
         -o -name "*.txt" -o -name "*.xml" -o -name "*.wasm" -o -name "*.map" \
         \) ! -name "*.gz" ! -name "*.br" ! -name "*.zst" \
-    -exec sh -c 'for file; do \
+    -exec sh -ec 'for file; do \
         gzip -k -f -9 "$file"; \
         brotli -k -f -q 11 -s "$file"; \
         zstd -k -f -19 -T0 --no-progress "$file"; \

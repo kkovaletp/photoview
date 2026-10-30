@@ -562,3 +562,44 @@ func TestSpaHandler_ContentType(t *testing.T) {
 		})
 	}
 }
+
+func TestSpaHandler_BuildInfo(t *testing.T) {
+	tempDir := t.TempDir()
+
+	require.NoError(t, os.WriteFile(
+		filepath.Join(tempDir, "index.html"),
+		[]byte("<html>application</html>"),
+		0644,
+	))
+
+	const metadata = `{"commitSha":"0123456789abcdef"}`
+	require.NoError(t, os.WriteFile(
+		filepath.Join(tempDir, "build-info.json"),
+		[]byte(metadata),
+		0644,
+	))
+
+	handler, err := NewSpaHandler(tempDir, "index.html")
+	require.NoError(t, err)
+
+	for _, method := range []string{http.MethodGet, http.MethodHead} {
+		t.Run(method, func(t *testing.T) {
+			req := httptest.NewRequest(method, "/build-info.json", nil)
+			req.Header.Set("Accept-Encoding", "br, zstd, gzip")
+			rec := httptest.NewRecorder()
+
+			handler.ServeHTTP(rec, req)
+
+			assert.Equal(t, http.StatusOK, rec.Code)
+			assert.Equal(t, "no-store", rec.Header().Get("Cache-Control"))
+			assert.Contains(t, rec.Header().Get("Content-Type"), "application/json")
+			assert.Empty(t, rec.Header().Get("Content-Encoding"))
+
+			if method == http.MethodGet {
+				assert.JSONEq(t, metadata, rec.Body.String())
+			} else {
+				assert.Empty(t, rec.Body.String())
+			}
+		})
+	}
+}

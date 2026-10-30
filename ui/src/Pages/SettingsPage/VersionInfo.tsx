@@ -7,15 +7,14 @@ import {
   SectionTitle,
 } from './SettingsPage'
 
-const VERSION = import.meta.env.REACT_APP_BUILD_VERSION ?? 'undefined'
-const BUILD_DATE = import.meta.env.REACT_APP_BUILD_DATE ?? 'undefined'
-const BUILD_COMMIT_SHA = import.meta.env.REACT_APP_BUILD_COMMIT_SHA || undefined
-
 const VersionInfoWrapper = styled.div`
   margin-bottom: 24px;
 `
 
 const VersionInfo = () => {
+  const VERSION = import.meta.env.REACT_APP_BUILD_VERSION ?? 'undefined'
+  const BUILD_DATE = import.meta.env.REACT_APP_BUILD_DATE ?? 'undefined'
+  const BUILD_COMMIT_SHA = import.meta.env.REACT_APP_BUILD_COMMIT_SHA || undefined
   const { t } = useTranslation()
   const [commitSha, setCommitSha] = useState<string | undefined>(
     BUILD_COMMIT_SHA
@@ -64,7 +63,7 @@ const VersionInfo = () => {
     void loadBuildInfo()
 
     return () => controller.abort()
-  }, [])
+  }, [BUILD_COMMIT_SHA])
 
   return (
     <VersionInfoWrapper>

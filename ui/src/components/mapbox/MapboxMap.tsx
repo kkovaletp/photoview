@@ -74,6 +74,14 @@ const useMapboxMap = ({
   }, [])
 
   useEffect(() => {
+    return () => {
+      const currentMap = map.current
+      map.current = null
+      currentMap?.remove()
+    }
+  }, [])
+
+  useEffect(() => {
     if (
       mapboxLibrary == null ||
       mapContainer.current == null ||

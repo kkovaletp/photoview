@@ -1,60 +1,54 @@
 import type * as mapboxgl from 'mapbox-gl/esm'
-import { Dispatch } from 'react'
+import type { Dispatch } from 'react'
 import { createRoot } from 'react-dom/client'
 import MapClusterMarker from '../../Pages/PlacesPage/MapClusterMarker'
-import { MediaMarker } from '../../Pages/PlacesPage/MapPresentMarker'
-import { PlacesAction } from '../../Pages/PlacesPage/placesReducer'
+import type { MediaMarker } from '../../Pages/PlacesPage/MapPresentMarker'
+import type { PlacesAction } from '../../Pages/PlacesPage/placesReducer'
 
-const markers: { [key: string]: mapboxgl.Marker } = {}
-let markersOnScreen: typeof markers = {}
-
-type registerMediaMarkersArgs = {
+type RegisterMediaMarkersArgs = {
   map: mapboxgl.Map
   mapboxLibrary: typeof mapboxgl
   dispatchMarkerMedia: Dispatch<PlacesAction>
 }
 
-type MarkerElement = HTMLDivElement & {
-  _root?: ReturnType<typeof createRoot>
+type MarkerEntry = {
+  marker: mapboxgl.Marker
+  root: ReturnType<typeof createRoot>
+  coordinates: [number, number]
 }
 
 /**
- * Add appropriate event handlers to the map, to render and update media markers
- * Expects the provided mapbox map to contain geojson source of media
+ * Register media markers for one map.
+ * The returned function can also dispose the registration explicitly.
  */
-export const registerMediaMarkers = (args: registerMediaMarkersArgs) => {
-  const updateMarkers = makeUpdateMarkers(args)
+export const registerMediaMarkers = ({
+  map,
+  mapboxLibrary,
+  dispatchMarkerMedia,
+}: RegisterMediaMarkersArgs) => {
+  const markers = new Map<string, MarkerEntry>()
+  let disposed = false
 
-  args.map.on('move', updateMarkers)
-  args.map.on('moveend', updateMarkers)
-  args.map.on('sourcedata', updateMarkers)
-  updateMarkers()
-}
+  const updateMarkers = () => {
+    if (disposed || !map.getSource('media')) {
+      return
+    }
 
-/**
- * Make a function that can be passed to Mapbox to tell it how to render and update the image markers
- */
-const makeUpdateMarkers =
-  ({ map, mapboxLibrary, dispatchMarkerMedia }: registerMediaMarkersArgs) => () => {
-    const newMarkers: typeof markers = {}
-    const features: mapboxgl.GeoJSONFeature[] = map.querySourceFeatures('media')
+    const nextIds = new Set<string>()
+    const features = map.querySourceFeatures('media')
 
-    // for every media on the screen, create an HTML marker for it (if we didn't yet),
-    // and add it to the map if it's not there already
     for (const feature of features) {
       if (!feature.geometry) {
         console.warn('WARN: geojson feature had no geometry', { feature })
         continue
       }
 
-      // Type guard to ensure geometry is a Point
       if (feature.geometry.type !== 'Point') {
         console.warn('WARN: geojson feature geometry is not a Point', { feature })
         continue
       }
 
-      const coords = feature.geometry.coordinates as [number, number]
-      const props = feature.properties as MediaMarker
+      const props = feature.properties as MediaMarker | null
       if (props == null) {
         console.warn('WARN: geojson feature had no properties', {
           feature,
@@ -68,56 +62,86 @@ const makeUpdateMarkers =
         ? `cluster_${props.cluster_id}`
         : `media_${props.media_id}`
 
-      let marker = markers[id]
-      if (!marker) {
-        const el = createClusterPopupElement(props, {
-          dispatchMarkerMedia,
-        })
-        if (el) {
-          marker = markers[id] = new mapboxLibrary.Marker({
-            element: el,
-          }).setLngLat(coords)
-        } else {
-          console.error('Failed to create marker element for:', id)
-          continue
-        }
+      // A source query can return the same feature from multiple tiles.
+      if (nextIds.has(id)) {
+        continue
       }
-      newMarkers[id] = marker
+      nextIds.add(id)
 
-      if (!markersOnScreen[id]) marker.addTo(map)
-    }
-    // for every marker we've added previously, remove those that are no longer visible
-    for (const id in markersOnScreen) {
-      if (!newMarkers[id]) {
-        const el = markersOnScreen[id].getElement() as MarkerElement
-        el._root?.unmount()
-        markersOnScreen[id].remove()
+      const coordinates: [number, number] = [
+        feature.geometry.coordinates[0],
+        feature.geometry.coordinates[1],
+      ]
+
+      let entry = markers.get(id)
+
+      if (!entry) {
+        const element = document.createElement('div')
+        const root = createRoot(element)
+
+        root.render(
+          <MapClusterMarker
+            marker={props}
+            dispatchMarkerMedia={dispatchMarkerMedia}
+          />
+        )
+
+        const marker = new mapboxLibrary.Marker({ element })
+          .setLngLat(coordinates)
+          .addTo(map)
+
+        entry = { marker, root, coordinates }
+        markers.set(id, entry)
+      } else if (
+        entry.coordinates[0] !== coordinates[0] ||
+        entry.coordinates[1] !== coordinates[1]
+      ) {
+        entry.marker.setLngLat(coordinates)
+        entry.coordinates = coordinates
       }
     }
-    markersOnScreen = newMarkers
+
+    for (const [id, entry] of markers) {
+      if (!nextIds.has(id)) {
+        entry.marker.remove()
+        entry.root.unmount()
+        markers.delete(id)
+      }
+    }
   }
 
-function createClusterPopupElement(
-  geojsonProps: MediaMarker,
-  {
-    dispatchMarkerMedia,
-  }: {
-    dispatchMarkerMedia: Dispatch<PlacesAction>
+  const dispose = () => {
+    if (disposed) {
+      return
+    }
+    disposed = true
+
+    map.off('move', updateMarkers)
+    map.off('moveend', updateMarkers)
+    map.off('sourcedata', updateMarkers)
+    map.off('remove', dispose)
+
+    const entries = [...markers.values()]
+    markers.clear()
+
+    for (const entry of entries) {
+      entry.marker.remove()
+    }
+
+    // Map removal can run during the parent React tree's cleanup.
+    // Unmount independent roots after that cleanup completes.
+    queueMicrotask(() => {
+      for (const entry of entries) {
+        entry.root.unmount()
+      }
+    })
   }
-) {
-  try {
-    const el = document.createElement('div') as MarkerElement
-    const root = createRoot(el)
-    root.render(
-      <MapClusterMarker
-        marker={geojsonProps}
-        dispatchMarkerMedia={dispatchMarkerMedia}
-      />
-    )
-    el._root = root
-    return el
-  } catch (error) {
-    console.error('Failed to create cluster popup element:', error)
-    // throw error or return a fallback element to make error handling more consistent
-  }
+
+  map.on('move', updateMarkers)
+  map.on('moveend', updateMarkers)
+  map.on('sourcedata', updateMarkers)
+  map.on('remove', dispose)
+  updateMarkers()
+
+  return dispose
 }

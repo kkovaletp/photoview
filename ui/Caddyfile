@@ -107,6 +107,7 @@
 	@revalidate {
         file
         not path /assets/*
+        not path /build-info.json
     }
 	header @revalidate Cache-Control "public, must-revalidate"
     # Prevent caching errors
