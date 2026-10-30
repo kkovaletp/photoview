@@ -16,11 +16,15 @@ vi.mock('@apollo/client/react', async importOriginal => {
   }
 })
 
+const { removeMock } = vi.hoisted(() => ({
+  removeMock: vi.fn(),
+}))
+
 vi.mock('mapbox-gl/esm', () => ({
   Map: vi.fn(function () {
     return {
       resize: vi.fn(),
-      remove: vi.fn(),
+      remove: removeMock,
     }
   }),
   setWorkerUrl: vi.fn(),
@@ -67,18 +71,16 @@ describe('useMapboxMap lifecycle', () => {
       expect(configureMapbox).toHaveBeenCalledOnce()
     })
 
-    const map = configureMapbox.mock.calls[0][0]
-
     view.rerender(
       <TestMap configureMapbox={vi.fn<ConfigureMap>()} />
     )
 
     expect(mapboxLibrary.Map).toHaveBeenCalledOnce()
-    expect(map.remove).not.toHaveBeenCalled()
+    expect(removeMock).not.toHaveBeenCalled()
 
     view.unmount()
 
-    expect(map.remove).toHaveBeenCalledOnce()
+    expect(removeMock).toHaveBeenCalledOnce()
   })
 
   test('does not create a map after its owner has unmounted', async () => {

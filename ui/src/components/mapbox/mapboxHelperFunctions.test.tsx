@@ -113,10 +113,11 @@ function makeMap(initialFeatures: TestFeature[] = []) {
 }
 
 afterEach(async () => {
-    await act(() => {
+    await act(async () => {
         for (const dispose of disposers.splice(0)) {
             dispose()
         }
+        await Promise.resolve()
     })
 
     for (const host of hosts.splice(0)) {
