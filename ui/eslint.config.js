@@ -119,6 +119,7 @@ module.exports = [
             'codegen.ts',
             'i18next.config.ts',
             'vite-plugins/**/*.{ts,mts}',
+            'testing/transform-svg.js',
         ],
         languageOptions: {
             ecmaVersion: 2022,
@@ -133,7 +134,6 @@ module.exports = [
     {
         files: [
             'eslint.config.js',
-            'testing/transform-svg.js',
         ],
         languageOptions: {
             ecmaVersion: 2022,

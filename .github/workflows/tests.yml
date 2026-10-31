@@ -140,6 +140,7 @@ jobs:
           docker run --name test photoview/ui npm run test:ci
 
       - name: Extract coverage and test execution results
+        if: ${{ !cancelled() && (steps.test.conclusion == 'success' || steps.test.conclusion == 'failure') }}
         run: |
           docker cp test:/app/ui/coverage ./ui/ || true
           docker cp test:/app/ui/junit-report.xml ./ui/
