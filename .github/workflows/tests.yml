@@ -138,19 +138,22 @@ jobs:
         id: test
         run: |
           docker run --name test photoview/ui npm run test:ci
-          docker cp test:/app/ui/coverage ./ui/
+
+      - name: Extract coverage and test execution results
+        run: |
+          docker cp test:/app/ui/coverage ./ui/ || true
           docker cp test:/app/ui/junit-report.xml ./ui/
 
       - name: Upload coverage
         uses: codecov/codecov-action@v7
-        if: ${{ steps.test.conclusion == 'success' || steps.test.conclusion == 'failure' }}
+        if: ${{ !cancelled() && (steps.test.conclusion == 'success' || steps.test.conclusion == 'failure') }}
         with:
           token: ${{ secrets.CODECOV_TKN }}
           flags: ui
 
       - name: Upload test execution results
         uses: codecov/codecov-action@v7
-        if: ${{ steps.test.conclusion == 'success' || steps.test.conclusion == 'failure' }}
+        if: ${{ !cancelled() && (steps.test.conclusion == 'success' || steps.test.conclusion == 'failure') }}
         with:
           token: ${{ secrets.CODECOV_TKN }}
           flags: ui
@@ -164,12 +167,13 @@ jobs:
           docker run --name eslint-json photoview/ui npm run lint:ci-json
 
       - name: Extract ESLint reports
+        if: ${{ !cancelled() && ( steps.eslint.conclusion == 'success' || steps.eslint.conclusion == 'failure' ) }}
         working-directory: ui
         run: |
+          docker cp eslint-txt:/app/ui/eslint-report.txt ./ || true
           docker cp eslint-json:/app/ui/eslint-report.json ./
-          docker cp eslint-txt:/app/ui/eslint-report.txt ./
-          jq empty ./eslint-report.json || { echo "Invalid JSON file"; exit 1; }
-          # Fix the difference in paths in the JSON report to be correct outside the container
+          jq -e 'type == "array"' ./eslint-report.json || { echo "Invalid JSON file"; exit 1; }
+          # Convert container paths to workspace paths.
           jq --arg workspace "${{ github.workspace }}/ui/" '
             map(
               if has("filePath") and (.filePath | startswith("/app/ui/")) then
@@ -194,7 +198,7 @@ jobs:
 
       - name: Publish ESlint report in PR comment
         uses: actions/github-script@v9
-        if: ${{ !cancelled() && github.event_name == 'pull_request' }}
+        if: ${{ !cancelled() && github.event_name == 'pull_request' && ( steps.eslint.conclusion == 'success' || steps.eslint.conclusion == 'failure' ) }}
         with:
           github-token: ${{ secrets.COMMENT_TOKEN }}
           script: |
@@ -243,7 +247,7 @@ jobs:
 
       - name: SonarCloud Scan
         uses: SonarSource/sonarqube-scan-action@master
-        if: ${{ github.repository == 'kkovaletp/photoview' && ( steps.test.conclusion == 'success' || steps.test.conclusion == 'failure' ) }}
+        if: ${{ !cancelled() && github.repository == 'kkovaletp/photoview' && (steps.test.conclusion == 'success' || steps.test.conclusion == 'failure') }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} # Needed to get PR information, if any
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN_UI }}
