@@ -141,6 +141,7 @@ jobs:
           script: |
             const fs = require('fs');
             let scanResults = fs.readFileSync('output.html', 'utf8');
+            let rawResults = fs.readFileSync('vulns.json', 'utf8');
             let output = '';
 
             const comments = await github.rest.issues.listComments({
@@ -154,14 +155,14 @@ jobs:
             );
 
             output += '#### Anchore Grype scan results:\n';
-            output += 'Anchore Grype detected vulnerabilities in project dependencies, for which fixed versions are available.\n';
+            output += 'The table contains vulnerabile project dependencies, for which fixed versions are available.\n';
             output += 'Please find more details in the "Checks" tab of this PR > "Code scanning results" > "Grype".\n';
 
-            if (scanResults) {
+            if (JSON.parse(rawResults).matches.length > 0) {
               output += '\n' + scanResults + '\n';
             } else {
               output += '\nNo vulnerabilities detected.\n';
-              output += 'This might also mean that the scan job failed. Please check it.\n';
+              output += 'This might also mean that the scan job failed. Please check it's execution status.\n';
             }
 
             if (botComment) {

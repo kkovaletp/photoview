@@ -13,6 +13,8 @@ module.exports = [
             'node_modules/**',
             'dist/**',
             'coverage/**',
+            '**/__generated__/**',
+            '**/*.test.*',
         ],
     },
 
@@ -21,7 +23,7 @@ module.exports = [
 
     // Configuration for all JS/TS files
     {
-        files: ['**/*.js', '**/*.jsx', '**/*.ts', '**/*.tsx'],
+        files: ['**/*.js', '**/*.mjs', '**/*.jsx', '**/*.ts', '**/*.mts', '**/*.tsx'],
         languageOptions: {
             parser: tsParser,
             parserOptions: {
@@ -42,6 +44,10 @@ module.exports = [
                 module: 'readonly',
                 require: 'readonly',
             },
+        },
+        linterOptions: {
+            reportUnusedDisableDirectives: 'warn',
+            reportUnusedInlineConfigs: 'warn',
         },
         plugins: {
             '@typescript-eslint': tsPlugin,

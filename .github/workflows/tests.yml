@@ -159,15 +159,16 @@ jobs:
 
       - name: Run ESLint
         id: eslint
+        run: |
+          docker run --name eslint-txt photoview/ui npm run lint:ci
+          docker run --name eslint-json photoview/ui npm run lint:ci-json
+
+      - name: Extract ESLint reports
         working-directory: ui
         run: |
-          echo "--------------------------"
-          echo "ESLint execution results :"
-          echo "--------------------------"
-          docker run --name eslint photoview/ui npm run lint:ci || true
-          echo "--------------------------"
-          docker cp eslint:/app/ui/eslint-report.txt ./
-          docker cp eslint:/app/ui/eslint-report.json ./
+          docker cp eslint-json:/app/ui/eslint-report.json ./
+          docker cp eslint-txt:/app/ui/eslint-report.txt ./
+          jq empty ./eslint-report.json || { echo "Invalid JSON file"; exit 1; }
           # Fix the difference in paths in the JSON report to be correct outside the container
           jq --arg workspace "${{ github.workspace }}/ui/" '
             map(
@@ -179,12 +180,11 @@ jobs:
             )
           ' ./eslint-report.json > ./eslint-report-fixed.json
           mv ./eslint-report-fixed.json ./eslint-report.json
-          jq empty ./eslint-report.json || { echo "Invalid JSON file"; exit 1; }
 
       - name: ESLint artifact
         id: eslint-artifact
         uses: actions/upload-artifact@v7
-        if: ${{ steps.eslint.conclusion == 'success' || steps.eslint.conclusion == 'failure' }}
+        if: ${{ !cancelled() && ( steps.eslint.conclusion == 'success' || steps.eslint.conclusion == 'failure' ) }}
         with:
           name: ESLint-report
           path: ./ui/eslint-report*
@@ -194,7 +194,7 @@ jobs:
 
       - name: Publish ESlint report in PR comment
         uses: actions/github-script@v9
-        if: github.event_name == 'pull_request'
+        if: ${{ !cancelled() && github.event_name == 'pull_request' }}
         with:
           github-token: ${{ secrets.COMMENT_TOKEN }}
           script: |
@@ -213,7 +213,8 @@ jobs:
 
             if (ESLintResults) {
               output += '#### UI: ESLint issues:\n';
-              output += 'ESLint detected issues in the UI code.\n';
+              output += 'See the report for lint findings or execution diagnostics. ';
+              output += 'Check the ESLint step for its result.\n';
               output += '\n[ESLint execution report](' + ESLintResults + ')\n';
               output += '\nMake sure that you are logged in to be able to access the report.';
               output += '\nThe report is accessible by this link within 90 days after the last ';
