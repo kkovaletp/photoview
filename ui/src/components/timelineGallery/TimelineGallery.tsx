@@ -14,7 +14,6 @@ import {
 import {
   getActiveTimelineImage as getActiveTimelineMedia,
   timelineGalleryReducer,
-  TimelineMediaIndex,
 } from './timelineGalleryReducer'
 import { useUrlPresentModeSetup } from '../photoGallery/mediaGalleryReducer'
 import TimelineFilters from './TimelineFilters'
@@ -122,10 +121,10 @@ const TimelineGallery = () => {
 
   useUrlPresentModeSetup({
     dispatchMedia,
-    openPresentMode: _event => {
+    openPresentMode: () => {
       dispatchMedia({
         type: 'openPresentMode',
-        activeIndex: mediaState.activeIndex as unknown as TimelineMediaIndex,
+        activeIndex: mediaState.activeIndex,
       })
     },
   })
@@ -149,6 +148,12 @@ const TimelineGallery = () => {
         onlyFavorites={onlyFavorites}
         setOnlyFavorites={setOnlyFavorites}
         filterDate={filterDate}
+        /* TODO: Fix the following error:
+        Type '(x: string) => void' is not assignable to type '(date: string | null) => void'.
+  Types of parameters 'x' and 'date' are incompatible.
+    Type 'string | null' is not assignable to type 'string'.
+      Type 'null' is not assignable to type 'string'.
+TimelineFilters.tsx(30, 3): The expected type comes from property 'setFilterDate' which is declared here on type 'IntrinsicAttributes & DateSelectorProps & FavoriteCheckboxProps' */
         setFilterDate={setFilterDate}
       />
       <div className="-mx-3 flex flex-wrap" ref={containerElem}>

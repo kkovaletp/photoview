@@ -87,14 +87,7 @@ const FaceGroupTitle = ({ faceGroup }: FaceGroupTitleProps) => {
         onKeyDown={onKeyDown}
         onChange={e => setInputValue(e.target.value)}
         onBlur={event => {
-          if (
-            event.currentTarget.parentElement?.contains(
-              // Even while Sonar reports "This assertion is unnecessary since the receiver accepts
-              // the original type of the expression", it is actually needed to satisfy TypeScript
-              // that event.relatedTarget can be a Node or null, as opposed to the default HTMLInputElement | null
-              event.relatedTarget as Node | null
-            )
-          ) {
+          if (event.currentTarget.parentElement?.contains(event.relatedTarget)) {
             return
           }
           resetLabel()

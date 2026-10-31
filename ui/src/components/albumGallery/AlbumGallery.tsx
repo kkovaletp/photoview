@@ -41,9 +41,9 @@ export const ALBUM_GALLERY_FRAGMENT = gql`
 type AlbumGalleryProps = {
   album?: AlbumGalleryFieldsFragment
   loading?: boolean
-  customAlbumLink?(albumID: string): string
+  customAlbumLink?: (albumID: string) => string
   showFilter?: boolean
-  setOnlyFavorites?(favorites: boolean): void
+  setOnlyFavorites?: (favorites: boolean) => void
   setOrdering?: SetOrderingFn
   ordering?: MediaOrdering
   onlyFavorites?: boolean

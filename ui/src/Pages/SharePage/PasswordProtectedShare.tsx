@@ -5,7 +5,7 @@ import { TextField } from '../../primitives/form/Input'
 import { MessageContainer } from './SharePage'
 
 type ProtectedTokenEnterPasswordProps = {
-  refetchWithPassword(password: string): void
+  refetchWithPassword: (password: string) => void
   loading: boolean
 }
 

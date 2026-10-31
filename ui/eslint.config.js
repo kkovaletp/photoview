@@ -75,6 +75,11 @@ module.exports = [
             '@typescript-eslint/ban-ts-comment': 'warn',
             '@typescript-eslint/no-floating-promises': 'warn',
             '@typescript-eslint/no-misused-promises': 'warn',
+
+            // Advisory maintenance and render-efficiency checks.
+            '@typescript-eslint/no-unnecessary-type-assertion': 'warn',
+            '@typescript-eslint/no-duplicate-type-constituents': 'warn',
+            'react-hooks/set-state-in-effect': 'warn',
         },
         settings: {
             react: {

@@ -653,6 +653,7 @@ describe('ScannerConcurrentWorkers', () => {
         apolloOptions: {
           defaultOptions: {
             mutate: {
+              //TODO: Fix the following error: Type 'string' is not assignable to type 'undefined'.
               errorPolicy: 'all',
               onError,
             },

@@ -36,7 +36,7 @@ type FaceGroupRowProps = {
   faceGroup: MyFacesQuery['myFaceGroups'][0]
   faceSelected: boolean
   selectable: boolean
-  toggleFaceSelected(): void
+  toggleFaceSelected: () => void
 }
 
 const FaceGroupRow = ({

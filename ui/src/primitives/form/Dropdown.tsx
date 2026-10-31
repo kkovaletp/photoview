@@ -18,7 +18,7 @@ export type DropdownItem = {
 type DropdownProps = SelectHTMLAttributes<HTMLSelectElement> & {
   items: DropdownItem[]
   selected?: string
-  setSelected(value: string): void
+  setSelected: (value: string) => void
   className?: string
   placeholder?: string
 }

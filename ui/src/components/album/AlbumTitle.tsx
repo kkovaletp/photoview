@@ -77,7 +77,7 @@ const AlbumTitle = ({ album, disableLink = false }: AlbumTitleProps) => {
     })
   }, [albumId, isShareRoute, token, disableLink, fetchPath])
 
-  const delay = useDelay(200, [album])
+  const delay = useDelay(200, album)
 
   if (!album) {
     return (

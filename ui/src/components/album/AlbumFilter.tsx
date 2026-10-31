@@ -16,7 +16,7 @@ export type SortingOption = { value: SortingOptionValue; label: string }
 
 export type FavoriteCheckboxProps = {
   onlyFavorites: boolean
-  setOnlyFavorites(favorites: boolean): void
+  setOnlyFavorites: (favorites: boolean) => void
 }
 
 export const FavoritesCheckbox = ({
@@ -101,6 +101,11 @@ const SortingOptions = ({
       <div>
         <Dropdown
           aria-labelledby="filter_group_sort-label"
+          /* TODO: fix the following error:
+          Type '(value: SortingOptionValue) => void' is not assignable to type '(value: string) => void'.
+  Types of parameters 'value' and 'value' are incompatible.
+    Type 'string' is not assignable to type 'SortingOptionValue'.
+Dropdown.tsx(21, 3): The expected type comes from property 'setSelected' which is declared here on type 'IntrinsicAttributes & SelectHTMLAttributes<HTMLSelectElement> & { items: DropdownItem[]; selected?: string | undefined; setSelected: (value: string) => void; className?: string | undefined; placeholder?: string | undefined; }' */
           setSelected={changeOrderBy}
           value={ordering?.orderBy || undefined}
           items={sortingOptions}
@@ -131,7 +136,7 @@ const SortingOptions = ({
 
 type AlbumFilterProps = {
   onlyFavorites: boolean
-  setOnlyFavorites?(favorites: boolean): void
+  setOnlyFavorites?: (favorites: boolean) => void
   ordering?: MediaOrdering
   setOrdering?: SetOrderingFn
   sortingOptions?: SortingOption[]

@@ -5,7 +5,7 @@ import { AlbumBox } from './AlbumBox'
 type AlbumBoxesProps = {
   error?: Error
   albums?: AlbumQueryQuery['album']['subAlbums']
-  getCustomLink?(albumID: string): string
+  getCustomLink?: (albumID: string) => string
 }
 
 const AlbumBoxes = ({ error, albums, getCustomLink }: AlbumBoxesProps) => {

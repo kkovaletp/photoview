@@ -139,9 +139,9 @@ const VideoThumbnailIcon = styled(VideoThumbnailIconSVG)`
 type MediaThumbnailProps = {
   media: MediaGalleryFieldsFragment
   active: boolean
-  selectImage(): void
-  clickPresent(): void
-  clickFavorite(): void
+  selectImage: () => void
+  clickPresent: () => void
+  clickFavorite: () => void
 }
 
 export const MediaThumbnail = ({

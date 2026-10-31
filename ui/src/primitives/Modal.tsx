@@ -6,7 +6,7 @@ export type ModalAction = {
   key: string
   label: string
   variant?: 'negative' | 'positive' | 'default'
-  onClick(event: MouseEvent<HTMLButtonElement>): void
+  onClick: (event: MouseEvent<HTMLButtonElement>) => void
   disabled?: boolean
 }
 
@@ -16,7 +16,7 @@ export type ModalProps = {
   children?: ReactNode
   actions: ModalAction[]
   open: boolean
-  onClose(): void
+  onClose: () => void
 }
 
 const Modal = ({

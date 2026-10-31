@@ -16,7 +16,7 @@ const changeUserPasswordMutation = gql`
 `
 
 interface ChangePasswordModalProps {
-  onClose(): void
+  onClose: () => void
   open: boolean
   user: SettingsUsersQueryQuery['user'][0]
 }

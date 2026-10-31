@@ -8,6 +8,7 @@ import {
   Reference,
 } from '@apollo/client'
 import type { GraphQLError } from 'graphql'
+import { Kind, OperationTypeNode } from 'graphql'
 import { getMainDefinition } from '@apollo/client/utilities'
 import { ErrorLink } from '@apollo/client/link/error'
 import { CombinedGraphQLErrors } from '@apollo/client/errors'
@@ -20,7 +21,7 @@ import { GraphQLWsLink } from '@apollo/client/link/subscriptions'
 import { createClient } from 'graphql-ws'
 
 export const API_ENDPOINT = import.meta.env.REACT_APP_API_ENDPOINT
-  ? (import.meta.env.REACT_APP_API_ENDPOINT as string)
+  ? import.meta.env.REACT_APP_API_ENDPOINT
   : urlJoin(location.origin, '/api')
 
 export const GRAPHQL_ENDPOINT = urlJoin(API_ENDPOINT, '/graphql')
@@ -270,8 +271,8 @@ const link = ApolloLink.split(
   ({ query }) => {
     const definition = getMainDefinition(query)
     return (
-      definition.kind === 'OperationDefinition' &&
-      definition.operation === 'subscription'
+      definition.kind === Kind.OPERATION_DEFINITION &&
+      definition.operation === OperationTypeNode.SUBSCRIPTION
     )
   },
   wsLink,
@@ -522,8 +523,7 @@ type PaginateCacheType = {
 }
 
 // Modified version of Apollo's offsetLimitPagination()
-export const paginateCache = (keyArgs: KeySpecifier) =>
-({
+export const paginateCache = (keyArgs: KeySpecifier): PaginateCacheType => ({
   keyArgs,
   merge(existing, incoming, { args, fieldName }) {
     if (args?.paginate) {
@@ -571,7 +571,7 @@ export const paginateCache = (keyArgs: KeySpecifier) =>
       return existing ?? []
     }
   },
-} as PaginateCacheType)
+})
 
 const memoryCache = new InMemoryCache({
   typePolicies: {

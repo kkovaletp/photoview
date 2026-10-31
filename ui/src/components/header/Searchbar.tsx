@@ -289,7 +289,7 @@ type SearchRowProps = {
   preview: ReactNode
   label: ReactNode
   selected: boolean
-  setSelected(): void
+  setSelected: () => void
 }
 
 const SearchRow = ({
@@ -315,11 +315,13 @@ const SearchRow = ({
     }
   }, [selected, link, navigate])
 
-  if (selected) {
-    rowEl.current?.scrollIntoView({
-      block: 'nearest',
-    })
-  }
+  useEffect(() => {
+    if (selected) {
+      rowEl.current?.scrollIntoView({
+        block: 'nearest',
+      })
+    }
+  }, [selected])
 
   //NOSONAR: Using role="option" within custom listbox; interactions provided via mouseover/focus
   return (
@@ -347,7 +349,7 @@ type PhotoRowArgs = {
   query: string
   media: SearchQueryQuery['search']['media'][0]
   selected: boolean
-  setSelected(): void
+  setSelected: () => void
 }
 
 const PhotoRow = (props: PhotoRowArgs) => {
@@ -378,7 +380,7 @@ type AlbumRowArgs = {
   query: string
   album: SearchQueryQuery['search']['albums'][0]
   selected: boolean
-  setSelected(): void
+  setSelected: () => void
 }
 
 const AlbumRow = (props: AlbumRowArgs) => {

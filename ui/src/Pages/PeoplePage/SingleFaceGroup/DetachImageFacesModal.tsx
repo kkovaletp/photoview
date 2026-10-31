@@ -100,7 +100,7 @@ export const useDetachImageFaces = () => {
 
 type DetachImageFacesModalProps = {
   open: boolean
-  setOpen(open: boolean): void
+  setOpen: (open: boolean) => void
   faceGroup: MyFacesQuery['myFaceGroups'][0] | SingleFaceGroupQuery['faceGroup']
   selectedImageFaces?: Array<
     MyFacesQuery['myFaceGroups'][0]['imageFaces'][0] |

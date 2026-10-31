@@ -35,7 +35,7 @@ const initialState = {
 type AddUserRowProps = {
   setShow: Dispatch<SetStateAction<boolean>>
   show: boolean
-  onUserAdded(): void
+  onUserAdded: () => void
 }
 
 const AddUserRow = ({ setShow, show, onUserAdded }: AddUserRowProps) => {
