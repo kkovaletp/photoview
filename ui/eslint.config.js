@@ -3,7 +3,7 @@ const tsPlugin = require('@typescript-eslint/eslint-plugin');
 const tsParser = require('@typescript-eslint/parser');
 const reactPlugin = require('eslint-plugin-react');
 const reactHooksPlugin = require('eslint-plugin-react-hooks');
-const prettierConfig = require('eslint-config-prettier');
+const prettierConfig = require('eslint-config-prettier/flat');
 const globals = require('globals');
 
 module.exports = [
@@ -13,35 +13,37 @@ module.exports = [
             'node_modules/**',
             'dist/**',
             'coverage/**',
+            '**/__generated__/**',
+            '**/*.test.*',
         ],
     },
 
     // Base ESLint recommended
     js.configs.recommended,
 
-    // Configuration for all JS/TS files
+    // Typed rules for application code and known TypeScript tooling.
     {
-        files: ['**/*.js', '**/*.jsx', '**/*.ts', '**/*.tsx'],
+        files: [
+            'src/**/*.{ts,mts,tsx}',
+            'codegen.ts',
+            'i18next.config.ts',
+            'vite-plugins/**/*.{ts,mts}',
+        ],
         languageOptions: {
             parser: tsParser,
+            ecmaVersion: 2022,
+            sourceType: 'module',
             parserOptions: {
                 tsconfigRootDir: __dirname,
                 project: ['./tsconfig.json'],
                 ecmaFeatures: {
                     jsx: true,
                 },
-                ecmaVersion: 2022,
-                sourceType: 'module',
             },
-            globals: {
-                ...globals.browser,
-                ...globals.es2022,
-                Atomics: 'readonly',
-                SharedArrayBuffer: 'readonly',
-                process: 'readonly',
-                module: 'readonly',
-                require: 'readonly',
-            },
+        },
+        linterOptions: {
+            reportUnusedDisableDirectives: 'warn',
+            reportUnusedInlineConfigs: 'warn',
         },
         plugins: {
             '@typescript-eslint': tsPlugin,
@@ -51,25 +53,22 @@ module.exports = [
         rules: {
             // TypeScript recommended rules
             ...tsPlugin.configs['eslint-recommended'].overrides[0].rules,
-            ...tsPlugin.configs.recommended.rules,
-            ...tsPlugin.configs['recommended-requiring-type-checking'].rules,
+            ...tsPlugin.configs['recommended-type-checked'].rules,
 
             // React recommended rules
             ...reactPlugin.configs.recommended.rules,
+            ...reactPlugin.configs['jsx-runtime'].rules,
 
-            // React Hooks rules (from v6.x recommended)
+            // React Hooks recommended rules from the installed plugin.
             ...reactHooksPlugin.configs.recommended.rules,
 
             // Custom overrides
             'no-unused-vars': 'off',
             'react/display-name': 'off',
-            'react/react-in-jsx-scope': 'off',
             'react/prop-types': 'off',
-            'react/jsx-uses-react': 'off',
             'react-hooks/rules-of-hooks': 'error',
             'react-hooks/exhaustive-deps': 'warn',
             '@typescript-eslint/no-unused-vars': 'warn',
-            '@typescript-eslint/no-var-requires': 'off',
             '@typescript-eslint/explicit-module-boundary-types': 'off',
             '@typescript-eslint/no-non-null-assertion': 'off',
             '@typescript-eslint/no-explicit-any': 'warn',
@@ -81,6 +80,66 @@ module.exports = [
             react: {
                 version: 'detect',
                 runtime: 'automatic',
+            },
+        },
+    },
+
+    // Browser application code. Do not give the service worker DOM globals.
+    {
+        files: ['src/**/*.{js,mjs,jsx,ts,mts,tsx}'],
+        ignores: ['src/service-worker.ts'],
+        languageOptions: {
+            ecmaVersion: 2022,
+            sourceType: 'module',
+            parserOptions: {
+                ecmaFeatures: {
+                    jsx: true,
+                },
+            },
+            globals: {
+                ...globals.browser,
+            },
+        },
+    },
+
+    // Service-worker code has no window or document.
+    {
+        files: ['src/service-worker.ts'],
+        languageOptions: {
+            globals: {
+                ...globals.serviceworker,
+            },
+        },
+    },
+
+    // Node ESM tooling. CommonJS-only names are not available here.
+    {
+        files: [
+            'vite.config.mjs',
+            'codegen.ts',
+            'i18next.config.ts',
+            'vite-plugins/**/*.{ts,mts}',
+            'testing/transform-svg.js',
+        ],
+        languageOptions: {
+            ecmaVersion: 2022,
+            sourceType: 'module',
+            globals: {
+                ...globals.nodeBuiltin,
+            },
+        },
+    },
+
+    // Existing CommonJS configuration and test transformer.
+    {
+        files: [
+            'eslint.config.js',
+        ],
+        languageOptions: {
+            ecmaVersion: 2022,
+            sourceType: 'commonjs',
+            globals: {
+                ...globals.node,
             },
         },
     },
