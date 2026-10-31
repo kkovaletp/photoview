@@ -65,7 +65,7 @@ const SortingOptions = ({
     }
   }
 
-  const defaultOptions = useMemo(
+  const defaultOptions = useMemo<SortingOption[]>(
     () => [
       {
         value: 'date_shot',
@@ -88,6 +88,8 @@ const SortingOptions = ({
   )
 
   const sortingOptions = items ?? defaultOptions
+  const selectedSortingValue =
+    sortingOptions.find(option => option.value === ordering?.orderBy)?.value ?? ''
 
   return (
     <fieldset>
@@ -99,15 +101,10 @@ const SortingOptions = ({
         <span>{t('album_filter.sort', 'Sort')}</span>
       </legend>
       <div>
-        <Dropdown
+        <Dropdown<SortingOptionValue>
           aria-labelledby="filter_group_sort-label"
-          /* TODO: fix the following error:
-          Type '(value: SortingOptionValue) => void' is not assignable to type '(value: string) => void'.
-  Types of parameters 'value' and 'value' are incompatible.
-    Type 'string' is not assignable to type 'SortingOptionValue'.
-Dropdown.tsx(21, 3): The expected type comes from property 'setSelected' which is declared here on type 'IntrinsicAttributes & SelectHTMLAttributes<HTMLSelectElement> & { items: DropdownItem[]; selected?: string | undefined; setSelected: (value: string) => void; className?: string | undefined; placeholder?: string | undefined; }' */
           setSelected={changeOrderBy}
-          value={ordering?.orderBy || undefined}
+          value={selectedSortingValue}
           items={sortingOptions}
         />
         <button

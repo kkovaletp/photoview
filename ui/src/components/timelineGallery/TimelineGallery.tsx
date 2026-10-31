@@ -81,7 +81,7 @@ const TimelineGallery = () => {
     setParam('favorites', favorites ? '1' : null)
 
   const filterDate = getParam('date')
-  const setFilterDate = (x: string) => setParam('date', x)
+  const setFilterDate = (date: string | null) => setParam('date', date)
 
   const [mediaState, dispatchMedia] = useReducer(timelineGalleryReducer, {
     presenting: false,
@@ -148,12 +148,6 @@ const TimelineGallery = () => {
         onlyFavorites={onlyFavorites}
         setOnlyFavorites={setOnlyFavorites}
         filterDate={filterDate}
-        /* TODO: Fix the following error:
-        Type '(x: string) => void' is not assignable to type '(date: string | null) => void'.
-  Types of parameters 'x' and 'date' are incompatible.
-    Type 'string | null' is not assignable to type 'string'.
-      Type 'null' is not assignable to type 'string'.
-TimelineFilters.tsx(30, 3): The expected type comes from property 'setFilterDate' which is declared here on type 'IntrinsicAttributes & DateSelectorProps & FavoriteCheckboxProps' */
         setFilterDate={setFilterDate}
       />
       <div className="-mx-3 flex flex-wrap" ref={containerElem}>

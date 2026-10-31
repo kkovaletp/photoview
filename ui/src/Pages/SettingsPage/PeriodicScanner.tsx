@@ -175,7 +175,7 @@ const PeriodicScanner = () => {
     }
   }
 
-  const scanIntervalUnits: DropdownItem[] = [
+  const scanIntervalUnits: DropdownItem<TimeUnit>[] = [
     {
       label: t('settings.periodic_scanner.interval_unit.seconds', 'Seconds'),
       value: TimeUnit.Second,
@@ -260,7 +260,7 @@ const PeriodicScanner = () => {
               onScanIntervalUpdate(scanInterval)
             }}
           />
-          <Dropdown
+          <Dropdown<TimeUnit>
             aria-label="Interval unit"
             disabled={!enablePeriodicScanner || scanIntervalMutationLoading || loading}
             items={scanIntervalUnits}
@@ -268,9 +268,8 @@ const PeriodicScanner = () => {
             setSelected={value => {
               const newScanInterval: TimeValue = {
                 ...scanInterval,
-                unit: value as TimeUnit,
+                unit: value,
               }
-
               setScanInterval(newScanInterval)
               onScanIntervalUpdate(newScanInterval)
             }}

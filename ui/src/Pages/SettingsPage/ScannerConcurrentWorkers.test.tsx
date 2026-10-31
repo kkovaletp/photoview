@@ -646,20 +646,7 @@ describe('ScannerConcurrentWorkers', () => {
         },
       ]
 
-      const onError = vi.fn()
-
-      renderWithProviders(<ScannerConcurrentWorkers />, {
-        mocks,
-        apolloOptions: {
-          defaultOptions: {
-            mutate: {
-              //TODO: Fix the following error: Type 'string' is not assignable to type 'undefined'.
-              errorPolicy: 'all',
-              onError,
-            },
-          },
-        },
-      })
+      renderWithProviders(<ScannerConcurrentWorkers />, { mocks })
 
       const input = await screen.findByRole('spinbutton', {
         name: /scanner concurrent workers/i,
