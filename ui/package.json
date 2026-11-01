@@ -77,7 +77,7 @@
     "@graphql-codegen/cli": "^7.4.6",
     "@graphql-codegen/near-operation-file-preset": "^5.2.3",
     "@graphql-codegen/typescript": "^6.1.0",
-    "@graphql-codegen/typescript-operations": "^6.1.9",
+    "@graphql-codegen/typescript-operations": "^6.2.0",
     "@graphql-inspector/cli": "^7.0.2",
     "@testing-library/jest-dom": "^7.0.1",
     "@testing-library/react": "^16.3.3",
