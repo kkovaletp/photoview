@@ -21,7 +21,7 @@ import { FaceDetails } from '../../../Pages/PeoplePage/PeoplePage'
 type PersonMoreMenuItemProps = {
   label: string
   className?: string
-  onClick(): void
+  onClick: () => void
 }
 
 const PersonMoreMenuItem = ({

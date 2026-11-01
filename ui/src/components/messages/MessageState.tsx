@@ -12,6 +12,10 @@ import {
 import { Message } from './SubscriptionsHook'
 import { globalMessageHandler } from './globalMessageHandler'
 
+const CLEANUP_INTERVAL = 60 * 60 * 1000; // 1 hour in ms
+const MESSAGE_LIFETIME = 24 * 60 * 60 * 1000; // 24 hours in ms
+
+
 type MessageContextType = {
   messages: Message[]
   setMessages: Dispatch<SetStateAction<Message[]>>
@@ -55,9 +59,6 @@ export const MessageProvider = ({ children }: MessageProviderProps) => {
   useEffect(() => {
     globalMessageHandler.initialize({ add, removeKey })
   }, [add, removeKey])
-
-  const CLEANUP_INTERVAL = 60 * 60 * 1000; // 1 hour in ms
-  const MESSAGE_LIFETIME = 24 * 60 * 60 * 1000; // 24 hours in ms
 
   useEffect(() => {
     const cleanupInterval = setInterval(() => {

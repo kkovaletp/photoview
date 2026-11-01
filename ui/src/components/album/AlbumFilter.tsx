@@ -16,7 +16,7 @@ export type SortingOption = { value: SortingOptionValue; label: string }
 
 export type FavoriteCheckboxProps = {
   onlyFavorites: boolean
-  setOnlyFavorites(favorites: boolean): void
+  setOnlyFavorites: (favorites: boolean) => void
 }
 
 export const FavoritesCheckbox = ({
@@ -65,7 +65,7 @@ const SortingOptions = ({
     }
   }
 
-  const defaultOptions = useMemo(
+  const defaultOptions = useMemo<SortingOption[]>(
     () => [
       {
         value: 'date_shot',
@@ -88,6 +88,8 @@ const SortingOptions = ({
   )
 
   const sortingOptions = items ?? defaultOptions
+  const selectedSortingValue =
+    sortingOptions.find(option => option.value === ordering?.orderBy)?.value ?? ''
 
   return (
     <fieldset>
@@ -99,10 +101,10 @@ const SortingOptions = ({
         <span>{t('album_filter.sort', 'Sort')}</span>
       </legend>
       <div>
-        <Dropdown
+        <Dropdown<SortingOptionValue>
           aria-labelledby="filter_group_sort-label"
           setSelected={changeOrderBy}
-          value={ordering?.orderBy || undefined}
+          value={selectedSortingValue}
           items={sortingOptions}
         />
         <button
@@ -131,7 +133,7 @@ const SortingOptions = ({
 
 type AlbumFilterProps = {
   onlyFavorites: boolean
-  setOnlyFavorites?(favorites: boolean): void
+  setOnlyFavorites?: (favorites: boolean) => void
   ordering?: MediaOrdering
   setOrdering?: SetOrderingFn
   sortingOptions?: SortingOption[]

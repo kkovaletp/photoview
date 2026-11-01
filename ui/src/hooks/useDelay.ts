@@ -1,24 +1,21 @@
-import { useLayoutEffect, useState, useRef } from 'react'
+import { useLayoutEffect, useState } from 'react'
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function useDelay(wait: number, deps: any[] = []) {
-  const [update, setUpdate] = useState(false)
-  const _ = update // to avoid "update is declared but its value is never read" warning
-  const done = useRef(false)
+function useDelay(wait: number, resetKey?: unknown): boolean {
+  const [done, setDone] = useState(false)
 
   useLayoutEffect(() => {
+    setDone(false)
+
     const handle = setTimeout(() => {
-      done.current = true
-      setUpdate(x => !x)
+      setDone(true)
     }, wait)
 
     return () => {
-      done.current = false
       clearTimeout(handle)
     }
-  }, deps)
+  }, [wait, resetKey])
 
-  return done.current
+  return done
 }
 
 export default useDelay

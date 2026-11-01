@@ -646,19 +646,7 @@ describe('ScannerConcurrentWorkers', () => {
         },
       ]
 
-      const onError = vi.fn()
-
-      renderWithProviders(<ScannerConcurrentWorkers />, {
-        mocks,
-        apolloOptions: {
-          defaultOptions: {
-            mutate: {
-              errorPolicy: 'all',
-              onError,
-            },
-          },
-        },
-      })
+      renderWithProviders(<ScannerConcurrentWorkers />, { mocks })
 
       const input = await screen.findByRole('spinbutton', {
         name: /scanner concurrent workers/i,

@@ -14,7 +14,6 @@ import {
 import {
   getActiveTimelineImage as getActiveTimelineMedia,
   timelineGalleryReducer,
-  TimelineMediaIndex,
 } from './timelineGalleryReducer'
 import { useUrlPresentModeSetup } from '../photoGallery/mediaGalleryReducer'
 import TimelineFilters from './TimelineFilters'
@@ -82,7 +81,7 @@ const TimelineGallery = () => {
     setParam('favorites', favorites ? '1' : null)
 
   const filterDate = getParam('date')
-  const setFilterDate = (x: string) => setParam('date', x)
+  const setFilterDate = (date: string | null) => setParam('date', date)
 
   const [mediaState, dispatchMedia] = useReducer(timelineGalleryReducer, {
     presenting: false,
@@ -122,10 +121,10 @@ const TimelineGallery = () => {
 
   useUrlPresentModeSetup({
     dispatchMedia,
-    openPresentMode: _event => {
+    openPresentMode: () => {
       dispatchMedia({
         type: 'openPresentMode',
-        activeIndex: mediaState.activeIndex as unknown as TimelineMediaIndex,
+        activeIndex: mediaState.activeIndex,
       })
     },
   })

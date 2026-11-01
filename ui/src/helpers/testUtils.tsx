@@ -1,15 +1,18 @@
+import type { ComponentProps } from 'react'
 import { MockedProvider } from '@apollo/client/testing/react'
 import { render } from '@testing-library/react'
 import { MessageProvider } from '../components/messages/MessageState'
 import { MemoryRouter, Route, Routes, Location } from 'react-router'
 import { ReactElement, ReactNode } from 'react'
 
+type ApolloProviderProps = ComponentProps<typeof MockedProvider>
+
 /**
  * Options for configuring the test environment in renderWithProviders.
  */
 interface RenderWithProvidersOptions {
     /** Apollo GraphQL mocks */
-    mocks?: any[]
+    mocks?: ApolloProviderProps['mocks']
     /** Router deployment prefix */
     basename?: string
     /** Initial router entries for MemoryRouter */
@@ -19,9 +22,7 @@ interface RenderWithProvidersOptions {
     /** Path for the route */
     path?: string
     /** Apollo client configuration options */
-    apolloOptions?: {
-        defaultOptions?: any
-    }
+    apolloOptions?: Pick<ApolloProviderProps, 'defaultOptions'>
 }
 
 /**

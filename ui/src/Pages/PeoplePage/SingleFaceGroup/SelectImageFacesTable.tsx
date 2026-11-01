@@ -25,7 +25,7 @@ type ImageFaceRowProps = {
   | MyFacesQuery['myFaceGroups'][0]['imageFaces'][0]
   | SingleFaceGroupQuery['faceGroup']['imageFaces'][0]
   faceSelected: boolean
-  setFaceSelected(): void
+  setFaceSelected: () => void
 }
 
 const ImageFaceRow = ({

@@ -17,6 +17,7 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "noEmit": true,
+    "allowImportingTsExtensions": true,
     "jsx": "react-jsx",
     "types": [
       "geojson",
@@ -31,6 +32,7 @@
     "testing/setupTests.ts",
     "eslint.config.js",
     "codegen.ts",
-    "i18next.config.ts"
+    "i18next.config.ts",
+    "vite-plugins"
   ]
 }

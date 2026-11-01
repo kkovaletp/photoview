@@ -15,7 +15,7 @@ vi.mock('node:fs', () => {
 })
 
 import { existsSync, readdirSync, readFileSync } from 'node:fs'
-import { ethicalLicensePlugin } from './ethicalLicensePlugin'
+import { ethicalLicensePlugin } from './ethicalLicensePlugin.mts'
 
 // ─── typed mock handles ───────────────────────────────────────────────────────
 const mockedExistsSync = vi.mocked(existsSync)

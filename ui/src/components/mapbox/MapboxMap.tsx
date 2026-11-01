@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, forwardRef, HTMLProps } from 'react'
+import { useState, useRef, useEffect, forwardRef, HTMLProps, useLayoutEffect } from 'react'
 import { gql, type TypedDocumentNode } from '@apollo/client'
 import { useQuery } from '@apollo/client/react'
 import type * as mapboxgl from 'mapbox-gl/esm'
@@ -33,7 +33,7 @@ const ForwardedMapContainer = forwardRef<HTMLDivElement, HTMLProps<HTMLDivElemen
 ))
 
 type MapboxMapProps = {
-  configureMapbox(map: mapboxgl.Map, mapboxLibrary: typeof mapboxgl): void
+  configureMapbox: (map: mapboxgl.Map, mapboxLibrary: typeof mapboxgl) => void
   mapboxOptions?: Partial<mapboxgl.MapOptions>
 }
 
@@ -44,6 +44,7 @@ const useMapboxMap = ({
   const [mapboxLibrary, setMapboxLibrary] = useState<typeof mapboxgl>()
   const mapContainer = useRef<HTMLDivElement | null>(null)
   const map = useRef<mapboxgl.Map | null>(null)
+  const [mapboxMap, setMapboxMap] = useState<mapboxgl.Map | null>(null)
 
   const { data: mapboxData } = useQuery(MAPBOX_TOKEN_QUERY, {
     fetchPolicy: 'cache-first',
@@ -74,6 +75,14 @@ const useMapboxMap = ({
   }, [])
 
   useEffect(() => {
+    return () => {
+      const currentMap = map.current
+      map.current = null
+      currentMap?.remove()
+    }
+  }, [])
+
+  useEffect(() => {
     if (
       mapboxLibrary == null ||
       mapContainer.current == null ||
@@ -95,14 +104,17 @@ const useMapboxMap = ({
     SetMapLanguages(map.current)
 
     configureMapbox(map.current, mapboxLibrary)
-    map.current?.resize()
+    map.current.resize()
+    setMapboxMap(map.current)
   }, [configureMapbox, mapboxLibrary, mapboxData, mapboxOptions])
 
-  map.current?.resize()
+  useLayoutEffect(() => {
+    map.current?.resize()
+  })
 
   return {
     mapContainer: <ForwardedMapContainer ref={mapContainer} />,
-    mapboxMap: map.current,
+    mapboxMap,
     mapboxLibrary,
     mapboxToken: mapboxData?.mapboxToken ?? null,
   }

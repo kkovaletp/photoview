@@ -10,30 +10,42 @@ const DropdownStyledSelect = styled.select`
   background-position: center right 10px;
 `
 
-export type DropdownItem = {
-  value: string
+export type DropdownItem<Value extends string = string> = {
+  value: Value
   label: string
 }
 
-type DropdownProps = SelectHTMLAttributes<HTMLSelectElement> & {
-  items: DropdownItem[]
-  selected?: string
-  setSelected(value: string): void
+type DropdownProps<Value extends string = string> = Omit<
+  SelectHTMLAttributes<HTMLSelectElement>,
+  'value'
+> & {
+  items: readonly DropdownItem<Value>[]
+  selected?: Value
+  value?: Value | ''
+  setSelected: (value: Value) => void
   className?: string
   placeholder?: string
 }
 
-const Dropdown = ({
+function Dropdown<Value extends string = string>({
   items,
   selected,
+  value,
   setSelected,
   className,
   placeholder,
+  onChange: onNativeChange,
   ...otherProps
-}: DropdownProps) => {
-  const onChange = (e: ChangeEvent<HTMLSelectElement>) => {
-    setSelected(e.target.value)
-    otherProps.onChange?.(e)
+}: DropdownProps<Value>) {
+  const onChange = (event: ChangeEvent<HTMLSelectElement>) => {
+    const selectedValue = event.currentTarget.value
+    const selectedItem = items.find(item => item.value === selectedValue)
+
+    if (selectedItem !== undefined) {
+      setSelected(selectedItem.value)
+    }
+
+    onNativeChange?.(event)
   }
 
   const options = items.map(({ value, label }) => (
@@ -44,14 +56,14 @@ const Dropdown = ({
 
   return (
     <DropdownStyledSelect
+      {...otherProps}
       className={clsx(
         'bg-gray-50 px-2 py-0.5 pr-6 rounded border border-gray-200 focus:outline-none focus:border-blue-300 text-[#222] hover:bg-gray-100 disabled:hover:bg-gray-50 disabled:text-gray-500 disabled:cursor-default',
         'dark:bg-dark-input-bg dark:border-dark-input-border dark:text-dark-input-text dark:focus:border-blue-300',
         className
       )}
-      value={selected ?? ''}
+      value={value ?? selected ?? ''}
       onChange={onChange}
-      {...otherProps}
     >
       {placeholder && (
         <option value="" disabled hidden>

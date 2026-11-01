@@ -27,7 +27,7 @@ const EARLIEST_MEDIA_QUERY: TypedDocumentNode<
 
 type DateSelectorProps = {
   filterDate: string | null
-  setFilterDate(date: string | null): void
+  setFilterDate: (date: string | null) => void
 }
 
 const DateSelector = ({ filterDate, setFilterDate }: DateSelectorProps) => {

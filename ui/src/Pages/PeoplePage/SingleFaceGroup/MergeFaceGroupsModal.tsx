@@ -44,7 +44,7 @@ type FaceGroupSelection = {
 
 type MergeFaceGroupsModalProps = {
   state: MergeFaceGroupsModalState
-  setState(state: MergeFaceGroupsModalState): void
+  setState: (state: MergeFaceGroupsModalState) => void
   preselectedFaceGroup?: FaceGroupSelection
   refetchQueries: ApolloClient.QueryOptions[]
 }

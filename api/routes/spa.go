@@ -225,12 +225,17 @@ func (h SpaHandler) serveIndexHTML(w http.ResponseWriter, r *http.Request) {
 
 // setCacheHeaders sets appropriate cache headers based on the request path
 func (h SpaHandler) setCacheHeaders(w http.ResponseWriter, relPath string) {
+	const cacheControlHeader = "Cache-Control"
+	if relPath == "build-info.json" {
+		w.Header().Set(cacheControlHeader, "no-store")
+		return
+	}
 	if strings.HasPrefix(relPath, "assets/") {
 		// Long-term cache for fingerprinted assets
-		w.Header().Set("Cache-Control", "public, max-age=31536000, immutable")
+		w.Header().Set(cacheControlHeader, "public, max-age=31536000, immutable")
 	} else {
 		// Short cache with revalidation for other files
-		w.Header().Set("Cache-Control", "public, max-age=3600, must-revalidate")
+		w.Header().Set(cacheControlHeader, "public, max-age=3600, must-revalidate")
 	}
 }
 

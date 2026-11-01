@@ -46,7 +46,7 @@ const PreventScroll = createGlobalStyle`
 
 type PresentViewProps = {
   className?: string
-  imageLoaded?(): void
+  imageLoaded?: () => void
   activeMedia: MediaGalleryFieldsFragment
   dispatchMedia: Dispatch<GalleryAction>
   disableSaveCloseInHistory?: boolean

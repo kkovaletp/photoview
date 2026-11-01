@@ -104,8 +104,7 @@ const FaceCircleImage = ({
     y: (rect.minY + rect.maxY) / 2,
   }
 
-  let SpecificFaceImage: typeof FaceImageLandscape | typeof FaceImagePortrait =
-    FaceImageLandscape
+  let SpecificFaceImage: typeof FaceImageLandscape = FaceImageLandscape
   if (imageFace.media.thumbnail) {
     SpecificFaceImage =
       imageFace.media.thumbnail.width > imageFace.media.thumbnail.height

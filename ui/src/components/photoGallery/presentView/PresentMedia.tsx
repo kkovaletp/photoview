@@ -29,7 +29,7 @@ const StyledVideo = styled(ProtectedVideo)`
 
 type PresentMediaProps = {
   media: MediaGalleryFieldsFragment
-  imageLoaded?(): void
+  imageLoaded?: () => void
 }
 
 const PresentMedia = ({
