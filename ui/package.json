@@ -35,7 +35,7 @@
     "@apollo/client": "^4.3.6",
     "@dr.pogodin/react-helmet": "^3.3.1",
     "@headlessui/react": "^2.2.10",
-    "@swc/plugin-styled-components": "^18.0.1",
+    "@swc/plugin-styled-components": "^18.0.2",
     "@tailwindcss/vite": "^4.3.3",
     "@vitejs/plugin-react-swc": "^4.3.3",
     "clsx": "^2.1.1",
