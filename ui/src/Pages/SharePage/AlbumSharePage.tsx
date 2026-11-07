@@ -1,18 +1,18 @@
-import Layout from '../../components/layout/Layout'
-import styled from 'styled-components'
 import { gql, type TypedDocumentNode } from '@apollo/client'
 import { useQuery } from '@apollo/client/react'
 import { useTranslation } from 'react-i18next'
+import styled from 'styled-components'
+import Layout from '../../components/layout/Layout'
+import AlbumGallery, { ALBUM_GALLERY_FRAGMENT } from '../../components/albumGallery/AlbumGallery'
+import { MEDIA_GALLERY_FRAGMENT } from '../../components/photoGallery/fragments'
+import PaginateLoader from '../../components/PaginateLoader'
+import useScrollPagination from '../../hooks/useScrollPagination'
 import useURLParameters from '../../hooks/useURLParameters'
 import useOrderingParams from '../../hooks/useOrderingParams'
 import {
   ShareAlbumQueryQuery,
   ShareAlbumQueryQueryVariables,
 } from './__generated__/AlbumSharePage'
-import AlbumGallery, { ALBUM_GALLERY_FRAGMENT } from '../../components/albumGallery/AlbumGallery'
-import { MEDIA_GALLERY_FRAGMENT } from '../../components/photoGallery/fragments'
-import useScrollPagination from '../../hooks/useScrollPagination'
-import PaginateLoader from '../../components/PaginateLoader'
 
 export const SHARE_ALBUM_QUERY: TypedDocumentNode<
   ShareAlbumQueryQuery,
