@@ -349,7 +349,7 @@ describe('SearchBar Component', () => {
             'lg:top-10',
             'lg:h-[calc(100vh-152px)]'
         )
-    })
+    });
 });
 
 // Test AlbumRow component separately
