@@ -252,8 +252,8 @@ const SearchResults = ({
       role="listbox"
       aria-label={t('header.search.results_label', 'Search results')}
       className={clsx(
-        'absolute bg-white dark:bg-dark-bg left-0 right-0 top-18 overflow-y-auto h-[calc(100vh-152px)] border dark:border-dark-border px-4 z-0',
-        'lg:top-10 lg:shadow-md lg:rounded-b lg:max-h-140',
+        'absolute bg-white dark:bg-dark-bg left-0 right-0 top-full overflow-y-auto h-[max(0px,calc(100dvh-100%-5rem))] border dark:border-dark-border px-4 z-0',
+        'lg:top-10 lg:h-[calc(100vh-152px)] lg:shadow-md lg:rounded-b lg:max-h-140',
         { hidden: !expanded }
       )}
       tabIndex={-1}
