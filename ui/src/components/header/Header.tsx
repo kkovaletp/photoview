@@ -14,7 +14,7 @@ const Header = () => {
     <div
       className={clsx(
         'sticky top-0 z-10 bg-white dark:bg-dark-bg flex items-center justify-between py-3 px-4 lg:px-8 lg:pt-4 shadow-separator lg:shadow-none',
-        { 'mr-101': pinned }
+        { 'lg:mr-101': pinned }
       )}
     >
       <div className="mr-4 lg:mr-8 shrink-0 flex items-center gap-2">

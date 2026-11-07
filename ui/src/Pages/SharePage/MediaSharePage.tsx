@@ -1,4 +1,4 @@
-import { useContext, useEffect } from 'react'
+import { useContext, useEffect, useRef } from 'react'
 import styled from 'styled-components'
 import Layout from '../../components/layout/Layout'
 import {
@@ -13,14 +13,14 @@ import { MediaType } from '../../__generated__/globalTypes'
 import { exhaustiveCheck } from '../../helpers/utils'
 
 const DisplayPhoto = styled(ProtectedImage)`
-  /* width: 100%; */
-  max-height: calc(80vh);
+  max-width: 100%;
+  max-height: 80vh;
   object-fit: contain;
 `
 
 const DisplayVideo = styled(ProtectedVideo)`
-  /* width: 100%; */
-  max-height: calc(80vh);
+  max-width: 100%;
+  max-height: 80vh;
 `
 
 type MediaViewProps = {
@@ -29,14 +29,19 @@ type MediaViewProps = {
 
 const MediaView = ({ media }: MediaViewProps) => {
   const { updateSidebar, setPinned } = useContext(SidebarContext)
+  const sidebarInitialized = useRef(false)
 
   useEffect(() => {
     if (typeof updateSidebar === 'function') {
       updateSidebar(<MediaSidebar media={media} hidePreview />)
 
-      // Pin sidebar by default on desktop
-      if (window.innerWidth >= 1024) {
-        setPinned(true)
+      if (!sidebarInitialized.current) {
+        sidebarInitialized.current = true
+
+        // Pin sidebar by default on desktop
+        if (window.innerWidth >= 1024) {
+          setPinned(true)
+        }
       }
     }
   }, [media, updateSidebar, setPinned])
@@ -62,7 +67,7 @@ const MediaSharePage = ({ media }: MediaSharePageType) => {
     <Layout title={t('share_page.media.title', 'Shared media')}>
       <div data-testid="MediaSharePage">
         <h1 className="font-semibold text-xl mb-4">{media.title}</h1>
-        <MediaView media={media} />
+        <MediaView key={media.id} media={media} />
       </div>
     </Layout>
   )
