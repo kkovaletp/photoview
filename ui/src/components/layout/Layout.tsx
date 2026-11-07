@@ -24,9 +24,15 @@ export const ADMIN_QUERY: TypedDocumentNode<
 type LayoutProps = {
   children: ReactNode
   title: string
+  headerAction?: ReactNode
 }
 
-const Layout = ({ children, title, ...otherProps }: LayoutProps) => {
+const Layout = ({
+  children,
+  title,
+  headerAction,
+  ...otherProps
+}: LayoutProps) => {
   const { pinned, content: sidebarContent } = useContext(SidebarContext)
 
   return (
@@ -37,7 +43,7 @@ const Layout = ({ children, title, ...otherProps }: LayoutProps) => {
         </Helmet>
       </HelmetProvider>
       <div className="relative" {...otherProps} data-testid="Layout">
-        <Header />
+        <Header action={headerAction} />
         <div className="">
           <Authorized>
             <MainMenu />

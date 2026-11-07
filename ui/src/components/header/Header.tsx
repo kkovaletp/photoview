@@ -1,4 +1,4 @@
-import { useContext } from 'react'
+import { useContext, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import SearchBar from './Searchbar'
 import EthicalUseFlagBadge from '../termsOfUse/EthicalUseFlagBadge'
@@ -6,18 +6,18 @@ import { authToken } from '../../helpers/authentication'
 import { SidebarContext } from '../sidebar/Sidebar'
 import { clsx } from 'clsx'
 
-const Header = () => {
+const Header = ({ action }: { action?: ReactNode }) => {
   const { pinned } = useContext(SidebarContext)
   const { t } = useTranslation()
 
   return (
     <div
       className={clsx(
-        'sticky top-0 z-10 bg-white dark:bg-dark-bg flex items-center justify-between py-3 px-4 lg:px-8 lg:pt-4 shadow-separator lg:shadow-none',
+        'sticky top-0 z-10 bg-white dark:bg-dark-bg flex flex-wrap items-center justify-between gap-y-2 py-3 px-4 lg:px-8 lg:pt-4 shadow-separator lg:shadow-none',
         { 'lg:mr-101': pinned }
       )}
     >
-      <div className="mr-4 lg:mr-8 shrink-0 flex items-center gap-2">
+      <div className="mr-4 lg:mr-8 min-w-0 flex flex-wrap items-center gap-2">
         <h1 className="flex items-center gap-2">
           <img
             className="h-12 lg:h-10"
@@ -29,6 +29,7 @@ const Header = () => {
           </span>
         </h1>
         <EthicalUseFlagBadge />
+        {action}
       </div>
       {authToken() ? <SearchBar /> : null}
     </div>

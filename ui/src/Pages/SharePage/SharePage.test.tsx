@@ -120,6 +120,7 @@ describe('load correct share page, based on graphql query', () => {
           shareToken: {
             __typename: 'ShareToken',
             token: token,
+            hasPassword: true,
             album: null,
             media: {
               __typename: 'Media',
@@ -171,6 +172,7 @@ describe('load correct share page, based on graphql query', () => {
             shareToken: {
               __typename: 'ShareToken',
               token: token,
+              hasPassword: true,
               album: {
                 __typename: 'Album',
                 id: '1',
@@ -250,6 +252,7 @@ describe('load correct share page, based on graphql query', () => {
             shareToken: {
               __typename: 'ShareToken',
               token: token,
+              hasPassword: true,
               album: {
                 __typename: 'Album',
                 id: subalbumID,
