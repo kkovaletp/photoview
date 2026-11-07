@@ -363,7 +363,8 @@ export default interface Resources {
     "sidebar": {
       "action": {
         "close": "Close sidebar",
-        "pin": "Pin sidebar"
+        "pin": "Pin sidebar",
+        "show_media_info": "Show media info"
       },
       "album": {
         "album_cover": "Album cover",

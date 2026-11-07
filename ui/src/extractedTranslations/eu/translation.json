@@ -361,7 +361,8 @@
   "sidebar": {
     "action": {
       "close": "",
-      "pin": ""
+      "pin": "",
+      "show_media_info": ""
     },
     "album": {
       "album_cover": "Albumaren azala",
