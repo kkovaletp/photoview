@@ -1,16 +1,17 @@
 import { gql, type TypedDocumentNode } from '@apollo/client'
 import { useQuery } from '@apollo/client/react'
 import { Route, Routes, useParams } from 'react-router'
+import { useTranslation } from 'react-i18next'
 import styled from 'styled-components'
 import {
   getSharePassword,
+  clearSharePassword,
   saveSharePassword,
 } from '../../helpers/authentication'
+import { isNil } from '../../helpers/utils'
 import AlbumSharePage from './AlbumSharePage'
 import MediaSharePage from './MediaSharePage'
-import { useTranslation } from 'react-i18next'
 import PasswordProtectedShare from './PasswordProtectedShare'
-import { isNil } from '../../helpers/utils'
 import {
   SharePageTokenQuery,
   SharePageTokenQueryVariables,
@@ -94,6 +95,11 @@ const useTokenFromParams = () => {
   const { token } = useParams()
   if (isNil(token) || token.trim() === '') throw new Error('Expected `token` param to be defined')
   return token
+}
+
+const handleLogout = (token: string) => {
+  clearSharePassword(token)
+  window.location.reload() // Force re-validation
 }
 
 type SharedSubAlbumPageProps = { token: string; password: string | null }
