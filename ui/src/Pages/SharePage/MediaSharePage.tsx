@@ -28,13 +28,18 @@ type MediaViewProps = {
 }
 
 const MediaView = ({ media }: MediaViewProps) => {
-  const { updateSidebar } = useContext(SidebarContext)
+  const { updateSidebar, setPinned } = useContext(SidebarContext)
 
   useEffect(() => {
     if (typeof updateSidebar === 'function') {
       updateSidebar(<MediaSidebar media={media} hidePreview />)
+
+      // Pin sidebar by default on desktop
+      if (window.innerWidth >= 1024) {
+        setPinned(true)
+      }
     }
-  }, [media, updateSidebar])
+  }, [media, updateSidebar, setPinned])
 
   switch (media.type) {
     case MediaType.Photo:
