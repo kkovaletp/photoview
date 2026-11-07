@@ -318,6 +318,38 @@ describe('SearchBar Component', () => {
         })
         expect(errorSpy).not.toHaveBeenCalled()
     });
+
+    test('uses header-relative mobile results and preserves desktop positioning', async () => {
+        mockSearchData = {
+            search: {
+                query: 'vacation',
+                albums: sampleAlbums,
+                media: sampleMedia,
+            },
+        }
+
+        render(
+            <MemoryRouter>
+                <SearchBar />
+            </MemoryRouter>
+        )
+
+        const input = screen.getByRole('combobox')
+        fireEvent.focus(input)
+        fireEvent.change(input, { target: { value: 'vacation' } })
+
+        const results = await screen.findByRole('listbox')
+        const wrapper = input.parentElement
+
+        expect(wrapper).toHaveClass('lg:relative')
+        expect(wrapper).not.toHaveClass('relative')
+        expect(results).toHaveClass(
+            'top-full',
+            'h-[max(0px,calc(100dvh-100%-5rem))]',
+            'lg:top-10',
+            'lg:h-[calc(100vh-152px)]'
+        )
+    });
 });
 
 // Test AlbumRow component separately

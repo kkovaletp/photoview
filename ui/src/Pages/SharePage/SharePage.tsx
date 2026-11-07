@@ -1,16 +1,20 @@
 import { gql, type TypedDocumentNode } from '@apollo/client'
 import { useQuery } from '@apollo/client/react'
 import { Route, Routes, useParams } from 'react-router'
+import { useTranslation } from 'react-i18next'
+import type { ReactNode } from 'react'
 import styled from 'styled-components'
 import {
   getSharePassword,
+  clearSharePassword,
   saveSharePassword,
 } from '../../helpers/authentication'
+import { isNil } from '../../helpers/utils'
+import { Button } from '../../primitives/form/Input'
+import { reloadSharePage } from './reloadSharePage'
 import AlbumSharePage from './AlbumSharePage'
 import MediaSharePage from './MediaSharePage'
-import { useTranslation } from 'react-i18next'
 import PasswordProtectedShare from './PasswordProtectedShare'
-import { isNil } from '../../helpers/utils'
 import {
   SharePageTokenQuery,
   SharePageTokenQueryVariables,
@@ -25,6 +29,7 @@ export const SHARE_TOKEN_QUERY: TypedDocumentNode<
   query SharePageToken($token: String!, $password: String) {
     shareToken(credentials: { token: $token, password: $password }) {
       token
+      hasPassword
       album {
         id
       }
@@ -96,11 +101,33 @@ const useTokenFromParams = () => {
   return token
 }
 
-type SharedSubAlbumPageProps = { token: string; password: string | null }
-const SharedSubAlbumPage = ({ token, password }: SharedSubAlbumPageProps) => {
+const handleLogout = (token: string) => {
+  clearSharePassword(token)
+  reloadSharePage()
+}
+
+type SharedSubAlbumPageProps = {
+  token: string
+  password: string | null
+  headerAction?: ReactNode
+}
+
+const SharedSubAlbumPage = ({
+  token,
+  password,
+  headerAction,
+}: SharedSubAlbumPageProps) => {
   const { subAlbum } = useParams()
   if (isNil(subAlbum)) throw new Error('Expected `subAlbum` param to be defined')
-  return <AlbumSharePage albumID={subAlbum} token={token} password={password} />
+
+  return (
+    <AlbumSharePage
+      albumID={subAlbum}
+      token={token}
+      password={password}
+      headerAction={headerAction}
+    />
+  )
 }
 
 const AuthorizedTokenRoute = () => {
@@ -123,10 +150,25 @@ const AuthorizedTokenRoute = () => {
     </div>
   }
 
+  const headerAction = data?.shareToken?.hasPassword ? (
+    <Button className="min-h-11 px-3" onClick={() => handleLogout(token)}>
+      {t('settings.logout', 'Log out')}
+    </Button>
+  ) : null
+
   if (data?.shareToken?.album) {
     return (
       <Routes>
-        <Route path=":subAlbum" element={<SharedSubAlbumPage token={token} password={password} />} />
+        <Route
+          path=":subAlbum"
+          element={
+            <SharedSubAlbumPage
+              token={token}
+              password={password}
+              headerAction={headerAction}
+            />
+          }
+        />
         <Route
           index
           element={
@@ -134,6 +176,7 @@ const AuthorizedTokenRoute = () => {
               albumID={data.shareToken.album.id}
               token={token}
               password={password}
+              headerAction={headerAction}
             />
           }
         />
@@ -142,7 +185,12 @@ const AuthorizedTokenRoute = () => {
   }
 
   if (data?.shareToken?.media) {
-    return <MediaSharePage media={data.shareToken.media} />
+    return (
+      <MediaSharePage
+        media={data.shareToken.media}
+        headerAction={headerAction}
+      />
+    )
   }
 
   return <h1>{t('share_page.share_not_found', 'Share not found')}</h1>

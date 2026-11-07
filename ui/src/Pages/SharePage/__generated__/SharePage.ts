@@ -20,6 +20,7 @@ export type SharePageTokenQuery = {
   shareToken: {
     __typename: 'ShareToken'
     token: string
+    hasPassword: boolean
     album: { __typename: 'Album'; id: string } | null
     media: {
       __typename: 'Media'

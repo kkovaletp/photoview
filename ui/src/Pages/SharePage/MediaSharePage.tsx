@@ -1,4 +1,4 @@
-import { useContext, useEffect, useRef, useState } from 'react'
+import { useContext, useEffect, useRef, useState, type ReactNode } from 'react'
 import styled from 'styled-components'
 import { useTranslation } from 'react-i18next'
 import Layout from '../../components/layout/Layout'
@@ -107,13 +107,17 @@ const MediaView = ({ media }: MediaViewProps) => {
 
 type MediaSharePageType = {
   media: NonNullable<SharePageTokenQuery['shareToken']['media']>
+  headerAction?: ReactNode
 }
 
-const MediaSharePage = ({ media }: MediaSharePageType) => {
+const MediaSharePage = ({ media, headerAction }: MediaSharePageType) => {
   const { t } = useTranslation()
 
   return (
-    <Layout title={t('share_page.media.title', 'Shared media')}>
+    <Layout
+      title={t('share_page.media.title', 'Shared media')}
+      headerAction={headerAction}
+    >
       <div data-testid="MediaSharePage">
         <MediaView key={media.id} media={media} />
       </div>

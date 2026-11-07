@@ -1,6 +1,7 @@
 import { gql, type TypedDocumentNode } from '@apollo/client'
 import { useQuery } from '@apollo/client/react'
 import { useTranslation } from 'react-i18next'
+import type { ReactNode } from 'react'
 import styled from 'styled-components'
 import Layout from '../../components/layout/Layout'
 import AlbumGallery, { ALBUM_GALLERY_FRAGMENT } from '../../components/albumGallery/AlbumGallery'
@@ -44,9 +45,15 @@ type AlbumSharePageProps = {
   albumID: string
   token: string
   password: string | null
+  headerAction?: ReactNode
 }
 
-const AlbumSharePage = ({ albumID, token, password }: AlbumSharePageProps) => {
+const AlbumSharePage = ({
+  albumID,
+  token,
+  password,
+  headerAction,
+}: AlbumSharePageProps) => {
   const { t } = useTranslation()
 
   const urlParams = useURLParameters()
@@ -85,6 +92,7 @@ const AlbumSharePage = ({ albumID, token, password }: AlbumSharePageProps) => {
         title={
           album ? album.title : t('general.loading.album', 'Loading album')
         }
+        headerAction={headerAction}
       >
         <AlbumGallery
           ref={containerElem}
