@@ -150,7 +150,7 @@
   "people_page": {
     "action_label": {
       "change_label": "Change label",
-      "detach_images": "Detach face",
+      "detach_images": "Detach images",
       "merge_face": "Merge face",
       "merge_people": "Merge people",
       "move_faces": "Move faces"
