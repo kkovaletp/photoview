@@ -40,9 +40,6 @@ export const SIDEBAR_DOWNLOAD_QUERY: TypedDocumentNode<
 `
 
 const formatBytes = (t: TranslationFn) => (bytes: number) => {
-  if (bytes === 0)
-    return t('sidebar.download.filesize.byte', '{{count}} Byte', { count: 0 })
-
   const i = bytes === 0 ? 0 : Math.floor(Math.log(bytes) / Math.log(1024))
   const count = bytes === 0 ? 0 : Math.round(bytes / Math.pow(1024, i))
 
