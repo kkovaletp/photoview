@@ -63,7 +63,7 @@ test('requests albums with the selected ordering variables', async () => {
   await waitFor(() => expect(initialResult).toHaveBeenCalledOnce())
   await user.selectOptions(screen.getByRole('combobox'), 'title')
   await waitFor(() => expect(titleResult).toHaveBeenCalledOnce())
-  await user.click(screen.getByRole('button', { name: 'Sort direction' }))
+  await user.click(screen.getByRole('button', { name: 'Sorting direction' }))
 
   await waitFor(() => expect(sortedResult).toHaveBeenCalledOnce())
 })
