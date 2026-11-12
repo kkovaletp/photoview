@@ -239,7 +239,7 @@
   },
   "places_page": {
     "mapbox_token_error": {
-      "create_at": "Токен для Mapbox може бути створений безкоштовно на",
+      "create_at": "Токен для Mapbox може бути створений безкоштовно на <mapboxLink>mapbox.com</mapboxLink>.",
       "description": "Щоб використовувати функції карти, потрібен токен Mapbox.",
       "env_var": "Переконайтесь, що змінна оточення MAPBOX_TOKEN містить токен доступу.",
       "title": "Токен для Mapbox не знайдено"

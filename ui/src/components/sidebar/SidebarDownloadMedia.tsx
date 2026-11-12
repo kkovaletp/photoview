@@ -43,13 +43,17 @@ const formatBytes = (t: TranslationFn) => (bytes: number) => {
   if (bytes === 0)
     return t('sidebar.download.filesize.byte', '{{count}} Byte', { count: 0 })
 
-  const i = Math.floor(Math.log(bytes) / Math.log(1024))
-  const count = Math.round(bytes / Math.pow(1024, i))
+  const i = bytes === 0 ? 0 : Math.floor(Math.log(bytes) / Math.log(1024))
+  const count = bytes === 0 ? 0 : Math.round(bytes / Math.pow(1024, i))
 
   switch (i) {
     case 0:
-      // i18next-extract-mark-plural-next-line
-      return t('sidebar.download.filesize.byte', '{{count}} Byte', { count })
+      return t('sidebar.download.filesize.byte', {
+        count,
+        defaultValue_one: '{{count}} Byte',
+        defaultValue_other: '{{count}} Bytes',
+        defaultValue: '{{count}} Bytes',
+      })
     case 1:
       return t('sidebar.download.filesize.kilo_byte', '{{count}} KB', { count })
     case 2:

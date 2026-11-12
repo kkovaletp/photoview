@@ -109,8 +109,8 @@ const SortingOptions = ({
         />
         <button
           type="button"
-          title={t('album_filter.sort_direction', 'Sort direction')}
-          aria-label={t('album_filter.sort_direction', 'Sort direction')}
+          title={t('album_filter.sort_direction', 'Sorting direction')}
+          aria-label={t('album_filter.sort_direction', 'Sorting direction')}
           aria-pressed={ordering?.orderDirection === OrderDirection.Desc}
           className={clsx(
             'bg-gray-50 h-7.5 align-top px-2 py-1 rounded ml-2 border border-gray-200 focus:outline-none focus:border-blue-300 text-[#8b8b8b] hover:bg-gray-100 hover:text-[#777]',
