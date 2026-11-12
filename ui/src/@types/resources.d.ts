@@ -152,7 +152,7 @@ export default interface Resources {
     "people_page": {
       "action_label": {
         "change_label": "Change label",
-        "detach_images": "Detach face",
+        "detach_images": "Detach images",
         "merge_face": "Merge face",
         "merge_people": "Merge people",
         "move_faces": "Move faces"
@@ -235,7 +235,7 @@ export default interface Resources {
     },
     "places_page": {
       "mapbox_token_error": {
-        "create_at": "A mapbox token can be created for free at",
+        "create_at": "A mapbox token can be created for free at <mapboxLink>mapbox.com</mapboxLink>.",
         "description": "To use map related features a mapbox token is needed.",
         "env_var": "Make sure the access token is added as the MAPBOX_TOKEN environment variable.",
         "title": "Mapbox token is not set"
@@ -465,7 +465,7 @@ export default interface Resources {
         "action_label": {
           "detach_image": "Detach image",
           "merge_face": "Merge face",
-          "more_actions": "Face actions",
+          "more_actions": "More actions",
           "move_face": "Move face"
         },
         "confirm_image_detach": "Are you sure you want to detach this image?",
