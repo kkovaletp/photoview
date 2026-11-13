@@ -81,7 +81,7 @@
     "@graphql-inspector/cli": "^7.0.2",
     "@testing-library/jest-dom": "^7.0.1",
     "@testing-library/react": "^16.3.3",
-    "@testing-library/user-event": "^14.6.8",
+    "@testing-library/user-event": "^14.6.9",
     "@types/geojson": "^7946.0.16",
     "@types/js-cookie": "^3.0.6",
     "@types/luxon": "^3.7.6",
