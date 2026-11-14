@@ -50,8 +50,8 @@ jobs:
         uses: peter-evans/create-pull-request@v8
         with:
           token: ${{ secrets.COMMENT_TOKEN }}
-          commit-message: "Bump UI transitive deps and browserslist database"
-          title: "Bump UI transitive deps and browserslist database"
+          commit-message: "Update UI transitive deps and browserslist database"
+          title: "Update UI transitive deps and browserslist database"
           branch: update-ui-deps-and-browserslist-db
           delete-branch: true
           labels: "dependencies, javascript"
