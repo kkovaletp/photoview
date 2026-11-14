@@ -4,6 +4,7 @@ set -euo pipefail
 script_dir="$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)"
 healthcheck="${script_dir}/docker-healthcheck.sh"
 tmpdir="$(mktemp -d)"
+LOCALHOST_IP="127.0.0.1"
 trap 'rm -rf "${tmpdir}"' EXIT
 
 cat >"${tmpdir}/curl" <<'EOF'
@@ -71,30 +72,30 @@ expect_url() {
 }
 
 expect_failure() {
-    if run_check "/api" "127.0.0.1" "8080"; then
+    if run_check "/api" "$LOCALHOST_IP" "8080"; then
         echo "Expected health check to fail" >&2
         exit 1
     fi
 }
 
 expect_url "" "" "" \
-    "http://127.0.0.1:4001/api/graphql"
+    "http://$LOCALHOST_IP:4001/api/graphql"
 expect_url "/api" "0.0.0.0" "8080" \
-    "http://127.0.0.1:8080/api/graphql"
-expect_url "/api/" "127.0.0.1" "8080" \
-    "http://127.0.0.1:8080/api/graphql"
-expect_url "/photoview/api" "127.0.0.1" "8080" \
-    "http://127.0.0.1:8080/photoview/api/graphql"
-expect_url "/photoview/api/" "127.0.0.1" "8080" \
-    "http://127.0.0.1:8080/photoview/api/graphql"
-expect_url "https://gallery.example.com/photoview/api" "127.0.0.1" "8080" \
-    "http://127.0.0.1:8080/photoview/api/graphql"
-expect_url "https://gallery.example.com/photoview/api/" "127.0.0.1" "8080" \
-    "http://127.0.0.1:8080/photoview/api/graphql"
-expect_url "https://gallery.example.com" "127.0.0.1" "8080" \
-    "http://127.0.0.1:8080/api/graphql"
-expect_url "/" "127.0.0.1" "8080" \
-    "http://127.0.0.1:8080/graphql"
+    "http://$LOCALHOST_IP:8080/api/graphql"
+expect_url "/api/" "$LOCALHOST_IP" "8080" \
+    "http://$LOCALHOST_IP:8080/api/graphql"
+expect_url "/photoview/api" "$LOCALHOST_IP" "8080" \
+    "http://$LOCALHOST_IP:8080/photoview/api/graphql"
+expect_url "/photoview/api/" "$LOCALHOST_IP" "8080" \
+    "http://$LOCALHOST_IP:8080/photoview/api/graphql"
+expect_url "https://gallery.example.com/photoview/api" "$LOCALHOST_IP" "8080" \
+    "http://$LOCALHOST_IP:8080/photoview/api/graphql"
+expect_url "https://gallery.example.com/photoview/api/" "$LOCALHOST_IP" "8080" \
+    "http://$LOCALHOST_IP:8080/photoview/api/graphql"
+expect_url "https://gallery.example.com" "$LOCALHOST_IP" "8080" \
+    "http://$LOCALHOST_IP:8080/api/graphql"
+expect_url "/" "$LOCALHOST_IP" "8080" \
+    "http://$LOCALHOST_IP:8080/graphql"
 expect_url "/api" "192.0.2.10" "9000" \
     "http://192.0.2.10:9000/api/graphql"
 expect_url "/api" "::" "8080" \
@@ -115,7 +116,7 @@ expect_failure
 FAKE_RESPONSE='{"data":{"siteInfo":{"initialSetup":null}}}'
 expect_failure
 FAKE_RESPONSE='{"data":{"siteInfo":{"initialSetup":true}}}'
-run_check "/api" "127.0.0.1" "8080"
+run_check "/api" "$LOCALHOST_IP" "8080"
 
 FAKE_EXIT="7"
 expect_failure
