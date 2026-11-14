@@ -53,6 +53,8 @@ services:
       # PHOTOVIEW_SQLITE_PATH: ${PHOTOVIEW_SQLITE_PATH}
       ## Uncomment the next variable if set in the `.env` file
       # PHOTOVIEW_UI_ENDPOINTS: ${PHOTOVIEW_UI_ENDPOINTS}
+      ## Optional: Set this in .env when the public API path or URL is not /api.
+      # PHOTOVIEW_API_ENDPOINT: ${PHOTOVIEW_API_ENDPOINT}
       PHOTOVIEW_LISTEN_IP: "0.0.0.0"
       ## Uncomment the next variable and set a different value to change the port photoview uses inside the container.
       ## If you change this, remember to update the port mapping (under the `ports:`) above!

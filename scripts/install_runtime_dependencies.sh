@@ -19,6 +19,7 @@ LIBS=(
 
   # health check
   curl
+  jq
 
   # exiftool
   libimage-exiftool-perl

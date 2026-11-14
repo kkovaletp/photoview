@@ -1,4 +1,4 @@
-<img src="./screenshots/photoview-logo.svg" height="92px" alt="photoview logo" />
+![photoview logo](./screenshots/photoview-logo.svg)
 
 [![License](https://img.shields.io/github/license/kkovaletp/photoview)](./LICENSE.txt)
 [![GitHub contributors](https://img.shields.io/github/contributors/kkovaletp/photoview)](https://github.com/kkovaletp/photoview/graphs/contributors)
@@ -45,7 +45,7 @@ When your media has been scanned, they show up on the website, organized in the 
 > If you have questions regarding setup or development,
 feel free to start or join a discussion in this repo
 
-# ATTENTION to PostgreSQL users !!!
+# ATTENTION to PostgreSQL users!!!
 
 We switched to PostgreSQL 18 on the `master` branch. PostgreSQL 18 will be the default recommended version
 for the next release (PostgreSQL 17 remains supported). If you follow `master`, please check the
@@ -82,7 +82,7 @@ Glory to Ukraine! 🇺🇦
 
 ## Contents
 
-- [ATTENTION to PostgreSQL users !!!](#attention-to-postgresql-users-)
+- [ATTENTION to PostgreSQL users!!!](#attention-to-postgresql-users)
   - [Terms of use (Mandatory)](#terms-of-use-mandatory)
   - [Contents](#contents)
   - [Main features](#main-features)
@@ -264,6 +264,8 @@ be run with the UI and API in separate containers. This setup uses Caddy as a re
 
 **[→ Complete Separate UI Setup Guide](ui/Separate-UI-README.md)**
 
+For custom paths or separate UI and API services, see the endpoint and deployment path guidance in that guide.
+
 ### Hardware Acceleration
 
 You can run FFmpeg with hardware-acceleration–capable codecs by defining `PHOTOVIEW_VIDEO_HARDWARE_ACCELERATION` in your
@@ -307,7 +309,7 @@ docker compose -f dev-compose.yaml build # Build images for development
 docker compose -f dev-compose.yaml up # Launch API and UI servers
 ```
 
-The graphql playground can now be accessed at [localhost:4001](http://localhost:4001). The site can now be accessed at [localhost:1234](http://localhost:1234). Both servers will be relaunched after the code is changed.
+The graphql playground can now be accessed at [localhost:4001/api/](http://localhost:4001/api/). The site can now be accessed at [localhost:1234](http://localhost:1234). Both servers will be relaunched after the code is changed.
 
 By default, it uses sqlite3 as database. To run servers with other database, please update `PHOTOVIEW_DATABASE_DRIVER` value in `dev-compose.yaml` file and run:
 
@@ -329,7 +331,7 @@ docker run --rm -it -v `pwd`:/app --network host --env-file api/example.env phot
     reflex -g '*.go' -s -- go run . # Monitor source code and (re)launch API server
 ```
 
-The graphql playground can now be accessed at [localhost:4001](http://localhost:4001).
+The graphql playground can now be accessed at [localhost:4001/api/](http://localhost:4001/api/).
 
 > [!NOTE]
 > The server runs on the host network as `--network host` flag. It's easy to communicate between API server and UI server. If you don't want to do that, please check [Docker Network](https://docs.docker.com/network/) to create a new network to run servers.
@@ -454,7 +456,7 @@ cd ./api
 reflex -g '*.go' -s -- go run .
 ```
 
-The graphql playground can now be accessed at [localhost:4001](http://localhost:4001).
+The graphql playground can now be accessed at [localhost:4001/api/](http://localhost:4001/api/).
 
 ### Start UI server
 
@@ -474,4 +476,4 @@ npm run mon
 ```
 
 The site can now be accessed at [localhost:1234](http://localhost:1234).
-And the graphql playground at [localhost:4001](http://localhost:4001)
+And the graphql playground at [localhost:4001](http://localhost:4001/api/)

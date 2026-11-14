@@ -113,7 +113,7 @@ func main() {
 	}
 
 	if devMode {
-		log.Printf("🚀 Graphql playground ready at %s\n", apiListenURL.String())
+		log.Printf("🚀 Graphql playground ready at %s\n", apiListenURL.JoinPath("/").String())
 	} else {
 		log.Printf("Photoview API endpoint listening at %s\n", apiListenURL.String())
 
