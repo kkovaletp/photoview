@@ -125,3 +125,40 @@ func TestMediaGetThumbnail(t *testing.T) {
 	assert.Equal(t, thumb.MediaName, "video-thumbnail.jpg")
 	assert.NotNil(t, thumb.Media)
 }
+
+func TestMediaURLWithAPIEndpointVariants(t *testing.T) {
+	tests := []struct {
+		name     string
+		endpoint string
+		prefix   string
+	}{
+		{"relative", "/api", "/api"},
+		{"relative trailing slash", "/api/", "/api"},
+		{"prefixed", "/photoview/api", "/photoview/api"},
+		{"prefixed trailing slash", "/photoview/api/", "/photoview/api"},
+		{"absolute", "https://gallery.example.com/photoview/api", "https://gallery.example.com/photoview/api"},
+		{"absolute trailing slash", "https://gallery.example.com/photoview/api/", "https://gallery.example.com/photoview/api"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Setenv(string(utils.EnvAPIEndpoint), tt.endpoint)
+			endpoint := utils.ComputeApiEndpointUrlForTest()
+
+			utils.ConfigureTestEndpoints(endpoint, nil, nil)
+			t.Cleanup(utils.ResetTestEndpoints)
+
+			photo := models.MediaURL{
+				MediaName: "photo.jpg",
+				Purpose:   models.PhotoHighRes,
+			}
+			video := models.MediaURL{
+				MediaName: "video.mp4",
+				Purpose:   models.VideoWeb,
+			}
+
+			assert.Equal(t, tt.prefix+"/photo/photo.jpg", photo.URL())
+			assert.Equal(t, tt.prefix+"/video/video.mp4", video.URL())
+		})
+	}
+}

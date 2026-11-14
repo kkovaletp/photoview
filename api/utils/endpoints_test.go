@@ -2,9 +2,12 @@ package utils_test
 
 import (
 	"fmt"
+	"net/http"
+	"net/http/httptest"
 	"net/url"
 	"testing"
 
+	"github.com/gorilla/mux"
 	"github.com/kkovaletp/photoview/api/utils"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -544,4 +547,58 @@ func TestResetTestEndpoints(t *testing.T) {
 
 	// Clean up
 	utils.ResetTestEndpoints()
+}
+
+func TestAPIEndpointRoutePrefixWithTrailingSlash(t *testing.T) {
+	tests := []struct {
+		name     string
+		endpoint string
+		prefix   string
+	}{
+		{"default", "", "/api"},
+		{"relative", "/api", "/api"},
+		{"relative trailing slash", "/api/", "/api"},
+		{"prefixed", "/photoview/api", "/photoview/api"},
+		{"prefixed trailing slash", "/photoview/api/", "/photoview/api"},
+		{"absolute", "https://gallery.example.com/photoview/api", "/photoview/api"},
+		{"absolute trailing slash", "https://gallery.example.com/photoview/api/", "/photoview/api"},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			t.Setenv(string(utils.EnvAPIEndpoint), tt.endpoint)
+			t.Setenv(string(utils.EnvListenIP), "127.0.0.1")
+			t.Setenv(string(utils.EnvListenPort), "4001")
+
+			endpoint := utils.ComputeApiEndpointUrlForTest()
+			utils.ConfigureTestEndpoints(endpoint, nil, nil)
+			t.Cleanup(utils.ResetTestEndpoints)
+
+			listenURL := utils.ComputeApiListenUrlForTest()
+			router := mux.NewRouter()
+			apiRouter := router.PathPrefix(listenURL.Path).Subrouter()
+
+			handler := func(w http.ResponseWriter, _ *http.Request) {
+				w.WriteHeader(http.StatusNoContent)
+			}
+			apiRouter.HandleFunc("/graphql", handler)
+			apiRouter.PathPrefix("/photo").Subrouter().HandleFunc("/{name}", handler)
+			apiRouter.PathPrefix("/video").Subrouter().HandleFunc("/{name}", handler)
+			apiRouter.PathPrefix("/download").Subrouter().
+				HandleFunc("/album/{album_id}/{media_purpose}", handler)
+
+			for _, suffix := range []string{
+				"/graphql",
+				"/photo/photo.jpg",
+				"/video/video.mp4",
+				"/download/album/42/original",
+			} {
+				request := httptest.NewRequest(http.MethodGet, tt.prefix+suffix, nil)
+				recorder := httptest.NewRecorder()
+				router.ServeHTTP(recorder, request)
+
+				assert.Equal(t, http.StatusNoContent, recorder.Code, "path %s", request.URL.Path)
+			}
+		})
+	}
 }
