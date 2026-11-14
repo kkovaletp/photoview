@@ -46,6 +46,7 @@ Glory to Ukraine! 🇺🇦
       - [Step 1: Prepare the main app directory](#step-1-prepare-the-main-app-directory)
       - [Step 2: Copy Example Files](#step-2-copy-example-files)
       - [Step 3: Configure Environment Variables](#step-3-configure-environment-variables)
+        - [API endpoint and deployment path](#api-endpoint-and-deployment-path)
       - [Step 4: Read and optionally modify the `docker-compose.yml`](#step-4-read-and-optionally-modify-the-docker-composeyml)
       - [Step 5: Read and optionally modify the `Makefile`](#step-5-read-and-optionally-modify-the-makefile)
       - [Step 6: Configure the UI Service (if needed)](#step-6-configure-the-ui-service-if-needed)
@@ -255,6 +256,36 @@ Edit the `.env` file, read all its content, and set your values for the variable
 - `HTTPS_PORT`: The primary HTTPS port number (e.g., `8443`)
   - Used for HTTP-to-HTTPS redirects and log file naming
   - Should match the internal port in the docker-compose.yml > photoview-ui service definition.
+
+##### API endpoint and deployment path
+
+The UI and API can run on different hosts while the browser accesses both
+through one public origin. The supplied Caddyfile proxies `/api/*` to the API.
+In that setup, the API default `PHOTOVIEW_API_ENDPOINT=/api` also produces
+media URLs that use the UI origin.
+
+For a UI at `https://gallery.example.com/photoview/`, build the UI image
+with `UI_PUBLIC_URL=/photoview/`. Build it with
+`REACT_APP_API_ENDPOINT=https://gallery.example.com/photoview/api`.
+These values are embedded in the UI build.
+
+For the API from this repository, set
+`PHOTOVIEW_API_ENDPOINT=/photoview/api`. Set `PHOTOVIEW_UI_ENDPOINTS`
+to the browser-facing UI origin, such as `https://gallery.example.com`.
+
+Configure Caddy to forward `/photoview/api/*` to the API without
+stripping the prefix. Set its API health-check URI to
+`/photoview/api/graphql`. Configure Caddy to strip `/photoview` from UI
+file requests before serving files from `/srv`. Keep the UI container's
+own `/health-check` route.
+
+A trailing slash is accepted on the API endpoint, but these examples omit it.
+The GraphQL playground URL ends in `/`, for example `/api/`.
+
+If the browser accesses the API on a different origin, review the UI server's
+content security policy, the API's allowed UI origins, and cookie delivery.
+The default UI cookies are host-specific and use `SameSite=Lax`. An API URL
+alone does not make authenticated media and downloads work across origins.
 
 #### Step 4: Read and optionally modify the `docker-compose.yml`
 

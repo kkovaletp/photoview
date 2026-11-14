@@ -1,4 +1,4 @@
-<img src="./screenshots/photoview-logo.svg" height="92px" alt="photoview logo" />
+![photoview logo](./screenshots/photoview-logo.svg)
 
 [![License](https://img.shields.io/github/license/kkovaletp/photoview)](./LICENSE.txt)
 [![GitHub contributors](https://img.shields.io/github/contributors/kkovaletp/photoview)](https://github.com/kkovaletp/photoview/graphs/contributors)
@@ -45,7 +45,7 @@ When your media has been scanned, they show up on the website, organized in the 
 > If you have questions regarding setup or development,
 feel free to start or join a discussion in this repo
 
-# ATTENTION to PostgreSQL users !!!
+# ATTENTION to PostgreSQL users!!!
 
 We switched to PostgreSQL 18 on the `master` branch. PostgreSQL 18 will be the default recommended version
 for the next release (PostgreSQL 17 remains supported). If you follow `master`, please check the
@@ -82,7 +82,7 @@ Glory to Ukraine! 🇺🇦
 
 ## Contents
 
-- [ATTENTION to PostgreSQL users !!!](#attention-to-postgresql-users-)
+- [ATTENTION to PostgreSQL users!!!](#attention-to-postgresql-users)
   - [Terms of use (Mandatory)](#terms-of-use-mandatory)
   - [Contents](#contents)
   - [Main features](#main-features)
@@ -263,6 +263,8 @@ be run with the UI and API in separate containers. This setup uses Caddy as a re
 - Superior caching and compression
 
 **[→ Complete Separate UI Setup Guide](ui/Separate-UI-README.md)**
+
+For custom paths or separate UI and API services, see the endpoint and deployment path guidance in that guide.
 
 ### Hardware Acceleration
 
@@ -474,4 +476,4 @@ npm run mon
 ```
 
 The site can now be accessed at [localhost:1234](http://localhost:1234).
-And the graphql playground at [localhost:4001](http://localhost:4001)
+And the graphql playground at [localhost:4001](http://localhost:4001/api/)
