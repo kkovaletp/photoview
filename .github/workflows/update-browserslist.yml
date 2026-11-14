@@ -11,7 +11,8 @@ permissions:
   pull-requests: write
 
 jobs:
-  update-deps-and-browserslist:
+  update-ui-deps-and-browserslist:
+    name: Update UI transitive dependencies and browserslist database
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
@@ -49,13 +50,13 @@ jobs:
         uses: peter-evans/create-pull-request@v8
         with:
           token: ${{ secrets.COMMENT_TOKEN }}
-          commit-message: "Bump transitive deps and browserslist database"
-          title: "Bump transitive deps and browserslist database"
-          branch: update-deps-and-browserslist-db
+          commit-message: "Bump UI transitive deps and browserslist database"
+          title: "Bump UI transitive deps and browserslist database"
+          branch: update-ui-deps-and-browserslist-db
           delete-branch: true
           labels: "dependencies, javascript"
           body: |
-            This PR updates the transitive dependencies and browserslist database to the latest versions.
+            This PR updates the UI transitive dependencies and browserslist database to the latest versions.
 
             Changes:
             - Updated transitive dependencies in package-lock.json
@@ -63,3 +64,108 @@ jobs:
             - Refreshed browser compatibility data
 
             This is an automated update similar to Dependabot PRs.
+
+            -----
+
+            @coderabbitai, the purpose of this PR is to update transitive UI dependencies and the browserslist database, not the direct dependencies, even if they have updates within the allowed versions range. There are a lot of changes in the package-lock file. Could you please analyze them and write me a summarized list of the changes: what transitive dependencies were added, what was removed, what was updated (from - to versions), whether there are any direct dependency updates in the package-lock file within the allowed versions range, and anything else?
+
+  update-go-dependencies:
+    name: Update indirect Go dependencies
+    runs-on: ubuntu-latest
+    env:
+      # Fail rather than silently switching to a newer Go release series.
+      GOTOOLCHAIN: local
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+
+      - name: Set up Go
+        uses: actions/setup-go@v7
+        with:
+          # Match the Go release series used by the API Docker image.
+          go-version: "1.27.x"
+          check-latest: true
+          cache-dependency-path: api/go.sum
+
+      - name: Update indirect Go dependencies
+        working-directory: ./api
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          updates="$RUNNER_TEMP/go-module-updates.json"
+          before="$RUNNER_TEMP/go-modules-before.txt"
+          after="$RUNNER_TEMP/go-modules-after.txt"
+          targets="$RUNNER_TEMP/go-update-targets.txt"
+
+          # Record the selected module graph and available updates.
+          go list -m -u -json all > "$updates"
+
+          jq -r '
+            select(.Main != true)
+            | [.Path, (.Version // ""), (.Replace.Path // ""),
+               (.Replace.Version // "")]
+            | @tsv
+          ' "$updates" | LC_ALL=C sort > "$before"
+
+          # Target indirect modules with a reported update.
+          # Do not override modules that have a replace directive.
+          jq -r '
+            select(
+              .Indirect == true
+              and .Replace == null
+              and (.Update.Version? != null)
+            )
+            | "\(.Path)@\(.Update.Version)"
+          ' "$updates" | LC_ALL=C sort > "$targets"
+
+          mapfile -t modules < "$targets"
+
+          if (( ${#modules[@]} > 0 )); then
+            printf 'Requested updates:\n'
+            printf '%s\n' "${modules[@]}"
+
+            go get "${modules[@]}"
+            go mod tidy
+
+            go list -m -json all | jq -r '
+              select(.Main != true)
+              | [.Path, (.Version // ""), (.Replace.Path // ""),
+                 (.Replace.Version // "")]
+              | @tsv
+            ' | LC_ALL=C sort > "$after"
+
+            if cmp -s "$before" "$after"; then
+              echo "The selected module graph did not change."
+              git restore -- go.mod go.sum
+            else
+              echo "Selected module changes:"
+              diff -u "$before" "$after" || true
+              git diff -- go.mod go.sum
+            fi
+          else
+            echo "No indirect module updates were reported."
+            git restore -- go.mod go.sum
+          fi
+
+      - name: Create or update Go dependency PR
+        uses: peter-evans/create-pull-request@v8
+        with:
+          token: ${{ secrets.COMMENT_TOKEN }}
+          add-paths: |
+            api/go.mod
+            api/go.sum
+          commit-message: "Update indirect Go dependencies"
+          title: "Update indirect Go dependencies"
+          branch: update-go-transitive-dependencies
+          delete-branch: true
+          labels: "dependencies, go"
+          body: |
+            This PR updates available indirect Go modules.
+
+            Review the module changes and the API test and security results before merging.
+
+            -----
+
+            @coderabbitai, the purpose of this PR is to update transitive GO dependencies, not the direct dependencies, even if they have updates. There are a lot of changes in the go.mod and go.sum files. Could you please analyze them and write me a summarized list of the changes: what transitive dependencies were added, what was removed, what was updated (from - to versions), whether there are any direct dependency updates, and anything else?
