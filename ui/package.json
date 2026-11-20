@@ -41,7 +41,7 @@
     "clsx": "^2.1.1",
     "copy-to-clipboard": "^4.0.2",
     "dayjs": "^1.11.23",
-    "dompurify": "^3.4.17",
+    "dompurify": "^3.4.18",
     "graphql": "^16.15.0",
     "graphql-ws": "^6.4.2",
     "i18next": "27.1.3",
