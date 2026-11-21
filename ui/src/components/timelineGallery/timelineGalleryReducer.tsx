@@ -29,6 +29,13 @@ export function timelineGalleryReducer(
   switch (action.type) {
     case 'replaceTimelineGroups': {
       const timelineGroups = convertMediaToTimelineGroups(action.timeline)
+      // Before the reducer regroups the media, use the existing getActiveTimelineImage helper to find the currently active media.
+      // After the reducer regroups the media, search the new groups for a media item with the same id.
+      // Add one small private helper in the same file.
+      // The helper returns the new { date, album, media } index, or no index if it finds no match.
+      // If the reducer finds a match, store the new index and keep presenting unchanged.
+      // If the reducer finds no match, or if no media was selected, set the index to { -1, -1, -1 } and set presenting: false.
+      // Do not change history in the reducer.
 
       return {
         ...state,
