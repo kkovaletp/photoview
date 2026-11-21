@@ -28,8 +28,12 @@ export function timelineGalleryReducer(
 ): TimelineGalleryState {
   switch (action.type) {
     case 'replaceTimelineGroups': {
-      const activeMedia = getActiveTimelineImage({ mediaState: state })
       const timelineGroups = convertMediaToTimelineGroups(action.timeline)
+
+      const activeMedia = state.presenting
+        ? getActiveTimelineImage({ mediaState: state })
+        : undefined
+
       const activeIndex =
         activeMedia === undefined
           ? undefined
@@ -39,7 +43,7 @@ export function timelineGalleryReducer(
         ...state,
         timelineGroups,
         activeIndex: activeIndex ?? { date: -1, album: -1, media: -1 },
-        presenting: activeIndex === undefined ? false : state.presenting,
+        presenting: activeIndex !== undefined,
       }
     }
     case 'nextImage': {

@@ -778,7 +778,7 @@ describe('timeline gallery reducer', () => {
     expect(result.activeIndex).toEqual({ date: -1, album: -1, media: -1 })
   })
 
-  test('keeps a closed viewer closed when its selection remains', () => {
+  test('clears the selection when groups change while the viewer is closed', () => {
     const closedState: TimelineGalleryState = {
       ...defaultState,
       presenting: false,
@@ -791,9 +791,9 @@ describe('timeline gallery reducer', () => {
     })
 
     expect(result.presenting).toBe(false)
-    expect(getActiveTimelineImage({ mediaState: result })?.id).toBe(
-      getActiveTimelineImage({ mediaState: closedState })?.id
-    )
+    expect(result.activeIndex).toEqual({ date: -1, album: -1, media: -1 })
+    expect(getActiveTimelineImage({ mediaState: result })).toBeUndefined()
+    expect(result.timelineGroups).toEqual(defaultState.timelineGroups)
   })
 
   test.each([
