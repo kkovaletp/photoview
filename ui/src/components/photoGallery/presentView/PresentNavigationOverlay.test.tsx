@@ -131,3 +131,31 @@ test('the exit button leaves history alone when the caller asks it to', async ()
 
   back.mockRestore()
 })
+
+test('does not forward align to navigation buttons', () => {
+  const warn = vi.spyOn(console, 'warn')
+  const error = vi.spyOn(console, 'error')
+
+  try {
+    render(<PresentNavigationOverlay dispatchMedia={vi.fn()} />)
+
+    expect(screen.getByLabelText('Previous image')).not.toHaveAttribute('align')
+    expect(screen.getByLabelText('Next image')).not.toHaveAttribute('align')
+
+    const hasAlignWarning = (calls: unknown[][]) =>
+      calls.some(args =>
+        args.some(
+          arg =>
+            typeof arg === 'string' &&
+            /unknown prop/i.test(arg) &&
+            /align/i.test(arg)
+        )
+      )
+
+    expect(hasAlignWarning(warn.mock.calls)).toBe(false)
+    expect(hasAlignWarning(error.mock.calls)).toBe(false)
+  } finally {
+    warn.mockRestore()
+    error.mockRestore()
+  }
+})

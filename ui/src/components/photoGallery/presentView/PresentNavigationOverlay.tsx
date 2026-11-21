@@ -87,13 +87,13 @@ const InfoButton = styled(OverlayButton)`
   top: 28px;
 `
 
-const NavigationButton = styled(OverlayButton) <{ align: 'left' | 'right' }>`
+const NavigationButton = styled(OverlayButton) <{ $align: 'left' | 'right' }>`
   height: 80%;
   width: 20%;
   top: 10%;
 
-  ${({ align: float }) => (float === 'left' ? 'left: 0;' : null)}
-  ${({ align: float }) => (float === 'right' ? 'right: 0;' : null)}
+  ${({ $align: float }) => (float === 'left' ? 'left: 0;' : null)}
+  ${({ $align: float }) => (float === 'right' ? 'right: 0;' : null)}
 
   & svg {
     margin: auto;
@@ -173,7 +173,7 @@ const PresentNavigationOverlay = ({
         <NavigationButton
           aria-label="Previous image"
           className={hide ? 'hide' : undefined}
-          align="left"
+          $align="left"
           onClick={() => dispatchMedia({ type: 'previousImage' })}
         >
           <PrevIcon />
@@ -181,7 +181,7 @@ const PresentNavigationOverlay = ({
         <NavigationButton
           aria-label="Next image"
           className={hide ? 'hide' : undefined}
-          align="right"
+          $align="right"
           onClick={() => dispatchMedia({ type: 'nextImage' })}
         >
           <NextIcon />

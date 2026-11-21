@@ -43,7 +43,7 @@ const MediaGallery = ({ loading, mediaState, dispatchMedia }: MediaGalleryProps)
   const [markFavorite] = useMarkFavoriteMutation()
 
   const { media, activeIndex, presenting } = mediaState
-
+  const activeMedia = media[activeIndex]
   const { updateSidebar } = useContext(SidebarContext)
 
   let mediaElements = []
@@ -89,9 +89,9 @@ const MediaGallery = ({ loading, mediaState, dispatchMedia }: MediaGalleryProps)
         {mediaElements}
         <PhotoFiller />
       </Gallery>
-      {presenting && (
+      {presenting && activeMedia !== undefined && (
         <PresentView
-          activeMedia={mediaState.media[mediaState.activeIndex]}
+          activeMedia={activeMedia}
           dispatchMedia={dispatchMedia}
         />
       )}

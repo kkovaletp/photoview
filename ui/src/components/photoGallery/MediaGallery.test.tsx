@@ -112,6 +112,27 @@ test('keeps existing thumbnails when loading is true (no flicker)', () => {
   ).toHaveLength(1)
 })
 
+test('does not render the viewer for an invalid active index', () => {
+  const mediaState: MediaGalleryState = {
+    presenting: true,
+    activeIndex: 0,
+    media: [],
+  }
+
+  renderWithProviders(
+    <SidebarProvider>
+      <MediaGallery
+        dispatchMedia={vi.fn()}
+        loading={false}
+        mediaState={mediaState}
+      />
+    </SidebarProvider>,
+    { mocks: [] }
+  )
+
+  expect(screen.queryByTestId('present-overlay')).not.toBeInTheDocument()
+})
+
 describe('photo gallery presenting', () => {
   const dispatchMedia = vi.fn()
 

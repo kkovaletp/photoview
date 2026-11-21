@@ -8,7 +8,6 @@ import styled from 'styled-components'
 import Layout from '../../components/layout/Layout'
 import { registerMediaMarkers } from '../../components/mapbox/mapboxHelperFunctions'
 import useMapboxMap from '../../components/mapbox/MapboxMap'
-import { useUrlPresentModeSetup } from '../../components/photoGallery/mediaGalleryReducer'
 import MapPresentMarker from './MapPresentMarker'
 import { PlacesAction, placesReducer } from './placesReducer'
 import {
@@ -54,16 +53,6 @@ const MapPage = () => {
       projection: {
         name: 'globe',
       },
-    },
-  })
-
-  useUrlPresentModeSetup({
-    dispatchMedia: dispatchMarkerMedia,
-    openPresentMode: event => {
-      dispatchMarkerMedia({
-        type: 'openPresentMode',
-        activeIndex: event.state.activeIndex,
-      })
     },
   })
 
