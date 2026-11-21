@@ -2,6 +2,7 @@ import { Settings } from 'luxon'
 import { MediaType } from '../../__generated__/globalTypes'
 import { MyTimelineQuery } from './__generated__/TimelineGallery'
 import {
+  getActiveTimelineImage,
   timelineGalleryReducer,
   TimelineGalleryState,
   TimelineMediaIndex,
@@ -735,5 +736,77 @@ describe('timeline gallery reducer', () => {
       { id: 'z', mediaIds: ['first', 'third'] },
       { id: 'a', mediaIds: ['second'] },
     ])
+  })
+
+  test('keeps the selected media after groups change', () => {
+    const openState: TimelineGalleryState = {
+      ...defaultState,
+      presenting: true,
+      activeIndex: { date: 1, album: 0, media: 0 },
+    }
+    const selectedId = getActiveTimelineImage({ mediaState: openState })!.id
+    const newerMedia = {
+      ...timelineData[0],
+      id: 'newer',
+      date: '2021-01-01T18:00:00Z',
+    }
+
+    const result = timelineGalleryReducer(openState, {
+      type: 'replaceTimelineGroups',
+      timeline: [newerMedia, ...timelineData],
+    })
+
+    expect(result.presenting).toBe(true)
+    expect(result.activeIndex).toEqual({ date: 2, album: 0, media: 0 })
+    expect(getActiveTimelineImage({ mediaState: result })?.id).toBe(selectedId)
+  })
+
+  test('closes the viewer when the selected media is removed', () => {
+    const openState: TimelineGalleryState = {
+      ...defaultState,
+      presenting: true,
+      activeIndex: { date: 1, album: 0, media: 0 },
+    }
+    const selectedId = getActiveTimelineImage({ mediaState: openState })!.id
+
+    const result = timelineGalleryReducer(openState, {
+      type: 'replaceTimelineGroups',
+      timeline: timelineData.filter(item => item.id !== selectedId),
+    })
+
+    expect(result.presenting).toBe(false)
+    expect(result.activeIndex).toEqual({ date: -1, album: -1, media: -1 })
+  })
+
+  test('keeps a closed viewer closed when its selection remains', () => {
+    const closedState: TimelineGalleryState = {
+      ...defaultState,
+      presenting: false,
+      activeIndex: { date: 1, album: 0, media: 0 },
+    }
+
+    const result = timelineGalleryReducer(closedState, {
+      type: 'replaceTimelineGroups',
+      timeline: timelineData,
+    })
+
+    expect(result.presenting).toBe(false)
+    expect(getActiveTimelineImage({ mediaState: result })?.id).toBe(
+      getActiveTimelineImage({ mediaState: closedState })?.id
+    )
+  })
+
+  test.each([
+    { date: 99, album: 0, media: 0 },
+    { date: 0, album: 99, media: 0 },
+    { date: 0, album: 0, media: 99 },
+  ])('clears an invalid selection: %o', activeIndex => {
+    const result = timelineGalleryReducer(
+      { ...defaultState, presenting: true, activeIndex },
+      { type: 'replaceTimelineGroups', timeline: timelineData }
+    )
+
+    expect(result.presenting).toBe(false)
+    expect(result.activeIndex).toEqual({ date: -1, album: -1, media: -1 })
   })
 })

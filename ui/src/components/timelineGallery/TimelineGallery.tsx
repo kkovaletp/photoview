@@ -119,13 +119,17 @@ const TimelineGallery = () => {
     })
   }, [data])
 
+  const activeMedia = getActiveTimelineMedia({ mediaState })
+
   useUrlPresentModeSetup({
     dispatchMedia,
     openPresentMode: () => {
-      dispatchMedia({
-        type: 'openPresentMode',
-        activeIndex: mediaState.activeIndex,
-      })
+      if (activeMedia !== undefined) {
+        dispatchMedia({
+          type: 'openPresentMode',
+          activeIndex: mediaState.activeIndex,
+        })
+      }
     },
   })
 
@@ -142,11 +146,6 @@ const TimelineGallery = () => {
     />
   ))
 
-  // find the active media once per render.
-  // Render PresentView only if presenting is true and the active media is defined.
-  // Remove the non - null assertion(!) from the PresentView call.
-  // In the same file, update the browser - forward reopen callback passed to useUrlPresentModeSetup.Reopen the viewer only if the current index resolves to real media.If the index does not resolve to real media, do nothing.This closes the second known path, where the user presses Forward after a data reset.
-
   return (
     <div className="overflow-x-hidden">
       <TimelineFilters
@@ -162,10 +161,10 @@ const TimelineGallery = () => {
         active={loadingMore}
         text={t('general.loading.paginate.media', 'Loading more media')}
       />
-      {mediaState.presenting && (
+      {mediaState.presenting && activeMedia !== undefined && (
         <PresentView
           data-testid="present-view"
-          activeMedia={getActiveTimelineMedia({ mediaState })!}
+          activeMedia={activeMedia}
           dispatchMedia={dispatchMedia}
         />
       )}

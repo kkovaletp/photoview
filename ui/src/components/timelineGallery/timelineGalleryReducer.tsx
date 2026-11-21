@@ -28,23 +28,18 @@ export function timelineGalleryReducer(
 ): TimelineGalleryState {
   switch (action.type) {
     case 'replaceTimelineGroups': {
+      const activeMedia = getActiveTimelineImage({ mediaState: state })
       const timelineGroups = convertMediaToTimelineGroups(action.timeline)
-      // Before the reducer regroups the media, use the existing getActiveTimelineImage helper to find the currently active media.
-      // After the reducer regroups the media, search the new groups for a media item with the same id.
-      // Add one small private helper in the same file.
-      // The helper returns the new { date, album, media } index, or no index if it finds no match.
-      // If the reducer finds a match, store the new index and keep presenting unchanged.
-      // If the reducer finds no match, or if no media was selected, set the index to { -1, -1, -1 } and set presenting: false.
-      // Do not change history in the reducer.
+      const activeIndex =
+        activeMedia === undefined
+          ? undefined
+          : findTimelineMediaIndex(timelineGroups, activeMedia.id)
 
       return {
         ...state,
-        activeIndex: {
-          album: -1,
-          date: -1,
-          media: -1,
-        },
         timelineGroups,
+        activeIndex: activeIndex ?? { date: -1, album: -1, media: -1 },
+        presenting: activeIndex === undefined ? false : state.presenting,
       }
     }
     case 'nextImage': {
@@ -175,9 +170,9 @@ export const getTimelineImage = ({
 }: {
   mediaState: TimelineGalleryState
   index: TimelineMediaIndex
-}): MyTimelineQuery['myTimeline'][0] => {
+}): MyTimelineQuery['myTimeline'][0] | undefined => {
   const { date, album, media } = index
-  return mediaState.timelineGroups[date].albums[album].media[media]
+  return mediaState.timelineGroups[date]?.albums[album]?.media[media]
 }
 
 export const getActiveTimelineImage = ({
@@ -195,6 +190,23 @@ export const getActiveTimelineImage = ({
   }
 
   return getTimelineImage({ mediaState, index: mediaState.activeIndex })
+}
+
+function findTimelineMediaIndex(
+  timelineGroups: TimelineGroup[],
+  mediaId: MyTimelineQuery['myTimeline'][number]['id']
+): TimelineMediaIndex | undefined {
+  for (const [date, group] of timelineGroups.entries()) {
+    for (const [album, albumGroup] of group.albums.entries()) {
+      const media = albumGroup.media.findIndex(item => item.id === mediaId)
+
+      if (media !== -1) {
+        return { date, album, media }
+      }
+    }
+  }
+
+  return undefined
 }
 
 function convertMediaToTimelineGroups(
