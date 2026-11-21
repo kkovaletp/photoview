@@ -17,6 +17,7 @@ export type PhotoGalleryAction =
   | { type: 'openPresentMode'; activeIndex: number }
   | { type: 'selectImage'; index: number }
   | { type: 'replaceMedia'; media: MediaGalleryFieldsFragment[] }
+  | { type: 'replaceAlbumMedia'; media: MediaGalleryFieldsFragment[] }
 
 export function mediaGalleryReducer(
   state: MediaGalleryState,
@@ -66,6 +67,23 @@ export function mediaGalleryReducer(
         activeIndex: -1,
         presenting: false,
       }
+    case 'replaceAlbumMedia': {
+      const activeId = state.presenting
+        ? state.media[state.activeIndex]?.id
+        : undefined
+
+      const activeIndex =
+        activeId === undefined
+          ? -1
+          : action.media.findIndex(media => media.id === activeId)
+
+      return {
+        ...state,
+        media: action.media,
+        activeIndex,
+        presenting: activeIndex !== -1,
+      }
+    }
   }
 }
 

@@ -595,7 +595,7 @@ const memoryCache = new InMemoryCache({
     },
     Query: {
       fields: {
-        myTimeline: paginateCache(['onlyFavorites']),
+        myTimeline: paginateCache(['onlyFavorites', 'fromDate']),
         myFaceGroups: paginateCache([['paginate', ['limit']]]),
       },
     },

@@ -70,7 +70,7 @@ const AlbumGallery = forwardRef(
     })
 
     useEffect(() => {
-      dispatchMedia({ type: 'replaceMedia', media: album?.media || [] })
+      dispatchMedia({ type: 'replaceAlbumMedia', media: album?.media || [] })
     }, [album?.media])
 
     useUrlPresentModeSetup({
