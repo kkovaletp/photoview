@@ -267,17 +267,9 @@ function convertMediaToTimelineGroups(
     }))
 }
 
-export const openTimelinePresentMode = ({
-  dispatchMedia,
-  activeIndex,
-}: {
+export const openTimelinePresentMode = ({ dispatchMedia, activeIndex }: {
   dispatchMedia: Dispatch<TimelineGalleryAction>
   activeIndex: TimelineMediaIndex
 }) => {
-  dispatchMedia({
-    type: 'openPresentMode',
-    activeIndex,
-  })
-
-  history.pushState({ presenting: true, activeIndex: activeIndex }, '')
+  dispatchMedia({ type: 'openPresentMode', activeIndex })
 }

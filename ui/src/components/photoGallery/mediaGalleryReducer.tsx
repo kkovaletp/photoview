@@ -1,4 +1,4 @@
-import { Dispatch, useEffect, useRef } from 'react'
+import { Dispatch } from 'react'
 import { MediaGalleryFieldsFragment } from './__generated__/fragments'
 
 export interface MediaGalleryState {
@@ -42,6 +42,14 @@ export function mediaGalleryReducer(
         }
       }
     case 'openPresentMode':
+      if (
+        !Number.isInteger(action.activeIndex) ||
+        action.activeIndex < 0 ||
+        action.activeIndex >= state.media.length
+      ) {
+        return state
+      }
+
       return {
         ...state,
         presenting: true,
@@ -87,65 +95,15 @@ export function mediaGalleryReducer(
   }
 }
 
-export interface MediaGalleryPopStateEvent extends PopStateEvent {
-  state: MediaGalleryState
-}
-
-export const useUrlPresentModeSetup = ({
-  dispatchMedia,
-  openPresentMode,
-}: {
-  dispatchMedia: Dispatch<GalleryAction>
-  openPresentMode: (event: MediaGalleryPopStateEvent) => void
-}) => {
-  const openPresentModeRef = useRef(openPresentMode)
-
-  useEffect(() => {
-    openPresentModeRef.current = openPresentMode
-  }, [openPresentMode])
-
-  useEffect(() => {
-    const urlChangeListener = (event: MediaGalleryPopStateEvent) => {
-      if (event.state.presenting === true) {
-        openPresentModeRef.current(event)
-      } else {
-        dispatchMedia({ type: 'closePresentMode' })
-      }
-    }
-
-    globalThis.addEventListener('popstate', urlChangeListener)
-
-    history.replaceState({ presenting: false }, '')
-
-    return () => {
-      globalThis.removeEventListener('popstate', urlChangeListener)
-    }
-  }, [dispatchMedia])
-}
-
-export const openPresentModeAction = ({
-  dispatchMedia,
-  activeIndex,
-}: {
+export const openPresentModeAction = ({ dispatchMedia, activeIndex }: {
   dispatchMedia: Dispatch<PhotoGalleryAction>
   activeIndex: number
 }) => {
-  dispatchMedia({
-    type: 'openPresentMode',
-    activeIndex: activeIndex,
-  })
-
-  history.pushState({ presenting: true, activeIndex }, '')
+  dispatchMedia({ type: 'openPresentMode', activeIndex })
 }
 
-export const closePresentModeAction = ({
-  dispatchMedia,
-}: {
+export const closePresentModeAction = ({ dispatchMedia }: {
   dispatchMedia: Dispatch<GalleryAction>
 }) => {
-  dispatchMedia({
-    type: 'closePresentMode',
-  })
-
-  history.back()
+  dispatchMedia({ type: 'closePresentMode' })
 }

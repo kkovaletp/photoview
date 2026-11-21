@@ -4,10 +4,7 @@ import MediaGallery from '../photoGallery/MediaGallery'
 import { MEDIA_GALLERY_FRAGMENT } from '../photoGallery/fragments'
 import AlbumBoxes from './AlbumBoxes'
 import AlbumFilter from '../album/AlbumFilter'
-import {
-  mediaGalleryReducer,
-  useUrlPresentModeSetup,
-} from '../photoGallery/mediaGalleryReducer'
+import { mediaGalleryReducer } from '../photoGallery/mediaGalleryReducer'
 import { MediaOrdering, SetOrderingFn } from '../../hooks/useOrderingParams'
 import { gql } from '@apollo/client'
 import { AlbumGalleryFieldsFragment } from './__generated__/AlbumGallery'
@@ -72,16 +69,6 @@ const AlbumGallery = forwardRef(
     useEffect(() => {
       dispatchMedia({ type: 'replaceAlbumMedia', media: album?.media || [] })
     }, [album?.media])
-
-    useUrlPresentModeSetup({
-      dispatchMedia,
-      openPresentMode: event => {
-        dispatchMedia({
-          type: 'openPresentMode',
-          activeIndex: event?.state?.activeIndex,
-        })
-      },
-    })
 
     let subAlbumElement = null
     if (album) {
