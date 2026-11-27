@@ -47,7 +47,7 @@
     "i18next": "27.1.5",
     "js-cookie": "^3.0.8",
     "luxon": "^3.7.2",
-    "mapbox-gl": "~3.35.0",
+    "mapbox-gl": "~3.35.2",
     "marked": "^18.2.1",
     "react": "19.3.1",
     "react-blurhash": "^0.3.0",
