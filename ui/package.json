@@ -43,7 +43,7 @@
     "dayjs": "^1.11.23",
     "dompurify": "^3.4.18",
     "graphql": "^16.15.0",
-    "graphql-ws": "^6.4.2",
+    "graphql-ws": "^6.4.3",
     "i18next": "27.1.5",
     "js-cookie": "^3.0.8",
     "luxon": "^3.7.2",
