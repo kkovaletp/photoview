@@ -33,7 +33,7 @@
   },
   "dependencies": {
     "@apollo/client": "^4.3.8",
-    "@dr.pogodin/react-helmet": "^3.3.1",
+    "@dr.pogodin/react-helmet": "^3.3.3",
     "@headlessui/react": "^2.2.10",
     "@swc/plugin-styled-components": "^18.0.4",
     "@tailwindcss/vite": "^4.3.5",
