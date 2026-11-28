@@ -179,7 +179,7 @@ services:
 
   ## Comment out the `postgres` service if PHOTOVIEW_DATABASE_DRIVER is set to `mysql` or `sqlite` in the .env
   postgres:
-    image: postgres:18-alpine
+    image: postgres:19-alpine
     labels:
       - "com.centurylinklabs.watchtower.enable=true"
     hostname: photoview-pgsql
