@@ -30,14 +30,20 @@ export function timelineGalleryReducer(
     case 'replaceTimelineGroups': {
       const timelineGroups = convertMediaToTimelineGroups(action.timeline)
 
+      const activeMedia = state.presenting
+        ? getActiveTimelineImage({ mediaState: state })
+        : undefined
+
+      const activeIndex =
+        activeMedia === undefined
+          ? undefined
+          : findTimelineMediaIndex(timelineGroups, activeMedia.id)
+
       return {
         ...state,
-        activeIndex: {
-          album: -1,
-          date: -1,
-          media: -1,
-        },
         timelineGroups,
+        activeIndex: activeIndex ?? { date: -1, album: -1, media: -1 },
+        presenting: activeIndex !== undefined,
       }
     }
     case 'nextImage': {
@@ -168,9 +174,9 @@ export const getTimelineImage = ({
 }: {
   mediaState: TimelineGalleryState
   index: TimelineMediaIndex
-}): MyTimelineQuery['myTimeline'][0] => {
+}): MyTimelineQuery['myTimeline'][0] | undefined => {
   const { date, album, media } = index
-  return mediaState.timelineGroups[date].albums[album].media[media]
+  return mediaState.timelineGroups[date]?.albums[album]?.media[media]
 }
 
 export const getActiveTimelineImage = ({
@@ -188,6 +194,23 @@ export const getActiveTimelineImage = ({
   }
 
   return getTimelineImage({ mediaState, index: mediaState.activeIndex })
+}
+
+function findTimelineMediaIndex(
+  timelineGroups: TimelineGroup[],
+  mediaId: MyTimelineQuery['myTimeline'][number]['id']
+): TimelineMediaIndex | undefined {
+  for (const [date, group] of timelineGroups.entries()) {
+    for (const [album, albumGroup] of group.albums.entries()) {
+      const media = albumGroup.media.findIndex(item => item.id === mediaId)
+
+      if (media !== -1) {
+        return { date, album, media }
+      }
+    }
+  }
+
+  return undefined
 }
 
 function convertMediaToTimelineGroups(
@@ -244,17 +267,9 @@ function convertMediaToTimelineGroups(
     }))
 }
 
-export const openTimelinePresentMode = ({
-  dispatchMedia,
-  activeIndex,
-}: {
+export const openTimelinePresentMode = ({ dispatchMedia, activeIndex }: {
   dispatchMedia: Dispatch<TimelineGalleryAction>
   activeIndex: TimelineMediaIndex
 }) => {
-  dispatchMedia({
-    type: 'openPresentMode',
-    activeIndex,
-  })
-
-  history.pushState({ presenting: true, activeIndex: activeIndex }, '')
+  dispatchMedia({ type: 'openPresentMode', activeIndex })
 }

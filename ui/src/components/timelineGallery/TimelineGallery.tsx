@@ -15,7 +15,6 @@ import {
   getActiveTimelineImage as getActiveTimelineMedia,
   timelineGalleryReducer,
 } from './timelineGalleryReducer'
-import { useUrlPresentModeSetup } from '../photoGallery/mediaGalleryReducer'
 import TimelineFilters from './TimelineFilters'
 
 export const MY_TIMELINE_QUERY: TypedDocumentNode<
@@ -113,21 +112,15 @@ const TimelineGallery = () => {
   })
 
   useEffect(() => {
+    if (data === undefined) return
+
     dispatchMedia({
       type: 'replaceTimelineGroups',
-      timeline: data?.myTimeline || [],
+      timeline: data.myTimeline,
     })
   }, [data])
 
-  useUrlPresentModeSetup({
-    dispatchMedia,
-    openPresentMode: () => {
-      dispatchMedia({
-        type: 'openPresentMode',
-        activeIndex: mediaState.activeIndex,
-      })
-    },
-  })
+  const activeMedia = getActiveTimelineMedia({ mediaState })
 
   if (error) {
     return <div>{error.message}</div>
@@ -157,10 +150,10 @@ const TimelineGallery = () => {
         active={loadingMore}
         text={t('general.loading.paginate.media', 'Loading more media')}
       />
-      {mediaState.presenting && (
+      {mediaState.presenting && activeMedia !== undefined && (
         <PresentView
           data-testid="present-view"
-          activeMedia={getActiveTimelineMedia({ mediaState })!}
+          activeMedia={activeMedia}
           dispatchMedia={dispatchMedia}
         />
       )}

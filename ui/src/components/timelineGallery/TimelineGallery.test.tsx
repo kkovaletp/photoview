@@ -1,9 +1,14 @@
-import { screen, waitFor } from '@testing-library/react'
+import { ApolloClient, InMemoryCache, gql } from '@apollo/client'
+import { ApolloProvider } from '@apollo/client/react'
+import { MockLink } from '@apollo/client/testing'
+import { screen, waitFor, act, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import TimelineGallery, { MY_TIMELINE_QUERY } from './TimelineGallery'
 import { timelineData } from './timelineTestData'
 import { renderWithProviders } from '../../helpers/testUtils'
-import { gql } from '@apollo/client'
+import { renderWithRouter } from '../../helpers/testUtils'
+import { SidebarProvider } from '../sidebar/Sidebar'
+import { MessageProvider } from '../messages/MessageState'
 
 vi.mock('../../hooks/useScrollPagination')
 
@@ -206,4 +211,163 @@ test('filter by favorites', async () => {
     },
     { timeout: 3000 }
   )
+})
+
+const timelineVariables = {
+  onlyFavorites: false,
+  fromDate: undefined,
+  offset: 0,
+  limit: 200,
+}
+
+function renderTimelineWithCache() {
+  const selected = timelineData[0]
+
+  if (selected.thumbnail === null) {
+    throw new Error('The selected test media must have a thumbnail')
+  }
+
+  const newer = {
+    ...selected,
+    id: 'newer',
+    date: '2021-01-01T18:00:00Z',
+    thumbnail: {
+      ...selected.thumbnail,
+      url: '/photo/newer-thumbnail.jpg',
+    },
+    album: {
+      ...selected.album,
+      id: 'newer-album',
+      title: 'Newer album',
+    },
+  }
+
+  const cache = new InMemoryCache()
+
+  cache.writeQuery({
+    query: EARLIEST_MEDIA_QUERY,
+    data: { __typename: 'Query', myMedia: [] },
+  })
+  cache.writeQuery({
+    query: MY_TIMELINE_QUERY,
+    variables: timelineVariables,
+    data: { __typename: 'Query', myTimeline: [selected] },
+  })
+
+  const client = new ApolloClient({ cache, link: new MockLink([]) })
+  const view = renderWithRouter(
+    <ApolloProvider client={client}>
+      <MessageProvider>
+        <SidebarProvider>
+          <TimelineGallery />
+        </SidebarProvider>
+      </MessageProvider>
+    </ApolloProvider>,
+    { initialEntries: ['/timeline'] }
+  )
+
+  return {
+    cache,
+    client,
+    view,
+    selected,
+    newer,
+    selectedUrl: new URL(selected.thumbnail.url, location.origin).href,
+  }
+}
+
+test('keeps the open media after regrouping and closes when it is removed', async () => {
+  const { cache, client, view, selected, newer, selectedUrl } =
+    renderTimelineWithCache()
+  const user = userEvent.setup()
+
+  try {
+    await user.click(await screen.findByRole('presentation'))
+
+    expect(screen.getByTestId('present-img-thumbnail')).toHaveAttribute(
+      'src',
+      selectedUrl
+    )
+
+    // The newer media is now immediately before the selected media.
+    fireEvent.keyDown(document, { key: 'ArrowLeft' })
+    expect(screen.getByTestId('present-img-thumbnail')).toHaveAttribute(
+      'src',
+      new URL(newer.thumbnail.url, location.origin).href
+    )
+
+    fireEvent.keyDown(document, { key: 'ArrowRight' })
+    expect(screen.getByTestId('present-img-thumbnail')).toHaveAttribute(
+      'src',
+      selectedUrl
+    )
+
+    // The new date moves the selected media to a different index.
+    await act(async () => {
+      cache.writeQuery({
+        query: MY_TIMELINE_QUERY,
+        variables: timelineVariables,
+        data: { __typename: 'Query', myTimeline: [newer, selected] },
+      })
+    })
+
+    await screen.findByRole('link', { name: 'Newer album' })
+    expect(screen.getByTestId('present-img-thumbnail')).toHaveAttribute(
+      'src',
+      selectedUrl
+    )
+
+    await act(async () => {
+      cache.writeQuery({
+        query: MY_TIMELINE_QUERY,
+        variables: timelineVariables,
+        data: { __typename: 'Query', myTimeline: [newer] },
+      })
+    })
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('present-overlay')).not.toBeInTheDocument()
+    })
+  } finally {
+    view.unmount()
+    client.stop()
+  }
+})
+
+test('stays closed after data changes and can open the selected media again', async () => {
+  const { cache, client, view, selected, newer, selectedUrl } =
+    renderTimelineWithCache()
+  const user = userEvent.setup()
+
+  try {
+    await user.click(await screen.findByRole('presentation'))
+    expect(screen.getByTestId('present-overlay')).toBeInTheDocument()
+
+    fireEvent.keyDown(document, { key: 'Escape' })
+    expect(screen.queryByTestId('present-overlay')).not.toBeInTheDocument()
+
+    await act(async () => {
+      cache.writeQuery({
+        query: MY_TIMELINE_QUERY,
+        variables: timelineVariables,
+        data: { __typename: 'Query', myTimeline: [newer, selected] },
+      })
+    })
+
+    await screen.findByRole('link', { name: 'Newer album' })
+    expect(screen.queryByTestId('present-overlay')).not.toBeInTheDocument()
+
+    // The newer date appears first; the selected media appears second.
+    const thumbnails = await screen.findAllByRole('presentation')
+    expect(thumbnails).toHaveLength(2)
+    await user.click(thumbnails[1])
+
+    expect(screen.getByTestId('present-img-thumbnail')).toHaveAttribute(
+      'src',
+      selectedUrl
+    )
+  } finally {
+    view.unmount()
+    client.stop()
+  }
 })

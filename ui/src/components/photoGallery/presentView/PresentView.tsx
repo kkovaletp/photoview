@@ -49,7 +49,6 @@ type PresentViewProps = {
   imageLoaded?: () => void
   activeMedia: MediaGalleryFieldsFragment
   dispatchMedia: Dispatch<GalleryAction>
-  disableSaveCloseInHistory?: boolean
 }
 
 const PresentView = ({
@@ -57,7 +56,6 @@ const PresentView = ({
   imageLoaded,
   activeMedia,
   dispatchMedia,
-  disableSaveCloseInHistory,
 }: PresentViewProps) => {
   const {
     updateSidebar,
@@ -109,12 +107,7 @@ const PresentView = ({
 
       if (e.key === 'Escape') {
         e.stopPropagation()
-
-        if (disableSaveCloseInHistory === true) {
-          dispatchMedia({ type: 'closePresentMode' })
-        } else {
-          closePresentModeAction({ dispatchMedia })
-        }
+        closePresentModeAction({ dispatchMedia })
       }
     }
 
@@ -123,7 +116,7 @@ const PresentView = ({
     return function cleanup() {
       document.removeEventListener('keydown', keyDownEvent)
     }
-  }, [dispatchMedia, disableSaveCloseInHistory])
+  }, [dispatchMedia])
 
   return (
     <StyledContainer
@@ -133,7 +126,6 @@ const PresentView = ({
       <PreventScroll />
       <PresentNavigationOverlay
         dispatchMedia={dispatchMedia}
-        disableSaveCloseInHistory={disableSaveCloseInHistory}
         onInfoClick={() => {
           updateSidebar(<MediaSidebar media={activeMedia} />, infoPanelOwner)
           // Pinned, so a wide screen lays the panel out beside the photo.

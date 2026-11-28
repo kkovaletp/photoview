@@ -85,49 +85,62 @@ test('a horizontal swipe navigates between images', () => {
   expect(dispatchMedia).toHaveBeenNthCalledWith(2, { type: 'previousImage' })
 })
 
-test('the exit button leaves the viewer and steps back in history', async () => {
+test('navigation and exit do not change browser history', async () => {
   vi.useRealTimers()
 
   const dispatchMedia = vi.fn()
-  const back = vi
-    .spyOn(window.history, 'back')
-    .mockImplementation(() => undefined)
+  const back = vi.spyOn(window.history, 'back')
+  const pushState = vi.spyOn(window.history, 'pushState')
+  const replaceState = vi.spyOn(window.history, 'replaceState')
 
-  render(<PresentNavigationOverlay dispatchMedia={dispatchMedia} />)
+  try {
+    render(<PresentNavigationOverlay dispatchMedia={dispatchMedia} />)
 
-  // Hidden controls take no clicks, so the first tap is the one that reveals
-  // them - the same two steps a touch user takes.
-  fireEvent.click(screen.getByTestId('present-overlay'))
-  await userEvent.click(screen.getByLabelText('Exit presentation mode'))
+    // A tap reveals the controls on a touch device.
+    fireEvent.click(screen.getByTestId('present-overlay'))
+    await userEvent.click(screen.getByLabelText('Next image'))
+    await userEvent.click(screen.getByLabelText('Previous image'))
+    await userEvent.click(screen.getByLabelText('Exit presentation mode'))
 
-  expect(dispatchMedia).toHaveBeenCalledWith({ type: 'closePresentMode' })
-  // Leaving restores the URL the viewer came from.
-  expect(back).toHaveBeenCalled()
-
-  back.mockRestore()
+    expect(dispatchMedia).toHaveBeenNthCalledWith(1, { type: 'nextImage' })
+    expect(dispatchMedia).toHaveBeenNthCalledWith(2, { type: 'previousImage' })
+    expect(dispatchMedia).toHaveBeenNthCalledWith(3, {
+      type: 'closePresentMode',
+    })
+    expect(back).not.toHaveBeenCalled()
+    expect(pushState).not.toHaveBeenCalled()
+    expect(replaceState).not.toHaveBeenCalled()
+  } finally {
+    back.mockRestore()
+    pushState.mockRestore()
+    replaceState.mockRestore()
+  }
 })
 
-test('the exit button leaves history alone when the caller asks it to', async () => {
-  vi.useRealTimers()
+test('does not forward align to navigation buttons', () => {
+  const warn = vi.spyOn(console, 'warn')
+  const error = vi.spyOn(console, 'error')
 
-  const dispatchMedia = vi.fn()
-  const back = vi
-    .spyOn(window.history, 'back')
-    .mockImplementation(() => undefined)
+  try {
+    render(<PresentNavigationOverlay dispatchMedia={vi.fn()} />)
 
-  render(
-    <PresentNavigationOverlay
-      dispatchMedia={dispatchMedia}
-      disableSaveCloseInHistory
-    />
-  )
+    expect(screen.getByLabelText('Previous image')).not.toHaveAttribute('align')
+    expect(screen.getByLabelText('Next image')).not.toHaveAttribute('align')
 
-  fireEvent.click(screen.getByTestId('present-overlay'))
-  await userEvent.click(screen.getByLabelText('Exit presentation mode'))
+    const hasAlignWarning = (calls: unknown[][]) =>
+      calls.some(args =>
+        args.some(
+          arg =>
+            typeof arg === 'string' &&
+            /unknown prop/i.test(arg) &&
+            /align/i.test(arg)
+        )
+      )
 
-  expect(dispatchMedia).toHaveBeenCalledWith({ type: 'closePresentMode' })
-  // This caller manages history itself.
-  expect(back).not.toHaveBeenCalled()
-
-  back.mockRestore()
+    expect(hasAlignWarning(warn.mock.calls)).toBe(false)
+    expect(hasAlignWarning(error.mock.calls)).toBe(false)
+  } finally {
+    warn.mockRestore()
+    error.mockRestore()
+  }
 })

@@ -142,7 +142,6 @@ test('arrow keys navigate and escape leaves the viewer', () => {
       <PresentView
         activeMedia={makeMedia('1')}
         dispatchMedia={dispatchMedia}
-        disableSaveCloseInHistory
       />
     </SidebarContext.Provider>
   )
@@ -156,11 +155,8 @@ test('arrow keys navigate and escape leaves the viewer', () => {
   expect(dispatchMedia).toHaveBeenNthCalledWith(3, { type: 'closePresentMode' })
 })
 
-test('escape without the history flag steps back instead', () => {
+test('escape closes the viewer without moving browser history', () => {
   const dispatchMedia = vi.fn()
-  const back = vi
-    .spyOn(window.history, 'back')
-    .mockImplementation(() => undefined)
 
   renderWithRouter(
     <SidebarContext.Provider
@@ -176,12 +172,16 @@ test('escape without the history flag steps back instead', () => {
     </SidebarContext.Provider>
   )
 
-  fireEvent.keyDown(document, { key: 'Escape' })
+  const back = vi.spyOn(window.history, 'back')
 
-  expect(dispatchMedia).toHaveBeenCalledWith({ type: 'closePresentMode' })
-  expect(back).toHaveBeenCalled()
+  try {
+    fireEvent.keyDown(document, { key: 'Escape' })
 
-  back.mockRestore()
+    expect(dispatchMedia).toHaveBeenCalledWith({ type: 'closePresentMode' })
+    expect(back).not.toHaveBeenCalled()
+  } finally {
+    back.mockRestore()
+  }
 })
 
 test('closing the viewer closes an info panel it opened', async () => {
@@ -226,25 +226,6 @@ test('closing the viewer leaves a sidebar the user opened beforehand alone', () 
 
   expect(getContent()).not.toBeNull()
   expect(updateSidebar).toHaveBeenLastCalledWith(null, expect.any(Symbol))
-})
-
-test('the exit button steps back in history when the caller did not opt out', async () => {
-  const back = vi
-    .spyOn(window.history, 'back')
-    .mockImplementation(() => undefined)
-
-  const { unmount } = renderWithSidebar(makeMedia('1'))
-
-  // The gallery and the timeline open the viewer with history.pushState, so
-  // leaving it has to pop that entry again - otherwise the browser's back
-  // button reopens the viewer. Escape always did this; the button did not.
-  fireEvent.click(screen.getByTestId('present-overlay'))
-  await userEvent.click(screen.getByLabelText('Exit presentation mode'))
-
-  expect(back).toHaveBeenCalled()
-
-  unmount()
-  back.mockRestore()
 })
 
 test('the info panel opens pinned, so a wide screen shows it beside the photo', async () => {

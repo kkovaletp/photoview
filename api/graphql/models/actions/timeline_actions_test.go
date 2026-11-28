@@ -8,6 +8,7 @@ import (
 	"github.com/kkovaletp/photoview/api/graphql/models/actions"
 	"github.com/kkovaletp/photoview/api/test_utils"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestMyTimeline(t *testing.T) {
@@ -113,5 +114,47 @@ func TestMyTimeline(t *testing.T) {
 
 		assert.NoError(t, err)
 		assert.Len(t, timelineMedia, 2)
+	})
+
+	t.Run("MyTimeline uses media ID to break ties across pages", func(t *testing.T) {
+		tiedMedia := []models.Media{
+			{
+				Title:    "tie1",
+				Path:     "/photos/tie1",
+				AlbumID:  rootAlbum.ID,
+				DateShot: time.Unix(1640995200, 0),
+			},
+			{
+				Title:    "tie2",
+				Path:     "/photos/tie2",
+				AlbumID:  rootAlbum.ID,
+				DateShot: time.Unix(1640995200, 0),
+			},
+		}
+
+		require.NoError(t, db.Save(&tiedMedia).Error)
+
+		firstID, secondID := tiedMedia[0].ID, tiedMedia[1].ID
+		if firstID > secondID {
+			firstID, secondID = secondID, firstID
+		}
+
+		limit, firstOffset, secondOffset := 1, 0, 1
+
+		firstPage, err := actions.MyTimeline(db, user, &models.Pagination{
+			Limit:  &limit,
+			Offset: &firstOffset,
+		}, nil, nil)
+		require.NoError(t, err)
+		require.Len(t, firstPage, 1)
+		require.Equal(t, firstID, firstPage[0].ID)
+
+		secondPage, err := actions.MyTimeline(db, user, &models.Pagination{
+			Limit:  &limit,
+			Offset: &secondOffset,
+		}, nil, nil)
+		require.NoError(t, err)
+		require.Len(t, secondPage, 1)
+		require.Equal(t, secondID, secondPage[0].ID)
 	})
 }
