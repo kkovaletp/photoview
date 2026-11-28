@@ -48,6 +48,7 @@ require (
 	github.com/sosodev/duration v1.4.0 // indirect
 	github.com/stretchr/objx v0.8.0 // indirect
 	github.com/urfave/cli/v3 v3.14.0 // indirect
+	github.com/vektah/dataloaden v0.3.0 // indirect
 	go.yaml.in/yaml/v3 v3.0.6 // indirect
 	golang.org/x/mod v0.43.0 // indirect
 	golang.org/x/sync v0.25.0 // indirect
@@ -55,4 +56,7 @@ require (
 	golang.org/x/tools v0.53.0 // indirect
 )
 
-tool github.com/99designs/gqlgen
+tool (
+	github.com/99designs/gqlgen
+	github.com/vektah/dataloaden
+)

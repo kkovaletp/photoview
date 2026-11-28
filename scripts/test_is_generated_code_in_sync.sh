@@ -2,12 +2,13 @@
 set -euo pipefail
 
 cd "$(dirname "$0")/../api"
-go generate ./...
 
 if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
   echo '--- FAIL: The sync check must run inside a git work tree.'
   exit 1
 fi
+
+go generate ./...
 
 if [[ "$(git status -s 2>/dev/null | head -1)" != "" ]]; then
   # shellcheck disable=SC2016
