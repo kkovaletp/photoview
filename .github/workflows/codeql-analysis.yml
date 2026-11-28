@@ -44,6 +44,11 @@ jobs:
           # Run further tests
           queries: security-extended, security-and-quality
           # debug: true
+          config: |
+            paths-ignore:
+              - 'ui/**/__generated__/**'
+              - 'ui/src/@types/i18next.d.ts'
+              - 'ui/src/@types/resources.d.ts'
 
       # Autobuild attempts to build any compiled languages (C/C++, C#, or Java).
       - name: Autobuild
@@ -53,7 +58,30 @@ jobs:
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v4
+        id: codeql-analyse
         with:
+          category: "/language:${{ matrix.language }}"
+          output: sarif-results
+          upload: failure-only
+
+      - name: Filter generated Go alerts
+        uses: advanced-security/filter-sarif@v1.1
+        if: ${{ matrix.language == 'go' }}
+        with:
+          patterns: |
+            -api/graphql/generated.go
+            -api/graphql/models/generated.go
+            -api/dataloader/gen_mediaurlloader.go
+            -api/dataloader/gen_userfavoritesloader.go
+            -api/dataloader/gen_userloader.go
+          input: sarif-results/go.sarif
+          output: sarif-results/go.sarif
+
+      - name: Upload CodeQL results
+        uses: github/codeql-action/upload-sarif@v4
+        if: ${{ !cancelled() && steps.codeql-analyse.conclusion != 'failure' }}
+        with:
+          sarif_file: sarif-results
           category: "/language:${{ matrix.language }}"
 
   anchore:
