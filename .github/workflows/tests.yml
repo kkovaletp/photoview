@@ -32,7 +32,7 @@ jobs:
           - 3306:3306
 
       postgres:
-        image: postgres:18-alpine
+        image: postgres:19-alpine
         env:
           POSTGRES_USER: photoview
           POSTGRES_PASSWORD: photosecret
