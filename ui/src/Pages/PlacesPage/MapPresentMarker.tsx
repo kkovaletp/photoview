@@ -123,7 +123,6 @@ const MapPresentMarker = ({
       <PresentView
         activeMedia={markerMediaState.media[markerMediaState.activeIndex]}
         dispatchMedia={dispatchMarkerMedia}
-        disableSaveCloseInHistory={true}
       />
     )
   } else {

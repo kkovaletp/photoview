@@ -40,7 +40,8 @@ func (r *albumResolver) Media(ctx context.Context, obj *models.Album, order *mod
 		query = query.Where("EXISTS (?)", favoriteQuery)
 	}
 
-	query = models.FormatSQL(query, order, paginate)
+	// Preserve the requested order and use the media ID to break ties.
+	query = models.FormatSQL(query, order, paginate).Order("media.id ASC")
 
 	var media []*models.Media
 	if err := query.Find(&media).Error; err != nil {

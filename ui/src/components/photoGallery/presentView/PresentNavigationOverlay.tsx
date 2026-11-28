@@ -105,14 +105,12 @@ const NavigationButton = styled(OverlayButton) <{ $align: 'left' | 'right' }>`
 type PresentNavigationOverlayProps = {
   children?: ReactNode
   dispatchMedia: Dispatch<GalleryAction>
-  disableSaveCloseInHistory?: boolean
   onInfoClick?: () => void
 }
 
 const PresentNavigationOverlay = ({
   children,
   dispatchMedia,
-  disableSaveCloseInHistory,
   onInfoClick,
 }: PresentNavigationOverlayProps) => {
   const [hide, setHide] = useState(true)
@@ -189,13 +187,7 @@ const PresentNavigationOverlay = ({
         <ExitButton
           aria-label="Exit presentation mode"
           className={hide ? 'hide' : undefined}
-          onClick={() => {
-            if (disableSaveCloseInHistory === true) {
-              dispatchMedia({ type: 'closePresentMode' })
-            } else {
-              closePresentModeAction({ dispatchMedia })
-            }
-          }}
+          onClick={() => closePresentModeAction({ dispatchMedia })}
         >
           <ExitIcon />
         </ExitButton>

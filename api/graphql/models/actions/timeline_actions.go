@@ -51,6 +51,8 @@ func MyTimeline(db *gorm.DB, user *models.User, paginate *models.Pagination, onl
 				Where("user_media_data.favorite"))
 	}
 
+	// Break ties between media with the same date and album title.
+	query = query.Order("media.id ASC")
 	query = models.FormatSQL(query, nil, paginate)
 
 	var media []*models.Media

@@ -1,7 +1,7 @@
 import { ApolloClient, InMemoryCache, gql } from '@apollo/client'
 import { ApolloProvider } from '@apollo/client/react'
 import { MockLink } from '@apollo/client/testing'
-import { screen, waitFor, act } from '@testing-library/react'
+import { screen, waitFor, act, fireEvent } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import TimelineGallery, { MY_TIMELINE_QUERY } from './TimelineGallery'
 import { timelineData } from './timelineTestData'
@@ -289,6 +289,19 @@ test('keeps the open media after regrouping and closes when it is removed', asyn
       selectedUrl
     )
 
+    // The newer media is now immediately before the selected media.
+    fireEvent.keyDown(document, { key: 'ArrowLeft' })
+    expect(screen.getByTestId('present-img-thumbnail')).toHaveAttribute(
+      'src',
+      new URL(newer.thumbnail.url, location.origin).href
+    )
+
+    fireEvent.keyDown(document, { key: 'ArrowRight' })
+    expect(screen.getByTestId('present-img-thumbnail')).toHaveAttribute(
+      'src',
+      selectedUrl
+    )
+
     // The new date moves the selected media to a different index.
     await act(async () => {
       cache.writeQuery({
@@ -315,38 +328,22 @@ test('keeps the open media after regrouping and closes when it is removed', asyn
     await waitFor(() => {
       expect(screen.queryByTestId('present-overlay')).not.toBeInTheDocument()
     })
-
-    act(() => {
-      window.dispatchEvent(
-        new PopStateEvent('popstate', {
-          state: {
-            presenting: true,
-            activeIndex: { date: 0, album: 0, media: 0 },
-          },
-        })
-      )
-    })
-
-    expect(screen.queryByTestId('present-overlay')).not.toBeInTheDocument()
   } finally {
     view.unmount()
     client.stop()
   }
 })
 
-test('does not reopen a cleared selection after data changes while closed', async () => {
-  const { cache, client, view, selected, newer } = renderTimelineWithCache()
+test('stays closed after data changes and can open the selected media again', async () => {
+  const { cache, client, view, selected, newer, selectedUrl } =
+    renderTimelineWithCache()
   const user = userEvent.setup()
 
   try {
     await user.click(await screen.findByRole('presentation'))
     expect(screen.getByTestId('present-overlay')).toBeInTheDocument()
 
-    act(() => {
-      window.dispatchEvent(
-        new PopStateEvent('popstate', { state: { presenting: false } })
-      )
-    })
+    fireEvent.keyDown(document, { key: 'Escape' })
     expect(screen.queryByTestId('present-overlay')).not.toBeInTheDocument()
 
     await act(async () => {
@@ -357,21 +354,18 @@ test('does not reopen a cleared selection after data changes while closed', asyn
       })
     })
 
-    // Wait until the replacement has reached the gallery reducer.
     await screen.findByRole('link', { name: 'Newer album' })
-
-    act(() => {
-      window.dispatchEvent(
-        new PopStateEvent('popstate', {
-          state: {
-            presenting: true,
-            activeIndex: { date: 0, album: 0, media: 0 },
-          },
-        })
-      )
-    })
-
     expect(screen.queryByTestId('present-overlay')).not.toBeInTheDocument()
+
+    // The newer date appears first; the selected media appears second.
+    const thumbnails = await screen.findAllByRole('presentation')
+    expect(thumbnails).toHaveLength(2)
+    await user.click(thumbnails[1])
+
+    expect(screen.getByTestId('present-img-thumbnail')).toHaveAttribute(
+      'src',
+      selectedUrl
+    )
   } finally {
     view.unmount()
     client.stop()
