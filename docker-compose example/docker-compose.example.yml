@@ -160,7 +160,7 @@ services:
   ## It is an optional service to simplify the upgrade process. You can also upgrade PostgreSQL manually.
   ## It is safe to keep it enabled, as if it detects no upgrade is needed, it exits immediately.
   #   postgres-autoupgrade:
-  #     image: pgautoupgrade/pgautoupgrade:18-alpine
+  #     image: pgautoupgrade/pgautoupgrade:19-alpine
   #     hostname: pgsql-upg
   #     container_name: pgsql-upg
   #     network_mode: "none"
